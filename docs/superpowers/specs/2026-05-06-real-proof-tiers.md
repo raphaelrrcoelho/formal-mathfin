@@ -91,7 +91,37 @@ The standard proof: write `φ` as the supremum of countably many affine function
 
 **Textbook claim.** For `p > 1` and a non-negative submartingale `(M_n)`: `‖max_{k ≤ n} M_k‖_p ≤ (p / (p − 1)) · ‖M_n‖_p`.
 
-**Status: feasible at v4.18.0; deferred for proof-engineering effort.**
+**Status: library-blocked everywhere (2026-05-08 web/AFP/Mathlib audit).**
+
+**Negative-finding audit (2026-05-08).** Exhaustive search across every plausible
+formal source returned no Lean or Isabelle proof of this theorem to wrap:
+
+- Mathlib v4.18.0: only L^1 form (`MeasureTheory.maximal_ineq`); the
+  `OptionalStopping.lean` docstring explicitly notes the L^p form is "in an upcoming
+  PR" — no such PR is currently open (searched all Mathlib4 PRs/issues mentioning Doob).
+- AFP `Doob_Convergence` (Keskin, 2024): only upcrossing + a.s. convergence; no
+  maximal inequality (probed `/opt/afp/thys/Doob_Convergence/*.thy`).
+- AFP `Martingales` (Keskin, Banach-space, 2024): `Martingale.thy` has no `doob`
+  or `maximal` lemmas at all (definitions only).
+- AFP `DiscretePricing/Martingale.thy`: 4 basic algebraic lemmas only.
+- Isabelle HOL-Probability core: no `Martingale.thy` exists in the core distribution.
+- `RemyDegenne/brownian-motion` (the Mathlib martingale specialist's WIP repo):
+  blueprint has `lem:doob_Lp_countable` outlined with the **same proof strategy**
+  we used (layer cake → L^1 maximal → Fubini → Hölder), but it is **not yet
+  formalized in Lean**. The repo's `DoobLp.lean` despite the filename only contains
+  the L^1 inequality generalized to countable + right-continuous index types.
+- No Lean↔Isabelle proof transport exists (OpenTheory connects HOL Light/Isabelle/HOL4
+  only; no Lean target).
+
+**Conclusion.** Doob's L^p maximal inequality is a genuine open frontier in formal
+probability. The Mathlib expert closest to formalizing it is at the same outline
+stage we are. Treat A.2 as `reduced_core` until either (a) Mathlib lands
+`MeasureTheory.maximal_ineq_Lp` or (b) Degenne's `lem:doob_Lp_countable` is
+formalized upstream. We have a 10-helper-lemma Lean scaffold in
+`docs/superpowers/sketches/doob_lp_v1.lean` that captures roughly half the proof
+infrastructure.
+
+See `docker/AFP_NOTES.md` for the full audit trail.
 
 **Audit (2026-05-07).** All ingredients exist at toolchain `v4.18.0`:
 
@@ -243,7 +273,7 @@ A direct Isabelle wrapper of `stationary_distribution_unique` matches the textbo
 
 | Target | Status | Blocker |
 |--------|--------|---------|
-| A.2 Doob L^p | partial — helpers verified locally | Fubini swap + Hölder + ENNReal algebra remaining; sketch in `docs/superpowers/sketches/doob_lp_v1.lean` |
+| A.2 Doob L^p | **library-blocked** | Not in Mathlib, AFP, or Degenne's WIP brownian-motion repo (2026-05-08 audit). 10 helper lemmas verified in `docs/superpowers/sketches/doob_lp_v1.lean`; Fubini swap remains. Stays `reduced_core`. |
 | A.4 sum exp → Gamma | blocked | No measure convolution; no MGF uniqueness |
 | A.6 MV Gaussian marginal | blocked | No multivariate Gaussian in Mathlib |
 | A.7 bivariate Gaussian conditional | blocked | Depends on A.6 |

@@ -32,12 +32,26 @@ is wired but **not yet exercised** — the next Docker rebuild lands it. See
 `docker/AFP_NOTES.md` for authoring patterns and the full list of probed AFP
 lemmas (including `stationary_distribution_unique`).
 
-Tier A targets remaining: A.2 (Doob L^p, **partial progress 2026-05-08** —
-six helper lemmas now verified locally against Mathlib v4.18.0 in
-`docs/superpowers/sketches/doob_lp_v1.lean` (`runMax`, `runMax_nonneg`,
-`runMax_measurable`, `runMax_stronglyMeasurable`, `layer_meas_bound`,
-`lintegral_runMax_rpow_eq_layer`); main theorem still `sorry` — Fubini swap
-+ Hölder + ENNReal algebra remain (1-3 days)), A.4 (sum of exponentials,
+Tier A targets remaining: A.2 (Doob L^p, **library-blocked 2026-05-08** —
+exhaustive web/AFP/Mathlib audit found NO formal version of this theorem in
+any source (Mathlib master, in-flight Mathlib PRs, AFP `Doob_Convergence`,
+AFP `Martingales`, AFP `DiscretePricing`, HOL-Probability core, or
+`RemyDegenne/brownian-motion`). The Mathlib martingale specialist's
+`brownian-motion` blueprint outlines `lem:doob_Lp_countable` with the same
+proof strategy we used (layer cake → L^1 maximal → Fubini → Hölder) but
+has not formalized it. There is no Lean↔Isabelle proof-transport mechanism
+that would let us wrap an Isabelle proof. We have 10 helper lemmas verified
+against Mathlib v4.18.0 in `docs/superpowers/sketches/doob_lp_v1.lean`
+(`runMax`, `runMax_nonneg`, `runMax_measurable`,
+`runMax_stronglyMeasurable`, `layer_meas_bound`,
+`lintegral_runMax_rpow_eq_layer`, `layer_integrand_bound`,
+`A_le_layer_integral`, `lintegral_rpow_Ioc`,
+`ofReal_setIntegral_eq_setLIntegral_ofReal`); the Fubini swap remains
+the dominant cost on the path to a faithful main proof. Status: stays
+`reduced_core` until Mathlib lands `MeasureTheory.maximal_ineq_Lp` (or
+Degenne's `lem:doob_Lp_countable` is formalized upstream); see
+`docker/AFP_NOTES.md` for the full negative-finding audit), A.4 (sum of
+exponentials,
 **blocked**: no measure convolution / MGF uniqueness), A.6/A.7 (multivariate
 Gaussian, **blocked**: no MV Gaussian construction), A.8 (`mc-thm-1.4.40`
 convergence, **still blocked** — neither Mathlib nor AFP `Stochastic_Matrices`

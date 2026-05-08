@@ -105,6 +105,31 @@ NOT directly available even with the expanded AFP install:
   matrices (target for A.8 = `mc-thm-1.4.40`). Probed
   `Stochastic_Matrix_Perron_Frobenius`: existence/uniqueness only, no
   convergence-of-powers statement found. Still blocked at the AFP level.
+- **Doob's L^p maximal inequality** (target for A.2 = `mart-thm-2.4.6`).
+  Probed 2026-05-08 across every plausible source:
+  - AFP `Doob_Convergence` (Keskin): only upcrossing + a.s. convergence; no maximal.
+  - AFP `Martingales` (Keskin, Banach-space): `Martingale.thy` has no `doob`/`maximal`
+    lemmas at all (definitions only).
+  - AFP `DiscretePricing/Martingale.thy`: 4 basic algebraic lemmas only.
+  - Isabelle HOL-Probability core: has no `Martingale.thy`.
+  - Mathlib v4.18.0: has only the L^1 form (`MeasureTheory.maximal_ineq`); the
+    `OptionalStopping.lean` docstring explicitly notes the L^p form is "in an
+    upcoming PR" and no such PR is currently open (searched all Mathlib PRs/issues
+    mentioning Doob).
+  - `RemyDegenne/brownian-motion` (the Mathlib martingale specialist's WIP repo):
+    blueprint has `lem:doob_Lp_countable` outlined with the same proof strategy as
+    our sketch (layer cake → L^1 → Fubini → Hölder), but **not yet formalized**
+    in Lean. The repo's `DoobLp.lean` despite the filename only contains the L^1
+    inequality generalized to countable + right-continuous index types.
+  - No Lean↔Isabelle proof transport: OpenTheory connects HOL Light/Isabelle/HOL4
+    only; no Lean target. There is no mechanism to wrap an Isabelle proof inside
+    a Lean theorem (or vice versa) without re-proving from scratch.
+  Conclusion: Doob's L^p maximal inequality is a genuine open frontier in formal
+  probability. Treating `mart-thm-2.4.6` as `reduced_core` with a 10-helper-lemma
+  Lean scaffold is the honest position. Future unblock: track Degenne's
+  `brownian-motion` repo (he is closest to formalizing it) and the Mathlib
+  `Probability/Martingale/` directory for an `Lp.lean` file or a PR adding
+  `MeasureTheory.maximal_ineq_Lp` / `Submartingale.lp_maximal`.
 
 ## Image cost estimate
 
