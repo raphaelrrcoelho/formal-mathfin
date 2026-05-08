@@ -3,6 +3,14 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile.verify
+    # Memory caps for the Lean side. lean-interact triggers `lake build` of
+    # Mathlib + RemyDegenne/brownian-motion lazily on the first verify call;
+    # without these env caps, Lake spawns `nproc` parallel `lean` workers each
+    # peaking at ~1-2 GB, easily blowing past an 8 GB host. LEAN_NUM_THREADS=1
+    # makes each lean worker single-threaded (lower per-worker peak); override
+    # via host env if the box has more headroom.
+    environment:
+      - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
     volumes:
       - ../python:/app/python:ro
       - ../benchmarks:/app/benchmarks:ro
