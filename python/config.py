@@ -21,6 +21,12 @@ class LeanRequireSpec:
 class LeanConfig:
     version: str = "v4.30.0-rc1"
     mathlib: bool = True
+    # Optional commit pin for Mathlib. When set, lean-interact pulls Mathlib at
+    # exactly this commit instead of resolving the string "mathlib" to whatever
+    # master is at fetch time. Required when a vendored library (e.g. Degenne's
+    # brownian-motion) was tested against a specific Mathlib snapshot and would
+    # break against a newer master.
+    mathlib_rev: str | None = None
     # Additional Lean dependencies beyond Mathlib. Each entry becomes a
     # `lean_interact.LeanRequire` and is appended to the `require` list of the
     # `TempRequireProject`. Use this for vendored libraries like
@@ -41,6 +47,7 @@ class LeanConfig:
         return cls(
             version=d.get("version", cls.version),
             mathlib=d.get("mathlib", cls.mathlib),
+            mathlib_rev=d.get("mathlib_rev"),
             extra_requires=extras,
         )
 

@@ -3,6 +3,12 @@
 [hybrid-verify.lean]
 version = "v4.30.0-rc1"
 mathlib = true
+# Pin Mathlib to the exact commit listed in Degenne's brownian-motion
+# `lake-manifest.json` at our pinned commit (51807683...). That manifest was
+# produced under `leanprover/lean4:v4.30.0-rc1`, the same toolchain we set
+# above. Without this pin, lean-interact resolves "mathlib" to current master
+# (now on rc2), which silently breaks the transitive Brownian-motion build.
+mathlib_rev = "f23306121184"
 
 # Vendored Lean libraries beyond Mathlib master. Each entry is appended to the
 # `require` list passed to `lean-interact`'s TempRequireProject. Pin `rev` to a

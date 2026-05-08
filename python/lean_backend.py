@@ -27,10 +27,12 @@ class LeanBackend:
         self,
         lean_version: str = "v4.30.0-rc1",
         mathlib: bool = True,
+        mathlib_rev: str | None = None,
         extra_requires: Sequence[LeanRequireSpec] = (),
     ):
         self._lean_version = lean_version
         self._mathlib = mathlib
+        self._mathlib_rev = mathlib_rev
         self._extra_requires = tuple(extra_requires)
         self._server: Any = None
         self._project: Any = None
@@ -62,7 +64,16 @@ class LeanBackend:
 
         require_list: list = []
         if self._mathlib:
-            require_list.append("mathlib")
+            if self._mathlib_rev:
+                require_list.append(
+                    LeanRequire(
+                        name="mathlib",
+                        git="https://github.com/leanprover-community/mathlib4",
+                        rev=self._mathlib_rev,
+                    )
+                )
+            else:
+                require_list.append("mathlib")
         for r in self._extra_requires:
             require_list.append(LeanRequire(name=r.name, git=r.git, rev=r.rev))
 

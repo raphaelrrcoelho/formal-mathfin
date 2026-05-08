@@ -131,6 +131,7 @@ def main(argv: list[str] | None = None) -> int:
     lean = LeanBackend(
         lean_version=config.lean.version,
         mathlib=config.lean.mathlib,
+        mathlib_rev=config.lean.mathlib_rev,
         extra_requires=config.lean.extra_requires,
     )
     isabelle = IsabelleBackend(

@@ -30,7 +30,6 @@ EXPECTED_FULL_THEOREMS = {
 }
 
 EXPECTED_NON_PLACEHOLDER_THEOREMS = {
-    "bm-thm-5.3.2",
     "bm-cor-5.3.4",
 }
 
