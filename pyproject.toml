@@ -31,7 +31,7 @@ packages = ["python"]
 
 [tool.hybrid-verify]
 [tool.hybrid-verify.lean]
-version = "v4.18.0"
+version = "v4.30.0-rc2"
 mathlib = true
 
 [tool.hybrid-verify.isabelle]
