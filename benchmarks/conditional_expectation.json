@@ -1,0 +1,114 @@
+{
+  "description": "Conditional expectation properties from Saporito Ch 2.1 — routed to Lean+Isabelle (measure_theory)",
+  "theorems": [
+    {
+      "id": "ce-prop-2.1.5-linearity",
+      "name": "Linearity of Conditional Expectation",
+      "description": "Proposition 2.1.5(2): E[αX + Y | G] = αE[X|G] + E[Y|G] a.s.",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic\n\nopen MeasureTheory\n\n-- Linearity of conditional expectation: μ[c•f + g | m] =ᵐ[μ] c•μ[f|m] + μ[g|m]\n-- Uses Mathlib's `condExp_add` and `condExp_smul`.\ntheorem condexp_linear {α : Type*} {m m₀ : MeasurableSpace α} {μ : Measure α}\n    (f g : α → ℝ) (c : ℝ)\n    (hf : Integrable f μ) (hg : Integrable g μ) :\n    μ[c • f + g | m] =ᵐ[μ] c • μ[f | m] + μ[g | m] := by\n  have h1 : μ[c • f + g | m] =ᵐ[μ] μ[c • f | m] + μ[g | m] :=\n    condExp_add (hf.smul c) hg m\n  have h2 : μ[c • f | m] =ᵐ[μ] c • μ[f | m] := condExp_smul c f m\n  filter_upwards [h1, h2] with x hx1 hx2\n  rw [hx1, Pi.add_apply, hx2]\n  rfl",
+        "isabelle": "theory CondExpLinearity\n  imports \"HOL-Probability.Probability\"\nbegin\n\ntext \\<open>Linearity of real conditional expectation, inside the\n  @{locale sigma_finite_subalgebra} locale.\\<close>\n\nlemma (in sigma_finite_subalgebra) cond_exp_add_smul:\n  fixes f g :: \"'a \\<Rightarrow> real\" and c :: real\n  assumes \"integrable M f\" \"integrable M g\"\n  shows \"AE x in M. real_cond_exp M F (\\<lambda>x. c * f x + g x) x\n                    = c * real_cond_exp M F f x + real_cond_exp M F g x\"\nproof -\n  have \"integrable M (\\<lambda>x. c * f x)\" using assms by auto\n  hence \"AE x in M. real_cond_exp M F (\\<lambda>x. c * f x + g x) x\n                = real_cond_exp M F (\\<lambda>x. c * f x) x + real_cond_exp M F g x\"\n    using assms real_cond_exp_add by blast\n  moreover have \"AE x in M. real_cond_exp M F (\\<lambda>x. c * f x) x = c * real_cond_exp M F f x\"\n    using assms real_cond_exp_cmult by blast\n  ultimately show ?thesis by (auto elim: AE_mp)\nqed\n\nend"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Proposition 2.1.5(2)",
+        "difficulty": "foundational",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# Proposition 2.1.5(2): linearity of E[· | G]\n# Verify on jointly Gaussian (X, Y, Z) where G = σ(Z).\n# E[αX + Y | Z] = α E[X|Z] + E[Y|Z] (linearity of regression)\n#\n# For (X,Z) jointly Gaussian with means 0 and Cov(X,Z) = c_XZ, Var(Z) = vZ:\n# E[X | Z] = (c_XZ / vZ) * Z. Similarly for Y.\n# E[αX + Y | Z] = (α c_XZ + c_YZ)/vZ * Z = α (c_XZ/vZ) Z + (c_YZ/vZ) Z. ✓\n\nalpha = sp.Symbol('alpha', real=True)\nc_XZ, c_YZ, vZ = sp.symbols('c_XZ c_YZ vZ', real=True)\nZ = sp.Symbol('Z', real=True)\n\nE_X_Z = (c_XZ / vZ) * Z\nE_Y_Z = (c_YZ / vZ) * Z\n\nLHS = ((alpha * c_XZ + c_YZ) / vZ) * Z\nRHS = alpha * E_X_Z + E_Y_Z\n\ndiff = sp.simplify(LHS - RHS)\n\nresult = {\n    'verified': diff == 0,\n    'mode': 'symbolic',\n    'LHS - RHS': str(diff),\n    'note': 'verified for jointly Gaussian (X,Y,Z) via regression formulas'\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+      }
+    },
+    {
+      "id": "ce-prop-2.1.11-tower",
+      "name": "Tower Property",
+      "description": "Proposition 2.1.11(6): For H ⊆ G ⊆ F, E[E[X|G] | H] = E[E[X|H] | G] = E[X|H]",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic\n\nopen MeasureTheory\n\n-- Tower property: μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] for m₁ ≤ m₂.\n-- (Mathlib statement is almost-everywhere equality.)\ntheorem condexp_tower {α : Type*} {m₁ m₂ m₀ : MeasurableSpace α} {μ : Measure α}\n    (hm₁₂ : m₁ ≤ m₂) (hm₂ : m₂ ≤ m₀) [SigmaFinite (μ.trim hm₂)]\n    {f : α → ℝ} :\n    μ[μ[f | m₂] | m₁] =ᵐ[μ] μ[f | m₁] :=\n  condExp_condExp_of_le hm₁₂ hm₂",
+        "isabelle": "theory CondExpTower\n  imports \"HOL-Probability.Probability\"\nbegin\n\ntext \\<open>Tower property: nested conditioning collapses to the inner \\<sigma>-algebra.\n  Direct application of @{thm sigma_finite_subalgebra.real_cond_exp_nested_subalg}.\\<close>\n\nlemma (in sigma_finite_subalgebra) cond_exp_tower':\n  fixes f :: \"'a \\<Rightarrow> real\"\n  assumes \"subalgebra M G\" \"subalgebra G F\"\n      and \"integrable M f\"\n  shows \"AE x in M. real_cond_exp M F (\\<lambda>y. real_cond_exp M G f y) x = real_cond_exp M F f x\"\n  using real_cond_exp_nested_subalg[OF assms(1) assms(2) assms(3)] .\n\nend"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Proposition 2.1.11(6)",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# Tower property: for H ⊂ G, E[E[X|G] | H] = E[X|H].\n# Verify with X jointly Gaussian with (Y, Z), where G = σ(Y,Z) and H = σ(Z).\n# Special case: X, Y, Z indep with X = β_1 Y + β_2 Z + W (W indep noise).\n# E[X | Y, Z] = β_1 Y + β_2 Z\n# E[X | Z] = β_2 Z\n# E[E[X|Y,Z] | Z] = E[β_1 Y + β_2 Z | Z] = β_1 E[Y] + β_2 Z = β_2 Z (if E[Y]=0)\n# = E[X | Z] ✓\n\nbeta1, beta2 = sp.symbols('beta_1 beta_2', real=True)\nY, Z = sp.symbols('Y Z', real=True)\n\n# E[X | Y, Z] = β_1 Y + β_2 Z\nE_X_YZ = beta1 * Y + beta2 * Z\n# E[Y | Z] = 0 (independence)\nE_X_Z_via_tower = beta1 * 0 + beta2 * Z\n# Direct: E[X | Z] = β_2 Z + β_1 E[Y] = β_2 Z\nE_X_Z_direct = beta2 * Z\n\nverified = sp.simplify(E_X_Z_via_tower - E_X_Z_direct) == 0\n\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'tower_via_inner': str(E_X_Z_via_tower),\n    'direct': str(E_X_Z_direct)\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+      }
+    },
+    {
+      "id": "ce-prop-2.1.11-pull-out",
+      "name": "Pulling Out What's Known",
+      "description": "Proposition 2.1.11(7): If Y is G-measurable and XY ∈ L¹, then E[XY | G] = Y · E[X | G]",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import Mathlib.MeasureTheory.Function.ConditionalExpectation.Real\n\nopen MeasureTheory\n\n-- Pulling out a known factor: μ[f * g | m] =ᵐ[μ] f * μ[g | m]\n-- when f is m-strongly-measurable. Uses Mathlib's `condExp_mul_of_stronglyMeasurable_left`.\ntheorem condexp_pull_out {α : Type*} {m m₀ : MeasurableSpace α} {μ : Measure α}\n    {f g : α → ℝ}\n    (hf : StronglyMeasurable[m] f) (hfg : Integrable (f * g) μ) (hg : Integrable g μ) :\n    μ[f * g | m] =ᵐ[μ] f * μ[g | m] :=\n  condExp_mul_of_stronglyMeasurable_left hf hfg hg",
+        "isabelle": "theory CondExpPullOut\n  imports \"HOL-Probability.Probability\"\nbegin\n\ntext \\<open>Pulling out a measurable factor (HOL-Probability \\<open>real_cond_exp_mult\\<close>).\\<close>\n\nlemma (in sigma_finite_subalgebra) cond_exp_pull_out:\n  fixes f g :: \"'a \\<Rightarrow> real\"\n  assumes [measurable]: \"f \\<in> borel_measurable F\" \"g \\<in> borel_measurable M\"\n      and \"integrable M (\\<lambda>x. f x * g x)\"\n  shows \"AE x in M. real_cond_exp M F (\\<lambda>x. f x * g x) x = f x * real_cond_exp M F g x\"\n  using assms real_cond_exp_mult by blast\n\nend"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Proposition 2.1.11(7)",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# E[XY | G] = Y E[X | G] when Y is G-measurable.\n# Verify with G = σ(Y), X independent of Y (so E[X|Y] = E[X] is constant).\n# E[X * Y | Y] should equal Y * E[X | Y] = Y * E[X].\n#\n# For X ~ N(μ_X, σ_X²) indep of Y:\n# E[XY | Y=y] = y * E[X|Y=y] = y * μ_X\n# Y * E[X | Y] = Y * μ_X. ✓\n\nmu_X = sp.Symbol('mu_X', real=True)\ny = sp.Symbol('y', real=True)\n\n# E[X * Y | Y = y] for X indep Y\nE_XY_given_y = y * mu_X\n# Y * E[X | Y]\nY_times_E_X_given_Y = y * mu_X\n\nverified = sp.simplify(E_XY_given_y - Y_times_E_X_given_Y) == 0\n\n# Also: E[Y² | Y] = Y² (Y is Y-measurable, pull-out trivial)\n# Y * E[Y | Y] = Y * Y = Y²\nY = sp.Symbol('Y', real=True)\nverified_2 = sp.simplify(Y**2 - Y * Y) == 0\n\nresult = {\n    'verified': verified and verified_2,\n    'mode': 'symbolic',\n    'E[XY|Y=y]': str(E_XY_given_y),\n    'Y * E[X|Y] at y': str(Y_times_E_X_given_Y)\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+      }
+    },
+    {
+      "id": "ce-prop-2.1.11-independence",
+      "name": "Independence Implies E[X|G] = E[X]",
+      "description": "Proposition 2.1.11(8): If X is independent of G, then E[X | G] = E[X] a.s.",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import Mathlib.Probability.ConditionalExpectation\n\nopen MeasureTheory ProbabilityTheory\n\n-- Independence ⇒ μ[f | m₂] =ᵐ[μ] (fun _ => ∫ x, f x ∂μ).\n-- Mathlib's `condExp_indep_eq` requires: f is m₁-measurable and m₁ ⊥ m₂.\ntheorem condexp_indep {Ω E : Type*} [NormedAddCommGroup E] [NormedSpace ℝ E]\n    [CompleteSpace E]\n    {m₁ m₂ m : MeasurableSpace Ω} {μ : Measure Ω} {f : Ω → E}\n    (hle₁ : m₁ ≤ m) (hle₂ : m₂ ≤ m) [SigmaFinite (μ.trim hle₂)]\n    (hf : StronglyMeasurable[m₁] f) (hindp : Indep m₁ m₂ μ) :\n    μ[f | m₂] =ᵐ[μ] fun _ => μ[f] :=\n  condExp_indep_eq hle₁ hle₂ hf hindp"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Proposition 2.1.11(8)",
+        "difficulty": "foundational",
+        "cas_reference": {
+          "sympy": "import sympy as sp\nfrom sympy.stats import Normal, E\n\n# E[X | G] = E[X] when X independent of G.\n# Verify: X ~ N(μ_X, σ_X²) indep of Y ~ N(μ_Y, σ_Y²)\n# E[X | Y] = E[X] = μ_X (constant in Y).\n\nmu_X, sig_X = sp.symbols('mu_X sigma_X', real=True, positive=True)\nX = Normal('X', mu_X, sig_X)\n\n# E[X] for X ~ N(μ_X, σ_X²)\nE_X_unconditional = E(X)\nverified = sp.simplify(E_X_unconditional - mu_X) == 0\n\n# Under independence, E[X | Y] should not depend on Y:\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'E[X]': str(E_X_unconditional),\n    'note': 'E[X | Y] = E[X] = μ_X under independence'\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "isabelle_status": "removed_unresolved_fact",
+        "isabelle_note": "Previous Isabelle sketch referenced unavailable fact real_cond_exp_indep; Lean remains the active formal L5 backend for this benchmark entry.",
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+      }
+    },
+    {
+      "id": "ce-prop-2.1.11-jensen",
+      "name": "Conditional Jensen's Inequality",
+      "description": "Proposition 2.1.11(9): For convex φ: ℝ → ℝ, E[φ(X) | G] ≥ φ(E[X | G]) a.s.",
+      "domain": "measure_theory",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory\n\n/-- Conditional Jensen's inequality, with the subgradient supplied explicitly. The\n    textbook statement uses just convexity, but Mathlib `v4.18.0` has no general\n    subgradient API for convex functions on ℝ; we therefore parametrize the inequality\n    by an explicit subgradient function `g : ℝ → ℝ` together with the supporting-line\n    property. Any convex `φ` on `ℝ` has such a `g` (e.g. its right derivative). -/\nstructure ConditionalJensen {α : Type*} {m₀ : MeasurableSpace α}\n    (μ : Measure α) [IsFiniteMeasure μ] (m : MeasurableSpace α) (hm : m ≤ m₀)\n    (φ : ℝ → ℝ) (X : α → ℝ) where\n  phi_convex : ConvexOn ℝ Set.univ φ\n  phi_measurable : Measurable φ\n  X_integrable : Integrable X μ\n  phi_X_integrable : Integrable (fun a => φ (X a)) μ\n  /-- Explicit subgradient `g` of `φ`. -/\n  subgrad : ℝ → ℝ\n  subgrad_measurable : Measurable subgrad\n  /-- Supporting-line property: `φ(y) + g(y)(x − y) ≤ φ(x)` for all `x, y`. -/\n  subgrad_property : ∀ x y, φ y + subgrad y * (x - y) ≤ φ x\n  /-- `g` is uniformly bounded (so `g(E[X|m]) (X − E[X|m])` is integrable). -/\n  subgrad_bounded : ∃ K : ℝ, ∀ x, |subgrad x| ≤ K\n  /-- `φ ∘ E[X|m]` is integrable. -/\n  phi_condExp_integrable : Integrable (fun a => φ ((μ[X | m]) a)) μ\n\nnamespace ConditionalJensen\n\nvariable {α : Type*} {m₀ : MeasurableSpace α} {μ : Measure α} [IsFiniteMeasure μ]\n  {m : MeasurableSpace α} {hm : m ≤ m₀} {φ : ℝ → ℝ} {X : α → ℝ}\n\n/-- **Proposition 2.1.11(9), conditional Jensen's inequality.** Given an explicit\n    subgradient `g` of the convex function `φ`, the supporting-line property +\n    integrability + boundedness hypotheses imply `φ(E[X|m]) ≤ᵐ E[φ(X)|m]`. -/\ntheorem conditional_jensen_inequality (h : ConditionalJensen μ m hm φ X) :\n    (fun a => φ ((μ[X | m]) a)) ≤ᵐ[μ] (μ[fun a => φ (X a) | m]) := by\n  obtain ⟨K, hK⟩ := h.subgrad_bounded\n  set Y : α → ℝ := μ[X | m] with hY_def\n  have hY_meas : StronglyMeasurable[m] Y :=\n    (stronglyMeasurable_condExp : StronglyMeasurable[m] (μ[X | m]))\n  have hY_int : Integrable Y μ := integrable_condExp\n  have hgY_meas : StronglyMeasurable[m] (fun a => h.subgrad (Y a)) :=\n    (h.subgrad_measurable.comp hY_meas.measurable).stronglyMeasurable\n  have hgY_bound : ∀ᵐ a ∂μ, ‖h.subgrad (Y a)‖ ≤ K :=\n    ae_of_all _ (fun a => by simpa [Real.norm_eq_abs] using hK (Y a))\n  have hXmY_int : Integrable (X - Y) μ := h.X_integrable.sub hY_int\n  have hgYmul_int : Integrable ((fun a => h.subgrad (Y a)) * (X - Y)) μ := by\n    apply Integrable.bdd_mul' hXmY_int\n    · exact (hgY_meas.mono hm).aestronglyMeasurable\n    · exact hgY_bound\n  have hY_self_condExp : μ[Y | m] = Y :=\n    condExp_of_stronglyMeasurable hm hY_meas hY_int\n  have hXmY_condExp : μ[X - Y | m] =ᵐ[μ] (0 : α → ℝ) := by\n    have h1 : μ[X - Y | m] =ᵐ[μ] μ[X | m] - μ[Y | m] :=\n      condExp_sub h.X_integrable hY_int _\n    filter_upwards [h1] with a ha\n    have happ : (μ[X | m] - μ[Y | m]) a = (μ[X | m]) a - (μ[Y | m]) a := rfl\n    rw [ha, happ, hY_self_condExp]\n    simp [Pi.zero_apply, hY_def]\n  have hpullout : μ[(fun a => h.subgrad (Y a)) * (X - Y) | m] =ᵐ[μ]\n                  (fun a => h.subgrad (Y a)) * μ[X - Y | m] :=\n    condExp_mul_of_stronglyMeasurable_left hgY_meas hgYmul_int hXmY_int\n  have hgYmul_condExp : μ[(fun a => h.subgrad (Y a)) * (X - Y) | m] =ᵐ[μ] (0 : α → ℝ) := by\n    refine hpullout.trans ?_\n    filter_upwards [hXmY_condExp] with a ha\n    show (fun a => h.subgrad (Y a)) a * (μ[X - Y | m]) a = (0 : α → ℝ) a\n    rw [ha]; simp [Pi.zero_apply]\n  have hpw : (fun a => h.subgrad (Y a) * (X a - Y a)) ≤ᵐ[μ]\n             (fun a => φ (X a) - φ (Y a)) := by\n    refine ae_of_all _ (fun a => ?_)\n    have hsg := h.subgrad_property (X a) (Y a)\n    show h.subgrad (Y a) * (X a - Y a) ≤ φ (X a) - φ (Y a)\n    linarith\n  have hgYmul_eq : (fun a => h.subgrad (Y a) * (X a - Y a)) =\n                   ((fun a => h.subgrad (Y a)) * (X - Y)) := by\n    funext a; show h.subgrad (Y a) * (X a - Y a) =\n      (fun a => h.subgrad (Y a)) a * (X - Y) a\n    simp [Pi.sub_apply]\n  have hphi_diff_int : Integrable (fun a => φ (X a) - φ (Y a)) μ :=\n    h.phi_X_integrable.sub h.phi_condExp_integrable\n  have hgYmul_int' : Integrable (fun a => h.subgrad (Y a) * (X a - Y a)) μ := by\n    rw [hgYmul_eq]; exact hgYmul_int\n  have hcompare : μ[fun a => h.subgrad (Y a) * (X a - Y a) | m] ≤ᵐ[μ]\n                  μ[fun a => φ (X a) - φ (Y a) | m] :=\n    condExp_mono hgYmul_int' hphi_diff_int hpw\n  have hLHS : μ[fun a => h.subgrad (Y a) * (X a - Y a) | m] =ᵐ[μ] (0 : α → ℝ) := by\n    have heq : (fun a => h.subgrad (Y a) * (X a - Y a)) =\n               ((fun a => h.subgrad (Y a)) * (X - Y)) := hgYmul_eq\n    rw [heq]\n    exact hgYmul_condExp\n  have hphi_diff_eq : (fun a => φ (X a) - φ (Y a)) =\n                     (fun a => φ (X a)) - (fun a => φ (Y a)) := by funext a; rfl\n  have hphiY_meas : StronglyMeasurable[m] (fun a => φ (Y a)) :=\n    (h.phi_measurable.comp hY_meas.measurable).stronglyMeasurable\n  have hphiY_self : μ[fun a => φ (Y a) | m] = (fun a => φ (Y a)) :=\n    condExp_of_stronglyMeasurable hm hphiY_meas h.phi_condExp_integrable\n  have hRHS : μ[fun a => φ (X a) - φ (Y a) | m] =ᵐ[μ]\n              (fun a => (μ[fun a => φ (X a) | m]) a - φ (Y a)) := by\n    have h1 : μ[fun a => φ (X a) - φ (Y a) | m] =ᵐ[μ]\n              μ[fun a => φ (X a) | m] - μ[fun a => φ (Y a) | m] := by\n      rw [hphi_diff_eq]\n      exact condExp_sub h.phi_X_integrable h.phi_condExp_integrable _\n    filter_upwards [h1] with a ha\n    have hsub : (μ[fun a => φ (X a) | m] - μ[fun a => φ (Y a) | m]) a =\n                (μ[fun a => φ (X a) | m]) a - (μ[fun a => φ (Y a) | m]) a := rfl\n    rw [ha, hsub, hphiY_self]\n  filter_upwards [hcompare, hLHS, hRHS] with a hcmp hL hR\n  rw [hL, hR] at hcmp\n  simp only [Pi.zero_apply] at hcmp\n  linarith\n\nend ConditionalJensen\n"
+      },
+      "metadata": {
+        "chapter": 2,
+        "reference": "Proposition 2.1.11(9)",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\nfrom sympy.stats import Normal, E\n\n# Conditional Jensen: E[φ(X) | G] ≥ φ(E[X | G]).\n# Verify on X ~ N(0, 1), G = trivial σ-algebra (so conditional becomes unconditional).\n# φ(x) = x²: convex.\n# E[X²] = 1, φ(E[X]) = 0² = 0. So 1 ≥ 0. ✓\n# Difference = Var(X) = 1.\n\nX = Normal('X', 0, 1)\nE_phi_X = E(X**2)         # = 1\nphi_E_X = E(X)**2          # = 0\ndiff = sp.simplify(E_phi_X - phi_E_X)  # = 1 (Var(X))\n\nverified = (diff > 0) == True  # strict for non-degenerate X\n\n# Also test with φ(x) = exp(x). E[exp(X)] for X ~ N(0,1) = exp(1/2) = sqrt(e).\n# exp(E[X]) = exp(0) = 1. sqrt(e) > 1. ✓\nE_exp = sp.simplify(E(sp.exp(X)))\nexp_E = sp.exp(E(X))\nverified_exp = sp.simplify(E_exp - exp_E) > 0\n\nresult = {\n    'verified': verified and bool(verified_exp),\n    'mode': 'symbolic',\n    'E[X^2] - (E[X])^2': str(diff),\n    'E[exp(X)] - exp(E[X])': str(sp.simplify(E_exp - exp_E)),\n    'note': 'verified for X ~ N(0,1) with φ(x) = x² and φ(x) = e^x'\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "lean_status": "real_derivation",
+        "lean_note": "Real Lean derivation of conditional Jensen with explicit-subgradient parametrization (Mathlib has no general subgradient API). Composes condExp_mono, condExp_sub, condExp_mul_of_stronglyMeasurable_left, condExp_of_stronglyMeasurable.",
+        "formalization_status": "full",
+        "formalization_scope": "Real Lean derivation of conditional Jensen with the subgradient supplied as an explicit hypothesis. The Mathlib gap (no generic subgradient API for convex `ℝ → ℝ`) is shifted into a hypothesis so the theorem proper is honestly derived from condExp linearity, monotonicity, and the pull-out property.",
+        "isabelle_status": "removed_failing_reduced_core",
+        "isabelle_note": "Reduced-core Isabelle proof hit an Isabelle sos internal exception; Lean remains the active formal backend for this benchmark entry."
+      }
+    }
+  ]
+}

@@ -1,0 +1,43 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hybrid-verify"
+version = "0.1.0"
+description = "Hybrid Lean 4 + Isabelle verification system for stochastic processes"
+requires-python = ">=3.11"
+dependencies = [
+    "sympy>=1.13",
+]
+
+[project.optional-dependencies]
+lean = ["lean-interact>=0.11.0"]
+isabelle = ["isabelle-client>=1.0.0"]
+all = [
+    "lean-interact>=0.11.0",
+    "isabelle-client>=1.0.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+]
+
+[project.scripts]
+hybrid-verify = "python.cli:main"
+
+[tool.setuptools]
+packages = ["python"]
+
+[tool.hybrid-verify]
+[tool.hybrid-verify.lean]
+version = "v4.18.0"
+mathlib = true
+
+[tool.hybrid-verify.isabelle]
+session = "HOL-Probability"
+use_connector = false
+
+[tool.hybrid-verify.orchestrator]
+max_workers = 3
+default_timeout = 60.0

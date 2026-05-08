@@ -1,0 +1,33 @@
+services:
+  verify:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.verify
+    volumes:
+      - ../python:/app/python:ro
+      - ../benchmarks:/app/benchmarks:ro
+      - ../hybrid_verify.toml:/app/hybrid_verify.toml:ro
+      - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
+    working_dir: /app
+    command: ["benchmarks/cross_validated.json", "-v", "--config", "hybrid_verify.toml", "--timeout", "120"]
+
+  lean:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.lean
+    volumes:
+      - ../benchmarks:/app/benchmarks:ro
+      - ../hybrid_verify.toml:/app/hybrid_verify.toml:ro
+    working_dir: /app
+
+  isabelle:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.isabelle
+    volumes:
+      - ../benchmarks:/app/benchmarks:ro
+      - ../hybrid_verify.toml:/app/hybrid_verify.toml:ro
+    working_dir: /app
+
+volumes:
+  lean_interact_cache:

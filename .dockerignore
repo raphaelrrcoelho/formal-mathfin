@@ -1,0 +1,11 @@
+.git
+.agents
+.codex
+.claude
+.pytest_cache
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.egg-info
+stochastic_notes.pdf

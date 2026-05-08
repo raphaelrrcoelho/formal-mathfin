@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+.pytest_cache/
+.venv/
+
+# Lean
+lean/.lake/
+lean/build/
+*.olean
+
+# Editor / agent local state
+.agents/
+.codex/
+.claude/settings.local.json
+
+# OS / IDE
+.DS_Store
+*.swp
+*~

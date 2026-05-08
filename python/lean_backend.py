@@ -1,0 +1,204 @@
+"""Lean 4 verification backend using lean-interact."""
+
+from __future__ import annotations
+
+import logging
+import shutil
+import threading
+import time
+from typing import Any
+
+from .models import (
+    Backend,
+    BackendResult,
+    ConfidenceLevel,
+    TheoremStatement,
+    VerificationStatus,
+)
+
+logger = logging.getLogger(__name__)
+
+
+class LeanBackend:
+    """Lean 4 backend using lean-interact's AutoLeanServer with Mathlib support."""
+
+    def __init__(
+        self,
+        lean_version: str = "v4.18.0",
+        mathlib: bool = True,
+    ):
+        self._lean_version = lean_version
+        self._mathlib = mathlib
+        self._server: Any = None
+        self._project: Any = None
+        self._lock = threading.Lock()
+
+    @property
+    def name(self) -> str:
+        return "lean"
+
+    def is_available(self) -> bool:
+        """Check if lean-interact and the Lean toolchain are installed."""
+        try:
+            import lean_interact  # noqa: F401
+        except ImportError:
+            return False
+        return shutil.which("lake") is not None
+
+    def _ensure_server(self) -> None:
+        """Lazily initialize the Lean server (defers expensive Mathlib setup)."""
+        if self._server is not None:
+            return
+
+        from lean_interact import (
+            AutoLeanServer,
+            LeanREPLConfig,
+            TempRequireProject,
+        )
+
+        if self._mathlib:
+            self._project = TempRequireProject(
+                lean_version=self._lean_version,
+                require="mathlib",
+            )
+            config = LeanREPLConfig(
+                project=self._project,
+                verbose=False,
+            )
+        else:
+            config = LeanREPLConfig(
+                lean_version=self._lean_version,
+                verbose=False,
+            )
+
+        self._server = AutoLeanServer(config)
+        logger.info("Lean server initialized (mathlib=%s)", self._mathlib)
+
+    async def verify(
+        self,
+        theorem: TheoremStatement,
+        timeout: float = 60.0,
+    ) -> BackendResult:
+        """Verify a theorem using Lean 4."""
+        start = time.monotonic()
+
+        if not self.is_available():
+            return BackendResult(
+                backend=Backend.LEAN,
+                status=VerificationStatus.UNAVAILABLE,
+                error_message="lean-interact not installed",
+            )
+
+        code = theorem.code.get(Backend.LEAN)
+        if not code:
+            return BackendResult(
+                backend=Backend.LEAN,
+                status=VerificationStatus.NOT_ATTEMPTED,
+                error_message="No Lean code provided for this theorem",
+            )
+
+        with self._lock:
+            try:
+                self._ensure_server()
+                return self._run_verification(code, start)
+            except Exception as e:
+                elapsed = time.monotonic() - start
+                logger.error("Lean verification failed: %s", e)
+                return BackendResult(
+                    backend=Backend.LEAN,
+                    status=VerificationStatus.FAILED,
+                    error_message=str(e),
+                    elapsed_seconds=elapsed,
+                )
+
+    def _run_verification(self, code: str, start: float) -> BackendResult:
+        """Execute Lean code and parse the response."""
+        from lean_interact import Command
+
+        response = self._server.run(Command(cmd=code))
+        elapsed = time.monotonic() - start
+        raw = str(response)
+
+        # Parse the response. Newer lean-interact returns CommandResponse with a
+        # `messages` list whose entries have `severity` ('error', 'warning', 'info').
+        messages = getattr(response, "messages", []) or []
+        error_msgs = [
+            m for m in messages
+            if getattr(m, "severity", None) == "error"
+        ]
+
+        # Fall back to legacy attributes
+        legacy_errors = getattr(response, "errors", None)
+        if not error_msgs and legacy_errors:
+            error_msgs = legacy_errors
+
+        has_errors_attr = getattr(response, "has_errors", None)
+        if callable(has_errors_attr):
+            errored = has_errors_attr()
+        else:
+            errored = bool(error_msgs)
+
+        sorries = getattr(response, "sorries", [])
+        sorry_count = len(sorries) if isinstance(sorries, list) else 0
+
+        if errored:
+            error_strs = []
+            for m in error_msgs:
+                data = getattr(m, "data", None)
+                pos = getattr(m, "start_pos", None)
+                if data is not None:
+                    if pos is not None:
+                        error_strs.append(f"line {getattr(pos, 'line', '?')}: {data}")
+                    else:
+                        error_strs.append(str(data))
+                else:
+                    error_strs.append(str(m))
+            return BackendResult(
+                backend=Backend.LEAN,
+                status=VerificationStatus.FAILED,
+                confidence=ConfidenceLevel.L0,
+                raw_output=raw,
+                error_message="; ".join(error_strs) if error_strs else "(unknown error)",
+                elapsed_seconds=elapsed,
+            )
+
+        if sorry_count > 0:
+            confidence = (
+                ConfidenceLevel.L4 if sorry_count == 1 else ConfidenceLevel.L3
+            )
+            return BackendResult(
+                backend=Backend.LEAN,
+                status=VerificationStatus.PARTIAL,
+                confidence=confidence,
+                raw_output=raw,
+                sorry_count=sorry_count,
+                elapsed_seconds=elapsed,
+            )
+
+        # Success: no errors, no sorries
+        return BackendResult(
+            backend=Backend.LEAN,
+            status=VerificationStatus.SUCCESS,
+            confidence=ConfidenceLevel.L5,
+            raw_output=raw,
+            elapsed_seconds=elapsed,
+        )
+
+    def shutdown(self) -> None:
+        """Shut down the Lean server and clean up."""
+        with self._lock:
+            if self._server is not None:
+                try:
+                    self._server.close()
+                except Exception:
+                    pass
+                self._server = None
+
+            if self._project is not None:
+                try:
+                    self._project.cleanup()
+                except Exception:
+                    pass
+                self._project = None
+
+        logger.info("Lean backend shut down")

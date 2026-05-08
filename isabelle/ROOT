@@ -1,0 +1,25 @@
+session HybridVerify = "HOL-Probability" +
+  options [document = false]
+  directories
+    "theories"
+  theories
+    StochasticBasic
+
+(*
+  HybridVerifyAFP extends the HOL-Probability stack with AFP entries that
+  cover ergodic theory (Birkhoff) and Markov chain models. It is only built
+  when the AFP component is registered (see docker/Dockerfile.verify and
+  docker/AFP_NOTES.md). Benchmark theorems that need
+    imports "Ergodic_Theory.Invariants"
+    imports "Markov_Models.Discrete_Time_Markov_Chain"
+  should select session = "HybridVerifyAFP" via metadata.isabelle_session.
+*)
+session HybridVerifyAFP = "HOL-Probability" +
+  options [document = false]
+  sessions
+    "Ergodic_Theory"
+    "Markov_Models"
+  directories
+    "theories"
+  theories
+    StochasticBasic

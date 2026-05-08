@@ -1,0 +1,116 @@
+FROM ubuntu:24.04
+
+ENV DEBIAN_FRONTEND=noninteractive
+ENV PATH="/root/.elan/bin:/opt/Isabelle2025-2/bin:${PATH}"
+ENV ISABELLE_HOME_USER="/root/.isabelle/Isabelle2025-2"
+
+# Set to "0" to skip the AFP layer entirely (faster builds, no Ergodic_Theory /
+# Markov_Models). Defaults to "1" so AFP-dependent benchmarks Just Work.
+ARG INSTALL_AFP=1
+ENV INSTALL_AFP=${INSTALL_AFP}
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates \
+    curl \
+    git \
+    libfontconfig1 \
+    libgomp1 \
+    libgmp-dev \
+    perl \
+    python3 \
+    python3-pip \
+    python3-venv \
+    tar \
+    wget \
+    zstd \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install Lean via elan. The repo's lean-toolchain controls the version used by Lake.
+RUN curl -sSf https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh \
+    | sh -s -- -y --default-toolchain none
+
+# Install Isabelle.
+WORKDIR /opt
+RUN wget -q https://isabelle.in.tum.de/dist/Isabelle2025-2_linux.tar.gz \
+    && tar -xzf Isabelle2025-2_linux.tar.gz \
+    && rm Isabelle2025-2_linux.tar.gz \
+    && isabelle version
+
+# Keep Isabelle's JVM below the default 4 GiB heap. Poly/ML also needs memory,
+# and this project usually runs on developer machines rather than large builders.
+RUN mkdir -p /root/.isabelle/Isabelle2025-2/etc \
+    && printf '%s\n' \
+      'ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx2g -Xss8m"' \
+      > /root/.isabelle/Isabelle2025-2/etc/settings
+
+WORKDIR /app
+
+# Copy project metadata first so Python dependencies are cached independently
+# from benchmark/theory edits.
+COPY pyproject.toml requirements.txt ./
+COPY python/ python/
+
+RUN python3 -m pip install --break-system-packages -e ".[all]"
+
+# Copy prover projects and install the repo-pinned Lean toolchain. The Python
+# Lean backend uses lean-interact/TempRequireProject rather than this Lake
+# package, so do not build the local Lake target here.
+COPY lean/ lean/
+RUN elan toolchain install "$(cat lean/lean-toolchain)" \
+    && cd lean \
+    && lean --version \
+    && lake --version
+
+COPY isabelle/ isabelle/
+RUN isabelle build -b -j 1 -o threads=1 HOL-Probability
+
+# ---------------------------------------------------------------------------
+# AFP (Archive of Formal Proofs) layer.
+#
+# Placed AFTER the HOL-Probability build so that toggling/refreshing AFP does
+# not invalidate the expensive HOL-Probability heap cache.
+#
+# We download `afp-current.tar.gz` (the AFP release tracking the current
+# stable Isabelle, which as of Isabelle 2025-2 is the matching release) and
+# register it as an Isabelle component via `isabelle components -u`. We then
+# pre-build only the two sessions we actually need:
+#
+#   * Ergodic_Theory       -- Birkhoff's ergodic theorem (in Invariants) and
+#                             Hasselblatt-style ergodic theory.
+#   * Markov_Models        -- discrete/continuous-time Markov chains, MDPs.
+#   * Stochastic_Matrices  -- stationary-distribution existence/uniqueness via
+#                             Perron-Frobenius (pulls in Perron_Frobenius and
+#                             Jordan_Normal_Form transitively).
+#
+# Their AFP dependencies (Coinductive, Gauss-Jordan_Elim_Fun, Perron_Frobenius,
+# Jordan_Normal_Form, etc.) are pulled in transitively by `isabelle build -b`.
+# We deliberately do NOT pre-build the rest of the AFP -- a full AFP heap
+# build is multi-hour and tens of GB, which blows past the -Xmx2g build cap
+# and the disk budget for this image.
+#
+# Build is single-threaded (`-j 1 -o threads=1`) for the same reason
+# HOL-Probability is: Poly/ML's per-thread heap pressure plus our 2 GiB cap.
+# Pass `--build-arg INSTALL_AFP=0` to skip this layer entirely.
+# ---------------------------------------------------------------------------
+RUN if [ "$INSTALL_AFP" = "1" ]; then \
+      mkdir -p /opt/afp \
+      && wget -q https://www.isa-afp.org/release/afp-current.tar.gz -O /tmp/afp-current.tar.gz \
+      && tar -xzf /tmp/afp-current.tar.gz -C /opt/afp --strip-components=1 \
+      && rm /tmp/afp-current.tar.gz \
+      && isabelle components -u /opt/afp/thys \
+      && isabelle build -b -j 1 -o threads=1 Ergodic_Theory Markov_Models Stochastic_Matrices ; \
+    else \
+      echo "Skipping AFP install (INSTALL_AFP=$INSTALL_AFP)" ; \
+    fi
+
+# Runtime defaults. Keep this after the Isabelle heap build so changing runtime
+# caps does not invalidate the expensive HOL-Probability build layer.
+RUN elan default "$(cat lean/lean-toolchain)" \
+    && printf '%s\n' \
+      'ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx3g -Xss8m"' \
+      > /root/.isabelle/Isabelle2025-2/etc/settings
+
+COPY benchmarks/ benchmarks/
+COPY hybrid_verify.toml ./
+
+ENTRYPOINT ["python3", "-m", "python.cli"]

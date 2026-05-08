@@ -1,0 +1,18 @@
+[hybrid-verify]
+
+[hybrid-verify.lean]
+version = "v4.18.0"
+mathlib = true
+
+[hybrid-verify.isabelle]
+# Default session for benchmarks that only need HOL-Probability. Individual
+# theorems can override this via metadata.isabelle_session = "HybridVerifyAFP"
+# (or any other registered session) when their code imports AFP entries such
+# as Ergodic_Theory or Markov_Models. See docker/AFP_NOTES.md.
+session = "HOL-Probability"
+afp_session = "HybridVerifyAFP"
+use_connector = false
+
+[hybrid-verify.orchestrator]
+max_workers = 3
+default_timeout = 60.0

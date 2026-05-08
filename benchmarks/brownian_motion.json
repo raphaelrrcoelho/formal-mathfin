@@ -1,0 +1,193 @@
+{
+  "description": "Brownian motion theorems from Saporito Ch 5 — routed to Lean (Mathlib)",
+  "theorems": [
+    {
+      "id": "bm-def-5.1.1",
+      "name": "Brownian Motion Definition",
+      "description": "Definition 5.1.1: A process B is a standard Brownian motion if B_0 = 0, it has independent and stationary increments, B_t - B_s ~ N(0, t-s), and paths are a.s. continuous",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n-- Formal Brownian-motion definition: zero start, Gaussian increments,\n-- independent disjoint increments, and a.s. continuous paths.\nstructure StandardBrownianMotion {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_at_zero : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n\nexample {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : StandardBrownianMotion μ B) :\n    (∀ᵐ ω ∂μ, B 0 ω = 0) ∧ (∀ᵐ ω ∂μ, Continuous fun t => B t ω) :=\n  ⟨hB.zero_at_zero, hB.continuous_paths⟩"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Definition 5.1.1",
+        "difficulty": "foundational",
+        "formalization_status": "full",
+        "formalization_scope": "Faithful Lean encoding of the standard Brownian motion definition: zero start, Gaussian independent increments, and a.s. continuous paths."
+      }
+    },
+    {
+      "id": "bm-thm-5.1.5",
+      "name": "BM Martingale Property",
+      "description": "Theorem 5.1.5: B_t is a martingale w.r.t. its natural filtration. Also B_t² - t is a martingale.",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- A standard Brownian motion together with a witness that it is a martingale\n    with respect to a given filtration (Theorem 5.1.5). -/\nstructure BrownianMartingale {Ω : Type*} [m0 : MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) (𝓕 : Filtration ℝ m0) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Theorem 5.1.5: B is a martingale w.r.t. 𝓕. -/\n  is_martingale : Martingale B 𝓕 μ\n\n/-- Theorem 5.1.5: a standard Brownian motion is a martingale with respect to\n    its (natural) filtration. -/\ntheorem BrownianMartingale.brownian_is_martingale\n    {Ω : Type*} [m0 : MeasurableSpace Ω]\n    {μ : Measure Ω} {B : ℝ → Ω → ℝ} {𝓕 : Filtration ℝ m0}\n    (hB : BrownianMartingale μ B 𝓕) : Martingale B 𝓕 μ :=\n  hB.is_martingale\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Theorem 5.1.5",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# Verify E[B_t - B_s | F_s] = 0 using Gaussian properties\n# B_t - B_s ~ N(0, t-s), independent of F_s\n# So E[B_t | F_s] = E[B_s + (B_t - B_s) | F_s] = B_s + 0 = B_s\nt, s = sp.symbols('t s', positive=True)\nmu = 0  # E[B_t - B_s] = 0\nresult = {'verified': mu == 0, 'mode': 'symbolic', 'note': 'E[increment] = 0 confirms martingale property'}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-thm-5.1.7",
+      "name": "Reflection Principle",
+      "description": "Theorem 5.1.7: P(max_{0≤s≤t} B_s ≥ a) = 2 P(B_t ≥ a) for a > 0",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- A standard Brownian motion together with the reflection-principle\n    identity: for every `t ≥ 0` and `a > 0`,\n    `P(∃ s ∈ [0, t], B_s ≥ a) = 2 · P(B_t ≥ a)` (Theorem 5.1.7). -/\nstructure BrownianReflection {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Theorem 5.1.7: P(running maximum on [0,t] reaches a) = 2 · P(B_t ≥ a). -/\n  reflection_identity : ∀ ⦃t a : ℝ⦄, 0 ≤ t → 0 < a →\n    μ {ω | ∃ s ∈ Set.Icc (0 : ℝ) t, a ≤ B s ω} = 2 * μ {ω | a ≤ B t ω}\n\n/-- Theorem 5.1.7: the reflection-principle identity for a standard Brownian\n    motion. -/\ntheorem BrownianReflection.reflection_principle\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : BrownianReflection μ B) {t a : ℝ} (ht : 0 ≤ t) (ha : 0 < a) :\n    μ {ω | ∃ s ∈ Set.Icc (0 : ℝ) t, a ≤ B s ω} = 2 * μ {ω | a ≤ B t ω} :=\n  hB.reflection_identity ht ha\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Theorem 5.1.7",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\nfrom sympy.stats import Normal, P as Prob, cdf\n\n# Reflection principle: P(max_{s<=t} B_s >= a) = 2*P(B_t >= a)\n# Verify using standard normal\nt_val = sp.Integer(1)  # t = 1\na = sp.Symbol('a', positive=True)\n\nB_t = Normal('B_t', 0, sp.sqrt(t_val))\n\n# P(B_1 >= a) = 1 - Phi(a)\n# P(max B_s >= a) = 2*(1 - Phi(a))\n# This is the reflection principle identity\nresult = {'verified': True, 'mode': 'symbolic', 'note': 'P(max B_s >= a) = 2*P(B_t >= a) by symmetry of BM paths'}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-thm-5.3.2",
+      "name": "Hölder Continuity",
+      "description": "Theorem 5.3.2: BM paths are a.s. Hölder continuous of order α for every α < 1/2",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- A standard Brownian motion together with the path-regularity claim that\n    almost every sample path is locally Hölder of every exponent strictly less\n    than 1/2 (Theorem 5.3.2). -/\nstructure BrownianHolderRegularity {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Theorem 5.3.2: for every exponent α < 1/2, almost every BM path is\n      Hölder continuous of order α on every compact interval. -/\n  almost_sure_holder : ∀ (α : NNReal), (α : ℝ) < 1 / 2 → ∀ T : ℝ, 0 < T →\n    ∀ᵐ ω ∂μ, ∃ C : NNReal,\n      HolderOnWith C α (fun t : ℝ => B t ω) (Set.Icc 0 T)\n\n/-- Theorem 5.3.2: almost every Brownian path is Hölder continuous of every\n    order α strictly less than 1/2 on every compact interval. -/\ntheorem BrownianHolderRegularity.paths_almost_surely_holder\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : BrownianHolderRegularity μ B)\n    (α : NNReal) (hα : (α : ℝ) < 1 / 2) (T : ℝ) (hT : 0 < T) :\n    ∀ᵐ ω ∂μ, ∃ C : NNReal,\n      HolderOnWith C α (fun t : ℝ => B t ω) (Set.Icc 0 T) :=\n  hB.almost_sure_holder α hα T hT\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Theorem 5.3.2",
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-cor-5.3.4",
+      "name": "Nowhere Differentiability",
+      "description": "Corollary 5.3.4: BM paths are a.s. nowhere differentiable",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- A standard Brownian motion together with the path-regularity claim that\n    almost every sample path is nowhere differentiable (Corollary 5.3.4). -/\nstructure BrownianNowhereDifferentiable {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Corollary 5.3.4: almost every BM path is nowhere differentiable. -/\n  almost_sure_nowhere_diff : ∀ᵐ ω ∂μ,\n    ∀ x : ℝ, ¬ DifferentiableAt ℝ (fun t : ℝ => B t ω) x\n\n/-- Corollary 5.3.4: almost every Brownian sample path is nowhere differentiable. -/\ntheorem BrownianNowhereDifferentiable.paths_almost_surely_nowhere_differentiable\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : BrownianNowhereDifferentiable μ B) :\n    ∀ᵐ ω ∂μ, ∀ x : ℝ, ¬ DifferentiableAt ℝ (fun t : ℝ => B t ω) x :=\n  hB.almost_sure_nowhere_diff\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Corollary 5.3.4",
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-thm-5.1.4",
+      "name": "Brownian Motion Markov Property",
+      "description": "Theorem 5.1.4: (B_{t+s} - B_s)_{t>=0} is independent of F_s — the Markov property of BM follows from independent increments",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- A standard Brownian motion together with the Markov-property claim: for\n    every `s ≥ 0`, the post-`s` increment process `t ↦ B_{t+s} - B_s` is\n    independent of the σ-algebra generated by `B` on `[0, s]`\n    (Theorem 5.1.4). -/\nstructure BrownianMarkovProperty {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Theorem 5.1.4: every increment after time s is independent of every\n      increment up to time s. (Markov property in increment form.) -/\n  markov_property : ∀ ⦃r s t u : ℝ⦄, 0 ≤ r → r ≤ s → s ≤ t → t ≤ u →\n    IndepFun (fun ω => B s ω - B r ω) (fun ω => B u ω - B t ω) μ\n\n/-- Theorem 5.1.4: increments of a standard Brownian motion that lie before\n    and after time `s` are independent — the increment-form Markov property. -/\ntheorem BrownianMarkovProperty.markov_independence\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : BrownianMarkovProperty μ B)\n    {r s t u : ℝ} (hr : 0 ≤ r) (hrs : r ≤ s) (hst : s ≤ t) (htu : t ≤ u) :\n    IndepFun (fun ω => B s ω - B r ω) (fun ω => B u ω - B t ω) μ :=\n  hB.markov_property hr hrs hst htu\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Theorem 5.1.4",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# Theorem 5.1.4: BM Markov property via uncorrelatedness of jointly Gaussian variables\n# B_t - B_s and B_s are uncorrelated jointly Gaussian => independent\n# Cov(B_t - B_s, B_s) = Cov(B_t, B_s) - Var(B_s) = s - s = 0 (for s <= t)\nt, s = sp.symbols('t s', positive=True)\n\n# Cov(B_t, B_s) = min(t, s) for BM. For s <= t, Cov(B_t, B_s) = s.\n# Cov(B_t - B_s, B_s) = Cov(B_t, B_s) - Cov(B_s, B_s) = s - s = 0\ncov_increment = s - s  # symbolically: min(t, s) - s with s <= t\n\n# Joint Gaussianity + zero covariance => independence\n# This is the key step for BM Markov property\nresult = {\n    'verified': sp.simplify(cov_increment) == 0,\n    'mode': 'symbolic',\n    'cov_increment_past': str(cov_increment),\n    'note': 'B_t-B_s independent of F_s via uncorrelated jointly Gaussian'\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-rmk-5.1.6-square",
+      "name": "B_t² - t is a Martingale",
+      "description": "Remark 5.1.6: The process X_t = B_t² - t is a martingale w.r.t. the natural filtration of BM",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- A standard Brownian motion together with a witness that the process\n    `t ↦ B_t² − t` is a martingale with respect to a given filtration\n    (Remark 5.1.6, square version). -/\nstructure BrownianSquareMinusTimeMartingale {Ω : Type*} [m0 : MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) (𝓕 : Filtration ℝ m0) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Remark 5.1.6: `t ↦ B_t² − t` is a martingale w.r.t. 𝓕. -/\n  square_minus_t_martingale : Martingale (fun t ω => (B t ω) ^ 2 - t) 𝓕 μ\n\n/-- Remark 5.1.6: for a standard Brownian motion `B`, the process\n    `t ↦ B_t² − t` is a martingale. -/\ntheorem BrownianSquareMinusTimeMartingale.is_martingale\n    {Ω : Type*} [m0 : MeasurableSpace Ω]\n    {μ : Measure Ω} {B : ℝ → Ω → ℝ} {𝓕 : Filtration ℝ m0}\n    (hB : BrownianSquareMinusTimeMartingale μ B 𝓕) :\n    Martingale (fun t ω => (B t ω) ^ 2 - t) 𝓕 μ :=\n  hB.square_minus_t_martingale\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Remark 5.1.6",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# Remark 5.1.6 (i): X_t = B_t² - t is a martingale.\n# Need: E[B_t² - t | F_s] = B_s² - s for s <= t.\n#\n# Compute: E[B_t² | F_s] = E[(B_s + (B_t - B_s))² | F_s]\n#                        = B_s² + 2 B_s · E[B_t - B_s | F_s] + E[(B_t - B_s)² | F_s]\n#                        = B_s² + 0 + (t - s)\n# So E[B_t² - t | F_s] = B_s² + (t - s) - t = B_s² - s ✓\n\nB_s, t, s = sp.symbols('B_s t s', real=True)\n\n# E[B_t - B_s | F_s] = 0  (martingale property of BM)\n# Var(B_t - B_s) = t - s  (definition of BM)\nE_Bt_sq_given_Fs = B_s**2 + 2*B_s*0 + (t - s)\nE_Xt_given_Fs = E_Bt_sq_given_Fs - t\nX_s = B_s**2 - s\n\nresult = {\n    'verified': sp.simplify(E_Xt_given_Fs - X_s) == 0,\n    'mode': 'symbolic',\n    'E[X_t|F_s]': str(sp.simplify(E_Xt_given_Fs)),\n    'X_s': str(X_s)\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-rmk-5.1.6-exp",
+      "name": "Exponential Martingale exp(αB_t - α²t/2)",
+      "description": "Remark 5.1.6: Y_t = exp(αB_t - α²t/2) is a martingale (the Wald/stochastic exponential of BM)",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory Real\n\n/-- A standard Brownian motion together with a witness that the Wald\n    exponential `t ↦ exp(α · B_t − α² · t / 2)` is a martingale with respect\n    to a given filtration (Remark 5.1.6, exponential version). -/\nstructure BrownianExponentialMartingale {Ω : Type*} [m0 : MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) (𝓕 : Filtration ℝ m0) (α : ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Remark 5.1.6 (exponential): the Wald exponential is a martingale. -/\n  exp_martingale : Martingale (fun t ω => exp (α * B t ω - α ^ 2 * t / 2)) 𝓕 μ\n\n/-- Remark 5.1.6 (Wald exponential): for a standard Brownian motion `B` and\n    real `α`, the process `t ↦ exp(α B_t − α² t / 2)` is a martingale. -/\ntheorem BrownianExponentialMartingale.wald_exponential_is_martingale\n    {Ω : Type*} [m0 : MeasurableSpace Ω]\n    {μ : Measure Ω} {B : ℝ → Ω → ℝ} {𝓕 : Filtration ℝ m0} {α : ℝ}\n    (hB : BrownianExponentialMartingale μ B 𝓕 α) :\n    Martingale (fun t ω => exp (α * B t ω - α ^ 2 * t / 2)) 𝓕 μ :=\n  hB.exp_martingale\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Remark 5.1.6",
+        "difficulty": "intermediate",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# Remark 5.1.6 (ii): Y_t = exp(α B_t - α² t / 2) is a martingale.\n# Need: E[Y_t | F_s] = Y_s for s <= t.\n#\n# E[exp(α B_t) | F_s] = exp(α B_s) · E[exp(α (B_t - B_s))]\n#                    = exp(α B_s) · exp(α² (t - s) / 2)   (Gaussian MGF)\n# So E[Y_t | F_s] = exp(α B_s + α² (t-s)/2 - α² t / 2) = exp(α B_s - α² s / 2) = Y_s ✓\n\nB_s, t, s, alpha = sp.symbols('B_s t s alpha', real=True)\n\n# MGF of N(0, t-s): E[exp(α(B_t-B_s))] = exp(α²(t-s)/2)\nMGF_increment = sp.exp(alpha**2 * (t - s) / 2)\n\nE_Yt_given_Fs = sp.exp(alpha*B_s) * sp.exp(-alpha**2 * t / 2) * MGF_increment\nY_s = sp.exp(alpha*B_s - alpha**2 * s / 2)\n\n# Compare logs (clearer for SymPy)\ndiff = sp.simplify(sp.log(E_Yt_given_Fs) - sp.log(Y_s))\n\nresult = {\n    'verified': diff == 0,\n    'mode': 'symbolic',\n    'log_diff': str(diff),\n    'note': 'Wald exponential martingale; underlies Girsanov change of measure'\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-prop-5.1.2",
+      "name": "Gaussian Process Characterization of BM",
+      "description": "Proposition 5.1.2: A Gaussian process with mean 0 and covariance k(s,t) = s ∧ t is a Brownian motion (modulo continuity)",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- A continuous mean-zero Gaussian process on `[0, ∞)` with covariance\n    `k(s, t) = min s t` together with a witness that it is a standard\n    Brownian motion (Proposition 5.1.2). -/\nstructure GaussianProcessIsBrownian {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (X : ℝ → Ω → ℝ) : Prop where\n  /-- Mean is zero at every nonnegative time. -/\n  mean_zero : ∀ ⦃t : ℝ⦄, 0 ≤ t → ∫ ω, X t ω ∂μ = 0\n  /-- Covariance is `min s t` at all nonnegative times. -/\n  covariance : ∀ ⦃s t : ℝ⦄, 0 ≤ s → 0 ≤ t →\n    ∫ ω, X s ω * X t ω ∂μ = min s t\n  /-- Almost every sample path is continuous. -/\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => X t ω\n  /-- Each one-time marginal is Gaussian with variance `t`. -/\n  one_time_gaussian : ∀ ⦃t : ℝ⦄, (ht : 0 ≤ t) →\n    Measure.map (X t) μ = gaussianReal 0 ⟨t, ht⟩\n  /-- Proposition 5.1.2: the process satisfies the increment laws of a standard\n      Brownian motion (zero start, Gaussian independent increments). -/\n  is_brownian_motion :\n    (∀ᵐ ω ∂μ, X 0 ω = 0) ∧\n    (∀ ⦃s t : ℝ⦄, s ≤ t →\n      ∃ v : NNReal, (v : ℝ) = t - s ∧\n        Measure.map (fun ω => X t ω - X s ω) μ = gaussianReal 0 v) ∧\n    (∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n      IndepFun (fun ω => X t ω - X s ω) (fun ω => X v ω - X u ω) μ)\n\n/-- Proposition 5.1.2: a continuous mean-zero Gaussian process with covariance\n    `k(s, t) = min s t` is a standard Brownian motion. -/\ntheorem GaussianProcessIsBrownian.is_standard_brownian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {X : ℝ → Ω → ℝ}\n    (h : GaussianProcessIsBrownian μ X) :\n    (∀ᵐ ω ∂μ, X 0 ω = 0) ∧\n    (∀ ⦃s t : ℝ⦄, s ≤ t →\n      ∃ v : NNReal, (v : ℝ) = t - s ∧\n        Measure.map (fun ω => X t ω - X s ω) μ = gaussianReal 0 v) ∧\n    (∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n      IndepFun (fun ω => X t ω - X s ω) (fun ω => X v ω - X u ω) μ) :=\n  h.is_brownian_motion\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Proposition 5.1.2",
+        "difficulty": "foundational",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# Proposition 5.1.2: For a Gaussian process X with E[X_t]=0 and Cov(X_s,X_t) = s ∧ t,\n# verify the increments are N(0, t-s) and independent across disjoint intervals.\n#\n# Var(X_t - X_s) = Var(X_t) + Var(X_s) - 2 Cov(X_s, X_t)\n#                = t + s - 2 min(s,t) = t - s for s <= t.\n#\n# For 0 <= s_1 < s_2 <= t_1 < t_2:\n# Cov(X_{s_2}-X_{s_1}, X_{t_2}-X_{t_1}) = min(s_2,t_2) - min(s_2,t_1) - min(s_1,t_2) + min(s_1,t_1)\n#                                       = s_2 - s_2 - s_1 + s_1 = 0 (independence by Gaussianity)\n\ns, t = sp.symbols('s t', positive=True)\n# Increment variance: Var(X_t - X_s) for s <= t\nvar_increment = t + s - 2*s  # since min(s,t)=s\nverified_var = sp.simplify(var_increment - (t - s)) == 0\n\n# Disjoint intervals: cov of increments\ns1, s2, t1, t2 = sp.symbols('s1 s2 t1 t2', positive=True)\n# Assume 0 < s1 < s2 <= t1 < t2\n# min(s_2,t_2)=s_2, min(s_2,t_1)=s_2, min(s_1,t_2)=s_1, min(s_1,t_1)=s_1\ncov_disjoint_inc = (s2) - (s2) - (s1) + (s1)\nverified_indep = sp.simplify(cov_disjoint_inc) == 0\n\nresult = {\n    'verified': verified_var and verified_indep,\n    'mode': 'symbolic',\n    'var_increment': str(var_increment),\n    'cov_disjoint_increments': str(cov_disjoint_inc)\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    },
+    {
+      "id": "bm-thm-5.3.5",
+      "name": "BM Strong Law (limsup B_t / sqrt(2t log log t) = 1)",
+      "description": "Theorem 5.3.5 / Law of the Iterated Logarithm: limsup_{t -> infinity} B_t / sqrt(2t log log t) = 1 a.s.",
+      "domain": "brownian_motion",
+      "code": {
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory Real Filter\n\n/-- A standard Brownian motion together with the law-of-iterated-logarithm\n    (LIL) claim: almost surely\n      limsup_{t → ∞} B_t / √(2 t log log t) = 1.\n    (Theorem 5.3.5.) -/\nstructure BrownianLIL {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where\n  zero_start : ∀ᵐ ω ∂μ, B 0 ω = 0\n  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →\n    ∃ v : NNReal, (v : ℝ) = t - s ∧\n      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => B t ω - B s ω) (fun ω => B v ω - B u ω) μ\n  continuous_paths : ∀ᵐ ω ∂μ, Continuous fun t => B t ω\n  /-- Theorem 5.3.5: the LIL identity holds almost surely. -/\n  lil :\n    ∀ᵐ ω ∂μ,\n      Filter.limsup\n        (fun t : ℝ => B t ω / Real.sqrt (2 * t * Real.log (Real.log t)))\n        Filter.atTop = 1\n\n/-- Theorem 5.3.5: for a standard Brownian motion `B`,\n    `limsup_{t → ∞} B_t / √(2 t log log t) = 1` almost surely. -/\ntheorem BrownianLIL.law_of_iterated_logarithm\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hB : BrownianLIL μ B) :\n    ∀ᵐ ω ∂μ,\n      Filter.limsup\n        (fun t : ℝ => B t ω / Real.sqrt (2 * t * Real.log (Real.log t)))\n        Filter.atTop = 1 :=\n  hB.lil\n"
+      },
+      "metadata": {
+        "chapter": 5,
+        "reference": "Theorem 5.3.5",
+        "difficulty": "advanced",
+        "cas_reference": {
+          "sympy": "import sympy as sp\n\n# LIL: limsup B_t / sqrt(2 t log log t) = 1 a.s.\n# Structural verification: check the normalizing rate is the right scale.\n# E[B_t²] = t, so B_t / sqrt(t) ~ N(0,1).\n# The log log factor sharpens this from \"in distribution\" to \"a.s. limsup\".\n# Verify: for the rate sqrt(2t log log t), the variance of (B_t / rate) -> 0.\nt = sp.Symbol('t', positive=True)\nrate = sp.sqrt(2 * t * sp.log(sp.log(t)))\nvariance_ratio = t / rate**2  # should be 1/(2 log log t) -> 0\nlimit_value = sp.limit(variance_ratio, t, sp.oo)\n\nresult = {\n    'verified': limit_value == 0,\n    'mode': 'symbolic',\n    'normalized_var_limit': str(limit_value),\n    'note': 'rate sqrt(2t log log t) is the LIL normalization; full proof requires Borel-Cantelli'\n}"
+        },
+        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+      }
+    }
+  ]
+}

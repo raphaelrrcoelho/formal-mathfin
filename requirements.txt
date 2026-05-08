@@ -1,0 +1,4 @@
+sympy>=1.13
+# Optional: uncomment when Lean/Isabelle are available
+# lean-interact>=0.11.0
+# isabelle-client>=1.0.0
