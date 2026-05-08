@@ -34,6 +34,13 @@ packages = ["python"]
 version = "v4.30.0-rc2"
 mathlib = true
 
+# Mirror of hybrid_verify.toml's extra_requires; kept here so coverage tooling
+# that reads pyproject as a fallback config sees the same dependency set.
+[[tool.hybrid-verify.lean.extra_requires]]
+name = "BrownianMotion"
+git = "https://github.com/RemyDegenne/brownian-motion.git"
+rev = "51807683c5130238fd4013b2fbee314135e3d8d9"
+
 [tool.hybrid-verify.isabelle]
 session = "HOL-Probability"
 use_connector = false

@@ -6,8 +6,9 @@ import logging
 import shutil
 import threading
 import time
-from typing import Any
+from typing import Any, Sequence
 
+from .config import LeanRequireSpec
 from .models import (
     Backend,
     BackendResult,
@@ -24,11 +25,13 @@ class LeanBackend:
 
     def __init__(
         self,
-        lean_version: str = "v4.18.0",
+        lean_version: str = "v4.30.0-rc2",
         mathlib: bool = True,
+        extra_requires: Sequence[LeanRequireSpec] = (),
     ):
         self._lean_version = lean_version
         self._mathlib = mathlib
+        self._extra_requires = tuple(extra_requires)
         self._server: Any = None
         self._project: Any = None
         self._lock = threading.Lock()
@@ -53,13 +56,20 @@ class LeanBackend:
         from lean_interact import (
             AutoLeanServer,
             LeanREPLConfig,
+            LeanRequire,
             TempRequireProject,
         )
 
+        require_list: list = []
         if self._mathlib:
+            require_list.append("mathlib")
+        for r in self._extra_requires:
+            require_list.append(LeanRequire(name=r.name, git=r.git, rev=r.rev))
+
+        if require_list:
             self._project = TempRequireProject(
                 lean_version=self._lean_version,
-                require="mathlib",
+                require=require_list if len(require_list) > 1 else require_list[0],
             )
             config = LeanREPLConfig(
                 project=self._project,
@@ -72,7 +82,11 @@ class LeanBackend:
             )
 
         self._server = AutoLeanServer(config)
-        logger.info("Lean server initialized (mathlib=%s)", self._mathlib)
+        logger.info(
+            "Lean server initialized (mathlib=%s, extra=%s)",
+            self._mathlib,
+            [r.name for r in self._extra_requires],
+        )
 
     async def verify(
         self,

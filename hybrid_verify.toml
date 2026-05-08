@@ -1,8 +1,16 @@
 [hybrid-verify]
 
 [hybrid-verify.lean]
-version = "v4.18.0"
+version = "v4.30.0-rc2"
 mathlib = true
+
+# Vendored Lean libraries beyond Mathlib master. Each entry is appended to the
+# `require` list passed to `lean-interact`'s TempRequireProject. Pin `rev` to a
+# specific commit so toolchain bumps stay deterministic.
+[[hybrid-verify.lean.extra_requires]]
+name = "BrownianMotion"
+git = "https://github.com/RemyDegenne/brownian-motion.git"
+rev = "51807683c5130238fd4013b2fbee314135e3d8d9"
 
 [hybrid-verify.isabelle]
 # Default session for benchmarks that only need HOL-Probability. Individual

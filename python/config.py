@@ -8,16 +8,40 @@ from pathlib import Path
 from typing import Any
 
 
+@dataclass(frozen=True)
+class LeanRequireSpec:
+    """A Lean dependency spec for `lean-interact`'s `TempRequireProject`."""
+
+    name: str
+    git: str
+    rev: str | None = None
+
+
 @dataclass
 class LeanConfig:
-    version: str = "v4.18.0"
+    version: str = "v4.30.0-rc2"
     mathlib: bool = True
+    # Additional Lean dependencies beyond Mathlib. Each entry becomes a
+    # `lean_interact.LeanRequire` and is appended to the `require` list of the
+    # `TempRequireProject`. Use this for vendored libraries like
+    # RemyDegenne/brownian-motion that are not in Mathlib master yet.
+    extra_requires: list[LeanRequireSpec] = field(default_factory=list)
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> LeanConfig:
+        raw = d.get("extra_requires", []) or []
+        extras = [
+            LeanRequireSpec(
+                name=r["name"],
+                git=r["git"],
+                rev=r.get("rev"),
+            )
+            for r in raw
+        ]
         return cls(
             version=d.get("version", cls.version),
             mathlib=d.get("mathlib", cls.mathlib),
+            extra_requires=extras,
         )
 
 
