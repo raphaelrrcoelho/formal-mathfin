@@ -25,7 +25,7 @@ class LeanBackend:
 
     def __init__(
         self,
-        lean_version: str = "v4.30.0-rc2",
+        lean_version: str = "v4.30.0-rc1",
         mathlib: bool = True,
         extra_requires: Sequence[LeanRequireSpec] = (),
     ):

@@ -19,7 +19,7 @@ class LeanRequireSpec:
 
 @dataclass
 class LeanConfig:
-    version: str = "v4.30.0-rc2"
+    version: str = "v4.30.0-rc1"
     mathlib: bool = True
     # Additional Lean dependencies beyond Mathlib. Each entry becomes a
     # `lean_interact.LeanRequire` and is appended to the `require` list of the

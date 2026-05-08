@@ -1,7 +1,7 @@
 [hybrid-verify]
 
 [hybrid-verify.lean]
-version = "v4.30.0-rc2"
+version = "v4.30.0-rc1"
 mathlib = true
 
 # Vendored Lean libraries beyond Mathlib master. Each entry is appended to the

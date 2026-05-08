@@ -31,7 +31,7 @@ packages = ["python"]
 
 [tool.hybrid-verify]
 [tool.hybrid-verify.lean]
-version = "v4.30.0-rc2"
+version = "v4.30.0-rc1"
 mathlib = true
 
 # Mirror of hybrid_verify.toml's extra_requires; kept here so coverage tooling

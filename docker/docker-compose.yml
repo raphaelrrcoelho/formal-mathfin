@@ -4,11 +4,20 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.verify
     # Memory caps for the Lean side. lean-interact triggers `lake build` of
-    # Mathlib + RemyDegenne/brownian-motion lazily on the first verify call;
-    # without these env caps, Lake spawns `nproc` parallel `lean` workers each
-    # peaking at ~1-2 GB, easily blowing past an 8 GB host. LEAN_NUM_THREADS=1
-    # makes each lean worker single-threaded (lower per-worker peak); override
-    # via host env if the box has more headroom.
+    # Mathlib + RemyDegenne/brownian-motion lazily on the first verify call.
+    # Without caps, Lake reads `nproc` from cgroup and spawns that many parallel
+    # `lean` workers (1-2 GB each), trivially blowing past an 8 GB host on a
+    # multi-core machine.
+    #
+    # `cpuset` restricts the container to a fixed set of CPUs; this is what
+    # Lake actually reads via `nproc`, so it's the only way to bound the worker
+    # count (`cpus:` only caps CPU quota, not the worker count). Default is
+    # CPUs 0-3 (4 workers, ~4-6 GB peak Lean memory). Override on hosts with
+    # more headroom: `VERIFY_CPUSET=0-7 docker compose ... run --rm verify ...`
+    #
+    # `LEAN_NUM_THREADS=1` makes each lean worker single-threaded for an
+    # additional per-worker memory cap.
+    cpuset: "${VERIFY_CPUSET:-0-3}"
     environment:
       - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
     volumes:
