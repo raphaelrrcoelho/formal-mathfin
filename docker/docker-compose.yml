@@ -23,10 +23,18 @@ services:
     volumes:
       - ../python:/app/python:ro
       - ../benchmarks:/app/benchmarks:ro
+      - ../tests:/app/tests:ro
       - ../hybrid_verify.toml:/app/hybrid_verify.toml:ro
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
     working_dir: /app
     command: ["benchmarks/cross_validated.json", "-v", "--config", "hybrid_verify.toml", "--timeout", "120"]
+    # The same `verify` service can run the fast static lints inside docker by
+    # overriding the entrypoint, so version drift (Python 3.12, pytest, etc.)
+    # is impossible across machines:
+    #   docker compose -f docker/docker-compose.yml run --rm \
+    #       --entrypoint python3 verify -m pytest tests/test_router.py -q
+    #   docker compose -f docker/docker-compose.yml run --rm \
+    #       --entrypoint python3 verify -m python.coverage_report
 
   lean:
     build:

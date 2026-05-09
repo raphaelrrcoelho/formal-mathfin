@@ -13,6 +13,16 @@ mathlib_rev = "f23306121184"
 # Vendored Lean libraries beyond Mathlib master. Each entry is appended to the
 # `require` list passed to `lean-interact`'s TempRequireProject. Pin `rev` to a
 # specific commit so toolchain bumps stay deterministic.
+#
+# Note (2026-05-08): The Degenne BrownianMotion entry currently does not build
+# under TempRequireProject even with Mathlib pinned to its manifest commit AND
+# subverso/checkdecls/kolmogorov_extension4 pinned to Degenne's manifest
+# commits. The wrapper theorems are demoted to `placeholder`; restoring them
+# likely requires a tracked Lake project (mounted lakefile + lake-manifest)
+# rather than TempRequireProject. Keep the BrownianMotion entry here so the
+# project tree builds and `import BrownianMotion.Gaussian.BrownianMotion`
+# resolves at the lakefile level, but expect the wrappers to stay placeholder
+# until that compatibility is solved.
 [[hybrid-verify.lean.extra_requires]]
 name = "BrownianMotion"
 git = "https://github.com/RemyDegenne/brownian-motion.git"

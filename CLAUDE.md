@@ -33,11 +33,15 @@ pip install -e ".[all]"                               # adds lean-interact + isa
 pip install -e ".[dev]"                               # pytest + pytest-asyncio
 ```
 
-Fast regression checks:
+Fast regression checks (run inside the verify container so the Python /
+pytest versions match the verifier — host invocations risk env drift and
+should be avoided):
 
 ```bash
-python3 -m pytest tests/test_router.py
-python3 -m python.coverage_report
+docker compose -f docker/docker-compose.yml run --rm \
+    --entrypoint python3 verify -m pytest tests/test_router.py -q
+docker compose -f docker/docker-compose.yml run --rm \
+    --entrypoint python3 verify -m python.coverage_report
 ```
 
 `tests/test_router.py` enforces formal-only routing, no active `code.sympy`, no active `sorry`/`admit`, and a declared formalization-faithfulness status for every benchmark theorem.

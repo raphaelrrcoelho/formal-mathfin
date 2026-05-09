@@ -45,16 +45,15 @@ RUN mkdir -p /root/.isabelle/Isabelle2025-2/etc \
 
 WORKDIR /app
 
-# Copy project metadata first so Python dependencies are cached independently
-# from benchmark/theory edits.
-COPY pyproject.toml requirements.txt ./
-COPY python/ python/
-
-RUN python3 -m pip install --break-system-packages -e ".[all]"
-
-# Copy prover projects and install the repo-pinned Lean toolchain. The Python
-# Lean backend uses lean-interact/TempRequireProject rather than this Lake
-# package, so do not build the local Lake target here.
+# Layer ordering rationale: the Isabelle HOL-Probability heap and the AFP
+# pre-build below are the slowest steps (~30 min each). They depend on
+# `lean/` and `isabelle/` directories but NOT on Python sources. Put those
+# heavy builds BEFORE the Python/pip layers so that edits to
+# pyproject.toml / python/ / requirements.txt invalidate only the pip layer
+# (~1-2 min to rebuild) and not the Isabelle heaps.
+#
+# The trailing `COPY benchmarks/` + `COPY hybrid_verify.toml` are even
+# cheaper to redo and stay at the end.
 COPY lean/ lean/
 RUN elan toolchain install "$(cat lean/lean-toolchain)" \
     && cd lean \
@@ -109,6 +108,14 @@ RUN elan default "$(cat lean/lean-toolchain)" \
     && printf '%s\n' \
       'ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx3g -Xss8m"' \
       > /root/.isabelle/Isabelle2025-2/etc/settings
+
+# Python deps last so editing pyproject.toml / python/ does NOT invalidate the
+# Isabelle / AFP heap layers above (each ~30 min). The `[dev]` extra brings
+# pytest + pytest-asyncio so the static lints (`pytest tests/test_router.py`,
+# `python -m python.coverage_report`) run inside this container too.
+COPY pyproject.toml requirements.txt ./
+COPY python/ python/
+RUN python3 -m pip install --break-system-packages -e ".[all,dev]"
 
 COPY benchmarks/ benchmarks/
 COPY hybrid_verify.toml ./

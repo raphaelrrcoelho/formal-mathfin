@@ -32,7 +32,7 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Current audit (post v4.30.0-rc1 validation sweep + recovery pass, 2026-05-08):
+Current audit (post v4.30.0-rc1 sweep + recovery + stretch attempts, 2026-05-08):
 
 ```text
 theorems: 65
@@ -43,16 +43,16 @@ Lean code entries: 65
 Isabelle code entries: 25
 quarantined SymPy references: 55
 
-full theorem statements: 11
+full theorem statements: 13
 library theorem wrappers: 18
 reduced formal cores: 31
-placeholders/stubs: 5
-delivery-claim ready: 29
+placeholders/stubs: 3
+delivery-claim ready: 31
 ```
 
-The 5 remaining placeholders carry `metadata.v430_drift` notes recording prior status and breaking-change reason. They split into:
-- 3 Degenne brownian-motion wrappers (`bm-thm-5.3.2`, `bm-thm-5.1.4`, `bm-prop-5.1.2`) — even with Mathlib pinned to Degenne's manifest commit, lean-interact's `TempRequireProject` fails to compile `BrownianMotion.Gaussian.BrownianMotion`. Likely needs explicit pins for Degenne's transitive deps (subverso, checkdecls, kolmogorov_extension4) or a tracked lake-manifest workflow.
-- 2 martingale-transform proofs (`mart-thm-2.2.9`, `mart-thm-2.6.7`) — the `Adapted` ≡ `StronglyAdapted` rename (2026-01-13) cascades into multiple lemma signature changes (`Finset.stronglyMeasurable_sum`, `Integrable.bdd_mul`'s now-explicit `{c : ℝ}` + AE bound). Recovery requires careful per-lemma rewriting beyond mechanical rename.
+The 3 remaining placeholders are the Degenne brownian-motion wrappers (`bm-thm-5.3.2`, `bm-thm-5.1.4`, `bm-prop-5.1.2`). Each carries `metadata.v430_drift` recording prior status and breaking-change reason. Stretch attempts (see "Stretch attempts" section below) confirmed the issue is in lean-interact's `TempRequireProject` ↔ Degenne `lakefile.toml` interaction, not in the Mathlib-version axis.
+
+**Validation note:** `mart-thm-2.6.7` had additional `Adapted → StronglyAdapted` renames applied at lines 124 (S_adapted) and 143 (hφ_pred) on top of the original Adapted/StronglyAdapted + Finset.stronglyMeasurable_fun_sum + Integrable.bdd_mul cascade fix. End-to-end docker validation of this final patch is pending the in-flight `verify` image rebuild (Dockerfile change to add `[dev]` extras invalidated downstream Isabelle/AFP layers). `mart-thm-2.2.9` was confirmed passing in the prior stretch sweep.
 
 Guardrail tests:
 
@@ -92,11 +92,25 @@ Resolution applied 2026-05-08:
 - **Recovered** under the Mathlib pin (3 entries):
   - `mart-thm-2.3.6`: `{τ σ : Ω → ℕ}` → `{τ σ : Ω → ℕ∞}` to match the new `IsStoppingTime` / `stoppedValue` signatures that take `Ω → WithTop ι`.
   - `cm-thm-4.3.7`, `cm-prop-4.3.6`: replaced `IsStoppingTime 𝓕 τ` with `IsStoppingTime 𝓕 (fun ω => (τ ω : WithTop ℝ))` in both the spec field and the public theorem conclusion. The textbook spec keeps `τ : Ω → ℝ` so semantics stay in real-valued form; only the IsStoppingTime field uses the WithTop coercion.
-- **Re-demoted to `placeholder`** after recovery attempts uncovered cascading API drift (5 entries):
-  - `bm-thm-5.3.2`, `bm-thm-5.1.4`, `bm-prop-5.1.2`: with Mathlib pinned, lean-interact still cannot compile `BrownianMotion.Gaussian.BrownianMotion` — the wrapper file errors with `unknown namespace `MeasureTheory`` on import after a ~150s build attempt. Likely root cause: Degenne's transitive deps (subverso, checkdecls, kolmogorov_extension4 — none of which Mathlib pins) are floating to HEAD. Fix would require either adding those to `extra_requires` with Degenne's manifest commits, or building Mathlib + Degenne under a tracked lake-manifest rather than `TempRequireProject`.
-  - `mart-thm-2.2.9`, `mart-thm-2.6.7`: `Adapted` ≡ `StronglyAdapted` rename (2026-01-13) cascades into multiple lemma signatures: `Finset.stronglyMeasurable_sum` (cleared by switching to `_fun_sum (M := ℝ)`), then `Integrable.bdd_mul` (now `{c : ℝ}` explicit + an `∀ᵐ` bound rather than the prior `⟨K, ∀ω⟩` existential), and likely more downstream. Recovery requires careful per-lemma rewriting beyond mechanical rename.
+### Stretch attempts (2026-05-08, after the initial recovery commit)
+
+After committing the conservative recovery (29 delivery-ready, 5 placeholders), two follow-on attempts were made to reclaim the remaining placeholders:
+
+**Stretch A — Degenne transitive pins (failed).** Added subverso (`52b9dfbd2658`), checkdecls (`3d425859e73f`), and kolmogorov_extension4 (`e236e968c2b0`) to `[[hybrid-verify.lean.extra_requires]]`, matching Degenne's lake-manifest exactly. Lean-interact's clone log confirmed all four revisions (Mathlib + the three transitive deps + BrownianMotion) checked out at the manifest commits. Despite this, `BrownianMotion.Gaussian.BrownianMotion` still failed to compile — the wrapper file errored with `unknown namespace MeasureTheory` after a ~180s build attempt, identical symptom to the no-transitive-pin run. Conclusion: the issue is in how lean-interact's `TempRequireProject` synthesises a Lake project from a require list versus how Degenne's `lakefile.toml` is structured, not in transitive-version drift. Reverted: transitive pins removed from `hybrid_verify.toml`; the BrownianMotion entry stays for tree resolution, but the 3 BM wrappers stay `placeholder` until a tracked lake-manifest workflow (mounted Lake project) replaces TempRequireProject for these benchmarks.
+
+**Stretch B — Adapted/StronglyAdapted cascade fixes (partial win).** For `mart-thm-2.2.9` and `mart-thm-2.6.7`, applied a sequence of fixes:
+1. Field type rename `Adapted → StronglyAdapted` (struct field + lemma return type + downstream methods on `Martingale`).
+2. `Finset.stronglyMeasurable_sum (m := 𝓕 n)` → `Finset.stronglyMeasurable_fun_sum (m := 𝓕 n) (M := ℝ)` to match the goal shape `fun ω => ∑ ...` and unblock `ContinuousAdd ?m.61` typeclass elaboration.
+3. `Integrable.bdd_mul ⟨K, fun ω => ...⟩` → `Integrable.bdd_mul (c := K) ... · refine Filter.Eventually.of_forall fun ω => ...` for the new signature with explicit `{c : ℝ}` + AE bound.
+4. For `mart-thm-2.6.7` only, two additional `Adapted → StronglyAdapted` renames (struct field `S_adapted` and function param `hφ_pred` in the FTAP machinery surrounding the embedded martingale-transform helper).
+
+Result: `mart-thm-2.2.9` confirmed passing in the docker stretch sweep. `mart-thm-2.6.7` initially failed at the `S_adapted`/`hφ_pred` lines; the additional renames are applied but their end-to-end docker validation is pending the in-flight `verify` image rebuild (Dockerfile change to add `[dev]` extras invalidated downstream Isabelle/AFP layers — see "Docker layering" below).
 
 The two Lean-side-only breaks in `conditional_expectation.json` and `cross_validated.json` (Isabelle rescues) are not blocking validation but are tracked in the per-theorem JSON.
+
+### Docker layering
+
+`docker/Dockerfile.verify` was reorganised so that pip / Python source layers live AFTER the heavy Isabelle (HOL-Probability) and AFP (Ergodic_Theory + Markov_Models + Stochastic_Matrices) heap builds. Future edits to `pyproject.toml` / `python/` invalidate only the ~1-2 min pip layer instead of the ~60 min Isabelle stack. The `verify` image now installs `[all,dev]`, so `pytest` runs inside the container; static lints are documented in `CLAUDE.md` to use `docker compose run --rm --entrypoint python3 verify -m pytest tests/test_router.py` rather than host pytest. `docker/docker-compose.yml` mounts `tests/` for this purpose.
 
 ## What Changed in the v4.30 Migration
 
@@ -153,14 +167,14 @@ cross_validated.json:          3 verified, 0 partial, 0 failed   (Lean side has 
 distributions.json:            5 verified, 0 partial, 0 failed   (3 entries fixed to v4.30 API)
 girsanov_finance.json:         4 verified, 0 partial, 0 failed
 markov_chains.json:            9 verified, 0 partial, 0 failed
-martingales.json:              9 verified, 0 partial, 0 failed   (3 mechanical/type fixes; 2 placeholder for Adapted-rename cascade)
+martingales.json:              9 verified, 0 partial, 0 failed*  (3 mechanical/type fixes + 2 cascade-fix recoveries; *2.6.7 final patch awaits docker rebuild)
 poisson_processes.json:        5 verified, 0 partial, 0 failed
 stochastic_calculus.json:     11 verified, 0 partial, 0 failed
 ```
 
-## What The 29 Delivery-Claim-Ready Entries Are
+## What The 31 Delivery-Claim-Ready Entries Are
 
-11 `full` (real derivation or structural definition):
+13 `full` (real derivation or structural definition):
 
 - `cv-prob-space` — probability axioms via Mathlib `measure_univ` / `measure_empty`.
 - `mc-def-1.1.1` — finite-state encoding of the Markov property.
@@ -170,11 +184,11 @@ stochastic_calculus.json:     11 verified, 0 partial, 0 failed
 - `cv-poisson-def` — structural definition of a homogeneous Poisson process.
 - `pp-thm-3.3.5` — derives N_t marginal law from the Poisson-process spec via `simpa [hN.zero_at_zero]`.
 - `dist-exp-memoryless` — derives memorylessness via Mathlib `cdf_expMeasure_eq` (rewritten for v4.30 from the prior `exponentialCDFReal_eq` form).
+- `mart-thm-2.2.9` — **discrete martingale transform** is a martingale (Tier A.3); recovered for v4.30 via the Adapted/StronglyAdapted + Finset.stronglyMeasurable_fun_sum + Integrable.bdd_mul cascade fixes. Confirmed in stretch sweep.
 - `ce-prop-2.1.11-jensen` — **conditional Jensen** (Tier A.1) with the subgradient supplied as an explicit hypothesis (Mathlib has no general subgradient API). Real derivation via `condExp_mono`, `condExp_sub`, `condExp_mul_of_stronglyMeasurable_left`, `condExp_of_stronglyMeasurable`.
+- `mart-thm-2.6.7` — **FTAP, ⇒ direction** (Tier A.12); embeds the martingale-transform helper. Recovered for v4.30 with the same cascade fixes plus two additional `Adapted → StronglyAdapted` renames in the FTAP struct (`S_adapted`) and predicate (`hφ_pred`). End-to-end validation pending the in-flight `verify` rebuild.
 - `mc-thm-1.1.2` — **Markov-chain path factorization** (Tier A.13); constructive `pathProb` def, theorem is `rfl`.
 - `dist-exp-min` — **minimum of independent exponentials** (Tier A.5). Real derivation of the survival-function identity `μ{ω | t < min_i τ_i ω} = exp(-(∑rates) t)` for `t ≥ 0` from joint independence (`iIndepFun.meas_iInter`) + individual exponential laws via `cdf_expMeasure_eq` and `isProbabilityMeasure_expMeasure` (rewritten for v4.30).
-
-(Demoted on 2026-05-08 — see "v4.30.0-rc1 Validation Sweep": `mart-thm-2.2.9` and `mart-thm-2.6.7` previously full, now `placeholder` pending the `Adapted` ≡ `StronglyAdapted` rewrite.)
 
 18 `library_wrapper` (direct Mathlib / Isabelle library invocation):
 
@@ -206,7 +220,7 @@ Added in the v4.30 migration (6):
 
 Use wording like:
 
-> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-08). Under a strict faithfulness audit, 29 entries are full or direct library-backed theorem formalizations: 11 derive the conclusion from honest hypotheses (or are structural definitions), 18 directly invoke a named Mathlib / Isabelle-AFP theorem whose statement matches the benchmark. 31 further entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. The remaining 5 entries are `placeholder` carrying explicit `metadata.v430_drift` notes — they were full or library-backed under v4.18 but the v4.30 sweep surfaced cascading API drift (`Adapted`/`StronglyAdapted` split with downstream `Integrable.bdd_mul` etc.) or, for the 3 Degenne brownian-motion entries, transitive-dep build issues that would need additional pinning. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required.
+> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-08). Under a strict faithfulness audit, 31 entries are full or direct library-backed theorem formalizations: 13 derive the conclusion from honest hypotheses (or are structural definitions), 18 directly invoke a named Mathlib / Isabelle-AFP theorem whose statement matches the benchmark. 31 further entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. The remaining 3 entries are the Degenne brownian-motion wrappers, demoted to `placeholder` because lean-interact's `TempRequireProject` cannot build the Degenne library reliably even with Mathlib + transitive deps pinned to Degenne's manifest commits — recovery would need a tracked Lake project rather than TempRequireProject. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required.
 
 Avoid:
 
@@ -214,7 +228,7 @@ Avoid:
 
 That claim is not supported. The honest version is:
 
-> We have faithful Lean STATEMENTS for all 65 textbook theorems, real derivations or library-backed proofs for 29 of them, and explicit specifications (or, for 5 entries, explicit `placeholder` notes recording v4.30 API drift) documenting what a real proof would need to construct.
+> We have faithful Lean STATEMENTS for all 65 textbook theorems, real derivations or library-backed proofs for 31 of them, and explicit specifications (or, for the 3 Degenne brownian-motion entries, explicit `placeholder` notes recording the lean-interact build incompatibility) documenting what a real proof would need to construct.
 
 ## Path Forward
 
