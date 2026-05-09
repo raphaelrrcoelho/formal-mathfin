@@ -14,19 +14,35 @@ mathlib_rev = "f23306121184"
 # `require` list passed to `lean-interact`'s TempRequireProject. Pin `rev` to a
 # specific commit so toolchain bumps stay deterministic.
 #
-# Note (2026-05-08): The Degenne BrownianMotion entry currently does not build
-# under TempRequireProject even with Mathlib pinned to its manifest commit AND
-# subverso/checkdecls/kolmogorov_extension4 pinned to Degenne's manifest
-# commits. The wrapper theorems are demoted to `placeholder`; restoring them
-# likely requires a tracked Lake project (mounted lakefile + lake-manifest)
-# rather than TempRequireProject. Keep the BrownianMotion entry here so the
-# project tree builds and `import BrownianMotion.Gaussian.BrownianMotion`
-# resolves at the lakefile level, but expect the wrappers to stay placeholder
-# until that compatibility is solved.
+# Note (2026-05-09): The Degenne BrownianMotion build is now confirmed working
+# under TempRequireProject — the prior failure was a too-tight 180s timeout
+# cutting off Lake mid-build (the actual build needs ~12 min once Mathlib is
+# cached). All four transitive pins below are required: leaving any out causes
+# lean-interact to compute a different tmp_project hash and start a fresh
+# build, which then resolves transitive deps differently from Degenne's
+# lake-manifest. The four pins together produce hash
+#   63469b532a407f4430881e4329be3dc62fefd9479114a45756cbc402bcfd12f8
+# which is what gets reused across runs (cached BM oleans persist in the
+# `lean_interact_cache` Docker volume).
 [[hybrid-verify.lean.extra_requires]]
 name = "BrownianMotion"
 git = "https://github.com/RemyDegenne/brownian-motion.git"
 rev = "51807683c5130238fd4013b2fbee314135e3d8d9"
+
+[[hybrid-verify.lean.extra_requires]]
+name = "subverso"
+git = "https://github.com/leanprover/subverso"
+rev = "52b9dfbd2658"
+
+[[hybrid-verify.lean.extra_requires]]
+name = "checkdecls"
+git = "https://github.com/PatrickMassot/checkdecls.git"
+rev = "3d425859e73f"
+
+[[hybrid-verify.lean.extra_requires]]
+name = "kolmogorov_extension4"
+git = "https://github.com/RemyDegenne/kolmogorov_extension4"
+rev = "e236e968c2b0"
 
 [hybrid-verify.isabelle]
 # Default session for benchmarks that only need HOL-Probability. Individual

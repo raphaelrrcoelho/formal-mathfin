@@ -2,12 +2,12 @@
 
 Goal: move from "active prover obligations type-check on faithful textbook statements" toward "real Lean derivations of textbook theorems."
 
-The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap, 2026-05-09):
+The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap + Degenne BM wraps, 2026-05-09):
 
 ```text
 65 benchmark statements
-33 delivery-claim ready entries: 13 full + 20 library_wrapper
-32 reduced formal cores
+35 delivery-claim ready entries: 13 full + 22 library_wrapper
+30 reduced formal cores
 0 placeholders
 0 active SymPy entries
 ```
@@ -20,14 +20,32 @@ def — A.13), `dist-exp-min` (minimum of independent exponentials, survival-
 function level — A.5), and `mc-thm-1.4.32` (Birkhoff/ergodic for Markov chains
 via AFP `Ergodic_Theory.Ergodicity.birkhoff_theorem_AE` — A.9, library_wrapper).
 
-**BM port (2026-05-09)**: the 3 Degenne placeholders were recovered without
-the Degenne Lake dependency by leveraging upstream Mathlib at pin
-`f23306121184`. `bm-thm-5.1.4` is now `library_wrapper` via Mathlib's
-`HasIndepIncrements.indepFun_eval_sub`; `bm-thm-5.3.2` and `bm-prop-5.1.2`
-are honest `reduced_core` structural encodings (Mathlib has the precondition
-`IsKolmogorovProcess` and `IsGaussianProcess` but not yet the
-Kolmogorov-Chentsov continuity theorem or the converse-direction wrapper
-proof). See `FORMALIZATION_STATUS.md` § "BM port (2026-05-09)".
+**Degenne BM wraps (2026-05-09)**: confirmed Degenne `RemyDegenne/brownian-motion`
+(commit 51807683) builds cleanly under `lean-interact`'s existing `TempRequireProject`
+once all four transitive deps are pinned in `hybrid_verify.toml` (Mathlib
+`f23306121184`, subverso, checkdecls, kolmogorov_extension4). The prior
+"unknown namespace MeasureTheory" failure was a 180s timeout cutoff, not a
+genuine build error — the actual build is ~12 min once Mathlib is cached, and
+the resulting BrownianMotion oleans persist in the `lean_interact_cache`
+Docker volume. Two BM `reduced_core` entries promoted to `library_wrapper`
+on this path:
+- **`bm-prop-5.1.2`** (Gaussian-process characterization) → wrap of
+  `IsGaussianProcess.isPreBrownian_of_covariance` from
+  `BrownianMotion/Gaussian/BrownianMotion.lean`. The conclusion `IsPreBrownian`
+  packages the BM-defining properties (joint Gaussianity, mean zero, covariance
+  `min s t`, independent increments, continuous modification).
+- **`bm-thm-5.3.2`** (Hölder continuity) → wrap of
+  `IsPreBrownian.memHolder_mk` (i.e. the Kolmogorov-Chentsov continuity
+  theorem from `BrownianMotion/Continuity/KolmogorovChentsov.lean`) for every
+  Hölder exponent `β ∈ (0, 1/2)`.
+
+**BM port (2026-05-09, earlier in session)**: the 3 Degenne BM placeholders
+were first recovered by leveraging upstream Mathlib at pin
+`f23306121184`. `bm-thm-5.1.4` was promoted to `library_wrapper` via Mathlib's
+`HasIndepIncrements.indepFun_eval_sub` (still applies). `bm-thm-5.3.2` and
+`bm-prop-5.1.2` were temporarily `reduced_core` and have now been promoted to
+`library_wrapper` via Degenne (see "Degenne BM wraps" above). See
+`FORMALIZATION_STATUS.md` § "BM port (2026-05-09)".
 
 **Strong Markov AFP wrap (2026-05-09)**: `mc-thm-1.2.11` promoted from
 `reduced_core` to `library_wrapper` via AFP
