@@ -32,6 +32,16 @@ class LeanConfig:
     # `TempRequireProject`. Use this for vendored libraries like
     # RemyDegenne/brownian-motion that are not in Mathlib master yet.
     extra_requires: list[LeanRequireSpec] = field(default_factory=list)
+    # Optional path to a real Lake project. When set, the backend switches from
+    # `lean-interact.TempRequireProject` (which synthesizes an ad-hoc project
+    # for each verification call) to `lean-interact.LocalProject` pointing at
+    # this directory. Use this when benchmark theorems need to import names
+    # from a pre-built `lean_lib` (e.g. a complex derivation that overwhelms
+    # the REPL elaborator if inlined into the benchmark JSON). The directory
+    # must contain `lakefile.lean` and `lean-toolchain`. When `local_project`
+    # is set, `mathlib`, `mathlib_rev`, and `extra_requires` are IGNORED — the
+    # Lake project's own `require` declarations are authoritative.
+    local_project: str | None = None
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> LeanConfig:
@@ -49,6 +59,7 @@ class LeanConfig:
             mathlib=d.get("mathlib", cls.mathlib),
             mathlib_rev=d.get("mathlib_rev"),
             extra_requires=extras,
+            local_project=d.get("local_project"),
         )
 
 

@@ -133,6 +133,7 @@ def main(argv: list[str] | None = None) -> int:
         mathlib=config.lean.mathlib,
         mathlib_rev=config.lean.mathlib_rev,
         extra_requires=config.lean.extra_requires,
+        local_project=config.lean.local_project,
     )
     isabelle = IsabelleBackend(
         session=config.isabelle.session,

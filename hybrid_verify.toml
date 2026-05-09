@@ -3,6 +3,17 @@
 [hybrid-verify.lean]
 version = "v4.30.0-rc1"
 mathlib = true
+# When set, the Lean backend uses `lean-interact.LocalProject` pointing at
+# this Lake project instead of synthesizing a `TempRequireProject` for each
+# verification call. Use this to land complex derivations as real Lean files
+# inside `lean/HybridVerify/` (with full `lake build` memory budget +
+# incremental compilation), then have benchmark theorems just
+# `import HybridVerify.X` and reference compiled lemmas by name. When set,
+# the `mathlib` / `mathlib_rev` / `extra_requires` keys are IGNORED — the
+# project's own `lakefile.lean` is authoritative. Path is relative to the
+# CWD when the verifier runs (in docker that's `/app`, so `lean` resolves to
+# `/app/lean`, the bind-mounted `lean/` dir).
+local_project = "lean"
 # Pin Mathlib to the exact commit listed in Degenne's brownian-motion
 # `lake-manifest.json` at our pinned commit (51807683...). That manifest was
 # produced under `leanprover/lean4:v4.30.0-rc1`, the same toolchain we set

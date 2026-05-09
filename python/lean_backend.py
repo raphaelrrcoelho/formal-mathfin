@@ -29,11 +29,13 @@ class LeanBackend:
         mathlib: bool = True,
         mathlib_rev: str | None = None,
         extra_requires: Sequence[LeanRequireSpec] = (),
+        local_project: str | None = None,
     ):
         self._lean_version = lean_version
         self._mathlib = mathlib
         self._mathlib_rev = mathlib_rev
         self._extra_requires = tuple(extra_requires)
+        self._local_project = local_project
         self._server: Any = None
         self._project: Any = None
         self._lock = threading.Lock()
@@ -51,7 +53,23 @@ class LeanBackend:
         return shutil.which("lake") is not None
 
     def _ensure_server(self) -> None:
-        """Lazily initialize the Lean server (defers expensive Mathlib setup)."""
+        """Lazily initialize the Lean server (defers expensive Mathlib setup).
+
+        Two project modes:
+
+        * ``LocalProject`` — used when ``local_project`` is set. Points at an
+          existing Lake project on disk (its ``lakefile.lean`` is authoritative
+          for ``require``s). Lake builds it once via ``auto_build=True`` then
+          caches; benchmark snippets only need to typecheck against the
+          pre-built library, so complex derivations that would OOM the REPL
+          elaborator can live as real Lean files inside the project. The
+          ``mathlib`` / ``mathlib_rev`` / ``extra_requires`` fields are
+          ignored in this mode.
+        * ``TempRequireProject`` — default. Synthesizes an ad-hoc project from
+          the require list for each verification call. Fine for short
+          wrappers; the whole proof has to elaborate from scratch in the
+          single REPL turn.
+        """
         if self._server is not None:
             return
 
@@ -59,8 +77,25 @@ class LeanBackend:
             AutoLeanServer,
             LeanREPLConfig,
             LeanRequire,
+            LocalProject,
             TempRequireProject,
         )
+
+        if self._local_project:
+            self._project = LocalProject(
+                directory=self._local_project,
+                auto_build=True,
+            )
+            config = LeanREPLConfig(
+                project=self._project,
+                verbose=False,
+            )
+            logger.info(
+                "Lean server initialized (LocalProject=%s)",
+                self._local_project,
+            )
+            self._server = AutoLeanServer(config)
+            return
 
         require_list: list = []
         if self._mathlib:

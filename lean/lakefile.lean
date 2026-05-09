@@ -6,12 +6,15 @@ package HybridVerify where
     ⟨`autoImplicit, false⟩
   ]
 
+-- Library `HybridVerify` lives at `HybridVerify/*.lean` (default srcDir = ".").
 @[default_target]
 lean_lib HybridVerify where
-  srcDir := "HybridVerify"
 
+-- Pinned to Degenne brownian-motion's lake-manifest commit (so all transitive
+-- versions resolve consistently). Bump together with the BrownianMotion pin.
 require mathlib from git
-  "https://github.com/leanprover-community/mathlib4" @ "master"
+  "https://github.com/leanprover-community/mathlib4" @
+  "f23306121184"
 
 -- RemyDegenne/brownian-motion: Brownian motion construction, multivariate
 -- Gaussian, Kolmogorov-Chentsov continuity, Doob's L^p inequality, stochastic

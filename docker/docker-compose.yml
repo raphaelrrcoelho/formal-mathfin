@@ -43,6 +43,12 @@ services:
       - ../tests:/app/tests:ro
       - ../hybrid_verify.toml:/app/hybrid_verify.toml:ro
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
+      # `lean/` is the project root for `LocalProject` mode (see
+      # `python.config.LeanConfig.local_project`). Sources are bind-mounted
+      # RW so iterating on a `.lean` file in `lean/HybridVerify/` doesn't
+      # require a docker rebuild. Lake build artifacts (`.lake/`) end up on
+      # the host as well — gitignored.
+      - ../lean:/app/lean
     working_dir: /app
     command: ["benchmarks/cross_validated.json", "-v", "--config", "hybrid_verify.toml", "--timeout", "120"]
     # The same `verify` service can run the fast static lints inside docker by

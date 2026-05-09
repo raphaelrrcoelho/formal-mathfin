@@ -2,15 +2,28 @@
 
 Goal: move from "active prover obligations type-check on faithful textbook statements" toward "real Lean derivations of textbook theorems."
 
-The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap + Degenne BM wraps + Degenne Doob L¹ continuous-time wrap, 2026-05-09):
+The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap + Degenne BM wraps + Degenne Doob L¹ continuous-time wrap + LocalProject spike with bm-thm-5.1.5 → full, 2026-05-09):
 
 ```text
 65 benchmark statements
-36 delivery-claim ready entries: 13 full + 23 library_wrapper
-29 reduced formal cores
+37 delivery-claim ready entries: 14 full + 23 library_wrapper
+28 reduced formal cores
 0 placeholders
 0 active SymPy entries
 ```
+
+**Infrastructure: LocalProject mode (2026-05-09)**. `python/config.py` and
+`python/lean_backend.py` now support `local_project` — when set in
+`hybrid_verify.toml`, the Lean backend uses `lean-interact.LocalProject`
+pointing at the `lean/` Lake project instead of synthesizing a
+`TempRequireProject` for each verification call. Complex derivations that
+would OOM the REPL elaborator (`bm-thm-5.1.5` did, three times in a row
+under TempRequireProject) can now live as real Lean files inside
+`lean/HybridVerify/` and get `lake build`-compiled with the full
+incremental-compilation memory budget per file. Benchmark snippets just
+`import HybridVerify.X` and reference the proven name. First-time benchmark
+runs build BrownianMotion via Lake (~12 min, cached in the host's
+`lean/.lake/`); subsequent runs are typecheck-only.
 
 **Sorry-aware audit (2026-05-09)**: every Degenne-derived `library_wrapper`
 is checked via `#print axioms` to confirm it does NOT transitively depend on
