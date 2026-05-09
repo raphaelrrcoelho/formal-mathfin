@@ -55,10 +55,21 @@ WORKDIR /app
 # The trailing `COPY benchmarks/` + `COPY hybrid_verify.toml` are even
 # cheaper to redo and stay at the end.
 COPY lean/ lean/
+# Install the toolchain pinned in lean/lean-toolchain, then prebuild the Lake
+# project. `lake exe cache get` downloads precompiled Mathlib oleans from the
+# leanprover-community reservoir (~30 sec download vs ~30 min Mathlib build
+# from source). Then `lake build` elaborates the HybridVerify library + its
+# direct deps (BrownianMotion etc.). This bakes the olean tree into the image
+# at /app/lean/.lake/, so the first verify call no longer pays for a cold
+# Lake build. The matching docker-compose.yml shadows /app/lean/.lake/ with
+# a named volume so the bind-mounted host lean/ dir does not stomp the
+# prebuild on container start.
 RUN elan toolchain install "$(cat lean/lean-toolchain)" \
     && cd lean \
     && lean --version \
-    && lake --version
+    && lake --version \
+    && lake exe cache get \
+    && lake build
 
 COPY isabelle/ isabelle/
 # `-o threads=2` runs Poly/ML with 2 worker threads inside the single

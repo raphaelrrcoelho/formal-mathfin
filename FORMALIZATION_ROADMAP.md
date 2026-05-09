@@ -12,18 +12,23 @@ The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap + 
 0 active SymPy entries
 ```
 
-**Infrastructure: LocalProject mode (2026-05-09)**. `python/config.py` and
-`python/lean_backend.py` now support `local_project` — when set in
-`hybrid_verify.toml`, the Lean backend uses `lean-interact.LocalProject`
-pointing at the `lean/` Lake project instead of synthesizing a
-`TempRequireProject` for each verification call. Complex derivations that
-would OOM the REPL elaborator (`bm-thm-5.1.5` did, three times in a row
-under TempRequireProject) can now live as real Lean files inside
-`lean/HybridVerify/` and get `lake build`-compiled with the full
-incremental-compilation memory budget per file. Benchmark snippets just
-`import HybridVerify.X` and reference the proven name. First-time benchmark
-runs build BrownianMotion via Lake (~12 min, cached in the host's
-`lean/.lake/`); subsequent runs are typecheck-only.
+**Infrastructure: LocalProject migration (2026-05-09)**. The Lean backend
+now exclusively uses `lean-interact.LocalProject` pointing at the `lean/`
+Lake project — the `TempRequireProject` branch was removed from
+`python/lean_backend.py`, and the now-dead `mathlib`/`mathlib_rev`/
+`extra_requires`/`version` fields were stripped from `python/config.py` and
+`hybrid_verify.toml`. `lakefile.lean` + `lake-manifest.json` are
+authoritative. Four non-trivial proofs that previously lived as inline JSON
+strings have been migrated to real Lean files under `lean/HybridVerify/`:
+`MartingaleTransform.lean` (Theorem 2.2.9), `FTAP.lean` (Theorem 2.6.7,
+imports `MartingaleTransform` instead of duplicating it), `CondExpJensen.lean`
+(Proposition 2.1.11(9)), `ExpMin.lean` (Appendix B.2 minimum-of-exponentials).
+Each benchmark JSON now imports the module and re-exports the named lemma
+in 15–25 lines. Authoring on host (VS Code + Lean LSP) is the intended
+path; trivial library wrappers can still stay inline. `Dockerfile.verify`
+also gained a `lake exe cache get && lake build` prebuild step so the next
+image rebuild bakes Mathlib oleans into the image (saves ~30 min on the
+first verify call).
 
 **Sorry-aware audit (2026-05-09)**: every Degenne-derived `library_wrapper`
 is checked via `#print axioms` to confirm it does NOT transitively depend on

@@ -45,9 +45,16 @@ services:
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
       # `lean/` is the project root for `LocalProject` mode (see
       # `python.config.LeanConfig.local_project`). Sources are bind-mounted
-      # RW so iterating on a `.lean` file in `lean/HybridVerify/` doesn't
-      # require a docker rebuild. Lake build artifacts (`.lake/`) end up on
+      # RW so authoring on host (VS Code + Lean LSP) propagates into the
+      # container with no rebuild. Lake build artifacts (`.lake/`) end up on
       # the host as well — gitignored.
+      #
+      # When the image is next rebuilt, Dockerfile.verify will prebuild the
+      # olean cache at /app/lean/.lake/ (via `lake exe cache get && lake
+      # build`). To make that prebuild survive the bind mount, add a named
+      # volume shadow on /app/lean/.lake/ at that point — see commit history
+      # for the spec. The bind-mount-only path below already works because
+      # the host's lean/.lake/ retains caches across runs.
       - ../lean:/app/lean
     working_dir: /app
     command: ["benchmarks/cross_validated.json", "-v", "--config", "hybrid_verify.toml", "--timeout", "120"]

@@ -128,13 +128,7 @@ def main(argv: list[str] | None = None) -> int:
     print(f"Loaded {len(theorems)} theorems from {theorem_path}")
 
     # Create backends
-    lean = LeanBackend(
-        lean_version=config.lean.version,
-        mathlib=config.lean.mathlib,
-        mathlib_rev=config.lean.mathlib_rev,
-        extra_requires=config.lean.extra_requires,
-        local_project=config.lean.local_project,
-    )
+    lean = LeanBackend(local_project=config.lean.local_project)
     isabelle = IsabelleBackend(
         session=config.isabelle.session,
         use_connector=config.isabelle.use_connector,

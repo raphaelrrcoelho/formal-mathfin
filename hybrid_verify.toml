@@ -1,59 +1,14 @@
 [hybrid-verify]
 
 [hybrid-verify.lean]
-version = "v4.30.0-rc1"
-mathlib = true
-# When set, the Lean backend uses `lean-interact.LocalProject` pointing at
-# this Lake project instead of synthesizing a `TempRequireProject` for each
-# verification call. Use this to land complex derivations as real Lean files
-# inside `lean/HybridVerify/` (with full `lake build` memory budget +
-# incremental compilation), then have benchmark theorems just
-# `import HybridVerify.X` and reference compiled lemmas by name. When set,
-# the `mathlib` / `mathlib_rev` / `extra_requires` keys are IGNORED — the
-# project's own `lakefile.lean` is authoritative. Path is relative to the
-# CWD when the verifier runs (in docker that's `/app`, so `lean` resolves to
-# `/app/lean`, the bind-mounted `lean/` dir).
+# Path to the Lake project the Lean backend elaborates against. The project's
+# own ``lakefile.lean`` (Mathlib pin, BrownianMotion pin, etc.) +
+# ``lake-manifest.json`` (transitive freeze) + ``lean-toolchain`` are
+# authoritative. Benchmark snippets just `import HybridVerify.X` and reference
+# compiled lemmas. Path is relative to the CWD when the verifier runs (in
+# Docker that's ``/app``, so ``lean`` resolves to ``/app/lean`` — the
+# bind-mounted source dir).
 local_project = "lean"
-# Pin Mathlib to the exact commit listed in Degenne's brownian-motion
-# `lake-manifest.json` at our pinned commit (51807683...). That manifest was
-# produced under `leanprover/lean4:v4.30.0-rc1`, the same toolchain we set
-# above. Without this pin, lean-interact resolves "mathlib" to current master
-# (now on rc2), which silently breaks the transitive Brownian-motion build.
-mathlib_rev = "f23306121184"
-
-# Vendored Lean libraries beyond Mathlib master. Each entry is appended to the
-# `require` list passed to `lean-interact`'s TempRequireProject. Pin `rev` to a
-# specific commit so toolchain bumps stay deterministic.
-#
-# Note (2026-05-09): The Degenne BrownianMotion build is now confirmed working
-# under TempRequireProject — the prior failure was a too-tight 180s timeout
-# cutting off Lake mid-build (the actual build needs ~12 min once Mathlib is
-# cached). All four transitive pins below are required: leaving any out causes
-# lean-interact to compute a different tmp_project hash and start a fresh
-# build, which then resolves transitive deps differently from Degenne's
-# lake-manifest. The four pins together produce hash
-#   63469b532a407f4430881e4329be3dc62fefd9479114a45756cbc402bcfd12f8
-# which is what gets reused across runs (cached BM oleans persist in the
-# `lean_interact_cache` Docker volume).
-[[hybrid-verify.lean.extra_requires]]
-name = "BrownianMotion"
-git = "https://github.com/RemyDegenne/brownian-motion.git"
-rev = "51807683c5130238fd4013b2fbee314135e3d8d9"
-
-[[hybrid-verify.lean.extra_requires]]
-name = "subverso"
-git = "https://github.com/leanprover/subverso"
-rev = "52b9dfbd2658"
-
-[[hybrid-verify.lean.extra_requires]]
-name = "checkdecls"
-git = "https://github.com/PatrickMassot/checkdecls.git"
-rev = "3d425859e73f"
-
-[[hybrid-verify.lean.extra_requires]]
-name = "kolmogorov_extension4"
-git = "https://github.com/RemyDegenne/kolmogorov_extension4"
-rev = "e236e968c2b0"
 
 [hybrid-verify.isabelle]
 # Default session for benchmarks that only need HOL-Probability. Individual

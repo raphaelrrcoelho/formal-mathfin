@@ -32,7 +32,7 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Current audit (post BM port + Strong Markov AFP wrap + Degenne BM wraps + Degenne Doob L¹ continuous-time wrap + LocalProject spike with bm-thm-5.1.5 → full, 2026-05-09):
+Current audit (post BM port + Strong Markov AFP wrap + Degenne BM wraps + Degenne Doob L¹ continuous-time wrap + LocalProject spike with bm-thm-5.1.5 → full + LocalProject migration of 4 non-trivial proofs from inline JSON to `lean/HybridVerify/`, 2026-05-09):
 
 ```text
 theorems: 65

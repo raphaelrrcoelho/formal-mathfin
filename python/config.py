@@ -8,59 +8,22 @@ from pathlib import Path
 from typing import Any
 
 
-@dataclass(frozen=True)
-class LeanRequireSpec:
-    """A Lean dependency spec for `lean-interact`'s `TempRequireProject`."""
-
-    name: str
-    git: str
-    rev: str | None = None
-
-
 @dataclass
 class LeanConfig:
-    version: str = "v4.30.0-rc1"
-    mathlib: bool = True
-    # Optional commit pin for Mathlib. When set, lean-interact pulls Mathlib at
-    # exactly this commit instead of resolving the string "mathlib" to whatever
-    # master is at fetch time. Required when a vendored library (e.g. Degenne's
-    # brownian-motion) was tested against a specific Mathlib snapshot and would
-    # break against a newer master.
-    mathlib_rev: str | None = None
-    # Additional Lean dependencies beyond Mathlib. Each entry becomes a
-    # `lean_interact.LeanRequire` and is appended to the `require` list of the
-    # `TempRequireProject`. Use this for vendored libraries like
-    # RemyDegenne/brownian-motion that are not in Mathlib master yet.
-    extra_requires: list[LeanRequireSpec] = field(default_factory=list)
-    # Optional path to a real Lake project. When set, the backend switches from
-    # `lean-interact.TempRequireProject` (which synthesizes an ad-hoc project
-    # for each verification call) to `lean-interact.LocalProject` pointing at
-    # this directory. Use this when benchmark theorems need to import names
-    # from a pre-built `lean_lib` (e.g. a complex derivation that overwhelms
-    # the REPL elaborator if inlined into the benchmark JSON). The directory
-    # must contain `lakefile.lean` and `lean-toolchain`. When `local_project`
-    # is set, `mathlib`, `mathlib_rev`, and `extra_requires` are IGNORED — the
-    # Lake project's own `require` declarations are authoritative.
-    local_project: str | None = None
+    # Path to the in-repo Lake project that the Lean backend elaborates
+    # against. The project's own ``lakefile.lean`` + ``lake-manifest.json`` +
+    # ``lean-toolchain`` are authoritative for Mathlib/Lean versions and
+    # transitive deps; benchmark snippets just `import HybridVerify.X` and
+    # reference compiled lemmas by name.
+    #
+    # Path is relative to the CWD when the verifier runs (in Docker that's
+    # ``/app``, so ``lean`` resolves to ``/app/lean`` — the bind-mounted
+    # source dir).
+    local_project: str = "lean"
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> LeanConfig:
-        raw = d.get("extra_requires", []) or []
-        extras = [
-            LeanRequireSpec(
-                name=r["name"],
-                git=r["git"],
-                rev=r.get("rev"),
-            )
-            for r in raw
-        ]
-        return cls(
-            version=d.get("version", cls.version),
-            mathlib=d.get("mathlib", cls.mathlib),
-            mathlib_rev=d.get("mathlib_rev"),
-            extra_requires=extras,
-            local_project=d.get("local_project"),
-        )
+        return cls(local_project=d.get("local_project", cls.local_project))
 
 
 @dataclass
@@ -115,7 +78,6 @@ def load_config(path: str | Path | None = None) -> HybridVerifyConfig:
     Falls back to defaults if no path is provided or file doesn't exist.
     """
     if path is None:
-        # Check default locations
         for candidate in ["hybrid_verify.toml", "pyproject.toml"]:
             p = Path(candidate)
             if p.exists():
@@ -132,7 +94,6 @@ def load_config(path: str | Path | None = None) -> HybridVerifyConfig:
     with open(path, "rb") as f:
         raw = tomllib.load(f)
 
-    # Support both standalone toml and [tool.hybrid-verify] in pyproject.toml
     if "tool" in raw and "hybrid-verify" in raw["tool"]:
         data = raw["tool"]["hybrid-verify"]
     elif "hybrid-verify" in raw:
