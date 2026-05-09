@@ -47,34 +47,26 @@ is wired but **not yet exercised** — the next Docker rebuild lands it. See
 `docker/AFP_NOTES.md` for authoring patterns and the full list of probed AFP
 lemmas (including `stationary_distribution_unique`).
 
-Tier A targets remaining: A.2 (Doob L^p, **library-blocked 2026-05-08** —
-exhaustive web/AFP/Mathlib audit found NO formal version of this theorem in
-any source (Mathlib master, in-flight Mathlib PRs, AFP `Doob_Convergence`,
-AFP `Martingales`, AFP `DiscretePricing`, HOL-Probability core, or
-`RemyDegenne/brownian-motion`). The Mathlib martingale specialist's
-`brownian-motion` blueprint outlines `lem:doob_Lp_countable` with the same
-proof strategy we used (layer cake → L^1 maximal → Fubini → Hölder) but
-has not formalized it. There is no Lean↔Isabelle proof-transport mechanism
-that would let us wrap an Isabelle proof. We have 10 helper lemmas verified
-against Mathlib v4.18.0 in `docs/superpowers/sketches/doob_lp_v1.lean`
-(`runMax`, `runMax_nonneg`, `runMax_measurable`,
-`runMax_stronglyMeasurable`, `layer_meas_bound`,
-`lintegral_runMax_rpow_eq_layer`, `layer_integrand_bound`,
-`A_le_layer_integral`, `lintegral_rpow_Ioc`,
-`ofReal_setIntegral_eq_setLIntegral_ofReal`); the Fubini swap remains
-the dominant cost on the path to a faithful main proof. Status: stays
-`reduced_core` until Mathlib lands `MeasureTheory.maximal_ineq_Lp` (or
-Degenne's `lem:doob_Lp_countable` is formalized upstream); see
-`docker/AFP_NOTES.md` for the full negative-finding audit), A.4 (sum of
-exponentials,
-**blocked**: no measure convolution / MGF uniqueness), A.6/A.7 (multivariate
-Gaussian, **blocked**: no MV Gaussian construction), A.8 (`mc-thm-1.4.40`
-convergence, **still blocked** — neither Mathlib nor AFP `Stochastic_Matrices`
-packages a `lim P^n` / spectral-gap theorem; would need building on top of
-AFP `Perron_Frobenius`), A.10 (`mc-thm-1.4.25` stationary uniqueness,
-**ready-to-wrap pending Docker rebuild** — direct wrap of AFP
-`stationary_distribution_unique`), A.11 (recurrence criterion, **deferred** —
-needs limit z→1 bridging from `gf_G` to ∑P^n).
+**Tier A status reconciliation (2026-05-09).** Several Tier A entries that
+were tagged "blocked" in the original spec have, in fact, been promoted
+to `library_wrapper` since (during the v4.30 migration and AFP install).
+The current Tier A board:
+
+- **A.1** `ce-prop-2.1.11-jensen` — DONE (`full`, with explicit-subgradient hyp).
+- **A.2** `mart-thm-2.4.6` (Doob L^p) — **library-blocked 2026-05-08** (exhaustive web/AFP/Mathlib audit found NO formal version in Mathlib master, in-flight Mathlib PRs, AFP `Doob_Convergence`, AFP `Martingales`, AFP `DiscretePricing`, HOL-Probability core, or `RemyDegenne/brownian-motion`). The Mathlib `brownian-motion` blueprint outlines `lem:doob_Lp_countable` with the same proof strategy we used (layer cake → L^1 maximal → Fubini → Hölder) but has not formalized it. We have 10 helper lemmas verified against Mathlib v4.18.0 in `docs/superpowers/sketches/doob_lp_v1.lean`; the Fubini swap remains the dominant cost. Status: stays `reduced_core` until Mathlib lands `MeasureTheory.maximal_ineq_Lp` (or Degenne's `lem:doob_Lp_countable` is formalized upstream).
+- **A.3** `mart-thm-2.2.9` — DONE (`full`).
+- **A.4** `pp-thm-3.3.8` (sum of exponentials → Erlang/Gamma) — **DONE** (`library_wrapper`). Wrapped via Isabelle `HOL-Probability.Distributions.prob_space.erlang_distributed_sum` specialized to k_i = 0; the textbook density λⁿ tⁿ⁻¹ e^{−λt}/(n−1)! is exactly HOL-Probability's `erlang_density (n−1) λ`. The original spec's "no measure convolution / MGF uniqueness" obstruction was sidestepped by going through HOL-Probability instead of Mathlib.
+- **A.5** `dist-exp-min` — DONE (`full`, survival-function form).
+- **A.6** `dist-thm-B.1.2-marginal` (MV Gaussian marginal) — **DONE** (`library_wrapper`) at v4.30 via Mathlib `Probability.Distributions.Gaussian.Multivariate.measurePreserving_eval_multivariateGaussian`. Mathlib added `multivariateGaussian` between v4.18 and v4.30.
+- **A.7** `dist-thm-B.1.3-conditional` (bivariate Gaussian conditional) — **still blocked** (`reduced_core`); even with `multivariateGaussian` in Mathlib, the conditional decomposition `E[X|σ(Y)] = μ_X + (ρσ_X/σ_Y)(Y − μ_Y)` is not packaged. Estimated 1–2 weeks once a Lean proof of this scalar identity from `multivariateGaussian` is written.
+- **A.8** `mc-thm-1.4.40` (finite-state convergence to stationary) — **DONE** (`library_wrapper`) via AFP `Markov_Models.Classifying_Markov_Chain_States.stationary_distribution_imp_p_limit` (a slightly different AFP entry point than the spec's anticipated `Stochastic_Matrices` route, which lacked a `lim Pⁿ` theorem).
+- **A.9** `mc-thm-1.4.32` — DONE (`library_wrapper`, AFP `Ergodic_Theory.birkhoff_theorem_AE`).
+- **A.10** `mc-thm-1.4.25` (stationary uniqueness) — **DONE** (`library_wrapper`) via AFP `Stochastic_Matrices.Stochastic_Matrix_Perron_Frobenius.stationary_distribution_unique`.
+- **A.11** `mc-thm-1.3.12` (recurrence criterion) — **DONE** (`library_wrapper`) via AFP `Markov_Models.Classifying_Markov_Chain_States.recurrent_iff_G_infinite`. The textbook ∑Pⁿ(i,i) = ∞ form maps directly onto AFP's `G x x = ∞` (where `G x x = enn_real (∑n. p x x n)`); the gf bridge anticipated in the spec was not needed because AFP packages this equivalence directly.
+- **A.12** `mart-thm-2.6.7` — DONE (`full`, ⇒ direction with bounded-strategy hyp).
+- **A.13** `mc-thm-1.1.2` — DONE (`full`, constructive).
+
+Net Tier A position: **11 of 13 Tier A entries are at `full` or `library_wrapper`.** Only A.2 (Doob L^p) and A.7 (bivariate Gaussian conditional) remain `reduced_core`, both genuinely upstream-blocked at the current Mathlib pin.
 
 **Full Docker verification 2026-05-08** (post router/backend edits): all
 65 benchmark theorems verify, 0 failed, 0 partial. `pytest tests/test_router.py`
