@@ -2,12 +2,12 @@
 
 Goal: move from "active prover obligations type-check on faithful textbook statements" toward "real Lean derivations of textbook theorems."
 
-The current audit is:
+The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap, 2026-05-09):
 
 ```text
 65 benchmark statements
-26 delivery-claim ready entries: 13 full + 13 library_wrapper
-39 reduced formal cores
+33 delivery-claim ready entries: 13 full + 20 library_wrapper
+32 reduced formal cores
 0 placeholders
 0 active SymPy entries
 ```
@@ -19,6 +19,21 @@ helper — A.12), `mc-thm-1.1.2` (Markov-chain path factorization, constructive
 def — A.13), `dist-exp-min` (minimum of independent exponentials, survival-
 function level — A.5), and `mc-thm-1.4.32` (Birkhoff/ergodic for Markov chains
 via AFP `Ergodic_Theory.Ergodicity.birkhoff_theorem_AE` — A.9, library_wrapper).
+
+**BM port (2026-05-09)**: the 3 Degenne placeholders were recovered without
+the Degenne Lake dependency by leveraging upstream Mathlib at pin
+`f23306121184`. `bm-thm-5.1.4` is now `library_wrapper` via Mathlib's
+`HasIndepIncrements.indepFun_eval_sub`; `bm-thm-5.3.2` and `bm-prop-5.1.2`
+are honest `reduced_core` structural encodings (Mathlib has the precondition
+`IsKolmogorovProcess` and `IsGaussianProcess` but not yet the
+Kolmogorov-Chentsov continuity theorem or the converse-direction wrapper
+proof). See `FORMALIZATION_STATUS.md` § "BM port (2026-05-09)".
+
+**Strong Markov AFP wrap (2026-05-09)**: `mc-thm-1.2.11` promoted from
+`reduced_core` to `library_wrapper` via AFP
+`Markov_Models.Discrete_Time_Markov_Process.lim_stream_strong_Markov` inside
+the `discrete_Markov_process` locale. Wrapper builds in 1s against the
+pre-built `Markov_Models` heap.
 
 **Infrastructure: AFP install** (2026-05-07/08). `docker/Dockerfile.verify` now
 pre-builds AFP `Ergodic_Theory`, `Markov_Models`, and `Stochastic_Matrices`

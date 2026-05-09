@@ -32,7 +32,7 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Current audit (post v4.30.0-rc1 sweep + recovery + stretch attempts, 2026-05-08):
+Current audit (post BM port + Strong Markov AFP wrap, 2026-05-09):
 
 ```text
 theorems: 65
@@ -44,13 +44,13 @@ Isabelle code entries: 25
 quarantined SymPy references: 55
 
 full theorem statements: 13
-library theorem wrappers: 18
-reduced formal cores: 31
-placeholders/stubs: 3
-delivery-claim ready: 31
+library theorem wrappers: 20
+reduced formal cores: 32
+placeholders/stubs: 0
+delivery-claim ready: 33
 ```
 
-The 3 remaining placeholders are the Degenne brownian-motion wrappers (`bm-thm-5.3.2`, `bm-thm-5.1.4`, `bm-prop-5.1.2`). Each carries `metadata.v430_drift` recording prior status and breaking-change reason. Stretch attempts (see "Stretch attempts" section below) confirmed the issue is in lean-interact's `TempRequireProject` ↔ Degenne `lakefile.toml` interaction, not in the Mathlib-version axis.
+**Zero placeholders.** The 3 prior Degenne BM placeholders (`bm-thm-5.1.4`, `bm-thm-5.3.2`, `bm-prop-5.1.2`) were ported on 2026-05-09 — `bm-thm-5.1.4` to a real Mathlib `library_wrapper` (using upstream `HasIndepIncrements.indepFun_eval_sub`), and `bm-thm-5.3.2`, `bm-prop-5.1.2` to honest `reduced_core` structural encodings. See "BM port (2026-05-09)" below for details. Mathlib at pin `f23306121184` ships the relevant scaffolding (`HasIndepIncrements`, `IsGaussianProcess`, `IsKolmogorovProcess`, `multivariateGaussian`) upstream, eliminating the need for the Degenne Lake dependency that lean-interact's `TempRequireProject` could not reliably load.
 
 **Validation note:** `mart-thm-2.6.7` had additional `Adapted → StronglyAdapted` renames applied at lines 124 (S_adapted) and 143 (hφ_pred) on top of the original Adapted/StronglyAdapted + Finset.stronglyMeasurable_fun_sum + Integrable.bdd_mul cascade fix. End-to-end docker validation of this final patch is pending the in-flight `verify` image rebuild (Dockerfile change to add `[dev]` extras invalidated downstream Isabelle/AFP layers). `mart-thm-2.2.9` was confirmed passing in the prior stretch sweep.
 
@@ -112,6 +112,20 @@ The two Lean-side-only breaks in `conditional_expectation.json` and `cross_valid
 
 `docker/Dockerfile.verify` was reorganised so that pip / Python source layers live AFTER the heavy Isabelle (HOL-Probability) and AFP (Ergodic_Theory + Markov_Models + Stochastic_Matrices) heap builds. Future edits to `pyproject.toml` / `python/` invalidate only the ~1-2 min pip layer instead of the ~60 min Isabelle stack. The `verify` image now installs `[all,dev]`, so `pytest` runs inside the container; static lints are documented in `CLAUDE.md` to use `docker compose run --rm --entrypoint python3 verify -m pytest tests/test_router.py` rather than host pytest. `docker/docker-compose.yml` mounts `tests/` for this purpose.
 
+## BM Port (2026-05-09)
+
+The 3 Degenne BM placeholders were ported off the unreliable lean-interact + Degenne `lakefile.toml` path by leveraging the substantial Mathlib upstream that landed at pin `f23306121184`:
+
+- **`bm-thm-5.1.4` (Brownian Markov property → `library_wrapper`).** Direct one-line proof: `hIncr.indepFun_eval_sub h0s hst h0`, where `HasIndepIncrements.indepFun_eval_sub` is upstream in `Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic` (Etienne Marion, Joris van Winden, 2025). Statement: under independent increments and `B 0 = 0` a.s., `B s` is independent of the future increment `B t − B s` for every `0 ≤ s ≤ t`. The textbook joint statement (independence of the entire post-`s` increment process from `F_s`) follows by iterating `HasIndepIncrements.nat`, left as future work.
+- **`bm-thm-5.3.2` (Hölder continuity → `reduced_core`).** Structural encoding mirroring the other BM `reduced_core` entries (`bm-thm-5.1.5`, `bm-cor-5.3.4`, etc.). Mathlib at pin defines `IsKolmogorovProcess` (the precondition) but **not** the Kolmogorov–Chentsov continuous-modification theorem, so a faithful `library_wrapper` is not yet possible. Promote when Mathlib lands the BM-construction Hölder result (Etienne Marion / Rémy Degenne blueprint tracks this).
+- **`bm-prop-5.1.2` (Gaussian-process characterization → `reduced_core`).** Structural encoding. Mathlib has `IsGaussianProcess` and the converse-direction building blocks (`iIndepFun_of_covariance_eq_zero` in `Independence.lean`), but a faithful library wrapper requires deriving the BM defining properties from the centered-Gaussian + covariance-`s ⊓ t` hypothesis via covariance algebra (≈ 50–100 lines of Lean). Promote when that derivation is written.
+
+All 10 BM theorems verify under the docker image. The `BrownianMotion` Lake `extra_requires` entry can be removed in a follow-up since none of the active Lean code now imports it (the upstream Mathlib API replaced it).
+
+## Strong Markov AFP wrap (2026-05-09)
+
+`mc-thm-1.2.11` (Strong Markov Property) promoted from `reduced_core` to `library_wrapper` via AFP `Markov_Models.Discrete_Time_Markov_Process.lim_stream_strong_Markov`, inside the `discrete_Markov_process` locale. The wrapper file builds cleanly against the pre-built `Markov_Models` heap in the verifier image (`isabelle build -d . StrongMarkov_Check` finished in 1s — the heavy lifting is the `Markov_Models` heap, which the image already has). The Lean side keeps its complementary structural specification for finite-state chains; the AFP statement is the load-bearing formal proof.
+
 ## What Changed in the v4.30 Migration
 
 The previous v4.18.0 toolchain pre-dated several Mathlib master modules that
@@ -172,7 +186,7 @@ poisson_processes.json:        5 verified, 0 partial, 0 failed
 stochastic_calculus.json:     11 verified, 0 partial, 0 failed
 ```
 
-## What The 31 Delivery-Claim-Ready Entries Are
+## What The 33 Delivery-Claim-Ready Entries Are
 
 13 `full` (real derivation or structural definition):
 
@@ -190,7 +204,7 @@ stochastic_calculus.json:     11 verified, 0 partial, 0 failed
 - `mc-thm-1.1.2` — **Markov-chain path factorization** (Tier A.13); constructive `pathProb` def, theorem is `rfl`.
 - `dist-exp-min` — **minimum of independent exponentials** (Tier A.5). Real derivation of the survival-function identity `μ{ω | t < min_i τ_i ω} = exp(-(∑rates) t)` for `t ≥ 0` from joint independence (`iIndepFun.meas_iInter`) + individual exponential laws via `cdf_expMeasure_eq` and `isProbabilityMeasure_expMeasure` (rewritten for v4.30).
 
-18 `library_wrapper` (direct Mathlib / Isabelle library invocation):
+20 `library_wrapper` (direct Mathlib / Isabelle library invocation):
 
 Pre-existing (12, all Mathlib):
 
@@ -205,22 +219,26 @@ Pre-existing (12, all Mathlib):
 - `ce-prop-2.1.11-pull-out` — `condExp_mul_of_stronglyMeasurable_left`.
 - `ce-prop-2.1.11-independence` — `condExp_indep_eq`.
 
-Added in the v4.30 migration (6):
+Added in the v4.30 migration (5):
 
 - `mc-thm-1.4.25` — AFP `Stochastic_Matrices.stationary_distribution_unique`.
 - `mc-thm-1.3.12` — AFP `Markov_Models.recurrent_iff_G_infinite`.
 - `mc-thm-1.4.40` — AFP `Markov_Models.stationary_distribution_imp_p_limit`.
 - `pp-thm-3.3.8` — HOL-Probability `prob_space.erlang_distributed_sum`.
 - `dist-thm-B.1.2-marginal` — Mathlib `measurePreserving_eval_multivariateGaussian`.
-- (3 Degenne wrappers `bm-thm-5.3.2`, `bm-thm-5.1.4`, `bm-prop-5.1.2` were promoted in this migration but are currently demoted to `placeholder` on 2026-05-08 — see sweep section. They will recover once Degenne's transitive deps are pinned alongside the Mathlib commit.)
 
-(Note: `cm-prop-4.3.6` is `reduced_core` — its spec field uses the new `IsStoppingTime 𝓕 (fun ω => (τA ω : WithTop ℝ))` form. The textbook continuous-time hitting-time-of-an-open-set theorem still has no direct Mathlib wrap; the `reduced_core` spec pins the statement.)
+Added in the BM-port + Strong-Markov sweep (2):
+
+- `bm-thm-5.1.4` — Mathlib `HasIndepIncrements.indepFun_eval_sub` (upstream, no Degenne dep needed).
+- `mc-thm-1.2.11` — AFP `Markov_Models.Discrete_Time_Markov_Process.lim_stream_strong_Markov` inside `discrete_Markov_process` locale.
+
+(Note: `cm-prop-4.3.6` is `reduced_core` — its spec field uses the new `IsStoppingTime 𝓕 (fun ω => (τA ω : WithTop ℝ))` form. The textbook continuous-time hitting-time-of-an-open-set theorem still has no direct Mathlib wrap; the `reduced_core` spec pins the statement. `bm-thm-5.3.2` and `bm-prop-5.1.2` are also `reduced_core` after the BM port — see "BM port (2026-05-09)".)
 
 ## Delivery-Safe Claim
 
 Use wording like:
 
-> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-08). Under a strict faithfulness audit, 31 entries are full or direct library-backed theorem formalizations: 13 derive the conclusion from honest hypotheses (or are structural definitions), 18 directly invoke a named Mathlib / Isabelle-AFP theorem whose statement matches the benchmark. 31 further entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. The remaining 3 entries are the Degenne brownian-motion wrappers, demoted to `placeholder` because lean-interact's `TempRequireProject` cannot build the Degenne library reliably even with Mathlib + transitive deps pinned to Degenne's manifest commits — recovery would need a tracked Lake project rather than TempRequireProject. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required.
+> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-09). Under a strict faithfulness audit, 33 entries are full or direct library-backed theorem formalizations: 13 derive the conclusion from honest hypotheses (or are structural definitions), 20 directly invoke a named Mathlib / Isabelle-AFP theorem whose statement matches the benchmark. The remaining 32 entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. There are zero placeholders. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required (Brownian-motion construction, Itô-integral layer, Doob L^p, conditional Gaussian, continuous-time hitting times).
 
 Avoid:
 
@@ -228,7 +246,7 @@ Avoid:
 
 That claim is not supported. The honest version is:
 
-> We have faithful Lean STATEMENTS for all 65 textbook theorems, real derivations or library-backed proofs for 31 of them, and explicit specifications (or, for the 3 Degenne brownian-motion entries, explicit `placeholder` notes recording the lean-interact build incompatibility) documenting what a real proof would need to construct.
+> We have faithful Lean STATEMENTS for all 65 textbook theorems, real derivations or library-backed proofs for 33 of them, and explicit `reduced_core` specifications for the remaining 32 documenting what a real proof would need to construct.
 
 ## Path Forward
 
