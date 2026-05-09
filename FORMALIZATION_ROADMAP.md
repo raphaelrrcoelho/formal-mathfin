@@ -2,15 +2,29 @@
 
 Goal: move from "active prover obligations type-check on faithful textbook statements" toward "real Lean derivations of textbook theorems."
 
-The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap + Degenne BM wraps, 2026-05-09):
+The current audit is (post v4.30 migration + BM port + Strong Markov AFP wrap + Degenne BM wraps + Degenne Doob L¹ continuous-time wrap, 2026-05-09):
 
 ```text
 65 benchmark statements
-35 delivery-claim ready entries: 13 full + 22 library_wrapper
-30 reduced formal cores
+36 delivery-claim ready entries: 13 full + 23 library_wrapper
+29 reduced formal cores
 0 placeholders
 0 active SymPy entries
 ```
+
+**Sorry-aware audit (2026-05-09)**: every Degenne-derived `library_wrapper`
+is checked via `#print axioms` to confirm it does NOT transitively depend on
+`sorryAx`. Several Degenne files do contain `sorry` (notably
+`Choquet/CompactSystem.lean` with 5 sorries and `StochasticIntegral/{LocalMartingale,
+SquareIntegrable, OptionalSampling, Komlos, UniformIntegrable, QuadraticVariation}.lean`),
+which transitively pollutes some attractive-looking lemmas — e.g.
+`MeasureTheory.isStoppingTime_hittingAfter'` from `Choquet/Debut.lean` was
+investigated as a wrap candidate for `cm-prop-4.3.6` (hitting time of an open
+set is a stopping time) but was rejected after `#print axioms` showed
+`sorryAx` in its dependency closure. The wraps that ARE landed
+(`isPreBrownian_of_covariance`, `memHolder_mk`, `HasIndepIncrements.indepFun_eval_sub`,
+`maximal_ineq_nonneg`) all show the standard clean axiom set
+`[propext, Classical.choice, Quot.sound]`.
 
 Recent promotions (Tier A): `mart-thm-2.2.9` (martingale transform — A.3),
 `ce-prop-2.1.11-jensen` (conditional Jensen with explicit subgradient — A.1),

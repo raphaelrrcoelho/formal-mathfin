@@ -32,7 +32,7 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Current audit (post BM port + Strong Markov AFP wrap + Degenne BM wraps, 2026-05-09):
+Current audit (post BM port + Strong Markov AFP wrap + Degenne BM wraps + Degenne Doob L¹ continuous-time wrap, 2026-05-09):
 
 ```text
 theorems: 65
@@ -44,11 +44,21 @@ Isabelle code entries: 25
 quarantined SymPy references: 55
 
 full theorem statements: 13
-library theorem wrappers: 22
-reduced formal cores: 30
+library theorem wrappers: 23
+reduced formal cores: 29
 placeholders/stubs: 0
-delivery-claim ready: 35
+delivery-claim ready: 36
 ```
+
+**Sorry-aware audit (2026-05-09)**: every Degenne-derived `library_wrapper`
+is `#print axioms`-checked to ensure it does not transitively depend on
+`sorryAx`. Confirmed clean (axioms = `[propext, Classical.choice, Quot.sound]`):
+`IsGaussianProcess.isPreBrownian_of_covariance`, `IsPreBrownian.memHolder_mk`,
+`HasIndepIncrements.indepFun_eval_sub`, `maximal_ineq_nonneg`. Rejected
+candidate: `MeasureTheory.isStoppingTime_hittingAfter'` from
+`Choquet/Debut.lean` — `#print axioms` revealed transitive dependence on
+`sorryAx` through `Choquet/CompactSystem.lean` (which has 5 unsolved sorries).
+`cm-prop-4.3.6` therefore stays `reduced_core`.
 
 **Zero placeholders.** The 3 prior Degenne BM placeholders (`bm-thm-5.1.4`, `bm-thm-5.3.2`, `bm-prop-5.1.2`) were ported on 2026-05-09 — `bm-thm-5.1.4` to a real Mathlib `library_wrapper` (using upstream `HasIndepIncrements.indepFun_eval_sub`), and `bm-thm-5.3.2`, `bm-prop-5.1.2` to honest `reduced_core` structural encodings. See "BM port (2026-05-09)" below for details. Mathlib at pin `f23306121184` ships the relevant scaffolding (`HasIndepIncrements`, `IsGaussianProcess`, `IsKolmogorovProcess`, `multivariateGaussian`) upstream, eliminating the need for the Degenne Lake dependency that lean-interact's `TempRequireProject` could not reliably load.
 
@@ -157,7 +167,7 @@ the concrete `brownian` Brownian-motion construction together with
 
 ## Promotions Landed in This Migration
 
-8 entries moved from `reduced_core` to `library_wrapper`:
+9 entries moved from `reduced_core` to `library_wrapper`:
 
 | ID | Source | Library theorem |
 |---|---|---|
@@ -169,6 +179,7 @@ the concrete `brownian` Brownian-motion construction together with
 | `bm-thm-5.1.4` | Mathlib `Probability.Independence.Process.HasIndepIncrements.Basic` | `HasIndepIncrements.indepFun_eval_sub` |
 | `bm-prop-5.1.2` | Degenne `BrownianMotion.Gaussian.BrownianMotion` | `IsGaussianProcess.isPreBrownian_of_covariance` |
 | `bm-thm-5.3.2` | Degenne `BrownianMotion.Gaussian.BrownianMotion` | `IsPreBrownian.memHolder_mk` (Kolmogorov-Chentsov) |
+| `cm-thm-4.3.9` | Degenne `BrownianMotion.StochasticIntegral.DoobLp` | `maximal_ineq_nonneg` (continuous-time L¹ Doob max ineq, sharp form) |
 
 End-to-end verification of these wrappers via the v4.30 Docker image is the
 next step (the AFP-only entries depend on the same image's prebuilt
@@ -193,7 +204,7 @@ poisson_processes.json:        5 verified, 0 partial, 0 failed
 stochastic_calculus.json:     11 verified, 0 partial, 0 failed
 ```
 
-## What The 35 Delivery-Claim-Ready Entries Are
+## What The 36 Delivery-Claim-Ready Entries Are
 
 13 `full` (real derivation or structural definition):
 
@@ -211,7 +222,7 @@ stochastic_calculus.json:     11 verified, 0 partial, 0 failed
 - `mc-thm-1.1.2` — **Markov-chain path factorization** (Tier A.13); constructive `pathProb` def, theorem is `rfl`.
 - `dist-exp-min` — **minimum of independent exponentials** (Tier A.5). Real derivation of the survival-function identity `μ{ω | t < min_i τ_i ω} = exp(-(∑rates) t)` for `t ≥ 0` from joint independence (`iIndepFun.meas_iInter`) + individual exponential laws via `cdf_expMeasure_eq` and `isProbabilityMeasure_expMeasure` (rewritten for v4.30).
 
-22 `library_wrapper` (direct Mathlib / Isabelle / Degenne library invocation):
+23 `library_wrapper` (direct Mathlib / Isabelle / Degenne library invocation):
 
 Pre-existing (12, all Mathlib):
 
@@ -244,13 +255,17 @@ Added in the Degenne BM wraps round (2):
 - `bm-prop-5.1.2` — Degenne `BrownianMotion.Gaussian.BrownianMotion.IsGaussianProcess.isPreBrownian_of_covariance` (Gaussian-process characterization).
 - `bm-thm-5.3.2` — Degenne `BrownianMotion.Gaussian.BrownianMotion.IsPreBrownian.memHolder_mk` (Hölder regularity via Kolmogorov-Chentsov in `Continuity/KolmogorovChentsov.lean`).
 
+Added in the Degenne Doob L¹ continuous-time wrap (1):
+
+- `cm-thm-4.3.9` — Degenne `BrownianMotion.StochasticIntegral.DoobLp.maximal_ineq_nonneg` (continuous-time Doob L¹ maximal inequality, sharp form: `ε · P({sup_{s ≤ n} Y_s ≥ ε}) ≤ ∫_{set} Y_n dP` for non-negative right-continuous submartingale Y). The textbook form `λ · P(sup ≥ λ) ≤ E[M_t]` is the immediate corollary by bounding the right-side set integral against `E[M_t]` (using `M_t ≥ 0`). Sorry-free per `#print axioms`.
+
 (Note: `cm-prop-4.3.6` is `reduced_core` — its spec field uses the new `IsStoppingTime 𝓕 (fun ω => (τA ω : WithTop ℝ))` form. The textbook continuous-time hitting-time-of-an-open-set theorem still has no direct Mathlib wrap; the `reduced_core` spec pins the statement. The 6 remaining BM `reduced_core` entries — `bm-thm-5.1.5`, `bm-thm-5.1.7`, `bm-cor-5.3.4`, `bm-rmk-5.1.6-square`, `bm-rmk-5.1.6-exp`, `bm-thm-5.3.5` — are not directly wrappable by Degenne: the martingale-property entries would need an `IsPreBrownian → Martingale` derivation (Degenne does not expose this directly), the reflection principle and law-of-iterated-logarithm are not in Degenne yet, and nowhere-differentiability is a research-grade analytical proof not yet formalized.)
 
 ## Delivery-Safe Claim
 
 Use wording like:
 
-> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-09). Under a strict faithfulness audit, 35 entries are full or direct library-backed theorem formalizations: 13 derive the conclusion from honest hypotheses (or are structural definitions), 22 directly invoke a named Mathlib / Isabelle-AFP / Degenne `brownian-motion` library theorem whose statement matches the benchmark. The remaining 30 entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. There are zero placeholders. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required (Itô-integral layer, BM reflection principle / nowhere-differentiability / law of iterated logarithm, Doob L^p, conditional Gaussian).
+> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-09). Under a strict faithfulness audit, 36 entries are full or direct library-backed theorem formalizations: 13 derive the conclusion from honest hypotheses (or are structural definitions), 23 directly invoke a named Mathlib / Isabelle-AFP / Degenne `brownian-motion` library theorem whose statement matches the benchmark. Every Degenne-derived wrapper has been `#print axioms`-audited to confirm sorry-freeness. The remaining 29 entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. There are zero placeholders. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required (Itô-integral layer, BM reflection principle / nowhere-differentiability / law of iterated logarithm, Doob L^p, conditional Gaussian, continuous-time hitting times of open sets).
 
 Avoid:
 
