@@ -27,6 +27,19 @@ private lemma max_sub_eq_of_le {s t : ℝ≥0} (hst : s ≤ t) :
   rw [hst_zero, max_eq_left (zero_le _)]
   exact NNReal.coe_sub hst
 
+/-- MGF identity at the centered-Gaussian level: for `α : ℝ` and `v : ℝ≥0`,
+    `∫ x, exp(α · x) ∂(gaussianReal 0 v) = exp(α² · v / 2)`.
+
+    Direct specialization of Mathlib's `mgf_id_gaussianReal` (which gives the
+    full MGF formula `mgf id (gaussianReal μ v) = fun t => exp(μt + vt²/2)`)
+    to `μ = 0`, applied at `t = α`. -/
+private lemma integral_exp_mul_gaussianReal_zero (α : ℝ) (v : ℝ≥0) :
+    ∫ x, Real.exp (α * x) ∂(gaussianReal 0 v) = Real.exp (α ^ 2 * (v : ℝ) / 2) := by
+  have h := congr_fun (mgf_id_gaussianReal (μ := 0) (v := v)) α
+  show mgf id (gaussianReal 0 v) α = _
+  rw [h]
+  ring_nf
+
 /-- Second moment of a centered real Gaussian: `∫ x, x² ∂(gaussianReal 0 v) = v`.
 
     Derived from Mathlib's `variance_id_gaussianReal` (variance of the identity
@@ -326,5 +339,175 @@ theorem BrownianMartingaleHyp.square_minus_time_is_martingale
   show (P[fun ω => (B t ω) ^ 2 - (t : ℝ) | (𝓕 s : MeasurableSpace Ω)]) ω
       = (B s ω) ^ 2 - (s : ℝ)
   linear_combination hs1 + hs2 + hs3 + hs4 + 2 * hcross + hdiffsq
+
+/-- **Theorem 5.1.6 (Wald exponential)**: for a pre-Brownian motion `B` adapted
+    to `𝓕` with future increments independent of past `𝓕`, and any `α : ℝ`,
+    the Wald exponential `t ↦ exp(α B_t − α² t / 2)` is a martingale w.r.t. `𝓕`.
+
+    Derivation:
+    - Pointwise: `α B_t − α²t/2 = (α B_s − α²s/2) + (α(B_t − B_s) − α²(t−s)/2)`,
+      so by `exp(a+b) = exp(a)·exp(b)` we have `M_t = M_s · D_st`.
+    - `M_s = exp(α B_s − α²s/2)` is 𝓕_s-measurable.
+    - `D_st = exp(α(B_t − B_s) − α²(t−s)/2)` is independent of 𝓕_s (a function
+      of the increment, which is independent of the past).
+    - `E[D_st]` = `exp(−α²(t−s)/2) · ∫ exp(αx) ∂(gaussianReal 0 (t−s))`
+                 = `exp(−α²(t−s)/2) · exp(α²(t−s)/2) = 1` (Gaussian MGF).
+    - Pull-out + independence: `E[M_t | 𝓕_s] = M_s · E[D_st | 𝓕_s] = M_s`. -/
+theorem BrownianMartingaleHyp.wald_exponential_is_martingale
+    {P : Measure Ω} [IsFiniteMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}
+    (h : BrownianMartingaleHyp P 𝓕 B) (α : ℝ) :
+    Martingale (fun t ω => Real.exp (α * B t ω - α ^ 2 * (t : ℝ) / 2)) 𝓕 P := by
+  refine ⟨fun u => ?_, fun s t hst => ?_⟩
+  -- Adaptedness: exp(α B_u − α²u/2) is 𝓕_u-measurable.
+  · have hB : StronglyMeasurable[𝓕 u] (B u) := h.stronglyAdapted u
+    have hinner : StronglyMeasurable[𝓕 u]
+        (fun ω => α * B u ω - α ^ 2 * (u : ℝ) / 2) :=
+      (hB.const_mul α).sub stronglyMeasurable_const
+    exact Real.continuous_exp.comp_stronglyMeasurable hinner
+  -- Conditional expectation step.
+  have h_meas_t : Measurable (B t) := ((h.stronglyAdapted t).mono (𝓕.le t)).measurable
+  have h_meas_s : Measurable (B s) := ((h.stronglyAdapted s).mono (𝓕.le s)).measurable
+  have h_meas_diff : Measurable (fun ω => B t ω - B s ω) := h_meas_t.sub h_meas_s
+  have h_eq_diff : (fun ω => B t ω - B s ω) = (B t - B s : Ω → ℝ) := by funext; rfl
+  -- HasLaw of increment.
+  have hL_diff : HasLaw (B t - B s) (gaussianReal 0 (max (t - s) (s - t))) P :=
+    h.isPreBrownian.hasLaw_sub t s
+  -- Integrability of `exp(α · (B_t - B_s))` under P (transfer via HasLaw).
+  have h_int_exp_diff : Integrable (fun ω => Real.exp (α * (B t ω - B s ω))) P := by
+    rw [show (fun ω => Real.exp (α * (B t ω - B s ω)))
+          = (fun x => Real.exp (α * x)) ∘ (B t - B s) from by funext ω; rfl]
+    refine Integrable.comp_aemeasurable ?_ h_meas_diff.aemeasurable
+    rw [hL_diff.map_eq]
+    exact integrable_exp_mul_gaussianReal α
+  -- Mean of `exp(α · (B_t - B_s))` under P (Gaussian MGF at α). Use
+  -- `HasLaw.integral_comp` (cleaner than `integral_map` whose pattern matcher
+  -- gets confused by `Real.exp (α * x)`'s elaborated form).
+  have h_int_exp_diff_eq :
+      ∫ ω, Real.exp (α * (B t ω - B s ω)) ∂P
+        = Real.exp (α ^ 2 * ((max (t - s) (s - t) : ℝ≥0) : ℝ) / 2) := by
+    have hf : AEStronglyMeasurable (fun x : ℝ => Real.exp (α * x))
+                (gaussianReal 0 (max (t - s) (s - t))) := by fun_prop
+    have h := hL_diff.integral_comp hf
+    -- h's LHS is `P[(fun x => Real.exp (α * x)) ∘ (B t - B s)]`; rewrite to
+    -- the lambda form used by the goal.
+    have h_lhs : ((fun x => Real.exp (α * x)) ∘ (B t - B s))
+               = (fun ω => Real.exp (α * (B t ω - B s ω))) := by funext ω; rfl
+    rw [h_lhs, integral_exp_mul_gaussianReal_zero] at h
+    exact h
+  -- Define M_s := exp(α B_s - α²s/2) (𝓕_s-measurable factor) and the increment exponential.
+  set Ms : Ω → ℝ := fun ω => Real.exp (α * B s ω - α ^ 2 * (s : ℝ) / 2) with hMs_def
+  set Dst : Ω → ℝ := fun ω => Real.exp (α * (B t ω - B s ω) - α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2)
+    with hDst_def
+  have hMs_meas : StronglyMeasurable[𝓕 s] Ms := by
+    have hB_s : StronglyMeasurable[𝓕 s] (B s) := h.stronglyAdapted s
+    have hinner_s : StronglyMeasurable[𝓕 s]
+        (fun ω => α * B s ω - α ^ 2 * (s : ℝ) / 2) :=
+      (hB_s.const_mul α).sub stronglyMeasurable_const
+    exact Real.continuous_exp.comp_stronglyMeasurable hinner_s
+  -- Pointwise decomposition: exp(α B_t − α²t/2) = M_s · D_st.
+  have h_decomp : ∀ ω,
+      Real.exp (α * B t ω - α ^ 2 * (t : ℝ) / 2) = Ms ω * Dst ω := by
+    intro ω
+    show _ = Real.exp _ * Real.exp _
+    rw [← Real.exp_add]
+    congr 1
+    ring
+  -- Integrability of D_st.
+  have h_int_Dst : Integrable Dst P := by
+    have h_eq : Dst = (fun ω => Real.exp (-(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2))
+                                  * Real.exp (α * (B t ω - B s ω))) := by
+      funext ω
+      show Real.exp _ = _ * Real.exp _
+      rw [← Real.exp_add]
+      congr 1
+      ring
+    rw [h_eq]
+    exact h_int_exp_diff.const_mul _
+  -- Mean of D_st = 1.
+  have h_int_Dst_eq_one : ∫ ω, Dst ω ∂P = 1 := by
+    have h_eq : Dst = (fun ω => Real.exp (-(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2))
+                                  * Real.exp (α * (B t ω - B s ω))) := by
+      funext ω
+      show Real.exp _ = _ * Real.exp _
+      rw [← Real.exp_add]; congr 1; ring
+    rw [h_eq, integral_const_mul, h_int_exp_diff_eq, max_sub_eq_of_le hst,
+        ← Real.exp_add]
+    rw [show -(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) + α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2 = 0
+        from by ring, Real.exp_zero]
+  -- Independence: D_st is a function of (B_t - B_s) which is independent of 𝓕_s.
+  have h_diff_meas_comap :
+      Measurable[MeasurableSpace.comap (fun ω => B t ω - B s ω) (borel ℝ)]
+        (fun ω => B t ω - B s ω) :=
+    fun s' hs' => ⟨s', hs', rfl⟩
+  have h_le_comap :
+      MeasurableSpace.comap (fun ω => B t ω - B s ω) (borel ℝ) ≤ mΩ := by
+    rintro s' ⟨t', ht', rfl⟩; exact h_meas_diff ht'
+  have h_Dst_meas_comap :
+      Measurable[MeasurableSpace.comap (fun ω => B t ω - B s ω) (borel ℝ)] Dst := by
+    have h_phi : Continuous fun x : ℝ =>
+        Real.exp (α * x - α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) :=
+      Real.continuous_exp.comp ((continuous_const.mul continuous_id).sub continuous_const)
+    intro s' hs'
+    refine ⟨_, h_phi.measurable hs', rfl⟩
+  have h_Dst_smeas_comap :
+      StronglyMeasurable[MeasurableSpace.comap (fun ω => B t ω - B s ω) (borel ℝ)] Dst :=
+    h_Dst_meas_comap.stronglyMeasurable
+  have h_condDst :
+      P[Dst | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ => (1 : ℝ) := by
+    have := condExp_indep_eq h_le_comap (𝓕.le s) h_Dst_smeas_comap
+      (h.indep_increment_filt hst)
+    rw [h_int_Dst_eq_one] at this
+    exact this
+  -- Pull-out: E[M_s · D_st | 𝓕_s] =ᵐ M_s · E[D_st | 𝓕_s] =ᵐ M_s · 1 = M_s.
+  have h_int_Ms : Integrable Ms P := by
+    have h_eq : Ms = (fun ω => Real.exp (-(α ^ 2 * (s : ℝ) / 2))
+                                * Real.exp (α * B s ω)) := by
+      funext ω
+      show Real.exp _ = _ * Real.exp _
+      rw [← Real.exp_add]; congr 1; ring
+    rw [h_eq]
+    refine Integrable.const_mul ?_ _
+    have hL_s : HasLaw (B s) (gaussianReal 0 s) P := h.isPreBrownian.hasLaw_eval s
+    rw [show (fun ω => Real.exp (α * B s ω))
+          = (fun x => Real.exp (α * x)) ∘ (B s) from by funext ω; rfl]
+    refine Integrable.comp_aemeasurable ?_ h_meas_s.aemeasurable
+    rw [hL_s.map_eq]
+    exact integrable_exp_mul_gaussianReal α
+  have h_int_MsDst : Integrable (fun ω => Ms ω * Dst ω) P := by
+    have h_decomp_fun : (fun ω => Real.exp (α * B t ω - α ^ 2 * (t : ℝ) / 2))
+                      = (fun ω => Ms ω * Dst ω) := funext h_decomp
+    rw [← h_decomp_fun]
+    -- Integrability of M_t = exp(α B_t - α²t/2).
+    have h_eq : (fun ω => Real.exp (α * B t ω - α ^ 2 * (t : ℝ) / 2))
+              = (fun ω => Real.exp (-(α ^ 2 * (t : ℝ) / 2)) * Real.exp (α * B t ω)) := by
+      funext ω
+      show Real.exp _ = _ * Real.exp _
+      rw [← Real.exp_add]; congr 1; ring
+    rw [h_eq]
+    refine Integrable.const_mul ?_ _
+    have hL_t : HasLaw (B t) (gaussianReal 0 t) P := h.isPreBrownian.hasLaw_eval t
+    rw [show (fun ω => Real.exp (α * B t ω))
+          = (fun x => Real.exp (α * x)) ∘ (B t) from by funext ω; rfl]
+    refine Integrable.comp_aemeasurable ?_ h_meas_t.aemeasurable
+    rw [hL_t.map_eq]
+    exact integrable_exp_mul_gaussianReal α
+  have h_pullout :
+      P[fun ω => Ms ω * Dst ω | (𝓕 s : MeasurableSpace Ω)]
+        =ᵐ[P] Ms * (P[Dst | (𝓕 s : MeasurableSpace Ω)]) := by
+    have h_eq : (fun ω => Ms ω * Dst ω) = Ms * Dst := by funext ω; rfl
+    rw [h_eq]
+    exact condExp_mul_of_stronglyMeasurable_left hMs_meas
+      (by rw [← h_eq]; exact h_int_MsDst) h_int_Dst
+  -- Combine: M_t = M_s · D_st pointwise; cond expectation gives M_s.
+  have h_decomp_ae :
+      (fun u => Real.exp (α * B t u - α ^ 2 * (t : ℝ) / 2))
+        =ᵐ[P] fun ω => Ms ω * Dst ω :=
+    Filter.Eventually.of_forall h_decomp
+  refine (condExp_congr_ae h_decomp_ae).trans ?_
+  refine h_pullout.trans ?_
+  filter_upwards [h_condDst] with ω hω
+  show (Ms * P[Dst | (𝓕 s : MeasurableSpace Ω)]) ω = Ms ω
+  simp [Pi.mul_apply, hω]
 
 end HybridVerify
