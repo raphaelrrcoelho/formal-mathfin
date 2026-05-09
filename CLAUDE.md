@@ -4,11 +4,25 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Commands
 
-Preferred all-backends runner is Docker:
+Preferred all-backends runner is Docker. The image is hosted on GHCR
+(`ghcr.io/raphaelrrcoelho/quantfin-verify`, private). Pull-first, build-fallback:
 
 ```bash
-docker compose -f docker/docker-compose.yml build verify
+# First time on a machine — log in to GHCR with your gh OAuth token:
+TOKEN=$(grep -E '^[[:space:]]+oauth_token:' ~/.config/gh/hosts.yml | head -1 | awk '{print $2}')
+echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
+# (gh auth must include `read:packages` scope; refresh with
+#  `gh auth refresh -h github.com -s read:packages` if needed.)
+
+# Refresh the image to the latest published version (3-min pull vs 50-min build):
+docker compose -f docker/docker-compose.yml pull verify
+
+# Run a benchmark:
 docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config hybrid_verify.toml --timeout 120
+
+# Force a local rebuild (only when changing Dockerfile/Isabelle/Lean toolchain):
+docker compose -f docker/docker-compose.yml build verify
+# Then re-publish; see docker/docker-compose.yml header for the docker push commands.
 ```
 
 The default compose command runs `benchmarks/cross_validated.json`:
@@ -17,11 +31,8 @@ The default compose command runs `benchmarks/cross_validated.json`:
 docker compose -f docker/docker-compose.yml run --rm verify
 ```
 
-Use the local Python CLI only for quick checks or when the local Lean/Isabelle toolchains are known to be configured:
-
-```bash
-python -m python.cli benchmarks/<file>.json [-v] [--config hybrid_verify.toml] [--timeout 120] [--parallel]
-```
+Do NOT run `python -m python.cli ...` against the host toolchain. Always go through the
+docker `verify` service so Mathlib/Lean/Isabelle versions are pinned and reproducible.
 
 `-v` enables debug logging. `--parallel` verifies all theorems concurrently (otherwise sequential per-theorem; intra-theorem dispatch is governed by the router).
 

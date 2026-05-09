@@ -1,5 +1,22 @@
 services:
   verify:
+    # Pull-first, build-as-fallback. `docker compose run` checks the local
+    # image cache first; if missing, pulls from GHCR (much faster than the
+    # ~50 min Isabelle/AFP build); if pull fails, falls back to the Dockerfile.
+    # The :latest tag tracks the most recent push; pin to a dated tag (e.g.
+    # quantfin-verify:2026-05-09) for reproducible CI/old-machine runs.
+    #
+    # Refresh: `docker compose -f docker/docker-compose.yml pull verify`
+    # Force rebuild: `docker compose -f docker/docker-compose.yml build verify`
+    # Re-publish (after a successful local rebuild + smoke tests):
+    #   TOKEN=$(grep -E '^[[:space:]]+oauth_token:' ~/.config/gh/hosts.yml | head -1 | awk '{print $2}')
+    #   echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
+    #   DATE=$(date -u +%Y-%m-%d)
+    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/quantfin-verify:$DATE
+    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/quantfin-verify:latest
+    #   docker push ghcr.io/raphaelrrcoelho/quantfin-verify:$DATE
+    #   docker push ghcr.io/raphaelrrcoelho/quantfin-verify:latest
+    image: ghcr.io/raphaelrrcoelho/quantfin-verify:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile.verify
@@ -12,12 +29,12 @@ services:
     # `cpuset` restricts the container to a fixed set of CPUs; this is what
     # Lake actually reads via `nproc`, so it's the only way to bound the worker
     # count (`cpus:` only caps CPU quota, not the worker count). Default is
-    # CPUs 0-3 (4 workers, ~4-6 GB peak Lean memory). Override on hosts with
-    # more headroom: `VERIFY_CPUSET=0-7 docker compose ... run --rm verify ...`
+    # CPUs 0-7 (8 workers, ~8-16 GB peak Lean memory). Drop back to `0-3` on
+    # tight hosts: `VERIFY_CPUSET=0-3 docker compose ... run --rm verify ...`
     #
     # `LEAN_NUM_THREADS=1` makes each lean worker single-threaded for an
     # additional per-worker memory cap.
-    cpuset: "${VERIFY_CPUSET:-0-3}"
+    cpuset: "${VERIFY_CPUSET:-0-7}"
     environment:
       - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
     volumes:

@@ -61,7 +61,14 @@ RUN elan toolchain install "$(cat lean/lean-toolchain)" \
     && lake --version
 
 COPY isabelle/ isabelle/
-RUN isabelle build -b -j 1 -o threads=1 HOL-Probability
+# `-o threads=2` runs Poly/ML with 2 worker threads inside the single
+# HOL-Probability session. The threads share the session heap (Poly/ML
+# is ~7 GiB peak on HOL-Analysis), so total memory is similar to
+# `threads=1`; CPU utilisation goes up (~30% wall-clock reduction on
+# HOL-Analysis, the dominant sub-build). `-j 1` because HOL-Probability's
+# dep chain is sequential — increasing `-j` here doesn't help and would
+# multiply memory if it did.
+RUN isabelle build -b -j 1 -o threads=2 HOL-Probability
 
 # ---------------------------------------------------------------------------
 # AFP (Archive of Formal Proofs) layer.
@@ -87,9 +94,13 @@ RUN isabelle build -b -j 1 -o threads=1 HOL-Probability
 # build is multi-hour and tens of GB, which blows past the -Xmx2g build cap
 # and the disk budget for this image.
 #
-# Build is single-threaded (`-j 1 -o threads=1`) for the same reason
-# HOL-Probability is: Poly/ML's per-thread heap pressure plus our 2 GiB cap.
-# Pass `--build-arg INSTALL_AFP=0` to skip this layer entirely.
+# Build uses `-j 1 -o threads=2`: single session at a time, two Poly/ML
+# worker threads per session. The aggressive `-j 2` was attempted on
+# 2026-05-08 and OOM-killed during HOL-Probability — Poly/ML peaks at
+# ~7 GiB RSS for HOL-Analysis, so two parallel sessions exceed the 12 GiB
+# host budget. The single-session-with-thread-parallelism path keeps the
+# CPU win (~30%) without the memory blowup. Pass `--build-arg INSTALL_AFP=0`
+# to skip this layer entirely.
 # ---------------------------------------------------------------------------
 RUN if [ "$INSTALL_AFP" = "1" ]; then \
       mkdir -p /opt/afp \
@@ -97,7 +108,7 @@ RUN if [ "$INSTALL_AFP" = "1" ]; then \
       && tar -xzf /tmp/afp-current.tar.gz -C /opt/afp --strip-components=1 \
       && rm /tmp/afp-current.tar.gz \
       && isabelle components -u /opt/afp/thys \
-      && isabelle build -b -j 1 -o threads=1 Ergodic_Theory Markov_Models Stochastic_Matrices ; \
+      && isabelle build -b -j 1 -o threads=2 Ergodic_Theory Markov_Models Stochastic_Matrices ; \
     else \
       echo "Skipping AFP install (INSTALL_AFP=$INSTALL_AFP)" ; \
     fi
