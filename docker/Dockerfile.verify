@@ -45,32 +45,18 @@ RUN mkdir -p /root/.isabelle/Isabelle2025-2/etc \
 
 WORKDIR /app
 
-# Layer ordering rationale: the Isabelle HOL-Probability heap and the AFP
-# pre-build below are the slowest steps (~30 min each). They depend on
-# `lean/` and `isabelle/` directories but NOT on Python sources. Put those
-# heavy builds BEFORE the Python/pip layers so that edits to
-# pyproject.toml / python/ / requirements.txt invalidate only the pip layer
-# (~1-2 min to rebuild) and not the Isabelle heaps.
+# Layer ordering rationale (revised 2026-05-09):
 #
-# The trailing `COPY benchmarks/` + `COPY hybrid_verify.toml` are even
-# cheaper to redo and stay at the end.
-COPY lean/ lean/
-# Install the toolchain pinned in lean/lean-toolchain, then prebuild the Lake
-# project. `lake exe cache get` downloads precompiled Mathlib oleans from the
-# leanprover-community reservoir (~30 sec download vs ~30 min Mathlib build
-# from source). Then `lake build` elaborates the HybridVerify library + its
-# direct deps (BrownianMotion etc.). This bakes the olean tree into the image
-# at /app/lean/.lake/, so the first verify call no longer pays for a cold
-# Lake build. The matching docker-compose.yml shadows /app/lean/.lake/ with
-# a named volume so the bind-mounted host lean/ dir does not stomp the
-# prebuild on container start.
-RUN elan toolchain install "$(cat lean/lean-toolchain)" \
-    && cd lean \
-    && lean --version \
-    && lake --version \
-    && lake exe cache get \
-    && lake build
-
+# The Isabelle HOL-Probability heap and the AFP pre-build below are the
+# slowest steps (~30 min each) and depend ONLY on `isabelle/` source. We
+# place them BEFORE the Lean COPY + lake prebuild so that changes to
+# `lean/lakefile.lean`, `lean/HybridVerify/*.lean`, or the lake-build RUN
+# command do not invalidate the Isabelle layers.
+#
+# The earlier ordering put `COPY lean/` first, which meant any Lean edit
+# busted the cache for HOL-Probability + AFP — costing ~60 min per Lean
+# iteration. That cost was paid once on 2026-05-09 to validate; the new
+# ordering avoids it for all future Lean-only rebuilds.
 COPY isabelle/ isabelle/
 # `-o threads=2` runs Poly/ML with 2 worker threads inside the single
 # HOL-Probability session. The threads share the session heap (Poly/ML
@@ -124,15 +110,31 @@ RUN if [ "$INSTALL_AFP" = "1" ]; then \
       echo "Skipping AFP install (INSTALL_AFP=$INSTALL_AFP)" ; \
     fi
 
-# Runtime defaults. Keep this after the Isabelle heap build so changing runtime
-# caps does not invalidate the expensive HOL-Probability build layer.
+# Lean toolchain + Lake project prebuild.
+# Comes AFTER Isabelle so editing lean/ never invalidates the Isabelle/AFP
+# layers above. `lake exe cache get` downloads precompiled Mathlib oleans
+# from the leanprover-community reservoir (~3 min download vs ~30 min Mathlib
+# build from source). `lake build` then elaborates the HybridVerify library +
+# its direct deps (BrownianMotion etc.). This bakes the olean tree into the
+# image at /app/lean/.lake/, so the first verify call no longer pays for a
+# cold Lake build.
+COPY lean/ lean/
+RUN elan toolchain install "$(cat lean/lean-toolchain)" \
+    && cd lean \
+    && lean --version \
+    && lake --version \
+    && lake exe cache get \
+    && lake build
+
+# Runtime defaults. Keep this after both heavy build layers so changing
+# runtime caps does not invalidate the expensive Isabelle/AFP/Lean builds.
 RUN elan default "$(cat lean/lean-toolchain)" \
     && printf '%s\n' \
       'ISABELLE_TOOL_JAVA_OPTIONS="-Djava.awt.headless=true -Xms512m -Xmx3g -Xss8m"' \
       > /root/.isabelle/Isabelle2025-2/etc/settings
 
 # Python deps last so editing pyproject.toml / python/ does NOT invalidate the
-# Isabelle / AFP heap layers above (each ~30 min). The `[dev]` extra brings
+# Isabelle / AFP / Lean prebuild layers above. The `[dev]` extra brings
 # pytest + pytest-asyncio so the static lints (`pytest tests/test_router.py`,
 # `python -m python.coverage_report`) run inside this container too.
 COPY pyproject.toml requirements.txt ./

@@ -104,6 +104,31 @@ SymPy never returns L3+ even on success — this is intentional, encoding that C
 
 **Lean proofs live in `lean/HybridVerify/*.lean`, not in JSON strings**. The Lean backend always uses `lean-interact.LocalProject` pointing at the in-repo `lean/` Lake project (configured via `hybrid_verify.toml` `local_project = "lean"`). `lakefile.lean` + `lake-manifest.json` + `lean-toolchain` are authoritative for Mathlib/Lean versions and transitive deps. Non-trivial proofs (multi-step derivations, helper lemmas, structures) **must** live as real Lean files under `lean/HybridVerify/` so they get the full `lake build` memory budget + incremental compilation + LSP authoring; benchmark snippets `import HybridVerify.<Module>` and re-export the named lemma in 5–25 lines. Trivial library wrappers (single-line `:= someLemma`) can stay inline in the JSON. The earlier `TempRequireProject` mode was removed (commit 2026-05-09) — REPL elaboration could not handle the BM-martingale class of proofs without OOM. To author a new proof: edit `lean/HybridVerify/<Module>.lean` on host with VS Code + Lean LSP (`loogle`/`leansearch%`/`exact?`/`apply?` are transitively available via Mathlib's `LeanSearchClient`), `lake build` to validate, then update the benchmark JSON to import + reference. Existing migrated examples: `BrownianMartingale`, `MartingaleTransform`, `FTAP`, `CondExpJensen`, `ExpMin`.
 
+**Fast authoring iteration via persistent REPL daemon (`docker compose service lean-repl`)**. The daemon (`python/lean_repl.py`) boots a `lean-interact` server pointing at `lean/` once per session, paying the ~5-min Mathlib + BrownianMotion + HybridVerify olean-load cost a single time. It then listens on TCP `127.0.0.1:7878` and processes each "check this file" request in 5-30 sec — vs. 5-15 min for the `docker compose run --rm verify` cold path. This is the LSP-equivalent for non-editor authoring (Claude Code edits via the Edit tool, not VS Code).
+
+Workflow:
+```bash
+# one-time per session: bring up the daemon, wait for "READY" in its logs
+docker compose -f docker/docker-compose.yml up -d lean-repl
+docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
+
+# per iteration: edit a .lean file, then check it via the wrapper
+./scripts/lean-check.sh lean/HybridVerify/BrownianMartingale.lean
+# Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
+
+# tear down at end of session
+docker compose -f docker/docker-compose.yml down lean-repl
+```
+
+`scripts/lean-check.sh` auto-detects whether the daemon is up (probes `127.0.0.1:7878`); falls back to `lake env lean <file>` inside a fresh `verify` container if not (slow but reliable, with live stdout — no `| tail` buffering). Daemon's TCP port is bound to localhost only (no external exposure).
+
+Caveats:
+- Daemon serializes requests through `LeanBackend._lock` (Lean isn't reentrant). Concurrent connections queue.
+- Daemon does not write `.olean`s for downstream imports; once a proof works in the daemon, run a final `lake build` (or restart the daemon) before relying on the oleans for cross-file imports.
+- If you bump Mathlib pin or the lakefile, restart the daemon to pick up new project state.
+
+For multi-iteration sessions, prefer keeping `BrownianMartingale.lean`-class files small (one theorem + its private helpers per file) so Lean only re-elaborates the changed file.
+
 **Backends are lazily initialized**. `LeanBackend._ensure_server` and `IsabelleBackend._ensure_connector`/`_ensure_session` defer the expensive Mathlib/HOL-Probability bootstrap to the first `verify()` call. Both hold a `threading.Lock` since the underlying servers are not thread-safe — async `verify()` calls serialize through the lock.
 
 **SymPy backend dispatch** (`sympy_verifier.py`):

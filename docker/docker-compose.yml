@@ -66,6 +66,35 @@ services:
     #   docker compose -f docker/docker-compose.yml run --rm \
     #       --entrypoint python3 verify -m python.coverage_report
 
+  # Persistent Lean-interact REPL daemon. Pays the ~5-min Mathlib + BrownianMotion
+  # + HybridVerify olean-load cost ONCE at startup, then handles each lake-check
+  # request in 5-30 sec instead of 5-15 min. See `python/lean_repl.py` for the
+  # protocol (TCP 7878, send raw .lean text, receive JSON response).
+  #
+  # Usage:
+  #   docker compose -f docker/docker-compose.yml up -d lean-repl
+  #   docker compose -f docker/docker-compose.yml logs -f lean-repl   # wait for READY
+  #   ./scripts/lean-check.sh lean/HybridVerify/<file>.lean            # fast iteration
+  #   docker compose -f docker/docker-compose.yml down lean-repl       # tear down
+  lean-repl:
+    image: ghcr.io/raphaelrrcoelho/quantfin-verify:latest
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.verify
+    cpuset: "${VERIFY_CPUSET:-0-7}"
+    environment:
+      - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
+    volumes:
+      - ../python:/app/python:ro
+      - ../lean:/app/lean
+      - ../hybrid_verify.toml:/app/hybrid_verify.toml:ro
+      - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
+    working_dir: /app
+    entrypoint: ["python3", "-m", "python.lean_repl"]
+    ports:
+      - "127.0.0.1:7878:7878"
+    restart: "no"
+
   lean:
     build:
       context: ..
