@@ -386,17 +386,123 @@ lemma fubini_swap
     · exact ENNReal.ofReal_ne_top
   rw [h_inner_simp]
 
-/-- Stage 2 (Hölder + algebra): bound the post-Fubini integral by the
-    Hölder inequality, yielding the L^p submartingale bound. -/
+/-- Stage 2a: apply Hölder to the post-Fubini integral.
+
+    For non-negative f, g and Hölder conjugates p, q (so 1/p + 1/q = 1):
+       `∫⁻ ω, ofReal(M_n) ⋅ ofReal(Mstar^(p-1)) ≤ (∫⁻ M_n^p)^(1/p) ⋅ (∫⁻ Mstar^p)^(1/q)`.
+    Wraps `ENNReal.lintegral_mul_le_Lp_mul_Lq` plus the rpow algebra
+    `(x^(p-1))^q = x^p` (using `(p-1)*q = p`). -/
+lemma holder_apply
+    [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
+    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
+    (hp : 1 < p) (n : ℕ) :
+    (∫⁻ ω, ENNReal.ofReal (M n ω) *
+            ENNReal.ofReal ((runMax M n ω) ^ (p - 1)) ∂μ)
+      ≤ (∫⁻ ω, ENNReal.ofReal ((M n ω) ^ p) ∂μ) ^ (1 / p) *
+          (∫⁻ ω, ENNReal.ofReal ((runMax M n ω) ^ p) ∂μ) ^ ((p - 1) / p) := by
+  set q := p / (p - 1) with hq_def
+  have hpq : p.HolderConjugate q := Real.HolderConjugate.conjExponent hp
+  have hp_pos : 0 < p := lt_trans zero_lt_one hp
+  have hp_ne_zero : p ≠ 0 := hp_pos.ne'
+  have hpm1_pos : 0 < p - 1 := by linarith
+  have hq_pos : 0 < q := by simp only [hq_def]; positivity
+  have hpm1_q_eq_p : (p - 1) * q = p := by
+    simp only [hq_def]; field_simp
+  have hsubM : Measurable (M n) :=
+    ((hsub.stronglyMeasurable n).measurable).mono (𝓕.le n) le_rfl
+  have hRunMaxMeas : Measurable (runMax M n) := runMax_measurable hsub n
+  have hf_meas : AEMeasurable (fun ω => ENNReal.ofReal (M n ω)) μ :=
+    (ENNReal.measurable_ofReal.comp hsubM).aemeasurable
+  have hg_meas : AEMeasurable
+      (fun ω => ENNReal.ofReal ((runMax M n ω) ^ (p - 1))) μ :=
+    (ENNReal.measurable_ofReal.comp (hRunMaxMeas.pow_const (p - 1))).aemeasurable
+  have key := ENNReal.lintegral_mul_le_Lp_mul_Lq μ hpq hf_meas hg_meas
+  -- Rewrite (ofReal M_n)^p = ofReal(M_n^p) using nonneg.
+  have h_f_pow : ∀ ω, (ENNReal.ofReal (M n ω)) ^ p = ENNReal.ofReal ((M n ω) ^ p) :=
+    fun ω => ENNReal.ofReal_rpow_of_nonneg (hnn n ω) hp_pos.le
+  -- Rewrite (ofReal Mstar^(p-1))^q = ofReal(Mstar^p) using (p-1)*q = p.
+  have h_g_pow : ∀ ω,
+      (ENNReal.ofReal ((runMax M n ω) ^ (p - 1))) ^ q
+        = ENNReal.ofReal ((runMax M n ω) ^ p) := by
+    intro ω
+    rw [ENNReal.ofReal_rpow_of_nonneg
+          (Real.rpow_nonneg (runMax_nonneg hnn n ω) _) hq_pos.le,
+        ← Real.rpow_mul (runMax_nonneg hnn n ω) (p - 1) q, hpm1_q_eq_p]
+  simp_rw [h_f_pow, h_g_pow] at key
+  -- The goal has 1/p and (p-1)/p; key has 1/q (= q⁻¹). Rewrite 1/q = (p-1)/p.
+  have h_one_div_q : (1 / q : ℝ) = (p - 1) / p := by
+    simp only [hq_def, one_div, inv_div]
+  rw [h_one_div_q] at key
+  -- Convert LHS: the integral of pointwise product equals the lintegral
+  -- of the (· * ·) function-product form.
+  have hlhs : ∫⁻ a : Ω, ((fun ω => ENNReal.ofReal (M n ω)) *
+              fun ω => ENNReal.ofReal (runMax M n ω ^ (p - 1))) a ∂μ
+            = ∫⁻ ω, ENNReal.ofReal (M n ω) *
+                    ENNReal.ofReal ((runMax M n ω) ^ (p - 1)) ∂μ := by rfl
+  rw [hlhs] at key
+  exact key
+
+/-- Stage 2 (Hölder + algebra): combining Fubini's output with Hölder
+    yields the master bound on `∫⁻ Mstar^p`. -/
 lemma holder_step
     [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
     (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
     (hp : 1 < p) (n : ℕ) :
     (∫⁻ ω, ENNReal.ofReal ((runMax M n ω) ^ p) ∂μ)
       ≤ ENNReal.ofReal (p / (p - 1)) *
-          (∫⁻ ω, ENNReal.ofReal (M n ω ^ p) ∂μ) ^ (p⁻¹) *
+          (∫⁻ ω, ENNReal.ofReal ((M n ω) ^ p) ∂μ) ^ (1 / p) *
           (∫⁻ ω, ENNReal.ofReal ((runMax M n ω) ^ p) ∂μ) ^ ((p - 1) / p) := by
-  sorry
+  have hp_pos : 0 < p := lt_trans zero_lt_one hp
+  have hpm1_pos : 0 < p - 1 := by linarith
+  have hpm1_inv_pos : 0 < 1 / (p - 1) := by positivity
+  -- Step 1: bound A := ∫⁻ Mstar^p via A_le_layer_integral.
+  have hA := A_le_layer_integral hsub hnn hp n
+  -- Step 2: rewrite the inner Bochner setIntegral as a setLIntegral.
+  have h_inner_rewrite : ∀ t,
+      ENNReal.ofReal (∫ ω in {ω | t ≤ runMax M n ω}, M n ω ∂μ)
+        = ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ := fun t =>
+    ofReal_setIntegral_eq_setLIntegral_ofReal hsub hnn n
+  simp_rw [h_inner_rewrite] at hA
+  -- Step 3: apply Fubini swap.
+  rw [fubini_swap hsub hnn hp n] at hA
+  -- Step 4: factor `ofReal(Mstar^(p-1)/(p-1))` as `ofReal(Mstar^(p-1)) * ofReal(1/(p-1))`.
+  have h_factor : ∀ ω,
+      ENNReal.ofReal ((runMax M n ω) ^ (p - 1) / (p - 1))
+        = ENNReal.ofReal ((runMax M n ω) ^ (p - 1)) * ENNReal.ofReal (1 / (p - 1)) := by
+    intro ω
+    rw [div_eq_mul_inv, ENNReal.ofReal_mul (Real.rpow_nonneg (runMax_nonneg hnn n ω) _),
+        show (p - 1)⁻¹ = 1 / (p - 1) by rw [one_div]]
+  simp_rw [h_factor] at hA
+  -- Step 5: pull constant ofReal(1/(p-1)) outside the inner integral.
+  have h_mul_const :
+      ∫⁻ ω, ENNReal.ofReal (M n ω) *
+        (ENNReal.ofReal ((runMax M n ω) ^ (p - 1)) * ENNReal.ofReal (1 / (p - 1))) ∂μ
+      = ENNReal.ofReal (1 / (p - 1)) *
+        ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((runMax M n ω) ^ (p - 1)) ∂μ := by
+    rw [← lintegral_const_mul]
+    · congr 1; funext ω; ring
+    · exact ((ENNReal.measurable_ofReal.comp
+          (((hsub.stronglyMeasurable n).measurable).mono (𝓕.le n) le_rfl)).mul
+        (ENNReal.measurable_ofReal.comp
+          ((runMax_measurable hsub n).pow_const (p - 1))))
+  rw [h_mul_const] at hA
+  -- Step 6: combine ofReal(p) * ofReal(1/(p-1)) = ofReal(p/(p-1)).
+  have h_const_combine :
+      ENNReal.ofReal p * ENNReal.ofReal (1 / (p - 1)) = ENNReal.ofReal (p / (p - 1)) := by
+    rw [← ENNReal.ofReal_mul hp_pos.le]
+    congr 1; field_simp
+  rw [show ENNReal.ofReal p * (ENNReal.ofReal (1 / (p - 1)) *
+        ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((runMax M n ω) ^ (p - 1)) ∂μ)
+      = ENNReal.ofReal p * ENNReal.ofReal (1 / (p - 1)) *
+        ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((runMax M n ω) ^ (p - 1)) ∂μ from by ring,
+      h_const_combine] at hA
+  -- Step 7: apply holder_apply to bound the post-Fubini integral.
+  refine hA.trans ?_
+  rw [mul_assoc]
+  exact mul_le_mul_left' (holder_apply hsub hnn hp n) _
 
 /-- Doob's L^p maximal inequality for non-negative submartingales.
 
