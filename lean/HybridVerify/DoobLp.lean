@@ -435,6 +435,401 @@ lemma holder_apply
   rw [hlhs] at key
   exact key
 
+/-- Truncated inner t-integral: for `Mstar ≥ 0` and `K > 0`,
+       `∫⁻ t in Ioi 0, t^(p-2) ⋅ 𝟙{0 < t ≤ K ∧ t ≤ Mstar}
+         = ofReal(min Mstar K^(p-1) / (p-1))`.
+    Identical to `inner_t_integral` but with an extra `t ≤ K` constraint,
+    which makes the inner Ioc become `Ioc 0 (min Mstar K)`. -/
+lemma inner_t_integral_truncated
+    {Mstar K p : ℝ} (hMstar : 0 ≤ Mstar) (hK : 0 < K) (hp : 1 < p) :
+    ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (p - 2)) *
+        ((Set.Iic K).indicator (fun _ => (1 : ℝ≥0∞)) t *
+         {t : ℝ | t ≤ Mstar}.indicator (fun _ => (1 : ℝ≥0∞)) t)
+      = ENNReal.ofReal ((min Mstar K) ^ (p - 1) / (p - 1)) := by
+  have hMinNonneg : 0 ≤ min Mstar K := le_min hMstar hK.le
+  rcases hMinNonneg.lt_or_eq with hpos | hzero
+  · -- min Mstar K > 0
+    have hMinPosLeMstar : min Mstar K ≤ Mstar := min_le_left _ _
+    have hMinPosLeK : min Mstar K ≤ K := min_le_right _ _
+    have h_eq : Set.EqOn
+        (fun t => ENNReal.ofReal (t ^ (p - 2)) *
+            ((Set.Iic K).indicator (fun _ => (1 : ℝ≥0∞)) t *
+             {t : ℝ | t ≤ Mstar}.indicator (fun _ => (1 : ℝ≥0∞)) t))
+        ((Set.Ioc 0 (min Mstar K)).indicator (fun t => ENNReal.ofReal (t ^ (p - 2))))
+        (Set.Ioi (0:ℝ)) := by
+      intro t ht
+      simp only
+      by_cases h_le_K : t ≤ K
+      · by_cases h_le_M : t ≤ Mstar
+        · have h_mem_min : t ∈ Set.Ioc (0:ℝ) (min Mstar K) :=
+            ⟨ht, le_min h_le_M h_le_K⟩
+          rw [Set.indicator_of_mem (show t ∈ Set.Iic K from h_le_K),
+              Set.indicator_of_mem (show t ∈ {t : ℝ | t ≤ Mstar} from h_le_M),
+              mul_one, mul_one,
+              Set.indicator_of_mem h_mem_min]
+        · have h_nmem_min : t ∉ Set.Ioc (0:ℝ) (min Mstar K) :=
+            fun h => h_le_M (h.2.trans hMinPosLeMstar)
+          rw [Set.indicator_of_mem (show t ∈ Set.Iic K from h_le_K),
+              Set.indicator_of_notMem (show t ∉ {t : ℝ | t ≤ Mstar} from h_le_M),
+              mul_zero, mul_zero,
+              Set.indicator_of_notMem h_nmem_min]
+      · have h_nmem_min : t ∉ Set.Ioc (0:ℝ) (min Mstar K) :=
+          fun h => h_le_K (h.2.trans hMinPosLeK)
+        rw [Set.indicator_of_notMem (show t ∉ Set.Iic K from h_le_K),
+            zero_mul, mul_zero,
+            Set.indicator_of_notMem h_nmem_min]
+    rw [setLIntegral_congr_fun measurableSet_Ioi h_eq]
+    have hsubset : Set.Ioc (0:ℝ) (min Mstar K) ⊆ Set.Ioi 0 := fun _ ht => ht.1
+    have h_simp : ∫⁻ t in Set.Ioi (0:ℝ),
+          (Set.Ioc 0 (min Mstar K)).indicator
+            (fun t => ENNReal.ofReal (t ^ (p - 2))) t
+        = ∫⁻ t in Set.Ioc (0:ℝ) (min Mstar K), ENNReal.ofReal (t ^ (p - 2)) := by
+      rw [setLIntegral_indicator measurableSet_Ioc,
+          Set.inter_eq_left.mpr hsubset]
+    rw [h_simp]
+    exact lintegral_rpow_Ioc hpos hp
+  · -- min Mstar K = 0
+    have hMstar_zero : Mstar = 0 := by
+      have h_min : min Mstar K = 0 := hzero.symm
+      by_contra h_ne
+      have hMpos : 0 < Mstar := lt_of_le_of_ne hMstar (Ne.symm h_ne)
+      have : 0 < min Mstar K := lt_min hMpos hK
+      linarith
+    have h_eq : Set.EqOn
+        (fun t => ENNReal.ofReal (t ^ (p - 2)) *
+            ((Set.Iic K).indicator (fun _ => (1 : ℝ≥0∞)) t *
+             {t : ℝ | t ≤ Mstar}.indicator (fun _ => (1 : ℝ≥0∞)) t))
+        (fun _ => 0) (Set.Ioi (0:ℝ)) := by
+      intro t ht
+      simp only
+      have hnot : t ∉ {t : ℝ | t ≤ Mstar} := by
+        change ¬ t ≤ Mstar
+        rw [hMstar_zero]; exact not_le.mpr ht
+      rw [Set.indicator_of_notMem hnot, mul_zero, mul_zero]
+    rw [setLIntegral_congr_fun measurableSet_Ioi h_eq, lintegral_zero]
+    rw [← hzero]
+    have hp10 : p - 1 ≠ 0 := by linarith
+    simp [Real.zero_rpow hp10]
+
+/-- Truncated Fubini swap. Analog of `fubini_swap` but with the outer
+    `t`-integral restricted to `Ioc 0 K`, producing
+    `min (runMax M n) K` in the post-swap formula. -/
+lemma fubini_swap_truncated
+    [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
+    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
+    (hp : 1 < p) (n : ℕ) (K : ℝ) (hK : 0 < K) :
+    ∫⁻ t in Set.Ioc (0:ℝ) K,
+        ENNReal.ofReal (t ^ (p - 2)) *
+          ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ
+      = ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1) / (p - 1)) ∂μ := by
+  -- Rewrite the LHS via an Ioi 0 outer integral with an Iic K indicator,
+  -- so we can reuse the bivariate Fubini machinery.
+  have hRunMaxMeas : Measurable (runMax M n) := runMax_measurable hsub n
+  have hsubM : Measurable (M n) :=
+    ((hsub.stronglyMeasurable n).measurable).mono (𝓕.le n) le_rfl
+  have hIocEqRestrict : Set.Ioc (0:ℝ) K = Set.Ioi 0 ∩ Set.Iic K := by
+    ext t; simp [Set.mem_Ioc, Set.mem_Ioi, Set.mem_Iic, and_comm]
+  rw [hIocEqRestrict]
+  rw [← MeasureTheory.lintegral_indicator (measurableSet_Ioi.inter measurableSet_Iic)]
+  -- Step 1: rewrite the inner setLIntegral as a full lintegral via indicator.
+  have step1 : ∀ t,
+      ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ
+        = ∫⁻ ω, {ω | t ≤ runMax M n ω}.indicator
+                  (fun ω => ENNReal.ofReal (M n ω)) ω ∂μ := by
+    intro t
+    rw [lintegral_indicator (measurableSet_le measurable_const hRunMaxMeas)]
+  -- Step 2: pull the constant ofReal(t^(p-2)) inside the inner lintegral.
+  have step2 : ∀ t, ENNReal.ofReal (t ^ (p - 2)) *
+        ∫⁻ ω, {ω | t ≤ runMax M n ω}.indicator
+                (fun ω => ENNReal.ofReal (M n ω)) ω ∂μ
+      = ∫⁻ ω, ENNReal.ofReal (t ^ (p - 2)) *
+              {ω | t ≤ runMax M n ω}.indicator
+                (fun ω => ENNReal.ofReal (M n ω)) ω ∂μ := by
+    intro t
+    exact (lintegral_const_mul _ ((ENNReal.measurable_ofReal.comp hsubM).indicator
+            (measurableSet_le measurable_const hRunMaxMeas))).symm
+  -- Joint measurability of the bivariate integrand (Ioi 0 ∩ Iic K is product-measurable).
+  have hJointSet : MeasurableSet {pr : ℝ × Ω | pr.1 ≤ runMax M n pr.2} := by
+    have h1 : Measurable (fun pr : ℝ × Ω => pr.1) := measurable_fst
+    have h2 : Measurable (fun pr : ℝ × Ω => runMax M n pr.2) :=
+      hRunMaxMeas.comp measurable_snd
+    exact measurableSet_le h1 h2
+  have hF_meas : Measurable (fun pr : ℝ × Ω =>
+      ENNReal.ofReal (pr.1 ^ (p - 2)) *
+        {q : ℝ × Ω | q.1 ≤ runMax M n q.2}.indicator
+          (fun q => ENNReal.ofReal (M n q.2)) pr) := by
+    refine Measurable.mul ?_ ?_
+    · refine ENNReal.measurable_ofReal.comp ?_
+      exact (measurable_fst : Measurable (fun pr : ℝ × Ω => pr.1)).pow_const (p - 2)
+    · refine Measurable.indicator ?_ hJointSet
+      exact ENNReal.measurable_ofReal.comp (hsubM.comp measurable_snd)
+  -- Rewrite outer indicator + push into bivariate integrand.
+  have h_outer_eq : ∫⁻ a, (Set.Ioi (0:ℝ) ∩ Set.Iic K).indicator
+        (fun t => ENNReal.ofReal (t ^ (p - 2)) *
+                ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ) a
+      = ∫⁻ t, ∫⁻ ω, (Set.Ioi (0:ℝ) ∩ Set.Iic K).indicator
+              (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+                {ω | s ≤ runMax M n ω}.indicator
+                  (fun ω => ENNReal.ofReal (M n ω)) ω) t ∂μ := by
+    apply lintegral_congr_ae
+    filter_upwards with t
+    by_cases ht : t ∈ Set.Ioi (0:ℝ) ∩ Set.Iic K
+    · rw [Set.indicator_of_mem ht, step1, step2]
+      apply lintegral_congr_ae
+      filter_upwards with ω
+      rw [Set.indicator_of_mem ht]
+    · rw [Set.indicator_of_notMem ht, ← lintegral_zero (μ := μ)]
+      apply lintegral_congr_ae
+      filter_upwards with ω
+      rw [Set.indicator_of_notMem ht]
+  rw [h_outer_eq]
+  -- Apply Fubini.
+  have hSwap_meas : AEMeasurable
+      (Function.uncurry (fun t ω => (Set.Ioi (0:ℝ) ∩ Set.Iic K).indicator
+          (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+            {ω | s ≤ runMax M n ω}.indicator
+              (fun ω => ENNReal.ofReal (M n ω)) ω) t))
+      (volume.prod μ) := by
+    refine (Measurable.indicator ?_ ?_).aemeasurable
+    · exact hF_meas
+    · exact measurable_fst (measurableSet_Ioi.inter measurableSet_Iic)
+  rw [lintegral_lintegral_swap hSwap_meas]
+  apply lintegral_congr_ae
+  filter_upwards with ω
+  -- Pointwise: rewrite indicator product, pull out ofReal(M_n ω), use inner_t_integral_truncated.
+  have h_pointwise : ∀ t,
+      (Set.Ioi (0:ℝ) ∩ Set.Iic K).indicator
+          (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+            {ω' | s ≤ runMax M n ω'}.indicator
+              (fun ω' => ENNReal.ofReal (M n ω')) ω) t
+        = ENNReal.ofReal (M n ω) *
+            ((Set.Ioi (0:ℝ)).indicator
+              (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+                ((Set.Iic K).indicator (fun _ => (1 : ℝ≥0∞)) s *
+                 {s : ℝ | s ≤ runMax M n ω}.indicator
+                  (fun _ => (1 : ℝ≥0∞)) s)) t) := by
+    intro t
+    by_cases ht_pos : t ∈ Set.Ioi (0:ℝ)
+    · by_cases ht_K : t ∈ Set.Iic K
+      · have ht_both : t ∈ Set.Ioi (0:ℝ) ∩ Set.Iic K := ⟨ht_pos, ht_K⟩
+        rw [Set.indicator_of_mem ht_both, Set.indicator_of_mem ht_pos,
+            Set.indicator_of_mem ht_K, one_mul]
+        by_cases h_le : t ≤ runMax M n ω
+        · have hmem1 : ω ∈ {ω' | t ≤ runMax M n ω'} := h_le
+          have hmem2 : t ∈ {s : ℝ | s ≤ runMax M n ω} := h_le
+          rw [Set.indicator_of_mem hmem1, Set.indicator_of_mem hmem2, mul_one]
+          ring
+        · have hnmem1 : ω ∉ {ω' | t ≤ runMax M n ω'} := h_le
+          have hnmem2 : t ∉ {s : ℝ | s ≤ runMax M n ω} := h_le
+          rw [Set.indicator_of_notMem hnmem1, Set.indicator_of_notMem hnmem2]
+          ring
+      · have ht_not_both : t ∉ Set.Ioi (0:ℝ) ∩ Set.Iic K := fun h => ht_K h.2
+        rw [Set.indicator_of_notMem ht_not_both, Set.indicator_of_mem ht_pos,
+            Set.indicator_of_notMem ht_K, zero_mul, mul_zero, mul_zero]
+    · have ht_not_both : t ∉ Set.Ioi (0:ℝ) ∩ Set.Iic K := fun h => ht_pos h.1
+      rw [Set.indicator_of_notMem ht_not_both,
+          Set.indicator_of_notMem ht_pos, mul_zero]
+  simp_rw [h_pointwise]
+  rw [lintegral_const_mul']
+  · -- Convert to setLIntegral on Ioi 0, then apply inner_t_integral_truncated.
+    have h_unfold :
+        ∫⁻ t, (Set.Ioi (0:ℝ)).indicator
+            (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+              ((Set.Iic K).indicator (fun _ => (1 : ℝ≥0∞)) s *
+               {s : ℝ | s ≤ runMax M n ω}.indicator
+                (fun _ => (1 : ℝ≥0∞)) s)) t
+          = ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (p - 2)) *
+              ((Set.Iic K).indicator (fun _ => (1 : ℝ≥0∞)) t *
+               {t : ℝ | t ≤ runMax M n ω}.indicator
+                (fun _ => (1 : ℝ≥0∞)) t) := by
+      rw [← lintegral_indicator measurableSet_Ioi]
+    rw [h_unfold]
+    rw [inner_t_integral_truncated (runMax_nonneg hnn n ω) hK hp]
+  · exact ENNReal.ofReal_ne_top
+
+/-- Truncated layer-cake bound: for `Z_K = min (runMax M n) K`,
+       `∫⁻ Z_K^p ≤ ofReal(p) * ∫⁻ t in Ioc 0 K, ofReal(t^(p-2)) * ofReal(∫_{Mstar ≥ t} M_n)`. -/
+lemma A_K_le_layer_integral
+    [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
+    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
+    (hp : 1 < p) (n : ℕ) (K : ℝ) (hK : 0 < K) :
+    ∫⁻ ω, ENNReal.ofReal ((min (runMax M n ω) K) ^ p) ∂μ
+      ≤ ENNReal.ofReal p *
+          ∫⁻ t in Set.Ioc (0:ℝ) K,
+            ENNReal.ofReal (t ^ (p - 2)) *
+              ENNReal.ofReal (∫ ω in {ω | t ≤ runMax M n ω}, M n ω ∂μ) := by
+  have hp_pos : 0 < p := lt_trans zero_lt_one hp
+  -- Apply layer cake to Z_K = min (runMax M n) K.
+  have hZK_nn : ∀ ω, 0 ≤ min (runMax M n ω) K :=
+    fun ω => le_min (runMax_nonneg hnn n ω) hK.le
+  have hZK_meas : Measurable (fun ω => min (runMax M n ω) K) :=
+    (runMax_measurable hsub n).min measurable_const
+  have h_layer :=
+    MeasureTheory.lintegral_rpow_eq_lintegral_meas_le_mul μ
+      (ae_of_all _ hZK_nn) hZK_meas.aemeasurable hp_pos
+  rw [h_layer]
+  -- The integrand `μ{Z_K ≥ t} * ofReal(t^(p-1))` equals
+  -- `μ{runMax ≥ t} * ofReal(t^(p-1))` for t ∈ Ioc 0 K and 0 for t > K.
+  have h_ZK_set : ∀ t > (0:ℝ),
+      μ {ω | t ≤ min (runMax M n ω) K} =
+        if t ≤ K then μ {ω | t ≤ runMax M n ω} else 0 := by
+    intro t ht
+    by_cases hle : t ≤ K
+    · simp only [hle, if_true]
+      congr 1
+      ext ω
+      simp [le_min_iff, hle]
+    · simp only [hle, if_false]
+      rw [show {ω | t ≤ min (runMax M n ω) K} = ∅ by
+        ext ω; simp [le_min_iff, hle]]
+      simp
+  -- Restrict the outer integral to Ioc 0 K.
+  have h_split : ∫⁻ t in Set.Ioi (0:ℝ), μ {ω | t ≤ min (runMax M n ω) K} *
+                  ENNReal.ofReal (t ^ (p - 1))
+              = ∫⁻ t in Set.Ioc (0:ℝ) K, μ {ω | t ≤ runMax M n ω} *
+                  ENNReal.ofReal (t ^ (p - 1)) := by
+    have hIoiSplit : Set.Ioi (0:ℝ) = Set.Ioc 0 K ∪ Set.Ioi K := by
+      ext t
+      simp only [Set.mem_Ioi, Set.mem_union, Set.mem_Ioc]
+      constructor
+      · intro h
+        by_cases hle : t ≤ K
+        · exact Or.inl ⟨h, hle⟩
+        · exact Or.inr (not_le.mp hle)
+      · rintro (⟨h1, _⟩ | h)
+        · exact h1
+        · exact lt_trans hK h
+    rw [hIoiSplit, lintegral_union measurableSet_Ioi
+        (by rw [Set.disjoint_iff]
+            intro t ⟨h1, h2⟩
+            simp only [Set.mem_Ioc, Set.mem_Ioi, Set.mem_empty_iff_false] at h1 h2
+            linarith [h2, h1.2])]
+    have h_zero_right : ∫⁻ t in Set.Ioi K, μ {ω | t ≤ min (runMax M n ω) K} *
+                          ENNReal.ofReal (t ^ (p - 1)) = 0 := by
+      apply setLIntegral_eq_zero measurableSet_Ioi
+      intro t ht
+      have ht_pos : 0 < t := lt_trans hK ht
+      have h_eq_zero : μ {ω | t ≤ min (runMax M n ω) K} = 0 := by
+        rw [h_ZK_set t ht_pos]
+        have ht_gt : ¬ t ≤ K := not_le.mpr ht
+        simp [ht_gt]
+      change μ {ω | t ≤ min (runMax M n ω) K} * _ = 0
+      rw [h_eq_zero, zero_mul]
+    have h_left : ∫⁻ t in Set.Ioc (0:ℝ) K, μ {ω | t ≤ min (runMax M n ω) K} *
+                    ENNReal.ofReal (t ^ (p - 1))
+                = ∫⁻ t in Set.Ioc (0:ℝ) K, μ {ω | t ≤ runMax M n ω} *
+                    ENNReal.ofReal (t ^ (p - 1)) := by
+      apply setLIntegral_congr_fun measurableSet_Ioc
+      intro t ht
+      show μ {ω | t ≤ min (runMax M n ω) K} * _ =
+            μ {ω | t ≤ runMax M n ω} * _
+      rw [h_ZK_set t ht.1, if_pos ht.2]
+    rw [h_left, h_zero_right, add_zero]
+  rw [h_split]
+  -- Now apply layer_integrand_bound pointwise.
+  apply mul_le_mul_left' _ (ENNReal.ofReal p)
+  apply setLIntegral_mono_ae'
+  · exact measurableSet_Ioc
+  refine Filter.Eventually.of_forall (fun t ht => ?_)
+  exact layer_integrand_bound hsub hnn n ht.1
+
+/-- Truncated holder_step: master bound for `A_K = ∫⁻ (min Mstar K)^p`. -/
+lemma holder_step_truncated
+    [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
+    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
+    (hp : 1 < p) (n : ℕ) (K : ℝ) (hK : 0 < K) :
+    (∫⁻ ω, ENNReal.ofReal ((min (runMax M n ω) K) ^ p) ∂μ)
+      ≤ ENNReal.ofReal (p / (p - 1)) *
+          (∫⁻ ω, ENNReal.ofReal ((M n ω) ^ p) ∂μ) ^ (1 / p) *
+          (∫⁻ ω, ENNReal.ofReal ((min (runMax M n ω) K) ^ p) ∂μ) ^ ((p - 1) / p) := by
+  have hp_pos : 0 < p := lt_trans zero_lt_one hp
+  have hpm1_pos : 0 < p - 1 := by linarith
+  -- Step 1: bound A_K via A_K_le_layer_integral.
+  have hA := A_K_le_layer_integral hsub hnn hp n K hK
+  -- Step 2: rewrite the inner Bochner integral as a setLIntegral of ofReal.
+  have h_inner_rewrite : ∀ t,
+      ENNReal.ofReal (∫ ω in {ω | t ≤ runMax M n ω}, M n ω ∂μ)
+        = ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ := fun t =>
+    ofReal_setIntegral_eq_setLIntegral_ofReal hsub hnn n
+  simp_rw [h_inner_rewrite] at hA
+  -- Step 3: apply truncated Fubini swap.
+  rw [fubini_swap_truncated hsub hnn hp n K hK] at hA
+  -- Step 4: factor `ofReal((Z_K)^(p-1)/(p-1))` into `ofReal((Z_K)^(p-1)) * ofReal(1/(p-1))`.
+  have h_factor : ∀ ω,
+      ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1) / (p - 1))
+        = ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1)) *
+            ENNReal.ofReal (1 / (p - 1)) := by
+    intro ω
+    have hZK_nn : 0 ≤ min (runMax M n ω) K := le_min (runMax_nonneg hnn n ω) hK.le
+    rw [div_eq_mul_inv, ENNReal.ofReal_mul (Real.rpow_nonneg hZK_nn _),
+        show (p - 1)⁻¹ = 1 / (p - 1) by rw [one_div]]
+  simp_rw [h_factor] at hA
+  -- Step 5: pull constant ofReal(1/(p-1)) outside.
+  have hsubM : Measurable (M n) :=
+    ((hsub.stronglyMeasurable n).measurable).mono (𝓕.le n) le_rfl
+  have hZKmeas : Measurable (fun ω => min (runMax M n ω) K) :=
+    (runMax_measurable hsub n).min measurable_const
+  have h_mul_const :
+      ∫⁻ ω, ENNReal.ofReal (M n ω) *
+        (ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1)) *
+          ENNReal.ofReal (1 / (p - 1))) ∂μ
+      = ENNReal.ofReal (1 / (p - 1)) *
+        ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1)) ∂μ := by
+    rw [← lintegral_const_mul]
+    · congr 1; funext ω; ring
+    · exact ((ENNReal.measurable_ofReal.comp hsubM).mul
+        (ENNReal.measurable_ofReal.comp (hZKmeas.pow_const (p - 1))))
+  rw [h_mul_const] at hA
+  -- Step 6: combine ofReal(p) * ofReal(1/(p-1)) = ofReal(p/(p-1)).
+  have h_const_combine :
+      ENNReal.ofReal p * ENNReal.ofReal (1 / (p - 1)) = ENNReal.ofReal (p / (p - 1)) := by
+    rw [← ENNReal.ofReal_mul hp_pos.le]
+    congr 1; field_simp
+  rw [show ENNReal.ofReal p * (ENNReal.ofReal (1 / (p - 1)) *
+        ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1)) ∂μ)
+      = ENNReal.ofReal p * ENNReal.ofReal (1 / (p - 1)) *
+        ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1)) ∂μ from by ring,
+      h_const_combine] at hA
+  -- Step 7: apply Hölder to bound the inner integral.
+  refine hA.trans ?_
+  rw [mul_assoc]
+  apply mul_le_mul_left'
+  -- Hölder: ∫⁻ ofReal(M n) * ofReal(Z_K^(p-1))
+  --   ≤ (∫⁻ ofReal(M n^p))^(1/p) * (∫⁻ ofReal(Z_K^p))^((p-1)/p)
+  set q := p / (p - 1) with hq_def
+  have hpq : p.HolderConjugate q := Real.HolderConjugate.conjExponent hp
+  have hq_pos : 0 < q := by simp only [hq_def]; positivity
+  have hpm1_q_eq_p : (p - 1) * q = p := by simp only [hq_def]; field_simp
+  have hf_meas : AEMeasurable (fun ω => ENNReal.ofReal (M n ω)) μ :=
+    (ENNReal.measurable_ofReal.comp hsubM).aemeasurable
+  have hg_meas : AEMeasurable
+      (fun ω => ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1))) μ :=
+    (ENNReal.measurable_ofReal.comp (hZKmeas.pow_const (p - 1))).aemeasurable
+  have key := ENNReal.lintegral_mul_le_Lp_mul_Lq μ hpq hf_meas hg_meas
+  have h_f_pow : ∀ ω, (ENNReal.ofReal (M n ω)) ^ p = ENNReal.ofReal ((M n ω) ^ p) :=
+    fun ω => ENNReal.ofReal_rpow_of_nonneg (hnn n ω) hp_pos.le
+  have h_g_pow : ∀ ω,
+      (ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1))) ^ q
+        = ENNReal.ofReal ((min (runMax M n ω) K) ^ p) := by
+    intro ω
+    have hZK_nn : 0 ≤ min (runMax M n ω) K := le_min (runMax_nonneg hnn n ω) hK.le
+    rw [ENNReal.ofReal_rpow_of_nonneg (Real.rpow_nonneg hZK_nn _) hq_pos.le,
+        ← Real.rpow_mul hZK_nn (p - 1) q, hpm1_q_eq_p]
+  simp_rw [h_f_pow, h_g_pow] at key
+  have h_one_div_q : (1 / q : ℝ) = (p - 1) / p := by
+    simp only [hq_def, one_div, inv_div]
+  rw [h_one_div_q] at key
+  have hlhs : ∫⁻ a : Ω, ((fun ω => ENNReal.ofReal (M n ω)) *
+              fun ω => ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1))) a ∂μ
+            = ∫⁻ ω, ENNReal.ofReal (M n ω) *
+                    ENNReal.ofReal ((min (runMax M n ω) K) ^ (p - 1)) ∂μ := by rfl
+  rw [hlhs] at key
+  exact key
+
 /-- Stage 2 (Hölder + algebra): combining Fubini's output with Hölder
     yields the master bound on `∫⁻ Mstar^p`. -/
 lemma holder_step
@@ -564,9 +959,17 @@ theorem doob_lp_maximal_inequality
       have hC_ne_zero : C ≠ 0 := by
         rw [hC_def]; simp [hC_pos]
       rw [ENNReal.mul_top hC_ne_zero]
-    · -- Truncation case: requires re-running holder_step for (runMax ⊓ K)
-      -- to bound A_K < ∞, then taking K → ∞ via lintegral_iSup.
-      -- This is ~100-150 lines of additional Lean; deferred.
+    · -- Truncation case: A = ∞, B < ∞. We derive a contradiction.
+      -- For each natural K ≥ 1: A_K := ∫⁻ (min Mstar K)^p ≤ K^p · μ(univ) < ∞.
+      -- By holder_step_truncated + rpow inversion: A_K^(1/p) ≤ C · B^(1/p) < ∞.
+      -- By monotone convergence as K → ∞: A_K ↑ A = ∞.
+      -- Hence ∞ = sup_K A_K^(1/p) ≤ C · B^(1/p) < ∞ — contradiction.
+      -- The full argument requires a few more support lemmas
+      -- (monotone convergence on the truncated family, rpow continuity).
+      -- Deferred as a focused follow-up: holder_step_truncated and
+      -- A_K_le_layer_integral are the substantive new pieces; the
+      -- closure here is ~50 more lines of supremum/monotone-convergence
+      -- bookkeeping.
       sorry
   -- Case 3: 0 < A < ∞. Do the rpow inversion.
   -- 0 < A < ∞ case.
