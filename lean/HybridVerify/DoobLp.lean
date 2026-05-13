@@ -8,8 +8,8 @@
   Hölder argument; see `docs/superpowers/specs/2026-05-06-real-proof-tiers.md`
   §A.2 for the high-level outline.
 
-  Status (2026-05-08): 10 lemmas verified locally against Mathlib v4.18.0
-  (lean-interact, with the standard `~/.cache/mathlib/` ltar cache):
+  Status (2026-05-13): 14 lemmas verified, main theorem has one `sorry`
+  remaining (truncation + rpow inversion). Mathlib v4.30 / Lean v4.30.0-rc1.
 
   | #  | Name                                | Content                                  |
   |----|-------------------------------------|------------------------------------------|
@@ -23,36 +23,29 @@
   | 8  | A_le_layer_integral                 | A ≤ ofReal p ⋅ ∫⁻ t in Ioi 0, ...        |
   | 9  | lintegral_rpow_Ioc                  | ∫⁻ t in Ioc 0 M, t^(p-2) = M^(p-1)/(p-1) |
   | 10 | ofReal_setIntegral_eq_setLIntegral  | ofReal(∫_S M_n) = ∫⁻_S ofReal(M_n)       |
+  | 11 | inner_t_integral                    | ∫⁻ t in Ioi 0, t^(p-2)·𝟙{t≤Mstar} = ...  |
+  | 12 | fubini_swap                         | bivariate Tonelli swap (Stage 1 ✓)       |
+  | 13 | holder_apply                        | direct Hölder application (Stage 2a ✓)   |
+  | 14 | holder_step                         | master bound `A ≤ C·B^(1/p)·A^((p-1)/p)` |
+  | 15 | eLpNorm_eq_lintegral_ofReal_pow     | eLpNorm conversion (private helper)      |
 
-  Remaining work, all multi-day Lean engineering:
+  Main theorem `doob_lp_maximal_inequality`: one `sorry` for the rpow
+  inversion + truncation step. Specifically, from
+     `A ≤ ofReal(p/(p-1)) · B^(1/p) · A^((p-1)/p)`        [holder_step]
+  extract
+     `A^(1/p) ≤ ofReal(p/(p-1)) · B^(1/p)`
+  requires:
+    1. **Truncation for the A = ∞, B < ∞ corner.** Standard trick:
+       replace `runMax` with `runMax ⊓ K`, derive the analog of
+       holder_step for the truncated A_K (re-running the chain), conclude
+       A_K^(1/p) ≤ C·B^(1/p), then take `K → ∞` via `lintegral_iSup`
+       (since `(runMax ⊓ K)^p ↑ runMax^p` pointwise a.e.).
+    2. **Rpow inversion in the 0 < A < ∞ case.** Use `A^1 = A^(1/p) ·
+       A^((p-1)/p)` (since `1/p + (p-1)/p = 1`), divide both sides by
+       `A^((p-1)/p)` (valid since `A^((p-1)/p) ∈ (0, ∞)`).
 
-  1. **Fubini swap** — the dominant cost. Set up a joint integrand on
-     `ℝ × Ω`, prove its joint AEMeasurability, apply
-     `MeasureTheory.lintegral_lintegral_swap`. Most of the difficulty lies in
-     unifying the inner / outer set restrictions with the joint indicator.
-     Concretely:
-        ∫⁻ t in Ioi 0, ofReal(t^(p-2)) ⋅ ∫⁻ ω in {Mstar≥t}, ofReal(M_n)
-        = ∫⁻ ω, ofReal(M_n ω) ⋅ ∫⁻ t in Ioc 0 (runMax M n ω), ofReal(t^(p-2))
-     after which lemma #9 evaluates the inner integral pointwise to
-        ofReal((runMax M n ω)^(p-1) / (p-1))   (with a separate base case
-                                                for `runMax M n ω = 0`).
-
-  2. **Hölder** — `ENNReal.lintegral_mul_le_Lp_mul_Lq` with the
-     `p.HolderConjugate (p / (p-1))` instance (3-field constructor:
-     1/p + 1/q = 1, 1 < p, 1 < q). Manage `((Mstar)^(p-1))^q = (Mstar)^p`
-     via `ENNReal.rpow_mul` / `Real.rpow_mul` with explicit `(p-1)*q = p`.
-
-  3. **Truncation argument** — to handle the case `eLpNorm Mstar = ⊤` while
-     `eLpNorm M_n < ⊤`, work first with `min runMax K` and let `K → ⊤`,
-     using `MeasureTheory.lintegral_iSup` on the monotone family.
-
-  4. **eLpNorm conversion** — `eLpNorm f (ofReal p) μ = (∫⁻ ofReal(f^p))^(1/p)`
-     for non-negative f and 1 < p. Use `eLpNorm_eq_lintegral_rpow_enorm` or
-     `MemLp.eLpNorm_eq_integral_rpow_norm` (exact name TBD).
-
-  Each step is independently feasible at v4.18.0 (the necessary Mathlib
-  lemmas exist). The total estimated effort matches the spec: 1-3 focused
-  days of Lean engineering.
+  Both steps are mechanical but lengthy. The truncated chain in step 1
+  is roughly 100-150 lines of Lean.
 -/
 
 import Mathlib
