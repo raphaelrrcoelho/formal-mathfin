@@ -959,18 +959,106 @@ theorem doob_lp_maximal_inequality
       have hC_ne_zero : C ≠ 0 := by
         rw [hC_def]; simp [hC_pos]
       rw [ENNReal.mul_top hC_ne_zero]
-    · -- Truncation case: A = ∞, B < ∞. We derive a contradiction.
-      -- For each natural K ≥ 1: A_K := ∫⁻ (min Mstar K)^p ≤ K^p · μ(univ) < ∞.
-      -- By holder_step_truncated + rpow inversion: A_K^(1/p) ≤ C · B^(1/p) < ∞.
-      -- By monotone convergence as K → ∞: A_K ↑ A = ∞.
-      -- Hence ∞ = sup_K A_K^(1/p) ≤ C · B^(1/p) < ∞ — contradiction.
-      -- The full argument requires a few more support lemmas
-      -- (monotone convergence on the truncated family, rpow continuity).
-      -- Deferred as a focused follow-up: holder_step_truncated and
-      -- A_K_le_layer_integral are the substantive new pieces; the
-      -- closure here is ~50 more lines of supremum/monotone-convergence
-      -- bookkeeping.
-      sorry
+    · -- Truncation case: A = ∞, B < ∞. Derive contradiction.
+      -- Strategy: for each K > 0, holder_step_truncated + rpow inversion
+      -- (since A_K finite) yields A_K^(1/p) ≤ C * B^(1/p). Raising both
+      -- sides to power p gives A_K ≤ (C * B^(1/p))^p, a finite bound
+      -- independent of K. By monotone convergence A = ⨆ A_K, so A is
+      -- bounded, contradicting A = ∞.
+      exfalso
+      have hB_lt_top : B < ⊤ := lt_of_le_of_ne le_top hBtop
+      have hC_lt_top : C < ⊤ := by rw [hC_def]; exact ENNReal.ofReal_lt_top
+      have hRHS_lt_top : C * B ^ (1 / p) < ⊤ := by
+        refine ENNReal.mul_lt_top hC_lt_top ?_
+        exact ENNReal.rpow_lt_top_of_nonneg hp_inv_pos.le hBtop
+      have hRHS_p_lt_top : (C * B ^ (1 / p)) ^ p < ⊤ :=
+        ENNReal.rpow_lt_top_of_nonneg hp_pos.le hRHS_lt_top.ne
+      -- A^1 = A^(1/p * p)  — used to set up the inversion algebra.
+      have hp_ne_zero : p ≠ 0 := hp_pos.ne'
+      have h_sum_inv : (1 : ℝ) / p + (p - 1) / p = 1 := by
+        rw [← add_div, show (1 : ℝ) + (p - 1) = p by ring, div_self hp_ne_zero]
+      have h_prod_p : (1 : ℝ) / p * p = 1 := by field_simp
+      -- For each K > 0: A_K ≤ (C * B^(1/p))^p < ∞.
+      have h_AK_bounded : ∀ (K : ℝ), 0 < K →
+          (∫⁻ ω, ENNReal.ofReal ((min (runMax M n ω) K) ^ p) ∂μ)
+            ≤ (C * B ^ (1 / p)) ^ p := by
+        intro K hK
+        have hAK_bound := holder_step_truncated hsub hnn hp n K hK
+        set A_K : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((min (runMax M n ω) K) ^ p) ∂μ
+            with hAK_def
+        -- A_K ≤ K^p · μ(univ) < ∞.
+        have hA_K_lt_top : A_K < ⊤ := by
+          rw [hAK_def]
+          have hZK_bdd : ∀ ω, (min (runMax M n ω) K) ^ p ≤ K ^ p := fun ω =>
+            Real.rpow_le_rpow (le_min (runMax_nonneg hnn n ω) hK.le)
+              (min_le_right _ _) hp_pos.le
+          calc ∫⁻ ω, ENNReal.ofReal ((min (runMax M n ω) K) ^ p) ∂μ
+              ≤ ∫⁻ _ : Ω, ENNReal.ofReal (K ^ p) ∂μ := by
+                apply lintegral_mono
+                intro ω
+                exact ENNReal.ofReal_le_ofReal (hZK_bdd ω)
+            _ = ENNReal.ofReal (K ^ p) * μ Set.univ := by
+                rw [lintegral_const]
+            _ < ⊤ := ENNReal.mul_lt_top ENNReal.ofReal_lt_top (measure_lt_top μ Set.univ)
+        -- Apply rpow inversion to get A_K^(1/p) ≤ C * B^(1/p).
+        have h_inv_bound : A_K ^ (1 / p) ≤ C * B ^ (1 / p) := by
+          by_cases hA_K_zero : A_K = 0
+          · rw [hA_K_zero, ENNReal.zero_rpow_of_pos hp_inv_pos]; exact zero_le _
+          have hAKpm1_ne_zero : A_K ^ ((p - 1) / p) ≠ 0 :=
+            fun h => hA_K_zero (ENNReal.rpow_eq_zero_iff_of_pos hpm1_p_pos |>.mp h)
+          have hAKpm1_ne_top : A_K ^ ((p - 1) / p) ≠ ⊤ := by
+            intro h
+            exact hA_K_lt_top.ne ((ENNReal.rpow_eq_top_iff_of_pos hpm1_p_pos).mp h)
+          have h_split : A_K ^ (1 / p) = A_K / A_K ^ ((p - 1) / p) := by
+            rw [eq_div_iff hAKpm1_ne_zero hAKpm1_ne_top, mul_comm]
+            rw [← ENNReal.rpow_add_of_nonneg (1/p) ((p-1)/p) hp_inv_pos.le hpm1_p_pos.le]
+            rw [h_sum_inv, ENNReal.rpow_one]
+          rw [h_split, ENNReal.div_le_iff hAKpm1_ne_zero hAKpm1_ne_top]
+          exact hAK_bound
+        -- Raise both sides to power p: A_K = (A_K^(1/p))^p ≤ (C*B^(1/p))^p.
+        calc A_K = A_K ^ (1 : ℝ) := by rw [ENNReal.rpow_one]
+          _ = (A_K ^ (1 / p)) ^ p := by
+                rw [← ENNReal.rpow_mul, h_prod_p]
+          _ ≤ (C * B ^ (1 / p)) ^ p := ENNReal.rpow_le_rpow h_inv_bound hp_pos.le
+      -- A = ⨆ K : ℕ, A_{K+1}. Hence A ≤ (C * B^(1/p))^p < ∞, contradicting A = ∞.
+      have h_iSup : (⨆ K : ℕ,
+          ∫⁻ ω, ENNReal.ofReal ((min (runMax M n ω) ((K : ℝ) + 1)) ^ p) ∂μ) = A := by
+        rw [hA_def]
+        rw [← lintegral_iSup]
+        · apply lintegral_congr_ae
+          filter_upwards with ω
+          have hMs_nn := runMax_nonneg hnn n ω
+          have h_eventually : ∃ K₀ : ℕ, ∀ K ≥ K₀,
+              min (runMax M n ω) ((K : ℝ) + 1) = runMax M n ω := by
+            obtain ⟨K₀, hK₀⟩ := exists_nat_gt (runMax M n ω)
+            refine ⟨K₀, fun K hK => ?_⟩
+            have h_lt : runMax M n ω < (K : ℝ) + 1 := by
+              calc runMax M n ω < (K₀ : ℝ) := hK₀
+                _ ≤ (K : ℝ) := by exact_mod_cast hK
+                _ ≤ (K : ℝ) + 1 := by linarith
+            exact min_eq_left h_lt.le
+          obtain ⟨K₀, hK₀⟩ := h_eventually
+          apply le_antisymm
+          · refine iSup_le fun K => ?_
+            refine ENNReal.ofReal_le_ofReal ?_
+            refine Real.rpow_le_rpow (le_min hMs_nn (by positivity)) ?_ hp_pos.le
+            exact min_le_left _ _
+          · refine le_iSup_of_le K₀ ?_
+            rw [hK₀ K₀ le_rfl]
+        · intro K
+          exact (((runMax_measurable hsub n).min measurable_const).pow_const p).ennreal_ofReal
+        · intro a b hab ω
+          refine ENNReal.ofReal_le_ofReal ?_
+          refine Real.rpow_le_rpow (le_min (runMax_nonneg hnn n ω) (by positivity)) ?_ hp_pos.le
+          refine min_le_min le_rfl ?_
+          have : (a : ℝ) ≤ (b : ℝ) := by exact_mod_cast hab
+          linarith
+      have h_A_le : A ≤ (C * B ^ (1 / p)) ^ p := by
+        rw [← h_iSup]
+        exact iSup_le fun K =>
+          h_AK_bounded ((K : ℝ) + 1) (by positivity)
+      have : A < ⊤ := lt_of_le_of_lt h_A_le hRHS_p_lt_top
+      exact absurd hAtop this.ne
   -- Case 3: 0 < A < ∞. Do the rpow inversion.
   -- 0 < A < ∞ case.
   have hApm1_ne_zero : A ^ ((p - 1) / p) ≠ 0 :=

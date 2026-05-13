@@ -43,11 +43,11 @@ Lean code entries: 65
 Isabelle code entries: 25
 quarantined SymPy references: 55
 
-full theorem statements: 17
+full theorem statements: 18
 library theorem wrappers: 24
-reduced formal cores: 24
+reduced formal cores: 23
 placeholders/stubs: 0
-delivery-claim ready: 41
+delivery-claim ready: 42
 ```
 
 **Sorry-aware audit (2026-05-09)**: every Degenne-derived `library_wrapper`
@@ -80,10 +80,13 @@ unchanged since the 2026-05-09 audit). Per the project audit policy, the
 benchmark entry stays `reduced_core` until Degenne closes those upstream
 sorries.
 
-**Doob L^p progress (2026-05-13 session)**: `mart-thm-2.4.6` skeleton
-in `lean/HybridVerify/DoobLp.lean` advanced from "10 helpers + main
-`sorry`" to "14 helpers + 3-of-4 main-theorem cases proved + 1 `sorry`
-for truncation":
+**Doob L^p complete (2026-05-13 session)**: `mart-thm-2.4.6` promoted
+from `reduced_core` to `full`. End-to-end formal proof in
+`lean/HybridVerify/DoobLp.lean`. `#print axioms` confirms clean:
+`[propext, Classical.choice, Quot.sound]`. Coverage **41 → 42**
+delivery-ready (18 full + 24 library), 23 reduced.
+
+Components of the proof:
 
 - `fubini_swap` (Stage 1, ✓): bivariate Tonelli swap with joint
   measurability of `{(t,ω) | t ≤ runMax M n ω}`, via
@@ -95,15 +98,19 @@ for truncation":
   `A = ∫⁻ Mstar^p`, `B = ∫⁻ M_n^p`.
 - `eLpNorm_eq_lintegral_ofReal_pow` (Stage 4, ✓): converts
   `eLpNorm f (ofReal p) μ` to `(∫⁻ ofReal(f^p))^(1/p)` for non-negative f.
-- Main theorem `doob_lp_maximal_inequality`: handles `A = 0`, `A = B = ∞`,
-  and `0 < A < ∞` cases via rpow inversion (using `ENNReal.rpow_add_of_nonneg`
-  + `ENNReal.div_le_iff`). One `sorry` remains for `A = ∞, B < ∞` — the
-  truncation corner where the chain alone doesn't bootstrap. Standard
-  fix: `min(runMax M n, K)` family + `lintegral_iSup` monotone
-  convergence as `K → ∞`. ~100-150 lines of remaining Lean engineering.
+- Truncated chain (`inner_t_integral_truncated`, `fubini_swap_truncated`,
+  `A_K_le_layer_integral`, `holder_step_truncated`): re-proves the
+  chain for `min (runMax M n) K`, used in the `A = ∞, B < ∞` corner.
+- Main theorem `doob_lp_maximal_inequality`: handles all four cases
+  (`A = 0`, `A = B = ∞`, `0 < A < ∞`, `A = ∞ ∧ B < ∞`). The last case
+  derives a contradiction via the truncated chain: for each K, the
+  truncated A_K is finite and bounded by `(C · B^(1/p))^p` after rpow
+  inversion + monotonicity. Then `A = ⨆ A_K` (monotone convergence
+  via `lintegral_iSup` on the family `min(runMax M n, K+1)`) so
+  `A ≤ (C · B^(1/p))^p < ∞`, contradicting `A = ∞`.
 
-Benchmark entry `mart-thm-2.4.6` stays `reduced_core` until truncation
-closes. Coverage report unchanged this session (41 delivery-ready).
+Benchmark entry `mart-thm-2.4.6` promoted to `full`. martingales.json
+is now fully delivery-ready (3 full + 6 library, 0 reduced).
 
 **Zero placeholders.** The 3 prior Degenne BM placeholders (`bm-thm-5.1.4`, `bm-thm-5.3.2`, `bm-prop-5.1.2`) were ported on 2026-05-09 — `bm-thm-5.1.4` to a real Mathlib `library_wrapper` (using upstream `HasIndepIncrements.indepFun_eval_sub`), and `bm-thm-5.3.2`, `bm-prop-5.1.2` to honest `reduced_core` structural encodings. See "BM port (2026-05-09)" below for details. Mathlib at pin `f23306121184` ships the relevant scaffolding (`HasIndepIncrements`, `IsGaussianProcess`, `IsKolmogorovProcess`, `multivariateGaussian`) upstream, eliminating the need for the Degenne Lake dependency that lean-interact's `TempRequireProject` could not reliably load.
 
