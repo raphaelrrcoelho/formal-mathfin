@@ -288,3 +288,33 @@ All checked May 2026:
 - [ITP 2026 conference page](https://itp-conference-2026.github.io/index.html)
 - [CPP — SIGPLAN](https://sigplan.org/Conferences/CPP/)
 - [AITP 2025](https://aitp-conference.org/2025/)
+
+---
+
+## Resume plan (decided 2026-05-13)
+
+After triaging the 10 remaining solo-tractable `reduced_core` candidates and
+finding the bottleneck is structural — benchmarks index continuous-time
+processes by `Filtration ℝ` while Mathlib/Degenne machinery requires
+`[OrderBot ι]` indexing (NNReal-ish), making "library wrapper" promotions
+non-trivial — the agreed sequencing is:
+
+1. **First: restructure continuous-time benchmarks to `[OrderBot ι] = NNReal`
+   indexing.** Affects entries in `continuous_martingales.json`,
+   `brownian_motion.json` (reduced ones), and `girsanov_finance.json` that
+   currently use `Filtration ℝ`. Once on NNReal, Degenne's
+   `Martingale.stoppedProcess_indicator`, `Choquet/Debut` (hitting times),
+   and the `Approximable`-filtration optional sampling theorems become
+   directly wrappable. Expected: opens 3-5 promotions as
+   `library_wrapper`.
+2. **Then: finish `mart-thm-2.4.6` Doob L^p as `full`.** Sketch already in
+   `lean/HybridVerify/DoobLp.lean` (10 helpers + main `sorry`); remaining
+   stages are Fubini swap (template at Mathlib
+   `MeasureTheory/Integral/Layercake.lean:119-179`) + Hölder + truncation
+   + eLpNorm conversion. ~1-3 focused days.
+
+What is *not* in scope (confirmed gated on Lean ecosystem, not on us):
+Itô formula, Girsanov, Black-Scholes PDE/call, SDE existence/uniqueness,
+Feynman-Kac, BM reflection principle, BM nowhere-differentiability, BM
+strong law (LIL), Poisson-process counting formulation. These stay
+`reduced_core` until upstream primitives ship.
