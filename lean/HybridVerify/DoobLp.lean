@@ -538,15 +538,54 @@ theorem doob_lp_maximal_inequality
         (runMax_measurable hsub n),
       eLpNorm_eq_lintegral_ofReal_pow (hnn n) hp
         (((hsub.stronglyMeasurable n).measurable).mono (𝓕.le n) le_rfl)]
-  -- Get the master bound from holder_step.
-  have hbound := holder_step hsub hnn hp n
-  -- Goal: A^(1/p) ≤ ofReal(p/(p-1)) * B^(1/p) given
-  --   hbound: A ≤ ofReal(p/(p-1)) * B^(1/p) * A^((p-1)/p)
-  -- where A = ∫⁻ Mstar^p, B = ∫⁻ M_n^p.
-  -- The extraction A^(1/p) ≤ ofReal(p/(p-1)) * B^(1/p) requires:
-  --   * truncation argument for the A = ∞, B < ∞ corner case
-  --   * rpow division: A^1 = A^((p-1)/p) * A^(1/p) (when A ≠ 0, ≠ ∞)
-  -- Both are mechanical but lengthy; deferred as `sorry` here.
-  sorry
+  -- Set A := ∫⁻ Mstar^p, B := ∫⁻ M_n^p, C := ofReal(p/(p-1)).
+  set A : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((runMax M n ω) ^ p) ∂μ with hA_def
+  set B : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((M n ω) ^ p) ∂μ with hB_def
+  set C : ℝ≥0∞ := ENNReal.ofReal (p / (p - 1)) with hC_def
+  have hbound : A ≤ C * B ^ (1 / p) * A ^ ((p - 1) / p) := holder_step hsub hnn hp n
+  have hp_pos : 0 < p := lt_trans zero_lt_one hp
+  have hpm1_pos : 0 < p - 1 := by linarith
+  have hp_inv_pos : 0 < 1 / p := by positivity
+  have hpm1_p_pos : 0 < (p - 1) / p := div_pos hpm1_pos hp_pos
+  -- Handle the trivial cases first.
+  -- Case 1: A = 0.
+  by_cases hA0 : A = 0
+  · rw [hA0, ENNReal.zero_rpow_of_pos hp_inv_pos]; exact zero_le _
+  -- Case 2: A = ∞. We use holder_step + the structure of the bound.
+  by_cases hAtop : A = ⊤
+  · -- A = ∞. Either RHS = ∞ (so done) or we derive a contradiction.
+    -- The RHS = C * B^(1/p) is ∞ iff B = ∞ (since C is finite & nonzero).
+    -- If B = ∞, eLpNorm M_n p μ = ∞^(1/p) = ∞, so RHS bound is ∞. ✓
+    -- If B < ∞, this is the truncation case — left as sorry.
+    by_cases hBtop : B = ⊤
+    · -- A = B = ∞. Both sides equal ∞, since C = ofReal(p/(p-1)) > 0.
+      rw [hAtop, hBtop, ENNReal.top_rpow_of_pos hp_inv_pos]
+      have hC_pos : 0 < p / (p - 1) := by positivity
+      have hC_ne_zero : C ≠ 0 := by
+        rw [hC_def]; simp [hC_pos]
+      rw [ENNReal.mul_top hC_ne_zero]
+    · -- Truncation case: requires re-running holder_step for (runMax ⊓ K)
+      -- to bound A_K < ∞, then taking K → ∞ via lintegral_iSup.
+      -- This is ~100-150 lines of additional Lean; deferred.
+      sorry
+  -- Case 3: 0 < A < ∞. Do the rpow inversion.
+  -- 0 < A < ∞ case.
+  have hApm1_ne_zero : A ^ ((p - 1) / p) ≠ 0 :=
+    fun h => hA0 (ENNReal.rpow_eq_zero_iff_of_pos hpm1_p_pos |>.mp h)
+  have hApm1_ne_top : A ^ ((p - 1) / p) ≠ ⊤ := by
+    intro h
+    have := (ENNReal.rpow_eq_top_iff_of_pos hpm1_p_pos).mp h
+    exact hAtop this
+  -- A^(1/p) = A / A^((p-1)/p).
+  have hp_ne_zero : p ≠ 0 := hp_pos.ne'
+  have h_sum : (1 : ℝ) / p + (p - 1) / p = 1 := by
+    rw [← add_div, show (1 : ℝ) + (p - 1) = p by ring, div_self hp_ne_zero]
+  have h_split : A ^ (1 / p) = A / A ^ ((p - 1) / p) := by
+    rw [eq_div_iff hApm1_ne_zero hApm1_ne_top, mul_comm]
+    rw [← ENNReal.rpow_add_of_nonneg (1/p) ((p-1)/p) hp_inv_pos.le hpm1_p_pos.le]
+    rw [h_sum, ENNReal.rpow_one]
+  rw [h_split]
+  rw [ENNReal.div_le_iff hApm1_ne_zero hApm1_ne_top]
+  exact hbound
 
 end HybridVerify.DoobLp
