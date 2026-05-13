@@ -504,10 +504,35 @@ lemma holder_step
   rw [mul_assoc]
   exact mul_le_mul_left' (holder_apply hsub hnn hp n) _
 
+/-- Conversion lemma: for a non-negative `M : Ω → ℝ` and `1 < p`,
+    `eLpNorm M (ofReal p) μ = (∫⁻ ω, ofReal(M ω ^ p) ∂μ)^(1/p)`. -/
+private lemma eLpNorm_eq_lintegral_ofReal_pow
+    {f : Ω → ℝ} (hf_nn : ∀ ω, 0 ≤ f ω) {p : ℝ} (hp : 1 < p)
+    (hfm : Measurable f) :
+    eLpNorm f (ENNReal.ofReal p) μ
+      = (∫⁻ ω, ENNReal.ofReal (f ω ^ p) ∂μ) ^ (1 / p) := by
+  have hp_pos : 0 < p := lt_trans zero_lt_one hp
+  have hp_ne_zero : (ENNReal.ofReal p) ≠ 0 := by
+    simp [hp_pos]
+  have hp_ne_top : (ENNReal.ofReal p) ≠ ⊤ := ENNReal.ofReal_ne_top
+  rw [eLpNorm_eq_lintegral_rpow_enorm_toReal hp_ne_zero hp_ne_top]
+  rw [ENNReal.toReal_ofReal hp_pos.le]
+  congr 1
+  apply lintegral_congr_ae
+  filter_upwards with ω
+  have : ‖f ω‖ₑ = ENNReal.ofReal (f ω) := by
+    rw [Real.enorm_eq_ofReal (hf_nn ω)]
+  rw [this, ENNReal.ofReal_rpow_of_nonneg (hf_nn ω) hp_pos.le]
+
 /-- Doob's L^p maximal inequality for non-negative submartingales.
 
-    PROOF SKELETON — main theorem still pending the truncation + eLpNorm
-    conversion (see TODO list at top of file). -/
+    Combines `holder_step` (which gives the master bound on `∫⁻ Mstar^p`)
+    with the eLpNorm-to-lintegral conversion. The truncation + rpow
+    inversion step (i.e. extracting `A^(1/p) ≤ C * B^(1/p)` from
+    `A ≤ C * B^(1/p) * A^((p-1)/p)`) remains as a `sorry`: it requires
+    case work on `A ∈ {0, finite, ∞}` and `B ∈ {0, finite, ∞}`, plus a
+    truncation argument (`min runMax K` family, `lintegral_iSup`) for the
+    `A = ∞, B < ∞` corner. -/
 theorem doob_lp_maximal_inequality
     [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
     (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
@@ -515,6 +540,20 @@ theorem doob_lp_maximal_inequality
     eLpNorm (runMax M n) (ENNReal.ofReal p) μ
       ≤ ENNReal.ofReal (p / (p - 1)) *
           eLpNorm (M n) (ENNReal.ofReal p) μ := by
+  -- Convert both eLpNorms to (∫⁻ ofReal(_^p))^(1/p) form.
+  rw [eLpNorm_eq_lintegral_ofReal_pow (runMax_nonneg hnn n) hp
+        (runMax_measurable hsub n),
+      eLpNorm_eq_lintegral_ofReal_pow (hnn n) hp
+        (((hsub.stronglyMeasurable n).measurable).mono (𝓕.le n) le_rfl)]
+  -- Get the master bound from holder_step.
+  have hbound := holder_step hsub hnn hp n
+  -- Goal: A^(1/p) ≤ ofReal(p/(p-1)) * B^(1/p) given
+  --   hbound: A ≤ ofReal(p/(p-1)) * B^(1/p) * A^((p-1)/p)
+  -- where A = ∫⁻ Mstar^p, B = ∫⁻ M_n^p.
+  -- The extraction A^(1/p) ≤ ofReal(p/(p-1)) * B^(1/p) requires:
+  --   * truncation argument for the A = ∞, B < ∞ corner case
+  --   * rpow division: A^1 = A^((p-1)/p) * A^(1/p) (when A ≠ 0, ≠ ∞)
+  -- Both are mechanical but lengthy; deferred as `sorry` here.
   sorry
 
 end HybridVerify.DoobLp
