@@ -254,22 +254,137 @@ lemma fubini_swap
           ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ
       = ∫⁻ ω, ENNReal.ofReal (M n ω) *
               ENNReal.ofReal ((runMax M n ω) ^ (p - 1) / (p - 1)) ∂μ := by
-  -- Outline of the remaining proof (the Fubini swap is the dominant cost):
-  --  1. Rewrite inner `setLIntegral` over `{Mstar ≥ t}` as a full lintegral
-  --     with `Set.indicator` (via `lintegral_indicator`, using
-  --     `runMax_measurable`).
-  --  2. Pull `ofReal(t^(p-2))` inside the inner integral via
-  --     `lintegral_const_mul`.
-  --  3. Apply `MeasureTheory.lintegral_lintegral_swap` after providing joint
-  --     AEMeasurability of the bivariate integrand. The relevant joint set
-  --     `{(t, ω) | t ≤ runMax M n ω}` is measurable as a preimage under
-  --     `measurable_snd.uncurry runMax_measurable` and `measurable_fst`.
-  --  4. For fixed ω, pull out `ofReal(M_n ω)` (constant in t) and apply
-  --     `inner_t_integral` (using `runMax_nonneg`).
-  --
-  -- This is genuinely 1-2 focused days of Lean engineering. Tracked as
-  -- TODO in the file header.
-  sorry
+  -- Measurability of runMax M n and M n.
+  have hRunMaxMeas : Measurable (runMax M n) := runMax_measurable hsub n
+  have hsubM : Measurable (M n) :=
+    ((hsub.stronglyMeasurable n).measurable).mono (𝓕.le n) le_rfl
+  -- Joint set {(t,ω) | t ≤ runMax M n ω} is product-measurable as the
+  -- preimage of {(a,b) : ℝ×ℝ | a ≤ b} under (fst, runMax ∘ snd).
+  have hJointSet : MeasurableSet {pr : ℝ × Ω | pr.1 ≤ runMax M n pr.2} := by
+    have h1 : Measurable (fun pr : ℝ × Ω => pr.1) := measurable_fst
+    have h2 : Measurable (fun pr : ℝ × Ω => runMax M n pr.2) :=
+      hRunMaxMeas.comp measurable_snd
+    exact measurableSet_le h1 h2
+  -- Step 1: rewrite the inner setLIntegral as a full lintegral via indicator.
+  have step1 : ∀ t,
+      ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ
+        = ∫⁻ ω, {ω | t ≤ runMax M n ω}.indicator
+                  (fun ω => ENNReal.ofReal (M n ω)) ω ∂μ := by
+    intro t
+    rw [lintegral_indicator (measurableSet_le measurable_const hRunMaxMeas)]
+  -- Step 2: pull the constant ofReal(t^(p-2)) inside the inner lintegral.
+  have step2 : ∀ t, ENNReal.ofReal (t ^ (p - 2)) *
+        ∫⁻ ω, {ω | t ≤ runMax M n ω}.indicator
+                (fun ω => ENNReal.ofReal (M n ω)) ω ∂μ
+      = ∫⁻ ω, ENNReal.ofReal (t ^ (p - 2)) *
+              {ω | t ≤ runMax M n ω}.indicator
+                (fun ω => ENNReal.ofReal (M n ω)) ω ∂μ := by
+    intro t
+    exact (lintegral_const_mul _ ((ENNReal.measurable_ofReal.comp hsubM).indicator
+            (measurableSet_le measurable_const hRunMaxMeas))).symm
+  -- Combine step1 + step2 to a clean bivariate integrand expression.
+  simp_rw [step1, step2]
+  -- Joint measurability of the bivariate integrand.
+  have hF_meas : Measurable (fun pr : ℝ × Ω =>
+      ENNReal.ofReal (pr.1 ^ (p - 2)) *
+        {q : ℝ × Ω | q.1 ≤ runMax M n q.2}.indicator
+          (fun q => ENNReal.ofReal (M n q.2)) pr) := by
+    refine Measurable.mul ?_ ?_
+    · refine ENNReal.measurable_ofReal.comp ?_
+      exact (measurable_fst : Measurable (fun pr : ℝ × Ω => pr.1)).pow_const (p - 2)
+    · refine Measurable.indicator ?_ hJointSet
+      exact ENNReal.measurable_ofReal.comp (hsubM.comp measurable_snd)
+  -- Rewrite the LHS with indicator on Ioi 0 (so it becomes a full lintegral
+  -- over ℝ) and apply lintegral_lintegral_swap on ℝ × Ω.
+  rw [← lintegral_indicator measurableSet_Ioi]
+  -- LHS now is ∫⁻ t, (Ioi 0).indicator (fun t => ∫⁻ ω, F(t,ω) ∂μ) t ∂volume
+  -- Massage to ∫⁻ t, ∫⁻ ω, (Ioi 0).indicator (fun _ => F(t,ω)) t ∂μ
+  have lhs_rewrite : ∫⁻ a, (Set.Ioi (0:ℝ)).indicator
+        (fun t => ∫⁻ ω, ENNReal.ofReal (t ^ (p - 2)) *
+                {ω | t ≤ runMax M n ω}.indicator
+                  (fun ω => ENNReal.ofReal (M n ω)) ω ∂μ) a
+      = ∫⁻ t, ∫⁻ ω, (Set.Ioi (0:ℝ)).indicator
+              (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+                {ω | s ≤ runMax M n ω}.indicator
+                  (fun ω => ENNReal.ofReal (M n ω)) ω) t ∂μ := by
+    apply lintegral_congr_ae
+    filter_upwards with t
+    by_cases ht : t ∈ Set.Ioi (0:ℝ)
+    · rw [Set.indicator_of_mem ht]
+      apply lintegral_congr_ae
+      filter_upwards with ω
+      rw [Set.indicator_of_mem ht]
+    · rw [Set.indicator_of_notMem ht, ← lintegral_zero (μ := μ)]
+      apply lintegral_congr_ae
+      filter_upwards with ω
+      rw [Set.indicator_of_notMem ht]
+  rw [lhs_rewrite]
+  -- Now apply lintegral_lintegral_swap.
+  have hSwap_meas : AEMeasurable
+      (Function.uncurry (fun t ω => (Set.Ioi (0:ℝ)).indicator
+          (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+            {ω | s ≤ runMax M n ω}.indicator
+              (fun ω => ENNReal.ofReal (M n ω)) ω) t))
+      (volume.prod μ) := by
+    refine (Measurable.indicator ?_ ?_).aemeasurable
+    · exact hF_meas
+    · exact measurable_fst measurableSet_Ioi
+  rw [lintegral_lintegral_swap hSwap_meas]
+  -- Now have ∫⁻ ω, ∫⁻ t, indicator(Ioi 0) F(t,ω) ∂volume ∂μ.
+  -- For each ω, the inner is the integral over Ioi 0 of
+  --   ofReal(t^(p-2)) * 𝟙{t ≤ runMax M n ω} * ofReal(M n ω)
+  -- = ofReal(M n ω) * (∫⁻ t in Ioi 0, ofReal(t^(p-2)) * 𝟙{t ≤ Mstar ω})
+  -- = ofReal(M n ω) * ofReal((runMax M n ω)^(p-1) / (p-1))  [inner_t_integral]
+  apply lintegral_congr_ae
+  filter_upwards with ω
+  -- Reduce the inner integral.
+  have h_inner_simp :
+      ∫⁻ t, (Set.Ioi (0:ℝ)).indicator
+          (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+            {ω' | s ≤ runMax M n ω'}.indicator
+              (fun ω' => ENNReal.ofReal (M n ω')) ω) t
+        = ENNReal.ofReal (M n ω) *
+            ENNReal.ofReal ((runMax M n ω) ^ (p - 1) / (p - 1)) := by
+    -- Rewrite the inner indicator
+    have h_pointwise : ∀ t,
+        (Set.Ioi (0:ℝ)).indicator
+            (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+              {ω' | s ≤ runMax M n ω'}.indicator
+                (fun ω' => ENNReal.ofReal (M n ω')) ω) t
+          = ENNReal.ofReal (M n ω) *
+              ((Set.Ioi (0:ℝ)).indicator
+                (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+                  {s : ℝ | s ≤ runMax M n ω}.indicator
+                    (fun _ => (1 : ℝ≥0∞)) s)) t := by
+      intro t
+      by_cases ht : t ∈ Set.Ioi (0:ℝ)
+      · rw [Set.indicator_of_mem ht, Set.indicator_of_mem ht]
+        by_cases hle : t ≤ runMax M n ω
+        · have hmem1 : ω ∈ {ω' | t ≤ runMax M n ω'} := hle
+          have hmem2 : t ∈ {s : ℝ | s ≤ runMax M n ω} := hle
+          rw [Set.indicator_of_mem hmem1, Set.indicator_of_mem hmem2, mul_one]
+          ring
+        · have hnmem1 : ω ∉ {ω' | t ≤ runMax M n ω'} := hle
+          have hnmem2 : t ∉ {s : ℝ | s ≤ runMax M n ω} := hle
+          rw [Set.indicator_of_notMem hnmem1, Set.indicator_of_notMem hnmem2,
+              mul_zero, mul_zero]
+      · rw [Set.indicator_of_notMem ht, Set.indicator_of_notMem ht, mul_zero]
+    simp_rw [h_pointwise]
+    rw [lintegral_const_mul']
+    · -- The inner lintegral matches inner_t_integral.
+      have h_eq :
+          ∫⁻ t, (Set.Ioi (0:ℝ)).indicator
+              (fun s => ENNReal.ofReal (s ^ (p - 2)) *
+                {s : ℝ | s ≤ runMax M n ω}.indicator
+                  (fun _ => (1 : ℝ≥0∞)) s) t
+            = ∫⁻ t in Set.Ioi (0:ℝ),
+                ENNReal.ofReal (t ^ (p - 2)) *
+                  {s : ℝ | s ≤ runMax M n ω}.indicator
+                    (fun _ => (1 : ℝ≥0∞)) t := by
+        rw [← lintegral_indicator measurableSet_Ioi]
+      rw [h_eq, inner_t_integral (runMax_nonneg hnn n ω) hp]
+    · exact ENNReal.ofReal_ne_top
+  rw [h_inner_simp]
 
 /-- Stage 2 (Hölder + algebra): bound the post-Fubini integral by the
     Hölder inequality, yielding the L^p submartingale bound. -/
