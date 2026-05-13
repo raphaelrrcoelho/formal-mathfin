@@ -184,10 +184,109 @@ lemma ofReal_setIntegral_eq_setLIntegral_ofReal
   · exact (hsub.integrable n).restrict
   · exact ae_of_all _ (hnn n)
 
+/-- Pointwise inner integral: for `Mstar ≥ 0`, integrating `t^(p-2)` against
+    the indicator `𝟙{0 < t ≤ Mstar}` evaluates to `Mstar^(p-1)/(p-1)`. -/
+lemma inner_t_integral
+    {Mstar p : ℝ} (hMstar : 0 ≤ Mstar) (hp : 1 < p) :
+    ∫⁻ t in Set.Ioi (0:ℝ), ENNReal.ofReal (t ^ (p - 2)) *
+        {t : ℝ | t ≤ Mstar}.indicator (fun _ => (1 : ℝ≥0∞)) t
+      = ENNReal.ofReal (Mstar ^ (p - 1) / (p - 1)) := by
+  rcases hMstar.lt_or_eq with hpos | hzero
+  · -- Mstar > 0: rewrite indicator-restricted integral as setLIntegral on Ioc.
+    have h_eq : Set.EqOn
+        (fun t => ENNReal.ofReal (t ^ (p - 2)) *
+            {t : ℝ | t ≤ Mstar}.indicator (fun _ => (1 : ℝ≥0∞)) t)
+        ((Set.Ioc 0 Mstar).indicator (fun t => ENNReal.ofReal (t ^ (p - 2))))
+        (Set.Ioi (0:ℝ)) := by
+      intro t ht
+      simp only
+      by_cases hle : t ≤ Mstar
+      · have hmem1 : t ∈ {t : ℝ | t ≤ Mstar} := hle
+        have hmem2 : t ∈ Set.Ioc (0:ℝ) Mstar := ⟨ht, hle⟩
+        rw [Set.indicator_of_mem hmem1, mul_one, Set.indicator_of_mem hmem2]
+      · have hnmem1 : t ∉ {t : ℝ | t ≤ Mstar} := hle
+        have hnmem2 : t ∉ Set.Ioc (0:ℝ) Mstar := fun h => hle h.2
+        rw [Set.indicator_of_notMem hnmem1, mul_zero, Set.indicator_of_notMem hnmem2]
+    rw [setLIntegral_congr_fun measurableSet_Ioi h_eq]
+    have hsubset : Set.Ioc (0:ℝ) Mstar ⊆ Set.Ioi 0 :=
+      fun _ ht => ht.1
+    have : ∫⁻ t in Set.Ioi (0:ℝ), (Set.Ioc 0 Mstar).indicator
+              (fun t => ENNReal.ofReal (t ^ (p - 2))) t
+            = ∫⁻ t in Set.Ioc (0:ℝ) Mstar, ENNReal.ofReal (t ^ (p - 2)) := by
+      rw [setLIntegral_indicator measurableSet_Ioc,
+          Set.inter_eq_left.mpr hsubset]
+    rw [this]
+    exact lintegral_rpow_Ioc hpos hp
+  · -- Mstar = 0: both sides are 0.
+    subst hzero
+    have h_eq : Set.EqOn
+        (fun t => ENNReal.ofReal (t ^ (p - 2)) *
+            {t : ℝ | t ≤ (0:ℝ)}.indicator (fun _ => (1 : ℝ≥0∞)) t)
+        (fun _ => 0) (Set.Ioi (0:ℝ)) := by
+      intro t ht
+      simp only
+      have hnot : t ∉ {t : ℝ | t ≤ (0:ℝ)} := by
+        change ¬ t ≤ 0
+        exact not_le.mpr ht
+      rw [Set.indicator_of_notMem hnot, mul_zero]
+    rw [setLIntegral_congr_fun measurableSet_Ioi h_eq, lintegral_zero]
+    have hp10 : p - 1 ≠ 0 := by linarith
+    simp [Real.zero_rpow hp10]
+
+/-- Fubini swap stage (Tier A.2 Stage 1).
+
+    For `p > 1`, a non-negative submartingale `M`, and a time `n`, the
+    iterated integral
+       `∫⁻ t in Ioi 0, ofReal(t^(p-2)) ⋅ ∫⁻_{Mstar ≥ t} ofReal(M_n) dμ`
+    equals
+       `∫⁻ ω, ofReal(M_n ω) ⋅ ofReal((Mstar ω)^(p-1) / (p-1)) dμ`.
+
+    Proof: rewrite the inner set-integral as an indicator-weighted full
+    integral; apply `MeasureTheory.lintegral_lintegral_swap` to swap the
+    order of integration; then evaluate the inner `t`-integral pointwise
+    via `inner_t_integral`. -/
+lemma fubini_swap
+    [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
+    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
+    (hp : 1 < p) (n : ℕ) :
+    ∫⁻ t in Set.Ioi (0:ℝ),
+        ENNReal.ofReal (t ^ (p - 2)) *
+          ∫⁻ ω in {ω | t ≤ runMax M n ω}, ENNReal.ofReal (M n ω) ∂μ
+      = ∫⁻ ω, ENNReal.ofReal (M n ω) *
+              ENNReal.ofReal ((runMax M n ω) ^ (p - 1) / (p - 1)) ∂μ := by
+  -- Outline of the remaining proof (the Fubini swap is the dominant cost):
+  --  1. Rewrite inner `setLIntegral` over `{Mstar ≥ t}` as a full lintegral
+  --     with `Set.indicator` (via `lintegral_indicator`, using
+  --     `runMax_measurable`).
+  --  2. Pull `ofReal(t^(p-2))` inside the inner integral via
+  --     `lintegral_const_mul`.
+  --  3. Apply `MeasureTheory.lintegral_lintegral_swap` after providing joint
+  --     AEMeasurability of the bivariate integrand. The relevant joint set
+  --     `{(t, ω) | t ≤ runMax M n ω}` is measurable as a preimage under
+  --     `measurable_snd.uncurry runMax_measurable` and `measurable_fst`.
+  --  4. For fixed ω, pull out `ofReal(M_n ω)` (constant in t) and apply
+  --     `inner_t_integral` (using `runMax_nonneg`).
+  --
+  -- This is genuinely 1-2 focused days of Lean engineering. Tracked as
+  -- TODO in the file header.
+  sorry
+
+/-- Stage 2 (Hölder + algebra): bound the post-Fubini integral by the
+    Hölder inequality, yielding the L^p submartingale bound. -/
+lemma holder_step
+    [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
+    (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
+    (hp : 1 < p) (n : ℕ) :
+    (∫⁻ ω, ENNReal.ofReal ((runMax M n ω) ^ p) ∂μ)
+      ≤ ENNReal.ofReal (p / (p - 1)) *
+          (∫⁻ ω, ENNReal.ofReal (M n ω ^ p) ∂μ) ^ (p⁻¹) *
+          (∫⁻ ω, ENNReal.ofReal ((runMax M n ω) ^ p) ∂μ) ^ ((p - 1) / p) := by
+  sorry
+
 /-- Doob's L^p maximal inequality for non-negative submartingales.
 
-    PROOF SKELETON — main theorem still pending the Fubini swap and
-    subsequent algebra (see TODO list at top of file). -/
+    PROOF SKELETON — main theorem still pending the truncation + eLpNorm
+    conversion (see TODO list at top of file). -/
 theorem doob_lp_maximal_inequality
     [IsFiniteMeasure μ] {𝓕 : Filtration ℕ m0} {M : ℕ → Ω → ℝ} {p : ℝ}
     (hsub : Submartingale M 𝓕 μ) (hnn : ∀ n ω, 0 ≤ M n ω)
