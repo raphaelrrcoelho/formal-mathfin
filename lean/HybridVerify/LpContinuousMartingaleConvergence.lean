@@ -58,7 +58,7 @@ def natFiltration (𝓕 : Filtration ℝ mΩ) : Filtration ℕ mΩ where
 
 /-- A continuous martingale sampled at natural times is a discrete
     martingale w.r.t. the natural-time sub-filtration. -/
-lemma discreteSample_martingale
+private lemma discreteSample_martingale
     {μ : Measure Ω} {𝓕 : Filtration ℝ mΩ} {M : ℝ → Ω → ℝ}
     (hM : Martingale M 𝓕 μ) :
     Martingale (discreteSample M) (natFiltration 𝓕) μ := by
@@ -71,9 +71,9 @@ lemma discreteSample_martingale
 
 /-- L^1-norm bound from L^p-norm bound on a finite measure space (Hölder).
     Returns the explicit nonneg-real bound. -/
-lemma eLpNorm_one_le_of_eLpNorm_p
+private lemma eLpNorm_one_le_of_eLpNorm_p
     {μ : Measure Ω} [IsFiniteMeasure μ] {f : Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
-    {R : ℝ} (hR_nn : 0 ≤ R)
+    {R : ℝ} (_hR_nn : 0 ≤ R)
     (hR : eLpNorm f (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
     (hfm : AEStronglyMeasurable f μ) :
     eLpNorm f 1 μ ≤ ENNReal.ofReal R * μ Set.univ ^ ((1 : ℝ) - 1 / p) := by
@@ -92,7 +92,7 @@ lemma eLpNorm_one_le_of_eLpNorm_p
 
 /-- The L^1 bound for the discrete sample, expressed as `ℝ≥0` for the
     Mathlib submartingale-convergence API. -/
-lemma discreteSample_l1_bounded
+private lemma discreteSample_l1_bounded
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
     (hM : Martingale M 𝓕 μ)
@@ -116,7 +116,7 @@ lemma discreteSample_l1_bounded
   exact eLpNorm_one_le_of_eLpNorm_p hp hR_nn (hbound (n : ℝ)) hM_meas
 
 /-- Discrete a.s. convergence: the discrete sample converges a.s. as `n → ∞`. -/
-lemma discreteSample_ae_tendsto
+private lemma discreteSample_ae_tendsto
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
     (hM : Martingale M 𝓕 μ)
@@ -134,7 +134,7 @@ noncomputable def discreteSampleLimit
   (natFiltration 𝓕).limitProcess (discreteSample M) μ
 
 /-- The discrete sample converges a.s. to its limit process. -/
-lemma discreteSample_ae_tendsto_limitProcess
+private lemma discreteSample_ae_tendsto_limitProcess
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
     (hM : Martingale M 𝓕 μ)
@@ -145,7 +145,7 @@ lemma discreteSample_ae_tendsto_limitProcess
   exact (discreteSample_martingale hM).submartingale.ae_tendsto_limitProcess hR'
 
 /-- The limit process is integrable (in `L^1`). -/
-lemma discreteSampleLimit_integrable
+private lemma discreteSampleLimit_integrable
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
     (hM : Martingale M 𝓕 μ)

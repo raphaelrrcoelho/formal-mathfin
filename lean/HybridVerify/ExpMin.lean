@@ -29,7 +29,7 @@ structure IndependentExponentialMinimum {Ω : Type*} [MeasurableSpace Ω]
 
 namespace IndependentExponentialMinimum
 
-variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+variable {Ω : Type*} [m0 : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}
 
 /-- Survival function of `expMeasure r` for `t ≥ 0` (Mathlib v4.30 API). -/
@@ -60,6 +60,7 @@ private lemma indep_inter_Ioi (h : IndependentExponentialMinimum μ n rates τ)
       ∏ i, μ ((τ i) ⁻¹' Set.Ioi t) :=
   h.joint_indep.meas_iInter (fun _ => ⟨Set.Ioi t, measurableSet_Ioi, rfl⟩)
 
+omit m0 in
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
 private lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
     {ω : Ω | t < (Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
@@ -91,7 +92,7 @@ theorem minimum_survival (h : IndependentExponentialMinimum μ n rates τ)
   rw [← Real.exp_sum]
   congr 1
   rw [Finset.sum_neg_distrib]
-  simp [Finset.sum_mul, neg_mul]
+  simp [Finset.sum_mul]
 
 end IndependentExponentialMinimum
 

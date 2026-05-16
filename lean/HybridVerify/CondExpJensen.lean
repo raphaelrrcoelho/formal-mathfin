@@ -56,7 +56,7 @@ theorem conditional_jensen_inequality (h : ConditionalJensen μ m hm φ X) :
     ae_of_all _ (fun a => by simpa [Real.norm_eq_abs] using hK (Y a))
   have hXmY_int : Integrable (X - Y) μ := h.X_integrable.sub hY_int
   have hgYmul_int : Integrable ((fun a => h.subgrad (Y a)) * (X - Y)) μ := by
-    apply Integrable.bdd_mul' hXmY_int
+    apply Integrable.bdd_mul hXmY_int
     · exact (hgY_meas.mono hm).aestronglyMeasurable
     · exact hgY_bound
   have hY_self_condExp : μ[Y | m] = Y :=
@@ -67,7 +67,7 @@ theorem conditional_jensen_inequality (h : ConditionalJensen μ m hm φ X) :
     filter_upwards [h1] with a ha
     have happ : (μ[X | m] - μ[Y | m]) a = (μ[X | m]) a - (μ[Y | m]) a := rfl
     rw [ha, happ, hY_self_condExp]
-    simp [Pi.zero_apply, hY_def]
+    simp [hY_def]
   have hpullout : μ[(fun a => h.subgrad (Y a)) * (X - Y) | m] =ᵐ[μ]
                   (fun a => h.subgrad (Y a)) * μ[X - Y | m] :=
     condExp_mul_of_stronglyMeasurable_left hgY_meas hgYmul_int hXmY_int
@@ -75,7 +75,7 @@ theorem conditional_jensen_inequality (h : ConditionalJensen μ m hm φ X) :
     refine hpullout.trans ?_
     filter_upwards [hXmY_condExp] with a ha
     show (fun a => h.subgrad (Y a)) a * (μ[X - Y | m]) a = (0 : α → ℝ) a
-    rw [ha]; simp [Pi.zero_apply]
+    rw [ha]; simp
   have hpw : (fun a => h.subgrad (Y a) * (X a - Y a)) ≤ᵐ[μ]
              (fun a => φ (X a) - φ (Y a)) := by
     refine ae_of_all _ (fun a => ?_)

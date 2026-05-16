@@ -31,7 +31,7 @@ variable {Ω β : Type*} {mΩ : MeasurableSpace Ω}
 
     The non-trivial direction uses continuity of X and openness of A to
     upgrade an arbitrary real witness to a rational witness via density. -/
-lemma hittingAfter_lt_eq_iUnion_rationals
+private lemma hittingAfter_lt_eq_iUnion_rationals
     [TopologicalSpace β]
     {X : ℝ → Ω → β} {A : Set β}
     (hX_cont : ∀ ω, Continuous (fun t => X t ω)) (hA_open : IsOpen A)
@@ -91,7 +91,7 @@ lemma hittingAfter_lt_eq_iUnion_rationals
     exact ⟨(q : ℝ), ⟨hq_nn, hq_lt⟩, hXq⟩
 
 /-- Measurability of `{ω | hittingAfter X A 0 ω < ↑i}`. -/
-lemma measurableSet_hittingAfter_lt_of_open
+private lemma measurableSet_hittingAfter_lt_of_open
     [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β]
     {𝓕 : Filtration ℝ mΩ} {X : ℝ → Ω → β} {A : Set β}
     (hX_cont : ∀ ω, Continuous (fun t => X t ω)) (hX_adapted : Adapted 𝓕 X)

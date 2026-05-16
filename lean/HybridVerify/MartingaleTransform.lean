@@ -99,7 +99,7 @@ private lemma step (h : MartingaleTransform μ 𝓕 M A AM) (n : ℕ) :
       condExp_of_stronglyMeasurable (𝓕.le n) (h.martingale_M.stronglyAdapted n)
         (h.martingale_M.integrable n)
     filter_upwards [h1, h2] with ω hω1 hω2
-    simp [Pi.sub_apply, Pi.zero_apply, hω1, hω2, h3]
+    simp [Pi.sub_apply, hω1, hω2, h3]
   have hpull : μ[A (n + 1) * (M (n + 1) - M n) | 𝓕 n] =ᵐ[μ]
                A (n + 1) * μ[M (n + 1) - M n | 𝓕 n] := by
     have hδ_int' : Integrable (A (n + 1) * (M (n + 1) - M n)) μ := by
@@ -116,7 +116,7 @@ private lemma step (h : MartingaleTransform μ 𝓕 M A AM) (n : ℕ) :
     rw [hδ_eq_mul]
     refine hpull.trans ?_
     filter_upwards [hMdiff] with ω hω
-    simp [Pi.mul_apply, Pi.zero_apply, hω]
+    simp [Pi.mul_apply, hω]
   have hAM_n_int : Integrable (AM n) μ := h.integrable_AM n
   have hAM_n_meas : StronglyMeasurable[𝓕 n] (AM n) := h.adapted_AM n
   have hcondAM_n : μ[AM n | 𝓕 n] = AM n :=
@@ -127,7 +127,7 @@ private lemma step (h : MartingaleTransform μ 𝓕 M A AM) (n : ℕ) :
   filter_upwards [hsplit, hδ_condExp] with ω hω1 hω2
   show AM n ω = (μ[AM (n + 1) | 𝓕 n]) ω
   rw [hω1]
-  simp [Pi.add_apply, Pi.zero_apply, hcondAM_n, hω2]
+  simp [Pi.add_apply, hcondAM_n, hω2]
 
 /-- **Theorem 2.2.9**: the martingale transform of a martingale by a bounded
     predictable process is itself a martingale. -/

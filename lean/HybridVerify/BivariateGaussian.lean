@@ -162,17 +162,13 @@ theorem conditional_expectation_formula
   -- Bridge: indep of σ-algebras (comap of (X − βY) and comap of Y).
   have h_diff_meas : Measurable (fun ω => X ω - β * Y ω) :=
     h.X_meas.sub (h.Y_meas.const_mul β)
-  have h_diff_meas_comap :
-      Measurable[MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ)]
-        (fun ω => X ω - β * Y ω) :=
-    fun s' hs' => ⟨s', hs', rfl⟩
   have h_diff_smeas_comap :
       StronglyMeasurable[MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ)]
         (fun ω => X ω - β * Y ω) :=
-    h_diff_meas_comap.stronglyMeasurable
+    (Measurable.of_comap_le le_rfl).stronglyMeasurable
   have h_diff_le_comap :
-      MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ) ≤ mΩ := by
-    rintro s' ⟨t', ht', rfl⟩; exact h_diff_meas ht'
+      MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ) ≤ mΩ :=
+    h_diff_meas.comap_le
   have h_indep_sigma :
       Indep (MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ))
             (MeasurableSpace.comap Y inferInstance) P :=
