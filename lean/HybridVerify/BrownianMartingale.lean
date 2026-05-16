@@ -63,7 +63,7 @@ private lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace �
     {P : Measure Ω} {Z : Ω → ℝ} (hZ_meas : Measurable Z)
     {m : ℝ} {v : ℝ≥0} (hZ : HasLaw Z (gaussianReal m v) P) (α : ℝ) :
     Integrable (fun ω ↦ Real.exp (α * Z ω)) P := by
-  rw [show (fun ω ↦ Real.exp (α * Z ω)) = (fun x ↦ Real.exp (α * x)) ∘ Z from by funext ω; rfl]
+  rw [show (fun ω ↦ Real.exp (α * Z ω)) = (fun x ↦ Real.exp (α * x)) ∘ Z from rfl]
   refine Integrable.comp_aemeasurable ?_ hZ_meas.aemeasurable
   rw [hZ.map_eq]
   exact integrable_exp_mul_gaussianReal α
@@ -93,7 +93,7 @@ theorem squareSubTime_isMartingale :
   have h_meas_t : Measurable (X t) := ((hX.stronglyAdapted t).mono (𝓕.le t)).measurable
   have h_meas_s : Measurable (X s) := ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
-  have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := by funext; rfl
+  have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
   -- HasLaws from `IsPreBrownian`.
   have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P :=
     hX.hasLaw_sub t s
@@ -159,7 +159,7 @@ theorem squareSubTime_isMartingale :
     exact this
   -- Pull-out for the cross term.
   have h_cross_eq :
-      (fun ω ↦ X s ω * (X t ω - X s ω)) = (X s) * (fun ω ↦ X t ω - X s ω) := by funext ω; rfl
+      (fun ω ↦ X s ω * (X t ω - X s ω)) = (X s) * (fun ω ↦ X t ω - X s ω) := rfl
   have h_pullout :
       P[fun ω ↦ X s ω * (X t ω - X s ω) | (𝓕 s : MeasurableSpace Ω)]
         =ᵐ[P] (X s) * (P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)]) := by
@@ -274,7 +274,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
   have h_meas_t : Measurable (X t) := ((hX.stronglyAdapted t).mono (𝓕.le t)).measurable
   have h_meas_s : Measurable (X s) := ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
-  have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := by funext; rfl
+  have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
   have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P :=
     hX.hasLaw_sub t s
   -- Integrability of `exp(α (X_t − X_s))`.
@@ -289,7 +289,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
                 (gaussianReal 0 (max (t - s) (s - t))) := by fun_prop
     have h := hL_diff.integral_comp hf
     have h_lhs : ((fun x ↦ Real.exp (α * x)) ∘ (X t - X s))
-               = (fun ω ↦ Real.exp (α * (X t ω - X s ω))) := by funext ω; rfl
+               = (fun ω ↦ Real.exp (α * (X t ω - X s ω))) := rfl
     rw [h_lhs, integral_exp_mul_gaussianReal_zero] at h
     exact h
   -- Define `M_s` (𝓕_s-measurable factor) and the increment exponential `D_{st}`.
@@ -360,7 +360,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
   have h_pullout :
       P[fun ω ↦ Ms ω * Dst ω | (𝓕 s : MeasurableSpace Ω)]
         =ᵐ[P] Ms * (P[Dst | (𝓕 s : MeasurableSpace Ω)]) := by
-    have h_eq : (fun ω ↦ Ms ω * Dst ω) = Ms * Dst := by funext ω; rfl
+    have h_eq : (fun ω ↦ Ms ω * Dst ω) = Ms * Dst := rfl
     rw [h_eq]
     exact condExp_mul_of_stronglyMeasurable_left hMs_meas
       (by rw [← h_eq]; exact h_int_MsDst) h_int_Dst

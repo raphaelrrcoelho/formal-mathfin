@@ -78,8 +78,7 @@ private lemma integrable_AM (h : MartingaleTransform μ 𝓕 M A AM) (n : ℕ) :
     `𝓕 n`-measurable so it equals its own conditional expectation. -/
 private lemma step (h : MartingaleTransform μ 𝓕 M A AM) (n : ℕ) :
     AM n =ᵐ[μ] μ[AM (n + 1) | 𝓕 n] := by
-  obtain ⟨K, hK⟩ := h.A_bounded
-  set δ : Ω → ℝ := fun ω => A (n + 1) ω * (M (n + 1) ω - M n ω) with hδ_def
+  set δ : Ω → ℝ := fun ω => A (n + 1) ω * (M (n + 1) ω - M n ω)
   have hAM_succ_eq : AM (n + 1) = AM n + δ := by
     funext ω
     have e := h.transform_def (n + 1) ω
@@ -101,19 +100,11 @@ private lemma step (h : MartingaleTransform μ 𝓕 M A AM) (n : ℕ) :
     filter_upwards [h1, h2] with ω hω1 hω2
     simp [Pi.sub_apply, hω1, hω2, h3]
   have hpull : μ[A (n + 1) * (M (n + 1) - M n) | 𝓕 n] =ᵐ[μ]
-               A (n + 1) * μ[M (n + 1) - M n | 𝓕 n] := by
-    have hδ_int' : Integrable (A (n + 1) * (M (n + 1) - M n)) μ := by
-      have heq : (A (n + 1) * (M (n + 1) - M n)) =
-                 (fun ω => A (n + 1) ω * (M (n + 1) ω - M n ω)) := by
-        funext ω; simp [Pi.mul_apply, Pi.sub_apply]
-      rw [heq]; exact hδ_int
-    exact condExp_mul_of_stronglyMeasurable_left
-      (h.predictable_A n) hδ_int'
+               A (n + 1) * μ[M (n + 1) - M n | 𝓕 n] :=
+    condExp_mul_of_stronglyMeasurable_left
+      (h.predictable_A n) hδ_int
       ((h.martingale_M.integrable (n + 1)).sub (h.martingale_M.integrable n))
   have hδ_condExp : μ[δ | 𝓕 n] =ᵐ[μ] (0 : Ω → ℝ) := by
-    have hδ_eq_mul : δ = A (n + 1) * (M (n + 1) - M n) := by
-      funext ω; simp [δ, Pi.mul_apply, Pi.sub_apply]
-    rw [hδ_eq_mul]
     refine hpull.trans ?_
     filter_upwards [hMdiff] with ω hω
     simp [Pi.mul_apply, hω]

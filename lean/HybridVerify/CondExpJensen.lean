@@ -83,10 +83,7 @@ theorem conditional_jensen_inequality (h : ConditionalJensen μ m hm φ X) :
     show h.subgrad (Y a) * (X a - Y a) ≤ φ (X a) - φ (Y a)
     linarith
   have hgYmul_eq : (fun a => h.subgrad (Y a) * (X a - Y a)) =
-                   ((fun a => h.subgrad (Y a)) * (X - Y)) := by
-    funext a; show h.subgrad (Y a) * (X a - Y a) =
-      (fun a => h.subgrad (Y a)) a * (X - Y) a
-    simp [Pi.sub_apply]
+                   ((fun a => h.subgrad (Y a)) * (X - Y)) := rfl
   have hphi_diff_int : Integrable (fun a => φ (X a) - φ (Y a)) μ :=
     h.phi_X_integrable.sub h.phi_condExp_integrable
   have hgYmul_int' : Integrable (fun a => h.subgrad (Y a) * (X a - Y a)) μ := by
@@ -100,7 +97,7 @@ theorem conditional_jensen_inequality (h : ConditionalJensen μ m hm φ X) :
     rw [heq]
     exact hgYmul_condExp
   have hphi_diff_eq : (fun a => φ (X a) - φ (Y a)) =
-                     (fun a => φ (X a)) - (fun a => φ (Y a)) := by funext a; rfl
+                     (fun a => φ (X a)) - (fun a => φ (Y a)) := rfl
   have hphiY_meas : StronglyMeasurable[m] (fun a => φ (Y a)) :=
     (h.phi_measurable.comp hY_meas.measurable).stronglyMeasurable
   have hphiY_self : μ[fun a => φ (Y a) | m] = (fun a => φ (Y a)) :=

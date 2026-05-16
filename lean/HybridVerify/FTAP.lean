@@ -45,7 +45,7 @@ theorem emm_implies_no_arbitrage
     P {ω | 0 < ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)} = 0 := by
   haveI : IsProbabilityMeasure FTAP.Q := FTAP.Q_isProbability
   set V : ℕ → Ω → ℝ := fun n ω =>
-    ∑ t ∈ Finset.range n, φ (t + 1) ω * (S (t + 1) ω - S t ω) with hV_def
+    ∑ t ∈ Finset.range n, φ (t + 1) ω * (S (t + 1) ω - S t ω)
   have hMT : MartingaleTransform FTAP.Q 𝓕 S φ V :=
     { martingale_M := FTAP.S_Q_martingale
       predictable_A := hφ_pred

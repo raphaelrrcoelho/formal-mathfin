@@ -52,21 +52,28 @@ structure BrownianIncrementSpec (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Pro
       `B t − B s` are independent. -/
   indep_increments : HasIndepIncrements B μ
 
+/-- A BM increment is `AEMeasurable` — its law is a (nonzero) Gaussian, and
+`AEMeasurable.of_map_ne_zero` recovers measurability from a nonzero pushforward. -/
+private lemma BrownianIncrementSpec.aemeasurable_increment
+    {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ → Ω → ℝ} (hB : BrownianIncrementSpec μ B)
+    {s t : ℝ} (hst : s ≤ t) :
+    AEMeasurable (fun ω => B t ω - B s ω) μ := by
+  obtain ⟨v, _, hv_map⟩ := hB.gaussian_increments hst
+  exact AEMeasurable.of_map_ne_zero (by rw [hv_map]; exact IsProbabilityMeasure.ne_zero _)
+
 /-- BM increments have mean zero (under the Gaussian-increments hypothesis). -/
 lemma BrownianIncrementSpec.integral_increment_eq_zero
     {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ → Ω → ℝ} (hB : BrownianIncrementSpec μ B)
     {s t : ℝ} (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ∂μ = 0 := by
-  obtain ⟨v, _, hv_map⟩ := hB.gaussian_increments hst
-  have h_aemeas : AEMeasurable (fun ω => B t ω - B s ω) μ := by
-    apply AEMeasurable.of_map_ne_zero
-    rw [hv_map]
-    exact (IsProbabilityMeasure.ne_zero (gaussianReal 0 v))
-  have : ∫ ω, (B t ω - B s ω) ∂μ
-        = ∫ x, x ∂(Measure.map (fun ω => B t ω - B s ω) μ) := by
-    rw [integral_map h_aemeas measurable_id'.aestronglyMeasurable]
-  rw [this, hv_map, integral_id_gaussianReal]
+  obtain ⟨_, _, hv_map⟩ := hB.gaussian_increments hst
+  rw [show ∫ ω, (B t ω - B s ω) ∂μ
+        = ∫ x, x ∂(Measure.map (fun ω => B t ω - B s ω) μ) from
+        (integral_map (hB.aemeasurable_increment hst)
+          measurable_id'.aestronglyMeasurable).symm,
+      hv_map, integral_id_gaussianReal]
 
 /-- **Wiener step-integral isometry.**
 
@@ -86,17 +93,9 @@ theorem wiener_step_isometry
     ∫ ω, (c * (B t ω - B s ω)) ^ 2 ∂μ = c ^ 2 * (t - s) := by
   -- Extract the increment distribution.
   obtain ⟨v, hv_eq, hv_map⟩ := hB.gaussian_increments hst
-  -- B_t − B_s is AEMeasurable: its pushforward is the Gaussian (nonzero
-  -- probability measure), so the pushforward is ≠ 0, hence the function
-  -- must be AEMeasurable (Mathlib `AEMeasurable.of_map_ne_zero`).
-  have h_aemeas : AEMeasurable (fun ω => B t ω - B s ω) μ := by
-    apply AEMeasurable.of_map_ne_zero
-    rw [hv_map]
-    exact (IsProbabilityMeasure.ne_zero (gaussianReal 0 v))
+  have h_aemeas := hB.aemeasurable_increment hst
   -- Rewrite `∫ ω, (c · (B_t − B_s))² ∂μ = c² · ∫ ω, (B_t − B_s)² ∂μ`.
-  have h_pull_c : ∀ ω, (c * (B t ω - B s ω)) ^ 2 = c ^ 2 * (B t ω - B s ω) ^ 2 := by
-    intro ω; ring
-  simp_rw [h_pull_c]
+  simp_rw [mul_pow]
   rw [integral_const_mul]
   congr 1
   -- `∫ ω, (B_t − B_s)² ∂μ = ∫ x, x² ∂(law of B_t − B_s)`.
@@ -106,8 +105,7 @@ theorem wiener_step_isometry
       (continuous_pow 2).measurable.aestronglyMeasurable]
   rw [h_map, hv_map]
   -- `∫ x, x² ∂(gaussianReal 0 v) = v` (variance of centered Gaussian).
-  have h_mean : ∫ x, x ∂(gaussianReal 0 v) = 0 := by
-    simpa using integral_id_gaussianReal (μ := 0) (v := v)
+  have h_mean : ∫ x, x ∂(gaussianReal 0 v) = 0 := integral_id_gaussianReal
   have h_var : Var[id; gaussianReal (0:ℝ) v] = (v : ℝ) :=
     variance_id_gaussianReal
   have h_var_eq : Var[id; gaussianReal (0:ℝ) v] = ∫ x, x ^ 2 ∂(gaussianReal (0:ℝ) v) := by
@@ -124,11 +122,8 @@ lemma BrownianIncrementSpec.integrable_increment_sq
     {B : ℝ → Ω → ℝ} (hB : BrownianIncrementSpec μ B)
     {s t : ℝ} (hst : s ≤ t) :
     Integrable (fun ω => (B t ω - B s ω) ^ 2) μ := by
-  obtain ⟨v, _, hv_map⟩ := hB.gaussian_increments hst
-  have h_aemeas : AEMeasurable (fun ω => B t ω - B s ω) μ := by
-    apply AEMeasurable.of_map_ne_zero
-    rw [hv_map]
-    exact (IsProbabilityMeasure.ne_zero (gaussianReal 0 v))
+  obtain ⟨_, _, hv_map⟩ := hB.gaussian_increments hst
+  have h_aemeas := hB.aemeasurable_increment hst
   -- Pushforward integrability: ∫ x², ∂(law) < ∞.
   rw [show (fun ω => (B t ω - B s ω) ^ 2) = (fun x : ℝ => x ^ 2) ∘ (fun ω => B t ω - B s ω)
         from rfl]
@@ -145,11 +140,8 @@ lemma BrownianIncrementSpec.variance_increment
     {B : ℝ → Ω → ℝ} (hB : BrownianIncrementSpec μ B)
     {s t : ℝ} (hst : s ≤ t) :
     Var[fun ω => B t ω - B s ω; μ] = t - s := by
-  obtain ⟨v, hv_eq, hv_map⟩ := hB.gaussian_increments hst
-  have h_aemeas : AEMeasurable (fun ω => B t ω - B s ω) μ := by
-    apply AEMeasurable.of_map_ne_zero
-    rw [hv_map]
-    exact (IsProbabilityMeasure.ne_zero (gaussianReal 0 v))
+  obtain ⟨_, hv_eq, _⟩ := hB.gaussian_increments hst
+  have h_aemeas := hB.aemeasurable_increment hst
   have h_mean_zero : ∫ ω, (B t ω - B s ω) ∂μ = 0 :=
     hB.integral_increment_eq_zero hst
   -- Var = E[X²] when E[X] = 0.

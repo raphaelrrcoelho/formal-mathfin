@@ -69,60 +69,51 @@ private lemma discreteSample_martingale
     have hij' : (i : ℝ) ≤ (j : ℝ) := by exact_mod_cast hij
     exact hM.2 (i : ℝ) (j : ℝ) hij'
 
-/-- L^1-norm bound from L^p-norm bound on a finite measure space (Hölder).
-    Returns the explicit nonneg-real bound. -/
+/-- L^1-norm bound from L^p-norm bound on a finite measure space (Hölder). -/
 private lemma eLpNorm_one_le_of_eLpNorm_p
     {μ : Measure Ω} [IsFiniteMeasure μ] {f : Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
-    {R : ℝ} (_hR_nn : 0 ≤ R)
-    (hR : eLpNorm f (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
+    {R : ℝ} (hR : eLpNorm f (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
     (hfm : AEStronglyMeasurable f μ) :
     eLpNorm f 1 μ ≤ ENNReal.ofReal R * μ Set.univ ^ ((1 : ℝ) - 1 / p) := by
   have hp_pos : 0 < p := lt_of_lt_of_le zero_lt_one hp
   have h1_le_p : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := by
     rw [show (1 : ℝ≥0∞) = ENNReal.ofReal 1 by simp]
     exact ENNReal.ofReal_le_ofReal hp
-  have h_le := eLpNorm_le_eLpNorm_mul_rpow_measure_univ
-    (μ := μ) (p := 1) (q := ENNReal.ofReal p) (f := f) h1_le_p hfm
-  refine h_le.trans ?_
-  have h_toReal_p : (ENNReal.ofReal p).toReal = p :=
-    ENNReal.toReal_ofReal hp_pos.le
-  have h_toReal_1 : (1 : ℝ≥0∞).toReal = 1 := rfl
-  rw [h_toReal_1, h_toReal_p, show ((1 : ℝ) / 1) = 1 from one_div_one]
+  refine (eLpNorm_le_eLpNorm_mul_rpow_measure_univ
+    (μ := μ) (p := 1) (q := ENNReal.ofReal p) (f := f) h1_le_p hfm).trans ?_
+  rw [ENNReal.toReal_one, ENNReal.toReal_ofReal hp_pos.le, one_div_one]
   gcongr
 
 /-- The L^1 bound for the discrete sample, expressed as `ℝ≥0` for the
     Mathlib submartingale-convergence API. -/
 private lemma discreteSample_l1_bounded
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
-    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p)
     (hM : Martingale M 𝓕 μ)
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     ∃ R' : ℝ≥0,
       ∀ n : ℕ, eLpNorm (discreteSample M n) 1 μ ≤ (R' : ℝ≥0∞) := by
   have hp_pos : 0 < p := lt_of_lt_of_le zero_lt_one hp
   have h_exp_nn : 0 ≤ (1 : ℝ) - 1 / p := by
-    have : 1 / p ≤ 1 := by
-      rw [div_le_one hp_pos]; exact hp
+    have : 1 / p ≤ 1 := (div_le_one hp_pos).mpr hp
     linarith
-  set bound : ℝ≥0∞ :=
-      ENNReal.ofReal R * μ Set.univ ^ ((1 : ℝ) - 1 / p) with hbound_def
-  have hbound_lt_top : bound < ⊤ := by
-    refine ENNReal.mul_lt_top ENNReal.ofReal_lt_top ?_
-    exact ENNReal.rpow_lt_top_of_nonneg h_exp_nn (measure_ne_top _ _)
+  set bound : ℝ≥0∞ := ENNReal.ofReal R * μ Set.univ ^ ((1 : ℝ) - 1 / p)
+  have hbound_lt_top : bound < ⊤ :=
+    ENNReal.mul_lt_top ENNReal.ofReal_lt_top
+      (ENNReal.rpow_lt_top_of_nonneg h_exp_nn (measure_ne_top _ _))
   refine ⟨bound.toNNReal, fun n => ?_⟩
   rw [ENNReal.coe_toNNReal hbound_lt_top.ne]
-  have hM_meas : AEStronglyMeasurable (M (n : ℝ)) μ :=
+  exact eLpNorm_one_le_of_eLpNorm_p hp (hbound (n : ℝ))
     ((hM.stronglyMeasurable (n : ℝ)).mono (𝓕.le _)).aestronglyMeasurable
-  exact eLpNorm_one_le_of_eLpNorm_p hp hR_nn (hbound (n : ℝ)) hM_meas
 
 /-- Discrete a.s. convergence: the discrete sample converges a.s. as `n → ∞`. -/
 private lemma discreteSample_ae_tendsto
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
-    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p)
     (hM : Martingale M 𝓕 μ)
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     ∀ᵐ ω ∂μ, ∃ c : ℝ, Tendsto (fun n : ℕ => discreteSample M n ω) atTop (𝓝 c) := by
-  obtain ⟨R', hR'⟩ := discreteSample_l1_bounded hp hR_nn hM hbound
+  obtain ⟨R', hR'⟩ := discreteSample_l1_bounded hp hM hbound
   exact (discreteSample_martingale hM).submartingale.exists_ae_tendsto_of_bdd hR'
 
 /-- The canonical limit of the discrete sample: a `(⨆ k, 𝓕 k)`-measurable
@@ -136,22 +127,22 @@ noncomputable def discreteSampleLimit
 /-- The discrete sample converges a.s. to its limit process. -/
 private lemma discreteSample_ae_tendsto_limitProcess
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
-    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p)
     (hM : Martingale M 𝓕 μ)
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     ∀ᵐ ω ∂μ,
       Tendsto (fun n : ℕ => M (n : ℝ) ω) atTop (𝓝 (discreteSampleLimit μ 𝓕 M ω)) := by
-  obtain ⟨R', hR'⟩ := discreteSample_l1_bounded hp hR_nn hM hbound
+  obtain ⟨R', hR'⟩ := discreteSample_l1_bounded hp hM hbound
   exact (discreteSample_martingale hM).submartingale.ae_tendsto_limitProcess hR'
 
 /-- The limit process is integrable (in `L^1`). -/
 private lemma discreteSampleLimit_integrable
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
-    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p) (hR_nn : 0 ≤ R)
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 ≤ p)
     (hM : Martingale M 𝓕 μ)
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     Integrable (discreteSampleLimit μ 𝓕 M) μ := by
-  obtain ⟨R', hR'⟩ := discreteSample_l1_bounded hp hR_nn hM hbound
+  obtain ⟨R', hR'⟩ := discreteSample_l1_bounded hp hM hbound
   have hAE : ∀ n, AEStronglyMeasurable (discreteSample M n) μ := fun n =>
     (((discreteSample_martingale hM).stronglyMeasurable n).mono
         ((natFiltration 𝓕).le _)).aestronglyMeasurable
@@ -178,9 +169,9 @@ theorem lp_continuous_martingale_converges_at_naturals
     (h : ContinuousLpMartingaleHyp μ 𝓕 M p) :
     ∃ (M_inf : Ω → ℝ), Integrable M_inf μ ∧
       ∀ᵐ ω ∂μ, Tendsto (fun n : ℕ => M (n : ℝ) ω) atTop (𝓝 (M_inf ω)) := by
-  obtain ⟨R, hR_nn, hR⟩ := h.lp_bounded
+  obtain ⟨R, _, hR⟩ := h.lp_bounded
   refine ⟨discreteSampleLimit μ 𝓕 M, ?_, ?_⟩
-  · exact discreteSampleLimit_integrable h.p_ge_one hR_nn h.is_martingale hR
-  · exact discreteSample_ae_tendsto_limitProcess h.p_ge_one hR_nn h.is_martingale hR
+  · exact discreteSampleLimit_integrable h.p_ge_one h.is_martingale hR
+  · exact discreteSample_ae_tendsto_limitProcess h.p_ge_one h.is_martingale hR
 
 end HybridVerify

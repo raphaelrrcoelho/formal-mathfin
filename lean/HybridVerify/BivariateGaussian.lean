@@ -82,13 +82,13 @@ theorem conditional_expectation_formula
       =ᵐ[P] fun ω => μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y) := by
   -- Set up β and Xhat.
   set β : ℝ := ρ * σ_X / σ_Y with hβ_def
-  set Xhat : Ω → ℝ := fun ω => μ_X + β * (Y ω - μ_Y) with hXhat_def
+  set Xhat : Ω → ℝ := fun ω => μ_X + β * (Y ω - μ_Y)
   -- σ(Y) sub-σ-algebra inclusion.
   have hY_le : MeasurableSpace.comap Y inferInstance ≤ mΩ := by
     rintro s ⟨t, ht, rfl⟩; exact h.Y_meas ht
   -- Xhat is σ(Y)-measurable (continuous function of Y).
-  have hY_smeas_comap : StronglyMeasurable[MeasurableSpace.comap Y inferInstance] Y := by
-    exact (Measurable.of_comap_le le_rfl).stronglyMeasurable
+  have hY_smeas_comap : StronglyMeasurable[MeasurableSpace.comap Y inferInstance] Y :=
+    (Measurable.of_comap_le le_rfl).stronglyMeasurable
   have hXhat_smeas : StronglyMeasurable[MeasurableSpace.comap Y inferInstance] Xhat := by
     refine StronglyMeasurable.add stronglyMeasurable_const ?_
     refine StronglyMeasurable.const_mul ?_ β
@@ -100,47 +100,18 @@ theorem conditional_expectation_formula
   have hXhat_int : Integrable Xhat P := by
     refine Integrable.add (integrable_const _) ?_
     exact (hY_int.sub (integrable_const _)).const_mul β
-  -- E[Xhat] = μ_X (since E[Y - μ_Y] = 0).
-  have hE_Xhat : ∫ ω, Xhat ω ∂P = μ_X := by
-    show ∫ ω, μ_X + β * (Y ω - μ_Y) ∂P = μ_X
-    have h_Yoff_int : Integrable (fun ω => Y ω - μ_Y) P :=
-      hY_int.sub (integrable_const μ_Y)
-    have h_βYoff_int : Integrable (fun ω => β * (Y ω - μ_Y)) P :=
-      h_Yoff_int.const_mul β
-    have h_add : ∫ ω, μ_X + β * (Y ω - μ_Y) ∂P
-               = ∫ ω, μ_X ∂P + ∫ ω, β * (Y ω - μ_Y) ∂P :=
-      integral_add (integrable_const μ_X) h_βYoff_int
-    rw [h_add, integral_const, integral_const_mul,
-        integral_sub hY_int (integrable_const _),
-        integral_const, h.mean_Y]
-    simp
   -- Conditional of Xhat given σ(Y): Xhat is σ(Y)-measurable, so E[Xhat | σ(Y)] = Xhat.
   have h_condXhat : P[Xhat | MeasurableSpace.comap Y inferInstance] = Xhat :=
     condExp_of_stronglyMeasurable hY_le hXhat_smeas hXhat_int
-  -- The pair (X − Xhat, Y) is jointly Gaussian.
-  -- It is (linearShift β) ∘ (X, Y).
-  have hXmXhat_eq : (fun ω => X ω - Xhat ω) = (fun ω => X ω - μ_X - β * (Y ω - μ_Y)) := by
-    funext ω; show _ = _; ring
+  -- The pair (X − β Y, Y) is jointly Gaussian: it is `(linearShift β) ∘ (X, Y)`.
   have hPair_eq :
-      (fun ω => (X ω - μ_X - β * (Y ω - μ_Y), Y ω - μ_Y))
-        = (linearShift β) ∘ (fun ω => (X ω - μ_X, Y ω - μ_Y)) := by
-    funext ω
-    simp [linearShift, Function.comp]
-  -- Need: HasGaussianLaw of the centered pair (X − μ_X, Y − μ_Y).
-  -- Translation by a constant preserves HasGaussianLaw via map_of_measurable
-  -- with the linear map (a, b) ↦ (a − μ_X, b − μ_Y). But translation by a
-  -- constant isn't linear; instead use HasGaussianLaw.add_const-style results.
-  -- For our purposes here we can sidestep and apply linearShift directly to
-  -- (X, Y), which is jointly Gaussian.
-  have hPair_eq2 :
       (fun ω => (X ω - β * Y ω, Y ω))
         = (linearShift β) ∘ (fun ω => (X ω, Y ω)) := by
-    funext ω
-    simp [linearShift, Function.comp]
-  have h_linShift_meas : Measurable (linearShift β) := (linearShift β).continuous.measurable
+    funext ω; simp [linearShift, Function.comp]
   have h_jointGaussian_diff : HasGaussianLaw (fun ω => (X ω - β * Y ω, Y ω)) P := by
-    rw [hPair_eq2]
-    exact h.joint_gaussian.map_of_measurable (linearShift β) h_linShift_meas
+    rw [hPair_eq]
+    exact h.joint_gaussian.map_of_measurable (linearShift β)
+      (linearShift β).continuous.measurable
   -- Cov(X − β Y, Y) = Cov(X, Y) − β · Cov(Y, Y) = ρ σ_X σ_Y − β σ_Y² = 0.
   have hcov_zero : cov[fun ω => X ω - β * Y ω, Y; P] = 0 := by
     have h_memLp_X : MemLp X 2 P := h.joint_gaussian.fst.memLp_two
@@ -190,9 +161,6 @@ theorem conditional_expectation_formula
     funext ω
     show X ω = (μ_X + β * (Y ω - μ_Y)) + (X ω - β * Y ω - (μ_X - β * μ_Y))
     ring
-  have h_int_XhatplusD : Integrable
-      (Xhat + (fun ω => X ω - β * Y ω - (μ_X - β * μ_Y))) P := by
-    rw [← h_X_decomp]; exact hX_int
   have h_cond_split :
       P[X | MeasurableSpace.comap Y inferInstance]
         =ᵐ[P] (P[Xhat | MeasurableSpace.comap Y inferInstance])
