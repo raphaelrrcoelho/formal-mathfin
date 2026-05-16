@@ -24,10 +24,10 @@
   and L^p convergence (5) currently rest on Mathlib's discrete machinery
   and a path-continuity argument — both are proved at our level using
   `lintegral_iSup` + Doob's L^p maximal inequality from
-  `HybridVerify.DoobLp`.
+  `HybridVerify.MathlibLp` (`MeasureTheory.maximal_ineq_Lp`).
 -/
 import Mathlib
-import HybridVerify.DoobLp
+import HybridVerify.MathlibLp
 
 namespace HybridVerify
 

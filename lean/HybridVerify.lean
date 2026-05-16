@@ -13,5 +13,5 @@ import HybridVerify.CondExpJensen
 import HybridVerify.ExpMin
 import HybridVerify.StoppedContinuousMartingale
 import HybridVerify.HittingTimeOpen
-import HybridVerify.DoobLp
+import HybridVerify.MathlibLp
 import HybridVerify.LpContinuousMartingaleConvergence
