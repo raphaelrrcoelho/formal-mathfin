@@ -36,16 +36,6 @@ open scoped Topology ENNReal NNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 
-/-- Hypotheses for Theorem 4.3.10: a continuous-time martingale on a
-    finite probability space, bounded in `L^p`, with continuous paths. -/
-structure ContinuousLpMartingaleHyp
-    (μ : Measure Ω) [IsFiniteMeasure μ] (𝓕 : Filtration ℝ mΩ)
-    (M : ℝ → Ω → ℝ) (p : ℝ) : Prop where
-  p_ge_one : 1 ≤ p
-  is_martingale : Martingale M 𝓕 μ
-  lp_bounded : ∃ R : ℝ, 0 ≤ R ∧ ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R
-  continuous_paths : ∀ ω, Continuous (fun t => M t ω)
-
 /-- Discrete-time sample of a continuous-time process at natural times. -/
 noncomputable def discreteSample (M : ℝ → Ω → ℝ) (n : ℕ) (ω : Ω) : ℝ :=
   M (n : ℝ) ω
@@ -165,13 +155,15 @@ private lemma discreteSampleLimit_integrable
     extensions are documented as follow-on work. -/
 theorem lp_continuous_martingale_converges_at_naturals
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
-    {M : ℝ → Ω → ℝ} {p : ℝ}
-    (h : ContinuousLpMartingaleHyp μ 𝓕 M p) :
+    {M : ℝ → Ω → ℝ} {p : ℝ} (hp : 1 ≤ p)
+    (hM : Martingale M 𝓕 μ)
+    (hbound : ∃ R : ℝ,
+      ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     ∃ (M_inf : Ω → ℝ), Integrable M_inf μ ∧
       ∀ᵐ ω ∂μ, Tendsto (fun n : ℕ => M (n : ℝ) ω) atTop (𝓝 (M_inf ω)) := by
-  obtain ⟨R, _, hR⟩ := h.lp_bounded
-  refine ⟨discreteSampleLimit μ 𝓕 M, ?_, ?_⟩
-  · exact discreteSampleLimit_integrable h.p_ge_one h.is_martingale hR
-  · exact discreteSample_ae_tendsto_limitProcess h.p_ge_one h.is_martingale hR
+  obtain ⟨R, hR⟩ := hbound
+  exact ⟨discreteSampleLimit μ 𝓕 M,
+    discreteSampleLimit_integrable hp hM hR,
+    discreteSample_ae_tendsto_limitProcess hp hM hR⟩
 
 end HybridVerify
