@@ -169,4 +169,82 @@ lemma integral_exp_mul_gaussianPDFReal_Ioi (a c : ℝ) :
     congr 1; ext y; simp [Set.mem_Ioi, sub_lt_iff_lt_add, add_comm]
   rw [h_int_eq, h_shift, gaussianReal_Ioi_toReal, neg_sub]
 
+/-! ### Risk-neutral lognormal hypothesis -/
+
+/-- The risk-neutral lognormal hypothesis for the Black-Scholes model.
+Under the risk-neutral measure `Q`, `S_T = S_0 · exp((r − σ²/2)T + σ√T · Z)`
+with `Z ~ N(0, 1)`. -/
+structure BSCallHyp {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    (Q : Measure Ω) [IsProbabilityMeasure Q]
+    (S_0 K r σ T : ℝ) (Z : Ω → ℝ) : Prop where
+  S_0_pos : 0 < S_0
+  K_pos : 0 < K
+  σ_pos : 0 < σ
+  T_pos : 0 < T
+  Z_law : HasLaw Z (gaussianReal 0 1) Q
+
+/-- `d₁` parameter in the BS formula. -/
+noncomputable def bsd1 (S_0 K r σ T : ℝ) : ℝ :=
+  (Real.log (S_0 / K) + (r + σ^2 / 2) * T) / (σ * Real.sqrt T)
+
+/-- `d₂ = d₁ − σ√T`. -/
+noncomputable def bsd2 (S_0 K r σ T : ℝ) : ℝ :=
+  bsd1 S_0 K r σ T - σ * Real.sqrt T
+
+/-- Terminal price `S_T(z) = S_0 · exp((r − σ²/2)T + σ√T · z)` viewed as a
+function of the standard-normal sample. -/
+noncomputable def bsTerminal (S_0 r σ T z : ℝ) : ℝ :=
+  S_0 * Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
+
+/-- Alternative form for `d₂`: `bsd2 = (log(S_0/K) + (r − σ²/2)T) / (σ√T)`. -/
+private lemma bsd2_eq {S_0 K r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
+    bsd2 S_0 K r σ T = (Real.log (S_0 / K) + (r - σ^2 / 2) * T) / (σ * Real.sqrt T) := by
+  have hσsqT_pos : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
+  have h_sqT_sq : Real.sqrt T ^ 2 = T := Real.sq_sqrt hT.le
+  unfold bsd2 bsd1
+  field_simp
+  nlinarith [h_sqT_sq, sq_nonneg (σ * Real.sqrt T)]
+
+/-- Exercise-region identification: `S_T(z) > K ↔ z > −d_2`. -/
+private lemma bsTerminal_gt_K_iff {S_0 K r σ T : ℝ}
+    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
+    bsTerminal S_0 r σ T z > K ↔ z > -bsd2 S_0 K r σ T := by
+  have hσsqT_pos : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
+  have h_KS_pos : 0 < K / S_0 := div_pos hK hS_0
+  have h_log_div : Real.log (K / S_0) = -Real.log (S_0 / K) := by
+    rw [Real.log_div hK.ne' hS_0.ne', Real.log_div hS_0.ne' hK.ne']; ring
+  -- core: S_T(z) > K ↔ log(K/S_0) < (r - σ²/2)T + σ√T·z
+  have h_core_iff : bsTerminal S_0 r σ T z > K ↔
+      Real.log (K / S_0) < (r - σ^2 / 2) * T + σ * Real.sqrt T * z := by
+    unfold bsTerminal
+    rw [gt_iff_lt, mul_comm S_0, ← div_lt_iff₀ hS_0]
+    exact (Real.log_lt_iff_lt_exp h_KS_pos).symm
+  rw [h_core_iff, bsd2_eq hσ hT, gt_iff_lt]
+  rw [show -((Real.log (S_0 / K) + (r - σ^2 / 2) * T) / (σ * Real.sqrt T))
+        = (-(Real.log (S_0 / K) + (r - σ^2 / 2) * T)) / (σ * Real.sqrt T) from
+      (neg_div _ _).symm]
+  rw [div_lt_iff₀ hσsqT_pos]
+  rw [h_log_div]
+  constructor
+  · intro h; linarith
+  · intro h; linarith
+
+/-- `max(S_T(z) − K, 0)` as an indicator on the exercise region. -/
+private lemma max_payoff_eq_indicator {S_0 K r σ T : ℝ}
+    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
+    max (bsTerminal S_0 r σ T z - K) 0 =
+      (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
+        (fun z' => bsTerminal S_0 r σ T z' - K) z := by
+  by_cases h : z ∈ Set.Ioi (-bsd2 S_0 K r σ T)
+  · rw [Set.indicator_of_mem h]
+    have hST : bsTerminal S_0 r σ T z > K :=
+      (bsTerminal_gt_K_iff hS_0 hK hσ hT z).mpr h
+    exact max_eq_left (sub_nonneg.mpr hST.le)
+  · rw [Set.indicator_of_notMem h]
+    have hz_le : z ≤ -bsd2 S_0 K r σ T := not_lt.mp h
+    have hST_le : bsTerminal S_0 r σ T z ≤ K := by
+      by_contra hcontra
+      exact h ((bsTerminal_gt_K_iff hS_0 hK hσ hT z).mp (not_le.mp hcontra))
+    exact max_eq_right (sub_nonpos.mpr hST_le)
+
 end HybridVerify
