@@ -73,6 +73,26 @@ namespace IsFilteredPreBrownian
 
 variable [hX : IsFilteredPreBrownian X 𝓕 P] [IsFiniteMeasure P]
 
+/-- For a Borel-measurable `φ : ℝ → ℝ` with `∫ φ (X_t ω − X_s ω) ∂P = c`, the
+conditional expectation of `φ ∘ (X_t − X_s)` given `𝓕 s` is a.e. the constant
+`c`. Captures the "increment is independent of the past, so functions of it
+behave like deterministic constants under conditional expectation" pattern. -/
+private lemma condExp_func_increment {s t : ℝ≥0} (hst : s ≤ t)
+    (h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω))
+    {φ : ℝ → ℝ} (hφ : Measurable φ) {c : ℝ}
+    (h_int_eq : ∫ ω, φ (X t ω - X s ω) ∂P = c) :
+    P[fun ω ↦ φ (X t ω - X s ω) | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ c := by
+  have h_indep : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)) (𝓕 s) P := by
+    have := hX.indep s t hst
+    convert this using 2
+  have hφ_comap :
+      Measurable[MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)]
+        (fun ω ↦ φ (X t ω - X s ω)) :=
+    hφ.comp (Measurable.of_comap_le le_rfl)
+  have := condExp_indep_eq h_meas_diff.comap_le (𝓕.le s)
+    hφ_comap.stronglyMeasurable h_indep
+  rwa [h_int_eq] at this
+
 /-- For a filtered pre-Brownian motion `X`, the process `t ↦ (X t)² − t` is a martingale
 w.r.t. `𝓕`.
 
@@ -132,32 +152,15 @@ theorem squareSubTime_isMartingale :
   have h_condBs_sq :
       P[fun ω ↦ (X s ω) ^ 2 | (𝓕 s : MeasurableSpace Ω)] = fun ω ↦ (X s ω) ^ 2 :=
     condExp_of_stronglyMeasurable (𝓕.le s) h_smeas_s_sq h_int_Bs_sq
-  -- Independence machinery: align the user's `fun ω ↦ X t ω - X s ω` form with the
-  -- pi-arithmetic `(X t - X s)` form Degenne uses in `IsFilteredPreBrownian.indep`.
-  have h_indep : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)) (𝓕 s) P := by
-    have := hX.indep s t hst
-    convert this using 2
-  have h_le_comap : MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ) ≤ mΩ :=
-    h_meas_diff.comap_le
-  -- `E[X_t − X_s | 𝓕_s] =ᵐ 0`.
+  -- `E[X_t − X_s | 𝓕_s] =ᵐ 0` and `E[(X_t − X_s)² | 𝓕_s] =ᵐ (t − s)`
+  -- (the increment is independent of `𝓕 s`).
   have h_condDiff :
-      P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (0 : ℝ) := by
-    have := condExp_indep_eq h_le_comap (𝓕.le s)
-      (Measurable.of_comap_le le_rfl).stronglyMeasurable h_indep
-    rw [h_int_diff_zero] at this
-    exact this
-  -- `E[(X_t − X_s)² | 𝓕_s] =ᵐ (t − s)`.
-  have h_diff_sq_meas_comap :
-      Measurable[MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)]
-        (fun ω ↦ (X t ω - X s ω) ^ 2) :=
-    (continuous_id.pow 2).measurable.comp (Measurable.of_comap_le le_rfl)
+      P[fun ω ↦ X t ω - X s ω | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (0 : ℝ) :=
+    condExp_func_increment hst h_meas_diff measurable_id h_int_diff_zero
   have h_condDiffSq :
       P[fun ω ↦ (X t ω - X s ω) ^ 2 | (𝓕 s : MeasurableSpace Ω)]
-        =ᵐ[P] fun _ ↦ ((t : ℝ) - (s : ℝ)) := by
-    have := condExp_indep_eq h_le_comap (𝓕.le s)
-      h_diff_sq_meas_comap.stronglyMeasurable h_indep
-    rw [h_int_diff_sq_zero] at this
-    exact this
+        =ᵐ[P] fun _ ↦ ((t : ℝ) - (s : ℝ)) :=
+    condExp_func_increment hst h_meas_diff (measurable_id.pow_const 2) h_int_diff_sq_zero
   -- Pull-out for the cross term.
   have h_cross_eq :
       (fun ω ↦ X s ω * (X t ω - X s ω)) = (X s) * (fun ω ↦ X t ω - X s ω) := rfl
@@ -323,23 +326,12 @@ theorem waldExponential_isMartingale (α : ℝ) :
         ← Real.exp_add]
     rw [show -(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) + α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2 = 0
         from by ring, Real.exp_zero]
-  -- Independence: `D_{st}` is a function of `(X_t − X_s)`, which is independent of `𝓕_s`.
-  have h_indep : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)) (𝓕 s) P := by
-    have := hX.indep s t hst
-    convert this using 2
-  have h_le_comap : MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ) ≤ mΩ :=
-    h_meas_diff.comap_le
-  have h_phi : Continuous fun x : ℝ ↦
-      Real.exp (α * x - α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) :=
-    Real.continuous_exp.comp ((continuous_const.mul continuous_id).sub continuous_const)
-  have h_Dst_meas_comap :
-      Measurable[MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)] Dst :=
-    h_phi.measurable.comp (Measurable.of_comap_le le_rfl)
-  have h_condDst : P[Dst | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (1 : ℝ) := by
-    have := condExp_indep_eq h_le_comap (𝓕.le s)
-      h_Dst_meas_comap.stronglyMeasurable h_indep
-    rw [h_int_Dst_eq_one] at this
-    exact this
+  -- `E[D_{st} | 𝓕_s] =ᵐ 1` (the increment is independent of `𝓕 s`).
+  have h_condDst : P[Dst | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (1 : ℝ) :=
+    condExp_func_increment hst h_meas_diff
+      (Real.continuous_exp.comp
+        ((continuous_const.mul continuous_id).sub continuous_const)).measurable
+      h_int_Dst_eq_one
   -- Pull-out: `E[M_s · D_{st} | 𝓕_s] =ᵐ M_s · E[D_{st} | 𝓕_s] =ᵐ M_s · 1 = M_s`.
   have h_int_Ms : Integrable Ms P := by
     have hMs_factor : Ms = (fun ω ↦ Real.exp (-(α ^ 2 * (s : ℝ) / 2))
