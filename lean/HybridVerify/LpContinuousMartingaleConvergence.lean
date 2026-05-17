@@ -20,27 +20,46 @@
        (de la Vallée-Poussin) and combined with a.s. convergence yields
        L^p convergence (Vitali).
 
-  The first three steps are written out below. (4) and (5) remain follow-on:
+  Steps 3 and 5 are proved below; step 4 is a documented gap.
 
-  Step 5 plan (cleanest known route):
-    • Define `S ω := ⨆ k : ℕ, ‖discreteSample M k ω‖ₑ : Ω → ℝ≥0∞` and reuse
-      `HybridVerify.runMax` machinery from `HybridVerify.MathlibLp` (helper
-      `runMax_pow_lintegral_lt_top` is the close analogue) to bound
-      `∫⁻ ω, S ω ^ p ∂μ ≤ ((p/(p-1)) · R)^p` via Doob + `lintegral_iSup`.
-    • Define `M^* ω := (S ω).toReal` and show `MemLp M^* (ofReal p) μ`.
-    • Apply `ProbabilityTheory.uniformIntegrable_of_dominated_singleton`
-      (`BrownianMotion.StochasticIntegral.UniformIntegrable`, Degenne) to get
-      `UniformIntegrable (discreteSample M) (ofReal p) μ` from the dominator.
-    • Finish with Mathlib's `MeasureTheory.tendsto_Lp_finite_of_tendsto_ae`
-      (Vitali) using the already-proved `discreteSample_ae_tendsto_limitProcess`.
+  Step 3 (`p ≥ 1`, natural-time a.s. convergence): proved as
+  `lp_continuous_martingale_converges_at_naturals`. Uses Mathlib's
+  `Submartingale.ae_tendsto_limitProcess` after transferring the `L^p` bound
+  to an `L^1` bound (Hölder on a finite measure space) at the natural-time
+  sub-filtration.
 
-  Step 4 plan: needs continuous-time Doob (`ProbabilityTheory.maximal_ineq_norm`
-  in `BrownianMotion.StochasticIntegral.DoobLp`) applied to the increment
-  martingale `(M_t − M_n)_{t ∈ [n, n+1]}`, plus a path-continuity (`IsCadlag`)
-  hypothesis on `M`. Note that Degenne's own
-  `IsSquareIntegrable.ae_tendsto_limitProcess` /
+  Step 5 (`p > 1`, natural-time `L^p` convergence): proved as
+  `lp_continuous_martingale_tendsto_eLpNorm_at_naturals`. Doob's `L^p`
+  maximal inequality (`MathlibLp.maximal_ineq_Lp`) bounds the running max;
+  monotone convergence (`lintegral_iSup'`) lifts it to the infinite sup
+  `S ω := ⨆_k ‖N_k ω‖ₑ`, yielding `MemLp ((S ω).toReal) p`. Degenne's
+  `uniformIntegrable_of_dominated_singleton`
+  (`BrownianMotion.StochasticIntegral.UniformIntegrable`) then gives
+  `UniformIntegrable (discreteSample M) (ofReal p) μ`, and Mathlib's Vitali
+  (`tendsto_Lp_finite_of_tendsto_ae`) closes it.
+
+  Step 4 (continuous-time bridge — pending). By path right-continuity the
+  continuous-time limit `t → ∞` should agree with the natural-time limit.
+  Pieces needed:
+    (a) Shift abstraction: filtration `𝓕_n t := 𝓕 (n + t)` over `ℝ≥0`
+        and increment martingale `Y_n t ω := M (n + t) ω − M n ω`. Adaptedness
+        is immediate for `t ≥ 0` (NNReal time); the conditional-expectation
+        property reduces to `hM.condExp_ae_eq` on the shifted indices.
+    (b) Apply `ProbabilityTheory.maximal_ineq_norm` from
+        `BrownianMotion.StochasticIntegral.DoobLp` to `Y_n` at index
+        `1 : ℝ≥0`, giving
+        `ε · P.real {ω | ε ≤ ⨆ t : Iic 1, ‖Y_n t ω‖} ≤ E[|M_{n+1} − M_n|]`.
+    (c) Step 5 + triangle gives `‖M_{n+1} − M_n‖_p → 0`; Hölder on the
+        finite measure space lifts to L¹, so the RHS of (b) tends to `0`.
+        Hence `sup_{t ∈ [n, n+1]} |M_t − M_n| → 0` in measure.
+    (d) Combine with step 3 (lifted from a.s. to in-measure via
+        `tendstoInMeasure_of_tendsto_ae`) to get continuous-time convergence
+        in measure `M t → L` as `t → ∞`.
+  Degenne's own `IsSquareIntegrable.ae_tendsto_limitProcess` and
   `tendsto_eLpNorm_two_limitProcess` are still `sorry` upstream, so this
-  cannot just be transported — it requires net new mathematical work.
+  cannot be transported — it's genuinely new mathematical work. Estimated
+  scope: ~200-300 lines of Lean, dominated by (a) (~80-150 lines of
+  shifted-filtration + increment-martingale plumbing).
 -/
 import Mathlib
 import HybridVerify.MathlibLp
