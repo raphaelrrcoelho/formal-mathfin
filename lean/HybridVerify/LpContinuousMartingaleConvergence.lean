@@ -64,6 +64,7 @@
 import Mathlib
 import HybridVerify.MathlibLp
 import BrownianMotion.StochasticIntegral.UniformIntegrable
+import BrownianMotion.StochasticIntegral.DoobLp
 
 namespace HybridVerify
 
@@ -381,4 +382,231 @@ theorem lp_continuous_martingale_tendsto_eLpNorm_at_naturals
       (norm_discreteSample_le_dominator hp hM hbound)).unifIntegrable
     (discreteSample_ae_tendsto_limitProcess hp.le hM hbound)
 
-end HybridVerify
+/-! ### Step 4: Continuous-time bridge. -/
+
+/-- Shifted filtration on `ℝ≥0` starting at natural index `n`:
+`(shiftedFiltration 𝓕 n).seq t = 𝓕 ((n : ℝ) + t)`. -/
+def shiftedFiltration (𝓕 : Filtration ℝ mΩ) (n : ℕ) : Filtration ℝ≥0 mΩ where
+  seq t := 𝓕 ((n : ℝ) + (t : ℝ))
+  mono' s t hst := 𝓕.mono <| by
+    have : (s : ℝ) ≤ (t : ℝ) := by exact_mod_cast hst
+    linarith
+  le' _ := 𝓕.le _
+
+/-- Shifted continuous-time process `(t : ℝ≥0) ↦ M ((n : ℝ) + t)`. -/
+private noncomputable def shiftedProc (M : ℝ → Ω → ℝ) (n : ℕ) (t : ℝ≥0) (ω : Ω) : ℝ :=
+  M ((n : ℝ) + (t : ℝ)) ω
+
+/-- Constant-in-time process `(_ : ℝ≥0) ↦ M (n : ℝ)`. -/
+private noncomputable def constProc (M : ℝ → Ω → ℝ) (n : ℕ) (_t : ℝ≥0) (ω : Ω) : ℝ :=
+  M (n : ℝ) ω
+
+/-- Increment process `Y_n t ω := M ((n : ℝ) + t) ω - M (n : ℝ) ω`, indexed by `t : ℝ≥0`. -/
+noncomputable def incrementProc (M : ℝ → Ω → ℝ) (n : ℕ) (t : ℝ≥0) (ω : Ω) : ℝ :=
+  M ((n : ℝ) + (t : ℝ)) ω - M (n : ℝ) ω
+
+private lemma shiftedProc_martingale {μ : Measure Ω} {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} (hM : Martingale M 𝓕 μ) (n : ℕ) :
+    Martingale (shiftedProc M n) (shiftedFiltration 𝓕 n) μ := by
+  refine ⟨fun t => hM.stronglyMeasurable _, fun s t hst => ?_⟩
+  have h_le : (n : ℝ) + (s : ℝ) ≤ (n : ℝ) + (t : ℝ) := by
+    have : (s : ℝ) ≤ (t : ℝ) := by exact_mod_cast hst
+    linarith
+  exact hM.condExp_ae_eq h_le
+
+private lemma constProc_martingale {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} (hM : Martingale M 𝓕 μ) (n : ℕ) :
+    Martingale (constProc M n) (shiftedFiltration 𝓕 n) μ := by
+  have h_le_shifted : ∀ s : ℝ≥0,
+      (𝓕 (n : ℝ) : MeasurableSpace Ω) ≤ (shiftedFiltration 𝓕 n).seq s := fun s =>
+    𝓕.mono (by have : (0 : ℝ) ≤ (s : ℝ) := s.coe_nonneg; linarith)
+  refine ⟨fun t => (hM.stronglyMeasurable _).mono (h_le_shifted t), fun s _t _hst => ?_⟩
+  have hM_meas : StronglyMeasurable[(shiftedFiltration 𝓕 n).seq s] (M (n : ℝ)) :=
+    (hM.stronglyMeasurable _).mono (h_le_shifted s)
+  show μ[fun ω => M (n : ℝ) ω | (shiftedFiltration 𝓕 n).seq s] =ᵐ[μ] fun ω => M (n : ℝ) ω
+  rw [condExp_of_stronglyMeasurable ((shiftedFiltration 𝓕 n).le _) hM_meas (hM.integrable _)]
+
+private lemma incrementProc_eq_sub (M : ℝ → Ω → ℝ) (n : ℕ) :
+    incrementProc M n = shiftedProc M n - constProc M n := rfl
+
+private lemma incrementProc_martingale {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} (hM : Martingale M 𝓕 μ) (n : ℕ) :
+    Martingale (incrementProc M n) (shiftedFiltration 𝓕 n) μ := by
+  rw [incrementProc_eq_sub]
+  exact (shiftedProc_martingale hM n).sub (constProc_martingale hM n)
+
+/-- Right-continuity of `M (· , ω)` transfers to the increment `incrementProc M n (· , ω)`. -/
+private lemma incrementProc_isRightContinuous
+    {M : ℝ → Ω → ℝ} (hM_cont : ∀ ω, Function.IsRightContinuous (fun t : ℝ => M t ω))
+    (n : ℕ) (ω : Ω) :
+    Function.IsRightContinuous (fun t : ℝ≥0 => incrementProc M n t ω) := by
+  intro a
+  refine ContinuousWithinAt.sub ?_ continuousWithinAt_const
+  set shift : ℝ≥0 → ℝ := fun t => ((n : ℝ) + (t : ℝ)) with shift_def
+  have h_shift_cont : Continuous shift :=
+    continuous_const.add NNReal.continuous_coe
+  have h_f_rc : ContinuousWithinAt (fun u : ℝ => M u ω) (Set.Ioi (shift a)) (shift a) :=
+    hM_cont ω _
+  have h_mapsto : Set.MapsTo shift (Set.Ioi a) (Set.Ioi (shift a)) := fun t ht => by
+    have hlt : (a : ℝ) < (t : ℝ) := by exact_mod_cast ht
+    show shift a < shift t
+    simp only [shift_def]; linarith
+  exact h_f_rc.comp h_shift_cont.continuousWithinAt h_mapsto
+
+/-- L^p triangle: `eLpNorm (M_(n+1) - M_n) p μ → 0` from step 5 + reindex. -/
+private lemma eLpNorm_increment_p_tendsto_zero
+    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
+    (hM : Martingale M 𝓕 μ)
+    (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
+    Tendsto (fun n : ℕ => eLpNorm
+      (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) := by
+  set L : Ω → ℝ := discreteSampleLimit μ 𝓕 M
+  have h_meas_M : ∀ k : ℝ, AEStronglyMeasurable (M k) μ := fun k =>
+    ((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable
+  have h_meas_L : AEStronglyMeasurable L μ :=
+    (Submartingale.memLp_limitProcess (discreteSample_martingale hM).submartingale
+      (fun _ => hbound _)).aestronglyMeasurable
+  have h_one_le_p : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := ENNReal.one_le_ofReal.mpr hp.le
+  -- step 5 gives ‖M n - L‖_p → 0
+  have hL_step5 : Tendsto (fun n : ℕ => eLpNorm
+      (fun ω => M (n : ℝ) ω - L ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) :=
+    lp_continuous_martingale_tendsto_eLpNorm_at_naturals hp hM hbound
+  -- ‖M (n+1) - L‖_p → 0 (reindex via `tendsto_add_atTop_iff_nat 1`)
+  have hL_shift : Tendsto (fun n : ℕ => eLpNorm
+      (fun ω => M ((n : ℝ) + 1) ω - L ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) := by
+    have h_pre : Tendsto (fun n : ℕ => eLpNorm
+        (fun ω => M ((n + 1 : ℕ) : ℝ) ω - L ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) :=
+      (tendsto_add_atTop_iff_nat 1).mpr hL_step5
+    refine h_pre.congr (fun n => ?_)
+    congr 1; funext ω; congr 2; push_cast; ring
+  -- triangle: ‖M(n+1) - M n‖_p ≤ ‖M(n+1) - L‖_p + ‖M n - L‖_p
+  have h_triangle : ∀ n : ℕ,
+      eLpNorm (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) (ENNReal.ofReal p) μ
+        ≤ eLpNorm (fun ω => M ((n : ℝ) + 1) ω - L ω) (ENNReal.ofReal p) μ
+          + eLpNorm (fun ω => M (n : ℝ) ω - L ω) (ENNReal.ofReal p) μ := fun n => by
+    have h_eq : (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω)
+        = (fun ω => (M ((n : ℝ) + 1) ω - L ω) - (M (n : ℝ) ω - L ω)) := by funext; ring
+    rw [h_eq]
+    exact eLpNorm_sub_le ((h_meas_M _).sub h_meas_L) ((h_meas_M _).sub h_meas_L) h_one_le_p
+  have h_rhs : Tendsto (fun n : ℕ =>
+      eLpNorm (fun ω => M ((n : ℝ) + 1) ω - L ω) (ENNReal.ofReal p) μ +
+      eLpNorm (fun ω => M (n : ℝ) ω - L ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) := by
+    have h : Tendsto _ atTop (𝓝 ((0 : ℝ≥0∞) + (0 : ℝ≥0∞))) :=
+      Filter.Tendsto.add hL_shift hL_step5
+    rwa [add_zero] at h
+  exact tendsto_of_tendsto_of_tendsto_of_le_of_le
+    (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_rhs (fun _ => zero_le _) h_triangle
+
+/-- L^1 triangle: `eLpNorm (M_(n+1) - M_n) 1 μ → 0` via Hölder from `p → 0`. -/
+private lemma eLpNorm_increment_one_tendsto_zero
+    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
+    (hM : Martingale M 𝓕 μ)
+    (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
+    Tendsto (fun n : ℕ => eLpNorm
+      (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ) atTop (𝓝 0) := by
+  have hp_pos : 0 < p := lt_trans zero_lt_one hp
+  have h_meas_diff : ∀ n : ℕ,
+      AEStronglyMeasurable (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) μ := fun n =>
+    ((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable.sub
+      ((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable
+  have h_one_le_p : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := ENNReal.one_le_ofReal.mpr hp.le
+  set C : ℝ≥0∞ := μ Set.univ ^ (1 - 1 / p) with C_def
+  have hLp : Tendsto (fun n : ℕ => eLpNorm
+      (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) (ENNReal.ofReal p) μ) atTop (𝓝 0) :=
+    eLpNorm_increment_p_tendsto_zero hp hM hbound
+  have h_holder : ∀ n : ℕ, eLpNorm (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ
+      ≤ eLpNorm (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) (ENNReal.ofReal p) μ * C := fun n => by
+    refine (eLpNorm_le_eLpNorm_mul_rpow_measure_univ (μ := μ)
+      (p := 1) (q := ENNReal.ofReal p) h_one_le_p (h_meas_diff n)).trans ?_
+    rw [C_def, ENNReal.toReal_one, ENNReal.toReal_ofReal hp_pos.le, one_div_one]
+  have hC_ne_top : C ≠ ⊤ :=
+    ENNReal.rpow_ne_top_of_nonneg
+      (by have : 1 / p ≤ 1 := (div_le_one hp_pos).mpr hp.le; linarith)
+      (measure_ne_top _ _)
+  have h_bound_tendsto : Tendsto (fun n : ℕ => eLpNorm
+      (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) (ENNReal.ofReal p) μ * C) atTop (𝓝 0) := by
+    have h := ENNReal.Tendsto.mul_const hLp (Or.inr hC_ne_top)
+    rwa [zero_mul] at h
+  exact tendsto_of_tendsto_of_tendsto_of_le_of_le
+    (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_bound_tendsto (fun _ => zero_le _) h_holder
+
+/-- The increment's `L^1` integral, in real-valued form. -/
+private lemma integral_norm_increment_tendsto_zero
+    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
+    (hM : Martingale M 𝓕 μ)
+    (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
+    Tendsto (fun n : ℕ => ∫ ω, ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖ ∂μ) atTop (𝓝 0) := by
+  have h_meas : ∀ n : ℕ,
+      AEStronglyMeasurable (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) μ := fun n =>
+    ((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable.sub
+      ((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable
+  have h_eLp1 := eLpNorm_increment_one_tendsto_zero hp hM hbound
+  have h_eq : (fun n : ℕ => ∫ ω, ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖ ∂μ) =
+      (fun n : ℕ => (eLpNorm (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ).toReal) := by
+    funext n
+    rw [integral_norm_eq_lintegral_enorm (h_meas n), eLpNorm_one_eq_lintegral_enorm]
+  rw [h_eq]
+  have h_toReal :
+      Tendsto (fun n : ℕ => (eLpNorm (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) 1 μ).toReal)
+        atTop (𝓝 ((0 : ℝ≥0∞).toReal)) :=
+    (ENNReal.tendsto_toReal ENNReal.zero_ne_top).comp h_eLp1
+  simpa using h_toReal
+
+/-- The L^1 integrability of each increment (each is in L^p, p > 1, on a finite measure space). -/
+private lemma increment_integrable
+    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
+    (hM : Martingale M 𝓕 μ)
+    (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) (n : ℕ) :
+    Integrable (fun ω => M ((n : ℝ) + 1) ω - M (n : ℝ) ω) μ := by
+  have h_one_le_p : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := ENNReal.one_le_ofReal.mpr hp.le
+  have hML_n1 : MemLp (M ((n : ℝ) + 1)) (ENNReal.ofReal p) μ :=
+    ⟨((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable,
+     (hbound _).trans_lt ENNReal.ofReal_lt_top⟩
+  have hML_n : MemLp (M (n : ℝ)) (ENNReal.ofReal p) μ :=
+    ⟨((hM.stronglyMeasurable _).mono (𝓕.le _)).aestronglyMeasurable,
+     (hbound _).trans_lt ENNReal.ofReal_lt_top⟩
+  exact (hML_n1.sub hML_n).integrable h_one_le_p
+
+/-- Sup-in-measure: for each `ε > 0`, `μ.real {ω | ε ≤ sup_{t ≤ 1} |incrementProc M n t ω|} → 0`. -/
+private lemma sup_increment_measure_tendsto_zero
+    {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
+    {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
+    (hM : Martingale M 𝓕 μ)
+    (hM_cont : ∀ ω, Function.IsRightContinuous (fun t : ℝ => M t ω))
+    (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
+    {ε : ℝ} (hε : 0 < ε) :
+    Tendsto (fun n : ℕ => μ.real {ω | ε ≤ ⨆ i : Set.Iic (1 : ℝ≥0),
+      ‖incrementProc M n i ω‖}) atTop (𝓝 0) := by
+  set S : ℕ → Set Ω := fun n =>
+    {ω | ε ≤ ⨆ i : Set.Iic (1 : ℝ≥0), ‖incrementProc M n i ω‖} with S_def
+  -- Pointwise equality: ‖incrementProc M n 1 ω‖ = ‖M (n+1) ω - M n ω‖
+  have h_norm_eq : ∀ n : ℕ, (fun ω => ‖incrementProc M n 1 ω‖) =
+      (fun ω => ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖) := fun n => by
+    funext ω
+    show ‖M ((n : ℝ) + ((1 : ℝ≥0) : ℝ)) ω - M (n : ℝ) ω‖ = _
+    rw [NNReal.coe_one]
+  -- maximal_ineq_norm + setIntegral_le_integral chain
+  have h_bound : ∀ n : ℕ,
+      ε * μ.real (S n) ≤ ∫ ω, ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖ ∂μ := fun n => by
+    have h_max := ProbabilityTheory.maximal_ineq_norm (incrementProc_martingale hM n) ε 1
+      (incrementProc_isRightContinuous hM_cont n)
+    rw [smul_eq_mul] at h_max
+    refine h_max.trans ?_
+    rw [show (fun ω => ‖incrementProc M n 1 ω‖) = (fun ω => ‖M ((n : ℝ) + 1) ω - M (n : ℝ) ω‖)
+      from h_norm_eq n]
+    exact setIntegral_le_integral (increment_integrable hp hM hbound n).norm
+      (Filter.Eventually.of_forall fun _ => norm_nonneg _)
+  -- ε * μ.real S → 0 by sandwich with integral_norm_increment_tendsto_zero
+  have h_int := integral_norm_increment_tendsto_zero hp hM hbound
+  have h_eps_mul : Tendsto (fun n : ℕ => ε * μ.real (S n)) atTop (𝓝 0) :=
+    tendsto_of_tendsto_of_tendsto_of_le_of_le tendsto_const_nhds h_int
+      (fun n => mul_nonneg hε.le measureReal_nonneg) h_bound
+  -- divide by ε
+  have h_div := h_eps_mul.const_mul ε⁻¹
+  simp only [mul_zero] at h_div
+  refine h_div.congr fun n => ?_
+  rw [← mul_assoc, inv_mul_cancel₀ hε.ne', one_mul]
