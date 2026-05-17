@@ -20,11 +20,27 @@
        (de la Vallée-Poussin) and combined with a.s. convergence yields
        L^p convergence (Vitali).
 
-  The first three steps are written out below. The continuous bridge (4)
-  and L^p convergence (5) currently rest on Mathlib's discrete machinery
-  and a path-continuity argument — both are proved at our level using
-  `lintegral_iSup` + Doob's L^p maximal inequality from
-  `HybridVerify.MathlibLp` (`MeasureTheory.maximal_ineq_Lp`).
+  The first three steps are written out below. (4) and (5) remain follow-on:
+
+  Step 5 plan (cleanest known route):
+    • Define `S ω := ⨆ k : ℕ, ‖discreteSample M k ω‖ₑ : Ω → ℝ≥0∞` and reuse
+      `HybridVerify.runMax` machinery from `HybridVerify.MathlibLp` (helper
+      `runMax_pow_lintegral_lt_top` is the close analogue) to bound
+      `∫⁻ ω, S ω ^ p ∂μ ≤ ((p/(p-1)) · R)^p` via Doob + `lintegral_iSup`.
+    • Define `M^* ω := (S ω).toReal` and show `MemLp M^* (ofReal p) μ`.
+    • Apply `ProbabilityTheory.uniformIntegrable_of_dominated_singleton`
+      (`BrownianMotion.StochasticIntegral.UniformIntegrable`, Degenne) to get
+      `UniformIntegrable (discreteSample M) (ofReal p) μ` from the dominator.
+    • Finish with Mathlib's `MeasureTheory.tendsto_Lp_finite_of_tendsto_ae`
+      (Vitali) using the already-proved `discreteSample_ae_tendsto_limitProcess`.
+
+  Step 4 plan: needs continuous-time Doob (`ProbabilityTheory.maximal_ineq_norm`
+  in `BrownianMotion.StochasticIntegral.DoobLp`) applied to the increment
+  martingale `(M_t − M_n)_{t ∈ [n, n+1]}`, plus a path-continuity (`IsCadlag`)
+  hypothesis on `M`. Note that Degenne's own
+  `IsSquareIntegrable.ae_tendsto_limitProcess` /
+  `tendsto_eLpNorm_two_limitProcess` are still `sorry` upstream, so this
+  cannot just be transported — it requires net new mathematical work.
 -/
 import Mathlib
 import HybridVerify.MathlibLp
