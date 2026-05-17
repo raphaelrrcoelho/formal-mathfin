@@ -1,0 +1,92 @@
+/-
+  HybridVerify.BlackScholesCall
+
+  Derivation of the Black-Scholes European call pricing formula from the
+  risk-neutral lognormal hypothesis:
+
+    C(S_0, K, r, σ, T) = S_0 · Φ(d_1) − K · e^{-rT} · Φ(d_2)
+
+  where
+    d_1 = (log(S_0/K) + (r + σ²/2)T) / (σ√T)
+    d_2 = d_1 − σ√T = (log(S_0/K) + (r − σ²/2)T) / (σ√T)
+    Φ(x) = standard normal CDF = (gaussianReal 0 1 (Set.Iic x)).toReal
+
+  Hypothesis: under the risk-neutral measure Q, log(S_T/S_0) is Gaussian with
+  mean (r − σ²/2)T and variance σ²T.
+
+  No upstream BS or Itô calculus required; this is pure Gaussian integration.
+
+  Mathlib leverage: `gaussianReal`, `gaussianPDFReal`,
+  `gaussianReal_map_const_mul`, `gaussianReal_map_add_const`,
+  `gaussianReal_map_neg`, `integral_gaussianReal_eq_integral_smul`,
+  `integral_map`, `MeasureTheory.HasLaw`, `MeasureTheory.NoAtoms`.
+-/
+import Mathlib
+
+namespace HybridVerify
+
+open MeasureTheory ProbabilityTheory Real
+open scoped NNReal ENNReal
+
+/-! ### Standard normal CDF -/
+
+/-- The standard normal cumulative distribution function `Φ(x) = P(Z ≤ x)`
+where `Z ~ N(0, 1)`. -/
+noncomputable def Phi (x : ℝ) : ℝ :=
+  (gaussianReal 0 1 (Set.Iic x)).toReal
+
+lemma Phi_def (x : ℝ) : Phi x = (gaussianReal 0 1 (Set.Iic x)).toReal := rfl
+
+lemma Phi_nonneg (x : ℝ) : 0 ≤ Phi x := ENNReal.toReal_nonneg
+
+lemma Phi_eq_integral (x : ℝ) :
+    Phi x = ∫ z in Set.Iic x, gaussianPDFReal 0 1 z := by
+  have h1 : (1 : ℝ≥0) ≠ 0 := one_ne_zero
+  rw [Phi_def, gaussianReal_apply_eq_integral _ h1]
+  exact ENNReal.toReal_ofReal <| setIntegral_nonneg measurableSet_Iic
+    (fun _ _ => gaussianPDFReal_nonneg _ _ _)
+
+/-- `Φ(-x) = 1 − Φ(x)`. Symmetry of the standard normal around 0. -/
+lemma Phi_neg (x : ℝ) : Phi (-x) = 1 - Phi x := by
+  -- Standard normal is symmetric: gaussianReal 0 1 is invariant under negation
+  have hmap : (gaussianReal (0 : ℝ) 1).map (fun y => -y) = gaussianReal 0 1 := by
+    rw [gaussianReal_map_neg, neg_zero]
+  -- Iic(-x) under negation pulls back to Ici x
+  have h_preimage : (fun y : ℝ => -y) ⁻¹' Set.Iic (-x) = Set.Ici x := by
+    ext y; simp [Set.mem_Ici]
+  -- gaussianReal 0 1 (Iic(-x)) = gaussianReal 0 1 (Ici x)
+  have h_eq : gaussianReal (0 : ℝ) 1 (Set.Iic (-x)) = gaussianReal 0 1 (Set.Ici x) := by
+    conv_lhs => rw [← hmap]
+    rw [Measure.map_apply measurable_neg measurableSet_Iic, h_preimage]
+  -- Ici x and Iio x partition univ; under NoAtoms, Q(Iio x) = Q(Iic x)
+  have h_one_nz : (1 : ℝ≥0) ≠ 0 := one_ne_zero
+  haveI : NoAtoms (gaussianReal (0 : ℝ) 1) := noAtoms_gaussianReal h_one_nz
+  have h_iio_iic : gaussianReal (0 : ℝ) 1 (Set.Iic x) = gaussianReal 0 1 (Set.Iio x) := by
+    have h_decomp : Set.Iic x = Set.Iio x ∪ {x} := by
+      ext y; simp [Set.mem_Iic, le_iff_lt_or_eq, eq_comm]
+    have h_disj : Disjoint (Set.Iio x) ({x} : Set ℝ) :=
+      Set.disjoint_singleton_right.mpr (lt_irrefl x)
+    rw [h_decomp, measure_union h_disj (measurableSet_singleton _),
+        measure_singleton, add_zero]
+  have h_total : gaussianReal (0 : ℝ) 1 (Set.Iio x) + gaussianReal 0 1 (Set.Ici x)
+      = 1 := by
+    rw [← measure_union (Set.Iio_disjoint_Ici le_rfl) measurableSet_Ici,
+        Set.Iio_union_Ici, measure_univ]
+  -- gaussianReal 0 1 (Iic(-x)) = gaussianReal 0 1 (Ici x) = 1 - gaussianReal 0 1 (Iic x)
+  rw [Phi_def, h_eq, Phi_def]
+  have h_iic_finite : gaussianReal (0 : ℝ) 1 (Set.Iic x) ≠ ⊤ := (measure_lt_top _ _).ne
+  have h_sum : gaussianReal (0 : ℝ) 1 (Set.Iic x) + gaussianReal 0 1 (Set.Ici x) = 1 := by
+    rw [h_iio_iic]; exact h_total
+  have h_eq_sub : gaussianReal (0 : ℝ) 1 (Set.Ici x) = 1 - gaussianReal 0 1 (Set.Iic x) := by
+    refine ENNReal.eq_sub_of_add_eq h_iic_finite ?_
+    rw [add_comm]; exact h_sum
+  rw [h_eq_sub, ENNReal.toReal_sub_of_le (by
+        rw [show (1 : ℝ≥0∞) = gaussianReal (0 : ℝ) 1 Set.univ from measure_univ.symm]
+        exact measure_mono (Set.subset_univ _)) (by simp)]
+  rfl
+
+/-- `Φ(x) + Φ(-x) = 1`. -/
+lemma Phi_add_Phi_neg (x : ℝ) : Phi x + Phi (-x) = 1 := by
+  rw [Phi_neg]; ring
+
+end HybridVerify

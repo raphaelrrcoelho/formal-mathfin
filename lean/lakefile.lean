@@ -23,4 +23,4 @@ require mathlib from git
 -- [[hybrid-verify.lean.extra_requires]] so lean-interact also sees it.
 require BrownianMotion from git
   "https://github.com/RemyDegenne/brownian-motion.git" @
-  "51807683c5130238fd4013b2fbee314135e3d8d9"
+  "16d15eb42c8c4a612bd0aacb28078c1802597216"
