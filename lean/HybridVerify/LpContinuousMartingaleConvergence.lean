@@ -38,28 +38,35 @@
   `UniformIntegrable (discreteSample M) (ofReal p) μ`, and Mathlib's Vitali
   (`tendsto_Lp_finite_of_tendsto_ae`) closes it.
 
-  Step 4 (continuous-time bridge — pending). By path right-continuity the
+  Step 4 (continuous-time bridge — partial). By path right-continuity the
   continuous-time limit `t → ∞` should agree with the natural-time limit.
   Pieces needed:
     (a) Shift abstraction: filtration `𝓕_n t := 𝓕 (n + t)` over `ℝ≥0`
-        and increment martingale `Y_n t ω := M (n + t) ω − M n ω`. Adaptedness
-        is immediate for `t ≥ 0` (NNReal time); the conditional-expectation
-        property reduces to `hM.condExp_ae_eq` on the shifted indices.
+        and increment martingale `Y_n t ω := M (n + t) ω − M n ω`. **Done**:
+        `shiftedFiltration`, `shiftedProc`/`constProc`/`incrementProc`,
+        `incrementProc_martingale` (via `.sub` of the two component martingales),
+        `incrementProc_isRightContinuous`.
     (b) Apply `ProbabilityTheory.maximal_ineq_norm` from
         `BrownianMotion.StochasticIntegral.DoobLp` to `Y_n` at index
         `1 : ℝ≥0`, giving
         `ε · P.real {ω | ε ≤ ⨆ t : Iic 1, ‖Y_n t ω‖} ≤ E[|M_{n+1} − M_n|]`.
+        **Done**: see `sup_increment_measure_tendsto_zero`.
     (c) Step 5 + triangle gives `‖M_{n+1} − M_n‖_p → 0`; Hölder on the
         finite measure space lifts to L¹, so the RHS of (b) tends to `0`.
         Hence `sup_{t ∈ [n, n+1]} |M_t − M_n| → 0` in measure.
+        **Done**: `eLpNorm_increment_p_tendsto_zero`,
+        `eLpNorm_increment_one_tendsto_zero`,
+        `integral_norm_increment_tendsto_zero`,
+        `sup_increment_measure_tendsto_zero`.
     (d) Combine with step 3 (lifted from a.s. to in-measure via
         `tendstoInMeasure_of_tendsto_ae`) to get continuous-time convergence
-        in measure `M t → L` as `t → ∞`.
+        in measure `M t → L` as `t → ∞`. **Blocked**: a `Nat.floor` inclusion
+        argument requires `BddAbove (range fun i : Set.Iic 1 ↦ ‖increment i ω‖)`
+        a.s., which needs continuous-time Doob `L^p` applied to `incrementProc`
+        (right-continuous running max boundedness; ~50 more lines).
   Degenne's own `IsSquareIntegrable.ae_tendsto_limitProcess` and
   `tendsto_eLpNorm_two_limitProcess` are still `sorry` upstream, so this
-  cannot be transported — it's genuinely new mathematical work. Estimated
-  scope: ~200-300 lines of Lean, dominated by (a) (~80-150 lines of
-  shifted-filtration + increment-martingale plumbing).
+  cannot be transported — it's genuinely new mathematical work.
 -/
 import Mathlib
 import HybridVerify.MathlibLp
@@ -610,3 +617,24 @@ private lemma sup_increment_measure_tendsto_zero
   simp only [mul_zero] at h_div
   refine h_div.congr fun n => ?_
   rw [← mul_assoc, inv_mul_cancel₀ hε.ne', one_mul]
+
+/-! ### Final assembly (deferred — see docstring at top of file).
+
+The remaining `lp_continuous_martingale_tendstoInMeasure` would chain the helpers above with
+`tendstoInMeasure_of_tendsto_ae` (step 3 → in-measure for the discrete sample) and a `Nat.floor`
+set-inclusion argument:
+
+  {ω | ε ≤ ‖M t ω − L ω‖} ⊆ {ω | ε/2 ≤ ⨆ i : Set.Iic 1, ‖incrementProc M ⌊t⌋ i ω‖}
+                          ∪ {ω | ε/2 ≤ ‖M ⌊t⌋ ω − L ω‖}
+
+The technical blocker is that `⨆ i : Set.Iic 1, ‖…‖ ω` for a right-continuous (but not
+necessarily cadlag) trajectory does not automatically have `BddAbove` (range), so the natural
+inclusion `‖incrementProc M n s ω‖ ≤ ⨆ i, ‖incrementProc M n i ω‖` requires
+`le_ciSup` with a `BddAbove` hypothesis that needs to be discharged a.s. by continuous-time
+Doob `L^p` applied to `incrementProc` — a separate ~50-line block of new work.
+
+Discrete-time Doob `L^p` is already in this file as `lintegral_discreteSampleSup_rpow_le`; the
+continuous-time analogue would follow the same structure with `runMax` replaced by a
+right-continuous running max + reduction to a countable rational mesh via `IsRightContinuous`. -/
+
+end HybridVerify
