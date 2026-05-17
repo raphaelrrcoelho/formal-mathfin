@@ -75,9 +75,6 @@ def lo (i : StepIndex T) : ℝ := (i.1.1 : ℝ)
 /-- Upper endpoint of the interval, as a real. -/
 def hi (i : StepIndex T) : ℝ := (i.1.2 : ℝ)
 
-lemma lo_le_hi (i : StepIndex T) : i.lo ≤ i.hi := by
-  unfold lo hi; exact_mod_cast i.2.1
-
 lemma hi_le_T (i : StepIndex T) : i.hi ≤ (T : ℝ) := by
   unfold hi; exact_mod_cast i.2.2
 
@@ -91,10 +88,6 @@ lemma volume_interval_lt_top (i : StepIndex T) :
     (volume i.interval) ≠ ∞ := by
   rw [interval, Real.volume_Ioc]
   exact ENNReal.ofReal_ne_top
-
-lemma volume_interval_eq (i : StepIndex T) :
-    volume i.interval = ENNReal.ofReal (i.hi - i.lo) := by
-  rw [interval, Real.volume_Ioc]
 
 end StepIndex
 
@@ -204,7 +197,7 @@ lemma covariance_increment_aux (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ 
   all_goals rcases le_total (t : ℝ) u with htu | htu
   all_goals rcases le_total (t : ℝ) v with htv | htv
   all_goals rcases le_total (s : ℝ) v with hsv | hsv
-  all_goals simp_all [min_eq_left, min_eq_right, max_eq_left, max_eq_right]
+  all_goals simp_all
   all_goals nlinarith
 
 /-! ### The key isometry on the formal-combination space -/
@@ -215,64 +208,49 @@ step indicators in `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`. -/
 private lemma inner_wienerIncrementLp_eq {T : ℝ≥0} (i j : StepIndex T) :
     ⟪wienerIncrementLp (μ := μ) B i, wienerIncrementLp (μ := μ) B j⟫_ℝ =
       ⟪stepIndicatorLp T i, stepIndicatorLp T j⟫_ℝ := by
-  -- LHS: integral form via L2.inner_def + covariance_increment_aux
+  -- LHS: L2.inner_def reduces ⟪·, ·⟫ to ∫ ⟪f, g⟫_ℝ ∂μ; for real values
+  -- ⟪x, y⟫_ℝ = y * x (Mathlib star-product convention), so we commute via ring.
   have hLHS : ⟪wienerIncrementLp (μ := μ) B i, wienerIncrementLp (μ := μ) B j⟫_ℝ =
               max 0 ((min (i.hi : ℝ) j.hi) - (max (i.lo : ℝ) j.lo)) := by
     rw [L2.inner_def]
-    have hI : (wienerIncrementLp (μ := μ) B i : Ω → ℝ) =ᵐ[μ]
-                fun ω => B i.1.2 ω - B i.1.1 ω :=
-      MemLp.coeFn_toLp _
-    have hJ : (wienerIncrementLp (μ := μ) B j : Ω → ℝ) =ᵐ[μ]
-                fun ω => B j.1.2 ω - B j.1.1 ω :=
-      MemLp.coeFn_toLp _
     have h_eq : ∀ᵐ ω ∂μ,
         (⟪(wienerIncrementLp (μ := μ) B i : Ω → ℝ) ω,
           (wienerIncrementLp (μ := μ) B j : Ω → ℝ) ω⟫_ℝ : ℝ) =
         (B i.1.2 ω - B i.1.1 ω) * (B j.1.2 ω - B j.1.1 ω) := by
-      filter_upwards [hI, hJ] with ω hωI hωJ
-      rw [hωI, hωJ]
-      show (B j.1.2 ω - B j.1.1 ω) * (B i.1.2 ω - B i.1.1 ω) =
-           (B i.1.2 ω - B i.1.1 ω) * (B j.1.2 ω - B j.1.1 ω)
+      filter_upwards [MemLp.coeFn_toLp (memLp_increment_two (B := B) (μ := μ) i),
+                       MemLp.coeFn_toLp (memLp_increment_two (B := B) (μ := μ) j)]
+        with ω hωI hωJ
+      rw [show (wienerIncrementLp (μ := μ) B i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from hωI,
+          show (wienerIncrementLp (μ := μ) B j : Ω → ℝ) ω = B j.1.2 ω - B j.1.1 ω from hωJ]
+      show (B j.1.2 ω - B j.1.1 ω) * (B i.1.2 ω - B i.1.1 ω) = _
       ring
     rw [integral_congr_ae h_eq]
     exact covariance_increment_aux (B := B) (μ := μ) i.1.1 i.1.2 j.1.1 j.1.2 i.2.1 j.2.1
-  -- RHS: indicator inner product via real_inner_indicatorConstLp_one_indicatorConstLp_one
+  -- RHS: indicator inner product = volume of intersection = max 0 (min hi - max lo).
   have hRHS : ⟪stepIndicatorLp T i, stepIndicatorLp T j⟫_ℝ =
               max 0 ((min (i.hi : ℝ) j.hi) - (max (i.lo : ℝ) j.lo)) := by
     rw [stepIndicatorLp, stepIndicatorLp,
         MeasureTheory.L2.real_inner_indicatorConstLp_one_indicatorConstLp_one
           i.measurableSet_interval j.measurableSet_interval
           i.restrict_interval_ne_top j.restrict_interval_ne_top]
-    -- Compute (volume.restrict (Iic T)).real (i.interval ∩ j.interval)
     have h_inter : i.interval ∩ j.interval =
         Set.Ioc (max (i.lo : ℝ) j.lo) (min (i.hi : ℝ) j.hi) := by
       simp [StepIndex.interval, Set.Ioc_inter_Ioc]
-    have h_meas : MeasurableSet (i.interval ∩ j.interval) :=
-      i.measurableSet_interval.inter j.measurableSet_interval
-    rw [Measure.real_def, Measure.restrict_apply h_meas, h_inter]
-    -- Show (Ioc (max lo) (min hi)) ∩ Ioc 0 T = Ioc (max lo) (min hi)
-    have hi_le : (i.hi : ℝ) ≤ T := i.hi_le_T
-    have hi_lo_nn : (0 : ℝ) ≤ (i.lo : ℝ) := (i.1.1 : ℝ≥0).coe_nonneg
-    have hj_lo_nn : (0 : ℝ) ≤ (j.lo : ℝ) := (j.1.1 : ℝ≥0).coe_nonneg
-    have h_sub : Set.Ioc (max (i.lo : ℝ) j.lo) (min (i.hi : ℝ) j.hi) ⊆ Set.Ioc (0 : ℝ) (T : ℝ) := by
-      intro x hx
-      simp only [Set.mem_Ioc] at hx ⊢
-      refine ⟨lt_of_le_of_lt (le_max_of_le_left hi_lo_nn) hx.1, ?_⟩
-      exact hx.2.trans (le_trans (min_le_left _ _) hi_le)
-    rw [Set.inter_eq_left.mpr h_sub, Real.volume_Ioc]
-    by_cases h : max (i.lo : ℝ) j.lo ≤ min (i.hi : ℝ) j.hi
-    · rw [ENNReal.toReal_ofReal (by linarith),
-          max_eq_right (by linarith : (0 : ℝ) ≤ min (i.hi : ℝ) j.hi - max (i.lo : ℝ) j.lo)]
-    · push Not at h
-      have hneg : min (i.hi : ℝ) j.hi - max (i.lo : ℝ) j.lo < 0 := by linarith
-      rw [ENNReal.ofReal_of_nonpos hneg.le, ENNReal.toReal_zero,
-          max_eq_left hneg.le]
+    have h_sub :
+        Set.Ioc (max (i.lo : ℝ) j.lo) (min (i.hi : ℝ) j.hi) ⊆ Set.Ioc (0 : ℝ) (T : ℝ) := by
+      rintro x ⟨hxL, hxR⟩
+      exact ⟨lt_of_le_of_lt (le_max_of_le_left (i.1.1 : ℝ≥0).coe_nonneg) hxL,
+             hxR.trans (le_trans (min_le_left _ _) i.hi_le_T)⟩
+    rw [Measure.real_def,
+        Measure.restrict_apply (i.measurableSet_interval.inter j.measurableSet_interval),
+        h_inter, Set.inter_eq_left.mpr h_sub, Real.volume_Ioc,
+        ENNReal.toReal_ofReal', max_comm]
   rw [hLHS, hRHS]
 
 theorem wiener_assembly_isometry (T : ℝ≥0)
     (f : StepIndex T →₀ ℝ) :
     ‖wienerAssembly (μ := μ) B T f‖ = ‖stepAssembly T f‖ := by
-  -- Both norms are nonneg; show squares are equal.
+  -- Squares of both norms equal a common double-sum over `f.support × f.support`.
   have h_sq : ‖wienerAssembly (μ := μ) B T f‖ ^ 2 = ‖stepAssembly T f‖ ^ 2 := by
     rw [← @real_inner_self_eq_norm_sq _ _ _ (wienerAssembly (μ := μ) B T f),
         ← @real_inner_self_eq_norm_sq _ _ _ (stepAssembly T f)]
@@ -284,9 +262,7 @@ theorem wiener_assembly_isometry (T : ℝ≥0)
     rw [real_inner_smul_left, real_inner_smul_right,
         real_inner_smul_left, real_inner_smul_right,
         inner_wienerIncrementLp_eq i j]
-  have h1 : 0 ≤ ‖wienerAssembly (μ := μ) B T f‖ := norm_nonneg _
-  have h2 : 0 ≤ ‖stepAssembly T f‖ := norm_nonneg _
-  nlinarith [sq_nonneg (‖wienerAssembly (μ := μ) B T f‖ - ‖stepAssembly T f‖)]
+  exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp h_sq
 
 /-! ### Density of step indicators in `Lp ℝ 2 (volume.restrict (Ioc 0 T))`
 
@@ -305,31 +281,21 @@ private lemma setIntegral_Ioc_eq_zero_of_orthogonal {T : ℝ≥0}
     (h_orth : ∀ i : StepIndex T, ⟪stepIndicatorLp T i, g⟫_ℝ = 0)
     (a b : ℝ) :
     ∫ x in Set.Ioc a b, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) = 0 := by
-  -- Rewrite `∫ x in s, g x ∂(volume.restrict (Ioc 0 T))` as
-  -- `∫ x in s ∩ Ioc 0 T, g x ∂volume` via `Measure.restrict_restrict`.
+  -- Push the restrict through: `∫ x in s, g x ∂(volume.restrict S) = ∫ x in s ∩ S, g x ∂volume`.
   rw [show (∫ x in Set.Ioc a b, (g : ℝ → ℝ) x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))))
-        = ∫ x, (g : ℝ → ℝ) x ∂(volume.restrict (Set.Ioc a b ∩ Set.Ioc (0 : ℝ) (T : ℝ))) by
-      rw [show ∫ x in Set.Ioc a b, (g : ℝ → ℝ) x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))
-            = ∫ x, (g : ℝ → ℝ) x ∂((volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))).restrict
-                (Set.Ioc a b)) from rfl,
-          Measure.restrict_restrict measurableSet_Ioc]]
-  rw [Set.Ioc_inter_Ioc]
-  -- Now goal: ∫ x, g x ∂(volume.restrict (Ioc (max a 0) (min b T))) = 0
-  -- Re-fold to setIntegral form:
-  rw [show (∫ x, (g : ℝ → ℝ) x ∂(volume.restrict (Set.Ioc (max a 0) (min b (T : ℝ)))))
-        = ∫ x in Set.Ioc (max a 0) (min b (T : ℝ)), (g : ℝ → ℝ) x ∂volume from rfl]
-  -- Split on whether the truncated interval is nonempty.
+        = ∫ x in Set.Ioc (max a 0) (min b (T : ℝ)), (g : ℝ → ℝ) x ∂volume by
+      show ∫ x, _ ∂((volume.restrict _).restrict _) = ∫ x, _ ∂(volume.restrict _)
+      rw [Measure.restrict_restrict measurableSet_Ioc, Set.Ioc_inter_Ioc]]
   by_cases hab' : max a 0 ≤ min b (T : ℝ)
   · -- Build a StepIndex matching `(max a 0, min b T]` and apply orthogonality.
     have ha'_nn : (0 : ℝ) ≤ max a 0 := le_max_right _ _
     have hb'_T : min b (T : ℝ) ≤ (T : ℝ) := min_le_right _ _
     have hb'_nn : (0 : ℝ) ≤ min b (T : ℝ) := le_trans ha'_nn hab'
-    have hb'_T_nn : (⟨min b (T : ℝ), hb'_nn⟩ : ℝ≥0) ≤ T := by
-      show (min b (T : ℝ) : ℝ) ≤ ((T : ℝ≥0) : ℝ); exact hb'_T
-    have hab_nn : (⟨max a 0, ha'_nn⟩ : ℝ≥0) ≤ ⟨min b (T : ℝ), hb'_nn⟩ := hab'
     let i : StepIndex T :=
-      ⟨(⟨max a 0, ha'_nn⟩, ⟨min b (T : ℝ), hb'_nn⟩), hab_nn, hb'_T_nn⟩
-    -- ⟪stepIndicatorLp T i, g⟫_ℝ unfolds to ∫ x in (max a 0, min b T], g x ∂volume.
+      ⟨(⟨max a 0, ha'_nn⟩, ⟨min b (T : ℝ), hb'_nn⟩), hab', by exact_mod_cast hb'_T⟩
+    -- The orthogonal inner product evaluates to `∫ x in (max a 0, min b T], g x ∂volume`:
+    -- after `inner_indicatorConstLp_one` it's `∫ in i.interval over ν`, and since
+    -- `i.interval ⊆ Ioc 0 T`, the restrict collapses.
     have h_inner_to_int :
         ⟪stepIndicatorLp T i, g⟫_ℝ =
           ∫ x in Set.Ioc (max a 0) (min b (T : ℝ)), g x ∂volume := by
@@ -340,22 +306,15 @@ private lemma setIntegral_Ioc_eq_zero_of_orthogonal {T : ℝ≥0}
         exact MeasureTheory.L2.inner_indicatorConstLp_one (𝕜 := ℝ)
           i.measurableSet_interval i.restrict_interval_ne_top g
       rw [h_indicator_inner]
-      -- LHS: ∫ x in i.interval, g x ∂(volume.restrict (Ioc 0 T))
-      --     = ∫ x in i.interval ∩ Ioc 0 T, g x ∂volume
-      --     = ∫ x in i.interval, g x ∂volume
-      show ∫ x, g x ∂((volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))).restrict i.interval) = _
+      show ∫ x, _ ∂((volume.restrict _).restrict i.interval) = _
       rw [Measure.restrict_restrict i.measurableSet_interval]
       show ∫ x in i.interval ∩ Set.Ioc (0 : ℝ) (T : ℝ), g x ∂volume = _
-      have h_int_sub :
-          i.interval ∩ Set.Ioc (0 : ℝ) (T : ℝ) =
-            Set.Ioc (max a 0) (min b (T : ℝ)) := by
-        show (Set.Ioc ((max a 0 : ℝ)) (min b (T : ℝ))) ∩ Set.Ioc (0 : ℝ) (T : ℝ) = _
-        rw [Set.Ioc_inter_Ioc, max_eq_left ha'_nn, min_eq_left hb'_T]
-      rw [h_int_sub]
+      rw [show i.interval ∩ Set.Ioc (0 : ℝ) (T : ℝ) = Set.Ioc (max a 0) (min b (T : ℝ)) by
+            show Set.Ioc (max a 0) (min b (T : ℝ)) ∩ Set.Ioc (0 : ℝ) (T : ℝ) = _
+            rw [Set.Ioc_inter_Ioc, max_eq_left ha'_nn, min_eq_left hb'_T]]
     rw [← h_inner_to_int]
     exact h_orth i
-  · -- Empty truncated interval: integral is zero.
-    push Not at hab'
+  · push Not at hab'
     rw [Set.Ioc_eq_empty (lt_asymm hab'), setIntegral_empty]
 
 /-- For `g : Lp ℝ 2 (volume.restrict (Ioc 0 T))` orthogonal to every step
@@ -379,86 +338,50 @@ private lemma setIntegral_eq_zero_of_orthogonal {T : ℝ≥0}
     ∫ x in s, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) = 0)
     (h_eq := borel_eq_generateFrom_Ioc_le ℝ) (h_inter := ?_)
     (empty := ?_) (basic := ?_) (compl := ?_) (iUnion := ?_) s hs
-  · -- π-system property of half-open intervals.
+  · -- π-system: intersection of two `Ioc a b` (nonempty) is again such.
     rintro u ⟨a₁, b₁, _, rfl⟩ v ⟨a₂, b₂, _, rfl⟩ huv
-    refine ⟨max a₁ a₂, min b₁ b₂, ?_, by rw [Set.Ioc_inter_Ioc]⟩
-    obtain ⟨x, hx⟩ := huv
-    rw [Set.mem_inter_iff, Set.mem_Ioc, Set.mem_Ioc] at hx
-    obtain ⟨⟨h1, h2⟩, h3, h4⟩ := hx
-    have hmax_lt : max a₁ a₂ < x := by rw [max_lt_iff]; exact ⟨h1, h3⟩
-    have hx_min : x ≤ min b₁ b₂ := le_min h2 h4
-    linarith
-  · -- Empty set.
-    exact setIntegral_empty
-  · -- Base case: `Ioc a b`.
+    rw [Set.Ioc_inter_Ioc] at huv
+    exact ⟨max a₁ a₂, min b₁ b₂, (Set.nonempty_Ioc.mp huv).le, (Set.Ioc_inter_Ioc ..).symm⟩
+  · exact setIntegral_empty
+  · -- Base case `Ioc a b`.
     rintro _ ⟨a, b, _, rfl⟩
     exact setIntegral_Ioc_eq_zero_of_orthogonal g h_orth a b
-  · -- Complement: `∫ tᶜ = ∫ univ - ∫ t = 0 - 0 = 0`.
+  · -- Complement: ∫ univ = 0 (by base case `a = 0, b = T`), so ∫ tᶜ = -∫ t = 0.
     intro t ht hPt
     have h_full :
         ∫ x, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) = 0 := by
-      have h_ioc : ∫ x in Set.Ioc (0 : ℝ) (T : ℝ), g x
-          ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) = 0 :=
-        setIntegral_Ioc_eq_zero_of_orthogonal g h_orth 0 (T : ℝ)
-      have hν_idempotent :
-          (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))).restrict
-              (Set.Ioc (0 : ℝ) (T : ℝ)) =
-          volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)) := by
-        rw [Measure.restrict_restrict measurableSet_Ioc, Set.inter_self]
-      calc ∫ x, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))
-          = ∫ x, g x ∂((volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))).restrict
-              (Set.Ioc (0 : ℝ) (T : ℝ))) := by rw [hν_idempotent]
-        _ = 0 := h_ioc
-    have h_add :
-        ∫ x in t, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) +
-          ∫ x in tᶜ, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) =
-            ∫ x, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
-      integral_add_compl ht hg_int
-    linarith
+      have h_ioc := setIntegral_Ioc_eq_zero_of_orthogonal g h_orth 0 (T : ℝ)
+      rwa [show (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))).restrict
+              (Set.Ioc (0 : ℝ) (T : ℝ)) = volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)) by
+            rw [Measure.restrict_restrict measurableSet_Ioc, Set.inter_self]] at h_ioc
+    linarith [integral_add_compl ht hg_int, hPt, h_full]
   · -- Disjoint union: countable additivity.
     intro f hf hf_meas hf_zero
     rw [integral_iUnion hf_meas hf hg_int.integrableOn]
     simp [hf_zero]
 
 /-- **Density of step indicators.** The map `stepAssembly T` has dense range in
-`Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`. Proof: orthogonal complement is `⊥` by
-`setIntegral_eq_zero_of_orthogonal` + `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`. -/
+`Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`. Proof: orthogonal complement is `⊥`
+via `setIntegral_eq_zero_of_orthogonal` + `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`. -/
 theorem stepAssembly_denseRange (T : ℝ≥0) :
     DenseRange (stepAssembly T) := by
-  haveI : IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) := by
-    refine ⟨?_⟩
-    rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc]
-    exact ENNReal.ofReal_lt_top
-  -- Strategy: show `(LinearMap.range (stepAssembly T))ᗮ = ⊥`, then convert back.
-  have h_orth_eq_bot : (LinearMap.range (stepAssembly T))ᗮ = ⊥ := by
-    rw [Submodule.eq_bot_iff]
-    intro g h_mem
-    -- Orthogonality with each step indicator: `⟪stepIndicatorLp T i, g⟫_ℝ = 0`.
-    have h_orth : ∀ i : StepIndex T, ⟪stepIndicatorLp T i, g⟫_ℝ = 0 := by
-      intro i
-      have h_in_range : stepIndicatorLp T i ∈ LinearMap.range (stepAssembly T) :=
-        ⟨Finsupp.single i 1, by simp [stepAssembly, Finsupp.linearCombination_single]⟩
-      rw [Submodule.mem_orthogonal] at h_mem
-      exact h_mem _ h_in_range
-    -- Extend to all measurable sets via π-system induction.
-    have h_int : ∀ s : Set ℝ, MeasurableSet s →
-        ∫ x in s, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) = 0 :=
-      fun s hs => setIntegral_eq_zero_of_orthogonal g h_orth s hs
-    -- g = 0 a.e. via Lp.ae_eq_zero_of_forall_setIntegral_eq_zero
-    have hg_int_on : ∀ s, MeasurableSet s →
-        (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) s < ∞ →
-        IntegrableOn g s (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) := by
-      intro s _ _
-      exact ((Lp.memLp g).integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)).integrableOn
-    have h_ae_zero : (g : ℝ → ℝ) =ᵐ[volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))] 0 :=
-      Lp.ae_eq_zero_of_forall_setIntegral_eq_zero g (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-        (by simp : (2 : ℝ≥0∞) ≠ ∞) hg_int_on (fun s hs _ => h_int s hs)
-    exact (Lp.eq_zero_iff_ae_eq_zero (f := g)).mpr h_ae_zero
-  -- Convert `(LinearMap.range _)ᗮ = ⊥` → `DenseRange`.
-  rw [denseRange_iff_closure_range, ← LinearMap.coe_range (stepAssembly T),
-      ← Submodule.topologicalClosure_coe,
-      (Submodule.topologicalClosure_eq_top_iff.mpr h_orth_eq_bot : _),
-      Submodule.top_coe]
+  haveI : IsFiniteMeasure (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
+    ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, Real.volume_Ioc];
+        exact ENNReal.ofReal_lt_top⟩
+  -- Suffices: `(LinearMap.range (stepAssembly T))ᗮ = ⊥` (every `g` orthogonal to range is 0).
+  suffices h_orth_eq_bot : (LinearMap.range (stepAssembly T))ᗮ = ⊥ by
+    rw [denseRange_iff_closure_range, ← LinearMap.coe_range (stepAssembly T),
+        ← Submodule.topologicalClosure_coe,
+        Submodule.topologicalClosure_eq_top_iff.mpr h_orth_eq_bot, Submodule.top_coe]
+  rw [Submodule.eq_bot_iff]
+  intro g h_mem
+  rw [Submodule.mem_orthogonal] at h_mem
+  have h_orth : ∀ i : StepIndex T, ⟪stepIndicatorLp T i, g⟫_ℝ = 0 := fun i =>
+    h_mem _ ⟨Finsupp.single i 1, by simp [stepAssembly, Finsupp.linearCombination_single]⟩
+  exact (Lp.eq_zero_iff_ae_eq_zero (f := g)).mpr <|
+    Lp.ae_eq_zero_of_forall_setIntegral_eq_zero g (by norm_num) (by simp)
+      (fun _ _ _ => ((Lp.memLp g).integrable one_le_two).integrableOn)
+      (fun s hs _ => setIntegral_eq_zero_of_orthogonal g h_orth s hs)
 
 /-- The Wiener integral as a continuous linear isometry
 `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T)) →L[ℝ] Lp ℝ 2 μ`. -/
@@ -472,30 +395,18 @@ noncomputable def wienerIntegralLp (B : ℝ≥0 → Ω → ℝ)
 theorem wienerIntegralLp_norm (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :
     ‖wienerIntegralLp (μ := μ) B T f‖ = ‖f‖ := by
-  have h_dense : DenseRange (stepAssembly T) := stepAssembly_denseRange T
-  -- Use density of `stepAssembly` and continuity of both norms.
-  set W : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) →L[ℝ] Lp ℝ 2 μ :=
-    wienerIntegralLp (μ := μ) B T with hW_def
-  -- The norm bound (used to extract `extendOfNorm`).
+  set W := wienerIntegralLp (μ := μ) B T with hW
+  have h_dense := stepAssembly_denseRange T
   have h_norm : ∀ x : StepIndex T →₀ ℝ,
-      ‖wienerAssembly (μ := μ) B T x‖ ≤ 1 * ‖stepAssembly T x‖ := by
-    intro x
-    rw [one_mul]
-    exact (wiener_assembly_isometry (μ := μ) (B := B) T x).le
-  -- On the dense subset (image of `stepAssembly`), the norm is preserved.
-  have h_on_range : ∀ x : StepIndex T →₀ ℝ, ‖W (stepAssembly T x)‖ = ‖stepAssembly T x‖ := by
-    intro x
-    have hext : W (stepAssembly T x) = wienerAssembly (μ := μ) B T x := by
-      rw [hW_def, wienerIntegralLp]
-      exact LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩ x
-    rw [hext, wiener_assembly_isometry (μ := μ) (B := B) T x]
-  -- Both sides are continuous in `f`; agree on a dense set ⇒ agree everywhere.
-  have h_cont₁ : Continuous (fun f => ‖W f‖) :=
-    continuous_norm.comp W.continuous
-  have h_cont₂ : Continuous (fun f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) => ‖f‖) :=
-    continuous_norm
-  refine h_dense.induction_on (p := fun y => ‖W y‖ = ‖y‖) f
-    (isClosed_eq h_cont₁ h_cont₂) (fun x => h_on_range x)
+      ‖wienerAssembly (μ := μ) B T x‖ ≤ 1 * ‖stepAssembly T x‖ := fun x => by
+    rw [one_mul]; exact (wiener_assembly_isometry (μ := μ) (B := B) T x).le
+  -- Equality holds on `range stepAssembly` by `extendOfNorm_eq` + assembly isometry.
+  have h_on_range : ∀ x, ‖W (stepAssembly T x)‖ = ‖stepAssembly T x‖ := fun x => by
+    rw [hW, wienerIntegralLp, LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩,
+        wiener_assembly_isometry]
+  -- Both sides continuous in `f`; agree on a dense set ⇒ agree everywhere.
+  exact h_dense.induction_on (p := fun y => ‖W y‖ = ‖y‖) f
+    (isClosed_eq (continuous_norm.comp W.continuous) continuous_norm) h_on_range
 
 /-- Helper: for any `g : Lp ℝ 2 ν`, `‖g‖² = ∫ ω, (g ω)² ∂ν`. -/
 private lemma Lp_real_two_norm_sq {α : Type*} {mα : MeasurableSpace α} (ν : Measure α)
