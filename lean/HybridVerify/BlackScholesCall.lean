@@ -89,4 +89,24 @@ lemma Phi_neg (x : ℝ) : Phi (-x) = 1 - Phi x := by
 lemma Phi_add_Phi_neg (x : ℝ) : Phi x + Phi (-x) = 1 := by
   rw [Phi_neg]; ring
 
+/-! ### Completing the square -/
+
+/-- The exponential shift identity: `exp(c·z) · gaussianPDFReal 0 1 z =
+exp(c²/2) · gaussianPDFReal c 1 z`. This is the algebraic content of
+"completing the square" `c·z − z²/2 = c²/2 − (z − c)²/2`. -/
+lemma exp_mul_gaussianPDFReal_zero_one (c z : ℝ) :
+    Real.exp (c * z) * gaussianPDFReal 0 1 z =
+      Real.exp (c^2 / 2) * gaussianPDFReal c 1 z := by
+  unfold gaussianPDFReal
+  simp only [NNReal.coe_one, mul_one]
+  have key : c * z + -(z - 0)^2 / 2 = c^2 / 2 + -(z - c)^2 / 2 := by ring
+  set P : ℝ := (Real.sqrt (2 * π))⁻¹ with P_def
+  calc Real.exp (c * z) * ((Real.sqrt (2 * π))⁻¹ * Real.exp (-(z - 0)^2 / 2))
+      = P * (Real.exp (c * z) * Real.exp (-(z - 0)^2 / 2)) := by rw [P_def]; ring
+    _ = P * Real.exp (c * z + -(z - 0)^2 / 2) := by rw [Real.exp_add]
+    _ = P * Real.exp (c^2 / 2 + -(z - c)^2 / 2) := by rw [key]
+    _ = P * (Real.exp (c^2 / 2) * Real.exp (-(z - c)^2 / 2)) := by rw [Real.exp_add]
+    _ = Real.exp (c^2 / 2) * ((Real.sqrt (2 * π))⁻¹ * Real.exp (-(z - c)^2 / 2)) := by
+        rw [P_def]; ring
+
 end HybridVerify
