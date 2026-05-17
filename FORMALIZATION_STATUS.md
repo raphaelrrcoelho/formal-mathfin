@@ -32,8 +32,8 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Coverage as of 2026-05-17 (after `sc-thm-6.2.5` Itô-isometry promotion):
-**45 / 65 delivery-ready** (20 full + 25 library wrappers), 20 reduced cores, 0 placeholders.
+Coverage as of 2026-05-17 (after `sc-thm-6.2.5` Itô-isometry + `cm-thm-4.3.10` real-time-in-measure promotions):
+**45 / 65 delivery-ready** (21 full + 24 library wrappers), 20 reduced cores, 0 placeholders.
 
 ### Quality / structural improvements (2026-05-16 → 2026-05-17 sessions)
 

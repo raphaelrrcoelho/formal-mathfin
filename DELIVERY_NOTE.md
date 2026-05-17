@@ -4,17 +4,17 @@ This repository is a reproducible Lean 4 / Isabelle verification artifact for st
 
 The current honest status (refresh with `python3 -m python.coverage_report`):
 
-- **45 entries** are delivery-claim ready (`full + library_wrapper`): 20 real derivations or structural definitions, 25 direct Mathlib / Degenne library invocations.
+- **45 entries** are delivery-claim ready (`full + library_wrapper`): 21 real derivations or structural definitions, 24 direct Mathlib / Degenne library invocations.
 - **20 entries** are `reduced_core`: either algebraic/analytic core checks or Lean specifications where the textbook conclusion is encoded as a structure axiom rather than derived. Concentrated in `stochastic_calculus.json` (10/11; `sc-thm-6.2.5` Itô Isometry is now `full`), `girsanov_finance.json` (4/4), `poisson_processes.json` (3/5), `brownian_motion.json` (3/10) — these chapters depend on Itô calculus / Girsanov machinery that neither Mathlib nor Degenne has fully formalized yet.
 - **0 entries** are `placeholder`.
 
-A previous round of edits over-stated the audit by promoting 45 specification-based entries to `full`. Those promotions were rolled back: a structure with the textbook conclusion as a field, projected via `:= h.conclusion_field`, is not a derivation, and the audit should reflect that. After the rollback, real-proof work landed `mart-thm-2.2.9` (discrete martingale transform from `martingale_nat` + pull-out), `mart-thm-2.6.7` (FTAP ⇒ direction), `mart-thm-2.4.6` (Doob's `L^p` maximal inequality, end-to-end from Hölder + Fubini), `cond-prop-2.1.11.9` (conditional Jensen), 4 Brownian-motion martingale wraps (BM is a martingale, `B²−t` is a martingale, Wald exponential, Markov property), 4 continuous-martingale results (including stopped martingale, hitting time of an open set, and `L^p`-convergence at natural times under right-continuity), and `sc-thm-6.2.5` Itô isometry (full L²-extension via formal-combination step isometry + density of step indicators via orthogonal complement + π-system induction + `LinearMap.extendOfNorm`).
+A previous round of edits over-stated the audit by promoting 45 specification-based entries to `full`. Those promotions were rolled back: a structure with the textbook conclusion as a field, projected via `:= h.conclusion_field`, is not a derivation, and the audit should reflect that. After the rollback, real-proof work landed `mart-thm-2.2.9` (discrete martingale transform from `martingale_nat` + pull-out), `mart-thm-2.6.7` (FTAP ⇒ direction), `mart-thm-2.4.6` (Doob's `L^p` maximal inequality, end-to-end from Hölder + Fubini), `cond-prop-2.1.11.9` (conditional Jensen), 4 Brownian-motion martingale wraps (BM is a martingale, `B²−t` is a martingale, Wald exponential, Markov property), 4 continuous-martingale results (including stopped martingale, hitting time of an open set, and `cm-thm-4.3.10` real-time convergence in measure for `L^p`-bounded right-continuous martingales — full end-to-end derivation via shifted increment martingale, eLpNorm-triangle, Degenne `maximal_ineq_norm` + `rightCont_iSup_ofReal_ne_top`, and a `Nat.floor` set-inclusion argument), and `sc-thm-6.2.5` Itô isometry (full L²-extension via formal-combination step isometry + density of step indicators via orthogonal complement + π-system induction + `LinearMap.extendOfNorm`).
 
 ## What Is Ready To Say
 
 Safe wording:
 
-> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check. Under a strict faithfulness audit, 45 entries (69%) are full or direct library-backed theorem formalizations: 20 derive the textbook conclusion (or are structural definitions), 25 directly invoke a named Mathlib or Degenne (BrownianMotion) library theorem whose statement matches the benchmark. The remaining 20 entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. They concentrate in the chapters dependent on Itô calculus / Girsanov machinery (`stochastic_calculus.json`, `girsanov_finance.json`) that neither Mathlib nor Degenne has fully formalized yet. No entries are `placeholder`. The artifact identifies precisely where current Lean/Isabelle libraries support the course material and where new stochastic-process infrastructure is required.
+> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check. Under a strict faithfulness audit, 45 entries (69%) are full or direct library-backed theorem formalizations: 21 derive the textbook conclusion (or are structural definitions), 24 directly invoke a named Mathlib or Degenne (BrownianMotion) library theorem whose statement matches the benchmark. The remaining 20 entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. They concentrate in the chapters dependent on Itô calculus / Girsanov machinery (`stochastic_calculus.json`, `girsanov_finance.json`) that neither Mathlib nor Degenne has fully formalized yet. No entries are `placeholder`. The artifact identifies precisely where current Lean/Isabelle libraries support the course material and where new stochastic-process infrastructure is required.
 
 Avoid:
 
@@ -22,7 +22,7 @@ Avoid:
 
 That claim is not supported. The honest version:
 
-> We have faithful Lean STATEMENTS for all 65 textbook theorems, real derivations or library-backed proofs for 45 of them, and explicit specifications for the remaining 20 documenting what a real proof would need to construct.
+> We have faithful Lean STATEMENTS for all 65 textbook theorems, real derivations or library-backed proofs for 45 of them (21 full derivations + 24 library wrappers), and explicit specifications for the remaining 20 documenting what a real proof would need to construct.
 
 ## Current Numbers
 
@@ -43,9 +43,9 @@ Lean code entries: 65
 Isabelle code entries: 25
 quarantined SymPy references: 55
 
-full theorem statements: 19
-library theorem wrappers: 25
-reduced formal cores: 21
+full theorem statements: 21
+library theorem wrappers: 24
+reduced formal cores: 20
 placeholders/stubs: 0
 delivery-claim ready: 45
 ```
