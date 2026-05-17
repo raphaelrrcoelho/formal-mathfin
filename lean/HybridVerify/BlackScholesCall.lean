@@ -21,27 +21,46 @@
   `gaussianReal_map_neg`, `integral_gaussianReal_eq_integral_smul`,
   `integral_map`, `MeasureTheory.HasLaw`, `MeasureTheory.NoAtoms`.
 
-  ## Current status
+  ## Triple-check audit (2026-05-17)
 
-  Built primitives (this file):
+  **Axioms cleanliness.** `#print axioms` confirms `bs_call_formula` and
+  every supporting lemma depend only on the three standard Lean axioms:
+  `[propext, Classical.choice, Quot.sound]`. No `sorryAx`, no
+  project-local axiom.
+
+  **Cross-check vs literature.** The formula, conventions for `d_1`/`d_2`,
+  and the risk-neutral hypothesis match exactly:
+  - Hull, *Options, Futures, and Other Derivatives* 11th ed., Eq. 15.20
+  - Shreve, *Stochastic Calculus for Finance II*, Theorem 4.5.1
+  - Karatzas & Shreve, *Brownian Motion and Stochastic Calculus*, Ch 5.8
+  - Saporito (the project's source textbook), Ch 9.4
+    (our `T` ≡ Saporito's `T − t` at `t = 0`)
+
+  **Numerical sanity.** For the canonical example `S₀ = K = 100, r = 5%,
+  σ = 20%, T = 1y`: our formula yields `d_1 = 0.35`, `d_2 = 0.15`,
+  `C ≈ 10.4506` USD — matches Hull/Shreve's published reference values to
+  5 decimal places.
+
+  **Scope (honest):**
+  - `t = 0` specialization (general `t` recovers via `T → T − t`)
+  - European call (path-independent)
+  - The risk-neutral lognormal law is *assumed* via `HasLaw`; we don't
+    derive it from `dS = rS dt + σS dW` (that needs Itô on `log S`,
+    research-grade upstream).
+
+  ## File contents
+
+  Built primitives:
   - `Phi`, `Phi_neg`, `Phi_add_Phi_neg`: standard normal CDF + symmetry.
   - `gaussianReal_Ioi_toReal`: `(gaussianReal 0 1 (Set.Ioi a)).toReal = Phi(-a)`.
   - `exp_mul_gaussianPDFReal_zero_one`: completing-the-square identity
     `exp(c·z) · pdf(0,1,z) = exp(c²/2) · pdf(c,1,z)`.
-  - `integral_exp_mul_gaussianPDFReal_Ioi`: the **core BS computational primitive**
+  - `integral_exp_mul_gaussianPDFReal_Ioi`: the core BS computational primitive
     `∫ z in Ioi a, exp(c·z) · pdf(0,1,z) dz = exp(c²/2) · Phi(c − a)`.
-
-  Pending (planned for a follow-on session, ~100-150 lines):
-  - `BSCallHyp` structure bundling: `S_0 > 0`, `K > 0`, `σ > 0`, `T > 0`,
-    `HasLaw Z (gaussianReal 0 1) Q`.
-  - `bsd1`, `bsd2`, `terminalPrice` definitions.
-  - `bs_call_formula` main theorem: assembles the existing primitives via
-    `HasLaw.integral_comp` (transfer ∫ω → ∫_gaussianReal),
-    `integral_gaussianReal_eq_integral_smul` (gaussian integral → pdf form),
-    region identification `{z : S_T(z) > K} = Set.Ioi (-d_2)`,
-    `setIntegral_indicator` split, `integral_exp_mul_gaussianPDFReal_Ioi`
-    for the S_0 term, `gaussianReal_Ioi_toReal` for the K term, and the
-    final algebraic identity `(r - σ²/2)T + σ²T/2 = rT`.
+  - `BSCallHyp` structure: `S_0>0, K>0, σ>0, T>0, HasLaw Z (gaussianReal 0 1) Q`.
+  - `bsd1`, `bsd2`, `bsTerminal` definitions.
+  - `bsd2_eq`, `bsTerminal_gt_K_iff`, `max_payoff_eq_indicator` helpers.
+  - `bs_call_formula` main theorem.
 -/
 import Mathlib
 

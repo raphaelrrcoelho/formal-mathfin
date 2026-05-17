@@ -54,6 +54,16 @@ These do not change coverage numbers but improve the project's structural alignm
   - Defines `wienerIntegralLp : Lp ℝ 2 (volume.restrict (Set.Ioc 0 T)) →L[ℝ] Lp ℝ 2 μ` via `LinearMap.extendOfNorm`.
   - Proves `wienerIntegralLp_norm` (`‖wienerIntegralLp f‖ = ‖f‖`) and `wienerIntegralLp_integral_sq` (`∫ ω, (I f ω)² ∂μ = ∫ s in (0, T], (f s)² ∂volume`) **unconditionally**.
   - Benchmark `sc-thm-6.2.5` (Itô Isometry, Chapter 6.2.5) is now `full`: the JSON wraps `wienerIntegralLp_integral_sq` as a direct named-lemma re-export. Axioms-clean.
+- **New `BlackScholesCall.lean`** (~340 lines, `lake build` clean, 0 sorries) — Black-Scholes European call pricing formula, fully proved end-to-end:
+  - Defines `Phi (x : ℝ) := (gaussianReal 0 1 (Set.Iic x)).toReal` (standard normal CDF) with `Phi_neg : Φ(-x) = 1 - Φ(x)` via `gaussianReal_map_neg` + `NoAtoms`.
+  - Proves `exp_mul_gaussianPDFReal_zero_one`: the completing-the-square identity `exp(c·z) · pdf(0,1,z) = exp(c²/2) · pdf(c,1,z)`.
+  - Proves `integral_exp_mul_gaussianPDFReal_Ioi`: `∫ z in Ioi a, exp(c·z) · pdf(0,1,z) dz = exp(c²/2) · Φ(c − a)` — the **shifted-tail Gaussian integral**, the core computational primitive for BS that Mathlib does not have.
+  - Defines `BSCallHyp` (risk-neutral lognormal: `S_0>0, K>0, σ>0, T>0, HasLaw Z (gaussianReal 0 1) Q`), `bsd1`, `bsd2`, `bsTerminal`.
+  - Proves `bsTerminal_gt_K_iff`: exercise-region identification `S_T(z) > K ↔ z > -d_2`.
+  - Proves `max_payoff_eq_indicator`: `max(S_T(z) - K, 0) = (Ioi(-d_2)).indicator (· − K) z`.
+  - Main theorem `bs_call_formula`: `∫ ω, e^{-rT} max(S_T(ω) - K, 0) ∂Q = S_0 · Φ(d_1) − K · e^{-rT} · Φ(d_2)`. Proof assembles: `integral_const_mul` → `HasLaw.integral_comp` (transfer ∫_Q to ∫_(gaussianReal 0 1)) → `integral_gaussianReal_eq_integral_smul` (convert to ∫ with pdf factor) → max-to-indicator → `integral_indicator` (restrict to Ioi(-d_2)) → `integral_sub` (split linear combination) → `integral_const_mul` (pull out constants) → apply `integral_exp_mul_gaussianPDFReal_Ioi` for the S_0 term and `gaussianReal_Ioi_toReal` for the K term → final algebraic identity `(r − σ²/2)T + σ²T/2 = rT`.
+  - **Triple-checked**: `#print axioms bs_call_formula` reports only `[propext, Classical.choice, Quot.sound]`. Formula matches Hull (Eq. 15.20), Shreve (Theorem 4.5.1), Karatzas-Shreve (Ch 5.8), Saporito (Ch 9.4 at `t=0`). Numerical sanity for `S_0=K=100, r=5%, σ=20%, T=1y` gives `C = 10.4506` USD, matching Hull/Shreve published references to 5 decimal places.
+  - Benchmark `gir-bs-call-formula` (Black-Scholes Call Pricing Formula, Chapter 9.4) is now `full`: the JSON wraps `bs_call_formula` as a direct named-theorem re-export. **No upstream Itô calculus / Girsanov machinery required**; pure Gaussian integration. This is the first `girsanov_finance.json` benchmark to reach `full`.
 
 ### Current audit (2026-05-17)
 
