@@ -216,7 +216,7 @@ noncomputable def bsTerminal (S_0 r σ T z : ℝ) : ℝ :=
   S_0 * Real.exp ((r - σ^2 / 2) * T + σ * Real.sqrt T * z)
 
 /-- Alternative form for `d₂`: `bsd2 = (log(S_0/K) + (r − σ²/2)T) / (σ√T)`. -/
-private lemma bsd2_eq {S_0 K r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
+lemma bsd2_eq {S_0 K r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     bsd2 S_0 K r σ T = (Real.log (S_0 / K) + (r - σ^2 / 2) * T) / (σ * Real.sqrt T) := by
   have hσsqT_pos : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
   have h_sqT_sq : Real.sqrt T ^ 2 = T := Real.sq_sqrt hT.le
@@ -225,7 +225,7 @@ private lemma bsd2_eq {S_0 K r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
   nlinarith [h_sqT_sq, sq_nonneg (σ * Real.sqrt T)]
 
 /-- Exercise-region identification: `S_T(z) > K ↔ z > −d_2`. -/
-private lemma bsTerminal_gt_K_iff {S_0 K r σ T : ℝ}
+lemma bsTerminal_gt_K_iff {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
     bsTerminal S_0 r σ T z > K ↔ z > -bsd2 S_0 K r σ T := by
   have hσsqT_pos : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
