@@ -27,16 +27,22 @@ all three items shipped in the same session as phase 1. all axioms-clean; all `f
 
 milestone DONE: rigorous theory of vanilla derivatives. covers the standard closed-form option pricing models taught in a quant program.
 
-## phase 3: discrete-continuous bridge (PARTIAL 2026-05-18)
+## phase 3: discrete-continuous bridge (PARTIAL 2026-05-18, deeper progress same day)
 
 - [x] **discrete-time binomial tree pricing framework** — `BinomialModel.lean`. includes:
   - risk-neutral up-probability `crrUpProb u d r = (e^r − d)/(u − d)` + no-arbitrage condition `BinomialNoArb` + `(0, 1)`-range proof.
   - single-period option price `binomialOptionPriceOnePeriod`.
   - **replicating-portfolio theorems** (cost, up-state payoff, down-state payoff) — three full proofs.
   - multi-period `binomialPrice` via well-founded recursion on remaining steps; one-step consistency lemma; linearity and scalar-homogeneity in the payoff; constant-payoff price closed form `e^{-rn} · c`.
-- [ ] **CRR convergence theorem**: binomial pricing converges to black-scholes as `Δt → 0`. classic limit theorem using the CLT (already have it) plus careful drift correction (`u_n = e^{σ√Δt}, d_n = e^{−σ√Δt}, p_n` chosen so the binomial mean and variance match GBM to first order). still ~500-800 lines, requires careful work with CLT applied to log-returns. **TODO future session**.
+- [x] **CRR parameterization + classical-analytic limit core** — `BinomialCRRConvergence.lean`.
+  - CRR parameterization: `crrUp = e^{σ√Δt}`, `crrDown = e^{−σ√Δt}`, `crrPerStepRate = rΔt`, `crrProb` definitions.
+  - one-step risk-neutral martingale identity (exact algebraic): `p_n · u_n + (1 − p_n) · d_n = e^{rΔt}`.
+  - exponential difference-quotient limits: `(e^{cx}−1)/x → c`, `(e^{c·h²}−1)/h² → c`, `(e^{c·h²}−1)/h → 0`, `(e^{σh} − e^{−σh})/h → 2σ`. all proved via `HasDerivAt` + `hasDerivAt_iff_tendsto_slope`.
+  - **`crrProb_tendsto_half`**: `p_n → 1/2` as `n → ∞`. the substantive analytic step — `p_n` becomes asymptotically symmetric Bernoulli. ~80 lines, uses quotient-of-limits + composition with `h_n = √(T/n)`.
+  - **`crr_variance_limit`**: `4 σ² T · p_n (1 − p_n) → σ² T`. direct corollary.
+- [ ] **full pricing-convergence theorem**: `binomialPrice → bs_call_price` as `n → ∞`. requires a **triangular-array CLT** (Lindeberg-Feller) — Mathlib at the current pin only ships the **fixed-iid CLT** (`tendstoInDistribution_inv_sqrt_mul_sum_sub`). plus a continuous-mapping + uniform-integrability argument for the call payoff. **TODO future session**: either (a) draft a triangular-array CLT upstream in Mathlib, or (b) prove CRR convergence directly via characteristic functions (Levy's continuity theorem on log-returns).
 
-milestone (partial): discrete-time framework with no-arbitrage replication formalized. CRR continuous-time limit remains as future work.
+milestone (still partial): classical-analytic CRR↔BS correspondence is formalized on the variance side (and via `p_n → 1/2`). drift-limit `n · (2 p_n − 1) · σ√Δt → (r − σ²/2) T` needs second-order Taylor on `2 e^{rΔt} − e^{σ√Δt} − e^{−σ√Δt}` and is documented in `BinomialCRRConvergence.lean` as further analytic work. full distributional convergence to BS is upstream-gated.
 
 ## phase 4: upstream foundations
 
@@ -82,9 +88,9 @@ phases 1 + 2 + phase 3 (basic framework) all landed in a single session on 2026-
 ## what done looks like (achieved)
 
 end of 2026-05-18 session:
-- **76 total theorems** (was 65 — 11 new in `benchmarks/mathematical_finance.json`)
-- **60 delivery-ready** (was 49)
-  - **36 `full`** (was 25 — +11 from `mathematical_finance.json`)
+- **79 total theorems** (was 65 — 14 new in `benchmarks/mathematical_finance.json`)
+- **63 delivery-ready** (was 49)
+  - **39 `full`** (was 25 — +14 from `mathematical_finance.json`)
   - **24 `library_wrapper`** (unchanged)
 - **16 `reduced_core`** (unchanged; itô-gated)
 - **0 `placeholders`** (unchanged)

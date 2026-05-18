@@ -32,10 +32,10 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Coverage as of 2026-05-18 (after Phase 1 + Phase 2 + Phase 3 (basic) of `QUANTFIN_ROADMAP.md`):
-**60 / 76 delivery-ready** (36 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
+Coverage as of 2026-05-18 (after Phase 1 + Phase 2 + Phase 3 of `QUANTFIN_ROADMAP.md`):
+**63 / 79 delivery-ready** (39 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 
-The 11 new theorems are in `benchmarks/mathematical_finance.json`:
+The 14 new theorems are in `benchmarks/mathematical_finance.json`:
 
 | ID | name | new module |
 |---|---|---|
@@ -50,8 +50,11 @@ The 11 new theorems are in `benchmarks/mathematical_finance.json`:
 | `mf-implied-vol-unique` | implied volatility uniqueness | `ImpliedVolatility.lean` |
 | `mf-black-futures` | Black-76 futures call | `BlackFutures.lean` |
 | `mf-binomial-replication` | single-period binomial replication | `BinomialModel.lean` |
+| `mf-crr-one-step-martingale` | CRR one-step risk-neutral martingale | `BinomialCRRConvergence.lean` |
+| `mf-crr-prob-half` | CRR risk-neutral prob → 1/2 | `BinomialCRRConvergence.lean` |
+| `mf-crr-variance-limit` | CRR variance → σ²T | `BinomialCRRConvergence.lean` |
 
-All 11 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
+All 14 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
 
 ### Quality / structural improvements (2026-05-16 → 2026-05-17 sessions)
 

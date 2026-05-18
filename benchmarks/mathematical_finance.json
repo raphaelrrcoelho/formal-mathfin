@@ -176,6 +176,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of all three statements: portfolio cost, up-state payoff, down-state payoff. Lives in lean/HybridVerify/BinomialModel.lean. Axioms-clean. Multi-period backward induction (binomialPrice) also defined and proved consistent; CRR convergence to BS is upstream."
       }
+    },
+    {
+      "id": "mf-crr-one-step-martingale",
+      "name": "CRR One-Step Risk-Neutral Martingale Identity",
+      "description": "Under CRR parameterization (u_n = e^{σ √Δt}, d_n = e^{-σ √Δt}, Δt = T/n), the risk-neutral up-probability p_n = (e^{rΔt} - d_n)/(u_n - d_n) satisfies p_n · u_n + (1 - p_n) · d_n = e^{rΔt}. The discrete-time discounted asset is a Q-martingale at each step. Exact algebraic identity, not asymptotic.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BinomialCRRConvergence\n\nopen HybridVerify\n\n/-- CRR one-step risk-neutral martingale identity. -/\ntheorem crr_one_step_martingale_identity {σ T r : ℝ} {n : ℕ}\n    (h_du : crrDown σ T n < crrUp σ T n) :\n    crrProb r σ T n * crrUp σ T n + (1 - crrProb r σ T n) * crrDown σ T n\n      = Real.exp (crrPerStepRate r T n) :=\n  HybridVerify.crr_one_step_martingale h_du\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "CRR parameterization, one-step martingale (Hull 21.1, Shreve I 1.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Pure algebraic identity following from the definitions of crrUp, crrDown, crrPerStepRate, crrProb. Lives in lean/HybridVerify/BinomialCRRConvergence.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-crr-prob-half",
+      "name": "CRR Risk-Neutral Probability Tends to 1/2",
+      "description": "Under CRR parameterization, p_n → 1/2 as n → ∞. This is the substantive analytic step in the CRR-to-BS correspondence: the per-step Bernoulli increment becomes asymptotically symmetric. Implies the variance limit n · σ² Δt · 4 p_n (1 - p_n) → σ² T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BinomialCRRConvergence\n\nopen HybridVerify Filter\nopen scoped Topology\n\n/-- CRR risk-neutral probability tends to 1/2 as n → ∞. -/\ntheorem crr_prob_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ => crrProb r σ T n) Filter.atTop (𝓝 (1/2)) :=\n  HybridVerify.crrProb_tendsto_half hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "CRR convergence (analytic step), Hull 21.1, Shreve I 3.2",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in lean/HybridVerify/BinomialCRRConvergence.lean. Axioms-clean. (Full distributional convergence binomialPrice → bs_call_price is upstream-gated on triangular-array CLT.)"
+      }
+    },
+    {
+      "id": "mf-crr-variance-limit",
+      "name": "CRR Variance Limit",
+      "description": "Under CRR parameterization, n · σ² · (T/n) · 4 p_n (1 - p_n) → σ² T as n → ∞. The per-step variance of the log-return matches the BS variance to leading order. Direct corollary of crrProb_tendsto_half.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BinomialCRRConvergence\n\nopen HybridVerify Filter\nopen scoped Topology\n\n/-- CRR variance limit: 4 σ² T · p_n (1 - p_n) → σ² T. -/\ntheorem crr_variance_limit_theorem {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto\n      (fun n : ℕ => 4 * σ^2 * T * (crrProb r σ T n) * (1 - crrProb r σ T n))\n      Filter.atTop (𝓝 (σ^2 * T)) :=\n  HybridVerify.crr_variance_limit hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "CRR variance convergence (Hull 21.1, Shreve I 3.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in lean/HybridVerify/BinomialCRRConvergence.lean. Axioms-clean."
+      }
     }
   ]
 }
