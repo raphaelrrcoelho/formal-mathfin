@@ -23,5 +23,7 @@ lean/build/
 
 # Local secrets and scratch artefacts (PR drafts, env)
 .env
+.env.*
+.env*.txt
 *-pr-description.md
 pr-description.md
