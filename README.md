@@ -1,0 +1,100 @@
+# automated_proofs_quantfin
+
+formal verification of stochastic-processes textbook theorems via a hybrid lean 4 + isabelle/hol + sympy orchestrator. tracks coverage of saporito's *stochastic processes* at the theorem level, with an honest faithfulness audit.
+
+## status
+
+| | count |
+|---|---|
+| total theorems | 65 |
+| delivery-ready | **49** |
+| ↳ full derivations | 25 |
+| ↳ library wrappers | 24 |
+| reduced cores (upstream-gated) | 16 |
+| placeholders | 0 |
+
+every theorem tagged `full` is `#print axioms`-clean: depends only on `[propext, Classical.choice, Quot.sound]` (the three standard mathlib axioms).
+
+see `FORMALIZATION_STATUS.md` for the per-theorem audit and `FORMALIZATION_ROADMAP.md` for what's left.
+
+## what makes it different
+
+most lean formalization projects pick one theorem and go deep, or contribute to mathlib directly. this is structured the other way: take a real textbook, audit theorem-by-theorem, distinguish "we proved it" from "we wrapped a library" from "we encoded the statement honestly but haven't derived it yet."
+
+- **honest taxonomy.** every benchmark entry declares `full`, `library_wrapper`, `reduced_core`, or `placeholder`. delivery-claim counts only the first two. the audit policy lives in `FORMALIZATION_STATUS.md`.
+- **multi-backend routing.** each theorem can dispatch to lean 4, isabelle/hol, sympy, or several in parallel. the python orchestrator picks based on `domain`. routing table is in `python/router.py`.
+- **substantial original derivations**, not in mathlib or in degenne's brownian-motion library at current pins:
+  - itô isometry on $L^2(0, T]$ from step-function isometry + π-system density + `LinearMap.extendOfNorm` (`lean/HybridVerify/WienerIntegralL2.lean`, 433 lines)
+  - black-scholes call formula from the risk-neutral lognormal hypothesis (`BlackScholesCall.lean`, ~370 lines, no itô used)
+  - black-scholes PDE forward direction via the magic identity $S \phi(d_1) = K e^{-r\tau} \phi(d_2)$ (`BlackScholesPDE.lean`)
+  - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
+  - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
+  - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.
+- **continuous-time martingale L² convergence** (saporito 4.3.10), promoted to `full` via degenne's `Submartingale.rightCont_iSup_ofReal_ne_top` (`LpContinuousMartingaleConvergence.lean`, 703 lines)
+- **doob L² for discrete-time martingales** (mart-thm-2.4.6), via mathlib's discrete `pow_norm_le_pow_norm_of_exponent_le`
+
+reproducibility: lean and isabelle versions are pinned in the verify docker image. the lean toolchain is 4.30.0-rc1 with mathlib at commit `f23306121184` and degenne's brownian-motion at `16d15eb4`. isabelle 2025-2 with `HOL-Probability` prebuilt.
+
+## quick start
+
+pull the prebuilt image (3 min) instead of rebuilding (50 min):
+
+```bash
+docker compose -f docker/docker-compose.yml pull verify
+```
+
+run the verifier on a benchmark file:
+
+```bash
+docker compose -f docker/docker-compose.yml run --rm verify benchmarks/stochastic_calculus.json -v --timeout 120
+```
+
+static coverage report:
+
+```bash
+docker compose -f docker/docker-compose.yml run --rm --entrypoint python3 verify -m python.coverage_report
+```
+
+regression tests (router routing, formal-only enforcement, faithfulness-status presence):
+
+```bash
+docker compose -f docker/docker-compose.yml run --rm --entrypoint python3 verify -m pytest tests/test_router.py -q
+```
+
+## layout
+
+```
+python/         orchestrator, backends, router, CLI
+  models.py       Domain/Backend/ConfidenceLevel enums, TheoremStatement
+  orchestrator.py central coordinator (sequential + parallel dispatch)
+  router.py       DEFAULT_ROUTING + PARALLEL_DOMAINS
+  cli.py          python -m python.cli benchmarks/file.json
+lean/           lake project. mathlib + degenne brownian-motion pinned.
+  HybridVerify/   substantial proofs (each > ~50 lines lives here)
+benchmarks/     10 json files keyed by saporito chapters
+tests/          pytest regression (router + coverage invariants)
+docker/         pinned verify image
+```
+
+benchmark theorems with non-trivial proofs `import HybridVerify.<Module>` and re-export the named lemma in 5-25 lines. trivial library wrappers stay inline in the json. this split lets `lake build` give each big proof the full incremental-compilation budget while keeping the benchmark snippets short.
+
+## what isn't done
+
+the 16 remaining `reduced_core` theorems all hit one of:
+
+- **itô integral / doleans-dade / girsanov machinery** (4 girsanov + ~8 stochastic-calculus theorems including itô's formula, time-dependent itô, lévy's martingale characterization, SDE existence)
+- **continuous-time poisson processes** (3 theorems: interarrival exponential, superposition, thinning). mathlib has only the discrete `PoissonPMF`.
+- **fine brownian path machinery** (3 BM pathology theorems: reflection principle, nowhere-differentiability, law of iterated logarithm)
+
+these need upstream work in mathlib or degenne's brownian-motion to unlock. the project will revisit when that lands.
+
+## related upstream work
+
+derived as part of this project, candidates for upstream contribution:
+
+- `gaussianReal_zero_one_Iic_neg`, `gaussianReal_zero_one_Ioi_toReal`, `exp_mul_gaussianPDFReal_zero_one`, `integral_exp_mul_gaussianPDFReal_zero_one_Ioi` (standard normal tail + completing-the-square): drafted as a mathlib PR.
+- `IsFilteredPreBrownian.squareSubTime_isMartingale`, `IsFilteredPreBrownian.waldExponential_isMartingale` (the two textbook BM martingales): drafted as a contribution to remy degenne's `brownian-motion` library.
+
+## license
+
+apache 2.0, per the headers on each source file.
