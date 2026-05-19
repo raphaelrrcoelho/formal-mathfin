@@ -32,10 +32,10 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Coverage as of 2026-05-18 (after Phase 1 + Phase 2 + Phase 3 of `QUANTFIN_ROADMAP.md`):
-**63 / 79 delivery-ready** (39 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
+Coverage as of 2026-05-19 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks):
+**79 / 95 delivery-ready** (55 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 
-The 14 new theorems are in `benchmarks/mathematical_finance.json`:
+The `mathematical_finance.json` benchmark now has 30 theorems (all `full`). Original 14 + 16 new from the 2026-05-19 pass:
 
 | ID | name | new module |
 |---|---|---|
@@ -53,8 +53,24 @@ The 14 new theorems are in `benchmarks/mathematical_finance.json`:
 | `mf-crr-one-step-martingale` | CRR one-step risk-neutral martingale | `BinomialCRRConvergence.lean` |
 | `mf-crr-prob-half` | CRR risk-neutral prob → 1/2 | `BinomialCRRConvergence.lean` |
 | `mf-crr-variance-limit` | CRR variance → σ²T | `BinomialCRRConvergence.lean` |
+| `mf-bs-put-delta` | BS put delta | `BlackScholesPutGreeks.lean` |
+| `mf-bs-put-gamma` | BS put gamma | `BlackScholesPutGreeks.lean` |
+| `mf-bs-put-theta` | BS put theta | `BlackScholesPutGreeks.lean` |
+| `mf-bs-put-vega` | BS put vega | `BlackScholesPutGreeks.lean` |
+| `mf-bs-put-rho` | BS put rho | `BlackScholesPutGreeks.lean` |
+| `mf-bs-vanna` | BS vanna | `BlackScholesHigherGreeks.lean` |
+| `mf-bs-volga` | BS volga | `BlackScholesHigherGreeks.lean` |
+| `mf-bachelier-delta` | Bachelier delta | `BachelierGreeks.lean` |
+| `mf-bachelier-vega` | Bachelier vega | `BachelierGreeks.lean` |
+| `mf-cash-digital-delta` | cash-or-nothing digital delta | `BlackScholesDigitalGreeks.lean` |
+| `mf-asset-digital-delta` | asset-or-nothing digital delta | `BlackScholesDigitalGreeks.lean` |
+| `mf-bs-dividends-call` | BS-Merton call with dividends | `BlackScholesDividends.lean` |
+| `mf-garman-kohlhagen` | Garman-Kohlhagen FX call | `BlackScholesDividends.lean` |
+| `mf-black76-delta` | Black-76 delta | `BlackFuturesGreeks.lean` |
+| `mf-black76-gamma` | Black-76 gamma | `BlackFuturesGreeks.lean` |
+| `mf-black76-vega` | Black-76 vega | `BlackFuturesGreeks.lean` |
 
-All 14 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
+All 30 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
 
 ### Quality / structural improvements (2026-05-16 → 2026-05-17 sessions)
 

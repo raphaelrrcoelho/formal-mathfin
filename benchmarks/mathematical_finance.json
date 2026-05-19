@@ -224,6 +224,262 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in lean/HybridVerify/BinomialCRRConvergence.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-bs-put-delta",
+      "name": "BS Put Delta",
+      "description": "Put delta: ∂P/∂S = Φ(d₁) - 1. Direct chain rule via put-call parity P = C - S + K e^{-rτ}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsP K r σ s τ)\n      (HybridVerify.Phi (HybridVerify.bsd1 S K r σ τ) - 1) S :=\n  HybridVerify.hasDerivAt_bsP_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put delta (Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity: bsP = bsV - S + K e^{-rτ}, so ∂P/∂S = ∂V/∂S - 1 = Φ(d₁) - 1. Lives in lean/HybridVerify/BlackScholesPutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-gamma",
+      "name": "BS Put Gamma",
+      "description": "Put gamma: ∂²P/∂S² = ϕ(d₁) / (S σ √τ). Same as call gamma since put-call parity differs by a linear function of S.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.Phi (HybridVerify.bsd1 s K r σ τ) - 1)\n      (gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsP_SS hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put gamma (Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Same as call gamma (the linear correction in put-call parity has zero second derivative). Lives in lean/HybridVerify/BlackScholesPutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-theta",
+      "name": "BS Put Theta (τ form)",
+      "description": "Put theta: ∂P/∂τ = σ S ϕ(d₁) / (2 √τ) - r K e^{-rτ} Φ(-d₂).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_theta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsP K r σ S t)\n      (σ * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (2 * Real.sqrt τ)\n        - r * K * Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ)) τ :=\n  HybridVerify.hasDerivAt_bsP_tau hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put theta (Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity: ∂P/∂τ = ∂V/∂τ - r K e^{-rτ}, with Φ(d₂) → Φ(-d₂) via Phi_add_Phi_neg. Lives in lean/HybridVerify/BlackScholesPutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-vega",
+      "name": "BS Put Vega",
+      "description": "Put vega: ∂P/∂σ = S ϕ(d₁) √τ. Same as call vega.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_vega_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsP K r s S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  HybridVerify.hasDerivAt_bsP_sigma hK hS hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put vega (Hull 19.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Same as call vega via put-call parity. Lives in lean/HybridVerify/BlackScholesPutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-put-rho",
+      "name": "BS Put Rho",
+      "description": "Put rho: ∂P/∂r = -K τ e^{-rτ} Φ(-d₂).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_rho_thm {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsP K r' σ S τ)\n      (-(K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ))) r :=\n  HybridVerify.hasDerivAt_bsP_r hK hσ hτ hS r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS put rho (Hull 19.7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity + Phi_add_Phi_neg. Lives in lean/HybridVerify/BlackScholesPutGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-vanna",
+      "name": "BS Vanna (∂²V/∂σ∂S)",
+      "description": "Vanna: ∂²V/∂σ∂S = ∂(vega)/∂S = -ϕ(d₁) · d₂ / σ. Cross-Greek between spot and volatility.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesHigherGreeks\n\nopen HybridVerify\n\ntheorem bs_vanna_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => s * gaussianPDFReal 0 1 (HybridVerify.bsd1 s K r σ τ) * Real.sqrt τ)\n      (-(gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * HybridVerify.bsd2 S K r σ τ / σ)) S :=\n  HybridVerify.hasDerivAt_bsV_vanna hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS vanna (Wystup 2002)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Product + chain rule on vega(S), with σ√τ - d₁ = -d₂ collapse. Lives in lean/HybridVerify/BlackScholesHigherGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-volga",
+      "name": "BS Volga / Vomma (∂²V/∂σ²)",
+      "description": "Volga: ∂²V/∂σ² = vega · d₁ · d₂ / σ. The convexity of option value in volatility.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesHigherGreeks\n\nopen HybridVerify\n\ntheorem bs_volga_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r s τ) * Real.sqrt τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ\n        * HybridVerify.bsd1 S K r σ τ * HybridVerify.bsd2 S K r σ τ / σ) σ :=\n  HybridVerify.hasDerivAt_bsV_volga hK hS hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS volga / vomma (Wystup 2002)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof using the clean derivative ∂_σ d₁ = -d₂/σ + chain rule on ϕ. Lives in lean/HybridVerify/BlackScholesHigherGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bachelier-delta",
+      "name": "Bachelier Delta",
+      "description": "Bachelier delta: ∂V/∂S = Φ(d) where d = (S-K)/(σ√T). Chain-rule contributions through d cancel via the identity (S-K)/(σ√T) = d.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_delta_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => HybridVerify.bachelierV K σ T s)\n      (HybridVerify.Phi (HybridVerify.bachelierD S K σ T)) S :=\n  HybridVerify.hasDerivAt_bachelierV_S hσ hT S\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Bachelier delta",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Product + chain rule, with (S-K)·∂d/∂S = d cancelling the σ√T·ϕ(d)·∂d/∂S contribution. Lives in lean/HybridVerify/BachelierGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bachelier-vega",
+      "name": "Bachelier Vega",
+      "description": "Bachelier vega: ∂V/∂σ = √T · ϕ(d). Cancellation via (S-K)·∂d/∂σ = -d²·σ√T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_vega_thm {K T : ℝ} (hT : 0 < T)\n    {S σ : ℝ} (hσ : 0 < σ) :\n    HasDerivAt (fun s => HybridVerify.bachelierV K s T S)\n      (Real.sqrt T * gaussianPDFReal 0 1 (HybridVerify.bachelierD S K σ T)) σ :=\n  HybridVerify.hasDerivAt_bachelierV_sigma hT hσ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Bachelier vega",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Quotient rule on d + chain rule on Φ, ϕ; algebraic cancellation. Lives in lean/HybridVerify/BachelierGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-delta",
+      "name": "Cash-or-Nothing Digital Delta",
+      "description": "Cash digital delta: ∂V_cash/∂S = e^{-rτ} · ϕ(d₂) / (S σ √τ). Direct chain rule on Φ(d₂(S)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsCashDigital K r σ s τ)\n      (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsCashDigital_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing digital delta (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Chain rule on e^{-rτ} · Φ(d₂(S)). Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-delta",
+      "name": "Asset-or-Nothing Digital Delta",
+      "description": "Asset digital delta: ∂V_asset/∂S = Φ(d₁) + ϕ(d₁) / (σ √τ). Product rule on S · Φ(d₁(S)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsAssetDigital K r σ s τ)\n      (HybridVerify.Phi (HybridVerify.bsd1 S K r σ τ)\n        + gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsAssetDigital_S hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing digital delta (Hull 26.1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Product rule on S · Φ(d₁(S)). Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-dividends-call",
+      "name": "BS-Merton Call with Continuous Dividends",
+      "description": "V_q = S e^{-qT} Φ(d₁) - K e^{-rT} Φ(d₂) with effective drift r-q. Extension of bs_call_formula to dividend-paying assets.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem bs_dividends_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r q σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r - q) σ T Z) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(q * T)) * Phi (bsd1 S_0 K (r - q) σ T)\n        - K * Real.exp (-(r * T)) * Phi (bsd2 S_0 K (r - q) σ T) :=\n  HybridVerify.bs_dividends_call_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton with dividends (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Apply bs_call_formula with rate parameter r-q, then factor e^{-rT} = e^{-qT} · e^{-(r-q)T} on the LHS. Lives in lean/HybridVerify/BlackScholesDividends.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-garman-kohlhagen",
+      "name": "Garman-Kohlhagen FX Call",
+      "description": "FX call pricing: V = S e^{-r_f·T} Φ(d₁) - K e^{-r_d·T} Φ(d₂) with effective drift r_d - r_f. Trivial corollary of dividends formula with q = r_f.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem garman_kohlhagen_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r_d r_f σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r_d - r_f) σ T Z) :\n    ∫ ω, Real.exp (-r_d * T) * max (bsTerminal S_0 (r_d - r_f) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(r_f * T)) * Phi (bsd1 S_0 K (r_d - r_f) σ T)\n        - K * Real.exp (-(r_d * T)) * Phi (bsd2 S_0 K (r_d - r_f) σ T) :=\n  HybridVerify.garman_kohlhagen_call_formula h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Garman-Kohlhagen FX (Hull 17.3)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Direct specialization of bs_dividends_call_formula with q := r_f. Lives in lean/HybridVerify/BlackScholesDividends.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-delta",
+      "name": "Black-76 Delta",
+      "description": "Futures option delta: ∂V_B/∂F = e^{-rT} · Φ(d₁). Specialization of BS delta to zero drift, post-multiplied by discount factor.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_delta_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => HybridVerify.blackV K σ r f T)\n      (Real.exp (-(r * T)) * HybridVerify.Phi (HybridVerify.bsd1 F K 0 σ T)) F :=\n  HybridVerify.hasDerivAt_blackV_F hK hσ r hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 delta (Hull 17.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. bsV delta at r=0 times outer discount factor e^{-rT}. Lives in lean/HybridVerify/BlackFuturesGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-gamma",
+      "name": "Black-76 Gamma",
+      "description": "Futures option gamma: ∂²V_B/∂F² = e^{-rT} · ϕ(d₁) / (F σ √T).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_gamma_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) * HybridVerify.Phi (HybridVerify.bsd1 f K 0 σ T))\n      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T)\n        / (F * σ * Real.sqrt T)) F :=\n  HybridVerify.hasDerivAt_blackV_FF hK hσ r hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 gamma (Hull 17.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. bsV gamma at r=0 times outer discount factor. Lives in lean/HybridVerify/BlackFuturesGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-vega",
+      "name": "Black-76 Vega",
+      "description": "Futures option vega: ∂V_B/∂σ = e^{-rT} · F · ϕ(d₁) · √T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_vega_thm {K : ℝ} (hK : 0 < K) (r : ℝ)\n    {F σ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T) :\n    HasDerivAt (fun s => HybridVerify.blackV K s r F T)\n      (Real.exp (-(r * T)) * F * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T)\n        * Real.sqrt T) σ :=\n  HybridVerify.hasDerivAt_blackV_sigma hK r hF hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 vega (Hull 17.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. bsV vega at r=0 times outer discount factor. Lives in lean/HybridVerify/BlackFuturesGreeks.lean. Axioms-clean."
+      }
     }
   ]
 }

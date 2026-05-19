@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 79 |
-| delivery-ready | **63** |
-| ↳ full derivations | 39 |
+| total theorems | 95 |
+| delivery-ready | **79** |
+| ↳ full derivations | 55 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -28,11 +28,15 @@ most lean formalization projects pick one theorem and go deep, or contribute to 
   - black-scholes call formula from the risk-neutral lognormal hypothesis (`BlackScholesCall.lean`, ~370 lines, no itô used)
   - black-scholes put formula via direct integration on the left tail + put-call parity corollary (`BlackScholesPut.lean`)
   - black-scholes digital options: cash-or-nothing and asset-or-nothing, with call decomposition (`BlackScholesDigital.lean`)
-  - black-scholes greeks: delta and gamma in `BlackScholesPDE.lean`, **vega** ($\partial_\sigma V = S \phi(d_1) \sqrt{\tau}$) and **rho** ($\partial_r V = K \tau e^{-r\tau} \Phi(d_2)$) via magic-identity collapses
+  - black-scholes greeks (call): delta, gamma, theta, **vega** ($\partial_\sigma V = S \phi(d_1) \sqrt{\tau}$), **rho** ($\partial_r V = K \tau e^{-r\tau} \Phi(d_2)$) in `BlackScholesPDE.lean` via magic-identity collapses
+  - black-scholes greeks (put): δ, γ, θ, vega, ρ in `BlackScholesPutGreeks.lean` derived from put-call parity + Mathlib derivative rules
+  - **higher-order BS greeks**: vanna ($\partial^2 V/\partial \sigma \partial S = -\phi(d_1) d_2 / \sigma$) and volga ($\partial^2 V/\partial \sigma^2 = \text{vega} \cdot d_1 d_2 / \sigma$) via the clean derivative $\partial_\sigma d_1 = -d_2/\sigma$ (`BlackScholesHigherGreeks.lean`)
   - black-scholes PDE forward direction via the magic identity $S \phi(d_1) = K e^{-r\tau} \phi(d_2)$ (`BlackScholesPDE.lean`)
-  - **bachelier model** option pricing (arithmetic BM), with the truncated-mean primitive $\int_a^\infty z \phi(z) dz = \phi(a)$ via FTC (`BachelierModel.lean`)
+  - **bachelier model** option pricing (arithmetic BM), with the truncated-mean primitive $\int_a^\infty z \phi(z) dz = \phi(a)$ via FTC; delta + vega greeks in `BachelierGreeks.lean`
+  - **digital option deltas**: cash-or-nothing and asset-or-nothing (`BlackScholesDigitalGreeks.lean`)
   - **implied volatility uniqueness** via vega-positivity + `strictMonoOn_of_deriv_pos` (`ImpliedVolatility.lean`)
-  - **black-76 formula** for futures options, derived as a specialization of the call formula with zero drift (`BlackFutures.lean`)
+  - **black-scholes-merton with continuous dividends** $V_q = S e^{-qT} \Phi(d_1) - K e^{-rT} \Phi(d_2)$ and **garman-kohlhagen FX call** (`BlackScholesDividends.lean`)
+  - **black-76 formula + greeks** for futures options (`BlackFutures.lean`, `BlackFuturesGreeks.lean`): formula derived as specialization of the call formula with zero drift; delta/gamma/vega follow directly
   - **forward / futures pricing** under no-arbitrage ($F = S_0 e^{rT}$), from the gaussian MGF (`BlackScholesForward.lean`)
   - **single-period binomial replication theorem** + multi-period backward-induction framework (`BinomialModel.lean`)
   - **CRR risk-neutral probability limit** $p_n \to 1/2$ as $n \to \infty$, plus variance limit $4\sigma^2 T \cdot p_n(1-p_n) \to \sigma^2 T$ (`BinomialCRRConvergence.lean`). substantive analytic content of CRR-to-BS correspondence. full distributional convergence is upstream-gated on a triangular-array CLT (mathlib only ships the fixed-iid CLT).
