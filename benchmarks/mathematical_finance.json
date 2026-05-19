@@ -624,6 +624,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof by induction on remaining steps, using supermartingale property + monotonicity of binomialOptionPriceOnePeriod. Lives in lean/HybridVerify/AmericanBinomial.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-crr-drift-quotient",
+      "name": "CRR Drift Quotient Limit",
+      "description": "(2 e^{rh²} − e^{σh} − e^{−σh}) / (h · (e^{σh} − e^{−σh})) → (r − σ²/2)/σ as h → 0. Substantive analytic content of the CRR-to-BS drift correspondence. Combined with sinh-side scaling (n → ∞ via h_n = √(T/n) and σT factor), gives the textbook drift limit n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T. The substitution itself is routine; the analytic content is captured here.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BinomialDriftLimit\n\nopen HybridVerify Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  HybridVerify.crr_drift_limit_h hσ r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "CRR drift convergence (Hull 21.1, Shreve I 3.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the h-form drift quotient limit. Building blocks: tendsto_exp_sym_sub_two_div_sq (via the algebraic identity e^{σh} + e^{-σh} - 2 = e^{-σh}(e^{σh} - 1)², reducing to existing tendsto_exp_sub_one_div); tendsto_crr_numerator_div_sq (combines with the existing tendsto_exp_sq_sub_one_div_sq); tendsto_sinh_div for the denominator. The n → ∞ form n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T is the obvious substitution h = √(T/n) scaled by σT, deferred as routine algebra (the Lean expression for the substitution is intricate, the analytic content is identical to the h-form proven here). Lives in lean/HybridVerify/BinomialDriftLimit.lean. Axioms-clean."
+      }
     }
   ]
 }

@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 104 |
-| delivery-ready | **88** |
-| ↳ full derivations | 64 |
+| total theorems | 105 |
+| delivery-ready | **89** |
+| ↳ full derivations | 65 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -41,6 +41,7 @@ most lean formalization projects pick one theorem and go deep, or contribute to 
   - **forward / futures pricing** under no-arbitrage ($F = S_0 e^{rT}$), from the gaussian MGF (`BlackScholesForward.lean`)
   - **single-period binomial replication theorem** + multi-period backward-induction framework (`BinomialModel.lean`)
   - **CRR risk-neutral probability limit** $p_n \to 1/2$ as $n \to \infty$, plus variance limit $4\sigma^2 T \cdot p_n(1-p_n) \to \sigma^2 T$ (`BinomialCRRConvergence.lean`). substantive analytic content of CRR-to-BS correspondence. full distributional convergence is upstream-gated on a triangular-array CLT (mathlib only ships the fixed-iid CLT).
+  - **CRR drift quotient limit** $(2e^{rh^2} - e^{\sigma h} - e^{-\sigma h})/(h(e^{\sigma h} - e^{-\sigma h})) \to (r - \sigma^2/2)/\sigma$ (`BinomialDriftLimit.lean`). Uses the algebraic identity $e^{\sigma h} + e^{-\sigma h} - 2 = e^{-\sigma h}(e^{\sigma h} - 1)^2$ to reduce the cosh-like difference to existing exp-quotient limits. Completes the analytic content of CRR drift matching.
   - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
   - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
   - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.
