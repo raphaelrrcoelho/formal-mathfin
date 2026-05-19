@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 105 |
-| delivery-ready | **89** |
-| ↳ full derivations | 65 |
+| total theorems | 108 |
+| delivery-ready | **92** |
+| ↳ full derivations | 68 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |

@@ -115,7 +115,8 @@ private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ 
       ∫ ω, (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
         = t / (n + 1) := fun k _ => by
     rw [hB.integral_sq_increment (equipartition_endpoint_le ht n k)]
-    field_simp; ring
+    field_simp
+    ring
   rw [Finset.sum_congr rfl hsum, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
   field_simp
 
@@ -136,7 +137,8 @@ private lemma tendsto_nt_div_succ (t : ℝ) :
         (nhds (t * 0)) := h_one_div.const_mul t
     rw [mul_zero] at h_const_mul
     refine h_const_mul.congr ?_
-    intro n; ring
+    intro n
+    ring
   have h_sub : Filter.Tendsto (fun n : ℕ => t - t / ((n : ℝ) + 1)) atTop (nhds (t - 0)) :=
     tendsto_const_nhds.sub h_t_div
   rwa [sub_zero] at h_sub

@@ -640,6 +640,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of the h-form drift quotient limit. Building blocks: tendsto_exp_sym_sub_two_div_sq (via the algebraic identity e^{σh} + e^{-σh} - 2 = e^{-σh}(e^{σh} - 1)², reducing to existing tendsto_exp_sub_one_div); tendsto_crr_numerator_div_sq (combines with the existing tendsto_exp_sq_sub_one_div_sq); tendsto_sinh_div for the denominator. The n → ∞ form n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T is the obvious substitution h = √(T/n) scaled by σT, deferred as routine algebra (the Lean expression for the substitution is intricate, the analytic content is identical to the h-form proven here). Lives in lean/HybridVerify/BinomialDriftLimit.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-bs-merton-rho",
+      "name": "BS-Merton Rho (Dividends)",
+      "description": "BS-Merton rho: ∂V_q/∂r = K · τ · e^{-rτ} · Φ(d₂'). Chain rule on r-q applied to existing call rho, then e^{-qT} · e^{-(r-q)T} = e^{-rT}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_rho_thm {K q σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsVDiv K r' q σ S τ)\n      (K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K (r - q) σ τ)) r :=\n  HybridVerify.hasDerivAt_bsVDiv_r hK hσ hτ hS r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends rho (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on r' ↦ r' - q applied to existing call rho, combining e^{-qT} · e^{-(r-q)T} = e^{-rT}. Lives in lean/HybridVerify/BlackScholesDividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-psi",
+      "name": "BS-Merton Psi (dividend Greek)",
+      "description": "BS-Merton psi: ∂V_q/∂q = -S · τ · e^{-qτ} · Φ(d₁'). Sensitivity of the option price to the dividend yield, derived via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_psi_thm {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (q : ℝ) :\n    HasDerivAt (fun q' => HybridVerify.bsVDiv K r q' σ S τ)\n      (-(S * τ * Real.exp (-(q * τ)) * HybridVerify.Phi (HybridVerify.bsd1 S K (r - q) σ τ))) q :=\n  HybridVerify.hasDerivAt_bsVDiv_q hK hσ hτ hS q\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends psi (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ). The first-term contribution -τ·V_q and the second-term -K·τ·e^{-rτ}·Φ(d₂') combine via the magic-identity-like cancellation S·e^{-qτ}·Φ(d₁') = K·e^{-rτ}·Φ(d₂') minus itself (the residual Φ(d₂') terms cancel). Lives in lean/HybridVerify/BlackScholesDividendsGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bs-merton-theta",
+      "name": "BS-Merton Theta (τ form, Dividends)",
+      "description": "BS-Merton theta: ∂V_q/∂τ = -q·V_q + e^{-qτ}·(σ·S·ϕ(d₁')/(2√τ) + (r-q)·K·e^{-(r-q)τ}·Φ(d₂')).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_theta_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsVDiv K r q σ S t)\n      (-(q * HybridVerify.bsVDiv K r q σ S τ) +\n        Real.exp (-(q * τ)) *\n          (σ * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K (r - q) σ τ) / (2 * Real.sqrt τ)\n            + (r - q) * K * Real.exp (-((r - q) * τ)) *\n              HybridVerify.Phi (HybridVerify.bsd2 S K (r - q) σ τ))) τ :=\n  HybridVerify.hasDerivAt_bsVDiv_tau hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS-Merton dividends theta (Hull 17.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ) using existing hasDerivAt_bsV_tau at effective drift r-q. Lives in lean/HybridVerify/BlackScholesDividendsGreeks.lean. Axioms-clean."
+      }
     }
   ]
 }

@@ -22,7 +22,8 @@ via the standard density / `LinearMap.extendOfNorm` construction.
 ## Construction
 
 1. Index step intervals by `StepIndex T := { (s, t) : ℝ≥0 × ℝ≥0 // s ≤ t ∧ t ≤ T }`.
-2. Two formal-assembly linear maps on `StepIndex T →₀ ℝ`:
+2. Two linear maps out of the finitely supported coefficient space
+   `StepIndex T →₀ ℝ`:
    * `stepAssembly`: `δ_(s, t) ↦ indicatorConstLp 2 _ _ 1` in
      `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`.
    * `wienerAssembly`: `δ_(s, t) ↦ [fun ω ↦ B t ω - B s ω]` in `Lp ℝ 2 μ`.
@@ -35,8 +36,8 @@ via the standard density / `LinearMap.extendOfNorm` construction.
 
 ## Main results
 
-* `wiener_assembly_isometry`: the step-function Itô isometry on the
-  formal-combination space `StepIndex T →₀ ℝ`.
+* `wiener_assembly_isometry`: the step-function Itô isometry on
+  `StepIndex T →₀ ℝ`.
 * `stepAssembly_denseRange`: step indicators span a dense subspace of
   `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`.
 * `wienerIntegralLp`: the Wiener integral as a `ContinuousLinearMap` from
@@ -45,9 +46,6 @@ via the standard density / `LinearMap.extendOfNorm` construction.
 * `wienerIntegralLp_norm`: the Itô isometry `‖wienerIntegralLp f‖ = ‖f‖`.
 * `wienerIntegralLp_integral_sq`: the Itô isometry in integral form,
   `∫ ω, (I f ω)² ∂μ = ∫ s in (0, T], (f s)² ∂volume`.
-
-All axioms-clean (`#print axioms` reports only Mathlib's
-`[propext, Classical.choice, Quot.sound]`).
 -/
 
 namespace HybridVerify
@@ -84,6 +82,13 @@ def interval (i : StepIndex T) : Set ℝ := Set.Ioc i.lo i.hi
 lemma measurableSet_interval (i : StepIndex T) :
     MeasurableSet (i.interval) := measurableSet_Ioc
 
+/-- The interval represented by a `StepIndex T` is contained in `(0, T]`. -/
+lemma interval_subset_Ioc_zero_T (i : StepIndex T) :
+    i.interval ⊆ Set.Ioc (0 : ℝ) (T : ℝ) := by
+  rintro x ⟨hx_lo, hx_hi⟩
+  exact ⟨lt_of_le_of_lt (i.1.1 : ℝ≥0).coe_nonneg hx_lo,
+    hx_hi.trans i.hi_le_T⟩
+
 lemma volume_interval_lt_top (i : StepIndex T) :
     (volume i.interval) ≠ ∞ := by
   rw [interval, Real.volume_Ioc]
@@ -96,9 +101,9 @@ end StepIndex
 /-- Helper: measure of an interval under the restricted volume is finite. -/
 lemma StepIndex.restrict_interval_ne_top {T : ℝ≥0} (i : StepIndex T) :
     (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) i.interval ≠ ∞ := by
-  rw [Measure.restrict_apply i.measurableSet_interval]
-  exact ne_of_lt (lt_of_le_of_lt (measure_mono Set.inter_subset_left)
-    (lt_of_le_of_ne le_top i.volume_interval_lt_top))
+  rw [Measure.restrict_apply i.measurableSet_interval,
+      Set.inter_eq_left.mpr i.interval_subset_Ioc_zero_T]
+  exact i.volume_interval_lt_top
 
 /-- The indicator `𝟙_{(lo, hi]}` as an element of `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`. -/
 noncomputable def stepIndicatorLp (T : ℝ≥0) (i : StepIndex T) :
@@ -117,14 +122,14 @@ noncomputable def wienerIncrementLp (B : ℝ≥0 → Ω → ℝ)
     [IsPreBrownian B μ] {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
   (memLp_increment_two (B := B) (μ := μ) i).toLp _
 
-/-! ### Formal assembly maps on `StepIndex T →₀ ℝ` -/
+/-! ### Assembly maps on finitely supported coefficients -/
 
-/-- Linear assembly of formal coefficients into the step-function side. -/
+/-- Linear map from finitely supported coefficients to step functions. -/
 noncomputable def stepAssembly (T : ℝ≥0) :
     (StepIndex T →₀ ℝ) →ₗ[ℝ] Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
   Finsupp.linearCombination ℝ (stepIndicatorLp T)
 
-/-- Linear assembly of formal coefficients into the Wiener-integral side. -/
+/-- Linear map from finitely supported coefficients to Wiener increments. -/
 noncomputable def wienerAssembly (B : ℝ≥0 → Ω → ℝ)
     [IsPreBrownian B μ] (T : ℝ≥0) :
     (StepIndex T →₀ ℝ) →ₗ[ℝ] Lp ℝ 2 μ :=
@@ -135,7 +140,7 @@ noncomputable def wienerAssembly (B : ℝ≥0 → Ω → ℝ)
 For `s ≤ t, u ≤ v ∈ ℝ≥0`,
 `E[(B_t - B_s)(B_v - B_u)] = vol((s, t] ∩ (u, v])`.
 
-We prove this in the cleaner form using `min` / `max` arithmetic. -/
+The right hand side is written as `max 0 (min t v - max s u)`. -/
 
 /-- `∫ ω, B s ω * B t ω ∂μ = min s t` for pre-Brownian motion `B` with zero start.
 Combines `IsPreBrownian.covariance_eval` and `covariance_eq_sub` (the means are zero). -/
@@ -149,6 +154,22 @@ lemma integral_mul_eval (s t : ℝ≥0) :
   have hEt : ∫ ω, B t ω ∂μ = 0 := hB.integral_eval t
   rw [hEs, hEt, zero_mul, sub_zero] at h_cov
   exact h_cov
+
+/-- Endpoint arithmetic for the covariance of two ordered Brownian increments. -/
+private lemma covariance_increment_arithmetic
+    (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ v) :
+    ((min t v : ℝ≥0) : ℝ) - ((min t u : ℝ≥0) : ℝ) -
+      ((min s v : ℝ≥0) : ℝ) + ((min s u : ℝ≥0) : ℝ) =
+        max 0 ((min (t : ℝ) v) - (max (s : ℝ) u)) := by
+  push_cast
+  have hsR : (s : ℝ) ≤ t := by exact_mod_cast hst
+  have huR : (u : ℝ) ≤ v := by exact_mod_cast huv
+  rcases le_total (s : ℝ) u with hsu | hsu
+  all_goals rcases le_total (t : ℝ) u with htu | htu
+  all_goals rcases le_total (t : ℝ) v with htv | htv
+  all_goals rcases le_total (s : ℝ) v with hsv | hsv
+  all_goals simp_all
+  all_goals nlinarith
 
 /-- Covariance identity for BM increments:
 `E[(B_t - B_s)(B_v - B_u)] = vol((s, t] ∩ (u, v])`,
@@ -190,17 +211,9 @@ lemma covariance_increment_aux (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ 
     rw [h_eq_fun]; linarith [e1, e2, e3]
   rw [h_lhs, integral_mul_eval (μ := μ) t v, integral_mul_eval (μ := μ) t u,
       integral_mul_eval (μ := μ) s v, integral_mul_eval (μ := μ) s u]
-  push_cast
-  have hsR : (s : ℝ) ≤ t := by exact_mod_cast hst
-  have huR : (u : ℝ) ≤ v := by exact_mod_cast huv
-  rcases le_total (s : ℝ) u with hsu | hsu
-  all_goals rcases le_total (t : ℝ) u with htu | htu
-  all_goals rcases le_total (t : ℝ) v with htv | htv
-  all_goals rcases le_total (s : ℝ) v with hsv | hsv
-  all_goals simp_all
-  all_goals nlinarith
+  exact covariance_increment_arithmetic s t u v hst huv
 
-/-! ### The key isometry on the formal-combination space -/
+/-! ### The key isometry on finitely supported coefficients -/
 
 /-- The core pairing identity: for two step indices `i j ∈ StepIndex T`,
 the inner product of the Wiener increments equals the inner product of the
@@ -238,9 +251,8 @@ private lemma inner_wienerIncrementLp_eq {T : ℝ≥0} (i j : StepIndex T) :
       simp [StepIndex.interval, Set.Ioc_inter_Ioc]
     have h_sub :
         Set.Ioc (max (i.lo : ℝ) j.lo) (min (i.hi : ℝ) j.hi) ⊆ Set.Ioc (0 : ℝ) (T : ℝ) := by
-      rintro x ⟨hxL, hxR⟩
-      exact ⟨lt_of_le_of_lt (le_max_of_le_left (i.1.1 : ℝ≥0).coe_nonneg) hxL,
-             hxR.trans (le_trans (min_le_left _ _) i.hi_le_T)⟩
+      rw [← h_inter]
+      exact fun x hx => i.interval_subset_Ioc_zero_T hx.1
     rw [Measure.real_def,
         Measure.restrict_apply (i.measurableSet_interval.inter j.measurableSet_interval),
         h_inter, Set.inter_eq_left.mpr h_sub, Real.volume_Ioc,

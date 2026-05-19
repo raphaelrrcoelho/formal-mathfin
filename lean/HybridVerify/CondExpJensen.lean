@@ -14,7 +14,7 @@ open MeasureTheory
 variable {α : Type*} {m₀ : MeasurableSpace α} {μ : Measure α} [IsFiniteMeasure μ]
   {m : MeasurableSpace α} {φ : ℝ → ℝ} {X : α → ℝ}
 
-/-- **Proposition 2.1.11(9), conditional Jensen's inequality.**
+/-- Conditional Jensen's inequality with an explicit subgradient.
 
 For a convex `φ : ℝ → ℝ` with an explicit subgradient `g` satisfying the
 supporting-line property `φ(y) + g(y)(x − y) ≤ φ(x)` and uniformly bounded,
@@ -55,34 +55,41 @@ theorem conditional_jensen_inequality
     refine (condExp_mul_of_stronglyMeasurable_left hgY_meas hgYmul_int hXmY_int).trans ?_
     filter_upwards [hXmY_condExp] with a ha
     show g (Y a) * (μ[X - Y | m]) a = 0
-    rw [ha]; simp
-  have hpw : (fun a ↦ g (Y a) * (X a - Y a)) ≤ᵐ[μ] (fun a ↦ φ (X a) - φ (Y a)) :=
+    rw [ha]
+    simp
+  have h_supporting_line :
+      (fun a ↦ g (Y a) * (X a - Y a)) ≤ᵐ[μ] (fun a ↦ φ (X a) - φ (Y a)) :=
     ae_of_all _ fun a ↦ by
-      have := hg_subgrad (X a) (Y a); linarith
+      have h := hg_subgrad (X a) (Y a)
+      linarith
   have hgYmul_eq : (fun a ↦ g (Y a) * (X a - Y a)) = (fun a ↦ g (Y a)) * (X - Y) := rfl
   have hφ_diff_int : Integrable (fun a ↦ φ (X a) - φ (Y a)) μ :=
     hφX_int.sub hφcE_int
   have hgYmul_int' : Integrable (fun a ↦ g (Y a) * (X a - Y a)) μ := hgYmul_eq ▸ hgYmul_int
-  have hcompare : μ[fun a ↦ g (Y a) * (X a - Y a) | m] ≤ᵐ[μ]
-                  μ[fun a ↦ φ (X a) - φ (Y a) | m] :=
-    condExp_mono hgYmul_int' hφ_diff_int hpw
-  have hLHS : μ[fun a ↦ g (Y a) * (X a - Y a) | m] =ᵐ[μ] (0 : α → ℝ) :=
+  have h_condExp_mono :
+      μ[fun a ↦ g (Y a) * (X a - Y a) | m] ≤ᵐ[μ]
+        μ[fun a ↦ φ (X a) - φ (Y a) | m] :=
+    condExp_mono hgYmul_int' hφ_diff_int h_supporting_line
+  have h_subgradient_condExp :
+      μ[fun a ↦ g (Y a) * (X a - Y a) | m] =ᵐ[μ] (0 : α → ℝ) :=
     hgYmul_eq ▸ hgYmul_condExp
   have hφY_meas : StronglyMeasurable[m] (fun a ↦ φ (Y a)) :=
     (hφ_meas.comp hY_meas.measurable).stronglyMeasurable
   have hφY_self : μ[fun a ↦ φ (Y a) | m] = fun a ↦ φ (Y a) :=
     condExp_of_stronglyMeasurable hm hφY_meas hφcE_int
-  have hRHS : μ[fun a ↦ φ (X a) - φ (Y a) | m] =ᵐ[μ]
-              fun a ↦ (μ[fun a ↦ φ (X a) | m]) a - φ (Y a) := by
+  have h_condExp_phi_diff :
+      μ[fun a ↦ φ (X a) - φ (Y a) | m] =ᵐ[μ]
+        fun a ↦ (μ[fun a ↦ φ (X a) | m]) a - φ (Y a) := by
     have h1 : μ[fun a ↦ φ (X a) - φ (Y a) | m] =ᵐ[μ]
               μ[fun a ↦ φ (X a) | m] - μ[fun a ↦ φ (Y a) | m] := by
       change μ[(fun a ↦ φ (X a)) - (fun a ↦ φ (Y a)) | m] =ᵐ[μ] _
       exact condExp_sub hφX_int hφcE_int _
     filter_upwards [h1] with a ha
     rw [ha, Pi.sub_apply, hφY_self]
-  filter_upwards [hcompare, hLHS, hRHS] with a hcmp hL hR
-  rw [hL, hR] at hcmp
-  simp only [Pi.zero_apply] at hcmp
+  filter_upwards [h_condExp_mono, h_subgradient_condExp, h_condExp_phi_diff]
+    with a h_mono h_subgrad h_phi_diff
+  rw [h_subgrad, h_phi_diff] at h_mono
+  simp only [Pi.zero_apply] at h_mono
   linarith
 
 end HybridVerify

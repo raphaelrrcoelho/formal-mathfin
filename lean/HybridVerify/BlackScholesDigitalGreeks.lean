@@ -15,15 +15,14 @@ For the two digital (binary) European options:
 * **Cash-or-nothing** call price `V_cash(S, τ) = e^{-rτ} Φ(d₂)`.
 * **Asset-or-nothing** call price `V_asset(S, τ) = S Φ(d₁)`.
 
-We derive their deltas and gammas:
+We derive their deltas and the asset-side gamma:
 
 * `hasDerivAt_bsCashDigital_S` — δ_cash = e^{-rτ} ϕ(d₂) / (S σ √τ).
-* `hasDerivAt_bsCashDigital_SS` — γ_cash = -e^{-rτ} ϕ(d₂) · d₁ / (S² σ² τ).
 * `hasDerivAt_bsAssetDigital_S` — δ_asset = Φ(d₁) + ϕ(d₁) / (σ √τ).
 * `hasDerivAt_bsAssetDigital_SS` — γ_asset = -ϕ(d₁) · d₂ / (S σ² τ).
 
 (The latter follows from the BS magic identity `K e^{-rτ} ϕ(d₂) = S ϕ(d₁)`
-which collapses the `S · ϕ(d₁) · ∂_S d₁` chain-rule term. Gammas use the
+which collapses the `S · ϕ(d₁) · ∂_S d₁` chain-rule term, and uses the
 clean identity `σ√τ − d₁ = -d₂`.)
 -/
 

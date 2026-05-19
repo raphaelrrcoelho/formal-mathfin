@@ -29,7 +29,8 @@ private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
     linarith
   have h_diff_nonneg : (0 : ℝ) ≤ 1 - Real.exp (-(r * t)) := by linarith
   rw [← ENNReal.ofReal_one, ← ENNReal.ofReal_sub _ h_diff_nonneg]
-  congr 1; ring
+  congr 1
+  ring
 
 omit m0 in
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
