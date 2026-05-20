@@ -1856,6 +1856,230 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: equal-weight specialization of Real.geom_mean_le_arith_mean_weighted plus multiplication by n. Lives in lean/HybridVerify/AsianOptionInequality.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-survival-at-zero",
+      "name": "Survival Probability at Maturity",
+      "description": "Under constant hazard rate h, the survival probability at T = t equals 1: S(T, T) = 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem survival_at_zero_thm (h T : ℝ) :\n    HybridVerify.survivalProbability h T T = 1 :=\n  HybridVerify.survival_at_zero h T\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit risk (Duffie-Singleton 1999; Lando 2004)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from exp(0) = 1. Lives in lean/HybridVerify/CreditSpread.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-survival-pos",
+      "name": "Survival Probability Positivity",
+      "description": "Survival probability is strictly positive: 0 < exp(-h(T-t)) for all h, t, T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem survival_pos_thm (h t T : ℝ) :\n    0 < HybridVerify.survivalProbability h t T :=\n  HybridVerify.survival_pos h t T\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit risk (Duffie-Singleton 1999)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from Real.exp_pos. Lives in lean/HybridVerify/CreditSpread.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-credit-spread-eq-hazard",
+      "name": "Credit Spread Equals Hazard Under Constant Hazard",
+      "description": "Under constant hazard rate h, the credit spread -log(S)/(T-t) equals h. Structurally identical to ZCB yield equality under flat rate.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem credit_spread_eq_hazard_thm {h t T : ℝ} (htT : t < T) :\n    -Real.log (HybridVerify.survivalProbability h t T) / (T - t) = h :=\n  HybridVerify.creditSpread_eq_hazard htT\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit pricing under constant hazard (Lando 2004 Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Real.log_exp + field_simp. Lives in lean/HybridVerify/CreditSpread.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-survival-strictAnti",
+      "name": "Survival Strictly Decreasing Under Positive Hazard",
+      "description": "Positive hazard ⇒ survival probability strictly decreasing in horizon T. Hazard induces default risk that accumulates over time.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem survival_strictAnti_thm {h t : ℝ} (hh : 0 < h) :\n    StrictAntiOn (fun T => HybridVerify.survivalProbability h t T) (Set.Ici t) :=\n  HybridVerify.survival_strictAnti_of_pos_hazard hh\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "Reduced-form credit risk: survival monotonicity (Lando 2004)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Real.exp_lt_exp on increasing argument. Lives in lean/HybridVerify/CreditSpread.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsd1-K-deriv",
+      "name": "Strike Derivative of d_1",
+      "description": "∂_K d_1(S, K, r, σ, τ) = -1/(K·σ·√τ). Mirror of the ∂_S d_1 result.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsd1_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => HybridVerify.bsd1 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  HybridVerify.hasDerivAt_bsd1_K S r σ τ hS hσ hτ hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes K-derivative of d_1 (Hull Ch 17)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Real.log_div + HasDerivAt.congr_of_eventuallyEq on a (k ≠ 0)-neighborhood. Lives in lean/HybridVerify/OptionStrikeProperties.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsd2-K-deriv",
+      "name": "Strike Derivative of d_2",
+      "description": "∂_K d_2(S, K, r, σ, τ) = -1/(K·σ·√τ), same as ∂_K d_1 since d_2 - d_1 = -σ√τ is K-independent.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsd2_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => HybridVerify.bsd2 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  HybridVerify.hasDerivAt_bsd2_K S r σ τ hS hσ hτ hK\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes K-derivative of d_2 (Hull Ch 17)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: bsd2 = bsd1 - σ√τ, so K-derivative is same as bsd1's. Lives in lean/HybridVerify/OptionStrikeProperties.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsV-K-deriv",
+      "name": "Call Price Strike Derivative",
+      "description": "∂_K bsV = -e^{-rτ}·Φ(d_2). The magic identity S·ϕ(d_1) = K·e^{-rτ}·ϕ(d_2) collapses the d_1 contribution.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsV_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => HybridVerify.bsV k r σ S τ)\n      (-(Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ))) K :=\n  HybridVerify.hasDerivAt_bsV_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes ∂_K Greek (Hull Ch 17; Black-Scholes 1973)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product/chain rule + bs_identity magic identity collapse. Lives in lean/HybridVerify/OptionStrikeProperties.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsP-K-deriv",
+      "name": "Put Price Strike Derivative",
+      "description": "∂_K bsP = e^{-rτ}·Φ(-d_2). Follows from put-call parity bsP = bsV - S + K·e^{-rτ}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsP_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => HybridVerify.bsP k r σ S τ)\n      (Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ)) K :=\n  HybridVerify.hasDerivAt_bsP_K hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-Scholes put ∂_K Greek (Hull Ch 17)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via put-call parity bsP_eq_bsV + ∂_K bsV + Phi_neg. Lives in lean/HybridVerify/OptionStrikeProperties.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsV-KK-deriv",
+      "name": "Call Price Convexity in Strike",
+      "description": "∂²_K bsV = e^{-rτ}·ϕ(d_2)/(K·σ·√τ) ≥ 0 — call price is convex in strike (equivalent to butterfly-spread non-negativity).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify ProbabilityTheory\n\ntheorem bsV_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => -(Real.exp (-(r * τ)) *\n        HybridVerify.Phi (HybridVerify.bsd2 S k r σ τ)))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  HybridVerify.hasDerivAt_bsV_KK hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Call price convexity in strike (butterfly spread non-negativity; Hull Ch 12.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: derivative of -e^{-rτ}·Phi(d_2(K)) chains via Phi' = ϕ and ∂_K d_2. Lives in lean/HybridVerify/OptionStrikeProperties.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-n-periods-linearity",
+      "name": "Multi-Period Kelly Log-Growth Linearity",
+      "description": "T·kellyGrowth(p, b, f) = T·(p·log(1 + f·b) + (1-p)·log(1 - f)). Linear aggregation of iid period log-growths.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_n_periods_linearity_thm (T : ℕ) (p b f : ℝ) :\n    (T : ℝ) * HybridVerify.kellyGrowth p b f =\n      (T : ℝ) * (p * Real.log (1 + f * b) + (1 - p) * Real.log (1 - f)) :=\n  HybridVerify.kellyGrowth_n_periods T p b f\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Multi-period Kelly aggregation (Kelly 1956; Thorp 2006)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof by definitional unfolding. Lives in lean/HybridVerify/MultiPeriodKelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-n-periods-foc",
+      "name": "Multi-Period Kelly First-Order Optimality",
+      "description": "The Kelly fraction f* is optimal for any horizon T (the optimal fraction doesn't depend on horizon — Kelly is myopic).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_n_periods_foc_thm (T : ℕ) {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => (T : ℝ) * HybridVerify.kellyGrowth p b f) 0\n      (HybridVerify.kellyFraction p b) :=\n  HybridVerify.kelly_n_periods_deriv_at_kelly T hp hp1 hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Multi-period Kelly myopia (Thorp 2006; MacLean-Thorp-Ziemba 2010)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via const_mul on single-period first-order condition. Lives in lean/HybridVerify/MultiPeriodKelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-fraction-lt-one",
+      "name": "Kelly Fraction < 1",
+      "description": "For proper probabilities p < 1 and positive payoff b > 0, the Kelly fraction is strictly less than 1 — Kelly never bets the full bankroll on a single proper bet.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_lt_one_thm {p b : ℝ} (hp : p < 1) (hb : 0 < b) :\n    HybridVerify.kellyFraction p b < 1 :=\n  HybridVerify.kellyFraction_lt_one hp hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Kelly fraction bounds (Kelly 1956)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via div_lt_one + nlinarith. Lives in lean/HybridVerify/MultiPeriodKelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-fraction-zero-iff",
+      "name": "Kelly Fraction = 0 iff Break-Even Bet",
+      "description": "Kelly fraction f* = 0 if and only if p·(b+1) = 1 — i.e., the bet has zero expected log-growth.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_zero_iff_thm (p : ℝ) {b : ℝ} (hb : b ≠ 0) :\n    HybridVerify.kellyFraction p b = 0 ↔ p * (b + 1) = 1 :=\n  HybridVerify.kellyFraction_eq_zero_iff p hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Kelly fraction zero at break-even (Thorp 2006)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via div_eq_zero_iff + linarith. Lives in lean/HybridVerify/MultiPeriodKelly.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-kelly-fraction-pos-iff",
+      "name": "Kelly Fraction > 0 iff Favorable Bet",
+      "description": "Kelly fraction f* > 0 if and only if p·(b+1) > 1 — the bet has strictly positive expected log-growth.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_pos_iff_thm (p : ℝ) {b : ℝ} (hb : 0 < b) :\n    0 < HybridVerify.kellyFraction p b ↔ 1 < p * (b + 1) :=\n  HybridVerify.kellyFraction_pos_iff p hb\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Kelly fraction sign (Thorp 2006)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via lt_div_iff + linarith. Lives in lean/HybridVerify/MultiPeriodKelly.lean. Axioms-clean."
+      }
     }
   ]
 }

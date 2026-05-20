@@ -155,8 +155,22 @@ The `mathematical_finance.json` benchmark now has 116 theorems (all `full`). Ori
 | `mf-am-gm-two` | Two-element AM-GM inequality | `AsianOptionInequality.lean` |
 | `mf-asian-geom-le-arith-two` | Two-date Asian payoff geometric ≤ arithmetic | `AsianOptionInequality.lean` |
 | `mf-geom-mean-arith-mean-n` | N-element equal-weight AM-GM | `AsianOptionInequality.lean` |
+| `mf-survival-at-zero` | Survival probability at maturity S(T,T) = 1 | `CreditSpread.lean` |
+| `mf-survival-pos` | Survival probability strictly positive | `CreditSpread.lean` |
+| `mf-credit-spread-eq-hazard` | Credit spread = hazard rate (flat curve) | `CreditSpread.lean` |
+| `mf-survival-strictAnti` | Survival strictly decreasing under positive hazard | `CreditSpread.lean` |
+| `mf-bsd1-K-deriv` | ∂_K d_1 = -1/(K σ √τ) | `OptionStrikeProperties.lean` |
+| `mf-bsd2-K-deriv` | ∂_K d_2 = -1/(K σ √τ) | `OptionStrikeProperties.lean` |
+| `mf-bsV-K-deriv` | Call ∂_K bsV = -e^{-rτ}·Φ(d_2) | `OptionStrikeProperties.lean` |
+| `mf-bsP-K-deriv` | Put ∂_K bsP = e^{-rτ}·Φ(-d_2) | `OptionStrikeProperties.lean` |
+| `mf-bsV-KK-deriv` | Call convexity ∂²_K bsV ≥ 0 | `OptionStrikeProperties.lean` |
+| `mf-kelly-n-periods-linearity` | Multi-period Kelly log-growth linearity | `MultiPeriodKelly.lean` |
+| `mf-kelly-n-periods-foc` | Multi-period Kelly first-order optimality (myopia) | `MultiPeriodKelly.lean` |
+| `mf-kelly-fraction-lt-one` | Kelly fraction < 1 for proper bets | `MultiPeriodKelly.lean` |
+| `mf-kelly-fraction-zero-iff` | Kelly = 0 ⟺ break-even bet | `MultiPeriodKelly.lean` |
+| `mf-kelly-fraction-pos-iff` | Kelly > 0 ⟺ favorable bet | `MultiPeriodKelly.lean` |
 
-All 116 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
+All 130 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
 
 ### Quality / structural improvements (2026-05-16 → 2026-05-17 sessions)
 

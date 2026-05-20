@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 181 |
-| delivery-ready | **165** |
-| ↳ full derivations | 141 |
+| total theorems | 195 |
+| delivery-ready | **179** |
+| ↳ full derivations | 155 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -58,6 +58,9 @@ most lean formalization projects pick one theorem and go deep, or contribute to 
   - **extended performance ratios** (`PerformanceRatiosExtended.lean`): Sortino $(\mu - \text{target})/\sigma_{\text{down}}$, Treynor $(\mu - r_f)/\beta$, Information ratio $(\mu_p - \mu_b)/\sigma_{\text{active}}$, all scale-invariant; tracking-error decomposition $\sigma_{\text{active}}^2 = \sigma_p^2 - 2\mathrm{Cov} + \sigma_b^2$ with self-benchmark identity and Cauchy-Schwarz lower bound.
   - **second-order bond immunization** (`BondConvexityImmunization.lean`): convexity-times-value $C_P \cdot P = \sum_i w_i (T_i - t)^2 e^{-r(T_i-t)}$, $\partial^2 P/\partial r^2 = C_P \cdot P$, and Redington second-order immunization (matching convexity gives $\partial^2(A-L)/\partial r^2 = 0$).
   - **Asian option inequality + AM-GM** (`AsianOptionInequality.lean`): two-element AM-GM $\sqrt{ab} \le (a+b)/2$, n-element equal-weight AM-GM $n \cdot \prod f_i^{1/n} \le \sum f_i$ (via Mathlib's weighted version), and the two-date geometric-Asian-call payoff bound $\max(\sqrt{S_1 S_2} - K, 0) \le \max((S_1+S_2)/2 - K, 0)$.
+  - **reduced-form credit risk** (`CreditSpread.lean`): survival probability under constant hazard $S(t, T) = e^{-h(T-t)}$, credit spread $= h$ identity, and strict monotonic decrease in maturity under positive hazard.
+  - **strike Greeks for BS** (`OptionStrikeProperties.lean`): $\partial_K d_i = -1/(K \sigma \sqrt{\tau})$, $\partial_K \mathrm{bsV} = -e^{-r\tau} \Phi(d_2)$ (clean closed form via magic-identity collapse), $\partial_K \mathrm{bsP} = e^{-r\tau} \Phi(-d_2)$ via put-call parity, and $\partial^2_K \mathrm{bsV} = e^{-r\tau} \phi(d_2)/(K \sigma \sqrt{\tau}) \ge 0$ (butterfly-spread non-negativity).
+  - **multi-period Kelly + fraction bounds** (`MultiPeriodKelly.lean`): $T$-period log-growth linearity $T \cdot g(f)$, Kelly fraction myopia (optimal $f^*$ independent of horizon), $f^* < 1$, and the sign analysis $f^* = 0 \iff p(b+1) = 1$, $f^* > 0 \iff p(b+1) > 1$.
   - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
   - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
   - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.
