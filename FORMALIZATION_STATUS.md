@@ -32,10 +32,10 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Coverage as of 2026-05-19 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work):
-**102 / 118 delivery-ready** (78 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
+Coverage as of 2026-05-19 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work; **ninth pass: Phase 5 broader quant-finance** — fixed-income ZCB pricing/yield/duration/convexity, two-asset Markowitz portfolio theory with completing-the-square factorization, CAPM beta + portfolio linearity — 12 theorems extending the project beyond derivatives pricing into fixed income and portfolio theory):
+**114 / 130 delivery-ready** (90 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 
-The `mathematical_finance.json` benchmark now has 53 theorems (all `full`). Original 14 + 16 from the first pass + 9 from the second pass + 1 from the third pass + 3 from the fourth pass + 1 from the fifth pass + 6 from the sixth pass + 2 from the seventh pass + 1 from the eighth pass:
+The `mathematical_finance.json` benchmark now has 65 theorems (all `full`). Original 14 + 16 from the first pass + 9 from the second pass + 1 from the third pass + 3 from the fourth pass + 1 from the fifth pass + 6 from the sixth pass + 2 from the seventh pass + 1 from the eighth pass + 12 from the ninth pass:
 
 | ID | name | new module |
 |---|---|---|
@@ -92,8 +92,20 @@ The `mathematical_finance.json` benchmark now has 53 theorems (all `full`). Orig
 | `mf-black76-rho` | Black-76 rho (futures call) | `BlackFuturesGreeks.lean` |
 | `mf-black76-theta` | Black-76 theta (T form, futures call) | `BlackFuturesGreeks.lean` |
 | `mf-crr-drift-limit` | CRR drift limit (n-form, full textbook form) | `BinomialDriftLimit.lean` |
+| `mf-zcb-maturity` | ZCB pays par at maturity | `FixedIncome.lean` |
+| `mf-zcb-yield` | ZCB yield-to-maturity equals rate (constant `r`) | `FixedIncome.lean` |
+| `mf-zcb-duration` | ZCB Macaulay duration = time-to-maturity | `FixedIncome.lean` |
+| `mf-zcb-convexity` | ZCB convexity = (time-to-maturity)² | `FixedIncome.lean` |
+| `mf-markowitz-variance-factored` | Two-asset Markowitz variance: completing-the-square | `Markowitz.lean` |
+| `mf-markowitz-min-var-value` | Two-asset Markowitz variance at min-var weight | `Markowitz.lean` |
+| `mf-markowitz-min-var-bound` | Two-asset Markowitz variance ≥ V_min | `Markowitz.lean` |
+| `mf-markowitz-perfect-hedge` | Two-asset perfect hedge: V_min = 0 at ρ = −1 | `Markowitz.lean` |
+| `mf-capm-beta-market` | CAPM market beta = 1 | `CAPM.lean` |
+| `mf-capm-beta-riskfree` | CAPM risk-free beta = 0 | `CAPM.lean` |
+| `mf-capm-beta-linearity-two` | CAPM two-asset portfolio beta linearity | `CAPM.lean` |
+| `mf-capm-beta-linearity-finset` | CAPM finset-indexed portfolio beta linearity | `CAPM.lean` |
 
-All 53 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
+All 65 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
 
 ### Quality / structural improvements (2026-05-16 → 2026-05-17 sessions)
 

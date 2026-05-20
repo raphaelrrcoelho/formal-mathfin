@@ -848,6 +848,198 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form crr_drift_limit_h, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in lean/HybridVerify/BinomialDriftLimit.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-zcb-maturity",
+      "name": "Zero-Coupon Bond at Maturity",
+      "description": "ZCB pays par at maturity: B(T, T) = exp(0) = 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_maturity_thm (r T : ℝ) : HybridVerify.zcb r T T = 1 :=\n  HybridVerify.zcb_at_maturity r T\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Continuous-compounding ZCB (Hull 4.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in lean/HybridVerify/FixedIncome.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-zcb-yield",
+      "name": "Zero-Coupon Bond Yield Identity",
+      "description": "Under a constant short rate r, the yield-to-maturity of a continuously-compounded ZCB equals r: -log(B(t,T))/(T-t) = r.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_yield_thm {r t T : ℝ} (htT : t < T) :\n    -Real.log (HybridVerify.zcb r t T) / (T - t) = r :=\n  HybridVerify.zcb_yield_eq_rate htT\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Yield-to-maturity for ZCB (Hull 4.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via log of exp + algebraic simplification. Lives in lean/HybridVerify/FixedIncome.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-zcb-duration",
+      "name": "Zero-Coupon Bond Duration = Time to Maturity",
+      "description": "ZCB Macaulay duration equals remaining time: -∂_r B(t,T) / B(t,T) = T - t.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -(-(T - t) * HybridVerify.zcb r t T) / HybridVerify.zcb r t T = T - t :=\n  HybridVerify.zcb_duration_eq_time_to_maturity t T r\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Macaulay/Modified Duration for ZCB (Hull 4.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in lean/HybridVerify/FixedIncome.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-zcb-convexity",
+      "name": "Zero-Coupon Bond Convexity = (Time to Maturity)²",
+      "description": "ZCB convexity equals squared remaining time: ∂²_r B(t,T) / B(t,T) = (T - t)².",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    ((T - t)^2 * HybridVerify.zcb r t T) / HybridVerify.zcb r t T = (T - t)^2 :=\n  HybridVerify.zcb_convexity_eq_time_to_maturity_sq t T r\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Bond convexity for ZCB (Hull 4.9)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Lives in lean/HybridVerify/FixedIncome.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-variance-factored",
+      "name": "Two-Asset Markowitz Variance Factorization",
+      "description": "Completing-the-square: Var(w) = D·(w - w*)² + V_min where D = σ₁² - 2ρσ₁σ₂ + σ₂², w* is the min-var weight, V_min = σ₁²σ₂²(1-ρ²)/D.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_variance_factored_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : HybridVerify.minVarDenom σ₁ σ₂ ρ ≠ 0) (w : ℝ) :\n    HybridVerify.portfolioVarTwo σ₁ σ₂ ρ w =\n      HybridVerify.minVarDenom σ₁ σ₂ ρ *\n        (w - HybridVerify.minVarWeightTwo σ₁ σ₂ ρ) ^ 2\n      + HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  HybridVerify.portfolioVarTwo_eq_quad hD w\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz mean-variance frontier, two-asset case (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring on the polynomial identity. Lives in lean/HybridVerify/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-min-var-value",
+      "name": "Two-Asset Markowitz Variance at Min Weight",
+      "description": "The portfolio variance evaluated at the min-variance weight equals V_min = σ₁²σ₂²(1-ρ²)/D.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_min_var_value_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : HybridVerify.minVarDenom σ₁ σ₂ ρ ≠ 0) :\n    HybridVerify.portfolioVarTwo σ₁ σ₂ ρ (HybridVerify.minVarWeightTwo σ₁ σ₂ ρ) =\n      HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  HybridVerify.portfolioVarTwo_at_minVarWeight hD\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz minimum-variance closed form (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, immediate from the variance factorization at w = w*. Lives in lean/HybridVerify/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-min-var-bound",
+      "name": "Two-Asset Markowitz Variance Lower Bound",
+      "description": "Portfolio variance is always at least the minimum-variance value: Var(w) ≥ V_min for all w (under positive D).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_min_var_bound_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : 0 < HybridVerify.minVarDenom σ₁ σ₂ ρ) (w : ℝ) :\n    HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ ≤\n      HybridVerify.portfolioVarTwo σ₁ σ₂ ρ w :=\n  HybridVerify.portfolioVarTwo_ge_min hD w\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz mean-variance frontier as a lower envelope (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from the variance factorization plus sq_nonneg + linarith. Lives in lean/HybridVerify/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-perfect-hedge",
+      "name": "Two-Asset Markowitz Perfect Hedge",
+      "description": "When ρ = -1 (perfectly anti-correlated), the minimum portfolio variance is exactly zero.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_perfect_hedge_thm (σ₁ σ₂ : ℝ) :\n    HybridVerify.minPortfolioVarTwo σ₁ σ₂ (-1) = 0 :=\n  HybridVerify.minPortfolioVarTwo_perfect_anticorr σ₁ σ₂\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz perfect-hedge identity (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The numerator (1 - ρ²) vanishes at ρ = -1. Lives in lean/HybridVerify/Markowitz.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-market",
+      "name": "CAPM Beta of the Market Portfolio",
+      "description": "The market's beta is one: β_M = Cov(R_M, R_M)/Var(R_M) = 1.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_market_thm {varRm : ℝ} (hVar : varRm ≠ 0) :\n    HybridVerify.beta varRm varRm = 1 :=\n  HybridVerify.beta_market hVar\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from div_self. Lives in lean/HybridVerify/CAPM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-riskfree",
+      "name": "CAPM Beta of a Risk-Free Asset",
+      "description": "A risk-free asset (zero covariance with the market) has beta zero: β = 0/Var(R_M) = 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_riskfree_thm (varRm : ℝ) :\n    HybridVerify.beta 0 varRm = 0 :=\n  HybridVerify.beta_of_riskFree varRm\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from zero_div. Lives in lean/HybridVerify/CAPM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-linearity-two",
+      "name": "CAPM Beta Linearity for Two-Asset Portfolio",
+      "description": "Beta of a portfolio R_p = w₁R₁ + w₂R₂ is the weighted sum of betas: β_p = w₁β₁ + w₂β₂. Bilinearity of covariance.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_linearity_two_thm {varRm : ℝ} (hVar : varRm ≠ 0)\n    (w₁ w₂ covR₁Rm covR₂Rm : ℝ) :\n    HybridVerify.beta (w₁ * covR₁Rm + w₂ * covR₂Rm) varRm =\n      w₁ * HybridVerify.beta covR₁Rm varRm + w₂ * HybridVerify.beta covR₂Rm varRm :=\n  HybridVerify.beta_linearity_two hVar w₁ w₂ covR₁Rm covR₂Rm\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM beta linearity (Bodie-Kane-Marcus Ch 9.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via bilinearity of covariance, axiomatized as `(w₁·c₁ + w₂·c₂)/v = w₁·c₁/v + w₂·c₂/v`. Lives in lean/HybridVerify/CAPM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capm-beta-linearity-finset",
+      "name": "CAPM Beta Linearity for Finset-Indexed Portfolio",
+      "description": "Beta of a portfolio R_p = ∑ w_i R_i is the weighted sum of betas: β_p = ∑ w_i β_i. Bilinearity over a finite-index family.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_linearity_finset_thm\n    {ι : Type*} (s : Finset ι) (w c : ι → ℝ) (varRm : ℝ) :\n    HybridVerify.beta (∑ i ∈ s, w i * c i) varRm =\n      ∑ i ∈ s, w i * HybridVerify.beta (c i) varRm :=\n  HybridVerify.beta_linearity_finset s w c varRm\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "CAPM beta linearity for portfolios (Bodie-Kane-Marcus Ch 9.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_div + mul_div_assoc. Lives in lean/HybridVerify/CAPM.lean. Axioms-clean."
+      }
     }
   ]
 }
