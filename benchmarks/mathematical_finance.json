@@ -1648,6 +1648,214 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring. Lives in lean/HybridVerify/TwoFundSeparation.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-sortino-scale-invariant",
+      "name": "Sortino Ratio Scale Invariance",
+      "description": "Sortino ratio (μ - target)/σ_down is invariant under uniform scaling of mean, target, and downside semi-deviation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem sortino_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ target σ_down : ℝ) :\n    HybridVerify.sortinoRatio (c * μ) (c * target) (c * σ_down) =\n      HybridVerify.sortinoRatio μ target σ_down :=\n  HybridVerify.sortinoRatio_scale_invariant hc μ target σ_down\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Sortino ratio (Sortino-van der Meer 1991; Bodie-Kane-Marcus Ch 10)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in lean/HybridVerify/PerformanceRatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-sortino-translation",
+      "name": "Sortino Ratio Translation Invariance",
+      "description": "Sortino ratio is invariant under additive shift of both mean and target by the same amount.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem sortino_translation_thm (μ target σ_down shift : ℝ) :\n    HybridVerify.sortinoRatio (μ + shift) (target + shift) σ_down =\n      HybridVerify.sortinoRatio μ target σ_down :=\n  HybridVerify.sortinoRatio_translation μ target σ_down shift\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Sortino ratio (Sortino-van der Meer 1991)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring_nf. Lives in lean/HybridVerify/PerformanceRatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-treynor-scale-invariant",
+      "name": "Treynor Ratio Scale Invariance",
+      "description": "Treynor ratio (μ - r_f)/β is invariant under uniform scaling of mean, risk-free rate, and beta.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem treynor_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ r_f β : ℝ) :\n    HybridVerify.treynorRatio (c * μ) (c * r_f) (c * β) =\n      HybridVerify.treynorRatio μ r_f β :=\n  HybridVerify.treynorRatio_scale_invariant hc μ r_f β\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Treynor ratio (Treynor 1965; Bodie-Kane-Marcus Ch 10)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in lean/HybridVerify/PerformanceRatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-information-ratio-scale-invariant",
+      "name": "Information Ratio Scale Invariance",
+      "description": "Information ratio (μ_p - μ_b)/σ_active is invariant under uniform scaling.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem information_ratio_scale_invariant_thm {c : ℝ} (hc : c ≠ 0)\n    (μ_p μ_b σ_active : ℝ) :\n    HybridVerify.informationRatio (c * μ_p) (c * μ_b) (c * σ_active) =\n      HybridVerify.informationRatio μ_p μ_b σ_active :=\n  HybridVerify.informationRatio_scale_invariant hc μ_p μ_b σ_active\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Information ratio (Grinold-Kahn 1999, Active Portfolio Management)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in lean/HybridVerify/PerformanceRatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-tracking-error-self",
+      "name": "Tracking Error Vanishes for Self-Benchmark",
+      "description": "When the benchmark equals the portfolio (σ_p = σ_b and cov = σ_p²), the tracking-error² vanishes.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem tracking_error_self_thm (σ_p : ℝ) :\n    HybridVerify.trackingErrorSq σ_p σ_p (σ_p ^ 2) = 0 :=\n  HybridVerify.trackingErrorSq_self σ_p\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Tracking error decomposition (Grinold-Kahn 1999)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring. Lives in lean/HybridVerify/PerformanceRatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-tracking-error-cauchy-bound",
+      "name": "Tracking Error Lower Bound from Cauchy-Schwarz",
+      "description": "Under the Cauchy-Schwarz bound cov ≤ σ_p·σ_b, the tracking-error² ≥ (σ_p - σ_b)².",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem tracking_error_cauchy_bound_thm (σ_p σ_b cov : ℝ)\n    (h_cs : cov ≤ σ_p * σ_b) :\n    (σ_p - σ_b) ^ 2 ≤ HybridVerify.trackingErrorSq σ_p σ_b cov :=\n  HybridVerify.trackingErrorSq_ge_diff_sq σ_p σ_b cov h_cs\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Tracking error bound from Cauchy-Schwarz (Grinold-Kahn 1999)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via nlinarith on the algebraic identity. Lives in lean/HybridVerify/PerformanceRatiosExtended.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-dur-rate-deriv",
+      "name": "Bond Portfolio Duration Rate Sensitivity",
+      "description": "Derivative of the duration-times-value w.r.t. rate: ∂_r (D_P·P) = −C_P·P, where C_P is the convexity-times-value.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_dur_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bondPortfolioDur s w T t r')\n      (-HybridVerify.bondPortfolioConv s w T t r) r :=\n  HybridVerify.hasDerivAt_bondPortfolioDur_r s w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via HasDerivAt.sum on the per-bond exponential second derivative. Lives in lean/HybridVerify/BondConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-2nd-deriv",
+      "name": "Bond Portfolio Second-Order Rate Sensitivity",
+      "description": "The second derivative ∂²P/∂r² = C_P·P, where C_P is the convexity-times-value of the portfolio.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => -HybridVerify.bondPortfolioDur s w T t r')\n      (HybridVerify.bondPortfolioConv s w T t r) r :=\n  HybridVerify.hasDerivAt_neg_bondPortfolioDur_r s w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof by negating the duration derivative. Lives in lean/HybridVerify/BondConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-single-conv",
+      "name": "Single-Bond Portfolio Convexity",
+      "description": "A single-bond portfolio's convexity-times-value equals w·(T-t)²·exp(-r(T-t)), matching the ZCB second-order sensitivity in FixedIncome.lean.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_single_conv_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioConv {i} w T t r =\n      w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_conv i w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Single ZCB convexity as a degenerate portfolio (Fabozzi Ch 5)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in lean/HybridVerify/BondConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-2nd-immunization",
+      "name": "Bond Portfolio Second-Order Immunization",
+      "description": "Matching both duration AND convexity of the asset and liability gives ∂²(A-L)/∂r² = 0 at the current rate — second-order Redington immunization.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : HybridVerify.bondPortfolioConv sA wA TA t r =\n                    HybridVerify.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        -HybridVerify.bondPortfolioDur sA wA TA t r' -\n        (-HybridVerify.bondPortfolioDur sL wL TL t r'))\n      0 r :=\n  HybridVerify.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Second-order Redington immunization (Fabozzi Ch 5; Hull Ch 4.11)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via second-derivative sensitivities of A and L plus convexity matching. Lives in lean/HybridVerify/BondConvexityImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-am-gm-two",
+      "name": "Two-Element AM-GM Inequality",
+      "description": "For non-negative a, b: √(a·b) ≤ (a + b)/2. The two-element arithmetic-mean-geometric-mean inequality.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.AsianOptionInequality\n\nopen HybridVerify\n\ntheorem am_gm_two_thm (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :\n    Real.sqrt (a * b) ≤ (a + b) / 2 :=\n  HybridVerify.am_gm_two a b ha hb\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "AM-GM inequality (two-element case)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via nlinarith on (a-b)² ≥ 0 and Real.sqrt monotonicity. Lives in lean/HybridVerify/AsianOptionInequality.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asian-geom-le-arith-two",
+      "name": "Two-Date Geometric ≤ Arithmetic Asian Payoff",
+      "description": "For positive prices S₁, S₂ at two averaging dates and any strike K, the geometric-Asian-call payoff is bounded above by the arithmetic-Asian-call payoff.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.AsianOptionInequality\n\nopen HybridVerify\n\ntheorem asian_geom_le_arith_two_thm (S₁ S₂ K : ℝ)\n    (h₁ : 0 ≤ S₁) (h₂ : 0 ≤ S₂) :\n    max (Real.sqrt (S₁ * S₂) - K) 0 ≤ max ((S₁ + S₂) / 2 - K) 0 :=\n  HybridVerify.asian_payoff_geom_le_arith_two S₁ S₂ K h₁ h₂\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Asian options: geometric vs arithmetic (Kemna-Vorst 1990; Hull Ch 26.13)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via AM-GM + max monotonicity. Lives in lean/HybridVerify/AsianOptionInequality.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-geom-mean-arith-mean-n",
+      "name": "N-Element Equal-Weight AM-GM",
+      "description": "For non-negative f : Fin n → ℝ and n > 0: n · ∏ f_i^{1/n} ≤ ∑ f_i — equal-weight AM-GM derived from mathlib's weighted version.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.AsianOptionInequality\n\nopen HybridVerify\n\ntheorem geom_mean_arith_mean_n_thm {n : ℕ} (f : Fin n → ℝ)\n    (h_nn : ∀ i, 0 ≤ f i) (hn : 0 < n) :\n    (n : ℝ) * (∏ i : Fin n, f i ^ ((n : ℝ)⁻¹)) ≤ ∑ i : Fin n, f i :=\n  HybridVerify.geom_mean_le_arith_mean_n f h_nn hn\n"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "AM-GM inequality (equal-weight n-element case)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: equal-weight specialization of Real.geom_mean_le_arith_mean_weighted plus multiplication by n. Lives in lean/HybridVerify/AsianOptionInequality.lean. Axioms-clean."
+      }
     }
   ]
 }
