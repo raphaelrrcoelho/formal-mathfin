@@ -1,8 +1,10 @@
-# automated_proofs_quantfin
+# Formally Verified Quant Finance in Lean 4
 
-formal verification of stochastic-processes textbook theorems via a hybrid lean 4 + isabelle/hol + sympy orchestrator. tracks coverage of saporito's *stochastic processes* at the theorem level, with an honest faithfulness audit.
+168 fully-derived theorems across 9 categories of mathematical finance, plus 24 library wrappers and 16 upstream-gated reduced cores. Every full derivation is `#print axioms`-clean: depends only on `[propext, Classical.choice, Quot.sound]`.
 
-## status
+This is a Lean 4 library of quant-finance theorems — Black-Scholes / Black-76 / Bachelier, binomial trees, fixed income, portfolio theory (Markowitz / CAPM / two-fund), performance ratios (Sharpe / Sortino / Kelly), and coherent risk measures (VaR / CVaR axioms). Built on Mathlib with no Itô / Girsanov dependence; everything follows from gaussian MGF, completing-the-square, put-call parity, and Mathlib's existing probability framework.
+
+## Status
 
 | | count |
 |---|---|
@@ -13,126 +15,137 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
 
-every theorem tagged `full` is `#print axioms`-clean: depends only on `[propext, Classical.choice, Quot.sound]` (the three standard mathlib axioms).
+See [`FORMALIZATION_STATUS.md`](FORMALIZATION_STATUS.md) for the per-theorem audit and [`QUANTFIN_ROADMAP.md`](QUANTFIN_ROADMAP.md) for what's next.
 
-see `FORMALIZATION_STATUS.md` for the per-theorem audit and `QUANTFIN_ROADMAP.md` for what's next.
+## What's covered
 
-## what makes it different
+| Category | Module | Headline results |
+|---|---|---|
+| **Black-Scholes** | `BlackScholes/` | Call, put, digital (cash + asset) formulas + parity; full Greek matrix (δ, γ, vega, θ, ρ, vanna, volga, ψ); BS-Merton with dividends; Garman-Kohlhagen FX; implied vol uniqueness; PDE forward direction; strike Greeks (∂_K, ∂²_K); static price bounds; box-spread arbitrage; lognormal moments; variance swap fair strike. |
+| **Bachelier** | `BlackScholes/Bachelier{,Greeks}.lean` | Arithmetic-BM option pricing with the truncated-mean primitive; full first-order Greeks. |
+| **Asian options** | `BlackScholes/AsianInequality.lean` | AM-GM (2-elt + n-elt equal-weight); two-date geometric ≤ arithmetic Asian payoff bound. |
+| **Futures (Black-76)** | `Futures/` | Black-76 formula via zero-drift specialization + full Greek matrix. |
+| **Binomial trees** | `Binomial/` | Single-period replication; multi-period backward induction; American options (Snell envelope); CRR convergence (variance, drift quotient + n-form). |
+| **Fixed income** | `FixedIncome/` | ZCB price + duration + convexity; coupon bond pricing + YTM monotonicity; annuity geometric-series closed form; forward / spot rate consistency; first-order + second-order Redington immunization; yield-curve bootstrap; reduced-form credit (constant-hazard survival + spread = hazard). |
+| **Portfolio theory** | `Portfolio/` | Two-asset Markowitz (completing-the-square); n-asset Markowitz (Finset double sum, diagonal, iid diversification, PSD bound); CAPM (β + portfolio linearity); two-fund separation (CML equation + Sharpe invariance). |
+| **Performance ratios** | `Performance/` | Sharpe (scale invariance + √T scaling); Sortino; Treynor; Information ratio; tracking-error decomposition; Kelly criterion (FOC + horizon-myopia + fraction bounds + sign analysis). |
+| **Risk measures** | `RiskMeasures/` | Gaussian VaR / CVaR closed forms; coherent axioms (translation, homogeneity, monotonicity, subadditivity); joint-stdev triangle inequality; VaR/CVaR additivity at ρ=1. |
 
-most lean formalization projects pick one theorem and go deep, or contribute to mathlib directly. this is structured the other way: take a real textbook, audit theorem-by-theorem, distinguish "we proved it" from "we wrapped a library" from "we encoded the statement honestly but haven't derived it yet."
+## Worked example: BS call delta via the magic identity
 
-- **honest taxonomy.** every benchmark entry declares `full`, `library_wrapper`, `reduced_core`, or `placeholder`. delivery-claim counts only the first two. the audit policy lives in `FORMALIZATION_STATUS.md`.
-- **multi-backend routing.** each theorem can dispatch to lean 4, isabelle/hol, sympy, or several in parallel. the python orchestrator picks based on `domain`. routing table is in `python/router.py`.
-- **substantial original derivations**, not in mathlib or in degenne's brownian-motion library at current pins:
-  - itô isometry on $L^2(0, T]$ from step-function isometry + π-system density + `LinearMap.extendOfNorm` (`lean/HybridVerify/WienerIntegralL2.lean`, 433 lines)
-  - black-scholes call formula from the risk-neutral lognormal hypothesis (`BlackScholesCall.lean`, ~370 lines, no itô used)
-  - black-scholes put formula via direct integration on the left tail + put-call parity corollary (`BlackScholesPut.lean`)
-  - black-scholes digital options: cash-or-nothing and asset-or-nothing, with call decomposition (`BlackScholesDigital.lean`)
-  - black-scholes greeks (call): delta, gamma, theta, **vega** ($\partial_\sigma V = S \phi(d_1) \sqrt{\tau}$), **rho** ($\partial_r V = K \tau e^{-r\tau} \Phi(d_2)$) in `BlackScholesPDE.lean` via magic-identity collapses
-  - black-scholes greeks (put): δ, γ, θ, vega, ρ in `BlackScholesPutGreeks.lean` derived from put-call parity + Mathlib derivative rules
-  - **higher-order BS greeks**: vanna ($\partial^2 V/\partial \sigma \partial S = -\phi(d_1) d_2 / \sigma$) and volga ($\partial^2 V/\partial \sigma^2 = \text{vega} \cdot d_1 d_2 / \sigma$) via the clean derivative $\partial_\sigma d_1 = -d_2/\sigma$ (`BlackScholesHigherGreeks.lean`)
-  - black-scholes PDE forward direction via the magic identity $S \phi(d_1) = K e^{-r\tau} \phi(d_2)$ (`BlackScholesPDE.lean`)
-  - **bachelier model** option pricing (arithmetic BM), with the truncated-mean primitive $\int_a^\infty z \phi(z) dz = \phi(a)$ via FTC; full first-order greeks δ, γ, vega, θ in `BachelierGreeks.lean`
-  - **digital option deltas + asset-or-nothing gamma** (`BlackScholesDigitalGreeks.lean`)
-  - **implied volatility uniqueness** via vega-positivity + `strictMonoOn_of_deriv_pos` (`ImpliedVolatility.lean`)
-  - **black-scholes-merton with continuous dividends** $V_q = S e^{-qT} \Phi(d_1) - K e^{-rT} \Phi(d_2)$ and **garman-kohlhagen FX call** (`BlackScholesDividends.lean`); δ, γ, vega via $V_q = e^{-qT} \cdot \mathrm{bsV}(K, r-q, \sigma, S, T)$ identity (`BlackScholesDividendsGreeks.lean`)
-  - **black-76 formula + greeks** for futures options (`BlackFutures.lean`, `BlackFuturesGreeks.lean`): formula derived as specialization of the call formula with zero drift; delta/gamma/vega follow directly
-  - **american options in binomial tree** (`AmericanBinomial.lean`): Bellman/Snell-envelope definition of `americanPrice`, supermartingale property of the discounted price, intrinsic-value bound, and American ≥ European for the same payoff. No new infrastructure beyond `BinomialModel`.
-  - **forward / futures pricing** under no-arbitrage ($F = S_0 e^{rT}$), from the gaussian MGF (`BlackScholesForward.lean`)
-  - **single-period binomial replication theorem** + multi-period backward-induction framework (`BinomialModel.lean`)
-  - **CRR risk-neutral probability limit** $p_n \to 1/2$ as $n \to \infty$, plus variance limit $4\sigma^2 T \cdot p_n(1-p_n) \to \sigma^2 T$ (`BinomialCRRConvergence.lean`). substantive analytic content of CRR-to-BS correspondence. full distributional convergence is upstream-gated on a triangular-array CLT (mathlib only ships the fixed-iid CLT).
-  - **CRR drift quotient limit** $(2e^{rh^2} - e^{\sigma h} - e^{-\sigma h})/(h(e^{\sigma h} - e^{-\sigma h})) \to (r - \sigma^2/2)/\sigma$ (`BinomialDriftLimit.lean`). Uses the algebraic identity $e^{\sigma h} + e^{-\sigma h} - 2 = e^{-\sigma h}(e^{\sigma h} - 1)^2$ to reduce the cosh-like difference to existing exp-quotient limits. Plus the textbook n-form $n \cdot (2 p_n - 1) \cdot \sigma \sqrt{T/n} \to (r - \sigma^2/2) T$, closing the analytic content of CRR drift matching.
-  - **complete digital options Greek matrix**: cash-or-nothing and asset-or-nothing $\delta, \gamma$, vega, $\rho, \theta$ in `BlackScholesDigitalGreeks.lean`. Vega uses the clean derivative $\partial_\sigma d_1 = -d_2/\sigma$ via `bsd2_eq` + `field_simp + ring`.
-  - **Black-76 Greek matrix**: $\delta, \gamma$, vega, $\rho, \theta$ in `BlackFuturesGreeks.lean`. $\rho = -T \cdot V_B$ is clean because the inner $\mathrm{bsV}$ is $r$-independent at zero drift.
-  - **fixed income basics** (`FixedIncome.lean`): zero-coupon bond pricing under deterministic short rate $B(t, T) = e^{-r(T - t)}$, yield-to-maturity identity, Macaulay duration $=T-t$, convexity $= (T-t)^2$.
-  - **Markowitz two-asset portfolio theory** (`Markowitz.lean`): completing-the-square factorization $\mathrm{Var}(w) = D \cdot (w - w^*)^2 + V_{\min}$ with $D = \sigma_1^2 - 2 \rho \sigma_1 \sigma_2 + \sigma_2^2$, giving the minimum-variance weight $w^*$, minimum variance $V_{\min} = \sigma_1^2 \sigma_2^2 (1 - \rho^2) / D$, lower-bound property, and perfect-hedge corollary $V_{\min} = 0$ at $\rho = -1$.
-  - **CAPM** (`CAPM.lean`): $\beta = \mathrm{Cov}(R, R_M)/\mathrm{Var}(R_M)$, $\beta_M = 1$, $\beta_{\text{risk-free}} = 0$, and portfolio beta linearity $\beta_p = \sum w_i \beta_i$ (bilinearity of covariance over a finset-indexed portfolio).
-  - **Gaussian risk measures** (`GaussianRiskMeasures.lean`): closed-form Value-at-Risk and Conditional Value-at-Risk for $L \sim \mathcal{N}(\mu, \sigma^2)$ — $\mathrm{VaR}_\alpha = \mu + \sigma z$, $\mathrm{CVaR}_\alpha = \mu + \sigma \phi(z)/(1-\alpha)$ — with affine invariance, standard-normal specializations, the $\mathrm{CVaR} - \mathrm{VaR} = \sigma(\phi(z)/(1-\alpha) - z)$ identity, and the $\sqrt{T}$ time-aggregation rule.
-  - **bond portfolio immunization** (`BondImmunization.lean`): Finset-indexed bond portfolio value $P(r) = \sum_i w_i e^{-r(T_i - t)}$, duration-times-value $D_P \cdot P = \sum_i w_i (T_i - t) e^{-r(T_i - t)}$, first-order rate sensitivity $\partial P/\partial r = -D_P \cdot P$, and Redington-style first-order immunization condition (matching $D_A \cdot A = D_L \cdot L$ ⇒ $\partial(A-L)/\partial r = 0$).
-  - **N-asset Markowitz** (`MarkowitzNAsset.lean`): portfolio variance as Finset double sum $\sum_{i,j} w_i w_j \sigma_{ij}$, quadratic scaling, diagonal collapse ($\mathrm{Var} = \sum w_i^2 \sigma_{ii}$ under zero cross-covariances), iid diversification ($c^2 n \sigma^2$), positive-semidefinite non-negativity, and explicit two-asset compatibility with `Markowitz.lean`.
-  - **performance ratios** (`PerformanceRatios.lean`): Sharpe ratio scale invariance and $\sqrt{T}$ time-aggregation scaling, Kelly criterion first-order optimality $g'(f^*) = 0$ for the expected log-growth $p \log(1 + fb) + q \log(1 - f)$.
-  - **coherent risk-measure axioms** (`RiskMeasureAxioms.lean`): gaussian VaR/CVaR satisfy the Artzner-Delbaen-Eber-Heath axioms (translation invariance, positive homogeneity, monotonicity, subadditivity), with the substantive joint-stdev triangle inequality $\sqrt{\sigma_1^2 + 2\rho \sigma_1 \sigma_2 + \sigma_2^2} \le \sigma_1 + \sigma_2$ for $|\rho| \le 1$.
-  - **annuity + YTM + forward/spot consistency** (`CouponBondsAndAnnuities.lean`): annuity geometric-series closed form $A_n = c e^{-r\Delta t} (1 - x^n)/(1 - x)$ with $x = e^{-r\Delta t}$, instantaneous forward rate $f(t,T) = r$ under flat curve, coupon-bond strict monotonicity in yield (parameter form of YTM uniqueness).
-  - **static option bounds + box-spread identity** (`StaticOptionBounds.lean`): $\Phi \le 1$, BS call price $\le S$, BS put price $\le K e^{-r\tau}$, and the put-call-parity box-spread identity $(bsV(K_1) - bsP(K_1)) - (bsV(K_2) - bsP(K_2)) = (K_2 - K_1) e^{-r\tau}$.
-  - **two-fund separation (algebraic)** (`TwoFundSeparation.lean`): Capital Market Line equation $\mu = r_f + \sigma \cdot \mathrm{Sharpe}_t$, Sharpe invariance along the CML, and unique decomposition of any CML portfolio as $\alpha$ tangent + $(1-\alpha)$ risk-free with $\alpha = \sigma_p / \sigma_t$.
-  - **extended performance ratios** (`PerformanceRatiosExtended.lean`): Sortino $(\mu - \text{target})/\sigma_{\text{down}}$, Treynor $(\mu - r_f)/\beta$, Information ratio $(\mu_p - \mu_b)/\sigma_{\text{active}}$, all scale-invariant; tracking-error decomposition $\sigma_{\text{active}}^2 = \sigma_p^2 - 2\mathrm{Cov} + \sigma_b^2$ with self-benchmark identity and Cauchy-Schwarz lower bound.
-  - **second-order bond immunization** (`BondConvexityImmunization.lean`): convexity-times-value $C_P \cdot P = \sum_i w_i (T_i - t)^2 e^{-r(T_i-t)}$, $\partial^2 P/\partial r^2 = C_P \cdot P$, and Redington second-order immunization (matching convexity gives $\partial^2(A-L)/\partial r^2 = 0$).
-  - **Asian option inequality + AM-GM** (`AsianOptionInequality.lean`): two-element AM-GM $\sqrt{ab} \le (a+b)/2$, n-element equal-weight AM-GM $n \cdot \prod f_i^{1/n} \le \sum f_i$ (via Mathlib's weighted version), and the two-date geometric-Asian-call payoff bound $\max(\sqrt{S_1 S_2} - K, 0) \le \max((S_1+S_2)/2 - K, 0)$.
-  - **reduced-form credit risk** (`CreditSpread.lean`): survival probability under constant hazard $S(t, T) = e^{-h(T-t)}$, credit spread $= h$ identity, and strict monotonic decrease in maturity under positive hazard.
-  - **strike Greeks for BS** (`OptionStrikeProperties.lean`): $\partial_K d_i = -1/(K \sigma \sqrt{\tau})$, $\partial_K \mathrm{bsV} = -e^{-r\tau} \Phi(d_2)$ (clean closed form via magic-identity collapse), $\partial_K \mathrm{bsP} = e^{-r\tau} \Phi(-d_2)$ via put-call parity, and $\partial^2_K \mathrm{bsV} = e^{-r\tau} \phi(d_2)/(K \sigma \sqrt{\tau}) \ge 0$ (butterfly-spread non-negativity).
-  - **multi-period Kelly + fraction bounds** (`MultiPeriodKelly.lean`): $T$-period log-growth linearity $T \cdot g(f)$, Kelly fraction myopia (optimal $f^*$ independent of horizon), $f^* < 1$, and the sign analysis $f^* = 0 \iff p(b+1) = 1$, $f^* > 0 \iff p(b+1) > 1$.
-  - **lognormal second moment + variance** (`LognormalSecondMoment.lean`): $E_Q[S_T^2] = S_0^2 e^{2rT + \sigma^2 T}$ via the gaussian MGF at $2 \sigma \sqrt{T}$, and $\mathrm{Var}_Q[S_T] = S_0^2 e^{2rT}(e^{\sigma^2 T} - 1)$.
-  - **yield-curve bootstrap** (`YieldCurveBootstrap.lean`): general single-step solve $B_n = (P - \sum c_i B_i)/(c_n + F)$, base-case first-bond ($B_1 = P/(c+F)$), and explicit two-bond step plus a consistency identity.
-  - **variance swap fair strike** (`VarianceSwap.lean`): the log-payoff replication piece of the Demeterfi-Derman-Kamal formula, $(2/T) \cdot E_Q[\log(F/S_T)] = \sigma^2$, via the log-discount algebraic identity plus $E[Z] = 0$ for the standard normal.
-  - **put-price convexity + VaR additivity at ρ=1** (`StrikeConvexityAndRiskAdditivity.lean`): $\partial^2_K \mathrm{bsP} \ge 0$ matches the call convexity (since put and call differ by a $K$-linear term), gaussian VaR/CVaR additivity at perfect positive correlation (the extremal case of subadditivity).
-  - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
-  - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
-  - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.
-- **continuous-time martingale L² convergence** (saporito 4.3.10), promoted to `full` via degenne's `Submartingale.rightCont_iSup_ofReal_ne_top` (`LpContinuousMartingaleConvergence.lean`, 703 lines)
-- **doob L² for discrete-time martingales** (mart-thm-2.4.6), via mathlib's discrete `pow_norm_le_pow_norm_of_exponent_le`
+The clean closed form `∂_S V = Φ(d₁)` falls out by chain rule on each piece, with the magic identity `S·ϕ(d₁) = K·e^{-rτ}·ϕ(d₂)` killing the residual `∂_S d_i` contributions:
 
-reproducibility: lean and isabelle versions are pinned in the verify docker image. the lean toolchain is 4.30.0-rc1 with mathlib at commit `f23306121184` and degenne's brownian-motion at `16d15eb4`. isabelle 2025-2 with `HOL-Probability` prebuilt.
+```lean
+-- HybridVerify/BlackScholes/PDE.lean
+lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (fun s => bsV K r σ s τ) (Phi (bsd1 S K r σ τ)) S := by
+  -- Chain rule on S·Φ(d₁) and K·e^{-rτ}·Φ(d₂):
+  have h_d1_S := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
+  have h_d2_S := hasDerivAt_bsd2_S (r := r) hK hσ hτ hS
+  have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
+  have h_Phi_d2 := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp S h_d2_S
+  have h_V := (hasDerivAt_id S).mul h_Phi_d1
+              |>.sub (h_Phi_d2.const_mul (K * Real.exp (-(r * τ))))
+  -- Collapse the surviving ∂_S d_i terms via the magic identity:
+  have h_bs := bs_identity (r := r) hS hK hσ hτ
+  ...; field_simp; linear_combination -h_bs
+```
 
-## quick start
+The same `bs_identity` collapse drives delta, gamma, theta, vega, rho, and the higher-order Greeks (vanna / volga). The PDE forward direction `∂_τ V = r S · ∂_S V + ½ σ² S² · ∂²_S V - r V` is the same identity again on a different combination.
 
-pull the prebuilt image (3 min) instead of rebuilding (50 min):
+See [`Examples.lean`](lean/HybridVerify/Examples.lean) for a curated tour of five representative proofs (BS delta, Markowitz min-variance, gaussian VaR subadditivity, Kelly criterion, variance swap fair strike).
+
+## Repository layout
+
+```
+lean/                           Lake project, Mathlib pinned to f23306121184
+├── HybridVerify.lean             umbrella (imports every submodule)
+├── HybridVerify/
+│   ├── Foundations/              Probability primitives (gaussian, BM, martingales, Wiener integral)
+│   ├── BlackScholes/             BS family + Bachelier + Asian + lognormal + variance swap
+│   ├── Futures/                  Black-76
+│   ├── Binomial/                 Binomial / CRR / American
+│   ├── FixedIncome/              ZCB, coupon bonds, immunization, bootstrap, credit
+│   ├── Portfolio/                Markowitz, CAPM, two-fund
+│   ├── Performance/              Sharpe / Sortino / Treynor / IR / Kelly
+│   └── RiskMeasures/             VaR/CVaR + coherent axioms + additivity
+├── lakefile.lean
+└── lean-toolchain                4.30.0-rc1
+
+benchmarks/                     JSON theorem files (11 chapters of stochastic-processes textbook,
+                                  with mathematical_finance.json the centerpiece — 143 entries)
+
+python/                         Multi-backend verifier (Lean / Isabelle / SymPy)
+docker/                         Pinned reproducibility image
+tests/                          pytest regression on routing + faithfulness status
+```
+
+A benchmark theorem with a non-trivial proof imports the corresponding `HybridVerify.<Section>.<Module>` and re-exports the named lemma in 5–25 lines. Trivial library wrappers stay inline in the JSON.
+
+## Quick start
+
+Pull the prebuilt image (~3 min) instead of rebuilding (~50 min):
 
 ```bash
 docker compose -f docker/docker-compose.yml pull verify
 ```
 
-run the verifier on a benchmark file:
+Verify all benchmarks in a chapter:
 
 ```bash
-docker compose -f docker/docker-compose.yml run --rm verify benchmarks/stochastic_calculus.json -v --timeout 120
+docker compose -f docker/docker-compose.yml run --rm verify benchmarks/mathematical_finance.json -v --timeout 120
 ```
 
-static coverage report:
+Static coverage report:
 
 ```bash
 docker compose -f docker/docker-compose.yml run --rm --entrypoint python3 verify -m python.coverage_report
 ```
 
-regression tests (router routing, formal-only enforcement, faithfulness-status presence):
+Build only the Lean library (no verifier):
+
+```bash
+docker compose -f docker/docker-compose.yml run --rm --entrypoint bash verify -lc 'cd lean && lake build'
+```
+
+Router regression tests (formal-only enforcement, faithfulness-status presence):
 
 ```bash
 docker compose -f docker/docker-compose.yml run --rm --entrypoint python3 verify -m pytest tests/test_router.py -q
 ```
 
-## layout
+## Reproducibility
 
-```
-python/         orchestrator, backends, router, CLI
-  models.py       Domain/Backend/ConfidenceLevel enums, TheoremStatement
-  orchestrator.py central coordinator (sequential + parallel dispatch)
-  router.py       DEFAULT_ROUTING + PARALLEL_DOMAINS
-  cli.py          python -m python.cli benchmarks/file.json
-lean/           lake project. mathlib + degenne brownian-motion pinned.
-  HybridVerify/   substantial proofs (each > ~50 lines lives here)
-benchmarks/     10 json files keyed by saporito chapters
-tests/          pytest regression (router + coverage invariants)
-docker/         pinned verify image
-```
+The verify Docker image pins:
 
-benchmark theorems with non-trivial proofs `import HybridVerify.<Module>` and re-export the named lemma in 5-25 lines. trivial library wrappers stay inline in the json. this split lets `lake build` give each big proof the full incremental-compilation budget while keeping the benchmark snippets short.
+- Lean toolchain `4.30.0-rc1`
+- Mathlib at commit `f23306121184`
+- Remy Degenne's `brownian-motion` library at commit `16d15eb42c`
+- Isabelle 2025-2 with `HOL-Probability` prebuilt
 
-## what isn't done
+Every `full` theorem is checked with `#print axioms`; the only axioms allowed are the three standard Mathlib axioms: `[propext, Classical.choice, Quot.sound]`.
 
-the 16 remaining `reduced_core` theorems all hit one of:
+## What's not done (yet)
 
-- **itô integral / doleans-dade / girsanov machinery** (4 girsanov + ~8 stochastic-calculus theorems including itô's formula, time-dependent itô, lévy's martingale characterization, SDE existence)
-- **continuous-time poisson processes** (3 theorems: interarrival exponential, superposition, thinning). mathlib has only the discrete `PoissonPMF`.
-- **fine brownian path machinery** (3 BM pathology theorems: reflection principle, nowhere-differentiability, law of iterated logarithm)
+The 16 remaining `reduced_core` theorems are upstream-gated:
 
-these need upstream work in mathlib or degenne's brownian-motion to unlock. the project will revisit when that lands.
+- **Itô calculus** (4 Girsanov + ~8 stochastic-calculus theorems including Itô's lemma, time-dependent Itô, Lévy's martingale characterization, SDE existence): Mathlib does not yet ship the Itô integral. The project will revisit when it lands.
+- **Continuous-time Poisson processes** (3 theorems: interarrival exponential, superposition, thinning): Mathlib has only the discrete `PoissonPMF`.
+- **Fine BM path machinery** (3 BM pathology theorems: reflection principle, nowhere-differentiability, law of iterated logarithm).
 
-## related upstream work
+## Related upstream contributions
 
-derived as part of this project, candidates for upstream contribution:
+Drafted as part of this project:
 
-- `gaussianReal_zero_one_Iic_neg`, `gaussianReal_zero_one_Ioi_toReal`, `exp_mul_gaussianPDFReal_zero_one`, `integral_exp_mul_gaussianPDFReal_zero_one_Ioi` (standard normal tail + completing-the-square): drafted as a mathlib PR.
-- `IsFilteredPreBrownian.squareSubTime_isMartingale`, `IsFilteredPreBrownian.waldExponential_isMartingale` (the two textbook BM martingales): drafted as a contribution to remy degenne's `brownian-motion` library.
+- `gaussianReal_zero_one_Iic_neg`, `gaussianReal_zero_one_Ioi_toReal`, `exp_mul_gaussianPDFReal_zero_one`, `integral_exp_mul_gaussianPDFReal_zero_one_Ioi` (standard normal tail + completing-the-square): drafted as a Mathlib PR.
+- `IsFilteredPreBrownian.squareSubTime_isMartingale`, `IsFilteredPreBrownian.waldExponential_isMartingale` (the two textbook BM martingales): drafted as a contribution to Remy Degenne's `brownian-motion` library.
 
-## license
+## References
 
-apache 2.0, per the headers on each source file.
+Saporito, *Stochastic Processes* (textbook chapter coverage, primary source).
+Hull, *Options, Futures, and Other Derivatives*. Bodie / Kane / Marcus, *Investments*. Fabozzi, *Fixed Income Mathematics*. McNeil / Frey / Embrechts, *Quantitative Risk Management*. Demeterfi / Derman / Kamal, *More Than You Ever Wanted to Know About Volatility Swaps* (1999). Artzner / Delbaen / Eber / Heath, *Coherent Measures of Risk* (1999). Kelly, *A New Interpretation of Information Rate* (1956). Tobin, *Liquidity Preference as Behavior Towards Risk* (1958). Sharpe (1965), Treynor (1965), Sortino-van der Meer (1991), Grinold-Kahn (1999). Black-Scholes (1973), Merton (1973), Black (1976), Bachelier (1900), Cox-Ross-Rubinstein (1979).
+
+## License
+
+Apache 2.0, per the headers on each source file.

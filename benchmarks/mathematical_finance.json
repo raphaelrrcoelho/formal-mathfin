@@ -7,7 +7,7 @@
       "description": "Discounted expected put payoff under the risk-neutral lognormal hypothesis: P = K e^{-rT} Phi(-d_2) - S_0 Phi(-d_1), where d_1, d_2 are the standard BS quantities.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPut\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Black-Scholes European put pricing formula via direct integration\n    parallel to the call formula (left-tail completing-the-square). -/\ntheorem bs_put_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0 ∂Q\n      = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) -\n        S_0 * Phi (-(bsd1 S_0 K r σ T)) :=\n  HybridVerify.bs_put_formula h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Put\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Black-Scholes European put pricing formula via direct integration\n    parallel to the call formula (left-tail completing-the-square). -/\ntheorem bs_put_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0 ∂Q\n      = K * Real.exp (-r * T) * Phi (-(bsd2 S_0 K r σ T)) -\n        S_0 * Phi (-(bsd1 S_0 K r σ T)) :=\n  HybridVerify.bs_put_formula h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -23,7 +23,7 @@
       "description": "C - P = S_0 - K e^{-rT}: the difference between European call and put prices under the BS hypothesis equals the spot minus the discounted strike. Direct algebraic corollary of bs_call_formula + bs_put_formula + Phi(d) + Phi(-d) = 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPut\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Put-call parity: C - P = S_0 - K e^{-rT}. -/\ntheorem put_call_parity\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    (∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0 ∂Q) -\n    (∫ ω, Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0 ∂Q)\n      = S_0 - K * Real.exp (-r * T) :=\n  HybridVerify.bs_put_call_parity h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Put\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Put-call parity: C - P = S_0 - K e^{-rT}. -/\ntheorem put_call_parity\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    (∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 r σ T (Z ω) - K) 0 ∂Q) -\n    (∫ ω, Real.exp (-r * T) * max (K - bsTerminal S_0 r σ T (Z ω)) 0 ∂Q)\n      = S_0 - K * Real.exp (-r * T) :=\n  HybridVerify.bs_put_call_parity h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -39,7 +39,7 @@
       "description": "Cash-or-nothing digital pays $1 iff S_T > K. Price: V = e^{-rT} Phi(d_2).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigital\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Cash-or-nothing digital call pricing formula. -/\ntheorem cash_or_nothing_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) *\n        (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) ∂Q\n      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  HybridVerify.bs_cash_or_nothing_formula h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Digital\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Cash-or-nothing digital call pricing formula. -/\ntheorem cash_or_nothing_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) *\n        (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) ∂Q\n      = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=\n  HybridVerify.bs_cash_or_nothing_formula h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -55,7 +55,7 @@
       "description": "Asset-or-nothing digital pays S_T iff S_T > K. Price: V = S_0 Phi(d_1).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigital\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Asset-or-nothing digital call pricing formula. -/\ntheorem asset_or_nothing_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) *\n        (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T (Z ω)) ∂Q\n      = S_0 * Phi (bsd1 S_0 K r σ T) :=\n  HybridVerify.bs_asset_or_nothing_formula h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Digital\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Asset-or-nothing digital call pricing formula. -/\ntheorem asset_or_nothing_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, Real.exp (-r * T) *\n        (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T (Z ω)) ∂Q\n      = S_0 * Phi (bsd1 S_0 K r σ T) :=\n  HybridVerify.bs_asset_or_nothing_formula h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -71,7 +71,7 @@
       "description": "F = S_0 e^{rT}: the no-arbitrage forward price equals the risk-neutral expectation of the terminal asset price under BSCallHyp.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesForward\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- No-arbitrage forward price under BS lognormal hypothesis: E_Q[S_T] = S_0 e^{rT}. -/\ntheorem forward_price\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 * Real.exp (r * T) :=\n  HybridVerify.expected_terminal_eq_forward h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Forward\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- No-arbitrage forward price under BS lognormal hypothesis: E_Q[S_T] = S_0 e^{rT}. -/\ntheorem forward_price\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q = S_0 * Real.exp (r * T) :=\n  HybridVerify.expected_terminal_eq_forward h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -87,7 +87,7 @@
       "description": "Vega = dV/dσ = S phi(d_1) sqrt(T). The Black-Scholes call price has derivative with respect to volatility equal to S * pdf(d_1) * sqrt(T), strictly positive for S, T > 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPDE\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\n/-- Black-Scholes vega: dV/dσ = S phi(d_1) sqrt(τ). -/\ntheorem bs_vega {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsV K r s S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  HybridVerify.hasDerivAt_bsV_sigma hK hS hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PDE\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\n/-- Black-Scholes vega: dV/dσ = S phi(d_1) sqrt(τ). -/\ntheorem bs_vega {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsV K r s S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  HybridVerify.hasDerivAt_bsV_sigma hK hS hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -103,7 +103,7 @@
       "description": "Rho = dV/dr = K tau e^{-r tau} Phi(d_2). The Black-Scholes call price derivative with respect to the risk-free rate r equals K * tau * exp(-r*tau) * Phi(d_2).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPDE\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\n/-- Black-Scholes rho: dV/dr = K tau e^{-r tau} Phi(d_2). -/\ntheorem bs_rho {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsV K r' σ S τ)\n      (K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ)) r :=\n  HybridVerify.hasDerivAt_bsV_r hK hσ hτ hS r\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PDE\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\n/-- Black-Scholes rho: dV/dr = K tau e^{-r tau} Phi(d_2). -/\ntheorem bs_rho {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsV K r' σ S τ)\n      (K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ)) r :=\n  HybridVerify.hasDerivAt_bsV_r hK hσ hτ hS r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -119,7 +119,7 @@
       "description": "Under arithmetic-BM dynamics S_T = S_0 + sigma*sqrt(T)*Z (no log, no exponential), the European call price is V = (S_0 - K) Phi(d) + sigma sqrt(T) phi(d), where d = (S_0 - K)/(sigma sqrt(T)).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BachelierModel\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Bachelier European call pricing formula. -/\ntheorem bachelier_call_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K σ T : ℝ} {Z : Ω → ℝ}\n    (h : BachelierHyp Q S_0 K σ T Z) :\n    ∫ ω, max (bachelierTerminal S_0 σ T (Z ω) - K) 0 ∂Q\n      = (S_0 - K) * Phi (bachelierD S_0 K σ T) +\n        σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S_0 K σ T) :=\n  HybridVerify.bachelier_call_formula h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Bachelier\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Bachelier European call pricing formula. -/\ntheorem bachelier_call_formula\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K σ T : ℝ} {Z : Ω → ℝ}\n    (h : BachelierHyp Q S_0 K σ T Z) :\n    ∫ ω, max (bachelierTerminal S_0 σ T (Z ω) - K) 0 ∂Q\n      = (S_0 - K) * Phi (bachelierD S_0 K σ T) +\n        σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S_0 K σ T) :=\n  HybridVerify.bachelier_call_formula h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -135,7 +135,7 @@
       "description": "For S, K, T > 0, the BS call price as a function of sigma is strictly monotone on (0, infinity). Hence the implied volatility (when it exists) is unique.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.ImpliedVolatility\n\nopen MeasureTheory ProbabilityTheory Real\nopen HybridVerify\n\n/-- Implied volatility uniqueness: the BS call price is strictly monotone in σ on (0, ∞). -/\ntheorem implied_vol_unique {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)\n    {S : ℝ} (hS : 0 < S) {σ₁ σ₂ : ℝ} (hσ₁ : 0 < σ₁) (hσ₂ : 0 < σ₂)\n    (h_eq : HybridVerify.bsV K r σ₁ S T = HybridVerify.bsV K r σ₂ S T) :\n    σ₁ = σ₂ :=\n  HybridVerify.implied_volatility_unique hK hT hS hσ₁ hσ₂ h_eq\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.ImpliedVolatility\n\nopen MeasureTheory ProbabilityTheory Real\nopen HybridVerify\n\n/-- Implied volatility uniqueness: the BS call price is strictly monotone in σ on (0, ∞). -/\ntheorem implied_vol_unique {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)\n    {S : ℝ} (hS : 0 < S) {σ₁ σ₂ : ℝ} (hσ₁ : 0 < σ₁) (hσ₂ : 0 < σ₂)\n    (h_eq : HybridVerify.bsV K r σ₁ S T = HybridVerify.bsV K r σ₂ S T) :\n    σ₁ = σ₂ :=\n  HybridVerify.implied_volatility_unique hK hT hS hσ₁ hσ₂ h_eq\n"
       },
       "metadata": {
         "chapter": 9,
@@ -151,7 +151,7 @@
       "description": "European call on a futures contract: V = e^{-rT} [F Phi(d_1) - K Phi(d_2)] where d_1 = (log(F/K) + sigma^2 T/2) / (sigma sqrt(T)) and d_2 = d_1 - sigma sqrt(T). Specialization of BS to zero-drift futures + independent discount rate.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackFutures\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Black-76 formula for European call on futures. -/\ntheorem black_futures_call\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {F K σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q F K 0 σ T Z) (r : ℝ) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal F 0 σ T (Z ω) - K) 0 ∂Q\n      = Real.exp (-r * T) *\n          (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T)) :=\n  HybridVerify.black_futures_formula h r\n"
+        "lean": "import Mathlib\nimport HybridVerify.Futures.Black76\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Black-76 formula for European call on futures. -/\ntheorem black_futures_call\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {F K σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q F K 0 σ T Z) (r : ℝ) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal F 0 σ T (Z ω) - K) 0 ∂Q\n      = Real.exp (-r * T) *\n          (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T)) :=\n  HybridVerify.black_futures_formula h r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -167,7 +167,7 @@
       "description": "In a single-period binomial model with no-arbitrage (d < e^r < u), every contingent claim with payoffs (V_u, V_d) in the up/down states is replicable, and the replicating portfolio cost equals the risk-neutral expected payoff discounted: V_0 = e^{-r} (q V_u + (1-q) V_d) where q = (e^r - d) / (u - d).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BinomialModel\n\nopen HybridVerify\n\n/-- Single-period binomial: the replicating portfolio cost equals the\n    risk-neutral expected discounted payoff. -/\ntheorem binomial_replication_cost {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * S_0 + B = binomialOptionPriceOnePeriod u d r V_u V_d :=\n  HybridVerify.replicating_portfolio_cost hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_u in the up state. -/\ntheorem binomial_replication_up {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * u) + B * Real.exp r = V_u :=\n  HybridVerify.replicating_payoff_up hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_d in the down state. -/\ntheorem binomial_replication_down {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * d) + B * Real.exp r = V_d :=\n  HybridVerify.replicating_payoff_down hS_0 h\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.Model\n\nopen HybridVerify\n\n/-- Single-period binomial: the replicating portfolio cost equals the\n    risk-neutral expected discounted payoff. -/\ntheorem binomial_replication_cost {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * S_0 + B = binomialOptionPriceOnePeriod u d r V_u V_d :=\n  HybridVerify.replicating_portfolio_cost hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_u in the up state. -/\ntheorem binomial_replication_up {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * u) + B * Real.exp r = V_u :=\n  HybridVerify.replicating_payoff_up hS_0 h\n\n/-- Single-period binomial: the replicating portfolio pays V_d in the down state. -/\ntheorem binomial_replication_down {S_0 u d r V_u V_d : ℝ}\n    (hS_0 : 0 < S_0) (h : BinomialNoArb u d r) :\n    let Δ : ℝ := (V_u - V_d) / (S_0 * (u - d))\n    let B : ℝ := Real.exp (-r) * (u * V_d - d * V_u) / (u - d)\n    Δ * (S_0 * d) + B * Real.exp r = V_d :=\n  HybridVerify.replicating_payoff_down hS_0 h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -183,7 +183,7 @@
       "description": "Under CRR parameterization (u_n = e^{σ √Δt}, d_n = e^{-σ √Δt}, Δt = T/n), the risk-neutral up-probability p_n = (e^{rΔt} - d_n)/(u_n - d_n) satisfies p_n · u_n + (1 - p_n) · d_n = e^{rΔt}. The discrete-time discounted asset is a Q-martingale at each step. Exact algebraic identity, not asymptotic.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BinomialCRRConvergence\n\nopen HybridVerify\n\n/-- CRR one-step risk-neutral martingale identity. -/\ntheorem crr_one_step_martingale_identity {σ T r : ℝ} {n : ℕ}\n    (h_du : crrDown σ T n < crrUp σ T n) :\n    crrProb r σ T n * crrUp σ T n + (1 - crrProb r σ T n) * crrDown σ T n\n      = Real.exp (crrPerStepRate r T n) :=\n  HybridVerify.crr_one_step_martingale h_du\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.CRRConvergence\n\nopen HybridVerify\n\n/-- CRR one-step risk-neutral martingale identity. -/\ntheorem crr_one_step_martingale_identity {σ T r : ℝ} {n : ℕ}\n    (h_du : crrDown σ T n < crrUp σ T n) :\n    crrProb r σ T n * crrUp σ T n + (1 - crrProb r σ T n) * crrDown σ T n\n      = Real.exp (crrPerStepRate r T n) :=\n  HybridVerify.crr_one_step_martingale h_du\n"
       },
       "metadata": {
         "chapter": 9,
@@ -199,7 +199,7 @@
       "description": "Under CRR parameterization, p_n → 1/2 as n → ∞. This is the substantive analytic step in the CRR-to-BS correspondence: the per-step Bernoulli increment becomes asymptotically symmetric. Implies the variance limit n · σ² Δt · 4 p_n (1 - p_n) → σ² T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BinomialCRRConvergence\n\nopen HybridVerify Filter\nopen scoped Topology\n\n/-- CRR risk-neutral probability tends to 1/2 as n → ∞. -/\ntheorem crr_prob_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ => crrProb r σ T n) Filter.atTop (𝓝 (1/2)) :=\n  HybridVerify.crrProb_tendsto_half hσ hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.CRRConvergence\n\nopen HybridVerify Filter\nopen scoped Topology\n\n/-- CRR risk-neutral probability tends to 1/2 as n → ∞. -/\ntheorem crr_prob_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ => crrProb r σ T n) Filter.atTop (𝓝 (1/2)) :=\n  HybridVerify.crrProb_tendsto_half hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -215,7 +215,7 @@
       "description": "Under CRR parameterization, n · σ² · (T/n) · 4 p_n (1 - p_n) → σ² T as n → ∞. The per-step variance of the log-return matches the BS variance to leading order. Direct corollary of crrProb_tendsto_half.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BinomialCRRConvergence\n\nopen HybridVerify Filter\nopen scoped Topology\n\n/-- CRR variance limit: 4 σ² T · p_n (1 - p_n) → σ² T. -/\ntheorem crr_variance_limit_theorem {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto\n      (fun n : ℕ => 4 * σ^2 * T * (crrProb r σ T n) * (1 - crrProb r σ T n))\n      Filter.atTop (𝓝 (σ^2 * T)) :=\n  HybridVerify.crr_variance_limit hσ hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.CRRConvergence\n\nopen HybridVerify Filter\nopen scoped Topology\n\n/-- CRR variance limit: 4 σ² T · p_n (1 - p_n) → σ² T. -/\ntheorem crr_variance_limit_theorem {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto\n      (fun n : ℕ => 4 * σ^2 * T * (crrProb r σ T n) * (1 - crrProb r σ T n))\n      Filter.atTop (𝓝 (σ^2 * T)) :=\n  HybridVerify.crr_variance_limit hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -231,7 +231,7 @@
       "description": "Put delta: ∂P/∂S = Φ(d₁) - 1. Direct chain rule via put-call parity P = C - S + K e^{-rτ}.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsP K r σ s τ)\n      (HybridVerify.Phi (HybridVerify.bsd1 S K r σ τ) - 1) S :=\n  HybridVerify.hasDerivAt_bsP_S hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsP K r σ s τ)\n      (HybridVerify.Phi (HybridVerify.bsd1 S K r σ τ) - 1) S :=\n  HybridVerify.hasDerivAt_bsP_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -247,7 +247,7 @@
       "description": "Put gamma: ∂²P/∂S² = ϕ(d₁) / (S σ √τ). Same as call gamma since put-call parity differs by a linear function of S.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.Phi (HybridVerify.bsd1 s K r σ τ) - 1)\n      (gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsP_SS hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.Phi (HybridVerify.bsd1 s K r σ τ) - 1)\n      (gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsP_SS hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -263,7 +263,7 @@
       "description": "Put theta: ∂P/∂τ = σ S ϕ(d₁) / (2 √τ) - r K e^{-rτ} Φ(-d₂).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_theta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsP K r σ S t)\n      (σ * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (2 * Real.sqrt τ)\n        - r * K * Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ)) τ :=\n  HybridVerify.hasDerivAt_bsP_tau hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_theta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsP K r σ S t)\n      (σ * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (2 * Real.sqrt τ)\n        - r * K * Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ)) τ :=\n  HybridVerify.hasDerivAt_bsP_tau hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -279,7 +279,7 @@
       "description": "Put vega: ∂P/∂σ = S ϕ(d₁) √τ. Same as call vega.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_vega_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsP K r s S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  HybridVerify.hasDerivAt_bsP_sigma hK hS hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_vega_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsP K r s S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ) σ :=\n  HybridVerify.hasDerivAt_bsP_sigma hK hS hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -295,7 +295,7 @@
       "description": "Put rho: ∂P/∂r = -K τ e^{-rτ} Φ(-d₂).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesPutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_rho_thm {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsP K r' σ S τ)\n      (-(K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ))) r :=\n  HybridVerify.hasDerivAt_bsP_r hK hσ hτ hS r\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PutGreeks\n\nopen HybridVerify\n\ntheorem bs_put_rho_thm {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsP K r' σ S τ)\n      (-(K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ))) r :=\n  HybridVerify.hasDerivAt_bsP_r hK hσ hτ hS r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -311,7 +311,7 @@
       "description": "Vanna: ∂²V/∂σ∂S = ∂(vega)/∂S = -ϕ(d₁) · d₂ / σ. Cross-Greek between spot and volatility.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesHigherGreeks\n\nopen HybridVerify\n\ntheorem bs_vanna_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => s * gaussianPDFReal 0 1 (HybridVerify.bsd1 s K r σ τ) * Real.sqrt τ)\n      (-(gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * HybridVerify.bsd2 S K r σ τ / σ)) S :=\n  HybridVerify.hasDerivAt_bsV_vanna hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.HigherGreeks\n\nopen HybridVerify\n\ntheorem bs_vanna_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => s * gaussianPDFReal 0 1 (HybridVerify.bsd1 s K r σ τ) * Real.sqrt τ)\n      (-(gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * HybridVerify.bsd2 S K r σ τ / σ)) S :=\n  HybridVerify.hasDerivAt_bsV_vanna hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -327,7 +327,7 @@
       "description": "Volga: ∂²V/∂σ² = vega · d₁ · d₂ / σ. The convexity of option value in volatility.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesHigherGreeks\n\nopen HybridVerify\n\ntheorem bs_volga_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r s τ) * Real.sqrt τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ\n        * HybridVerify.bsd1 S K r σ τ * HybridVerify.bsd2 S K r σ τ / σ) σ :=\n  HybridVerify.hasDerivAt_bsV_volga hK hS hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.HigherGreeks\n\nopen HybridVerify\n\ntheorem bs_volga_thm {K r : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r s τ) * Real.sqrt τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * Real.sqrt τ\n        * HybridVerify.bsd1 S K r σ τ * HybridVerify.bsd2 S K r σ τ / σ) σ :=\n  HybridVerify.hasDerivAt_bsV_volga hK hS hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -343,7 +343,7 @@
       "description": "Bachelier delta: ∂V/∂S = Φ(d) where d = (S-K)/(σ√T). Chain-rule contributions through d cancel via the identity (S-K)/(σ√T) = d.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_delta_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => HybridVerify.bachelierV K σ T s)\n      (HybridVerify.Phi (HybridVerify.bachelierD S K σ T)) S :=\n  HybridVerify.hasDerivAt_bachelierV_S hσ hT S\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_delta_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => HybridVerify.bachelierV K σ T s)\n      (HybridVerify.Phi (HybridVerify.bachelierD S K σ T)) S :=\n  HybridVerify.hasDerivAt_bachelierV_S hσ hT S\n"
       },
       "metadata": {
         "chapter": 9,
@@ -359,7 +359,7 @@
       "description": "Bachelier vega: ∂V/∂σ = √T · ϕ(d). Cancellation via (S-K)·∂d/∂σ = -d²·σ√T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_vega_thm {K T : ℝ} (hT : 0 < T)\n    {S σ : ℝ} (hσ : 0 < σ) :\n    HasDerivAt (fun s => HybridVerify.bachelierV K s T S)\n      (Real.sqrt T * gaussianPDFReal 0 1 (HybridVerify.bachelierD S K σ T)) σ :=\n  HybridVerify.hasDerivAt_bachelierV_sigma hT hσ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_vega_thm {K T : ℝ} (hT : 0 < T)\n    {S σ : ℝ} (hσ : 0 < σ) :\n    HasDerivAt (fun s => HybridVerify.bachelierV K s T S)\n      (Real.sqrt T * gaussianPDFReal 0 1 (HybridVerify.bachelierD S K σ T)) σ :=\n  HybridVerify.hasDerivAt_bachelierV_sigma hT hσ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -375,7 +375,7 @@
       "description": "Cash digital delta: ∂V_cash/∂S = e^{-rτ} · ϕ(d₂) / (S σ √τ). Direct chain rule on Φ(d₂(S)).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsCashDigital K r σ s τ)\n      (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsCashDigital_S hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsCashDigital K r σ s τ)\n      (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsCashDigital_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -391,7 +391,7 @@
       "description": "Asset digital delta: ∂V_asset/∂S = Φ(d₁) + ϕ(d₁) / (σ √τ). Product rule on S · Φ(d₁(S)).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsAssetDigital K r σ s τ)\n      (HybridVerify.Phi (HybridVerify.bsd1 S K r σ τ)\n        + gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsAssetDigital_S hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_delta_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsAssetDigital K r σ s τ)\n      (HybridVerify.Phi (HybridVerify.bsd1 S K r σ τ)\n        + gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) / (σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsAssetDigital_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -407,7 +407,7 @@
       "description": "V_q = S e^{-qT} Φ(d₁) - K e^{-rT} Φ(d₂) with effective drift r-q. Extension of bs_call_formula to dividend-paying assets.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem bs_dividends_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r q σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r - q) σ T Z) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(q * T)) * Phi (bsd1 S_0 K (r - q) σ T)\n        - K * Real.exp (-(r * T)) * Phi (bsd2 S_0 K (r - q) σ T) :=\n  HybridVerify.bs_dividends_call_formula h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Dividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem bs_dividends_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r q σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r - q) σ T Z) :\n    ∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(q * T)) * Phi (bsd1 S_0 K (r - q) σ T)\n        - K * Real.exp (-(r * T)) * Phi (bsd2 S_0 K (r - q) σ T) :=\n  HybridVerify.bs_dividends_call_formula h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -423,7 +423,7 @@
       "description": "FX call pricing: V = S e^{-r_f·T} Φ(d₁) - K e^{-r_d·T} Φ(d₂) with effective drift r_d - r_f. Trivial corollary of dividends formula with q = r_f.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem garman_kohlhagen_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r_d r_f σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r_d - r_f) σ T Z) :\n    ∫ ω, Real.exp (-r_d * T) * max (bsTerminal S_0 (r_d - r_f) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(r_f * T)) * Phi (bsd1 S_0 K (r_d - r_f) σ T)\n        - K * Real.exp (-(r_d * T)) * Phi (bsd2 S_0 K (r_d - r_f) σ T) :=\n  HybridVerify.garman_kohlhagen_call_formula h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Dividends\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem garman_kohlhagen_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r_d r_f σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K (r_d - r_f) σ T Z) :\n    ∫ ω, Real.exp (-r_d * T) * max (bsTerminal S_0 (r_d - r_f) σ T (Z ω) - K) 0 ∂Q\n      = S_0 * Real.exp (-(r_f * T)) * Phi (bsd1 S_0 K (r_d - r_f) σ T)\n        - K * Real.exp (-(r_d * T)) * Phi (bsd2 S_0 K (r_d - r_f) σ T) :=\n  HybridVerify.garman_kohlhagen_call_formula h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -439,7 +439,7 @@
       "description": "Futures option delta: ∂V_B/∂F = e^{-rT} · Φ(d₁). Specialization of BS delta to zero drift, post-multiplied by discount factor.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_delta_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => HybridVerify.blackV K σ r f T)\n      (Real.exp (-(r * T)) * HybridVerify.Phi (HybridVerify.bsd1 F K 0 σ T)) F :=\n  HybridVerify.hasDerivAt_blackV_F hK hσ r hF hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.Futures.Black76Greeks\n\nopen HybridVerify\n\ntheorem black76_delta_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => HybridVerify.blackV K σ r f T)\n      (Real.exp (-(r * T)) * HybridVerify.Phi (HybridVerify.bsd1 F K 0 σ T)) F :=\n  HybridVerify.hasDerivAt_blackV_F hK hσ r hF hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -455,7 +455,7 @@
       "description": "Futures option gamma: ∂²V_B/∂F² = e^{-rT} · ϕ(d₁) / (F σ √T).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_gamma_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) * HybridVerify.Phi (HybridVerify.bsd1 f K 0 σ T))\n      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T)\n        / (F * σ * Real.sqrt T)) F :=\n  HybridVerify.hasDerivAt_blackV_FF hK hσ r hF hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.Futures.Black76Greeks\n\nopen HybridVerify\n\ntheorem black76_gamma_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => Real.exp (-(r * T)) * HybridVerify.Phi (HybridVerify.bsd1 f K 0 σ T))\n      (Real.exp (-(r * T)) * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T)\n        / (F * σ * Real.sqrt T)) F :=\n  HybridVerify.hasDerivAt_blackV_FF hK hσ r hF hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -471,7 +471,7 @@
       "description": "Futures option vega: ∂V_B/∂σ = e^{-rT} · F · ϕ(d₁) · √T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_vega_thm {K : ℝ} (hK : 0 < K) (r : ℝ)\n    {F σ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T) :\n    HasDerivAt (fun s => HybridVerify.blackV K s r F T)\n      (Real.exp (-(r * T)) * F * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T)\n        * Real.sqrt T) σ :=\n  HybridVerify.hasDerivAt_blackV_sigma hK r hF hσ hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.Futures.Black76Greeks\n\nopen HybridVerify\n\ntheorem black76_vega_thm {K : ℝ} (hK : 0 < K) (r : ℝ)\n    {F σ T : ℝ} (hF : 0 < F) (hσ : 0 < σ) (hT : 0 < T) :\n    HasDerivAt (fun s => HybridVerify.blackV K s r F T)\n      (Real.exp (-(r * T)) * F * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T)\n        * Real.sqrt T) σ :=\n  HybridVerify.hasDerivAt_blackV_sigma hK r hF hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -487,7 +487,7 @@
       "description": "Bachelier gamma: ∂²V/∂S² = ϕ(d) / (σ √T). Chain rule on Φ(d(S)).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_gamma_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => HybridVerify.Phi (HybridVerify.bachelierD s K σ T))\n      (gaussianPDFReal 0 1 (HybridVerify.bachelierD S K σ T) / (σ * Real.sqrt T)) S :=\n  HybridVerify.hasDerivAt_bachelierV_SS hσ hT S\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_gamma_thm {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :\n    HasDerivAt (fun s => HybridVerify.Phi (HybridVerify.bachelierD s K σ T))\n      (gaussianPDFReal 0 1 (HybridVerify.bachelierD S K σ T) / (σ * Real.sqrt T)) S :=\n  HybridVerify.hasDerivAt_bachelierV_SS hσ hT S\n"
       },
       "metadata": {
         "chapter": 9,
@@ -503,7 +503,7 @@
       "description": "Bachelier theta: ∂V/∂T = σ · ϕ(d) / (2 √T). Cancellation via (S-K) · d / √T = σ · d².",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_theta_thm {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < T) :\n    HasDerivAt (fun t => HybridVerify.bachelierV K σ t S)\n      (σ * gaussianPDFReal 0 1 (HybridVerify.bachelierD S K σ T) / (2 * Real.sqrt T)) T :=\n  HybridVerify.hasDerivAt_bachelierV_T hσ hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.BachelierGreeks\n\nopen HybridVerify\n\ntheorem bachelier_theta_thm {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < T) :\n    HasDerivAt (fun t => HybridVerify.bachelierV K σ t S)\n      (σ * gaussianPDFReal 0 1 (HybridVerify.bachelierD S K σ T) / (2 * Real.sqrt T)) T :=\n  HybridVerify.hasDerivAt_bachelierV_T hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -519,7 +519,7 @@
       "description": "Asset digital gamma: ∂²V_asset/∂S² = -ϕ(d₁) · d₂ / (S σ² T). Sum of Φ-term and pdf-term contributions, collapsed via σ√T − d₁ = -d₂.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => HybridVerify.Phi (HybridVerify.bsd1 s K r σ τ) +\n        gaussianPDFReal 0 1 (HybridVerify.bsd1 s K r σ τ) / (σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        HybridVerify.bsd2 S K r σ τ / (S * σ^2 * τ))) S :=\n  HybridVerify.hasDerivAt_bsAssetDigital_SS hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => HybridVerify.Phi (HybridVerify.bsd1 s K r σ τ) +\n        gaussianPDFReal 0 1 (HybridVerify.bsd1 s K r σ τ) / (σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        HybridVerify.bsd2 S K r σ τ / (S * σ^2 * τ))) S :=\n  HybridVerify.hasDerivAt_bsAssetDigital_SS hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -535,7 +535,7 @@
       "description": "BS-Merton delta: ∂V_q/∂S = e^{-qT} · Φ(d₁') where d₁' = bsd1 S K (r-q) σ T. Via identity V_q = e^{-qT} · bsV(K, r-q, σ, S, T).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_delta_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsVDiv K r q σ s τ)\n      (Real.exp (-(q * τ)) * HybridVerify.Phi (HybridVerify.bsd1 S K (r - q) σ τ)) S :=\n  HybridVerify.hasDerivAt_bsVDiv_S hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_delta_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsVDiv K r q σ s τ)\n      (Real.exp (-(q * τ)) * HybridVerify.Phi (HybridVerify.bsd1 S K (r - q) σ τ)) S :=\n  HybridVerify.hasDerivAt_bsVDiv_S hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -551,7 +551,7 @@
       "description": "BS-Merton gamma: ∂²V_q/∂S² = e^{-qT} · ϕ(d₁') / (S σ √T).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_gamma_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => Real.exp (-(q * τ)) *\n        HybridVerify.Phi (HybridVerify.bsd1 s K (r - q) σ τ))\n      (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K (r - q) σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsVDiv_SS hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_gamma_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => Real.exp (-(q * τ)) *\n        HybridVerify.Phi (HybridVerify.bsd1 s K (r - q) σ τ))\n      (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K (r - q) σ τ)\n        / (S * σ * Real.sqrt τ)) S :=\n  HybridVerify.hasDerivAt_bsVDiv_SS hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -567,7 +567,7 @@
       "description": "BS-Merton vega: ∂V_q/∂σ = e^{-qT} · S · ϕ(d₁') · √T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_vega_thm {K r q : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsVDiv K r q s S τ)\n      (Real.exp (-(q * τ)) * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K (r - q) σ τ)\n        * Real.sqrt τ) σ :=\n  HybridVerify.hasDerivAt_bsVDiv_sigma hK hS hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_vega_thm {K r q : ℝ} (hK : 0 < K)\n    {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun s => HybridVerify.bsVDiv K r q s S τ)\n      (Real.exp (-(q * τ)) * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K (r - q) σ τ)\n        * Real.sqrt τ) σ :=\n  HybridVerify.hasDerivAt_bsVDiv_sigma hK hS hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -583,7 +583,7 @@
       "description": "For every n, S: g(S) ≤ americanPrice u d r g n S. The American option is always worth at least its immediate exercise value. Direct from the Bellman max.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.AmericanBinomial\n\nopen HybridVerify\n\ntheorem american_ge_intrinsic_thm (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    g S ≤ HybridVerify.americanPrice u d r g n S :=\n  HybridVerify.americanPrice_ge_intrinsic u d r g n S\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.American\n\nopen HybridVerify\n\ntheorem american_ge_intrinsic_thm (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    g S ≤ HybridVerify.americanPrice u d r g n S :=\n  HybridVerify.americanPrice_ge_intrinsic u d r g n S\n"
       },
       "metadata": {
         "chapter": 9,
@@ -599,7 +599,7 @@
       "description": "The one-period continuation at V_{n+1} is bounded above by V_{n+1} itself: discounted American price is a supermartingale under the risk-neutral measure.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.AmericanBinomial\n\nopen HybridVerify\n\ntheorem american_supermartingale_thm (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    HybridVerify.binomialOptionPriceOnePeriod u d r\n        (HybridVerify.americanPrice u d r g n (S * u))\n        (HybridVerify.americanPrice u d r g n (S * d))\n      ≤ HybridVerify.americanPrice u d r g (n + 1) S :=\n  HybridVerify.americanPrice_supermartingale u d r g n S\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.American\n\nopen HybridVerify\n\ntheorem american_supermartingale_thm (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    HybridVerify.binomialOptionPriceOnePeriod u d r\n        (HybridVerify.americanPrice u d r g n (S * u))\n        (HybridVerify.americanPrice u d r g n (S * d))\n      ≤ HybridVerify.americanPrice u d r g (n + 1) S :=\n  HybridVerify.americanPrice_supermartingale u d r g n S\n"
       },
       "metadata": {
         "chapter": 9,
@@ -615,7 +615,7 @@
       "description": "binomialPrice ≤ americanPrice for the same intrinsic g. The American option dominates the European with the same payoff — the early-exercise feature can only add value.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.AmericanBinomial\n\nopen HybridVerify\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : HybridVerify.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    HybridVerify.binomialPrice u d r g n S ≤ HybridVerify.americanPrice u d r g n S :=\n  HybridVerify.binomialPrice_le_americanPrice h g n S\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.American\n\nopen HybridVerify\n\ntheorem american_ge_european_thm {u d r : ℝ} (h : HybridVerify.BinomialNoArb u d r)\n    (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    HybridVerify.binomialPrice u d r g n S ≤ HybridVerify.americanPrice u d r g n S :=\n  HybridVerify.binomialPrice_le_americanPrice h g n S\n"
       },
       "metadata": {
         "chapter": 9,
@@ -631,7 +631,7 @@
       "description": "(2 e^{rh²} − e^{σh} − e^{−σh}) / (h · (e^{σh} − e^{−σh})) → (r − σ²/2)/σ as h → 0. Substantive analytic content of the CRR-to-BS drift correspondence. Combined with sinh-side scaling (n → ∞ via h_n = √(T/n) and σT factor), gives the textbook drift limit n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T. The substitution itself is routine; the analytic content is captured here.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BinomialDriftLimit\n\nopen HybridVerify Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  HybridVerify.crr_drift_limit_h hσ r\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.DriftLimit\n\nopen HybridVerify Filter\nopen scoped Topology\n\ntheorem crr_drift_quotient_thm {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :\n    Tendsto (fun h : ℝ =>\n        (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))\n          / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))\n      (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=\n  HybridVerify.crr_drift_limit_h hσ r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -647,7 +647,7 @@
       "description": "BS-Merton rho: ∂V_q/∂r = K · τ · e^{-rτ} · Φ(d₂'). Chain rule on r-q applied to existing call rho, then e^{-qT} · e^{-(r-q)T} = e^{-rT}.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_rho_thm {K q σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsVDiv K r' q σ S τ)\n      (K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K (r - q) σ τ)) r :=\n  HybridVerify.hasDerivAt_bsVDiv_r hK hσ hτ hS r\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_rho_thm {K q σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsVDiv K r' q σ S τ)\n      (K * τ * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K (r - q) σ τ)) r :=\n  HybridVerify.hasDerivAt_bsVDiv_r hK hσ hτ hS r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -663,7 +663,7 @@
       "description": "BS-Merton psi: ∂V_q/∂q = -S · τ · e^{-qτ} · Φ(d₁'). Sensitivity of the option price to the dividend yield, derived via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_psi_thm {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (q : ℝ) :\n    HasDerivAt (fun q' => HybridVerify.bsVDiv K r q' σ S τ)\n      (-(S * τ * Real.exp (-(q * τ)) * HybridVerify.Phi (HybridVerify.bsd1 S K (r - q) σ τ))) q :=\n  HybridVerify.hasDerivAt_bsVDiv_q hK hσ hτ hS q\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_psi_thm {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)\n    {S : ℝ} (hS : 0 < S) (q : ℝ) :\n    HasDerivAt (fun q' => HybridVerify.bsVDiv K r q' σ S τ)\n      (-(S * τ * Real.exp (-(q * τ)) * HybridVerify.Phi (HybridVerify.bsd1 S K (r - q) σ τ))) q :=\n  HybridVerify.hasDerivAt_bsVDiv_q hK hσ hτ hS q\n"
       },
       "metadata": {
         "chapter": 9,
@@ -679,7 +679,7 @@
       "description": "BS-Merton theta: ∂V_q/∂τ = -q·V_q + e^{-qτ}·(σ·S·ϕ(d₁')/(2√τ) + (r-q)·K·e^{-(r-q)τ}·Φ(d₂')).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_theta_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsVDiv K r q σ S t)\n      (-(q * HybridVerify.bsVDiv K r q σ S τ) +\n        Real.exp (-(q * τ)) *\n          (σ * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K (r - q) σ τ) / (2 * Real.sqrt τ)\n            + (r - q) * K * Real.exp (-((r - q) * τ)) *\n              HybridVerify.Phi (HybridVerify.bsd2 S K (r - q) σ τ))) τ :=\n  HybridVerify.hasDerivAt_bsVDiv_tau hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DividendsGreeks\n\nopen HybridVerify\n\ntheorem bs_merton_theta_thm {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsVDiv K r q σ S t)\n      (-(q * HybridVerify.bsVDiv K r q σ S τ) +\n        Real.exp (-(q * τ)) *\n          (σ * S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K (r - q) σ τ) / (2 * Real.sqrt τ)\n            + (r - q) * K * Real.exp (-((r - q) * τ)) *\n              HybridVerify.Phi (HybridVerify.bsd2 S K (r - q) σ τ))) τ :=\n  HybridVerify.hasDerivAt_bsVDiv_tau hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -695,7 +695,7 @@
       "description": "Cash digital gamma: ∂²V_cash/∂S² = -e^{-rτ} · ϕ(d₂) · d₁ / (S² σ² τ). Quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ), collapsed via d₂ + σ√τ = d₁.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n        HybridVerify.bsd1 S K r σ τ / (S^2 * σ^2 * τ))) S :=\n  HybridVerify.hasDerivAt_bsCashDigital_SS hK hσ hS hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n        HybridVerify.bsd1 S K r σ τ / (S^2 * σ^2 * τ))) S :=\n  HybridVerify.hasDerivAt_bsCashDigital_SS hK hσ hS hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -711,7 +711,7 @@
       "description": "Asset digital rho: ∂_r V_asset = S · ϕ(d₁) · √τ/σ. Direct chain rule using ∂_r d₁ = √τ/σ.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsAssetDigital K r' σ S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * (Real.sqrt τ / σ)) r :=\n  HybridVerify.hasDerivAt_bsAssetDigital_r S K σ hσ hτ r\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsAssetDigital K r' σ S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * (Real.sqrt τ / σ)) r :=\n  HybridVerify.hasDerivAt_bsAssetDigital_r S K σ hσ hτ r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -727,7 +727,7 @@
       "description": "Cash digital rho: ∂_r V_cash = e^{-rτ}·(ϕ(d₂)·√τ/σ − τ·Φ(d₂)). Product rule on e^{-rτ}·Φ(d₂(r)).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsCashDigital K r' σ S τ)\n      (Real.exp (-(r * τ)) *\n        (gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) * (Real.sqrt τ / σ)\n          - τ * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ))) r :=\n  HybridVerify.hasDerivAt_bsCashDigital_r S K σ hσ hτ r\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsCashDigital K r' σ S τ)\n      (Real.exp (-(r * τ)) *\n        (gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) * (Real.sqrt τ / σ)\n          - τ * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ))) r :=\n  HybridVerify.hasDerivAt_bsCashDigital_r S K σ hσ hτ r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -743,7 +743,7 @@
       "description": "Asset digital vega: ∂_σ V_asset = -S · ϕ(d₁) · d₂ / σ. Chain rule with ∂_σ d₁ = -d₂/σ via bsd2_eq.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_vega_thm (S K r : ℝ) {σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => HybridVerify.bsAssetDigital K r σ' S τ)\n      (-(S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        HybridVerify.bsd2 S K r σ τ / σ)) σ :=\n  HybridVerify.hasDerivAt_bsAssetDigital_sigma S K r hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_vega_thm (S K r : ℝ) {σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => HybridVerify.bsAssetDigital K r σ' S τ)\n      (-(S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        HybridVerify.bsd2 S K r σ τ / σ)) σ :=\n  HybridVerify.hasDerivAt_bsAssetDigital_sigma S K r hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -759,7 +759,7 @@
       "description": "Cash digital vega: ∂_σ V_cash = -e^{-rτ} · ϕ(d₂) · d₁ / σ. Chain rule with ∂_σ d₂ = -d₁/σ.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_vega_thm (S K : ℝ) {r σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => HybridVerify.bsCashDigital K r σ' S τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n        HybridVerify.bsd1 S K r σ τ / σ)) σ :=\n  HybridVerify.hasDerivAt_bsCashDigital_sigma S K hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_vega_thm (S K : ℝ) {r σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => HybridVerify.bsCashDigital K r σ' S τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n        HybridVerify.bsd1 S K r σ τ / σ)) σ :=\n  HybridVerify.hasDerivAt_bsCashDigital_sigma S K hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -775,7 +775,7 @@
       "description": "Asset digital theta: ∂_τ V_asset = S · ϕ(d₁) · ((r + σ²/2)τ − log(S/K))/(2στ√τ). Direct chain rule.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsAssetDigital K r σ S t)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  HybridVerify.hasDerivAt_bsAssetDigital_tau S K r σ hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsAssetDigital K r σ S t)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  HybridVerify.hasDerivAt_bsAssetDigital_tau S K r σ hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -791,7 +791,7 @@
       "description": "Cash digital theta: ∂_τ V_cash = -r·e^{-rτ}·Φ(d₂) + e^{-rτ}·ϕ(d₂)·∂_τ d₂. Product rule on e^{-rτ}·Φ(d₂(τ)).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsCashDigital K r σ S t)\n      (-r * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ) +\n        Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n          (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ)\n            - σ / (2 * Real.sqrt τ))) τ :=\n  HybridVerify.hasDerivAt_bsCashDigital_tau S K r σ hσ hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.DigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsCashDigital K r σ S t)\n      (-r * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ) +\n        Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n          (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ)\n            - σ / (2 * Real.sqrt τ))) τ :=\n  HybridVerify.hasDerivAt_bsCashDigital_tau S K r σ hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -807,7 +807,7 @@
       "description": "Black-76 rho: ∂_r V_B = -T · V_B. Clean form because the inner bsV is r-independent (zero drift in futures setup) — only the e^{-rT} discount contributes.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_rho_thm (K σ F T : ℝ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.blackV K σ r' F T)\n      (-T * HybridVerify.blackV K σ r F T) r :=\n  HybridVerify.hasDerivAt_blackV_r K σ F T r\n"
+        "lean": "import Mathlib\nimport HybridVerify.Futures.Black76Greeks\n\nopen HybridVerify\n\ntheorem black76_rho_thm (K σ F T : ℝ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.blackV K σ r' F T)\n      (-T * HybridVerify.blackV K σ r F T) r :=\n  HybridVerify.hasDerivAt_blackV_r K σ F T r\n"
       },
       "metadata": {
         "chapter": 9,
@@ -823,7 +823,7 @@
       "description": "Black-76 theta: ∂_T V_B = -r·V_B + e^{-rT}·σ·F·ϕ(d₁)/(2√T). Product rule on e^{-rT}·bsV(K, 0, σ, F, T) using BS theta at r=0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BlackFuturesGreeks\n\nopen HybridVerify\n\ntheorem black76_theta_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun t => HybridVerify.blackV K σ r F t)\n      (-r * HybridVerify.blackV K σ r F T +\n        Real.exp (-(r * T)) *\n          (σ * F * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T) / (2 * Real.sqrt T))) T :=\n  HybridVerify.hasDerivAt_blackV_T hK hσ r hF hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.Futures.Black76Greeks\n\nopen HybridVerify\n\ntheorem black76_theta_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun t => HybridVerify.blackV K σ r F t)\n      (-r * HybridVerify.blackV K σ r F T +\n        Real.exp (-(r * T)) *\n          (σ * F * gaussianPDFReal 0 1 (HybridVerify.bsd1 F K 0 σ T) / (2 * Real.sqrt T))) T :=\n  HybridVerify.hasDerivAt_blackV_T hK hσ r hF hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -839,7 +839,7 @@
       "description": "CRR drift limit (n-form): n · (2 p_n − 1) · σ · √(T/n) → (r − σ²/2) · T as n → ∞. Closes the analytic content of CRR-to-BS drift correspondence; the h-form was shipped in mf-crr-drift-quotient.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BinomialDriftLimit\n\nopen HybridVerify\n\ntheorem crr_drift_limit_thm {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ =>\n        (n : ℝ) * (2 * HybridVerify.crrProb r σ T n - 1) * σ * Real.sqrt (T / n))\n      Filter.atTop (nhds ((r - σ^2 / 2) * T)) :=\n  HybridVerify.crr_drift_limit_n hσ hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.DriftLimit\n\nopen HybridVerify\n\ntheorem crr_drift_limit_thm {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ =>\n        (n : ℝ) * (2 * HybridVerify.crrProb r σ T n - 1) * σ * Real.sqrt (T / n))\n      Filter.atTop (nhds ((r - σ^2 / 2) * T)) :=\n  HybridVerify.crr_drift_limit_n hσ hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -855,7 +855,7 @@
       "description": "ZCB pays par at maturity: B(T, T) = exp(0) = 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_maturity_thm (r T : ℝ) : HybridVerify.zcb r T T = 1 :=\n  HybridVerify.zcb_at_maturity r T\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ZCB\n\nopen HybridVerify\n\ntheorem zcb_maturity_thm (r T : ℝ) : HybridVerify.zcb r T T = 1 :=\n  HybridVerify.zcb_at_maturity r T\n"
       },
       "metadata": {
         "chapter": 10,
@@ -871,7 +871,7 @@
       "description": "Under a constant short rate r, the yield-to-maturity of a continuously-compounded ZCB equals r: -log(B(t,T))/(T-t) = r.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_yield_thm {r t T : ℝ} (htT : t < T) :\n    -Real.log (HybridVerify.zcb r t T) / (T - t) = r :=\n  HybridVerify.zcb_yield_eq_rate htT\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ZCB\n\nopen HybridVerify\n\ntheorem zcb_yield_thm {r t T : ℝ} (htT : t < T) :\n    -Real.log (HybridVerify.zcb r t T) / (T - t) = r :=\n  HybridVerify.zcb_yield_eq_rate htT\n"
       },
       "metadata": {
         "chapter": 10,
@@ -887,7 +887,7 @@
       "description": "ZCB Macaulay duration equals remaining time: -∂_r B(t,T) / B(t,T) = T - t.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -(-(T - t) * HybridVerify.zcb r t T) / HybridVerify.zcb r t T = T - t :=\n  HybridVerify.zcb_duration_eq_time_to_maturity t T r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ZCB\n\nopen HybridVerify\n\ntheorem zcb_duration_thm (t T r : ℝ) :\n    -(-(T - t) * HybridVerify.zcb r t T) / HybridVerify.zcb r t T = T - t :=\n  HybridVerify.zcb_duration_eq_time_to_maturity t T r\n"
       },
       "metadata": {
         "chapter": 10,
@@ -903,7 +903,7 @@
       "description": "ZCB convexity equals squared remaining time: ∂²_r B(t,T) / B(t,T) = (T - t)².",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.FixedIncome\n\nopen HybridVerify\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    ((T - t)^2 * HybridVerify.zcb r t T) / HybridVerify.zcb r t T = (T - t)^2 :=\n  HybridVerify.zcb_convexity_eq_time_to_maturity_sq t T r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ZCB\n\nopen HybridVerify\n\ntheorem zcb_convexity_thm (t T r : ℝ) :\n    ((T - t)^2 * HybridVerify.zcb r t T) / HybridVerify.zcb r t T = (T - t)^2 :=\n  HybridVerify.zcb_convexity_eq_time_to_maturity_sq t T r\n"
       },
       "metadata": {
         "chapter": 10,
@@ -919,7 +919,7 @@
       "description": "Completing-the-square: Var(w) = D·(w - w*)² + V_min where D = σ₁² - 2ρσ₁σ₂ + σ₂², w* is the min-var weight, V_min = σ₁²σ₂²(1-ρ²)/D.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_variance_factored_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : HybridVerify.minVarDenom σ₁ σ₂ ρ ≠ 0) (w : ℝ) :\n    HybridVerify.portfolioVarTwo σ₁ σ₂ ρ w =\n      HybridVerify.minVarDenom σ₁ σ₂ ρ *\n        (w - HybridVerify.minVarWeightTwo σ₁ σ₂ ρ) ^ 2\n      + HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  HybridVerify.portfolioVarTwo_eq_quad hD w\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_variance_factored_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : HybridVerify.minVarDenom σ₁ σ₂ ρ ≠ 0) (w : ℝ) :\n    HybridVerify.portfolioVarTwo σ₁ σ₂ ρ w =\n      HybridVerify.minVarDenom σ₁ σ₂ ρ *\n        (w - HybridVerify.minVarWeightTwo σ₁ σ₂ ρ) ^ 2\n      + HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  HybridVerify.portfolioVarTwo_eq_quad hD w\n"
       },
       "metadata": {
         "chapter": 11,
@@ -935,7 +935,7 @@
       "description": "The portfolio variance evaluated at the min-variance weight equals V_min = σ₁²σ₂²(1-ρ²)/D.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_min_var_value_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : HybridVerify.minVarDenom σ₁ σ₂ ρ ≠ 0) :\n    HybridVerify.portfolioVarTwo σ₁ σ₂ ρ (HybridVerify.minVarWeightTwo σ₁ σ₂ ρ) =\n      HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  HybridVerify.portfolioVarTwo_at_minVarWeight hD\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_min_var_value_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : HybridVerify.minVarDenom σ₁ σ₂ ρ ≠ 0) :\n    HybridVerify.portfolioVarTwo σ₁ σ₂ ρ (HybridVerify.minVarWeightTwo σ₁ σ₂ ρ) =\n      HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ :=\n  HybridVerify.portfolioVarTwo_at_minVarWeight hD\n"
       },
       "metadata": {
         "chapter": 11,
@@ -951,7 +951,7 @@
       "description": "Portfolio variance is always at least the minimum-variance value: Var(w) ≥ V_min for all w (under positive D).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_min_var_bound_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : 0 < HybridVerify.minVarDenom σ₁ σ₂ ρ) (w : ℝ) :\n    HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ ≤\n      HybridVerify.portfolioVarTwo σ₁ σ₂ ρ w :=\n  HybridVerify.portfolioVarTwo_ge_min hD w\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_min_var_bound_thm {σ₁ σ₂ ρ : ℝ}\n    (hD : 0 < HybridVerify.minVarDenom σ₁ σ₂ ρ) (w : ℝ) :\n    HybridVerify.minPortfolioVarTwo σ₁ σ₂ ρ ≤\n      HybridVerify.portfolioVarTwo σ₁ σ₂ ρ w :=\n  HybridVerify.portfolioVarTwo_ge_min hD w\n"
       },
       "metadata": {
         "chapter": 11,
@@ -967,7 +967,7 @@
       "description": "When ρ = -1 (perfectly anti-correlated), the minimum portfolio variance is exactly zero.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_perfect_hedge_thm (σ₁ σ₂ : ℝ) :\n    HybridVerify.minPortfolioVarTwo σ₁ σ₂ (-1) = 0 :=\n  HybridVerify.minPortfolioVarTwo_perfect_anticorr σ₁ σ₂\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.Markowitz\n\nopen HybridVerify\n\ntheorem markowitz_perfect_hedge_thm (σ₁ σ₂ : ℝ) :\n    HybridVerify.minPortfolioVarTwo σ₁ σ₂ (-1) = 0 :=\n  HybridVerify.minPortfolioVarTwo_perfect_anticorr σ₁ σ₂\n"
       },
       "metadata": {
         "chapter": 11,
@@ -983,7 +983,7 @@
       "description": "The market's beta is one: β_M = Cov(R_M, R_M)/Var(R_M) = 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_market_thm {varRm : ℝ} (hVar : varRm ≠ 0) :\n    HybridVerify.beta varRm varRm = 1 :=\n  HybridVerify.beta_market hVar\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_market_thm {varRm : ℝ} (hVar : varRm ≠ 0) :\n    HybridVerify.beta varRm varRm = 1 :=\n  HybridVerify.beta_market hVar\n"
       },
       "metadata": {
         "chapter": 12,
@@ -999,7 +999,7 @@
       "description": "A risk-free asset (zero covariance with the market) has beta zero: β = 0/Var(R_M) = 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_riskfree_thm (varRm : ℝ) :\n    HybridVerify.beta 0 varRm = 0 :=\n  HybridVerify.beta_of_riskFree varRm\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_riskfree_thm (varRm : ℝ) :\n    HybridVerify.beta 0 varRm = 0 :=\n  HybridVerify.beta_of_riskFree varRm\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1015,7 +1015,7 @@
       "description": "Beta of a portfolio R_p = w₁R₁ + w₂R₂ is the weighted sum of betas: β_p = w₁β₁ + w₂β₂. Bilinearity of covariance.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_linearity_two_thm {varRm : ℝ} (hVar : varRm ≠ 0)\n    (w₁ w₂ covR₁Rm covR₂Rm : ℝ) :\n    HybridVerify.beta (w₁ * covR₁Rm + w₂ * covR₂Rm) varRm =\n      w₁ * HybridVerify.beta covR₁Rm varRm + w₂ * HybridVerify.beta covR₂Rm varRm :=\n  HybridVerify.beta_linearity_two hVar w₁ w₂ covR₁Rm covR₂Rm\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_linearity_two_thm {varRm : ℝ} (hVar : varRm ≠ 0)\n    (w₁ w₂ covR₁Rm covR₂Rm : ℝ) :\n    HybridVerify.beta (w₁ * covR₁Rm + w₂ * covR₂Rm) varRm =\n      w₁ * HybridVerify.beta covR₁Rm varRm + w₂ * HybridVerify.beta covR₂Rm varRm :=\n  HybridVerify.beta_linearity_two hVar w₁ w₂ covR₁Rm covR₂Rm\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1031,7 +1031,7 @@
       "description": "Beta of a portfolio R_p = ∑ w_i R_i is the weighted sum of betas: β_p = ∑ w_i β_i. Bilinearity over a finite-index family.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_linearity_finset_thm\n    {ι : Type*} (s : Finset ι) (w c : ι → ℝ) (varRm : ℝ) :\n    HybridVerify.beta (∑ i ∈ s, w i * c i) varRm =\n      ∑ i ∈ s, w i * HybridVerify.beta (c i) varRm :=\n  HybridVerify.beta_linearity_finset s w c varRm\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.CAPM\n\nopen HybridVerify\n\ntheorem capm_beta_linearity_finset_thm\n    {ι : Type*} (s : Finset ι) (w c : ι → ℝ) (varRm : ℝ) :\n    HybridVerify.beta (∑ i ∈ s, w i * c i) varRm =\n      ∑ i ∈ s, w i * HybridVerify.beta (c i) varRm :=\n  HybridVerify.beta_linearity_finset s w c varRm\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1047,7 +1047,7 @@
       "description": "For a gaussian loss L ~ N(μ, σ²), VaR_α(aL + b) = a·VaR_α(L) + b for a ≥ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify\n\ntheorem gaussian_var_affine_thm (μ σ z a b : ℝ) (ha : 0 ≤ a) :\n    HybridVerify.gaussianVaR (a * μ + b) (a * σ) z =\n      a * HybridVerify.gaussianVaR μ σ z + b :=\n  HybridVerify.gaussianVaR_affine μ σ z a b ha\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Gaussian\n\nopen HybridVerify\n\ntheorem gaussian_var_affine_thm (μ σ z a b : ℝ) (ha : 0 ≤ a) :\n    HybridVerify.gaussianVaR (a * μ + b) (a * σ) z =\n      a * HybridVerify.gaussianVaR μ σ z + b :=\n  HybridVerify.gaussianVaR_affine μ σ z a b ha\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1063,7 +1063,7 @@
       "description": "For a gaussian loss L ~ N(μ, σ²), CVaR_α(aL + b) = a·CVaR_α(L) + b for a ≥ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify\n\ntheorem gaussian_cvar_affine_thm (μ σ z α a b : ℝ) (ha : 0 ≤ a) :\n    HybridVerify.gaussianCVaR (a * μ + b) (a * σ) z α =\n      a * HybridVerify.gaussianCVaR μ σ z α + b :=\n  HybridVerify.gaussianCVaR_affine μ σ z α a b ha\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Gaussian\n\nopen HybridVerify\n\ntheorem gaussian_cvar_affine_thm (μ σ z α a b : ℝ) (ha : 0 ≤ a) :\n    HybridVerify.gaussianCVaR (a * μ + b) (a * σ) z α =\n      a * HybridVerify.gaussianCVaR μ σ z α + b :=\n  HybridVerify.gaussianCVaR_affine μ σ z α a b ha\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1079,7 +1079,7 @@
       "description": "Standard normal VaR collapses to the quantile: VaR_α(N(0,1)) = z_α.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify\n\ntheorem gaussian_var_standard_thm (z : ℝ) :\n    HybridVerify.gaussianVaR 0 1 z = z :=\n  HybridVerify.gaussianVaR_standard z\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Gaussian\n\nopen HybridVerify\n\ntheorem gaussian_var_standard_thm (z : ℝ) :\n    HybridVerify.gaussianVaR 0 1 z = z :=\n  HybridVerify.gaussianVaR_standard z\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1095,7 +1095,7 @@
       "description": "Standard normal CVaR equals ϕ(z)/(1-α): CVaR_α(N(0,1)) = ϕ(z_α)/(1-α).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify ProbabilityTheory\n\ntheorem gaussian_cvar_standard_thm (z α : ℝ) :\n    HybridVerify.gaussianCVaR 0 1 z α = gaussianPDFReal 0 1 z / (1 - α) :=\n  HybridVerify.gaussianCVaR_standard z α\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Gaussian\n\nopen HybridVerify ProbabilityTheory\n\ntheorem gaussian_cvar_standard_thm (z α : ℝ) :\n    HybridVerify.gaussianCVaR 0 1 z α = gaussianPDFReal 0 1 z / (1 - α) :=\n  HybridVerify.gaussianCVaR_standard z α\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1111,7 +1111,7 @@
       "description": "CVaR_α(L) − VaR_α(L) = σ·(ϕ(z)/(1-α) − z) for gaussian L ~ N(μ, σ²). The two coincide only when ϕ(z)/(1-α) = z (rarely true in practice).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify ProbabilityTheory\n\ntheorem gaussian_cvar_sub_var_thm (μ σ z α : ℝ) :\n    HybridVerify.gaussianCVaR μ σ z α - HybridVerify.gaussianVaR μ σ z =\n      σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  HybridVerify.gaussianCVaR_sub_VaR μ σ z α\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Gaussian\n\nopen HybridVerify ProbabilityTheory\n\ntheorem gaussian_cvar_sub_var_thm (μ σ z α : ℝ) :\n    HybridVerify.gaussianCVaR μ σ z α - HybridVerify.gaussianVaR μ σ z =\n      σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  HybridVerify.gaussianCVaR_sub_VaR μ σ z α\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1127,7 +1127,7 @@
       "description": "For iid gaussian increments aggregating to L_T ~ N(T·μ, T·σ²), VaR_α(L_T) = T·μ + σ·√T·z. The √T volatility scaling rule.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify Real\n\ntheorem gaussian_var_vol_scaling_thm (μ σ z T : ℝ) :\n    HybridVerify.gaussianVaR (T * μ) (σ * Real.sqrt T) z =\n      T * μ + σ * Real.sqrt T * z :=\n  HybridVerify.gaussianVaR_volatility_scaling μ σ z T\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Gaussian\n\nopen HybridVerify Real\n\ntheorem gaussian_var_vol_scaling_thm (μ σ z T : ℝ) :\n    HybridVerify.gaussianVaR (T * μ) (σ * Real.sqrt T) z =\n      T * μ + σ * Real.sqrt T * z :=\n  HybridVerify.gaussianVaR_volatility_scaling μ σ z T\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1143,7 +1143,7 @@
       "description": "For a ZCB portfolio P(r) = ∑ w_i exp(-r(T_i - t)) with duration-times-value D_P·P = ∑ w_i (T_i - t) exp(-r(T_i - t)), the rate derivative is ∂P/∂r = -D_P·P.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_portfolio_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bondPortfolioValue s w T t r')\n      (-HybridVerify.bondPortfolioDur s w T t r) r :=\n  HybridVerify.hasDerivAt_bondPortfolioValue_r s w T t r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Immunization\n\nopen HybridVerify\n\ntheorem bond_portfolio_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bondPortfolioValue s w T t r')\n      (-HybridVerify.bondPortfolioDur s w T t r) r :=\n  HybridVerify.hasDerivAt_bondPortfolioValue_r s w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1159,7 +1159,7 @@
       "description": "A single-bond portfolio's duration-times-value reduces to w·(T - t)·exp(-r(T - t)), matching the ZCB duration in FixedIncome.lean.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_single_dur_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioDur {i} w T t r =\n      w i * (T i - t) * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_dur i w T t r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Immunization\n\nopen HybridVerify\n\ntheorem bond_single_dur_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioDur {i} w T t r =\n      w i * (T i - t) * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_dur i w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1175,7 +1175,7 @@
       "description": "A single-bond portfolio's value reduces to w·exp(-r(T - t)), matching the ZCB price.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_single_value_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioValue {i} w T t r =\n      w i * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_value i w T t r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Immunization\n\nopen HybridVerify\n\ntheorem bond_single_value_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioValue {i} w T t r =\n      w i * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_value i w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1191,7 +1191,7 @@
       "description": "If the duration-times-value of the asset portfolio matches that of the liability, the net portfolio's first-order rate sensitivity is zero: ∂(A - L)/∂r = 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_immunization_first_order_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match : HybridVerify.bondPortfolioDur sA wA TA t r =\n               HybridVerify.bondPortfolioDur sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        HybridVerify.bondPortfolioValue sA wA TA t r' -\n        HybridVerify.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  HybridVerify.bondPortfolio_immunization_first_order sA wA TA sL wL TL t r h_match\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Immunization\n\nopen HybridVerify\n\ntheorem bond_immunization_first_order_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match : HybridVerify.bondPortfolioDur sA wA TA t r =\n               HybridVerify.bondPortfolioDur sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        HybridVerify.bondPortfolioValue sA wA TA t r' -\n        HybridVerify.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  HybridVerify.bondPortfolio_immunization_first_order sA wA TA sL wL TL t r h_match\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1207,7 +1207,7 @@
       "description": "Portfolio variance scales quadratically in the weight magnitude: Var(c·w) = c²·Var(w).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_scaling_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ) (c : ℝ) :\n    HybridVerify.portfolioVarN s (fun i => c * w i) σ =\n      c ^ 2 * HybridVerify.portfolioVarN s w σ :=\n  HybridVerify.portfolioVarN_smul s w σ c\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_scaling_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ) (c : ℝ) :\n    HybridVerify.portfolioVarN s (fun i => c * w i) σ =\n      c ^ 2 * HybridVerify.portfolioVarN s w σ :=\n  HybridVerify.portfolioVarN_smul s w σ c\n"
       },
       "metadata": {
         "chapter": 11,
@@ -1223,7 +1223,7 @@
       "description": "When σ_ij = 0 for i ≠ j (uncorrelated assets), the portfolio variance reduces to ∑ w_i²·σ_ii.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_diag_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = 0) :\n    HybridVerify.portfolioVarN s w σ = ∑ i ∈ s, w i ^ 2 * σ i i :=\n  HybridVerify.portfolioVarN_diag s w σ h_diag\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_diag_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = 0) :\n    HybridVerify.portfolioVarN s w σ = ∑ i ∈ s, w i ^ 2 * σ i i :=\n  HybridVerify.portfolioVarN_diag s w σ h_diag\n"
       },
       "metadata": {
         "chapter": 11,
@@ -1239,7 +1239,7 @@
       "description": "Equal weights c on an n-asset portfolio with zero cross-covariances and common variance σ² gives Var = c²·n·σ². The classical diversification scaling.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_iid_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (c σ_sq : ℝ)\n    (kernel : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → kernel i j = 0)\n    (h_var : ∀ i ∈ s, kernel i i = σ_sq) :\n    HybridVerify.portfolioVarN s (fun _ => c) kernel = c ^ 2 * s.card * σ_sq :=\n  HybridVerify.portfolioVarN_equal_weights_iid s c σ_sq kernel h_diag h_var\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_iid_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (c σ_sq : ℝ)\n    (kernel : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → kernel i j = 0)\n    (h_var : ∀ i ∈ s, kernel i i = σ_sq) :\n    HybridVerify.portfolioVarN s (fun _ => c) kernel = c ^ 2 * s.card * σ_sq :=\n  HybridVerify.portfolioVarN_equal_weights_iid s c σ_sq kernel h_diag h_var\n"
       },
       "metadata": {
         "chapter": 11,
@@ -1255,7 +1255,7 @@
       "description": "If the covariance kernel σ defines a non-negative quadratic form (∀ v, ∑∑ v_i v_j σ_ij ≥ 0), then portfolio variance is non-negative for any weights.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_psd_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_psd : ∀ v : ι → ℝ, 0 ≤ ∑ i ∈ s, ∑ j ∈ s, v i * v j * σ i j) :\n    0 ≤ HybridVerify.portfolioVarN s w σ :=\n  HybridVerify.portfolioVarN_nonneg_of_psd s w σ h_psd\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_psd_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_psd : ∀ v : ι → ℝ, 0 ≤ ∑ i ∈ s, ∑ j ∈ s, v i * v j * σ i j) :\n    0 ≤ HybridVerify.portfolioVarN s w σ :=\n  HybridVerify.portfolioVarN_nonneg_of_psd s w σ h_psd\n"
       },
       "metadata": {
         "chapter": 11,
@@ -1271,7 +1271,7 @@
       "description": "When the index set has cardinality 2 with weights (w, 1-w) and the standard ρ-parametrized covariance, the n-asset variance recovers the two-asset formula w²σ₁² + (1-w)²σ₂² + 2w(1-w)ρσ₁σ₂.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_two_asset_thm (w σ₁ σ₂ ρ : ℝ) :\n    HybridVerify.portfolioVarN (Finset.univ : Finset (Fin 2))\n        (fun i => if i = 0 then w else 1 - w)\n        (fun i j =>\n          if i = 0 ∧ j = 0 then σ₁ ^ 2\n          else if i = 1 ∧ j = 1 then σ₂ ^ 2\n          else ρ * σ₁ * σ₂) =\n      w ^ 2 * σ₁ ^ 2 + (1 - w) ^ 2 * σ₂ ^ 2 + 2 * w * (1 - w) * ρ * σ₁ * σ₂ :=\n  HybridVerify.portfolioVarN_two_asset_compat w σ₁ σ₂ ρ\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_two_asset_thm (w σ₁ σ₂ ρ : ℝ) :\n    HybridVerify.portfolioVarN (Finset.univ : Finset (Fin 2))\n        (fun i => if i = 0 then w else 1 - w)\n        (fun i j =>\n          if i = 0 ∧ j = 0 then σ₁ ^ 2\n          else if i = 1 ∧ j = 1 then σ₂ ^ 2\n          else ρ * σ₁ * σ₂) =\n      w ^ 2 * σ₁ ^ 2 + (1 - w) ^ 2 * σ₂ ^ 2 + 2 * w * (1 - w) * ρ * σ₁ * σ₂ :=\n  HybridVerify.portfolioVarN_two_asset_compat w σ₁ σ₂ ρ\n"
       },
       "metadata": {
         "chapter": 11,
@@ -1287,7 +1287,7 @@
       "description": "The Sharpe ratio (μ - r_f)/σ is invariant under uniform scaling of mean, risk-free rate, and volatility: S(λμ, λr_f, λσ) = S(μ, r_f, σ).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatios\n\nopen HybridVerify\n\ntheorem sharpe_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ r_f σ : ℝ) :\n    HybridVerify.sharpeRatio (c * μ) (c * r_f) (c * σ) =\n      HybridVerify.sharpeRatio μ r_f σ :=\n  HybridVerify.sharpeRatio_scale_invariant hc μ r_f σ\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Ratios\n\nopen HybridVerify\n\ntheorem sharpe_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ r_f σ : ℝ) :\n    HybridVerify.sharpeRatio (c * μ) (c * r_f) (c * σ) =\n      HybridVerify.sharpeRatio μ r_f σ :=\n  HybridVerify.sharpeRatio_scale_invariant hc μ r_f σ\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1303,7 +1303,7 @@
       "description": "Under iid time aggregation L_T ~ N(T·μ, T·σ²), the Sharpe ratio scales as √T: S_T = √T · S_1. Standard quant rule for annualizing.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatios\n\nopen HybridVerify Real\n\ntheorem sharpe_sqrtT_thm {μ r_f σ T : ℝ} (hT : 0 < T) (hσ : σ ≠ 0) :\n    HybridVerify.sharpeRatio (T * μ) (T * r_f) (σ * Real.sqrt T) =\n      Real.sqrt T * HybridVerify.sharpeRatio μ r_f σ :=\n  HybridVerify.sharpeRatio_scaleT hT hσ\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Ratios\n\nopen HybridVerify Real\n\ntheorem sharpe_sqrtT_thm {μ r_f σ T : ℝ} (hT : 0 < T) (hσ : σ ≠ 0) :\n    HybridVerify.sharpeRatio (T * μ) (T * r_f) (σ * Real.sqrt T) =\n      Real.sqrt T * HybridVerify.sharpeRatio μ r_f σ :=\n  HybridVerify.sharpeRatio_scaleT hT hσ\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1319,7 +1319,7 @@
       "description": "At the Kelly fraction f* = (p·b - q)/b with q = 1 - p, the derivative of the expected log-growth p·log(1 + f·b) + q·log(1 - f) vanishes.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatios\n\nopen HybridVerify\n\ntheorem kelly_foc_thm {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => HybridVerify.kellyGrowth p b f) 0\n      (HybridVerify.kellyFraction p b) :=\n  HybridVerify.kellyGrowth_deriv_at_kelly hp hp1 hb\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Ratios\n\nopen HybridVerify\n\ntheorem kelly_foc_thm {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => HybridVerify.kellyGrowth p b f) 0\n      (HybridVerify.kellyFraction p b) :=\n  HybridVerify.kellyGrowth_deriv_at_kelly hp hp1 hb\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1335,7 +1335,7 @@
       "description": "VaR(L + c) = VaR(L) + c — the translation-invariance axiom of coherent risk measures (Artzner-Delbaen-Eber-Heath 1999).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_translation_thm (μ σ z c : ℝ) :\n    HybridVerify.gaussianVaR (μ + c) σ z = HybridVerify.gaussianVaR μ σ z + c :=\n  HybridVerify.gaussianVaR_translation μ σ z c\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_translation_thm (μ σ z c : ℝ) :\n    HybridVerify.gaussianVaR (μ + c) σ z = HybridVerify.gaussianVaR μ σ z + c :=\n  HybridVerify.gaussianVaR_translation μ σ z c\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1351,7 +1351,7 @@
       "description": "CVaR(L + c) = CVaR(L) + c — translation-invariance axiom for CVaR.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_translation_thm (μ σ z α c : ℝ) :\n    HybridVerify.gaussianCVaR (μ + c) σ z α =\n      HybridVerify.gaussianCVaR μ σ z α + c :=\n  HybridVerify.gaussianCVaR_translation μ σ z α c\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_translation_thm (μ σ z α c : ℝ) :\n    HybridVerify.gaussianCVaR (μ + c) σ z α =\n      HybridVerify.gaussianCVaR μ σ z α + c :=\n  HybridVerify.gaussianCVaR_translation μ σ z α c\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1367,7 +1367,7 @@
       "description": "VaR(λ·L) = λ·VaR(L) for λ ≥ 0 — positive-homogeneity axiom of coherent risk measures.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_pos_homog_thm (μ σ z : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    HybridVerify.gaussianVaR (l * μ) (l * σ) z = l * HybridVerify.gaussianVaR μ σ z :=\n  HybridVerify.gaussianVaR_positiveHomogeneity μ σ z hl\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_pos_homog_thm (μ σ z : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    HybridVerify.gaussianVaR (l * μ) (l * σ) z = l * HybridVerify.gaussianVaR μ σ z :=\n  HybridVerify.gaussianVaR_positiveHomogeneity μ σ z hl\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1383,7 +1383,7 @@
       "description": "CVaR(λ·L) = λ·CVaR(L) for λ ≥ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_pos_homog_thm (μ σ z α : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    HybridVerify.gaussianCVaR (l * μ) (l * σ) z α =\n      l * HybridVerify.gaussianCVaR μ σ z α :=\n  HybridVerify.gaussianCVaR_positiveHomogeneity μ σ z α hl\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_pos_homog_thm (μ σ z α : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    HybridVerify.gaussianCVaR (l * μ) (l * σ) z α =\n      l * HybridVerify.gaussianCVaR μ σ z α :=\n  HybridVerify.gaussianCVaR_positiveHomogeneity μ σ z α hl\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1399,7 +1399,7 @@
       "description": "If μ₁ ≤ μ₂ and the volatilities match, VaR(L₁) ≤ VaR(L₂) — monotonicity axiom (parameter form).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_monotone_thm {μ₁ μ₂ σ z : ℝ} (hμ : μ₁ ≤ μ₂) :\n    HybridVerify.gaussianVaR μ₁ σ z ≤ HybridVerify.gaussianVaR μ₂ σ z :=\n  HybridVerify.gaussianVaR_monotone_mean hμ\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_monotone_thm {μ₁ μ₂ σ z : ℝ} (hμ : μ₁ ≤ μ₂) :\n    HybridVerify.gaussianVaR μ₁ σ z ≤ HybridVerify.gaussianVaR μ₂ σ z :=\n  HybridVerify.gaussianVaR_monotone_mean hμ\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1415,7 +1415,7 @@
       "description": "If μ₁ ≤ μ₂ and the volatilities match, CVaR(L₁) ≤ CVaR(L₂).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_monotone_thm {μ₁ μ₂ σ z α : ℝ} (hμ : μ₁ ≤ μ₂) :\n    HybridVerify.gaussianCVaR μ₁ σ z α ≤ HybridVerify.gaussianCVaR μ₂ σ z α :=\n  HybridVerify.gaussianCVaR_monotone_mean hμ\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_monotone_thm {μ₁ μ₂ σ z α : ℝ} (hμ : μ₁ ≤ μ₂) :\n    HybridVerify.gaussianCVaR μ₁ σ z α ≤ HybridVerify.gaussianCVaR μ₂ σ z α :=\n  HybridVerify.gaussianCVaR_monotone_mean hμ\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1431,7 +1431,7 @@
       "description": "√(σ₁² + 2·ρ·σ₁·σ₂ + σ₂²) ≤ σ₁ + σ₂ whenever |ρ| ≤ 1 and σ_i ≥ 0. The substantive inequality behind gaussian subadditivity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem joint_stdev_triangle_thm {σ₁ σ₂ ρ : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) :\n    Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2) ≤ σ₁ + σ₂ :=\n  HybridVerify.joint_stdev_le h₁ h₂ hρ\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem joint_stdev_triangle_thm {σ₁ σ₂ ρ : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) :\n    Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2) ≤ σ₁ + σ₂ :=\n  HybridVerify.joint_stdev_le h₁ h₂ hρ\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1447,7 +1447,7 @@
       "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂). Subadditivity axiom (gaussian family).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    HybridVerify.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      HybridVerify.gaussianVaR μ₁ σ₁ z + HybridVerify.gaussianVaR μ₂ σ₂ z :=\n  HybridVerify.gaussianVaR_subadditive h₁ h₂ hρ hz\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    HybridVerify.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      HybridVerify.gaussianVaR μ₁ σ₁ z + HybridVerify.gaussianVaR μ₂ σ₂ z :=\n  HybridVerify.gaussianVaR_subadditive h₁ h₂ hρ hz\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1463,7 +1463,7 @@
       "description": "Same setup as gaussian VaR subadditivity with level α < 1: CVaR(L₁+L₂) ≤ CVaR(L₁) + CVaR(L₂). Gives CVaR coherence in the gaussian family.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.RiskMeasureAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hα : α < 1) :\n    HybridVerify.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z α ≤\n      HybridVerify.gaussianCVaR μ₁ σ₁ z α + HybridVerify.gaussianCVaR μ₂ σ₂ z α :=\n  HybridVerify.gaussianCVaR_subadditive h₁ h₂ hρ hα\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.CoherentAxioms\n\nopen HybridVerify\n\ntheorem gaussian_cvar_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hα : α < 1) :\n    HybridVerify.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z α ≤\n      HybridVerify.gaussianCVaR μ₁ σ₁ z α + HybridVerify.gaussianCVaR μ₂ σ₂ z α :=\n  HybridVerify.gaussianCVaR_subadditive h₁ h₂ hρ hα\n"
       },
       "metadata": {
         "chapter": 13,
@@ -1479,7 +1479,7 @@
       "description": "A_n(c, r, Δt) = c·e^{-rΔt}·(1 - e^{-nrΔt})/(1 - e^{-rΔt}), the standard annuity present-value formula derived from the geometric series identity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CouponBondsAndAnnuities\n\nopen HybridVerify Real\n\ntheorem annuity_closed_form_thm (n : ℕ) (c r Δt : ℝ)\n    (h : Real.exp (-(r * Δt)) ≠ 1) :\n    HybridVerify.annuityValue n c r Δt =\n      c * Real.exp (-(r * Δt)) *\n        (1 - Real.exp (-(r * Δt)) ^ n) / (1 - Real.exp (-(r * Δt))) :=\n  HybridVerify.annuityValue_closed_form n c r Δt h\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.CouponBonds\n\nopen HybridVerify Real\n\ntheorem annuity_closed_form_thm (n : ℕ) (c r Δt : ℝ)\n    (h : Real.exp (-(r * Δt)) ≠ 1) :\n    HybridVerify.annuityValue n c r Δt =\n      c * Real.exp (-(r * Δt)) *\n        (1 - Real.exp (-(r * Δt)) ^ n) / (1 - Real.exp (-(r * Δt))) :=\n  HybridVerify.annuityValue_closed_form n c r Δt h\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1495,7 +1495,7 @@
       "description": "Under a constant short rate r, the instantaneous forward rate f(t, T) = -∂_T log B(t, T) equals r at every horizon. ZCB compatibility.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CouponBondsAndAnnuities\n\nopen HybridVerify\n\ntheorem forward_spot_flat_thm (r t T : ℝ) :\n    HasDerivAt (fun T' => -Real.log (HybridVerify.zcb r t T')) r T :=\n  HybridVerify.hasDerivAt_neg_log_zcb_T r t T\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.CouponBonds\n\nopen HybridVerify\n\ntheorem forward_spot_flat_thm (r t T : ℝ) :\n    HasDerivAt (fun T' => -Real.log (HybridVerify.zcb r t T')) r T :=\n  HybridVerify.hasDerivAt_neg_log_zcb_T r t T\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1511,7 +1511,7 @@
       "description": "For a coupon bond with strictly positive coupons paid at strictly future times, the price is a strictly decreasing function of the yield. Establishes YTM uniqueness at the parameter-monotonicity level.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CouponBondsAndAnnuities\n\nopen HybridVerify\n\ntheorem coupon_bond_strict_anti_thm\n    {ι : Type*} (s : Finset ι) (c T : ι → ℝ) (t : ℝ)\n    (h_pos : ∀ i ∈ s, 0 < c i)\n    (h_future : ∀ i ∈ s, t < T i)\n    (h_nonempty : s.Nonempty) :\n    StrictAnti (fun r => ∑ i ∈ s, c i * Real.exp (-(r * (T i - t)))) :=\n  HybridVerify.couponBondPrice_strictAnti s c T t h_pos h_future h_nonempty\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.CouponBonds\n\nopen HybridVerify\n\ntheorem coupon_bond_strict_anti_thm\n    {ι : Type*} (s : Finset ι) (c T : ι → ℝ) (t : ℝ)\n    (h_pos : ∀ i ∈ s, 0 < c i)\n    (h_future : ∀ i ∈ s, t < T i)\n    (h_nonempty : s.Nonempty) :\n    StrictAnti (fun r => ∑ i ∈ s, c i * Real.exp (-(r * (T i - t)))) :=\n  HybridVerify.couponBondPrice_strictAnti s c T t h_pos h_future h_nonempty\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1527,7 +1527,7 @@
       "description": "Φ(x) ≤ 1 for all x, the upper-bound side of the CDF range. Follows from Φ(x) + Φ(-x) = 1 and Φ(-x) ≥ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StaticOptionBounds\n\nopen HybridVerify\n\ntheorem phi_le_one_thm (x : ℝ) : HybridVerify.Phi x ≤ 1 :=\n  HybridVerify.Phi_le_one x\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StaticBounds\n\nopen HybridVerify\n\ntheorem phi_le_one_thm (x : ℝ) : HybridVerify.Phi x ≤ 1 :=\n  HybridVerify.Phi_le_one x\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1543,7 +1543,7 @@
       "description": "Black-Scholes call price never exceeds the underlying price: bsV(K, r, σ, S, τ) ≤ S, for S, K ≥ 0. Follows from Φ ≤ 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StaticOptionBounds\n\nopen HybridVerify\n\ntheorem bsV_le_S_thm (K r σ S τ : ℝ) (hS : 0 ≤ S) (hK : 0 ≤ K) :\n    HybridVerify.bsV K r σ S τ ≤ S :=\n  HybridVerify.bsV_le_S K r σ S τ hS hK\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StaticBounds\n\nopen HybridVerify\n\ntheorem bsV_le_S_thm (K r σ S τ : ℝ) (hS : 0 ≤ S) (hK : 0 ≤ K) :\n    HybridVerify.bsV K r σ S τ ≤ S :=\n  HybridVerify.bsV_le_S K r σ S τ hS hK\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1559,7 +1559,7 @@
       "description": "Black-Scholes put price never exceeds the discounted strike: bsP(K, r, σ, S, τ) ≤ K·e^{-rτ}, for S, K ≥ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StaticOptionBounds\n\nopen HybridVerify\n\ntheorem bsP_le_K_disc_thm (K r σ S τ : ℝ) (hS : 0 ≤ S) (hK : 0 ≤ K) :\n    HybridVerify.bsP K r σ S τ ≤ K * Real.exp (-(r * τ)) :=\n  HybridVerify.bsP_le_K_disc K r σ S τ hS hK\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StaticBounds\n\nopen HybridVerify\n\ntheorem bsP_le_K_disc_thm (K r σ S τ : ℝ) (hS : 0 ≤ S) (hK : 0 ≤ K) :\n    HybridVerify.bsP K r σ S τ ≤ K * Real.exp (-(r * τ)) :=\n  HybridVerify.bsP_le_K_disc K r σ S τ hS hK\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1575,7 +1575,7 @@
       "description": "The box spread payoff (long call/short put at K₁) - (long call/short put at K₂) equals (K₂ - K₁)·e^{-rτ}, independent of S, σ. Pure-arbitrage identity from put-call parity at two strikes.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StaticOptionBounds\n\nopen HybridVerify\n\ntheorem box_spread_thm (K₁ K₂ r σ S τ : ℝ) :\n    (HybridVerify.bsV K₁ r σ S τ - HybridVerify.bsP K₁ r σ S τ) -\n      (HybridVerify.bsV K₂ r σ S τ - HybridVerify.bsP K₂ r σ S τ) =\n      (K₂ - K₁) * Real.exp (-(r * τ)) :=\n  HybridVerify.box_spread_identity K₁ K₂ r σ S τ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StaticBounds\n\nopen HybridVerify\n\ntheorem box_spread_thm (K₁ K₂ r σ S τ : ℝ) :\n    (HybridVerify.bsV K₁ r σ S τ - HybridVerify.bsP K₁ r σ S τ) -\n      (HybridVerify.bsV K₂ r σ S τ - HybridVerify.bsP K₂ r σ S τ) =\n      (K₂ - K₁) * Real.exp (-(r * τ)) :=\n  HybridVerify.box_spread_identity K₁ K₂ r σ S τ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1591,7 +1591,7 @@
       "description": "On the CML through (0, r_f) with slope Sharpe_t: μ_combined = r_f + σ_combined·Sharpe_t. Standard CML equation.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_equation_thm (μ_t σ_t r_f α : ℝ) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.cmlMean μ_t r_f α =\n      r_f + HybridVerify.cmlStdev σ_t α * HybridVerify.sharpeRatio μ_t r_f σ_t :=\n  HybridVerify.cml_equation μ_t σ_t r_f α hσ_t\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_equation_thm (μ_t σ_t r_f α : ℝ) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.cmlMean μ_t r_f α =\n      r_f + HybridVerify.cmlStdev σ_t α * HybridVerify.sharpeRatio μ_t r_f σ_t :=\n  HybridVerify.cml_equation μ_t σ_t r_f α hσ_t\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1607,7 +1607,7 @@
       "description": "Every (mean, stdev) pair on the Capital Market Line has the same Sharpe ratio as the tangent portfolio. Algebraic content of two-fund separation.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_sharpe_invariant_thm (μ_t σ_t r_f α : ℝ)\n    (hα : α ≠ 0) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.sharpeRatio (HybridVerify.cmlMean μ_t r_f α) r_f\n        (HybridVerify.cmlStdev σ_t α) =\n      HybridVerify.sharpeRatio μ_t r_f σ_t :=\n  HybridVerify.cml_sharpeRatio_invariant μ_t σ_t r_f α hα hσ_t\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_sharpe_invariant_thm (μ_t σ_t r_f α : ℝ)\n    (hα : α ≠ 0) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.sharpeRatio (HybridVerify.cmlMean μ_t r_f α) r_f\n        (HybridVerify.cmlStdev σ_t α) =\n      HybridVerify.sharpeRatio μ_t r_f σ_t :=\n  HybridVerify.cml_sharpeRatio_invariant μ_t σ_t r_f α hα hσ_t\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1623,7 +1623,7 @@
       "description": "Given a target portfolio standard deviation σ_p, the tangent-fund weight on the CML is uniquely α = σ_p/σ_t.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_decomposition_thm (σ_t σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.cmlStdev σ_t (σ_p / σ_t) = σ_p :=\n  HybridVerify.cml_decomposition_unique σ_t σ_p hσ_t\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_decomposition_thm (σ_t σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.cmlStdev σ_t (σ_p / σ_t) = σ_p :=\n  HybridVerify.cml_decomposition_unique σ_t σ_p hσ_t\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1639,7 +1639,7 @@
       "description": "A portfolio with std deviation σ_p on the CML has expected return r_f + σ_p·Sharpe_t. Inverse mapping to cml_decomposition_unique.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_mean_at_stdev_thm (μ_t σ_t r_f σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.cmlMean μ_t r_f (σ_p / σ_t) =\n      r_f + σ_p * HybridVerify.sharpeRatio μ_t r_f σ_t :=\n  HybridVerify.cml_mean_at_stdev μ_t σ_t r_f σ_p hσ_t\n"
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.TwoFundSeparation\n\nopen HybridVerify\n\ntheorem cml_mean_at_stdev_thm (μ_t σ_t r_f σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    HybridVerify.cmlMean μ_t r_f (σ_p / σ_t) =\n      r_f + σ_p * HybridVerify.sharpeRatio μ_t r_f σ_t :=\n  HybridVerify.cml_mean_at_stdev μ_t σ_t r_f σ_p hσ_t\n"
       },
       "metadata": {
         "chapter": 12,
@@ -1655,7 +1655,7 @@
       "description": "Sortino ratio (μ - target)/σ_down is invariant under uniform scaling of mean, target, and downside semi-deviation.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem sortino_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ target σ_down : ℝ) :\n    HybridVerify.sortinoRatio (c * μ) (c * target) (c * σ_down) =\n      HybridVerify.sortinoRatio μ target σ_down :=\n  HybridVerify.sortinoRatio_scale_invariant hc μ target σ_down\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.RatiosExtended\n\nopen HybridVerify\n\ntheorem sortino_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ target σ_down : ℝ) :\n    HybridVerify.sortinoRatio (c * μ) (c * target) (c * σ_down) =\n      HybridVerify.sortinoRatio μ target σ_down :=\n  HybridVerify.sortinoRatio_scale_invariant hc μ target σ_down\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1671,7 +1671,7 @@
       "description": "Sortino ratio is invariant under additive shift of both mean and target by the same amount.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem sortino_translation_thm (μ target σ_down shift : ℝ) :\n    HybridVerify.sortinoRatio (μ + shift) (target + shift) σ_down =\n      HybridVerify.sortinoRatio μ target σ_down :=\n  HybridVerify.sortinoRatio_translation μ target σ_down shift\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.RatiosExtended\n\nopen HybridVerify\n\ntheorem sortino_translation_thm (μ target σ_down shift : ℝ) :\n    HybridVerify.sortinoRatio (μ + shift) (target + shift) σ_down =\n      HybridVerify.sortinoRatio μ target σ_down :=\n  HybridVerify.sortinoRatio_translation μ target σ_down shift\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1687,7 +1687,7 @@
       "description": "Treynor ratio (μ - r_f)/β is invariant under uniform scaling of mean, risk-free rate, and beta.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem treynor_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ r_f β : ℝ) :\n    HybridVerify.treynorRatio (c * μ) (c * r_f) (c * β) =\n      HybridVerify.treynorRatio μ r_f β :=\n  HybridVerify.treynorRatio_scale_invariant hc μ r_f β\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.RatiosExtended\n\nopen HybridVerify\n\ntheorem treynor_scale_invariant_thm {c : ℝ} (hc : c ≠ 0) (μ r_f β : ℝ) :\n    HybridVerify.treynorRatio (c * μ) (c * r_f) (c * β) =\n      HybridVerify.treynorRatio μ r_f β :=\n  HybridVerify.treynorRatio_scale_invariant hc μ r_f β\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1703,7 +1703,7 @@
       "description": "Information ratio (μ_p - μ_b)/σ_active is invariant under uniform scaling.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem information_ratio_scale_invariant_thm {c : ℝ} (hc : c ≠ 0)\n    (μ_p μ_b σ_active : ℝ) :\n    HybridVerify.informationRatio (c * μ_p) (c * μ_b) (c * σ_active) =\n      HybridVerify.informationRatio μ_p μ_b σ_active :=\n  HybridVerify.informationRatio_scale_invariant hc μ_p μ_b σ_active\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.RatiosExtended\n\nopen HybridVerify\n\ntheorem information_ratio_scale_invariant_thm {c : ℝ} (hc : c ≠ 0)\n    (μ_p μ_b σ_active : ℝ) :\n    HybridVerify.informationRatio (c * μ_p) (c * μ_b) (c * σ_active) =\n      HybridVerify.informationRatio μ_p μ_b σ_active :=\n  HybridVerify.informationRatio_scale_invariant hc μ_p μ_b σ_active\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1719,7 +1719,7 @@
       "description": "When the benchmark equals the portfolio (σ_p = σ_b and cov = σ_p²), the tracking-error² vanishes.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem tracking_error_self_thm (σ_p : ℝ) :\n    HybridVerify.trackingErrorSq σ_p σ_p (σ_p ^ 2) = 0 :=\n  HybridVerify.trackingErrorSq_self σ_p\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.RatiosExtended\n\nopen HybridVerify\n\ntheorem tracking_error_self_thm (σ_p : ℝ) :\n    HybridVerify.trackingErrorSq σ_p σ_p (σ_p ^ 2) = 0 :=\n  HybridVerify.trackingErrorSq_self σ_p\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1735,7 +1735,7 @@
       "description": "Under the Cauchy-Schwarz bound cov ≤ σ_p·σ_b, the tracking-error² ≥ (σ_p - σ_b)².",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.PerformanceRatiosExtended\n\nopen HybridVerify\n\ntheorem tracking_error_cauchy_bound_thm (σ_p σ_b cov : ℝ)\n    (h_cs : cov ≤ σ_p * σ_b) :\n    (σ_p - σ_b) ^ 2 ≤ HybridVerify.trackingErrorSq σ_p σ_b cov :=\n  HybridVerify.trackingErrorSq_ge_diff_sq σ_p σ_b cov h_cs\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.RatiosExtended\n\nopen HybridVerify\n\ntheorem tracking_error_cauchy_bound_thm (σ_p σ_b cov : ℝ)\n    (h_cs : cov ≤ σ_p * σ_b) :\n    (σ_p - σ_b) ^ 2 ≤ HybridVerify.trackingErrorSq σ_p σ_b cov :=\n  HybridVerify.trackingErrorSq_ge_diff_sq σ_p σ_b cov h_cs\n"
       },
       "metadata": {
         "chapter": 15,
@@ -1751,7 +1751,7 @@
       "description": "Derivative of the duration-times-value w.r.t. rate: ∂_r (D_P·P) = −C_P·P, where C_P is the convexity-times-value.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_dur_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bondPortfolioDur s w T t r')\n      (-HybridVerify.bondPortfolioConv s w T t r) r :=\n  HybridVerify.hasDerivAt_bondPortfolioDur_r s w T t r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_dur_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bondPortfolioDur s w T t r')\n      (-HybridVerify.bondPortfolioConv s w T t r) r :=\n  HybridVerify.hasDerivAt_bondPortfolioDur_r s w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1767,7 +1767,7 @@
       "description": "The second derivative ∂²P/∂r² = C_P·P, where C_P is the convexity-times-value of the portfolio.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => -HybridVerify.bondPortfolioDur s w T t r')\n      (HybridVerify.bondPortfolioConv s w T t r) r :=\n  HybridVerify.hasDerivAt_neg_bondPortfolioDur_r s w T t r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_2nd_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => -HybridVerify.bondPortfolioDur s w T t r')\n      (HybridVerify.bondPortfolioConv s w T t r) r :=\n  HybridVerify.hasDerivAt_neg_bondPortfolioDur_r s w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1783,7 +1783,7 @@
       "description": "A single-bond portfolio's convexity-times-value equals w·(T-t)²·exp(-r(T-t)), matching the ZCB second-order sensitivity in FixedIncome.lean.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_single_conv_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioConv {i} w T t r =\n      w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_conv i w T t r\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_single_conv_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioConv {i} w T t r =\n      w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_conv i w T t r\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1799,7 +1799,7 @@
       "description": "Matching both duration AND convexity of the asset and liability gives ∂²(A-L)/∂r² = 0 at the current rate — second-order Redington immunization.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.BondConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : HybridVerify.bondPortfolioConv sA wA TA t r =\n                    HybridVerify.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        -HybridVerify.bondPortfolioDur sA wA TA t r' -\n        (-HybridVerify.bondPortfolioDur sL wL TL t r'))\n      0 r :=\n  HybridVerify.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ConvexityImmunization\n\nopen HybridVerify\n\ntheorem bond_2nd_immunization_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match_conv : HybridVerify.bondPortfolioConv sA wA TA t r =\n                    HybridVerify.bondPortfolioConv sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        -HybridVerify.bondPortfolioDur sA wA TA t r' -\n        (-HybridVerify.bondPortfolioDur sL wL TL t r'))\n      0 r :=\n  HybridVerify.bondPortfolio_immunization_second_order sA wA TA sL wL TL t r h_match_conv\n"
       },
       "metadata": {
         "chapter": 14,
@@ -1815,7 +1815,7 @@
       "description": "For non-negative a, b: √(a·b) ≤ (a + b)/2. The two-element arithmetic-mean-geometric-mean inequality.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.AsianOptionInequality\n\nopen HybridVerify\n\ntheorem am_gm_two_thm (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :\n    Real.sqrt (a * b) ≤ (a + b) / 2 :=\n  HybridVerify.am_gm_two a b ha hb\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.AsianInequality\n\nopen HybridVerify\n\ntheorem am_gm_two_thm (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :\n    Real.sqrt (a * b) ≤ (a + b) / 2 :=\n  HybridVerify.am_gm_two a b ha hb\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1831,7 +1831,7 @@
       "description": "For positive prices S₁, S₂ at two averaging dates and any strike K, the geometric-Asian-call payoff is bounded above by the arithmetic-Asian-call payoff.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.AsianOptionInequality\n\nopen HybridVerify\n\ntheorem asian_geom_le_arith_two_thm (S₁ S₂ K : ℝ)\n    (h₁ : 0 ≤ S₁) (h₂ : 0 ≤ S₂) :\n    max (Real.sqrt (S₁ * S₂) - K) 0 ≤ max ((S₁ + S₂) / 2 - K) 0 :=\n  HybridVerify.asian_payoff_geom_le_arith_two S₁ S₂ K h₁ h₂\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.AsianInequality\n\nopen HybridVerify\n\ntheorem asian_geom_le_arith_two_thm (S₁ S₂ K : ℝ)\n    (h₁ : 0 ≤ S₁) (h₂ : 0 ≤ S₂) :\n    max (Real.sqrt (S₁ * S₂) - K) 0 ≤ max ((S₁ + S₂) / 2 - K) 0 :=\n  HybridVerify.asian_payoff_geom_le_arith_two S₁ S₂ K h₁ h₂\n"
       },
       "metadata": {
         "chapter": 16,
@@ -1847,7 +1847,7 @@
       "description": "For non-negative f : Fin n → ℝ and n > 0: n · ∏ f_i^{1/n} ≤ ∑ f_i — equal-weight AM-GM derived from mathlib's weighted version.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.AsianOptionInequality\n\nopen HybridVerify\n\ntheorem geom_mean_arith_mean_n_thm {n : ℕ} (f : Fin n → ℝ)\n    (h_nn : ∀ i, 0 ≤ f i) (hn : 0 < n) :\n    (n : ℝ) * (∏ i : Fin n, f i ^ ((n : ℝ)⁻¹)) ≤ ∑ i : Fin n, f i :=\n  HybridVerify.geom_mean_le_arith_mean_n f h_nn hn\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.AsianInequality\n\nopen HybridVerify\n\ntheorem geom_mean_arith_mean_n_thm {n : ℕ} (f : Fin n → ℝ)\n    (h_nn : ∀ i, 0 ≤ f i) (hn : 0 < n) :\n    (n : ℝ) * (∏ i : Fin n, f i ^ ((n : ℝ)⁻¹)) ≤ ∑ i : Fin n, f i :=\n  HybridVerify.geom_mean_le_arith_mean_n f h_nn hn\n"
       },
       "metadata": {
         "chapter": 16,
@@ -1863,7 +1863,7 @@
       "description": "Under constant hazard rate h, the survival probability at T = t equals 1: S(T, T) = 1.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem survival_at_zero_thm (h T : ℝ) :\n    HybridVerify.survivalProbability h T T = 1 :=\n  HybridVerify.survival_at_zero h T\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Credit\n\nopen HybridVerify\n\ntheorem survival_at_zero_thm (h T : ℝ) :\n    HybridVerify.survivalProbability h T T = 1 :=\n  HybridVerify.survival_at_zero h T\n"
       },
       "metadata": {
         "chapter": 17,
@@ -1879,7 +1879,7 @@
       "description": "Survival probability is strictly positive: 0 < exp(-h(T-t)) for all h, t, T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem survival_pos_thm (h t T : ℝ) :\n    0 < HybridVerify.survivalProbability h t T :=\n  HybridVerify.survival_pos h t T\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Credit\n\nopen HybridVerify\n\ntheorem survival_pos_thm (h t T : ℝ) :\n    0 < HybridVerify.survivalProbability h t T :=\n  HybridVerify.survival_pos h t T\n"
       },
       "metadata": {
         "chapter": 17,
@@ -1895,7 +1895,7 @@
       "description": "Under constant hazard rate h, the credit spread -log(S)/(T-t) equals h. Structurally identical to ZCB yield equality under flat rate.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem credit_spread_eq_hazard_thm {h t T : ℝ} (htT : t < T) :\n    -Real.log (HybridVerify.survivalProbability h t T) / (T - t) = h :=\n  HybridVerify.creditSpread_eq_hazard htT\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Credit\n\nopen HybridVerify\n\ntheorem credit_spread_eq_hazard_thm {h t T : ℝ} (htT : t < T) :\n    -Real.log (HybridVerify.survivalProbability h t T) / (T - t) = h :=\n  HybridVerify.creditSpread_eq_hazard htT\n"
       },
       "metadata": {
         "chapter": 17,
@@ -1911,7 +1911,7 @@
       "description": "Positive hazard ⇒ survival probability strictly decreasing in horizon T. Hazard induces default risk that accumulates over time.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.CreditSpread\n\nopen HybridVerify\n\ntheorem survival_strictAnti_thm {h t : ℝ} (hh : 0 < h) :\n    StrictAntiOn (fun T => HybridVerify.survivalProbability h t T) (Set.Ici t) :=\n  HybridVerify.survival_strictAnti_of_pos_hazard hh\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Credit\n\nopen HybridVerify\n\ntheorem survival_strictAnti_thm {h t : ℝ} (hh : 0 < h) :\n    StrictAntiOn (fun T => HybridVerify.survivalProbability h t T) (Set.Ici t) :=\n  HybridVerify.survival_strictAnti_of_pos_hazard hh\n"
       },
       "metadata": {
         "chapter": 17,
@@ -1927,7 +1927,7 @@
       "description": "∂_K d_1(S, K, r, σ, τ) = -1/(K·σ·√τ). Mirror of the ∂_S d_1 result.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsd1_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => HybridVerify.bsd1 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  HybridVerify.hasDerivAt_bsd1_K S r σ τ hS hσ hτ hK\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StrikeGreeks\n\nopen HybridVerify\n\ntheorem bsd1_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => HybridVerify.bsd1 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  HybridVerify.hasDerivAt_bsd1_K S r σ τ hS hσ hτ hK\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1943,7 +1943,7 @@
       "description": "∂_K d_2(S, K, r, σ, τ) = -1/(K·σ·√τ), same as ∂_K d_1 since d_2 - d_1 = -σ√τ is K-independent.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsd2_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => HybridVerify.bsd2 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  HybridVerify.hasDerivAt_bsd2_K S r σ τ hS hσ hτ hK\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StrikeGreeks\n\nopen HybridVerify\n\ntheorem bsd2_K_deriv_thm (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)\n    {K : ℝ} (hK : 0 < K) :\n    HasDerivAt (fun k => HybridVerify.bsd2 S k r σ τ)\n      (-(1 / (K * σ * Real.sqrt τ))) K :=\n  HybridVerify.hasDerivAt_bsd2_K S r σ τ hS hσ hτ hK\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1959,7 +1959,7 @@
       "description": "∂_K bsV = -e^{-rτ}·Φ(d_2). The magic identity S·ϕ(d_1) = K·e^{-rτ}·ϕ(d_2) collapses the d_1 contribution.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsV_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => HybridVerify.bsV k r σ S τ)\n      (-(Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ))) K :=\n  HybridVerify.hasDerivAt_bsV_K hS hσ hK hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StrikeGreeks\n\nopen HybridVerify\n\ntheorem bsV_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => HybridVerify.bsV k r σ S τ)\n      (-(Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ))) K :=\n  HybridVerify.hasDerivAt_bsV_K hS hσ hK hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1975,7 +1975,7 @@
       "description": "∂_K bsP = e^{-rτ}·Φ(-d_2). Follows from put-call parity bsP = bsV - S + K·e^{-rτ}.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify\n\ntheorem bsP_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => HybridVerify.bsP k r σ S τ)\n      (Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ)) K :=\n  HybridVerify.hasDerivAt_bsP_K hS hσ hK hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StrikeGreeks\n\nopen HybridVerify\n\ntheorem bsP_K_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => HybridVerify.bsP k r σ S τ)\n      (Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S K r σ τ)) K :=\n  HybridVerify.hasDerivAt_bsP_K hS hσ hK hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -1991,7 +1991,7 @@
       "description": "∂²_K bsV = e^{-rτ}·ϕ(d_2)/(K·σ·√τ) ≥ 0 — call price is convex in strike (equivalent to butterfly-spread non-negativity).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.OptionStrikeProperties\n\nopen HybridVerify ProbabilityTheory\n\ntheorem bsV_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => -(Real.exp (-(r * τ)) *\n        HybridVerify.Phi (HybridVerify.bsd2 S k r σ τ)))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  HybridVerify.hasDerivAt_bsV_KK hS hσ hK hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.StrikeGreeks\n\nopen HybridVerify ProbabilityTheory\n\ntheorem bsV_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => -(Real.exp (-(r * τ)) *\n        HybridVerify.Phi (HybridVerify.bsd2 S k r σ τ)))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  HybridVerify.hasDerivAt_bsV_KK hS hσ hK hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2007,7 +2007,7 @@
       "description": "T·kellyGrowth(p, b, f) = T·(p·log(1 + f·b) + (1-p)·log(1 - f)). Linear aggregation of iid period log-growths.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_n_periods_linearity_thm (T : ℕ) (p b f : ℝ) :\n    (T : ℝ) * HybridVerify.kellyGrowth p b f =\n      (T : ℝ) * (p * Real.log (1 + f * b) + (1 - p) * Real.log (1 - f)) :=\n  HybridVerify.kellyGrowth_n_periods T p b f\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Kelly\n\nopen HybridVerify\n\ntheorem kelly_n_periods_linearity_thm (T : ℕ) (p b f : ℝ) :\n    (T : ℝ) * HybridVerify.kellyGrowth p b f =\n      (T : ℝ) * (p * Real.log (1 + f * b) + (1 - p) * Real.log (1 - f)) :=\n  HybridVerify.kellyGrowth_n_periods T p b f\n"
       },
       "metadata": {
         "chapter": 15,
@@ -2023,7 +2023,7 @@
       "description": "The Kelly fraction f* is optimal for any horizon T (the optimal fraction doesn't depend on horizon — Kelly is myopic).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_n_periods_foc_thm (T : ℕ) {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => (T : ℝ) * HybridVerify.kellyGrowth p b f) 0\n      (HybridVerify.kellyFraction p b) :=\n  HybridVerify.kelly_n_periods_deriv_at_kelly T hp hp1 hb\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Kelly\n\nopen HybridVerify\n\ntheorem kelly_n_periods_foc_thm (T : ℕ) {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => (T : ℝ) * HybridVerify.kellyGrowth p b f) 0\n      (HybridVerify.kellyFraction p b) :=\n  HybridVerify.kelly_n_periods_deriv_at_kelly T hp hp1 hb\n"
       },
       "metadata": {
         "chapter": 15,
@@ -2039,7 +2039,7 @@
       "description": "For proper probabilities p < 1 and positive payoff b > 0, the Kelly fraction is strictly less than 1 — Kelly never bets the full bankroll on a single proper bet.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_lt_one_thm {p b : ℝ} (hp : p < 1) (hb : 0 < b) :\n    HybridVerify.kellyFraction p b < 1 :=\n  HybridVerify.kellyFraction_lt_one hp hb\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Kelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_lt_one_thm {p b : ℝ} (hp : p < 1) (hb : 0 < b) :\n    HybridVerify.kellyFraction p b < 1 :=\n  HybridVerify.kellyFraction_lt_one hp hb\n"
       },
       "metadata": {
         "chapter": 15,
@@ -2055,7 +2055,7 @@
       "description": "Kelly fraction f* = 0 if and only if p·(b+1) = 1 — i.e., the bet has zero expected log-growth.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_zero_iff_thm (p : ℝ) {b : ℝ} (hb : b ≠ 0) :\n    HybridVerify.kellyFraction p b = 0 ↔ p * (b + 1) = 1 :=\n  HybridVerify.kellyFraction_eq_zero_iff p hb\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Kelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_zero_iff_thm (p : ℝ) {b : ℝ} (hb : b ≠ 0) :\n    HybridVerify.kellyFraction p b = 0 ↔ p * (b + 1) = 1 :=\n  HybridVerify.kellyFraction_eq_zero_iff p hb\n"
       },
       "metadata": {
         "chapter": 15,
@@ -2071,7 +2071,7 @@
       "description": "Kelly fraction f* > 0 if and only if p·(b+1) > 1 — the bet has strictly positive expected log-growth.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.MultiPeriodKelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_pos_iff_thm (p : ℝ) {b : ℝ} (hb : 0 < b) :\n    0 < HybridVerify.kellyFraction p b ↔ 1 < p * (b + 1) :=\n  HybridVerify.kellyFraction_pos_iff p hb\n"
+        "lean": "import Mathlib\nimport HybridVerify.Performance.Kelly\n\nopen HybridVerify\n\ntheorem kelly_fraction_pos_iff_thm (p : ℝ) {b : ℝ} (hb : 0 < b) :\n    0 < HybridVerify.kellyFraction p b ↔ 1 < p * (b + 1) :=\n  HybridVerify.kellyFraction_pos_iff p hb\n"
       },
       "metadata": {
         "chapter": 15,
@@ -2087,7 +2087,7 @@
       "description": "E_Q[S_T²] = S_0²·exp(2rT + σ²T) under the BS lognormal hypothesis. Derived from the Gaussian MGF evaluated at 2σ√T.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.LognormalSecondMoment\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem second_moment_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q =\n      S_0^2 * Real.exp (2 * r * T + σ^2 * T) :=\n  HybridVerify.secondMoment_terminal h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.LognormalMoments\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem second_moment_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q =\n      S_0^2 * Real.exp (2 * r * T + σ^2 * T) :=\n  HybridVerify.secondMoment_terminal h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2103,7 +2103,7 @@
       "description": "Var_Q[S_T] = S_0²·exp(2rT)·(exp(σ²T) - 1). Combines the second-moment formula with E[S_T] = S_0·exp(rT).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.LognormalSecondMoment\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem variance_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q -\n      (∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q)^2 =\n        S_0^2 * Real.exp (2 * r * T) * (Real.exp (σ^2 * T) - 1) :=\n  HybridVerify.variance_terminal h\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.LognormalMoments\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem variance_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q -\n      (∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q)^2 =\n        S_0^2 * Real.exp (2 * r * T) * (Real.exp (σ^2 * T) - 1) :=\n  HybridVerify.variance_terminal h\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2119,7 +2119,7 @@
       "description": "From the coupon-bond pricing equation P = ∑ c_i·B_i + (c_n + F)·B_n, the new ZCB price is B_n = (P - ∑ c_i·B_i)/(c_n + F).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_solve_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : HybridVerify.couponBondPricingEq sprev c B P c_last F B_last) :\n    B_last = (P - ∑ i ∈ sprev, c i * B i) / (c_last + F) :=\n  HybridVerify.bootstrap_solve sprev c B P c_last F B_last h hP\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.YieldCurve\n\nopen HybridVerify\n\ntheorem bootstrap_solve_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : HybridVerify.couponBondPricingEq sprev c B P c_last F B_last) :\n    B_last = (P - ∑ i ∈ sprev, c i * B i) / (c_last + F) :=\n  HybridVerify.bootstrap_solve sprev c B P c_last F B_last h hP\n"
       },
       "metadata": {
         "chapter": 14,
@@ -2135,7 +2135,7 @@
       "description": "For a single-period coupon bond with cash flow c + F at maturity, B_1 = P/(c + F).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_first_thm (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : P = (c_last + F) * B_last) :\n    B_last = P / (c_last + F) :=\n  HybridVerify.bootstrap_solve_first P c_last F B_last h hP\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.YieldCurve\n\nopen HybridVerify\n\ntheorem bootstrap_first_thm (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : P = (c_last + F) * B_last) :\n    B_last = P / (c_last + F) :=\n  HybridVerify.bootstrap_solve_first P c_last F B_last h hP\n"
       },
       "metadata": {
         "chapter": 14,
@@ -2151,7 +2151,7 @@
       "description": "For a two-period coupon bond paying c at both dates plus F at the second: B_2 = (P - c·B_1)/(c + F).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_second_thm (P c F B_1 B_2 : ℝ) (h : c + F ≠ 0)\n    (hP : P = c * B_1 + (c + F) * B_2) :\n    B_2 = (P - c * B_1) / (c + F) :=\n  HybridVerify.bootstrap_solve_second P c F B_1 B_2 h hP\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.YieldCurve\n\nopen HybridVerify\n\ntheorem bootstrap_second_thm (P c F B_1 B_2 : ℝ) (h : c + F ≠ 0)\n    (hP : P = c * B_1 + (c + F) * B_2) :\n    B_2 = (P - c * B_1) / (c + F) :=\n  HybridVerify.bootstrap_solve_second P c F B_1 B_2 h hP\n"
       },
       "metadata": {
         "chapter": 14,
@@ -2167,7 +2167,7 @@
       "description": "The bootstrapped B_n price, plugged back into the pricing equation, reproduces the original observed bond price P.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_consistency_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F : ℝ) (h : c_last + F ≠ 0) :\n    HybridVerify.couponBondPricingEq sprev c B P c_last F\n      ((P - ∑ i ∈ sprev, c i * B i) / (c_last + F)) :=\n  HybridVerify.bootstrap_consistency sprev c B P c_last F h\n"
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.YieldCurve\n\nopen HybridVerify\n\ntheorem bootstrap_consistency_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F : ℝ) (h : c_last + F ≠ 0) :\n    HybridVerify.couponBondPricingEq sprev c B P c_last F\n      ((P - ∑ i ∈ sprev, c i * B i) / (c_last + F)) :=\n  HybridVerify.bootstrap_consistency sprev c B P c_last F h\n"
       },
       "metadata": {
         "chapter": 14,
@@ -2183,7 +2183,7 @@
       "description": "log((S_0·e^{rT}) / (S_0·exp((r-σ²/2)T + σ√T·z))) = σ²T/2 - σ√T·z, after the S_0 cancellation. Setup for the variance swap fair-strike formula.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.VarianceSwap\n\nopen HybridVerify\n\ntheorem log_forward_bsTerminal_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T z : ℝ) :\n    Real.log ((S_0 * Real.exp (r * T)) /\n              (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n      = σ^2 * T / 2 - σ * Real.sqrt T * z :=\n  HybridVerify.log_forward_div_bsTerminal_eq hS r σ T z\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.VarianceSwap\n\nopen HybridVerify\n\ntheorem log_forward_bsTerminal_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T z : ℝ) :\n    Real.log ((S_0 * Real.exp (r * T)) /\n              (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n      = σ^2 * T / 2 - σ * Real.sqrt T * z :=\n  HybridVerify.log_forward_div_bsTerminal_eq hS r σ T z\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2199,7 +2199,7 @@
       "description": "E[log(F/S_T)] = σ²T/2 under the BS lognormal hypothesis (using ∫z d(gaussianReal 0 1) = 0).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.VarianceSwap\n\nopen ProbabilityTheory HybridVerify\n\ntheorem integral_log_forward_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) :\n    ∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n                  (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n      ∂(gaussianReal 0 1) = σ^2 * T / 2 :=\n  HybridVerify.integral_log_forward_div_bsTerminal_eq hS r σ T\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.VarianceSwap\n\nopen ProbabilityTheory HybridVerify\n\ntheorem integral_log_forward_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) :\n    ∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n                  (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n      ∂(gaussianReal 0 1) = σ^2 * T / 2 :=\n  HybridVerify.integral_log_forward_div_bsTerminal_eq hS r σ T\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2215,7 +2215,7 @@
       "description": "(2/T)·E[log(F/S_T)] = σ² under BS lognormal — the log-payoff piece of the Demeterfi-Derman-Kamal variance swap replication.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.VarianceSwap\n\nopen ProbabilityTheory HybridVerify\n\ntheorem variance_swap_log_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) (hT : T ≠ 0) :\n    (2 / T) *\n      (∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n            (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n        ∂(gaussianReal 0 1)) = σ^2 :=\n  HybridVerify.varianceSwap_log_contribution hS r σ T hT\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.VarianceSwap\n\nopen ProbabilityTheory HybridVerify\n\ntheorem variance_swap_log_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) (hT : T ≠ 0) :\n    (2 / T) *\n      (∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n            (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n        ∂(gaussianReal 0 1)) = σ^2 :=\n  HybridVerify.varianceSwap_log_contribution hS r σ T hT\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2231,7 +2231,7 @@
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen ProbabilityTheory HybridVerify\n\ntheorem gaussianPDF_symmetry_thm (z : ℝ) :\n    gaussianPDFReal 0 1 (-z) = gaussianPDFReal 0 1 z :=\n  HybridVerify.gaussianPDFReal_zero_one_neg z\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PutStrikeConvexity\n\nopen ProbabilityTheory HybridVerify\n\ntheorem gaussianPDF_symmetry_thm (z : ℝ) :\n    gaussianPDFReal 0 1 (-z) = gaussianPDFReal 0 1 z :=\n  HybridVerify.gaussianPDFReal_zero_one_neg z\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2247,7 +2247,7 @@
       "description": "∂²_K bsP = e^{-rτ}·ϕ(d_2)/(K·σ·√τ) — same as call convexity in K, since put and call differ by a function linear in K.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen ProbabilityTheory HybridVerify\n\ntheorem bsP_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S k r σ τ))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  HybridVerify.hasDerivAt_bsP_KK hS hσ hK hτ\n"
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PutStrikeConvexity\n\nopen ProbabilityTheory HybridVerify\n\ntheorem bsP_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S k r σ τ))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  HybridVerify.hasDerivAt_bsP_KK hS hσ hK hτ\n"
       },
       "metadata": {
         "chapter": 9,
@@ -2263,7 +2263,7 @@
       "description": "At ρ = 1 (perfect positive correlation), gaussian VaR is additive: VaR(L₁+L₂) = VaR(L₁) + VaR(L₂). The extremal case where diversification gives no benefit.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen HybridVerify\n\ntheorem gaussian_var_additive_thm {μ₁ μ₂ σ₁ σ₂ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    HybridVerify.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z =\n      HybridVerify.gaussianVaR μ₁ σ₁ z + HybridVerify.gaussianVaR μ₂ σ₂ z :=\n  HybridVerify.gaussianVaR_additive_at_rho_one h₁ h₂\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Additivity\n\nopen HybridVerify\n\ntheorem gaussian_var_additive_thm {μ₁ μ₂ σ₁ σ₂ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    HybridVerify.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z =\n      HybridVerify.gaussianVaR μ₁ σ₁ z + HybridVerify.gaussianVaR μ₂ σ₂ z :=\n  HybridVerify.gaussianVaR_additive_at_rho_one h₁ h₂\n"
       },
       "metadata": {
         "chapter": 13,
@@ -2279,7 +2279,7 @@
       "description": "At ρ = 1, gaussian CVaR is additive: CVaR(L₁+L₂) = CVaR(L₁) + CVaR(L₂).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen HybridVerify\n\ntheorem gaussian_cvar_additive_thm {μ₁ μ₂ σ₁ σ₂ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    HybridVerify.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z α =\n      HybridVerify.gaussianCVaR μ₁ σ₁ z α + HybridVerify.gaussianCVaR μ₂ σ₂ z α :=\n  HybridVerify.gaussianCVaR_additive_at_rho_one h₁ h₂\n"
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Additivity\n\nopen HybridVerify\n\ntheorem gaussian_cvar_additive_thm {μ₁ μ₂ σ₁ σ₂ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    HybridVerify.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z α =\n      HybridVerify.gaussianCVaR μ₁ σ₁ z α + HybridVerify.gaussianCVaR μ₂ σ₂ z α :=\n  HybridVerify.gaussianCVaR_additive_at_rho_one h₁ h₂\n"
       },
       "metadata": {
         "chapter": 13,
