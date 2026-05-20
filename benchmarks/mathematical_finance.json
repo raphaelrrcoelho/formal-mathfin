@@ -2288,6 +2288,422 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in lean/HybridVerify/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-chooser-decompose",
+      "name": "Chooser Option Payoff Decomposition (via Put-Call Parity)",
+      "description": "At the chooser date t, max(C_t, P_t) = C_t + max(0, K·e^{-r(T-t)} - S_t). Hence a chooser = long call (strike K, mat. T) + long put-payoff at date t with adjusted strike.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Chooser\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem chooser_via_pcp_thm (C P S K_disc : ℝ) (hPCP : C - P = S - K_disc) :\n    max C P = C + max 0 (K_disc - S) :=\n  HybridVerify.chooser_via_pcp _ _ _ _ hPCP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Chooser options (Hull 26.7, Rubinstein 1991)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-capped-call-bull-spread",
+      "name": "Capped Call equals Bull Call Spread",
+      "description": "min(max(S - K₁, 0), K₂ - K₁) = max(S - K₁, 0) - max(S - K₂, 0). Pure pointwise algebra via case split on S.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.CappedCall\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem capped_call_eq_bull_spread_thm (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :\n    min (max (S - K₁) 0) (K₂ - K₁) = max (S - K₁) 0 - max (S - K₂) 0 :=\n  HybridVerify.cappedCall_eq_bull_spread S K₁ K₂ h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Capped call decomposition (Hull 11.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bull-call-spread-payoff-le",
+      "name": "Bull-Call Spread Payoff Non-Negativity",
+      "description": "For K₁ ≤ K₂, max(S - K₂, 0) ≤ max(S - K₁, 0): the bull-call spread payoff is non-negative everywhere.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Spreads\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem bull_call_spread_payoff_le_thm (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :\n    max (S - K₂) 0 ≤ max (S - K₁) 0 :=\n  HybridVerify.bull_call_spread_payoff_le S K₁ K₂ h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bull-call spread no-arb (Hull 11.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-butterfly-payoff-nonneg",
+      "name": "Butterfly Spread Payoff Non-Negativity",
+      "description": "For K₁ ≤ K₃ with K₂ = (K₁+K₃)/2, max(S-K₁, 0) - 2·max(S-K₂, 0) + max(S-K₃, 0) ≥ 0. The butterfly payoff is non-negative — the foundation for Breeden-Litzenberger's implied PDF.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Spreads\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem butterfly_payoff_nonneg_thm (S K₁ K₃ : ℝ) (h : K₁ ≤ K₃) :\n    0 ≤ max (S - K₁) 0 - 2 * max (S - (K₁ + K₃) / 2) 0 + max (S - K₃) 0 :=\n  HybridVerify.butterfly_payoff_nonneg S K₁ K₃ h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Butterfly spread (Hull 11.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-lookback-payoff-ge-vanilla",
+      "name": "Lookback Call Payoff ≥ Vanilla Call Payoff",
+      "description": "Since the running max M ≥ S_T, max(M - K, 0) ≥ max(S_T - K, 0). Hence lookback call ≥ vanilla call (static lower bound).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.Lookback\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem lookback_payoff_ge_vanilla_thm (M S K : ℝ) (h : S ≤ M) :\n    max (S - K) 0 ≤ max (M - K) 0 :=\n  HybridVerify.lookback_payoff_ge_vanilla M S K h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Lookback option lower bound (Hull 26.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bermudan-sandwich",
+      "name": "Bermudan Sandwich: European ≤ Bermudan ≤ American",
+      "description": "For nested exercise sets Eur ⊆ Berm ⊆ Amer, the optimal-stopping values are sandwiched in the same order (monotonicity of Finset.sup' under subset inclusion).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.Bermudan\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem bermudan_sandwich_thm {ι : Type*} {Eur Berm Amer : Finset ι}\n    (hEB : Eur ⊆ Berm) (hBA : Berm ⊆ Amer) (hEurNE : Eur.Nonempty) (v : ι → ℝ) :\n    Eur.sup' hEurNE v ≤ Berm.sup' (hEurNE.mono hEB) v ∧\n      Berm.sup' (hEurNE.mono hEB) v ≤ Amer.sup' (hEurNE.mono (hEB.trans hBA)) v :=\n  HybridVerify.bermudan_sandwich hEB hBA hEurNE v\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bermudan sandwich (Hull 26.6, Rogers-Williams Vol 2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-macaulay-modified-discrete",
+      "name": "Modified Duration equals Macaulay Duration divided by (1+y)",
+      "description": "Under discrete annual compounding, the modified duration numerator equals the Macaulay duration numerator divided by (1+y). At the level of price-sensitivities, -dP/dy = D_mod · P where D_mod = D_mac / (1+y).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.MacaulayModified\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem modifiedNumerator_eq_macaulayNumerator_div_thm {ι : Type*}\n    (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) (y : ℝ) (hy : 1 + y ≠ 0) :\n    HybridVerify.modifiedNumerator s t c y =\n      HybridVerify.macaulayNumerator s t c y / (1 + y) :=\n  HybridVerify.modifiedNumerator_eq_macaulayNumerator_div s t c y hy\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Macaulay vs Modified duration (Fabozzi 4.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-nth-moment-terminal",
+      "name": "n-th Moment of the Terminal Asset Price (Power-Forward Moment)",
+      "description": "Under the BS lognormal hypothesis, E_Q[S_T^n] = S_0^n · exp(n·r·T + n(n-1)/2 · σ²·T). Generalizes the forward (n=1) and second moment (n=2). Derivation: gaussian MGF at c = n·σ·√T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PowerOption\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem nthMoment_terminal_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (n : ℕ)\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^n ∂Q =\n      S_0^n *\n        Real.exp ((n : ℝ) * r * T + (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) :=\n  HybridVerify.nthMoment_terminal n h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Power options under lognormal (Hull 26.10, Heynen-Kat 1996)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-power-forward-price",
+      "name": "Power-Forward Price under BS Lognormal",
+      "description": "Discounted n-th moment of S_T equals S_0^n · exp((n-1)·r·T + n(n-1)/2 · σ² T). Generalizes spot-forward parity (n=1: price = S_0).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.PowerOption\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem powerForward_price_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (n : ℕ)\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    Real.exp (-(r * T)) *\n      (∫ ω, (bsTerminal S_0 r σ T (Z ω))^n ∂Q) =\n      S_0^n *\n        Real.exp ((((n : ℝ) - 1) * r * T) +\n                  (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) :=\n  HybridVerify.powerForward_price n h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Power forward price (Heynen-Kat 1996)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-hazard-survival-const",
+      "name": "Time-Varying Hazard Survival Reduces to Constant Form",
+      "description": "When the hazard function is constant h(u) ≡ h₀, the cumulative hazard ∫₀^t h₀ du = h₀·t and the survival probability exp(-cumHazard) matches the constant-hazard formula exp(-h₀(T-t)) at t=0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem hazardSurvival_eq_const_survival_thm (h_0 T : ℝ) :\n    HybridVerify.hazardSurvival (fun _ => h_0) T =\n      HybridVerify.survivalProbability h_0 0 T :=\n  HybridVerify.hazardSurvival_eq_const_survival h_0 T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Time-varying hazard credit (Lando, Credit Risk Modeling)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-credit-spread-time-avg-hazard",
+      "name": "Credit Spread as Time-Averaged Hazard",
+      "description": "Under time-varying hazard h(u), the credit spread c(T) = -log(S(T))/T = H(T)/T where H is the cumulative hazard. The spread is the time-averaged hazard.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem creditSpread_eq_time_avg_hazard_thm {h : ℝ → ℝ} {T : ℝ} (hT : 0 < T) :\n    -Real.log (HybridVerify.hazardSurvival h T) / T = HybridVerify.cumHazard h T / T :=\n  HybridVerify.creditSpread_eq_time_avg_hazard hT\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Hazard curve and credit spread (Lando, Credit Risk Modeling)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-breeden-litzenberger",
+      "name": "Breeden-Litzenberger: Implied Risk-Neutral PDF from Option Prices",
+      "description": "The second strike-derivative of the BS call equals the discounted lognormal PDF: ∂²_K bsV(K) = e^{-rT} · ϕ(d_2)/(K σ √T), which is the risk-neutral PDF of S_T at K times the discount factor.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.BreedenLitzenberger\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem breedenLitzenberger_thm {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)\n    {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :\n    HasDerivAt (fun k => -(Real.exp (-(r * T)) * Phi (bsd2 S_0 k r σ T)))\n      (Real.exp (-(r * T)) * HybridVerify.lognormalTerminalPDF S_0 r σ T K) K :=\n  HybridVerify.breedenLitzenberger hS hσ hK hT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Breeden-Litzenberger 1978 (state-price densities from option prices)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-impliedvol-bracket",
+      "name": "Bisection Bracket Existence for Implied Volatility",
+      "description": "By IVT and strict monotonicity, any target price strictly between f(σ_lo) and f(σ_hi) admits a unique implied volatility σ ∈ (σ_lo, σ_hi). This is the bisection-method correctness statement.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholes.BisectionIV\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem impliedVol_bracket_exists_thm {f : ℝ → ℝ} {σ_lo σ_hi C_obs : ℝ}\n    (h_lo_lt_hi : σ_lo < σ_hi)\n    (h_cont : ContinuousOn f (Set.Icc σ_lo σ_hi))\n    (h_mono : StrictMonoOn f (Set.Icc σ_lo σ_hi))\n    (h_brkt : f σ_lo < C_obs ∧ C_obs < f σ_hi) :\n    ∃! σ : ℝ, σ ∈ Set.Ioo σ_lo σ_hi ∧ f σ = C_obs :=\n  HybridVerify.impliedVol_bracket_exists h_lo_lt_hi h_cont h_mono h_brkt\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bisection method for implied vol (Press et al., Numerical Recipes)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-risk-parity-2-asset",
+      "name": "Two-Asset Risk-Parity Equal Contribution",
+      "description": "For two assets, the risk-parity weights w₁ = σ₂/(σ₁+σ₂), w₂ = σ₁/(σ₁+σ₂) make each asset contribute equally to portfolio variance — independent of correlation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.RiskParity\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem risk_parity_equal_contribution_thm (σ₁ σ₂ ρ : ℝ) (hσ : σ₁ + σ₂ ≠ 0) :\n    let w₁ := HybridVerify.riskParityWeightTwo σ₁ σ₂\n    let w₂ := HybridVerify.riskParityWeightTwo σ₂ σ₁\n    w₁ * (w₁ * σ₁^2 + w₂ * ρ * σ₁ * σ₂) =\n      w₂ * (w₁ * ρ * σ₁ * σ₂ + w₂ * σ₂^2) :=\n  HybridVerify.risk_parity_equal_contribution σ₁ σ₂ ρ hσ\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Risk parity (Maillard-Roncalli-Teiletche 2010)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black-litterman-1d-mean",
+      "name": "Black-Litterman 1D Posterior Mean (Precision-Weighted)",
+      "description": "Posterior mean in the 1D Black-Litterman update equals (s₁²π + s₀²Q)/(s₀²+s₁²), the precision-weighted combination of prior π and view Q.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.BlackLitterman\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem blackLitterman_mean_eq_precision_weighted_thm\n    (π Q s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    HybridVerify.posteriorMean1d π Q s0sq s1sq =\n      (π / s0sq + Q / s1sq) / (1 / s0sq + 1 / s1sq) :=\n  HybridVerify.blackLitterman_mean_eq_precision_weighted π Q s0sq s1sq h₀ h₁\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Black-Litterman 1992 (posterior via gaussian conjugacy)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black-litterman-1d-variance",
+      "name": "Black-Litterman 1D Posterior Variance (Harmonic Mean)",
+      "description": "Posterior variance s₀²s₁²/(s₀²+s₁²) = 1/(1/s₀² + 1/s₁²): precision (1/variance) is additive in independent gaussian updates.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.BlackLitterman\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem blackLitterman_var_eq_inv_sum_precision_thm\n    (s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :\n    HybridVerify.posteriorVariance1d s0sq s1sq = 1 / (1 / s0sq + 1 / s1sq) :=\n  HybridVerify.blackLitterman_var_eq_inv_sum_precision s0sq s1sq h₀ h₁\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Black-Litterman 1992 (posterior precision additivity)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-tangent-portfolio-foc",
+      "name": "Tangent Portfolio First-Order Condition (Two-Asset)",
+      "description": "At the closed-form tangent weight w₁^T = (σ₂²r₁ - ρσ₁σ₂r₂)/D, the Sharpe-ratio FOC r₂(Σw)₁ = r₁(Σw)₂ holds: marginal-variance contributions are proportional to marginal excess returns.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Portfolio.TangentPortfolio\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem tangentTwo_satisfies_FOC_thm (r₁ r₂ σ₁ σ₂ ρ : ℝ) :\n    let D := σ₂^2 * r₁ + σ₁^2 * r₂ - ρ * σ₁ * σ₂ * (r₁ + r₂)\n    let w_num := σ₂^2 * r₁ - ρ * σ₁ * σ₂ * r₂\n    let one_sub_w_num := σ₁^2 * r₂ - ρ * σ₁ * σ₂ * r₁\n    r₂ * (w_num * σ₁^2 + one_sub_w_num * ρ * σ₁ * σ₂) =\n      r₁ * (w_num * ρ * σ₁ * σ₂ + one_sub_w_num * σ₂^2) :=\n  HybridVerify.tangentTwo_satisfies_FOC r₁ r₂ σ₁ σ₂ ρ\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Tangent portfolio (Markowitz 1952, Sharpe 1964)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-forward-rate-nonflat",
+      "name": "Forward Rate from Non-Flat Spot-Rate Curve",
+      "description": "When the spot rate R(T) is differentiable, d/dT [T · R(T)] = R(T) + T · R'(T) (product rule). This is the instantaneous forward rate, generalizing the flat-curve case.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.ForwardRate\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem hasDerivAt_T_mul_spotRate_thm {R : ℝ → ℝ} {R'_T T : ℝ}\n    (hR : HasDerivAt R R'_T T) :\n    HasDerivAt (fun t => t * R t) (R T + T * R'_T) T :=\n  HybridVerify.hasDerivAt_T_mul_spotRate hR\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Forward rate from spot rate (Fabozzi 5.2, Hull 4.7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-vasicek-deterministic-ode",
+      "name": "Vasicek Deterministic ODE Solution",
+      "description": "The closed form r(t) = θ + (r₀ - θ)·e^{-κt} solves the deterministic part of the Vasicek SDE dr/dt = κ(θ - r(t)). Exhibits exponential mean reversion to θ at rate κ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.FixedIncome.Vasicek\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem vasicekDeterministic_solves_ODE_thm (r₀ θ κ t : ℝ) :\n    HasDerivAt (HybridVerify.vasicekDeterministic r₀ θ κ)\n      (κ * (θ - HybridVerify.vasicekDeterministic r₀ θ κ t)) t :=\n  HybridVerify.vasicekDeterministic_solves_ODE r₀ θ κ t\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Vasicek 1977 short-rate model (deterministic part)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cvar-rockafellar-uryasev",
+      "name": "Rockafellar-Uryasev Form for Gaussian CVaR",
+      "description": "Gaussian CVaR rewrites as CVaR_α = VaR_α + σ · (ϕ(z)/(1-α) - z), the additive form of CVaR that motivates the variational characterization CVaR = inf_c [c + (1/(1-α))·E[(L-c)⁺]].",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem gaussianCVaR_rockafellarUryasev_thm (μ σ z α : ℝ) :\n    HybridVerify.gaussianCVaR μ σ z α =\n      HybridVerify.gaussianVaR μ σ z +\n        σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  HybridVerify.gaussianCVaR_rockafellarUryasev μ σ z α\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Rockafellar-Uryasev 2000 (CVaR optimization)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-spectral-risk-translation",
+      "name": "Spectral Risk Measure Translation Invariance",
+      "description": "Discrete spectral risk Σ φ_i Q_i with normalized weights (Σ φ = 1) satisfies translation invariance: ρ(Q + c) = ρ(Q) + c.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Spectral\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem spectralRisk_translation_thm {ι : Type*} (s : Finset ι) (φ : ι → ℝ)\n    (Q : ι → ℝ) (c : ℝ) (h_norm : ∑ i ∈ s, φ i = 1) :\n    HybridVerify.spectralRiskFinite s φ (fun i => Q i + c) =\n      HybridVerify.spectralRiskFinite s φ Q + c :=\n  HybridVerify.spectralRisk_translation s φ Q c h_norm\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Spectral risk measures (Acerbi 2002)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-herfindahl-cauchy-schwarz",
+      "name": "Herfindahl-Hirschman Index Lower Bound by Cauchy-Schwarz",
+      "description": "Under unit-budget constraint (Σ w_i = 1), the Cauchy-Schwarz inequality gives HHI = Σ w_i² ≥ 1/n where n = card s. Equality at equal weights.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.RiskMeasures.Concentration\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem herfindahl_card_inv_le_of_sum_one_thm {ι : Type*}\n    (s : Finset ι) (w : ι → ℝ) (hs : s.Nonempty) (h_sum : ∑ i ∈ s, w i = 1) :\n    (s.card : ℝ)⁻¹ ≤ HybridVerify.herfindahl s w :=\n  HybridVerify.herfindahl_card_inv_le_of_sum_one s w hs h_sum\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Concentration risk via Herfindahl (Hirschman 1945; Cauchy-Schwarz)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-annuity-due-closed-form",
+      "name": "Annuity-Due Geometric Closed Form",
+      "description": "Σ_{k=0}^{n-1} v^k = (1 - v^n)/(1 - v) for v ≠ 1. The annuity-due present value formula, mirror of the immediate-annuity case.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Actuarial.Insurance\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem annuityDueValue_thm (v : ℝ) (n : ℕ) (hv : v ≠ 1) :\n    ∑ k ∈ Finset.range n, v ^ k = (1 - v ^ n) / (1 - v) :=\n  HybridVerify.annuityDueValue v n hv\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Annuity-due formula (Bowers et al., Actuarial Mathematics)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gompertz-cumulative-force",
+      "name": "Gompertz Cumulative Force of Mortality",
+      "description": "∫₀^t B·e^{c·u} du = (B/c)·(e^{c·t} - 1) for c ≠ 0. The closed-form cumulative force of mortality under the Gompertz law μ(t) = B·e^{c·t}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Actuarial.Mortality\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem gompertz_cumulative_force_thm (B c t : ℝ) (hc : c ≠ 0) :\n    ∫ u in (0:ℝ)..t, B * Real.exp (c * u) =\n      (B / c) * (Real.exp (c * t) - 1) :=\n  HybridVerify.gompertz_cumulative_force B c t hc\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Gompertz mortality law (Bowers et al., Actuarial Mathematics)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsV-forward-lower-bound",
+      "name": "European Call Forward Lower Bound (No-Arb)",
+      "description": "Under risk-neutral lognormal hypothesis, bsV ≥ S_0 - K·e^{-rT}. Proof: bsV = bsP + S_0 - K·e^{-rT} (put-call parity) and bsP ≥ 0 (integral of (K-S_T)⁺ is non-negative).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.AmericanCallNoDividend\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem bsV_ge_forward_lower_bound_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    S_0 - K * Real.exp (-(r * T)) ≤ bsV K r σ S_0 T :=\n  HybridVerify.bsV_ge_forward_lower_bound h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "European call lower bound (Hull 11.3, Shreve 4.5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-1973-no-early-exercise",
+      "name": "Merton 1973: American = European for Non-Dividend Call",
+      "description": "Under positive interest rate and BS lognormal hypothesis, bsV > S - K. Strict dominance over immediate-exercise payoff implies American call equals European call (early exercise never optimal).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.Binomial.AmericanCallNoDividend\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\ntheorem bsV_strict_gt_immediate_exercise_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) (hr : 0 < r) :\n    S_0 - K < bsV K r σ S_0 T :=\n  HybridVerify.bsV_strict_gt_immediate_exercise h hr\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton 1973 (American call on non-dividend stock)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from HybridVerify. Axioms-clean."
+      }
     }
   ]
 }

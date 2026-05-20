@@ -1,16 +1,16 @@
 # Formally Verified Quant Finance in Lean 4
 
-168 fully-derived theorems across 9 categories of mathematical finance, plus 24 library wrappers and 16 upstream-gated reduced cores. Every full derivation is `#print axioms`-clean: depends only on `[propext, Classical.choice, Quot.sound]`.
+A Lean 4 library of formally verified quant-finance theorems — Black-Scholes / Black-76 / Bachelier with the full Greek matrix and strike-derivatives, exotic option decompositions (chooser, capped, lookback, power, Asian, variance swap), Breeden-Litzenberger implied PDF, binomial trees with Bermudan / Merton-1973 American-call dominance, fixed income with time-varying hazard credit + Vasicek + Macaulay/modified duration, portfolio theory (Markowitz / CAPM / two-fund / risk parity / Black-Litterman / tangent portfolio), performance ratios (Sharpe / Sortino / Kelly), coherent risk measures (VaR / CVaR / Rockafellar-Uryasev / spectral / Herfindahl), and basic actuarial mathematics (annuity-due, Gompertz). Built on Mathlib with no Itô / Girsanov dependence; everything follows from gaussian MGF, completing-the-square, put-call parity, and Mathlib's existing probability framework.
 
-This is a Lean 4 library of quant-finance theorems — Black-Scholes / Black-76 / Bachelier, binomial trees, fixed income, portfolio theory (Markowitz / CAPM / two-fund), performance ratios (Sharpe / Sortino / Kelly), and coherent risk measures (VaR / CVaR axioms). Built on Mathlib with no Itô / Girsanov dependence; everything follows from gaussian MGF, completing-the-square, put-call parity, and Mathlib's existing probability framework.
+Every full derivation is `#print axioms`-clean: depends only on `[propext, Classical.choice, Quot.sound]`.
 
 ## Status
 
 | | count |
 |---|---|
-| total theorems | 208 |
-| delivery-ready | **192** |
-| ↳ full derivations | 168 |
+| total theorems | 234 |
+| delivery-ready | **218** |
+| ↳ full derivations | 194 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -21,15 +21,16 @@ See [`FORMALIZATION_STATUS.md`](FORMALIZATION_STATUS.md) for the per-theorem aud
 
 | Category | Module | Headline results |
 |---|---|---|
-| **Black-Scholes** | `BlackScholes/` | Call, put, digital (cash + asset) formulas + parity; full Greek matrix (δ, γ, vega, θ, ρ, vanna, volga, ψ); BS-Merton with dividends; Garman-Kohlhagen FX; implied vol uniqueness; PDE forward direction; strike Greeks (∂_K, ∂²_K); static price bounds; box-spread arbitrage; lognormal moments; variance swap fair strike. |
+| **Black-Scholes** | `BlackScholes/` | Call, put, digital (cash + asset) formulas + parity; full Greek matrix (δ, γ, vega, θ, ρ, vanna, volga, ψ); BS-Merton with dividends; Garman-Kohlhagen FX; implied vol uniqueness + bisection bracket existence; PDE forward direction; strike Greeks (∂_K, ∂²_K); static price bounds; box-spread arbitrage; lognormal moments + n-th moment + power forward; variance swap fair strike; **Breeden-Litzenberger** implied risk-neutral PDF. |
+| **Exotic decompositions** | `BlackScholes/{Chooser,CappedCall,Spreads,Lookback,AsianInequality}.lean` | Chooser via put-call parity; capped call = bull spread; bull-spread + butterfly non-negativity (Breeden-Litzenberger PDF positivity); lookback ≥ vanilla lower bound; two-date geometric ≤ arithmetic Asian payoff. |
 | **Bachelier** | `BlackScholes/Bachelier{,Greeks}.lean` | Arithmetic-BM option pricing with the truncated-mean primitive; full first-order Greeks. |
-| **Asian options** | `BlackScholes/AsianInequality.lean` | AM-GM (2-elt + n-elt equal-weight); two-date geometric ≤ arithmetic Asian payoff bound. |
 | **Futures (Black-76)** | `Futures/` | Black-76 formula via zero-drift specialization + full Greek matrix. |
-| **Binomial trees** | `Binomial/` | Single-period replication; multi-period backward induction; American options (Snell envelope); CRR convergence (variance, drift quotient + n-form). |
-| **Fixed income** | `FixedIncome/` | ZCB price + duration + convexity; coupon bond pricing + YTM monotonicity; annuity geometric-series closed form; forward / spot rate consistency; first-order + second-order Redington immunization; yield-curve bootstrap; reduced-form credit (constant-hazard survival + spread = hazard). |
-| **Portfolio theory** | `Portfolio/` | Two-asset Markowitz (completing-the-square); n-asset Markowitz (Finset double sum, diagonal, iid diversification, PSD bound); CAPM (β + portfolio linearity); two-fund separation (CML equation + Sharpe invariance). |
+| **Binomial trees** | `Binomial/` | Single-period replication; multi-period backward induction; American options (Snell envelope); CRR convergence (variance, drift quotient + n-form); **Bermudan sandwich** (European ≤ Bermudan ≤ American); **Merton 1973** strict dominance bsV > S − K (American = European for non-dividend call). |
+| **Fixed income** | `FixedIncome/` | ZCB price + duration + convexity; coupon bond pricing + YTM monotonicity; annuity geometric-series closed form; flat + non-flat forward / spot rate consistency; Macaulay-vs-modified duration under discrete compounding; first-order + second-order Redington immunization; yield-curve bootstrap; reduced-form credit (constant + time-varying hazard); Vasicek mean-reversion deterministic ODE. |
+| **Portfolio theory** | `Portfolio/` | Two-asset Markowitz (completing-the-square); n-asset Markowitz (Finset double sum, diagonal, iid diversification, PSD bound); CAPM (β + portfolio linearity); two-fund separation (CML equation + Sharpe invariance); **risk parity** equal-contribution (correlation-independent); **Black-Litterman** 1D Bayesian update (precision-weighted mean, harmonic variance); **tangent portfolio** Sharpe-FOC cross-product identity. |
 | **Performance ratios** | `Performance/` | Sharpe (scale invariance + √T scaling); Sortino; Treynor; Information ratio; tracking-error decomposition; Kelly criterion (FOC + horizon-myopia + fraction bounds + sign analysis). |
-| **Risk measures** | `RiskMeasures/` | Gaussian VaR / CVaR closed forms; coherent axioms (translation, homogeneity, monotonicity, subadditivity); joint-stdev triangle inequality; VaR/CVaR additivity at ρ=1. |
+| **Risk measures** | `RiskMeasures/` | Gaussian VaR / CVaR closed forms; coherent axioms (translation, homogeneity, monotonicity, subadditivity); joint-stdev triangle inequality; VaR/CVaR additivity at ρ=1; **Rockafellar-Uryasev** form of gaussian CVaR; **spectral risk measures** with translation invariance and convex-combination structure; **Herfindahl-Hirschman concentration** with Cauchy-Schwarz lower bound `HHI ≥ 1/n`. |
+| **Actuarial** | `Actuarial/` | Annuity-due geometric closed form; net premium principle; **Gompertz cumulative force of mortality**. |
 
 ## Worked example: BS call delta via the magic identity
 
