@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 108 |
-| delivery-ready | **92** |
-| ↳ full derivations | 68 |
+| total theorems | 130 |
+| delivery-ready | **114** |
+| ↳ full derivations | 90 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -41,7 +41,12 @@ most lean formalization projects pick one theorem and go deep, or contribute to 
   - **forward / futures pricing** under no-arbitrage ($F = S_0 e^{rT}$), from the gaussian MGF (`BlackScholesForward.lean`)
   - **single-period binomial replication theorem** + multi-period backward-induction framework (`BinomialModel.lean`)
   - **CRR risk-neutral probability limit** $p_n \to 1/2$ as $n \to \infty$, plus variance limit $4\sigma^2 T \cdot p_n(1-p_n) \to \sigma^2 T$ (`BinomialCRRConvergence.lean`). substantive analytic content of CRR-to-BS correspondence. full distributional convergence is upstream-gated on a triangular-array CLT (mathlib only ships the fixed-iid CLT).
-  - **CRR drift quotient limit** $(2e^{rh^2} - e^{\sigma h} - e^{-\sigma h})/(h(e^{\sigma h} - e^{-\sigma h})) \to (r - \sigma^2/2)/\sigma$ (`BinomialDriftLimit.lean`). Uses the algebraic identity $e^{\sigma h} + e^{-\sigma h} - 2 = e^{-\sigma h}(e^{\sigma h} - 1)^2$ to reduce the cosh-like difference to existing exp-quotient limits. Completes the analytic content of CRR drift matching.
+  - **CRR drift quotient limit** $(2e^{rh^2} - e^{\sigma h} - e^{-\sigma h})/(h(e^{\sigma h} - e^{-\sigma h})) \to (r - \sigma^2/2)/\sigma$ (`BinomialDriftLimit.lean`). Uses the algebraic identity $e^{\sigma h} + e^{-\sigma h} - 2 = e^{-\sigma h}(e^{\sigma h} - 1)^2$ to reduce the cosh-like difference to existing exp-quotient limits. Plus the textbook n-form $n \cdot (2 p_n - 1) \cdot \sigma \sqrt{T/n} \to (r - \sigma^2/2) T$, closing the analytic content of CRR drift matching.
+  - **complete digital options Greek matrix**: cash-or-nothing and asset-or-nothing $\delta, \gamma$, vega, $\rho, \theta$ in `BlackScholesDigitalGreeks.lean`. Vega uses the clean derivative $\partial_\sigma d_1 = -d_2/\sigma$ via `bsd2_eq` + `field_simp + ring`.
+  - **Black-76 Greek matrix**: $\delta, \gamma$, vega, $\rho, \theta$ in `BlackFuturesGreeks.lean`. $\rho = -T \cdot V_B$ is clean because the inner $\mathrm{bsV}$ is $r$-independent at zero drift.
+  - **fixed income basics** (`FixedIncome.lean`): zero-coupon bond pricing under deterministic short rate $B(t, T) = e^{-r(T - t)}$, yield-to-maturity identity, Macaulay duration $=T-t$, convexity $= (T-t)^2$.
+  - **Markowitz two-asset portfolio theory** (`Markowitz.lean`): completing-the-square factorization $\mathrm{Var}(w) = D \cdot (w - w^*)^2 + V_{\min}$ with $D = \sigma_1^2 - 2 \rho \sigma_1 \sigma_2 + \sigma_2^2$, giving the minimum-variance weight $w^*$, minimum variance $V_{\min} = \sigma_1^2 \sigma_2^2 (1 - \rho^2) / D$, lower-bound property, and perfect-hedge corollary $V_{\min} = 0$ at $\rho = -1$.
+  - **CAPM** (`CAPM.lean`): $\beta = \mathrm{Cov}(R, R_M)/\mathrm{Var}(R_M)$, $\beta_M = 1$, $\beta_{\text{risk-free}} = 0$, and portfolio beta linearity $\beta_p = \sum w_i \beta_i$ (bilinearity of covariance over a finset-indexed portfolio).
   - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
   - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
   - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.
