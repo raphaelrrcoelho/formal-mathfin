@@ -704,6 +704,102 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ). Numerator f(s) = e^{-rτ}·ϕ(d₂(s)) with f'(S) = e^{-rτ}·(-d₂·ϕ(d₂))·(1/(Sσ√τ)); denominator g(s) = s·σ·√τ with g'(S) = σ·√τ. Quotient (f'·g − f·g')/g² collapses via d₂ + σ√τ = d₁. Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-asset-digital-rho",
+      "name": "Asset-or-Nothing Digital Rho",
+      "description": "Asset digital rho: ∂_r V_asset = S · ϕ(d₁) · √τ/σ. Direct chain rule using ∂_r d₁ = √τ/σ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsAssetDigital K r' σ S τ)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) * (Real.sqrt τ / σ)) r :=\n  HybridVerify.hasDerivAt_bsAssetDigital_r S K σ hσ hτ r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing rho (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. ∂_r d₁ = √τ/σ since d₁ − d₂ is r-independent. Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-rho",
+      "name": "Cash-or-Nothing Digital Rho",
+      "description": "Cash digital rho: ∂_r V_cash = e^{-rτ}·(ϕ(d₂)·√τ/σ − τ·Φ(d₂)). Product rule on e^{-rτ}·Φ(d₂(r)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_rho_thm (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bsCashDigital K r' σ S τ)\n      (Real.exp (-(r * τ)) *\n        (gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) * (Real.sqrt τ / σ)\n          - τ * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ))) r :=\n  HybridVerify.hasDerivAt_bsCashDigital_r S K σ hσ hτ r\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing rho (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule. ∂_r e^{-rτ} = -τ·e^{-rτ}, ∂_r Φ(d₂(r)) = ϕ(d₂)·√τ/σ. Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-vega",
+      "name": "Asset-or-Nothing Digital Vega",
+      "description": "Asset digital vega: ∂_σ V_asset = -S · ϕ(d₁) · d₂ / σ. Chain rule with ∂_σ d₁ = -d₂/σ via bsd2_eq.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_vega_thm (S K r : ℝ) {σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => HybridVerify.bsAssetDigital K r σ' S τ)\n      (-(S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        HybridVerify.bsd2 S K r σ τ / σ)) σ :=\n  HybridVerify.hasDerivAt_bsAssetDigital_sigma S K r hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing vega (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. The Lean form (σ²τ/2 − log(S/K) − rτ)/(σ²√τ) for ∂_σ d₁ equals -d₂/σ via bsd2_eq + field_simp + ring. Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-vega",
+      "name": "Cash-or-Nothing Digital Vega",
+      "description": "Cash digital vega: ∂_σ V_cash = -e^{-rτ} · ϕ(d₂) · d₁ / σ. Chain rule with ∂_σ d₂ = -d₁/σ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_vega_thm (S K : ℝ) {r σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :\n    HasDerivAt (fun σ' => HybridVerify.bsCashDigital K r σ' S τ)\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n        HybridVerify.bsd1 S K r σ τ / σ)) σ :=\n  HybridVerify.hasDerivAt_bsCashDigital_sigma S K hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing vega (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₂. The Lean form ∂_σ d₂ = ∂_σ d₁ − √τ equals -d₁/σ via bsd2_eq + the identity bsd2 + σ√τ = bsd1. Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asset-digital-theta",
+      "name": "Asset-or-Nothing Digital Theta (τ form)",
+      "description": "Asset digital theta: ∂_τ V_asset = S · ϕ(d₁) · ((r + σ²/2)τ − log(S/K))/(2στ√τ). Direct chain rule.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem asset_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsAssetDigital K r σ S t)\n      (S * gaussianPDFReal 0 1 (HybridVerify.bsd1 S K r σ τ) *\n        (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  HybridVerify.hasDerivAt_bsAssetDigital_tau S K r σ hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Asset-or-nothing theta (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁ in τ. Lean's natural quotient-rule form for ∂_τ d₁ equals (r + σ²/2)/(σ√τ) − d₁/(2τ) by algebra (left to consumer). Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-cash-digital-theta",
+      "name": "Cash-or-Nothing Digital Theta (τ form)",
+      "description": "Cash digital theta: ∂_τ V_cash = -r·e^{-rτ}·Φ(d₂) + e^{-rτ}·ϕ(d₂)·∂_τ d₂. Product rule on e^{-rτ}·Φ(d₂(τ)).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_theta_thm (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => HybridVerify.bsCashDigital K r σ S t)\n      (-r * Real.exp (-(r * τ)) * HybridVerify.Phi (HybridVerify.bsd2 S K r σ τ) +\n        Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n          (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ)\n            - σ / (2 * Real.sqrt τ))) τ :=\n  HybridVerify.hasDerivAt_bsCashDigital_tau S K r σ hσ hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing theta (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on e^{-rτ}·Φ(d₂(τ)). ∂_τ e^{-rτ} = -r·e^{-rτ}; ∂_τ Φ(d₂(τ)) = ϕ(d₂)·∂_τ d₂ where ∂_τ d₂ is the Lean natural form. Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
     }
   ]
 }
