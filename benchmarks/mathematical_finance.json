@@ -688,6 +688,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ) using existing hasDerivAt_bsV_tau at effective drift r-q. Lives in lean/HybridVerify/BlackScholesDividendsGreeks.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-cash-digital-gamma",
+      "name": "Cash-or-Nothing Digital Gamma",
+      "description": "Cash digital gamma: ∂²V_cash/∂S² = -e^{-rτ} · ϕ(d₂) · d₁ / (S² σ² τ). Quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ), collapsed via d₂ + σ√τ = d₁.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BlackScholesDigitalGreeks\n\nopen HybridVerify\n\ntheorem cash_digital_gamma_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt\n      (fun s => Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) *\n        HybridVerify.bsd1 S K r σ τ / (S^2 * σ^2 * τ))) S :=\n  HybridVerify.hasDerivAt_bsCashDigital_SS hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Cash-or-nothing gamma (Hull 26.1)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ). Numerator f(s) = e^{-rτ}·ϕ(d₂(s)) with f'(S) = e^{-rτ}·(-d₂·ϕ(d₂))·(1/(Sσ√τ)); denominator g(s) = s·σ·√τ with g'(S) = σ·√τ. Quotient (f'·g − f·g')/g² collapses via d₂ + σ√τ = d₁. Lives in lean/HybridVerify/BlackScholesDigitalGreeks.lean. Axioms-clean."
+      }
     }
   ]
 }

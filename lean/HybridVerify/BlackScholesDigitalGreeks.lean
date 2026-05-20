@@ -115,4 +115,45 @@ lemma hasDerivAt_bsAssetDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   rw [show Real.sqrt τ ^ 2 = τ from h_sqrt_sq]
   ring
 
+/-- **Cash-or-nothing gamma**: `∂²V_cash/∂S² = -e^{-rτ} · ϕ(d₂) · d₁ / (S² σ² τ)`.
+
+Differentiating δ_cash(s) = `e^{-rτ} · ϕ(d₂(s)) / (s · σ · √τ)` as a quotient
+`f(s)/g(s)` with `f(s) = e^{-rτ} · ϕ(d₂(s))` and `g(s) = s · σ · √τ`:
+* `f'(S) = e^{-rτ} · (-d₂ · ϕ(d₂)) · (1/(S σ √τ))`
+* `g'(S) = σ · √τ`
+* `(f/g)'(S) = (f' · g − f · g') / g²`
+* Numerator algebraically collapses via `d₂ + σ√τ = d₁`. -/
+lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt
+      (fun s => Real.exp (-(r * τ)) *
+        gaussianPDFReal 0 1 (bsd2 s K r σ τ) / (s * σ * Real.sqrt τ))
+      (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) *
+        bsd1 S K r σ τ / (S ^ 2 * σ ^ 2 * τ))) S := by
+  have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
+  have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
+  have hσ_ne : σ ≠ 0 := hσ.ne'
+  have hS_ne : S ≠ 0 := hS.ne'
+  have h_sqrt_sq : Real.sqrt τ ^ 2 = τ := Real.sq_sqrt hτ.le
+  have h_denom_ne : S * σ * Real.sqrt τ ≠ 0 :=
+    mul_ne_zero (mul_ne_zero hS_ne hσ_ne) h_sqrt_ne
+  have h_d2_S := hasDerivAt_bsd2_S (r := r) hK hσ hτ hS
+  have h_pdf := (hasDerivAt_pdf_digital (bsd2 S K r σ τ)).comp S h_d2_S
+  -- Numerator f(s) = e^{-rτ} · ϕ(d₂(s)).
+  have h_num := h_pdf.const_mul (Real.exp (-(r * τ)))
+  -- Denominator g(s) = s · σ · √τ.
+  have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
+  have h_denom : HasDerivAt (fun s : ℝ => s * σ * Real.sqrt τ) (σ * Real.sqrt τ) S := by
+    have h := (h_id.mul_const σ).mul_const (Real.sqrt τ)
+    simpa using h
+  have h_div := h_num.div h_denom h_denom_ne
+  convert h_div using 1
+  have h_bsd1 : bsd1 S K r σ τ = bsd2 S K r σ τ + σ * Real.sqrt τ := by
+    rw [bsd2]; ring
+  rw [h_bsd1]
+  simp only [Function.comp_apply]
+  field_simp
+  rw [show Real.sqrt τ ^ 2 = τ from h_sqrt_sq]
+  ring
+
 end HybridVerify

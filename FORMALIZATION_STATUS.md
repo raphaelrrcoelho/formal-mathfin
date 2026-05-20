@@ -32,10 +32,10 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Coverage as of 2026-05-19 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS):
-**92 / 108 delivery-ready** (68 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
+Coverage as of 2026-05-19 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item):
+**93 / 109 delivery-ready** (69 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 
-The `mathematical_finance.json` benchmark now has 43 theorems (all `full`). Original 14 + 16 from the first pass + 9 from the second pass + 1 from the third pass + 3 from the fourth pass:
+The `mathematical_finance.json` benchmark now has 44 theorems (all `full`). Original 14 + 16 from the first pass + 9 from the second pass + 1 from the third pass + 3 from the fourth pass + 1 from the fifth pass:
 
 | ID | name | new module |
 |---|---|---|
@@ -82,8 +82,9 @@ The `mathematical_finance.json` benchmark now has 43 theorems (all `full`). Orig
 | `mf-bs-merton-rho` | BS-Merton (dividends) rho | `BlackScholesDividendsGreeks.lean` |
 | `mf-bs-merton-psi` | BS-Merton (dividends) psi | `BlackScholesDividendsGreeks.lean` |
 | `mf-bs-merton-theta` | BS-Merton (dividends) theta (τ form) | `BlackScholesDividendsGreeks.lean` |
+| `mf-cash-digital-gamma` | Cash-or-nothing digital gamma | `BlackScholesDigitalGreeks.lean` |
 
-All 43 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
+All 44 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
 
 ### Quality / structural improvements (2026-05-16 → 2026-05-17 sessions)
 
