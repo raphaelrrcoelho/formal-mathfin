@@ -2080,6 +2080,102 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via lt_div_iff + linarith. Lives in lean/HybridVerify/MultiPeriodKelly.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-second-moment-terminal",
+      "name": "Lognormal Second Moment under Risk-Neutral",
+      "description": "E_Q[S_T²] = S_0²·exp(2rT + σ²T) under the BS lognormal hypothesis. Derived from the Gaussian MGF evaluated at 2σ√T.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.LognormalSecondMoment\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem second_moment_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q =\n      S_0^2 * Real.exp (2 * r * T + σ^2 * T) :=\n  HybridVerify.secondMoment_terminal h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Lognormal second moment (Hull Ch 14.7; risk-neutral measure under BS)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: (bsTerminal z)^2 = S_0^2·exp(2(r-σ²/2)T + 2σ√T·z), then HasLaw transfer + gaussian MGF at 2σ√T + BS algebra 2(r-σ²/2)T + (2σ√T)²/2 = 2rT + σ²T. Lives in lean/HybridVerify/LognormalSecondMoment.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-variance-terminal",
+      "name": "Lognormal Variance under Risk-Neutral",
+      "description": "Var_Q[S_T] = S_0²·exp(2rT)·(exp(σ²T) - 1). Combines the second-moment formula with E[S_T] = S_0·exp(rT).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.LognormalSecondMoment\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen HybridVerify\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\ntheorem variance_terminal_thm\n    {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ}\n    (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, (bsTerminal S_0 r σ T (Z ω))^2 ∂Q -\n      (∫ ω, bsTerminal S_0 r σ T (Z ω) ∂Q)^2 =\n        S_0^2 * Real.exp (2 * r * T) * (Real.exp (σ^2 * T) - 1) :=\n  HybridVerify.variance_terminal h\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Lognormal variance (Hull Ch 14.7; Bodie-Kane-Marcus Ch 21)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: secondMoment_terminal − (expected_terminal_eq_forward)² = S_0²·exp(2rT)·(exp(σ²T) - 1), via exp(rT)² = exp(2rT) and Real.exp_add. Lives in lean/HybridVerify/LognormalSecondMoment.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-solve",
+      "name": "Yield Curve Bootstrap: General Solve",
+      "description": "From the coupon-bond pricing equation P = ∑ c_i·B_i + (c_n + F)·B_n, the new ZCB price is B_n = (P - ∑ c_i·B_i)/(c_n + F).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_solve_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : HybridVerify.couponBondPricingEq sprev c B P c_last F B_last) :\n    B_last = (P - ∑ i ∈ sprev, c i * B i) / (c_last + F) :=\n  HybridVerify.bootstrap_solve sprev c B P c_last F B_last h hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Yield curve bootstrapping (Fabozzi, Fixed Income Mathematics Ch 9; Hull Ch 4.6)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + linarith on the pricing equation. Lives in lean/HybridVerify/YieldCurveBootstrap.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-solve-first",
+      "name": "Yield Curve Bootstrap: First Bond (Base Case)",
+      "description": "For a single-period coupon bond with cash flow c + F at maturity, B_1 = P/(c + F).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_first_thm (P c_last F B_last : ℝ) (h : c_last + F ≠ 0)\n    (hP : P = (c_last + F) * B_last) :\n    B_last = P / (c_last + F) :=\n  HybridVerify.bootstrap_solve_first P c_last F B_last h hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Yield curve bootstrapping base case (Fabozzi Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp. Lives in lean/HybridVerify/YieldCurveBootstrap.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-solve-second",
+      "name": "Yield Curve Bootstrap: Second Bond Step",
+      "description": "For a two-period coupon bond paying c at both dates plus F at the second: B_2 = (P - c·B_1)/(c + F).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_second_thm (P c F B_1 B_2 : ℝ) (h : c + F ≠ 0)\n    (hP : P = c * B_1 + (c + F) * B_2) :\n    B_2 = (P - c * B_1) / (c + F) :=\n  HybridVerify.bootstrap_solve_second P c F B_1 B_2 h hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Two-bond bootstrap step (Fabozzi Ch 9)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in lean/HybridVerify/YieldCurveBootstrap.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bootstrap-consistency",
+      "name": "Yield Curve Bootstrap: Consistency",
+      "description": "The bootstrapped B_n price, plugged back into the pricing equation, reproduces the original observed bond price P.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.YieldCurveBootstrap\n\nopen HybridVerify\n\ntheorem bootstrap_consistency_thm\n    {ι : Type*} (sprev : Finset ι) (c B : ι → ℝ)\n    (P c_last F : ℝ) (h : c_last + F ≠ 0) :\n    HybridVerify.couponBondPricingEq sprev c B P c_last F\n      ((P - ∑ i ∈ sprev, c i * B i) / (c_last + F)) :=\n  HybridVerify.bootstrap_consistency sprev c B P c_last F h\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bootstrap inversion identity (Fabozzi Ch 9)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in lean/HybridVerify/YieldCurveBootstrap.lean. Axioms-clean."
+      }
     }
   ]
 }

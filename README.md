@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 195 |
-| delivery-ready | **179** |
-| ↳ full derivations | 155 |
+| total theorems | 201 |
+| delivery-ready | **185** |
+| ↳ full derivations | 161 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -61,6 +61,8 @@ most lean formalization projects pick one theorem and go deep, or contribute to 
   - **reduced-form credit risk** (`CreditSpread.lean`): survival probability under constant hazard $S(t, T) = e^{-h(T-t)}$, credit spread $= h$ identity, and strict monotonic decrease in maturity under positive hazard.
   - **strike Greeks for BS** (`OptionStrikeProperties.lean`): $\partial_K d_i = -1/(K \sigma \sqrt{\tau})$, $\partial_K \mathrm{bsV} = -e^{-r\tau} \Phi(d_2)$ (clean closed form via magic-identity collapse), $\partial_K \mathrm{bsP} = e^{-r\tau} \Phi(-d_2)$ via put-call parity, and $\partial^2_K \mathrm{bsV} = e^{-r\tau} \phi(d_2)/(K \sigma \sqrt{\tau}) \ge 0$ (butterfly-spread non-negativity).
   - **multi-period Kelly + fraction bounds** (`MultiPeriodKelly.lean`): $T$-period log-growth linearity $T \cdot g(f)$, Kelly fraction myopia (optimal $f^*$ independent of horizon), $f^* < 1$, and the sign analysis $f^* = 0 \iff p(b+1) = 1$, $f^* > 0 \iff p(b+1) > 1$.
+  - **lognormal second moment + variance** (`LognormalSecondMoment.lean`): $E_Q[S_T^2] = S_0^2 e^{2rT + \sigma^2 T}$ via the gaussian MGF at $2 \sigma \sqrt{T}$, and $\mathrm{Var}_Q[S_T] = S_0^2 e^{2rT}(e^{\sigma^2 T} - 1)$.
+  - **yield-curve bootstrap** (`YieldCurveBootstrap.lean`): general single-step solve $B_n = (P - \sum c_i B_i)/(c_n + F)$, base-case first-bond ($B_1 = P/(c+F)$), and explicit two-bond step plus a consistency identity.
   - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
   - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
   - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.
