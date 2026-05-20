@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 201 |
-| delivery-ready | **185** |
-| ↳ full derivations | 161 |
+| total theorems | 208 |
+| delivery-ready | **192** |
+| ↳ full derivations | 168 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -63,6 +63,8 @@ most lean formalization projects pick one theorem and go deep, or contribute to 
   - **multi-period Kelly + fraction bounds** (`MultiPeriodKelly.lean`): $T$-period log-growth linearity $T \cdot g(f)$, Kelly fraction myopia (optimal $f^*$ independent of horizon), $f^* < 1$, and the sign analysis $f^* = 0 \iff p(b+1) = 1$, $f^* > 0 \iff p(b+1) > 1$.
   - **lognormal second moment + variance** (`LognormalSecondMoment.lean`): $E_Q[S_T^2] = S_0^2 e^{2rT + \sigma^2 T}$ via the gaussian MGF at $2 \sigma \sqrt{T}$, and $\mathrm{Var}_Q[S_T] = S_0^2 e^{2rT}(e^{\sigma^2 T} - 1)$.
   - **yield-curve bootstrap** (`YieldCurveBootstrap.lean`): general single-step solve $B_n = (P - \sum c_i B_i)/(c_n + F)$, base-case first-bond ($B_1 = P/(c+F)$), and explicit two-bond step plus a consistency identity.
+  - **variance swap fair strike** (`VarianceSwap.lean`): the log-payoff replication piece of the Demeterfi-Derman-Kamal formula, $(2/T) \cdot E_Q[\log(F/S_T)] = \sigma^2$, via the log-discount algebraic identity plus $E[Z] = 0$ for the standard normal.
+  - **put-price convexity + VaR additivity at ρ=1** (`StrikeConvexityAndRiskAdditivity.lean`): $\partial^2_K \mathrm{bsP} \ge 0$ matches the call convexity (since put and call differ by a $K$-linear term), gaussian VaR/CVaR additivity at perfect positive correlation (the extremal case of subadditivity).
   - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
   - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
   - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.

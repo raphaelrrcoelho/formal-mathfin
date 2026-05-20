@@ -2176,6 +2176,118 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in lean/HybridVerify/YieldCurveBootstrap.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-log-forward-bsTerminal",
+      "name": "Log-Discount Algebraic Identity",
+      "description": "log((S_0·e^{rT}) / (S_0·exp((r-σ²/2)T + σ√T·z))) = σ²T/2 - σ√T·z, after the S_0 cancellation. Setup for the variance swap fair-strike formula.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.VarianceSwap\n\nopen HybridVerify\n\ntheorem log_forward_bsTerminal_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T z : ℝ) :\n    Real.log ((S_0 * Real.exp (r * T)) /\n              (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n      = σ^2 * T / 2 - σ * Real.sqrt T * z :=\n  HybridVerify.log_forward_div_bsTerminal_eq hS r σ T z\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Demeterfi-Derman-Kamal log-replication setup (More Than You Ever Wanted to Know About Volatility Swaps 1999)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via S_0 cancellation + Real.exp_sub + Real.log_exp + ring. Lives in lean/HybridVerify/VarianceSwap.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-integral-log-forward",
+      "name": "Log-Moment Integral over Gaussian",
+      "description": "E[log(F/S_T)] = σ²T/2 under the BS lognormal hypothesis (using ∫z d(gaussianReal 0 1) = 0).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.VarianceSwap\n\nopen ProbabilityTheory HybridVerify\n\ntheorem integral_log_forward_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) :\n    ∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n                  (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n      ∂(gaussianReal 0 1) = σ^2 * T / 2 :=\n  HybridVerify.integral_log_forward_div_bsTerminal_eq hS r σ T\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Log moment of risk-neutral discount factor (Demeterfi-Derman-Kamal 1999)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: rewrite via algebraic identity, then linearity of integral + integral_id_gaussianReal (mean = 0) + integral_const on a probability measure. Lives in lean/HybridVerify/VarianceSwap.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-variance-swap-log",
+      "name": "Variance Swap Fair Strike (Log-Payoff Contribution)",
+      "description": "(2/T)·E[log(F/S_T)] = σ² under BS lognormal — the log-payoff piece of the Demeterfi-Derman-Kamal variance swap replication.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.VarianceSwap\n\nopen ProbabilityTheory HybridVerify\n\ntheorem variance_swap_log_thm {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) (hT : T ≠ 0) :\n    (2 / T) *\n      (∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n            (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))\n        ∂(gaussianReal 0 1)) = σ^2 :=\n  HybridVerify.varianceSwap_log_contribution hS r σ T hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Variance swap fair strike via log-replication (Demeterfi-Derman-Kamal 1999; Carr-Madan 1998)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: log-moment integral identity + (2/T)·(σ²T/2) = σ² via field_simp. Lives in lean/HybridVerify/VarianceSwap.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussianPDF-symmetry",
+      "name": "Standard Normal PDF Symmetry",
+      "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen ProbabilityTheory HybridVerify\n\ntheorem gaussianPDF_symmetry_thm (z : ℝ) :\n    gaussianPDFReal 0 1 (-z) = gaussianPDFReal 0 1 z :=\n  HybridVerify.gaussianPDFReal_zero_one_neg z\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Standard normal symmetry",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via congr + ring on the PDF formula. Lives in lean/HybridVerify/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bsP-KK-deriv",
+      "name": "Put Price Convexity in Strike",
+      "description": "∂²_K bsP = e^{-rτ}·ϕ(d_2)/(K·σ·√τ) — same as call convexity in K, since put and call differ by a function linear in K.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen ProbabilityTheory HybridVerify\n\ntheorem bsP_KK_deriv_thm {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)\n    {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :\n    HasDerivAt (fun k => Real.exp (-(r * τ)) * HybridVerify.Phi (-HybridVerify.bsd2 S k r σ τ))\n      (Real.exp (-(r * τ)) *\n        gaussianPDFReal 0 1 (HybridVerify.bsd2 S K r σ τ) /\n        (K * σ * Real.sqrt τ)) K :=\n  HybridVerify.hasDerivAt_bsP_KK hS hσ hK hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Put price convexity in strike (mirror of call convexity; Hull Ch 12.8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via derivative of Phi(-d_2(K)) + PDF symmetry + field_simp. Lives in lean/HybridVerify/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-additive-rho-one",
+      "name": "Gaussian VaR Additivity at Perfect Positive Correlation",
+      "description": "At ρ = 1 (perfect positive correlation), gaussian VaR is additive: VaR(L₁+L₂) = VaR(L₁) + VaR(L₂). The extremal case where diversification gives no benefit.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen HybridVerify\n\ntheorem gaussian_var_additive_thm {μ₁ μ₂ σ₁ σ₂ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    HybridVerify.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z =\n      HybridVerify.gaussianVaR μ₁ σ₁ z + HybridVerify.gaussianVaR μ₂ σ₂ z :=\n  HybridVerify.gaussianVaR_additive_at_rho_one h₁ h₂\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Gaussian VaR at ρ=1 (McNeil-Frey-Embrechts, QRM Ch 8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in lean/HybridVerify/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-cvar-additive-rho-one",
+      "name": "Gaussian CVaR Additivity at Perfect Positive Correlation",
+      "description": "At ρ = 1, gaussian CVaR is additive: CVaR(L₁+L₂) = CVaR(L₁) + CVaR(L₂).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.StrikeConvexityAndRiskAdditivity\n\nopen HybridVerify\n\ntheorem gaussian_cvar_additive_thm {μ₁ μ₂ σ₁ σ₂ z α : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) :\n    HybridVerify.gaussianCVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁^2 + 2 * 1 * σ₁ * σ₂ + σ₂^2)) z α =\n      HybridVerify.gaussianCVaR μ₁ σ₁ z α + HybridVerify.gaussianCVaR μ₂ σ₂ z α :=\n  HybridVerify.gaussianCVaR_additive_at_rho_one h₁ h₂\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Gaussian CVaR at ρ=1 (McNeil-Frey-Embrechts, QRM Ch 8)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in lean/HybridVerify/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+      }
     }
   ]
 }
