@@ -1040,6 +1040,246 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via Finset.sum_div + mul_div_assoc. Lives in lean/HybridVerify/CAPM.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-gaussian-var-affine",
+      "name": "Gaussian VaR Affine Invariance",
+      "description": "For a gaussian loss L ~ N(μ, σ²), VaR_α(aL + b) = a·VaR_α(L) + b for a ≥ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify\n\ntheorem gaussian_var_affine_thm (μ σ z a b : ℝ) (ha : 0 ≤ a) :\n    HybridVerify.gaussianVaR (a * μ + b) (a * σ) z =\n      a * HybridVerify.gaussianVaR μ σ z + b :=\n  HybridVerify.gaussianVaR_affine μ σ z a b ha\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Value-at-Risk affine invariance (McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring on the definition VaR = μ + σ·z. Lives in lean/HybridVerify/GaussianRiskMeasures.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-cvar-affine",
+      "name": "Gaussian CVaR Affine Invariance",
+      "description": "For a gaussian loss L ~ N(μ, σ²), CVaR_α(aL + b) = a·CVaR_α(L) + b for a ≥ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify\n\ntheorem gaussian_cvar_affine_thm (μ σ z α a b : ℝ) (ha : 0 ≤ a) :\n    HybridVerify.gaussianCVaR (a * μ + b) (a * σ) z α =\n      a * HybridVerify.gaussianCVaR μ σ z α + b :=\n  HybridVerify.gaussianCVaR_affine μ σ z α a b ha\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Conditional Value-at-Risk affine invariance (McNeil-Frey-Embrechts, QRM Ch 2)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring on the definition CVaR = μ + σ·φ(z)/(1-α). Lives in lean/HybridVerify/GaussianRiskMeasures.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-standard",
+      "name": "Gaussian VaR for Standard Normal",
+      "description": "Standard normal VaR collapses to the quantile: VaR_α(N(0,1)) = z_α.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify\n\ntheorem gaussian_var_standard_thm (z : ℝ) :\n    HybridVerify.gaussianVaR 0 1 z = z :=\n  HybridVerify.gaussianVaR_standard z\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Standard normal VaR (McNeil-Frey-Embrechts, QRM Ch 2)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from the definition 0 + 1·z = z. Lives in lean/HybridVerify/GaussianRiskMeasures.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-cvar-standard",
+      "name": "Gaussian CVaR for Standard Normal",
+      "description": "Standard normal CVaR equals ϕ(z)/(1-α): CVaR_α(N(0,1)) = ϕ(z_α)/(1-α).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify ProbabilityTheory\n\ntheorem gaussian_cvar_standard_thm (z α : ℝ) :\n    HybridVerify.gaussianCVaR 0 1 z α = gaussianPDFReal 0 1 z / (1 - α) :=\n  HybridVerify.gaussianCVaR_standard z α\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Standard normal CVaR closed form (McNeil-Frey-Embrechts, QRM Ch 2.2.4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from the definition 0 + 1·ϕ(z)/(1-α). Lives in lean/HybridVerify/GaussianRiskMeasures.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-cvar-sub-var",
+      "name": "Gaussian CVaR Minus VaR",
+      "description": "CVaR_α(L) − VaR_α(L) = σ·(ϕ(z)/(1-α) − z) for gaussian L ~ N(μ, σ²). The two coincide only when ϕ(z)/(1-α) = z (rarely true in practice).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify ProbabilityTheory\n\ntheorem gaussian_cvar_sub_var_thm (μ σ z α : ℝ) :\n    HybridVerify.gaussianCVaR μ σ z α - HybridVerify.gaussianVaR μ σ z =\n      σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  HybridVerify.gaussianCVaR_sub_VaR μ σ z α\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "CVaR/VaR difference (McNeil-Frey-Embrechts, QRM Ch 2.2.4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring on the definitions. Lives in lean/HybridVerify/GaussianRiskMeasures.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-gaussian-var-vol-scaling",
+      "name": "Gaussian VaR Time Aggregation",
+      "description": "For iid gaussian increments aggregating to L_T ~ N(T·μ, T·σ²), VaR_α(L_T) = T·μ + σ·√T·z. The √T volatility scaling rule.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.GaussianRiskMeasures\n\nopen HybridVerify Real\n\ntheorem gaussian_var_vol_scaling_thm (μ σ z T : ℝ) :\n    HybridVerify.gaussianVaR (T * μ) (σ * Real.sqrt T) z =\n      T * μ + σ * Real.sqrt T * z :=\n  HybridVerify.gaussianVaR_volatility_scaling μ σ z T\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "VaR volatility scaling under iid aggregation (McNeil-Frey-Embrechts, QRM Ch 2.3)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via ring on VaR(T·μ, σ√T, z) = T·μ + σ√T·z. Lives in lean/HybridVerify/GaussianRiskMeasures.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-portfolio-rate-deriv",
+      "name": "Bond Portfolio First-Order Rate Sensitivity",
+      "description": "For a ZCB portfolio P(r) = ∑ w_i exp(-r(T_i - t)) with duration-times-value D_P·P = ∑ w_i (T_i - t) exp(-r(T_i - t)), the rate derivative is ∂P/∂r = -D_P·P.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_portfolio_rate_deriv_thm\n    {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :\n    HasDerivAt (fun r' => HybridVerify.bondPortfolioValue s w T t r')\n      (-HybridVerify.bondPortfolioDur s w T t r) r :=\n  HybridVerify.hasDerivAt_bondPortfolioValue_r s w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Bond portfolio duration (Fabozzi, Fixed Income Mathematics; Hull Ch 4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from HasDerivAt.sum on the per-bond exponential derivative. Lives in lean/HybridVerify/BondImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-single-dur",
+      "name": "Single-Bond Portfolio Duration",
+      "description": "A single-bond portfolio's duration-times-value reduces to w·(T - t)·exp(-r(T - t)), matching the ZCB duration in FixedIncome.lean.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_single_dur_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioDur {i} w T t r =\n      w i * (T i - t) * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_dur i w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Single ZCB duration as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in lean/HybridVerify/BondImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-single-value",
+      "name": "Single-Bond Portfolio Value",
+      "description": "A single-bond portfolio's value reduces to w·exp(-r(T - t)), matching the ZCB price.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_single_value_thm\n    {ι : Type*} [DecidableEq ι] (i : ι) (w T : ι → ℝ) (t r : ℝ) :\n    HybridVerify.bondPortfolioValue {i} w T t r =\n      w i * Real.exp (-(r * (T i - t))) :=\n  HybridVerify.bondPortfolio_single_bond_value i w T t r\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Single ZCB price as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in lean/HybridVerify/BondImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-bond-immunization-first-order",
+      "name": "Bond Portfolio First-Order Immunization",
+      "description": "If the duration-times-value of the asset portfolio matches that of the liability, the net portfolio's first-order rate sensitivity is zero: ∂(A - L)/∂r = 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BondImmunization\n\nopen HybridVerify\n\ntheorem bond_immunization_first_order_thm\n    {ι κ : Type*}\n    (sA : Finset ι) (wA TA : ι → ℝ)\n    (sL : Finset κ) (wL TL : κ → ℝ)\n    (t r : ℝ)\n    (h_match : HybridVerify.bondPortfolioDur sA wA TA t r =\n               HybridVerify.bondPortfolioDur sL wL TL t r) :\n    HasDerivAt (fun r' =>\n        HybridVerify.bondPortfolioValue sA wA TA t r' -\n        HybridVerify.bondPortfolioValue sL wL TL t r')\n      0 r :=\n  HybridVerify.bondPortfolio_immunization_first_order sA wA TA sL wL TL t r h_match\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Redington immunization (Redington 1952; Fabozzi, Fixed Income Mathematics Ch 5)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from rate-sensitivity of A and L plus duration matching. Lives in lean/HybridVerify/BondImmunization.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-scaling",
+      "name": "N-Asset Portfolio Variance Quadratic Scaling",
+      "description": "Portfolio variance scales quadratically in the weight magnitude: Var(c·w) = c²·Var(w).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_scaling_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ) (c : ℝ) :\n    HybridVerify.portfolioVarN s (fun i => c * w i) σ =\n      c ^ 2 * HybridVerify.portfolioVarN s w σ :=\n  HybridVerify.portfolioVarN_smul s w σ c\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Markowitz portfolio variance scaling (Bodie-Kane-Marcus Ch 7)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from Finset.mul_sum + ring on the double sum. Lives in lean/HybridVerify/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-diag",
+      "name": "N-Asset Portfolio Variance Diagonal Covariance",
+      "description": "When σ_ij = 0 for i ≠ j (uncorrelated assets), the portfolio variance reduces to ∑ w_i²·σ_ii.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_diag_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → σ i j = 0) :\n    HybridVerify.portfolioVarN s w σ = ∑ i ∈ s, w i ^ 2 * σ i i :=\n  HybridVerify.portfolioVarN_diag s w σ h_diag\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Uncorrelated-asset portfolio variance (Bodie-Kane-Marcus Ch 7.2)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via inner-sum collapse Finset.sum_ite_eq' on the diagonal. Lives in lean/HybridVerify/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-iid",
+      "name": "Diversification Under Equal Weights and IID",
+      "description": "Equal weights c on an n-asset portfolio with zero cross-covariances and common variance σ² gives Var = c²·n·σ². The classical diversification scaling.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_iid_thm {ι : Type*} [DecidableEq ι]\n    (s : Finset ι) (c σ_sq : ℝ)\n    (kernel : ι → ι → ℝ)\n    (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → kernel i j = 0)\n    (h_var : ∀ i ∈ s, kernel i i = σ_sq) :\n    HybridVerify.portfolioVarN s (fun _ => c) kernel = c ^ 2 * s.card * σ_sq :=\n  HybridVerify.portfolioVarN_equal_weights_iid s c σ_sq kernel h_diag h_var\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Diversification under iid assets (Bodie-Kane-Marcus Ch 7.4)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via diagonal collapse + Finset.sum_const + nsmul_eq_mul. Lives in lean/HybridVerify/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-psd",
+      "name": "N-Asset Portfolio Variance Non-Negativity from PSD Kernel",
+      "description": "If the covariance kernel σ defines a non-negative quadratic form (∀ v, ∑∑ v_i v_j σ_ij ≥ 0), then portfolio variance is non-negative for any weights.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_psd_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_psd : ∀ v : ι → ℝ, 0 ≤ ∑ i ∈ s, ∑ j ∈ s, v i * v j * σ i j) :\n    0 ≤ HybridVerify.portfolioVarN s w σ :=\n  HybridVerify.portfolioVarN_nonneg_of_psd s w σ h_psd\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Positive-semidefinite covariance (Bodie-Kane-Marcus Ch 7; Markowitz 1952)",
+        "difficulty": "beginner",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof from definitional unfolding (PSD hypothesis applied at w). Lives in lean/HybridVerify/MarkowitzNAsset.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-markowitz-n-two-asset",
+      "name": "N-Asset Markowitz Matches Two-Asset Formula",
+      "description": "When the index set has cardinality 2 with weights (w, 1-w) and the standard ρ-parametrized covariance, the n-asset variance recovers the two-asset formula w²σ₁² + (1-w)²σ₂² + 2w(1-w)ρσ₁σ₂.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.MarkowitzNAsset\n\nopen HybridVerify\n\ntheorem markowitz_n_two_asset_thm (w σ₁ σ₂ ρ : ℝ) :\n    HybridVerify.portfolioVarN (Finset.univ : Finset (Fin 2))\n        (fun i => if i = 0 then w else 1 - w)\n        (fun i j =>\n          if i = 0 ∧ j = 0 then σ₁ ^ 2\n          else if i = 1 ∧ j = 1 then σ₂ ^ 2\n          else ρ * σ₁ * σ₂) =\n      w ^ 2 * σ₁ ^ 2 + (1 - w) ^ 2 * σ₂ ^ 2 + 2 * w * (1 - w) * ρ * σ₁ * σ₂ :=\n  HybridVerify.portfolioVarN_two_asset_compat w σ₁ σ₂ ρ\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Two-asset specialization of the n-asset Markowitz variance (Bodie-Kane-Marcus Ch 7.3)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via Finset.univ on Fin 2 expansion + ring. Lives in lean/HybridVerify/MarkowitzNAsset.lean. Axioms-clean."
+      }
     }
   ]
 }

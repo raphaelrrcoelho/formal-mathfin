@@ -6,9 +6,9 @@ formal verification of stochastic-processes textbook theorems via a hybrid lean 
 
 | | count |
 |---|---|
-| total theorems | 130 |
-| delivery-ready | **114** |
-| ↳ full derivations | 90 |
+| total theorems | 145 |
+| delivery-ready | **129** |
+| ↳ full derivations | 105 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
@@ -47,6 +47,9 @@ most lean formalization projects pick one theorem and go deep, or contribute to 
   - **fixed income basics** (`FixedIncome.lean`): zero-coupon bond pricing under deterministic short rate $B(t, T) = e^{-r(T - t)}$, yield-to-maturity identity, Macaulay duration $=T-t$, convexity $= (T-t)^2$.
   - **Markowitz two-asset portfolio theory** (`Markowitz.lean`): completing-the-square factorization $\mathrm{Var}(w) = D \cdot (w - w^*)^2 + V_{\min}$ with $D = \sigma_1^2 - 2 \rho \sigma_1 \sigma_2 + \sigma_2^2$, giving the minimum-variance weight $w^*$, minimum variance $V_{\min} = \sigma_1^2 \sigma_2^2 (1 - \rho^2) / D$, lower-bound property, and perfect-hedge corollary $V_{\min} = 0$ at $\rho = -1$.
   - **CAPM** (`CAPM.lean`): $\beta = \mathrm{Cov}(R, R_M)/\mathrm{Var}(R_M)$, $\beta_M = 1$, $\beta_{\text{risk-free}} = 0$, and portfolio beta linearity $\beta_p = \sum w_i \beta_i$ (bilinearity of covariance over a finset-indexed portfolio).
+  - **Gaussian risk measures** (`GaussianRiskMeasures.lean`): closed-form Value-at-Risk and Conditional Value-at-Risk for $L \sim \mathcal{N}(\mu, \sigma^2)$ — $\mathrm{VaR}_\alpha = \mu + \sigma z$, $\mathrm{CVaR}_\alpha = \mu + \sigma \phi(z)/(1-\alpha)$ — with affine invariance, standard-normal specializations, the $\mathrm{CVaR} - \mathrm{VaR} = \sigma(\phi(z)/(1-\alpha) - z)$ identity, and the $\sqrt{T}$ time-aggregation rule.
+  - **bond portfolio immunization** (`BondImmunization.lean`): Finset-indexed bond portfolio value $P(r) = \sum_i w_i e^{-r(T_i - t)}$, duration-times-value $D_P \cdot P = \sum_i w_i (T_i - t) e^{-r(T_i - t)}$, first-order rate sensitivity $\partial P/\partial r = -D_P \cdot P$, and Redington-style first-order immunization condition (matching $D_A \cdot A = D_L \cdot L$ ⇒ $\partial(A-L)/\partial r = 0$).
+  - **N-asset Markowitz** (`MarkowitzNAsset.lean`): portfolio variance as Finset double sum $\sum_{i,j} w_i w_j \sigma_{ij}$, quadratic scaling, diagonal collapse ($\mathrm{Var} = \sum w_i^2 \sigma_{ii}$ under zero cross-covariances), iid diversification ($c^2 n \sigma^2$), positive-semidefinite non-negativity, and explicit two-asset compatibility with `Markowitz.lean`.
   - feynman-kac formula identification: heat-kernel convolution equals $\mathbb{E}[g(x + B_t)]$ via `Measure.map` transfer + lebesgue translation invariance (`FeynmanKacHeatEquation.lean`)
   - quadratic variation of brownian motion in $L^1$ form (`BrownianQuadraticVariation.lean`)
   - standard normal CDF derivative $\Phi'(x) = \phi(x)$ via FTC on $\text{Iic}$ decomposition (`GaussianCDFDeriv.lean`). mathlib doesn't ship this; it doesn't ship `Real.erf` either.

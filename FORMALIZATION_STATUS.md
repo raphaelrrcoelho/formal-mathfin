@@ -32,10 +32,10 @@ Refresh with:
 python3 -m python.coverage_report
 ```
 
-Coverage as of 2026-05-19 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work; **ninth pass: Phase 5 broader quant-finance** — fixed-income ZCB pricing/yield/duration/convexity, two-asset Markowitz portfolio theory with completing-the-square factorization, CAPM beta + portfolio linearity — 12 theorems extending the project beyond derivatives pricing into fixed income and portfolio theory):
-**114 / 130 delivery-ready** (90 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
+Coverage as of 2026-05-20 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work; ninth pass: Phase 5 broader quant-finance — fixed-income ZCB pricing/yield/duration/convexity, two-asset Markowitz portfolio theory with completing-the-square factorization, CAPM beta + portfolio linearity — 12 theorems extending the project beyond derivatives pricing into fixed income and portfolio theory; **tenth pass: Phase 6 quant-risk + N-asset portfolio + bond immunization** — Gaussian VaR/CVaR closed forms with affine/scaling identities, bond portfolio rate sensitivity + Redington-style first-order immunization, N-asset Markowitz variance via Finset double sum with diagonal/iid/PSD/two-asset specializations — 15 theorems extending the project into risk-measurement and multi-asset portfolio theory):
+**129 / 145 delivery-ready** (105 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 
-The `mathematical_finance.json` benchmark now has 65 theorems (all `full`). Original 14 + 16 from the first pass + 9 from the second pass + 1 from the third pass + 3 from the fourth pass + 1 from the fifth pass + 6 from the sixth pass + 2 from the seventh pass + 1 from the eighth pass + 12 from the ninth pass:
+The `mathematical_finance.json` benchmark now has 80 theorems (all `full`). Original 14 + 16 from the first pass + 9 from the second pass + 1 from the third pass + 3 from the fourth pass + 1 from the fifth pass + 6 from the sixth pass + 2 from the seventh pass + 1 from the eighth pass + 12 from the ninth pass + 15 from the tenth pass:
 
 | ID | name | new module |
 |---|---|---|
@@ -104,8 +104,23 @@ The `mathematical_finance.json` benchmark now has 65 theorems (all `full`). Orig
 | `mf-capm-beta-riskfree` | CAPM risk-free beta = 0 | `CAPM.lean` |
 | `mf-capm-beta-linearity-two` | CAPM two-asset portfolio beta linearity | `CAPM.lean` |
 | `mf-capm-beta-linearity-finset` | CAPM finset-indexed portfolio beta linearity | `CAPM.lean` |
+| `mf-gaussian-var-affine` | Gaussian VaR affine invariance: VaR(aL+b) = a·VaR(L)+b | `GaussianRiskMeasures.lean` |
+| `mf-gaussian-cvar-affine` | Gaussian CVaR affine invariance | `GaussianRiskMeasures.lean` |
+| `mf-gaussian-var-standard` | Standard normal VaR = quantile z | `GaussianRiskMeasures.lean` |
+| `mf-gaussian-cvar-standard` | Standard normal CVaR = ϕ(z)/(1−α) | `GaussianRiskMeasures.lean` |
+| `mf-gaussian-cvar-sub-var` | CVaR − VaR = σ·(ϕ(z)/(1−α) − z) | `GaussianRiskMeasures.lean` |
+| `mf-gaussian-var-vol-scaling` | VaR √T volatility scaling under iid aggregation | `GaussianRiskMeasures.lean` |
+| `mf-bond-portfolio-rate-deriv` | Bond portfolio rate sensitivity: ∂P/∂r = −D_P·P | `BondImmunization.lean` |
+| `mf-bond-single-dur` | Single-bond portfolio duration = w·(T−t)·B(t,T) | `BondImmunization.lean` |
+| `mf-bond-single-value` | Single-bond portfolio value = w·B(t,T) | `BondImmunization.lean` |
+| `mf-bond-immunization-first-order` | Redington first-order immunization condition | `BondImmunization.lean` |
+| `mf-markowitz-n-scaling` | N-asset portfolio variance quadratic scaling | `MarkowitzNAsset.lean` |
+| `mf-markowitz-n-diag` | N-asset diagonal covariance: Var = ∑ w_i²·σ_ii | `MarkowitzNAsset.lean` |
+| `mf-markowitz-n-iid` | Diversification under iid: Var(c·1) = c²·n·σ² | `MarkowitzNAsset.lean` |
+| `mf-markowitz-n-psd` | N-asset variance ≥ 0 under PSD kernel | `MarkowitzNAsset.lean` |
+| `mf-markowitz-n-two-asset` | N-asset compatibility with two-asset Markowitz | `MarkowitzNAsset.lean` |
 
-All 65 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
+All 80 are `full`, axioms-clean (`#print axioms` = `[propext, Classical.choice, Quot.sound]`).
 
 ### Quality / structural improvements (2026-05-16 → 2026-05-17 sessions)
 
