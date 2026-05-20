@@ -832,6 +832,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via product rule on e^{-rT}·bsV(K, 0, σ, F, T). ∂_T e^{-rT} = -r·e^{-rT}; ∂_T bsV(·, 0, ·) reduces to σ·F·ϕ(d₁)/(2√T) (the rK·e^{-rT}·Φ(d₂) term vanishes at r=0). Lives in lean/HybridVerify/BlackFuturesGreeks.lean. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-crr-drift-limit",
+      "name": "CRR Drift Limit (textbook n-form)",
+      "description": "CRR drift limit (n-form): n · (2 p_n − 1) · σ · √(T/n) → (r − σ²/2) · T as n → ∞. Closes the analytic content of CRR-to-BS drift correspondence; the h-form was shipped in mf-crr-drift-quotient.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport HybridVerify.BinomialDriftLimit\n\nopen HybridVerify\n\ntheorem crr_drift_limit_thm {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :\n    Filter.Tendsto (fun n : ℕ =>\n        (n : ℝ) * (2 * HybridVerify.crrProb r σ T n - 1) * σ * Real.sqrt (T / n))\n      Filter.atTop (nhds ((r - σ^2 / 2) * T)) :=\n  HybridVerify.crr_drift_limit_n hσ hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "CRR drift correspondence to BS (Cox-Ross-Rubinstein 1979; Hull 13.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form crr_drift_limit_h, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in lean/HybridVerify/BinomialDriftLimit.lean. Axioms-clean."
+      }
     }
   ]
 }

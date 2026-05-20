@@ -149,18 +149,15 @@ theorem crr_drift_limit_h {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
       (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=
   tendsto_crr_drift_quotient hσ r
 
--- The n-form drift limit `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T`
--- is the routine substitution h = √(T/n) into `crr_drift_limit_h`, scaled by
--- σT. The algebraic juggling in Lean is purely mechanical (and gnarly); left
--- as a follow-up.
+/-- **CRR drift limit (textbook n-form)**: as `n → ∞`,
+`n · (2 p_n − 1) · σ · √(T/n) → (r − σ²/2) · T`.
 
-/- (drift limit n-form placeholder — deferred)
-private theorem crr_drift_limit_deferred {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
+The substitution `h_n = √(T/n)` reduces this to `crr_drift_limit_h` scaled by
+`σ T`, using the algebraic identity `n · (√(T/n))² = T`. -/
+theorem crr_drift_limit_n {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     Tendsto (fun n : ℕ =>
         (n : ℝ) * (2 * crrProb r σ T n - 1) * σ * Real.sqrt (T / n))
       atTop (𝓝 ((r - σ^2 / 2) * T)) := by
-  -- Substitute h_n = √(T/n). As n → ∞, h_n → 0+ (in particular h_n ≠ 0).
-  -- n · (2p_n - 1) · σ · √(T/n) = σT · (2p_n - 1) / h_n = σT · DriftQuotient(h_n).
   have h_sqrt_step : Tendsto (fun n : ℕ => Real.sqrt (crrStep T n)) atTop (𝓝[≠] 0) := by
     have h_to_zero : Tendsto (fun n : ℕ => Real.sqrt (crrStep T n)) atTop (𝓝 0) :=
       tendsto_sqrt_crrStep_zero T
@@ -174,7 +171,6 @@ private theorem crr_drift_limit_deferred {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 <
     exact h_sqrt_pos.ne'
   have h_drift_h := tendsto_crr_drift_quotient (hσ.ne') r
   have h_comp := h_drift_h.comp h_sqrt_step
-  -- h_comp : Tendsto (fun n => DriftQuotient(√(T/n))) atTop (𝓝 ((r - σ²/2)/σ))
   have h_σT : Tendsto (fun n : ℕ =>
       σ * T * ((2 * Real.exp (r * (Real.sqrt (crrStep T n))^2)
             - Real.exp (σ * Real.sqrt (crrStep T n))
@@ -195,7 +191,6 @@ private theorem crr_drift_limit_deferred {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 <
   have h_sqrt_sq : Real.sqrt (crrStep T n) ^ 2 = crrStep T n := Real.sq_sqrt h_step_pos.le
   have h_sqrt_pos : 0 < Real.sqrt (crrStep T n) := Real.sqrt_pos.mpr h_step_pos
   have h_sqrt_ne : Real.sqrt (crrStep T n) ≠ 0 := h_sqrt_pos.ne'
-  -- Denominator positive (since σ > 0 and √Δt > 0 ⟹ e^{σ√Δt} > e^{-σ√Δt}).
   have h_inner_lt : -(σ * Real.sqrt (crrStep T n)) < σ * Real.sqrt (crrStep T n) := by
     have h_pos : 0 < σ * Real.sqrt (crrStep T n) := mul_pos hσ h_sqrt_pos
     linarith
@@ -206,11 +201,16 @@ private theorem crr_drift_limit_deferred {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 <
   have hden_ne :
       Real.exp (σ * Real.sqrt (crrStep T n))
         - Real.exp (-(σ * Real.sqrt (crrStep T n))) ≠ 0 := hden_pos.ne'
-  -- (Algebraic key fact) n · √(T/n) · √(T/n) = T.
-  have h_n_sq_T : (n : ℝ) * (Real.sqrt (crrStep T n) * Real.sqrt (crrStep T n)) = T := by
-    rw [← sq, h_sqrt_sq, h_step_eq, mul_div_assoc']
-    field_simp
-  sorry
--/
+  have h_sqrt_eq : Real.sqrt (T / n) = Real.sqrt (crrStep T n) := by
+    rw [h_step_eq]
+  unfold crrProb crrUp crrDown crrPerStepRate
+  rw [h_sqrt_eq]
+  have h_n_step : (n : ℝ) * crrStep T n = T := by
+    rw [h_step_eq]; field_simp
+  field_simp
+  rw [h_sqrt_sq]
+  linear_combination
+    -(2 * Real.exp (r * crrStep T n) - Real.exp (σ * Real.sqrt (crrStep T n))
+        - Real.exp (-(σ * Real.sqrt (crrStep T n)))) * h_n_step
 
 end HybridVerify
