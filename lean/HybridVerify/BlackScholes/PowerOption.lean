@@ -6,27 +6,29 @@ Authors: Raphael Coelho
 import Mathlib
 import HybridVerify.BlackScholes.Call
 import HybridVerify.BlackScholes.Forward
+import HybridVerify.Foundations.StandardGaussianMGF
 
 /-!
 # Power options under the BS lognormal hypothesis
 
-A power option pays a function of `S_T^n` for some `n : ℕ`. The key
-risk-neutral moment is
+The `n`-th moment of `S_T` under `BSCallHyp` is
 
-  `E_Q[S_T^n] = S_0^n · exp(n·r·T + n(n-1)/2 · σ² T)`,
+  `E_Q[S_T^n] = S_0^n · exp(n · r · T + n(n−1)/2 · σ²T)`,
 
-with the canonical specializations `n = 1` (forward price) and `n = 2`
-(`secondMoment_terminal` in `LognormalMoments.lean`). Discounting gives the
-**power-forward price**
+and its discounted form is the *power-forward price*
 
-  `e^{-rT} · E_Q[S_T^n] = S_0^n · exp((n-1)·r·T + n(n-1)/2 · σ² T)`,
+  `e^{−rT} · E_Q[S_T^n] = S_0^n · exp((n−1) · r · T + n(n−1)/2 · σ²T)`.
 
-which generalizes both the spot-forward parity (`n = 1`, price = `S_0`) and the
-discounted second moment.
+Both are direct instances of the **affine-shifted standard-normal MGF**
+`∫ exp(α + β · z) · pdf(0, 1, z) dz = exp(α + β²/2)` (proved in
+`StandardGaussianMGF.lean`), with `α = n · (r − σ²/2) · T` and `β = n · σ · √T`.
+The identity `α + β²/2 = n · r · T + n(n−1)/2 · σ²T` is the algebraic core; the
+rest is the standard HasLaw transfer from `Z` to `gaussianReal 0 1`.
 
-Derivation pattern (identical to `secondMoment_terminal`): rewrite
-`(S_T)^n = S_0^n · exp(n·(r − σ²/2)·T + n·σ·√T·Z)`, apply the gaussian MGF
-`E[exp(c·Z)] = exp(c²/2)` at `c = n·σ·√T`.
+This file demonstrates the use of the affine MGF master: the proof body
+factors `(bsTerminal z)^n = S_0^n · exp(α + β·z)` and applies the master in a
+single rewrite. No manual constant-pulling. Compare to the earlier
+`secondMoment_terminal` (which is now derivable as `nthMoment_terminal 2`).
 
 Results:
 
@@ -40,7 +42,12 @@ open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
 
 /-- **`n`-th moment of the terminal asset price** under `BSCallHyp`:
-`E_Q[S_T^n] = S_0^n · exp(n·r·T + n(n-1)/2 · σ² T)`. -/
+`E_Q[S_T^n] = S_0^n · exp(n · r · T + n(n−1)/2 · σ²T)`.
+
+Direct instance of the affine-shifted standard-normal MGF: with
+`α = n(r − σ²/2)T` and `β = nσ√T`, the integrand `(bsTerminal z)^n` equals
+`S_0^n · exp(α + β·z)`, so `E[(bsTerminal)^n] = S_0^n · exp(α + β²/2)`.
+The algebraic identity `α + β²/2 = nrT + n(n−1)/2 σ²T` finishes. -/
 theorem nthMoment_terminal
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
@@ -50,70 +57,59 @@ theorem nthMoment_terminal
       S_0^n *
         Real.exp ((n : ℝ) * r * T + (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) := by
   obtain ⟨_hS_0, _hK, _hσ, hT, hZ⟩ := h
-  set N : ℝ := (n : ℝ) with N_def
-  set μ_log : ℝ := N * (r - σ^2 / 2) * T with μ_log_def
-  set ν_log : ℝ := N * σ * Real.sqrt T with ν_log_def
-  have hν_log_sq : ν_log^2 = N^2 * σ^2 * T := by
-    rw [ν_log_def]; ring_nf; rw [Real.sq_sqrt hT.le]
-  have h_algebra : μ_log + ν_log^2 / 2 = N * r * T + N * (N - 1) / 2 * σ^2 * T := by
-    rw [hν_log_sq]; ring
-  have h_term_meas : Measurable fun z : ℝ => (bsTerminal S_0 r σ T z)^n := by
-    unfold bsTerminal; fun_prop
-  rw [show (fun ω => (bsTerminal S_0 r σ T (Z ω))^n)
-        = (fun z => (bsTerminal S_0 r σ T z)^n) ∘ Z from rfl,
-      hZ.integral_comp h_term_meas.aestronglyMeasurable,
-      integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
-  have h_factor : ∀ z : ℝ,
-      gaussianPDFReal 0 1 z • (bsTerminal S_0 r σ T z)^n
-        = S_0^n * Real.exp μ_log *
-            (Real.exp (ν_log * z) * gaussianPDFReal 0 1 z) := by
+  set α : ℝ := (n : ℝ) * (r - σ^2 / 2) * T with α_def
+  set β : ℝ := (n : ℝ) * σ * Real.sqrt T with β_def
+  -- The two algebraic facts that drive the proof:
+  have h_β_sq : β^2 = (n : ℝ)^2 * σ^2 * T := by
+    rw [β_def]; ring_nf; rw [Real.sq_sqrt hT.le]
+  have h_algebra :
+      α + β^2 / 2 =
+        (n : ℝ) * r * T + (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T := by
+    rw [h_β_sq]; ring
+  -- Pointwise: `(S_0 · exp(...))^n = S_0^n · exp(α + β·z)`.
+  have h_pow : ∀ z : ℝ,
+      (bsTerminal S_0 r σ T z)^n = S_0^n * Real.exp (α + β * z) := by
     intro z
     unfold bsTerminal
-    have h_pow :
-        (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))^n
-          = S_0^n * (Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))^n :=
-      mul_pow _ _ _
-    have h_exp_pow :
-        (Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))^n
-          = Real.exp (μ_log + ν_log * z) := by
-      rw [← Real.exp_nat_mul]
-      congr 1
-      rw [μ_log_def, ν_log_def, N_def]; ring
-    rw [h_pow, h_exp_pow, smul_eq_mul, Real.exp_add]
-    ring
-  rw [show (fun z => gaussianPDFReal 0 1 z • (bsTerminal S_0 r σ T z)^n)
-        = (fun z => S_0^n * Real.exp μ_log *
-            (Real.exp (ν_log * z) * gaussianPDFReal 0 1 z)) from funext h_factor]
-  rw [integral_const_mul, integral_exp_mul_gaussianPDFReal_univ]
-  rw [show S_0^n * Real.exp μ_log * Real.exp (ν_log^2 / 2)
-        = S_0^n * (Real.exp μ_log * Real.exp (ν_log^2 / 2)) from by ring,
-      ← Real.exp_add, h_algebra]
+    rw [mul_pow, ← Real.exp_nat_mul]
+    congr 1
+    rw [α_def, β_def]; ring
+  -- HasLaw transfer + change to `pdf`-against-Lebesgue form.
+  have h_meas : Measurable fun z : ℝ => (bsTerminal S_0 r σ T z)^n := by
+    unfold bsTerminal; fun_prop
+  rw [show (fun ω => (bsTerminal S_0 r σ T (Z ω))^n) =
+        (fun z => (bsTerminal S_0 r σ T z)^n) ∘ Z from rfl,
+      hZ.integral_comp h_meas.aestronglyMeasurable,
+      integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
+  -- Substitute the pointwise factorisation and reorder.
+  simp_rw [smul_eq_mul, h_pow]
+  rw [show
+        (fun z : ℝ => gaussianPDFReal 0 1 z * (S_0^n * Real.exp (α + β * z)))
+        =
+        (fun z => S_0^n * (Real.exp (α + β * z) * gaussianPDFReal 0 1 z))
+      from funext (fun z => by ring)]
+  -- Apply the affine MGF master directly: the heart of the proof.
+  rw [integral_const_mul, integral_exp_affine_gaussianPDFReal_univ]
+  rw [h_algebra]
 
-/-- **Power-forward price**: discounted `n`-th moment of `S_T` equals
-`S_0^n · exp((n-1)·r·T + n(n-1)/2 · σ² T)`. Specializes to:
-* `n = 0`: `e^{-rT}`,
-* `n = 1`: `S_0` (martingale property of discounted spot),
-* `n = 2`: `S_0² · exp(r·T + σ² T)`. -/
+/-- **Power-forward price**: discounted `n`-th moment equals
+`S_0^n · exp((n−1) · r · T + n(n−1)/2 · σ²T)`. Specialises to:
+* `n = 0`: `e^{−rT}` (a unit-payoff at maturity is a zero-coupon bond).
+* `n = 1`: `S_0` (discounted spot is a martingale: `e^{−rT} · E[S_T] = S_0`).
+* `n = 2`: `S_0² · exp(rT + σ²T)` (the variance-relevant moment after
+  subtracting the squared forward). -/
 theorem powerForward_price
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (n : ℕ)
     (h : BSCallHyp Q S_0 K r σ T Z) :
     Real.exp (-(r * T)) *
-      (∫ ω, (bsTerminal S_0 r σ T (Z ω))^n ∂Q) =
+        (∫ ω, (bsTerminal S_0 r σ T (Z ω))^n ∂Q) =
       S_0^n *
-        Real.exp ((((n : ℝ) - 1) * r * T) +
+        Real.exp (((n : ℝ) - 1) * r * T +
                   (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T) := by
-  rw [nthMoment_terminal n h]
-  rw [show Real.exp (-(r * T)) *
-        (S_0^n *
-          Real.exp ((n : ℝ) * r * T +
-                    (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T))
-        = S_0^n *
-            (Real.exp (-(r * T)) *
-              Real.exp ((n : ℝ) * r * T +
-                        (n : ℝ) * ((n : ℝ) - 1) / 2 * σ^2 * T)) from by ring,
-      ← Real.exp_add]
+  rw [nthMoment_terminal n h, ← mul_assoc, mul_comm (Real.exp _) (S_0^n),
+      mul_assoc, ← Real.exp_add]
   congr 2
   ring
 

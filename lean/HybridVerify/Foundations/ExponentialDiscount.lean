@@ -16,62 +16,78 @@ identity:
 The instances:
 
 | object                | rate `r(u)`                    | quantity                                      |
-|-----------------------|---------------------------------|-----------------------------------------------|
-| Zero-coupon bond      | risk-free rate `r`              | `P(t) = exp(−r·(T−t))`                        |
-| Hazard credit         | hazard intensity `h`            | `S(t) = exp(−h·(T−t))`                        |
-| Survival w/ curve     | hazard function `h(u)`          | `S(t) = exp(−∫₀^t h(u)du)`  (`HazardCurve`)   |
-| Force of mortality    | force `μ(u)`                    | survival = `exp(−∫₀^t μ(u)du)` (`Mortality`)  |
-| Vasicek deterministic | drift toward `θ`                | `r(t) = θ + (r₀−θ)·exp(−κt)` (no integral)    |
+|-----------------------|--------------------------------|-----------------------------------------------|
+| Zero-coupon bond      | risk-free rate `r`             | `P(t) = exp(−r·(T−t))`                        |
+| Hazard credit         | hazard intensity `h`           | `S(t) = exp(−h·(T−t))`                        |
+| Survival w/ curve     | hazard function `h(u)`         | `S(t) = exp(−∫₀^t h(u) du)`  (`HazardCurve`)  |
+| Force of mortality    | force `μ(u)`                   | survival = `exp(−∫₀^t μ(u) du)` (`Mortality`) |
+| Vasicek deterministic | drift toward `θ`               | `r(t) = θ + (r₀−θ)·exp(−κt)` (no integral)    |
 
-The *flat-rate* identity `H(t) = r·t ⟹ exp(−r·t)` is shared by ZCB, credit
-spread, and Vasicek (at infinity); the *cumulative-integral* form
-`exp(−∫ rate du)` is shared by hazard curve and force-of-mortality survival.
+## The dual identity: rate as negative-log-derivative
 
-The general identity below sits underneath all of them.
+Given a *quantity* `Q(t) = exp(−H(t))`, the rate can be *recovered*:
 
-## The reciprocal: rates from quantities
+  `−d/dt log Q(t) = d/dt H(t) = rate(t)`.
 
-If `S(t) = exp(−H(t))`, then `−d/dt log S(t) = d/dt H(t) = rate(t)`. So:
+This is the conceptual content of every "rate from term-structure" formula:
 
-* **Forward rate from spot rate**: `f(T) = −d/dT log P(T) = d/dT (T · R(T))`
-  (`ForwardRate`).
-* **Force of mortality from survival**: `μ(t) = −d/dt log S(t)`.
-* **Hazard intensity from survival**: `h(t) = −d/dt log S(t)`.
+* **Forward rate from spot rate**: `f(T) = −d/dT log P(T)` where
+  `P(T) = exp(−T · R(T))`. (`ForwardRate.lean`)
+* **Force of mortality from survival**: `μ(t) = −d/dt log S(t)`. (`Mortality.lean`)
+* **Hazard intensity from survival**: `h(t) = −d/dt log S(t)`. (`HazardCurve.lean`)
 
-The same algebra (`exp` and `log` are inverses, derivatives commute through)
-generates each.
+The proof is one step: `log(exp(x)) = x` (Mathlib `Real.log_exp`). The
+derivative-of-`H` hypothesis carries through unchanged. We record this
+identity as `rate_eq_neg_log_deriv` below.
 
-This file records the master identity and notes the call sites. The
-specific consumers (`ZCB`, `Credit`, `HazardCurve`, `Mortality`, `Vasicek`,
-`ForwardRate`) each instantiate it under their respective rate functions.
+## Results
+
+* `rate_eq_neg_log_deriv`: if `H` has derivative `H'(t)` at `t`, then
+  `-d/dt log(exp(-H(t))) = H'(t)` at `t`. This is the universal
+  "rate from quantity" recovery.
+* `discount_pos`: `exp(-H) > 0` always (so all five discount/survival
+  quantities are positive).
+* `discount_strictAnti`: `H₁ < H₂ ⇒ exp(-H₂) < exp(-H₁)` (discounting
+  decreases in cumulative rate).
 -/
 
 namespace HybridVerify
 
 open Real
 
-/-- **Cumulative-rate / discount identity**: if `H(t)` is a cumulative-rate
-quantity then `exp(−H(t))` is its associated discount/survival factor.
-Trivial algebraically; significant *conceptually* — discount, hazard
-survival, and mortality survival are this one identity. -/
-lemma discount_eq_exp_neg_cum_rate (H : ℝ) :
-    Real.exp (-H) = Real.exp (-H) := rfl
+/-- **The universal rate-recovery identity**: if `H` is differentiable at
+`t` with derivative `H'`, then `−d/dt log(exp(−H(t))) = H'(t)` at `t`.
 
-/-- **Discount-factor positivity** (universal): for any cumulative rate `H`,
-`0 < exp(−H)`. This is the structural reason all five "survival/discount"
-quantities in the library are positive (`survival_pos`, `hazardSurvival_pos`,
-`survivalFromForce_pos`, ZCB pricing positivity). -/
+This is the conceptual reason `forward rate = −d/dT log P` (`ZCB`, `ForwardRate`),
+`force of mortality = −d/dt log S` (`Mortality`), and `hazard = −d/dt log S`
+(`HazardCurve`) are all *the same identity*: each computes the rate from
+the discount/survival, the difference is only in what `H` represents.
+
+The proof: `log(exp(−H s)) = −H s` (logs and exps are inverses), so
+`−log(exp(−H s)) = H s`, and the derivative of the LHS equals `H'(t)` by
+hypothesis. -/
+theorem rate_eq_neg_log_deriv {H : ℝ → ℝ} {H' t : ℝ}
+    (hH : HasDerivAt H H' t) :
+    HasDerivAt (fun s => -(Real.log (Real.exp (-H s)))) H' t := by
+  have h_eq : (fun s : ℝ => -(Real.log (Real.exp (-H s)))) = H := by
+    funext s; rw [Real.log_exp, neg_neg]
+  rw [h_eq]
+  exact hH
+
+/-- Universal discount/survival positivity: `0 < exp(−H)` for any `H`.
+
+Underpins `survival_pos` (constant-hazard credit), `hazardSurvival_pos`
+(time-varying hazard), `survivalFromForce_pos` (mortality), and the
+implicit positivity of the BS discount factor `exp(−rT)`. -/
 lemma discount_pos (H : ℝ) : 0 < Real.exp (-H) := Real.exp_pos _
 
-/-- **Discount is strictly decreasing in cumulative rate**: `H₁ < H₂ ⟹
-exp(−H₁) > exp(−H₂)`. Structural reason for positive-spread monotonicity
-(`survival_strictAnti_of_pos_hazard`) and for the no-arb ZCB shape. -/
-lemma discount_strictAnti (H₁ H₂ : ℝ) (h : H₁ < H₂) :
+/-- Universal discount monotonicity: `H₁ < H₂ ⇒ exp(−H₂) < exp(−H₁)`.
+
+Underpins `survival_strictAnti_of_pos_hazard`, the strict ordering of ZCB
+prices at distinct rates, and the strict-positive-correlation tightening
+of variance bounds. -/
+lemma discount_strictAnti {H₁ H₂ : ℝ} (h : H₁ < H₂) :
     Real.exp (-H₂) < Real.exp (-H₁) :=
   Real.exp_lt_exp.mpr (by linarith)
-
-/-- **Constant-rate cumulative**: `H(t) = r·t` is the special case shared by
-ZCB pricing, constant-hazard credit, and constant-force mortality. -/
-lemma cum_rate_const (r t : ℝ) : r * t = r * t := rfl
 
 end HybridVerify

@@ -73,8 +73,9 @@ import HybridVerify.BlackScholes.Lookback
 import HybridVerify.BlackScholes.PowerOption
 import HybridVerify.BlackScholes.BreedenLitzenberger
 import HybridVerify.BlackScholes.BisectionIV
--- Structural / principle module:
+-- Structural / principle modules:
 import HybridVerify.BlackScholes.StrikeConvexity
+import HybridVerify.BlackScholes.PriceBounds
 
 -- Futures
 import HybridVerify.Futures.Black76
