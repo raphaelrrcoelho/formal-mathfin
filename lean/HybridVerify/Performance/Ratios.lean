@@ -30,17 +30,29 @@ namespace HybridVerify
 
 open Real
 
+/-- **The "ratio scale invariance" algebraic master**: `(c·a − c·b) / (c·d) =
+(a − b) / d` for `c ≠ 0`.
+
+The same identity drives the scale invariance of every "difference-over-stdev"
+performance ratio: `Sharpe`, `Sortino`, `Treynor`, `Information ratio` are
+all instances. Naming the algebraic fact factors the work — each ratio's
+`*_scale_invariant` lemma is a one-line application. -/
+lemma diff_div_scale_invariant {c : ℝ} (hc : c ≠ 0) (a b d : ℝ) :
+    (c * a - c * b) / (c * d) = (a - b) / d := by
+  by_cases hd : d = 0
+  · subst hd; simp
+  · field_simp
+
 /-- Sharpe ratio `(μ - r_f) / σ`. -/
 noncomputable def sharpeRatio (μ r_f σ : ℝ) : ℝ := (μ - r_f) / σ
 
 /-- **Scale invariance**: the Sharpe ratio is invariant under uniform scaling
-of mean, risk-free rate, and volatility. -/
+of mean, risk-free rate, and volatility. One-line consequence of the
+`diff_div_scale_invariant` master. -/
 lemma sharpeRatio_scale_invariant {c : ℝ} (hc : c ≠ 0) (μ r_f σ : ℝ) :
     sharpeRatio (c * μ) (c * r_f) (c * σ) = sharpeRatio μ r_f σ := by
   unfold sharpeRatio
-  by_cases hσ : σ = 0
-  · subst hσ; simp
-  · field_simp
+  exact diff_div_scale_invariant hc μ r_f σ
 
 /-- **Sharpe `√T`-scaling**: under iid time aggregation, `L_T ~ N(T·μ, T·σ²)`,
 so the Sharpe ratio at horizon `T` equals `√T` times the unit-horizon Sharpe
