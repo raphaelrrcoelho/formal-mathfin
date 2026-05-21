@@ -45,6 +45,11 @@ import HybridVerify.Foundations.WienerIntegralL2
 -- Structural / principle modules:
 import HybridVerify.Foundations.StandardGaussianMGF
 import HybridVerify.Foundations.ExponentialDiscount
+-- Phase 13 additions:
+import HybridVerify.Foundations.StatePrices
+import HybridVerify.Foundations.TriangleArbitrage
+import HybridVerify.Foundations.CarrMadan
+import HybridVerify.Foundations.AlmgrenChriss
 
 -- BlackScholes
 import HybridVerify.BlackScholes.Call
@@ -76,10 +81,16 @@ import HybridVerify.BlackScholes.BisectionIV
 -- Structural / principle modules:
 import HybridVerify.BlackScholes.StrikeConvexity
 import HybridVerify.BlackScholes.PriceBounds
+-- Phase 13 additions:
+import HybridVerify.BlackScholes.Quanto
+import HybridVerify.BlackScholes.NewtonRaphsonIV
+import HybridVerify.BlackScholes.LognormalCOV
 
 -- Futures
 import HybridVerify.Futures.Black76
 import HybridVerify.Futures.Black76Greeks
+-- Phase 13 additions:
+import HybridVerify.Futures.Swaption
 
 -- Binomial
 import HybridVerify.Binomial.Model
@@ -88,6 +99,9 @@ import HybridVerify.Binomial.CRRConvergence
 import HybridVerify.Binomial.DriftLimit
 import HybridVerify.Binomial.Bermudan
 import HybridVerify.Binomial.AmericanCallNoDividend
+-- Phase 13 additions:
+import HybridVerify.Binomial.Girsanov
+import HybridVerify.Binomial.SecondFTAP
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB
@@ -100,6 +114,10 @@ import HybridVerify.FixedIncome.MacaulayModified
 import HybridVerify.FixedIncome.HazardCurve
 import HybridVerify.FixedIncome.ForwardRate
 import HybridVerify.FixedIncome.Vasicek
+-- Phase 13 additions:
+import HybridVerify.FixedIncome.KMVMerton
+import HybridVerify.FixedIncome.MeanReversionHalfLife
+import HybridVerify.FixedIncome.CDS
 
 -- Portfolio
 import HybridVerify.Portfolio.Markowitz
@@ -109,6 +127,8 @@ import HybridVerify.Portfolio.TwoFundSeparation
 import HybridVerify.Portfolio.RiskParity
 import HybridVerify.Portfolio.BlackLitterman
 import HybridVerify.Portfolio.TangentPortfolio
+-- Phase 13 additions:
+import HybridVerify.Portfolio.TangentPortfolioN
 
 -- Performance
 import HybridVerify.Performance.Ratios
@@ -126,3 +146,5 @@ import HybridVerify.RiskMeasures.Concentration
 -- Actuarial
 import HybridVerify.Actuarial.Insurance
 import HybridVerify.Actuarial.Mortality
+-- Phase 13 additions:
+import HybridVerify.Actuarial.CompoundPoisson

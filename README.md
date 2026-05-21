@@ -8,9 +8,9 @@ Every full derivation is `#print axioms`-clean: depends only on `[propext, Class
 
 | | count |
 |---|---|
-| total theorems | 234 |
-| delivery-ready | **218** |
-| ↳ full derivations | 194 |
+| total theorems | 251 |
+| delivery-ready | **235** |
+| ↳ full derivations | 211 |
 | ↳ library wrappers | 24 |
 | reduced cores (upstream-gated) | 16 |
 | placeholders | 0 |
