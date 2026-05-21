@@ -4,71 +4,59 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
+import HybridVerify.BlackScholes.StrikeConvexity
 
 /-!
-# Static spread non-negativity (bull-call, butterfly)
+# Static spread no-arbitrage relations (bull-call, butterfly)
 
-Two no-arbitrage payoff inequalities at expiry that follow from the call payoff
-`max(S − K, 0)` alone, with no dependence on a pricing model:
+Two static no-arbitrage payoff inequalities at expiry, both expressing
+*structural properties of the call payoff in the strike*:
 
-* **Bull-call spread non-negativity**: for `K₁ ≤ K₂`,
-  `max(S − K₂, 0) ≤ max(S − K₁, 0)`.
-  By no-arb (LOOP): a portfolio long `C(K₁)` short `C(K₂)` has non-negative
-  payoff at expiry, so its price today is non-negative.
-* **Butterfly non-negativity**: for `K₁ ≤ K₃` and `K₂ = (K₁ + K₃)/2`,
-  `0 ≤ max(S − K₁, 0) − 2 · max(S − K₂, 0) + max(S − K₃, 0)`.
-  Pure case split: at most one of the three legs contributes a non-zero
-  weight, and the central piece cancels by midpoint symmetry.
+* **Bull-call spread** `max(S − K₂, 0) ≤ max(S − K₁, 0)` for `K₁ ≤ K₂`:
+  the payoff `K ↦ max(S − K, 0)` is *antitone* in `K`.
+* **Butterfly spread** `0 ≤ max(S − K₁, 0) − 2 · max(S − (K₁+K₃)/2, 0) +
+  max(S − K₃, 0)`: the payoff is *convex* in `K`, so its discrete
+  second-difference at the midpoint is non-negative.
 
-Both are model-light arbitrage relations that constrain any consistent option
-price surface; the butterfly inequality is the cornerstone of the
-Breeden–Litzenberger non-negativity-of-implied-density argument.
+These are not two independent theorems; they are the *antitone* and *convex*
+faces of `K ↦ max(S − K, 0)`. Both structural facts are recorded in
+`StrikeConvexity.lean` (`antitone_call_payoff` and `convexOn_call_payoff`).
+
+The same convexity, applied infinitesimally rather than discretely, yields
+non-negativity of the second `K`-derivative of the European call price —
+i.e. the Breeden-Litzenberger implied PDF.
 -/
 
 namespace HybridVerify
 
 /-- **Bull-call spread payoff non-negativity**: for `K₁ ≤ K₂`,
-`max(S − K₂, 0) ≤ max(S − K₁, 0)`. -/
+`max(S − K₂, 0) ≤ max(S − K₁, 0)`. Antitone face of the call payoff in `K`. -/
 lemma bull_call_spread_payoff_le (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :
     max (S - K₂) 0 ≤ max (S - K₁) 0 :=
-  max_le_max (by linarith) le_rfl
+  antitone_call_payoff S h
 
-/-- **Butterfly spread payoff non-negativity**: for `K₁ ≤ K₃` with the central
-strike at the midpoint `K₂ = (K₁ + K₃)/2`,
-`0 ≤ max(S − K₁, 0) − 2 · max(S − (K₁+K₃)/2, 0) + max(S − K₃, 0)`. -/
-lemma butterfly_payoff_nonneg (S K₁ K₃ : ℝ) (h : K₁ ≤ K₃) :
+/-- **Butterfly spread payoff non-negativity**: for `K₂ = (K₁ + K₃)/2`,
+`0 ≤ max(S − K₁, 0) − 2 · max(S − (K₁+K₃)/2, 0) + max(S − K₃, 0)`.
+
+The discrete second-difference of the convex function `K ↦ max(S − K, 0)` at
+the midpoint of `K₁` and `K₃` is non-negative: this is Jensen's inequality
+`f((K₁+K₃)/2) ≤ (f(K₁) + f(K₃))/2`, multiplied by 2 and rearranged. The
+hypothesis `K₁ ≤ K₃` is retained for API stability but is not needed for
+the inequality. -/
+lemma butterfly_payoff_nonneg (S K₁ K₃ : ℝ) (_h : K₁ ≤ K₃) :
     0 ≤
       max (S - K₁) 0 -
         2 * max (S - (K₁ + K₃) / 2) 0 +
         max (S - K₃) 0 := by
-  set K₂ := (K₁ + K₃) / 2 with hK₂
-  have hK₁₂ : K₁ ≤ K₂ := by rw [hK₂]; linarith
-  have hK₂₃ : K₂ ≤ K₃ := by rw [hK₂]; linarith
-  by_cases h1 : S ≤ K₁
-  · have e1 : max (S - K₁) 0 = 0 := max_eq_right (by linarith)
-    have e2 : max (S - K₂) 0 = 0 := max_eq_right (by linarith)
-    have e3 : max (S - K₃) 0 = 0 := max_eq_right (by linarith)
-    rw [e1, e2, e3]; norm_num
-  push_neg at h1
-  by_cases h2 : S ≤ K₂
-  · have e1 : max (S - K₁) 0 = S - K₁ := max_eq_left (by linarith)
-    have e2 : max (S - K₂) 0 = 0 := max_eq_right (by linarith)
-    have e3 : max (S - K₃) 0 = 0 := max_eq_right (by linarith)
-    rw [e1, e2, e3]; linarith
-  push_neg at h2
-  by_cases h3 : S ≤ K₃
-  · have e1 : max (S - K₁) 0 = S - K₁ := max_eq_left (by linarith)
-    have e2 : max (S - K₂) 0 = S - K₂ := max_eq_left (by linarith)
-    have e3 : max (S - K₃) 0 = 0 := max_eq_right (by linarith)
-    rw [e1, e2, e3]
-    have hmid : 2 * K₂ = K₁ + K₃ := by rw [hK₂]; ring
-    linarith
-  · push_neg at h3
-    have e1 : max (S - K₁) 0 = S - K₁ := max_eq_left (by linarith)
-    have e2 : max (S - K₂) 0 = S - K₂ := max_eq_left (by linarith)
-    have e3 : max (S - K₃) 0 = S - K₃ := max_eq_left (by linarith)
-    rw [e1, e2, e3]
-    have hmid : 2 * K₂ = K₁ + K₃ := by rw [hK₂]; ring
-    linarith
+  -- Convexity inequality at α = β = 1/2 (midpoint convex combination).
+  have h_conv := (convexOn_call_payoff S).2 (Set.mem_univ K₁) (Set.mem_univ K₃)
+    (by norm_num : (0:ℝ) ≤ 1/2)
+    (by norm_num : (0:ℝ) ≤ 1/2)
+    (by norm_num : (1/2:ℝ) + 1/2 = 1)
+  simp only [smul_eq_mul] at h_conv
+  rw [show (1/2 * K₁ + 1/2 * K₃ : ℝ) = (K₁ + K₃) / 2 from by ring] at h_conv
+  -- h_conv: max(S − midpoint, 0) ≤ (1/2)·max(S−K₁, 0) + (1/2)·max(S−K₃, 0)
+  -- Multiply by 2 and rearrange.
+  linarith
 
 end HybridVerify

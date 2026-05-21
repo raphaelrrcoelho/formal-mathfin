@@ -42,6 +42,9 @@ import HybridVerify.Foundations.MartingaleTransform
 import HybridVerify.Foundations.MathlibLp
 import HybridVerify.Foundations.WienerIntegral
 import HybridVerify.Foundations.WienerIntegralL2
+-- Structural / principle modules:
+import HybridVerify.Foundations.StandardGaussianMGF
+import HybridVerify.Foundations.ExponentialDiscount
 
 -- BlackScholes
 import HybridVerify.BlackScholes.Call
@@ -70,6 +73,8 @@ import HybridVerify.BlackScholes.Lookback
 import HybridVerify.BlackScholes.PowerOption
 import HybridVerify.BlackScholes.BreedenLitzenberger
 import HybridVerify.BlackScholes.BisectionIV
+-- Structural / principle module:
+import HybridVerify.BlackScholes.StrikeConvexity
 
 -- Futures
 import HybridVerify.Futures.Black76
