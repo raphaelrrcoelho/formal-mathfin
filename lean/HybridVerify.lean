@@ -130,6 +130,8 @@ import HybridVerify.FixedIncome.Vasicek
 import HybridVerify.FixedIncome.KMVMerton
 import HybridVerify.FixedIncome.MeanReversionHalfLife
 import HybridVerify.FixedIncome.CDS
+-- Phase 21: first-principles duration-as-price-sensitivity
+import HybridVerify.FixedIncome.DurationSensitivity
 
 -- Portfolio
 import HybridVerify.Portfolio.Markowitz
@@ -141,6 +143,9 @@ import HybridVerify.Portfolio.BlackLitterman
 import HybridVerify.Portfolio.TangentPortfolio
 -- Phase 13 additions:
 import HybridVerify.Portfolio.TangentPortfolioN
+-- Phase 21: first-principles Sharpe-FOC and CAPM-equilibrium derivations
+import HybridVerify.Portfolio.SharpeFOCDerivation
+import HybridVerify.Portfolio.CAPMEquilibrium
 
 -- Performance
 import HybridVerify.Performance.Ratios
@@ -154,6 +159,8 @@ import HybridVerify.RiskMeasures.Additivity
 import HybridVerify.RiskMeasures.RockafellarUryasev
 import HybridVerify.RiskMeasures.Spectral
 import HybridVerify.RiskMeasures.Concentration
+-- Phase 21: first-principles coherent-axiom derivation from concave utility
+import HybridVerify.RiskMeasures.UtilityDerivation
 
 -- Actuarial
 import HybridVerify.Actuarial.Insurance

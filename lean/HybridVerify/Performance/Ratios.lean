@@ -21,6 +21,10 @@ Results:
 
 * `sharpeRatio`: definition.
 * `sharpeRatio_scale_invariant`: `S(λμ, λr_f, λσ) = S(μ, r_f, σ)` for `λ ≠ 0`.
+* `sharpeRatio_translation_invariant`: shift cancels in the excess return.
+* `sharpeRatio_affine_invariant`: full affine invariance, scale + shift.
+* `sharpeRatio_affine_signed`: with `|c|`-volatility convention, the Sharpe
+  ratio picks up `sign(c)` under `X ↦ c·X + d`.
 * `sharpeRatio_scaleT`: `S_T = √T · S_1` for iid time aggregation.
 * `kellyFraction`, `kellyGrowth`: definitions.
 * `kellyGrowth_deriv_at_kelly`: first-order optimality `g'(f*) = 0`.
@@ -53,6 +57,56 @@ lemma sharpeRatio_scale_invariant {c : ℝ} (hc : c ≠ 0) (μ r_f σ : ℝ) :
     sharpeRatio (c * μ) (c * r_f) (c * σ) = sharpeRatio μ r_f σ := by
   unfold sharpeRatio
   exact diff_div_scale_invariant hc μ r_f σ
+
+/-- **The "affine ratio invariance" algebraic master**: the ratio
+`(c·a + d − (c·b + d)) / (c·e)` collapses to `(a − b) / e` for `c ≠ 0`.
+The shift `d` cancels in the numerator; the scale `c` cancels between
+numerator and denominator. -/
+lemma diff_div_affine_invariant {c : ℝ} (hc : c ≠ 0) (a b d e : ℝ) :
+    (c * a + d - (c * b + d)) / (c * e) = (a - b) / e := by
+  rw [show c * a + d - (c * b + d) = c * a - c * b from by ring]
+  exact diff_div_scale_invariant hc a b e
+
+/-- **Signed affine invariance algebraic master**: when the denominator
+scales as `|c|` (the natural scaling of a standard deviation under
+`X ↦ c·X + d`, since `Var(cX + d) = c² · Var(X)`), the ratio picks up
+`sign(c)`. -/
+lemma diff_div_affine_signed {c : ℝ} (hc : c ≠ 0) (a b d e : ℝ) :
+    (c * a + d - (c * b + d)) / (|c| * e) = Real.sign c * ((a - b) / e) := by
+  rw [show c * a + d - (c * b + d) = c * (a - b) from by ring]
+  by_cases he : e = 0
+  · subst he; simp
+  · rcases lt_trichotomy c 0 with hc_neg | hc_zero | hc_pos
+    · rw [abs_of_neg hc_neg, Real.sign_of_neg hc_neg]
+      field_simp
+    · exact absurd hc_zero hc
+    · rw [abs_of_pos hc_pos, Real.sign_of_pos hc_pos]
+      field_simp
+
+/-- **Translation invariance of the Sharpe ratio**: shifting the mean and
+risk-free rate by the same additive constant preserves `S = (μ − r_f)/σ`,
+since the shift cancels in the excess return. -/
+lemma sharpeRatio_translation_invariant (μ r_f σ b : ℝ) :
+    sharpeRatio (μ + b) (r_f + b) σ = sharpeRatio μ r_f σ := by
+  unfold sharpeRatio; ring_nf
+
+/-- **Full affine invariance of the Sharpe ratio (signed-σ convention)**:
+under the joint substitution `μ → c·μ + d`, `r_f → c·r_f + d`, `σ → c·σ`,
+the Sharpe ratio is invariant for any `c ≠ 0`. The shift cancels in the
+excess, and the scale cancels in the ratio. -/
+lemma sharpeRatio_affine_invariant {c : ℝ} (hc : c ≠ 0) (μ r_f σ d : ℝ) :
+    sharpeRatio (c * μ + d) (c * r_f + d) (c * σ) = sharpeRatio μ r_f σ := by
+  unfold sharpeRatio
+  exact diff_div_affine_invariant hc μ r_f d σ
+
+/-- **Sign-aware affine invariance** (natural `|c|`-volatility convention):
+since `StDev(cX + d) = |c| · StDev(X)`, the Sharpe ratio under the joint
+substitution flips sign when `c < 0`. -/
+lemma sharpeRatio_affine_signed {c : ℝ} (hc : c ≠ 0) (μ r_f σ d : ℝ) :
+    sharpeRatio (c * μ + d) (c * r_f + d) (|c| * σ) =
+      Real.sign c * sharpeRatio μ r_f σ := by
+  unfold sharpeRatio
+  exact diff_div_affine_signed hc μ r_f d σ
 
 /-- **Sharpe `√T`-scaling**: under iid time aggregation, `L_T ~ N(T·μ, T·σ²)`,
 so the Sharpe ratio at horizon `T` equals `√T` times the unit-horizon Sharpe
