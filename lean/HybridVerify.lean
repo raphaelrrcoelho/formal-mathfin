@@ -111,6 +111,9 @@ import HybridVerify.BlackScholes.GreekSigns
 import HybridVerify.Binomial.PathReflection
 -- Phase 19: Snell envelope characterization of americanPrice
 import HybridVerify.Binomial.SnellEnvelope
+-- Phase 20: first-principles core derivations
+import HybridVerify.Foundations.NoArbitrageDerivations
+import HybridVerify.BlackScholes.RiskNeutralProbabilities
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB
