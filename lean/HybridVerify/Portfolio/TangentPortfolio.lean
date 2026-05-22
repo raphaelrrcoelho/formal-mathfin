@@ -51,4 +51,30 @@ theorem tangentTwo_satisfies_FOC (r₁ r₂ σ₁ σ₂ ρ : ℝ) :
       r₁ * (w_num * ρ * σ₁ * σ₂ + one_sub_w_num * σ₂^2) := by
   ring
 
+/-! ## N-asset extension (folded from `TangentPortfolioN.lean`)
+
+For `N` risky assets, the tangent portfolio satisfies the cross-product FOC
+`μ_excess(j) · (Σw)_i = μ_excess(i) · (Σw)_j` for all `i, j`. The two-asset
+case above is the `i = 1, j = 2` instance written out. -/
+
+/-- **N-asset tangent portfolio cross-product FOC**: the marginal-variance
+vector `(Σw)_i = ∑_k Σ_{i,k} w_k` is parallel to the excess-return vector
+`μ_excess`. -/
+def IsTangentPortfolioN {ι : Type*} (s : Finset ι) (μ_excess : ι → ℝ)
+    (Sg : ι → ι → ℝ) (w : ι → ℝ) : Prop :=
+  ∀ i ∈ s, ∀ j ∈ s,
+    μ_excess j * (∑ k ∈ s, Sg i k * w k) =
+      μ_excess i * (∑ k ∈ s, Sg j k * w k)
+
+/-- **Sufficient condition for tangency**: if `Σw = λ · μ_excess` for some
+scalar `λ`, then `w` is a tangent portfolio. Captures the matrix-inverse
+characterisation `w ∝ Σ⁻¹ · μ_excess` without requiring matrix machinery. -/
+theorem isTangent_of_proportional {ι : Type*} (s : Finset ι) (μ_excess : ι → ℝ)
+    (Sg : ι → ι → ℝ) (w : ι → ℝ) (lam : ℝ)
+    (h : ∀ i ∈ s, (∑ k ∈ s, Sg i k * w k) = lam * μ_excess i) :
+    IsTangentPortfolioN s μ_excess Sg w := by
+  intro i hi j hj
+  rw [h i hi, h j hj]
+  ring
+
 end HybridVerify

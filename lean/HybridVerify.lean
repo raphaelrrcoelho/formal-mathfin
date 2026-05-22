@@ -106,6 +106,7 @@ import HybridVerify.Binomial.SecondFTAP
 -- Phase 14: real new theorems
 import HybridVerify.Binomial.MertonAmericanCallTree
 import HybridVerify.Binomial.ReplicatingUniqueness
+import HybridVerify.BlackScholes.GreekSigns
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB
