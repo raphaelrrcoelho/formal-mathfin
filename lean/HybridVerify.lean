@@ -114,6 +114,8 @@ import HybridVerify.Binomial.SnellEnvelope
 -- Phase 20: first-principles core derivations
 import HybridVerify.Foundations.NoArbitrageDerivations
 import HybridVerify.BlackScholes.RiskNeutralProbabilities
+-- Phase 22: delta as stock-numeraire probability (Φ(d_1) = Q^(S)(S_T > K))
+import HybridVerify.BlackScholes.StockNumeraire
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB
@@ -132,6 +134,8 @@ import HybridVerify.FixedIncome.MeanReversionHalfLife
 import HybridVerify.FixedIncome.CDS
 -- Phase 21: first-principles duration-as-price-sensitivity
 import HybridVerify.FixedIncome.DurationSensitivity
+-- Phase 22: first-principles convexity-as-second-derivative
+import HybridVerify.FixedIncome.ConvexitySensitivity
 
 -- Portfolio
 import HybridVerify.Portfolio.Markowitz
