@@ -91,8 +91,7 @@ lemma weighted_max_zero_ge {q a b : ℝ} (hq : 0 ≤ q) (h1q : q ≤ 1) :
     have ha : a ≤ max a 0 := le_max_left _ _
     have hb : b ≤ max b 0 := le_max_left _ _
     nlinarith
-  · push_neg at hpos
-    rw [max_eq_right hpos.le]
+  · rw [max_eq_right (not_le.mp hpos).le]
     have ha_nn : 0 ≤ max a 0 := le_max_right _ _
     have hb_nn : 0 ≤ max b 0 := le_max_right _ _
     positivity
@@ -123,8 +122,8 @@ lemma exp_neg_mul_max_call_payoff (S K r : ℝ) :
         = S * (Real.exp (-r) * Real.exp r) - K * Real.exp (-r) := by ring
       _ = S * 1 - K * Real.exp (-r) := by rw [h_exp_inv]
       _ = S - K * Real.exp (-r) := by ring
-  · push_neg at h
-    rw [max_eq_right h.le, mul_zero]
+  · have h' : S * Real.exp r - K < 0 := not_le.mp h
+    rw [max_eq_right h'.le, mul_zero]
     have h_lhs_le : S - K * Real.exp (-r) ≤ 0 := by
       have h1 : Real.exp (-r) * (S * Real.exp r) ≤ Real.exp (-r) * K :=
         mul_le_mul_of_nonneg_left (by linarith : S * Real.exp r ≤ K) h_exp_pos.le

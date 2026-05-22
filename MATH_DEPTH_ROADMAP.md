@@ -109,15 +109,17 @@ and `Binomial/PathReflection.lean`:
    (`bsV_strike_convexOn`). PDF positivity in `BreedenLitzenberger.lean`
    becomes an actual derivation rather than a standalone fact.
 
-3. **Discrete reflection principle for binomial paths — algebraic core**
-   — DONE (`Binomial/PathReflection.lean`, ~180 LOC).
-   The position-reflection identity
-   `walkPos (reflectAfter τ ω) k = 2·walkPos ω τ − walkPos ω k` for
-   `τ ≤ k`, plus `reflectAfter_involutive` and the endpoint corollary
-   `walkPos_reflectAfter_endpoint`. The full hitting-time bijection
-   `|{paths to b touching a}| = |{paths to 2a − b}|` is downstream
-   follow-on work (requires defining first hitting time as `Nat.find` on
-   `{k | walkPos ω k = a}`; the algebraic identity does the heavy lifting).
+3. **Discrete reflection principle for binomial paths — full**
+   — DONE (`Binomial/PathReflection.lean`, ~370 LOC, both halves landed).
+   * **Algebraic core**: `walkPos (reflectAfter τ ω) k = 2·walkPos ω τ −
+     walkPos ω k` for `τ ≤ k` (via prefix/suffix sum decomposition);
+     `reflectAfter_involutive`; endpoint corollary.
+   * **Hitting-time bijection**: `firstHit ω a`, invariance under
+     reflection (`firstHit_reflectAfter_firstHit`), reflection-at-first-hit
+     involution (`reflectAtFirstHit_involutive`), and the full
+     **`reflectionPrincipleEquiv a b`** between `{ω : hits a, ends at b}`
+     and `{ω : hits a, ends at 2a − b}` as a Mathlib `Equiv`. Both
+     directions of the bijection are the same reflection map (involution).
 
 Total ~600 LOC across three modules, all landing in one session. Each
 ships a theorem whose statement is non-trivial and whose proof is real
