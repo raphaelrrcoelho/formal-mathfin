@@ -103,6 +103,9 @@ import HybridVerify.Binomial.AmericanCallNoDividend
 -- Phase 13 additions:
 import HybridVerify.Binomial.Girsanov
 import HybridVerify.Binomial.SecondFTAP
+-- Phase 14: real new theorems
+import HybridVerify.Binomial.MertonAmericanCallTree
+import HybridVerify.Binomial.ReplicatingUniqueness
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB

@@ -22,11 +22,21 @@ properties at the level of real-valued calculus:
 The full Vasicek model (including the stochastic part) is gated on the Itô
 integral and is not formalized here.
 
+## The half-life
+
+The Vasicek/OU mean-reversion has a characteristic *half-life*
+`t_{1/2} = log 2 / κ`: the time at which the gap from the mean has closed
+to half its initial value. Independent of `r₀` and `θ`; only the rate `κ`
+matters. (Folded from the former `MeanReversionHalfLife.lean`.)
+
 Results:
 
 * `vasicekDeterministic`: definition `θ + (r₀ − θ) e^{−κt}`.
 * `vasicekDeterministic_at_zero`: `r(0) = r₀`.
 * `vasicekDeterministic_solves_ODE`: `dr/dt = κ(θ − r(t))`.
+* `meanReversionHalfLife`: `log 2 / κ`.
+* `vasicekDeterministic_at_halfLife`: at `t = log 2 / κ`, the gap is half
+  the initial gap.
 -/
 
 namespace HybridVerify
@@ -61,6 +71,26 @@ theorem vasicekDeterministic_solves_ODE (r₀ θ κ t : ℝ) :
     h_exp.const_mul (r₀ - θ)
   have h := h_mul.const_add θ
   convert h using 1
+  ring
+
+/-! ## Half-life (folded from `MeanReversionHalfLife.lean`) -/
+
+/-- **Half-life** of mean-reverting decay at rate `κ`: the time at which the
+gap from the long-run mean is half its initial value. Depends only on `κ`. -/
+noncomputable def meanReversionHalfLife (κ : ℝ) : ℝ := Real.log 2 / κ
+
+/-- **At the half-life**, the Vasicek deterministic trajectory has closed
+exactly half the gap from `θ`: `r(t₁ₐ) − θ = (r₀ − θ) / 2`. -/
+theorem vasicekDeterministic_at_halfLife (r₀ θ κ : ℝ) (hκ : 0 < κ) :
+    vasicekDeterministic r₀ θ κ (meanReversionHalfLife κ) - θ =
+      (r₀ - θ) / 2 := by
+  unfold vasicekDeterministic meanReversionHalfLife
+  have hκ_ne : κ ≠ 0 := hκ.ne'
+  have h_inner : κ * (Real.log 2 / κ) = Real.log 2 := by field_simp
+  have h_exp : Real.exp (-(κ * (Real.log 2 / κ))) = 1 / 2 := by
+    rw [h_inner, Real.exp_neg, Real.exp_log (by norm_num : (0:ℝ) < 2)]
+    norm_num
+  rw [h_exp]
   ring
 
 end HybridVerify

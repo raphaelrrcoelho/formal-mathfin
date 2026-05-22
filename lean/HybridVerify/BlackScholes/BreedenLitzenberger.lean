@@ -95,4 +95,28 @@ theorem lognormalTerminalPDF_nonneg
     mul_pos (mul_pos hK hσ) (Real.sqrt_pos.mpr hT)
   exact div_nonneg h_pdf_nn h_den_pos.le
 
+/-! ## Change of variables to standard normal (folded from `LognormalCOV.lean`)
+
+The implied PDF and the standard-normal PDF are related by the substitution
+`K ↦ z = −bsd2(K)`, whose Jacobian is `dz/dK = −1/(K σ √T)`. The
+differential identity below packages this.
+
+The integration-to-1 claim
+`∫_0^∞ lognormalTerminalPDF dK = 1` follows from the gaussian PDF
+integrating to 1 over `ℝ` plus Mathlib's change-of-variables formula; we
+state only the differential. -/
+
+/-- **Differential change-of-variables identity** between the lognormal PDF
+of `S_T` and the standard-normal PDF:
+`f(K) · K · σ · √T = ϕ(bsd2(K))`. -/
+theorem lognormalTerminalPDF_change_of_variables
+    {S_0 r σ T K : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
+    lognormalTerminalPDF S_0 r σ T K * (K * σ * Real.sqrt T) =
+      gaussianPDFReal 0 1 (bsd2 S_0 K r σ T) := by
+  unfold lognormalTerminalPDF
+  have hsqrtT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
+  have h_den_ne : K * σ * Real.sqrt T ≠ 0 :=
+    (mul_pos (mul_pos hK hσ) hsqrtT_pos).ne'
+  field_simp
+
 end HybridVerify

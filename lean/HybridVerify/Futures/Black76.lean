@@ -60,4 +60,31 @@ theorem black_futures_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   --        = F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T)
   rw [h_bs]
 
+/-! ## Black model for swaptions (folded from `Swaption.lean`)
+
+A swaption with strike `K`, forward swap rate `F`, annuity `A`, vol `σ`,
+expiry `T` prices via the Black-76 formula scaled by the annuity numéraire.
+
+Payer-receiver parity `V^payer − V^receiver = A · (F − K)` is the swap-rate
+analog of put-call parity, with the same one-line proof via `Φ` symmetry. -/
+
+/-- **Payer swaption price under the Black model**: `A · [F · Φ(d_1) − K · Φ(d_2)]`. -/
+noncomputable def blackPayerSwaption (A F K σ T : ℝ) : ℝ :=
+  A * (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T))
+
+/-- **Receiver swaption price under the Black model**:
+`A · [K · Φ(−d_2) − F · Φ(−d_1)]`. -/
+noncomputable def blackReceiverSwaption (A F K σ T : ℝ) : ℝ :=
+  A * (K * Phi (-(bsd2 F K 0 σ T)) - F * Phi (-(bsd1 F K 0 σ T)))
+
+/-- **Payer-receiver swaption parity**: `V^payer − V^receiver = A · (F − K)`.
+The same `Phi`-symmetry proof as put-call parity, scaled by the annuity. -/
+theorem swaption_payer_receiver_parity (A F K σ T : ℝ) :
+    blackPayerSwaption A F K σ T - blackReceiverSwaption A F K σ T =
+      A * (F - K) := by
+  unfold blackPayerSwaption blackReceiverSwaption
+  have h_d1 := Phi_add_Phi_neg (bsd1 F K 0 σ T)
+  have h_d2 := Phi_add_Phi_neg (bsd2 F K 0 σ T)
+  linear_combination A * F * h_d1 - A * K * h_d2
+
 end HybridVerify

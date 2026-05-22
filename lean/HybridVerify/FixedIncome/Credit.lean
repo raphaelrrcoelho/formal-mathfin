@@ -70,4 +70,31 @@ lemma survival_strictAnti_of_pos_hazard {h t : ℝ} (hh : 0 < h) :
     linarith
   exact Real.exp_lt_exp.mpr h_arg
 
+/-! ## CDS fair spread with recovery (folded from `CDS.lean`)
+
+A CDS exchanges a periodic premium `c` for `(1 − R)` at default. Under
+constant hazard `h` and risk-free rate `r`, both legs share the annuity
+factor `(1 − e^{−(r+h) T}) / (r + h)`. Equating PVs gives the fair spread
+`c = h · (1 − R)`. Specialises to `c = h` (the bare `creditSpread_eq_hazard`)
+at zero recovery. -/
+
+/-- **Fair CDS spread under constant hazard with recovery**: `c = h · (1 − R)`. -/
+noncomputable def cdsFairSpread (hh R : ℝ) : ℝ := hh * (1 - R)
+
+/-- **Zero recovery specialisation**: the fair spread equals the hazard rate. -/
+lemma cdsFairSpread_zero_recovery (hh : ℝ) : cdsFairSpread hh 0 = hh := by
+  unfold cdsFairSpread; ring
+
+/-- **Leg-equality characterisation**: with `factor` the common annuity factor,
+the fair spread is the unique value equating premium and protection legs. -/
+theorem cds_leg_equality (hh R factor c : ℝ) (h_factor_ne : factor ≠ 0) :
+    c * factor = (1 - R) * hh * factor ↔ c = cdsFairSpread hh R := by
+  unfold cdsFairSpread
+  constructor
+  · intro heq
+    have := mul_right_cancel₀ h_factor_ne heq
+    linarith
+  · intro hc
+    rw [hc]; ring
+
 end HybridVerify

@@ -83,4 +83,29 @@ theorem gompertz_cumulative_force (B c t : ℝ) (hc : c ≠ 0) :
   simp [Real.exp_zero, mul_comm]
   ring
 
+/-! ## Compound Poisson MGF (folded from `CompoundPoisson.lean`)
+
+For `N ~ Poisson(λ)` with iid claim sizes `X_i` of MGF `M_X`, the compound
+Poisson aggregate `S = ∑_{i=1}^N X_i` has MGF `exp(λ · (M_X(t) − 1))`.
+The algebraic core is `e^{−λ} · e^{λ M} = e^{λ(M − 1)}`. The Lundberg
+adjustment coefficient solves `λ · (M(R) − 1) − c · R = 0`. -/
+
+/-- **Compound Poisson MGF algebraic core**: `e^{−λ} · e^{λ M} = e^{λ(M − 1)}`. -/
+theorem compoundPoisson_mgf_identity (lam M : ℝ) :
+    Real.exp (-lam) * Real.exp (lam * M) = Real.exp (lam * (M - 1)) := by
+  rw [← Real.exp_add]
+  congr 1; ring
+
+/-- **Lundberg adjustment-coefficient equation**: `λ · (M(R) − 1) − c · R = 0`. -/
+def isLundbergAdjustmentCoefficient (lam c R : ℝ) (M : ℝ → ℝ) : Prop :=
+  lam * (M R - 1) - c * R = 0
+
+/-- **Trivial root at zero**: `R = 0` always satisfies the adjustment equation
+when `M 0 = 1` (which holds for any MGF). -/
+theorem lundberg_zero_at_zero (lam c : ℝ) (M : ℝ → ℝ) (hM0 : M 0 = 1) :
+    isLundbergAdjustmentCoefficient lam c 0 M := by
+  unfold isLundbergAdjustmentCoefficient
+  rw [hM0]
+  ring
+
 end HybridVerify

@@ -75,4 +75,34 @@ theorem garman_kohlhagen_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
         - K * Real.exp (-(r_d * T)) * Phi (bsd2 S_0 K (r_d - r_f) σ T) :=
   bs_dividends_call_formula (q := r_f) h
 
+/-! ## Quanto correction (folded from `Quanto.lean`)
+
+A **quanto** is a derivative paying a function of a foreign asset in domestic
+currency. Under the domestic risk-neutral measure, the foreign asset acquires
+a *quanto-adjusted drift* `μ^{quanto} = r_dom − ρ · σ_S · σ_FX`. The forward
+becomes
+
+  `F^{quanto} = S₀ · exp((r_dom − ρ σ_S σ_FX) · T)`,
+
+vs the unadjusted domestic forward `F^{dom} = S₀ · exp(r_dom T)`. The
+correction factor is `exp(−ρ σ_S σ_FX T)`, the log-covariance term in the
+joint MGF. -/
+
+/-- **Quanto-adjusted forward**: foreign asset's forward under the domestic
+risk-neutral measure with quanto drift adjustment `−ρ σ_S σ_FX`. -/
+noncomputable def quantoForward (S_0 r_dom ρ σ_S σ_FX T : ℝ) : ℝ :=
+  S_0 * Real.exp ((r_dom - ρ * σ_S * σ_FX) * T)
+
+/-- **Quanto correction factor**: ratio of quanto-adjusted forward to
+unadjusted domestic forward equals `exp(−ρ σ_S σ_FX T)`. -/
+theorem quanto_correction_factor (S_0 r_dom ρ σ_S σ_FX T : ℝ) (hS : 0 < S_0) :
+    quantoForward S_0 r_dom ρ σ_S σ_FX T / (S_0 * Real.exp (r_dom * T))
+      = Real.exp (-(ρ * σ_S * σ_FX * T)) := by
+  unfold quantoForward
+  have hS_ne : S_0 ≠ 0 := hS.ne'
+  have h_exp_pos : 0 < Real.exp (r_dom * T) := Real.exp_pos _
+  rw [mul_div_mul_left _ _ hS_ne, ← Real.exp_sub]
+  congr 1
+  ring
+
 end HybridVerify

@@ -68,4 +68,30 @@ theorem implied_volatility_unique {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)
     σ₁ = σ₂ := by
   exact (bsV_strictMonoOn_sigma hK hT hS).injOn hσ₁ hσ₂ h_eq
 
+/-! ## Newton-Raphson iteration (folded from `NewtonRaphsonIV.lean`)
+
+The Newton iteration `σ_{n+1} = σ_n − f(σ_n)/f'(σ_n)` for root-finding. In
+the BS implied-vol setting, `f(σ) = bsV(σ) − C_obs` and `f'(σ) = vega(σ) > 0`
+(positive by `bsV_vega_pos`), so the iteration is well-defined for `σ > 0`.
+
+Quadratic convergence requires bounding the residual via Taylor with
+remainder; we record only the fixed-point-at-root and error-decomposition
+identities. -/
+
+/-- **Newton-Raphson iteration step**: `σ_{n+1} = σ_n − f(σ_n) / f'(σ_n)`. -/
+noncomputable def newtonStep (f f' : ℝ → ℝ) (σ : ℝ) : ℝ := σ - f σ / f' σ
+
+/-- **A root is a fixed point of the Newton iteration**. -/
+theorem newtonStep_fixed_at_root (f f' : ℝ → ℝ) {σ : ℝ} (h_root : f σ = 0) :
+    newtonStep f f' σ = σ := by
+  unfold newtonStep
+  rw [h_root, zero_div, sub_zero]
+
+/-- **Error decomposition for one Newton step** when `σ_*` is a root of `f`. -/
+theorem newtonStep_error_via_root
+    (f f' : ℝ → ℝ) {σ_star σ : ℝ} (_h_root : f σ_star = 0) :
+    newtonStep f f' σ - σ_star = (σ - σ_star) - f σ / f' σ := by
+  unfold newtonStep
+  ring
+
 end HybridVerify
