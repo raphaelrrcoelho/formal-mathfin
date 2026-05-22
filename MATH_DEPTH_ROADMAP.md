@@ -84,30 +84,45 @@ What it explicitly is *not*:
 * Original mathematics. Tao level is original mathematics; that's a
   different game.
 
-## Concrete next-round candidates
+## Concrete next-round candidates — STATUS
 
-Three depth theorems, ranked by leverage:
+Three depth theorems were planned. As of 2026-05-22, **all three cores have
+shipped** in `BlackScholes/StrikeConvexity.lean`, `Binomial/MertonAmericanCallTree.lean`,
+and `Binomial/PathReflection.lean`:
 
-1. **Multi-step Merton 1973 in the binomial tree** (~150 LOC).
-   Combines the one-period dominance shipped in `MertonAmericanCallTree`
-   with induction on `n`. Result: `americanPrice = binomialPrice` for
-   the non-dividend call at any horizon. Completes the Merton 1973
-   story in discrete time. Real theorem (induction + lower-bound
-   lemma + dominance).
+1. **Multi-step Merton 1973 in the binomial tree** — DONE
+   (`Binomial/MertonAmericanCallTree.lean`).
+   `americanPrice = binomialPrice` at every horizon `n` for the non-dividend
+   call (`r ≥ 0`, `K ≥ 0`). The one-period continuation dominance
+   (Jensen + martingale identity + discount shift) extends to multi-step
+   via induction on `n` with monotonicity of the one-period operator at
+   the inductive step. Three new theorems: `call_intrinsic_le_binomialPrice`,
+   `americanCallPrice_le_binomialPrice`, `americanCallPrice_eq_binomialPrice`.
 
-2. **Continuous convexity of `K ↦ bsV K r σ S τ` on `(0, ∞)`**
-   (~150 LOC). Bridges `ConvexPricingFunctional` (finite-state) to
-   the actual BS formula via `convexOn_of_deriv2_nonneg` +
-   `hasDerivAt_bsV_KK`. After this, four scales (payoff convex /
-   discrete price convex / continuous price convex / PDF positive)
-   are visibly one fact.
+2. **Continuous convexity of `K ↦ bsV K r σ S τ` on `(0, ∞)`** — DONE
+   (`BlackScholes/StrikeConvexity.lean`). Bridges `ConvexPricingFunctional`
+   (finite-state) to the actual BS formula via
+   `convexOn_of_deriv2_nonneg'` + `hasDerivAt_bsV_KK`. K-convexity now
+   visible at **three scales** in the library: payoff
+   (`convexOn_call_payoff`), finite-state price
+   (`callPrice_finiteState_convexOn_K`), continuous BS price
+   (`bsV_strike_convexOn`). PDF positivity in `BreedenLitzenberger.lean`
+   becomes an actual derivation rather than a standalone fact.
 
-3. **Discrete reflection principle for binomial paths** (~300 LOC).
-   Bijection on `Fin n → Bool`. Independently beautiful; unlocks
-   barrier-option pricing as a follow-on category.
+3. **Discrete reflection principle for binomial paths — algebraic core**
+   — DONE (`Binomial/PathReflection.lean`, ~180 LOC).
+   The position-reflection identity
+   `walkPos (reflectAfter τ ω) k = 2·walkPos ω τ − walkPos ω k` for
+   `τ ≤ k`, plus `reflectAfter_involutive` and the endpoint corollary
+   `walkPos_reflectAfter_endpoint`. The full hitting-time bijection
+   `|{paths to b touching a}| = |{paths to 2a − b}|` is downstream
+   follow-on work (requires defining first hitting time as `Nat.find` on
+   `{k | walkPos ω k = a}`; the algebraic identity does the heavy lifting).
 
-Total ~600 LOC across three modules. Each ships a theorem whose
-statement is non-trivial and whose proof is real math.
+Total ~600 LOC across three modules, all landing in one session. Each
+ships a theorem whose statement is non-trivial and whose proof is real
+math (calculus / induction / combinatorial sum decomposition,
+respectively).
 
 ## Larger, multi-session candidates
 

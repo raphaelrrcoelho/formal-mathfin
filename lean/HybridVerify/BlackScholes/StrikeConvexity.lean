@@ -4,58 +4,53 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
+import HybridVerify.BlackScholes.StrikeGreeks
 
 /-!
-# Strike-direction convexity of the European call payoff
+# Strike-direction convexity at every scale
 
-The European call payoff at maturity is `K ↦ max(S − K, 0)`. As a function of
-the strike `K` at fixed terminal price `S`, this payoff has two structural
-properties:
+The European call satisfies *the same* convexity-in-`K` fact at three
+different scales of resolution:
 
-* **`Antitone`** in `K` (decreasing): higher strikes pay less.
-* **`ConvexOn`** in `K` (convex, as the maximum of an affine function and zero).
+1. **Payoff level**, `K ↦ max(S − K, 0)`. Convex because the positive
+   part of an affine function is convex (`ConvexOn.sup` on `(S − ·)` and
+   `0`).
+2. **Finite-state price level**, `K ↦ Σ q_i · max(S_i − K, 0)`. Convex
+   because non-negative linear combinations of convex functions are convex
+   (`ConvexPricingFunctional.callPrice_finiteState_convexOn_K`).
+3. **Continuous BS price level**, `K ↦ bsV K r σ S τ`. Convex on `(0, ∞)`
+   because its second `K`-derivative is non-negative
+   (`hasDerivAt_bsV_KK` + `convexOn_of_deriv2_nonneg'`).
 
-Almost every static no-arbitrage relation between option prices traces back
-to one of these. We collect them here as the canonical source.
+The three scales are not three theorems; they are one principle realised at
+three different levels of integration. This file packages all three so the
+hierarchy is visible.
 
-## Why this matters
+## Downstream consequences (one principle, many faces)
 
-Bull-spread non-negativity, butterfly non-negativity, and Breeden-Litzenberger
-PDF positivity are *not three theorems*; they are three faces of the same
-fact:
-
-* **Bull spread** `V(K₁) ≥ V(K₂)` for `K₁ ≤ K₂` — Antitone-payoff after
-  risk-neutral expectation.
-* **Butterfly** `V(K₁) − 2V(K₂) + V(K₃) ≥ 0` for `K₂ = (K₁+K₃)/2` —
-  ConvexOn-payoff after risk-neutral expectation, discrete second-difference
-  form.
-* **Breeden-Litzenberger PDF positivity** `f(K) = e^{rT}·∂²_K V ≥ 0` —
-  ConvexOn-payoff after risk-neutral expectation, infinitesimal form.
-
-Risk-neutral expectation `E_Q[·]` is a positive linear operator. It preserves
-both `Antitone` and `ConvexOn`. So the payoff properties become call-*price*
-properties, and the static no-arb relations are corollaries.
-
-## Why ConvexOn-payoff holds
-
-`fun K => max (S − K) 0 = (S − ·) ⊔ 0`. The affine function `K ↦ S − K` is
-convex (in fact affine, hence both convex and concave). The constant function
-`0` is convex. The pointwise max of two convex functions is convex
-(`ConvexOn.sup`). One line.
+* **Bull spread** `V(K₁) ≥ V(K₂)` for `K₁ ≤ K₂` — `Antitone`-payoff after
+  pricing-functional preservation of monotonicity.
+* **Butterfly non-negativity at payoff** (`butterfly_payoff_nonneg`) —
+  convex-payoff second-difference inequality.
+* **Butterfly non-negativity at price** (`callPrice_finiteState_butterfly_nonneg`) —
+  pricing functional preserves convexity, hence the same second-difference
+  is non-negative at the price level.
+* **Breeden-Litzenberger PDF positivity** (`lognormalTerminalPDF_nonneg`) —
+  the infinitesimal manifestation of price-level convexity, by
+  `bsV_strike_convexOn` below + `convexOn_iff_deriv2_nonneg`.
 
 ## Results
 
 * `convexOn_sub_const_id`: `K ↦ a − K` is convex.
-* `convexOn_call_payoff`: `K ↦ max(S − K, 0)` is convex in K.
+* `convexOn_call_payoff`: `K ↦ max(S − K, 0)` is convex in K (payoff level).
 * `antitone_call_payoff`: `K ↦ max(S − K, 0)` is antitone in K.
-
-The downstream consumers (`Spreads.lean`, `Lookback.lean`,
-`StrikeGreeks.lean`, `BreedenLitzenberger.lean`) all rest on these.
+* `bsV_strike_convexOn`: `K ↦ bsV K r σ S τ` is convex on `(0, ∞)`
+  (continuous BS price level).
 -/
 
 namespace HybridVerify
 
-open Set
+open Set Real ProbabilityTheory
 
 /-- The affine function `K ↦ a − K` is convex on `Set.univ`. Affine
 functions are simultaneously convex and concave; the inequality holds
@@ -86,5 +81,78 @@ is itself antitone). The single-line consequence of monotonicity of `max`. -/
 lemma antitone_call_payoff (S : ℝ) :
     Antitone (fun K : ℝ => max (S - K) 0) :=
   fun _ _ h => max_le_max (by linarith) le_rfl
+
+/-! ## The continuous-price face
+
+Beyond the payoff (`convexOn_call_payoff`), the *price itself* is convex
+in the strike. The proof is the second-derivative test:
+
+* `hasDerivAt_bsV_K`: `∂_K bsV = −e^{-rτ} · Φ(d_2)` exists at every `K > 0`.
+* `hasDerivAt_bsV_KK`: `∂²_K bsV = e^{-rτ} · ϕ(d_2) / (K σ √τ)` exists and
+  is non-negative for every `K > 0`.
+
+We feed these to Mathlib's `convexOn_of_deriv2_nonneg'`. The only delicate
+step is identifying `deriv (fun K' => bsV K' r σ S τ)` with the explicit
+first derivative in a neighborhood of each interior point so the second
+derivative inherits the closed form — handled below with
+`HasDerivAt.congr_of_eventuallyEq`. -/
+
+/-- **First-derivative identification on `(0, ∞)`**: the closed form for
+`∂_K bsV` from `hasDerivAt_bsV_K` agrees with `deriv` on the whole positive
+half-line. Used to bridge `hasDerivAt_bsV_KK` to a second-derivative
+statement on `deriv` itself. -/
+private lemma deriv_bsV_eq_on_Ioi (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ)
+    (hτ : 0 < τ) {K : ℝ} (hK : K ∈ Set.Ioi (0 : ℝ)) :
+    deriv (fun k => bsV k r σ S τ) K =
+      -(Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)) :=
+  (hasDerivAt_bsV_K (S := S) (r := r) (σ := σ) hS hσ hK hτ).deriv
+
+/-- **Local equality of derivatives on `(0, ∞)`**: in a neighbourhood of any
+`K > 0`, `deriv (fun K' => bsV K' r σ S τ)` agrees with the explicit closed
+form, so derivative facts about the closed form transfer to `deriv`. -/
+private lemma deriv_bsV_eventuallyEq (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ)
+    (hτ : 0 < τ) {K : ℝ} (hK : 0 < K) :
+    (fun K' => deriv (fun k => bsV k r σ S τ) K') =ᶠ[nhds K]
+      (fun K' => -(Real.exp (-(r * τ)) * Phi (bsd2 S K' r σ τ))) := by
+  filter_upwards [isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hK)] with K' hK'
+  exact deriv_bsV_eq_on_Ioi S r σ τ hS hσ hτ hK'
+
+/-- **BS call price is convex in the strike on `(0, ∞)`** — the continuous-
+price face of the K-convexity principle.
+
+This is the second-derivative test applied to BS: at every `K > 0`,
+`∂²_K bsV = e^{-rτ} · ϕ(d_2)/(K σ √τ) ≥ 0`. The hypotheses of
+`convexOn_of_deriv2_nonneg'` are the differentiability of `bsV` and of its
+first derivative on `Ioi 0`, both of which we have in closed form from
+`hasDerivAt_bsV_K` and `hasDerivAt_bsV_KK`. -/
+theorem bsV_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K => bsV K r σ S τ) := by
+  refine convexOn_of_deriv2_nonneg' (convex_Ioi 0) ?_ ?_ ?_
+  -- (1) bsV is differentiable on Ioi 0 (from hasDerivAt_bsV_K).
+  · intro K hK
+    exact ((hasDerivAt_bsV_K (S := S) (r := r) (σ := σ) hS hσ hK hτ).differentiableAt
+      ).differentiableWithinAt
+  -- (2) deriv bsV is differentiable on Ioi 0 (from hasDerivAt_bsV_KK, transported via h_ev).
+  · intro K hK
+    have h_pos : 0 < K := hK
+    have h_KK := hasDerivAt_bsV_KK (S := S) (r := r) (σ := σ) hS hσ h_pos hτ
+    have h_ev := deriv_bsV_eventuallyEq S r σ τ hS hσ hτ h_pos
+    exact ((h_KK.congr_of_eventuallyEq h_ev).differentiableAt).differentiableWithinAt
+  -- (3) deriv^[2] bsV K ≥ 0 for K > 0.
+  · intro K hK
+    have h_pos : 0 < K := hK
+    have h_KK := hasDerivAt_bsV_KK (S := S) (r := r) (σ := σ) hS hσ h_pos hτ
+    have h_ev := deriv_bsV_eventuallyEq S r σ τ hS hσ hτ h_pos
+    have h_d2 : deriv^[2] (fun k => bsV k r σ S τ) K =
+        Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) /
+          (K * σ * Real.sqrt τ) :=
+      (h_KK.congr_of_eventuallyEq h_ev).deriv
+    rw [h_d2]
+    have h_exp_pos : 0 < Real.exp (-(r * τ)) := Real.exp_pos _
+    have h_pdf_nn : 0 ≤ gaussianPDFReal 0 1 (bsd2 S K r σ τ) :=
+      gaussianPDFReal_nonneg _ _ _
+    have h_den_pos : 0 < K * σ * Real.sqrt τ :=
+      mul_pos (mul_pos h_pos hσ) (Real.sqrt_pos.mpr hτ)
+    exact div_nonneg (mul_nonneg h_exp_pos.le h_pdf_nn) h_den_pos.le
 
 end HybridVerify

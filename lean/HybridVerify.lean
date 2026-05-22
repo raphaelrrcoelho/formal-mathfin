@@ -107,6 +107,8 @@ import HybridVerify.Binomial.SecondFTAP
 import HybridVerify.Binomial.MertonAmericanCallTree
 import HybridVerify.Binomial.ReplicatingUniqueness
 import HybridVerify.BlackScholes.GreekSigns
+-- Phase 16: reflection-principle algebraic core (André 1887)
+import HybridVerify.Binomial.PathReflection
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB
