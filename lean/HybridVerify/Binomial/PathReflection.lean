@@ -331,6 +331,121 @@ theorem walkPos_reflectAtFirstHit_endpoint (ω : Fin n → Bool) (a b : ℤ)
   exact walkPos_reflectAfter_endpoint (firstHit ω a h) ω (firstHit_le ω a h)
     a b (walkPos_firstHit ω a h) h_end
 
+/-! ## Discrete intermediate value theorem and the maximal distribution
+
+The reflection principle's *counting* statement, in its cleanest form, drops
+the `HitsLevel` hypothesis on one side: any path that *ends* above level `a`
+automatically *hits* level `a`. This is the discrete intermediate value
+theorem for ±1 walks. Combined with the bijection above, it gives the
+classical maximal-distribution counting identity
+
+  `|{ω : HitsLevel a ω}| = 2 · |{ω : a ≤ walkPos ω n}| − |{ω : walkPos ω n = a}|`
+
+for `a ≥ 0`. This is the headline result of the reflection principle in
+its application to barrier-option pricing: the cardinality of paths that
+*ever* exceed level `a` is computable in terms of the *endpoint* distribution.
+-/
+
+/-- **Step relation**: the walk's position at time `k + 1` equals the position
+at `k` plus the step value at index `k`. -/
+lemma walkPos_succ (ω : Fin n → Bool) {k : ℕ} (hk : k < n) :
+    walkPos ω (k + 1) = walkPos ω k + walkStep (ω ⟨k, hk⟩) := by
+  unfold walkPos
+  have h_split :
+      (Finset.univ.filter (fun (i : Fin n) => i.val < k + 1)) =
+      (Finset.univ.filter (fun (i : Fin n) => i.val < k)) ∪ {⟨k, hk⟩} := by
+    ext i
+    simp only [Finset.mem_filter, Finset.mem_univ, Finset.mem_union,
+      Finset.mem_singleton, true_and]
+    constructor
+    · intro h_lt_succ
+      by_cases h_eq : i.val = k
+      · exact Or.inr (Fin.ext h_eq)
+      · exact Or.inl (by omega)
+    · rintro (h_lt | h_eq)
+      · omega
+      · simp [h_eq]
+  have h_disj : Disjoint
+      (Finset.univ.filter (fun (i : Fin n) => i.val < k))
+      ({⟨k, hk⟩} : Finset (Fin n)) := by
+    rw [Finset.disjoint_singleton_right, Finset.mem_filter]
+    intro h
+    exact Nat.lt_irrefl k h.2
+  rw [h_split, Finset.sum_union h_disj, Finset.sum_singleton]
+
+/-- **Discrete intermediate value theorem for ±1 walks**: if the walk
+ends at or above level `a ≥ 0`, it hits level `a` at some time `k ≤ n`.
+
+Proof: take `τ` = smallest `k ≤ n` with `walkPos ω k ≥ a`. Either `τ = 0`
+(so `walkPos ω 0 = 0 ≥ a ≥ 0`, hence `a = 0` and we hit at 0), or `τ > 0`
+with `walkPos ω (τ−1) < a` (minimality) and `walkPos ω τ ≥ a`. Since each
+step is `±1`, `walkPos τ = walkPos (τ−1) ± 1`; the `-1` case would give
+`walkPos τ < a`, contradicting `≥ a`; the `+1` case gives
+`walkPos τ = walkPos (τ−1) + 1 ≤ a`, combined with `≥ a` gives `= a`. -/
+theorem HitsLevel_of_walkPos_endpoint_ge (ω : Fin n → Bool) (a : ℤ)
+    (ha : 0 ≤ a) (h_end : a ≤ walkPos ω n) : HitsLevel a ω := by
+  classical
+  -- Use Finset.min' on the set of k ≤ n with walkPos ω k ≥ a.
+  let S : Finset ℕ :=
+    (Finset.range (n + 1)).filter (fun k => a ≤ walkPos ω k)
+  have h_n_mem : n ∈ S := by
+    show n ∈ S
+    rw [show S = _ from rfl, Finset.mem_filter, Finset.mem_range]
+    exact ⟨Nat.lt_succ_self n, h_end⟩
+  have hS_nonempty : S.Nonempty := ⟨n, h_n_mem⟩
+  let τ := S.min' hS_nonempty
+  have h_τ_mem_filter :
+      τ ∈ (Finset.range (n + 1)).filter (fun k => a ≤ walkPos ω k) :=
+    S.min'_mem hS_nonempty
+  have h_τ_lt : τ < n + 1 :=
+    Finset.mem_range.mp (Finset.mem_filter.mp h_τ_mem_filter).1
+  have h_τ_le_n : τ ≤ n := by omega
+  have h_τ_ge : a ≤ walkPos ω τ := (Finset.mem_filter.mp h_τ_mem_filter).2
+  have h_min : ∀ k < τ, ¬ (a ≤ walkPos ω k) := by
+    intro k hk h_ge
+    have h_k_in : k ∈ S := by
+      show k ∈ S
+      rw [show S = _ from rfl, Finset.mem_filter, Finset.mem_range]
+      exact ⟨by omega, h_ge⟩
+    have : τ ≤ k := S.min'_le k h_k_in
+    omega
+  -- Show walkPos ω τ = a.
+  have h_eq : walkPos ω τ = a := by
+    rcases Nat.eq_zero_or_pos τ with hτ_zero | hτ_pos
+    · have h_walkPos_zero : walkPos ω τ = 0 := by rw [hτ_zero]; exact walkPos_zero ω
+      rw [h_walkPos_zero] at h_τ_ge
+      rw [h_walkPos_zero]
+      omega
+    · obtain ⟨m, h_eq_m⟩ := Nat.exists_eq_succ_of_ne_zero hτ_pos.ne'
+      have h_m_lt_n : m < n := by rw [h_eq_m] at h_τ_le_n; omega
+      have h_walkPos_m_lt : walkPos ω m < a := by
+        by_contra h_ge
+        have h_ge' : a ≤ walkPos ω m := not_lt.mp h_ge
+        have h_m_lt_τ : m < τ := by rw [h_eq_m]; omega
+        exact h_min m h_m_lt_τ h_ge'
+      have h_succ := walkPos_succ ω h_m_lt_n
+      have h_walkPos_τ_eq : walkPos ω τ = walkPos ω (m + 1) := by rw [h_eq_m]
+      rw [h_walkPos_τ_eq] at h_τ_ge
+      rw [h_walkPos_τ_eq]
+      have h_step_or : walkStep (ω ⟨m, h_m_lt_n⟩) = 1 ∨
+                        walkStep (ω ⟨m, h_m_lt_n⟩) = -1 := by
+        unfold walkStep
+        by_cases hb : ω ⟨m, h_m_lt_n⟩
+        · left; simp [hb]
+        · right; simp [hb]
+      rcases h_step_or with h_up | h_down
+      · rw [h_up] at h_succ; omega
+      · rw [h_down] at h_succ; omega
+  refine ⟨τ, ?_⟩
+  rw [hittingSet, Finset.mem_filter, Finset.mem_range]
+  exact ⟨by omega, h_eq⟩
+
+/-- **Endpoint-above-barrier ⟹ hits barrier** (alias / corollary).
+Same as `HitsLevel_of_walkPos_endpoint_ge`, stated as a one-line use. -/
+lemma HitsLevel_of_endpoint_gt {ω : Fin n → Bool} {a : ℤ} (ha : 0 ≤ a)
+    (h : a < walkPos ω n) : HitsLevel a ω :=
+  HitsLevel_of_walkPos_endpoint_ge ω a ha (le_of_lt h)
+
 /-- **The reflection-principle bijection** (André 1887, counting form).
 
 For any `a, b : ℤ`, the set of paths that hit level `a` and end at `b` is in
@@ -364,5 +479,69 @@ noncomputable def reflectionPrincipleEquiv (a b : ℤ) :
          linarith⟩
   left_inv ω := Subtype.ext (reflectAtFirstHit_involutive a ω.val)
   right_inv ω := Subtype.ext (reflectAtFirstHit_involutive a ω.val)
+
+/-- **Endpoint-above-`a` implies `HitsLevel`** — packaged as an `Equiv`
+between `{ω : hits a, ends at b}` and `{ω : ends at b}` for `b ≥ a > 0`.
+
+By the IVT, `walkPos ω n = b ≥ a > 0` automatically implies `HitsLevel a ω`,
+so the `HitsLevel` condition is redundant. -/
+noncomputable def hitsLevel_inhabited_above (a b : ℤ) (ha : 0 < a) (hb : a ≤ b) :
+    {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b} ≃
+    {ω : Fin n → Bool // walkPos ω n = b} where
+  toFun ω := ⟨ω.val, ω.property.2⟩
+  invFun ω :=
+    ⟨ω.val,
+     HitsLevel_of_walkPos_endpoint_ge ω.val a (le_of_lt ha)
+       (by rw [ω.property]; exact hb),
+     ω.property⟩
+  left_inv _ := rfl
+  right_inv _ := rfl
+
+/-- **Reflection bijection (below-the-barrier form)** — clean counting Equiv
+between paths-touching-`a`-ending-at-`b` (with `b ≤ a`) and paths-ending-
+at-`(2a − b)` (no hitting condition on the right, by IVT, since `2a − b ≥ a`).
+
+This is the form actually used in barrier-option pricing: the LHS is "paths
+that touch the barrier and end at `b`," the RHS is the simple endpoint
+distribution at `2a − b`. -/
+noncomputable def reflectionPrincipleEquiv_below
+    (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :
+    {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b} ≃
+    {ω : Fin n → Bool // walkPos ω n = 2 * a - b} :=
+  (reflectionPrincipleEquiv (n := n) a b).trans
+    (hitsLevel_inhabited_above a (2 * a - b) ha (by linarith))
+
+/-! ## `firstHit?` (Option-returning) for ergonomic downstream use
+
+The `firstHit` function requires a `HitsLevel a ω` proof as input. For
+downstream barrier-option code that doesn't have the hit hypothesis upfront
+(e.g. computing over all paths and discriminating by hit/no-hit at runtime),
+the `Option`-returning variant is cleaner. -/
+
+/-- **First hitting time (Option-returning)**: `some τ` if the path hits
+level `a` (with `τ` the first hit time), else `none`. -/
+noncomputable def firstHit? (ω : Fin n → Bool) (a : ℤ) : Option ℕ :=
+  if h : HitsLevel a ω then some (firstHit ω a h) else none
+
+lemma firstHit?_eq_some_of_hitsLevel (ω : Fin n → Bool) (a : ℤ)
+    (h : HitsLevel a ω) : firstHit? ω a = some (firstHit ω a h) := by
+  unfold firstHit?; rw [dif_pos h]
+
+lemma firstHit?_eq_none_iff_not_hitsLevel (ω : Fin n → Bool) (a : ℤ) :
+    firstHit? ω a = none ↔ ¬ HitsLevel a ω := by
+  refine ⟨fun h h_hit => ?_, fun h_not_hit => ?_⟩
+  · unfold firstHit? at h
+    rw [dif_pos h_hit] at h
+    exact Option.some_ne_none _ h
+  · unfold firstHit?; exact dif_neg h_not_hit
+
+lemma firstHit?_isSome_iff (ω : Fin n → Bool) (a : ℤ) :
+    (firstHit? ω a).isSome ↔ HitsLevel a ω := by
+  refine ⟨fun h => ?_, fun h_hit => ?_⟩
+  · by_contra h_not_hit
+    unfold firstHit? at h
+    rw [dif_neg h_not_hit] at h
+    exact Bool.false_ne_true h
+  · unfold firstHit?; rw [dif_pos h_hit]; rfl
 
 end HybridVerify

@@ -109,6 +109,8 @@ import HybridVerify.Binomial.ReplicatingUniqueness
 import HybridVerify.BlackScholes.GreekSigns
 -- Phase 16: reflection-principle algebraic core (André 1887)
 import HybridVerify.Binomial.PathReflection
+-- Phase 19: Snell envelope characterization of americanPrice
+import HybridVerify.Binomial.SnellEnvelope
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB
