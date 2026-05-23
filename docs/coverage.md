@@ -254,7 +254,7 @@ lands:
   `BrownianMotion/StochasticIntegral/LocalMartingale.lean`. Sorry-free.
   `#print axioms` confirmed clean:
   `[propext, Classical.choice, Quot.sound]`. Lives at
-  `HybridVerify/StoppedContinuousMartingale.lean`.
+  `QuantFin/StoppedContinuousMartingale.lean`.
 
 A second NNReal-restructure candidate `cm-prop-4.3.6` (hitting time of an
 open set) was scoped but did NOT promote: the Degenne wrap
@@ -267,7 +267,7 @@ sorries.
 
 **Doob L^p complete (2026-05-13 session)**: `mart-thm-2.4.6` promoted
 from `reduced_core` to `full`. End-to-end formal proof in
-`HybridVerify/DoobLp.lean`. `#print axioms` confirms clean:
+`QuantFin/DoobLp.lean`. `#print axioms` confirms clean:
 `[propext, Classical.choice, Quot.sound]`. Coverage **41 → 42**
 delivery-ready (18 full + 24 library), 23 reduced.
 
@@ -332,7 +332,7 @@ Resolution applied 2026-05-08:
   - `dist-thm-B.1.2-affine`: rewritten in the new `HasLaw X (gaussianReal μ v) P` form for `gaussianReal_const_mul` / `gaussianReal_add_const` (no longer the `Measure.map` form).
   - `dist-exp-memoryless`, `dist-exp-min`: rewritten using `cdf (expMeasure r)` + `cdf_expMeasure_eq` and the renamed `isProbabilityMeasure_expMeasure`. The textbook claims (memoryless property and min-of-independents survival function) are unchanged.
   - `mart-thm-2.4.3`, `mart-thm-2.4.6`: mechanical rename `Finset.nonempty_range_succ` → `Finset.nonempty_range_add_one`.
-- **Mathlib pin added** (`hybrid_verify.toml` → `mathlib_rev = "f23306121184"`):
+- **Mathlib pin added** (`quantfin.toml` → `mathlib_rev = "f23306121184"`):
   - `tools.verify.config.LeanConfig` and `tools.verify.lean_backend.LeanBackend` now accept `mathlib_rev`. When set, lean-interact pulls Mathlib at exactly that commit instead of resolving the bare string `"mathlib"` to whatever master is at fetch time.
   - The pin matches Degenne's `brownian-motion @ 51807683` lake-manifest, which itself targets `leanprover/lean4:v4.30.0-rc1` (matching our `lean-toolchain`). Without this pin, Mathlib master had drifted past Degenne's tested version (master is now on rc2), breaking the transitive Brownian-motion build.
   - The lean-interact temp project log confirms `info: mathlib: checking out revision 'f23306121184...'` after the pin took effect.
@@ -343,7 +343,7 @@ Resolution applied 2026-05-08:
 
 After committing the conservative recovery (29 delivery-ready, 5 placeholders), two follow-on attempts were made to reclaim the remaining placeholders:
 
-**Stretch A — Degenne transitive pins (failed).** Added subverso (`52b9dfbd2658`), checkdecls (`3d425859e73f`), and kolmogorov_extension4 (`e236e968c2b0`) to `[[hybrid-verify.lean.extra_requires]]`, matching Degenne's lake-manifest exactly. Lean-interact's clone log confirmed all four revisions (Mathlib + the three transitive deps + BrownianMotion) checked out at the manifest commits. Despite this, `BrownianMotion.Gaussian.BrownianMotion` still failed to compile — the wrapper file errored with `unknown namespace MeasureTheory` after a ~180s build attempt, identical symptom to the no-transitive-pin run. Conclusion: the issue is in how lean-interact's `TempRequireProject` synthesises a Lake project from a require list versus how Degenne's `lakefile.toml` is structured, not in transitive-version drift. Reverted: transitive pins removed from `hybrid_verify.toml`; the BrownianMotion entry stays for tree resolution, but the 3 BM wrappers stay `placeholder` until a tracked lake-manifest workflow (mounted Lake project) replaces TempRequireProject for these benchmarks.
+**Stretch A — Degenne transitive pins (failed).** Added subverso (`52b9dfbd2658`), checkdecls (`3d425859e73f`), and kolmogorov_extension4 (`e236e968c2b0`) to `[[quantfin-verify.lean.extra_requires]]`, matching Degenne's lake-manifest exactly. Lean-interact's clone log confirmed all four revisions (Mathlib + the three transitive deps + BrownianMotion) checked out at the manifest commits. Despite this, `BrownianMotion.Gaussian.BrownianMotion` still failed to compile — the wrapper file errored with `unknown namespace MeasureTheory` after a ~180s build attempt, identical symptom to the no-transitive-pin run. Conclusion: the issue is in how lean-interact's `TempRequireProject` synthesises a Lake project from a require list versus how Degenne's `lakefile.toml` is structured, not in transitive-version drift. Reverted: transitive pins removed from `quantfin.toml`; the BrownianMotion entry stays for tree resolution, but the 3 BM wrappers stay `placeholder` until a tracked lake-manifest workflow (mounted Lake project) replaces TempRequireProject for these benchmarks.
 
 **Stretch B — Adapted/StronglyAdapted cascade fixes (partial win).** For `mart-thm-2.2.9` and `mart-thm-2.6.7`, applied a sequence of fixes:
 1. Field type rename `Adapted → StronglyAdapted` (struct field + lemma return type + downstream methods on `Martingale`).
@@ -370,11 +370,11 @@ three from `reduced_core` to `library_wrapper`. The current state:
 - **`bm-thm-5.3.2` (Hölder continuity → `library_wrapper`).** Wrap of Degenne `IsPreBrownian.memHolder_mk` from `BrownianMotion/Gaussian/BrownianMotion.lean`. The textbook claim "almost every BM path is locally `α`-Hölder for every `α ∈ (0, 1/2)`" follows from Degenne's stronger conclusion that the continuous modification `h.mk B` produced by Kolmogorov-Chentsov is everywhere locally `β`-Hölder for every `β < 1/2`; the modification a.s. equals `B` via `IsPreBrownian.mk_ae_eq`. **Requires Degenne.**
 - **`bm-prop-5.1.2` (Gaussian-process characterization → `library_wrapper`).** Wrap of Degenne `IsGaussianProcess.isPreBrownian_of_covariance`. The benchmark hypothesis structure encodes a centered Gaussian process on `ℝ≥0` with covariance kernel `min(s, t)`; the conclusion `IsPreBrownian` packages the BM-defining properties (joint Gaussianity, mean zero, covariance `min s t`, independent increments, continuous modification). **Requires Degenne.**
 
-All 10 BM theorems verify under the docker image (full file run 2026-05-09: 10 verified, 0 partial, 0 failed). The Degenne dependency is now load-bearing for `bm-thm-5.3.2` and `bm-prop-5.1.2`; do not remove the `BrownianMotion` `extra_requires` entry from `hybrid_verify.toml`.
+All 10 BM theorems verify under the docker image (full file run 2026-05-09: 10 verified, 0 partial, 0 failed). The Degenne dependency is now load-bearing for `bm-thm-5.3.2` and `bm-prop-5.1.2`; do not remove the `BrownianMotion` `extra_requires` entry from `quantfin.toml`.
 
 ### Degenne build via `TempRequireProject` (2026-05-09)
 
-The prior `docs/coverage.md` note that "BrownianMotion fails to build under `TempRequireProject` even with manifest pins" is **superseded** — that failure was a 180s timeout cutting off Lake mid-build, not a real build error. With all four transitive deps pinned in `hybrid_verify.toml` (Mathlib `f23306121184`, subverso `52b9dfbd2658`, checkdecls `3d425859e73f`, kolmogorov_extension4 `e236e968c2b0`) — matching Degenne's lake-manifest exactly — `TempRequireProject` produces hash `63469b53...` and Lake builds the BM-specific files (~12 min once Mathlib is cached, 3168 jobs). The compiled BrownianMotion oleans persist in the `lean_interact_cache` Docker volume across runs. Each docker session pays a one-time ~3-minute import cost when the first BM-importing benchmark theorem hits the lean-interact REPL; subsequent BM theorems in the same session are cached.
+The prior `docs/coverage.md` note that "BrownianMotion fails to build under `TempRequireProject` even with manifest pins" is **superseded** — that failure was a 180s timeout cutting off Lake mid-build, not a real build error. With all four transitive deps pinned in `quantfin.toml` (Mathlib `f23306121184`, subverso `52b9dfbd2658`, checkdecls `3d425859e73f`, kolmogorov_extension4 `e236e968c2b0`) — matching Degenne's lake-manifest exactly — `TempRequireProject` produces hash `63469b53...` and Lake builds the BM-specific files (~12 min once Mathlib is cached, 3168 jobs). The compiled BrownianMotion oleans persist in the `lean_interact_cache` Docker volume across runs. Each docker session pays a one-time ~3-minute import cost when the first BM-importing benchmark theorem hits the lean-interact REPL; subsequent BM theorems in the same session are cached.
 
 ## Strong Markov AFP wrap (2026-05-09)
 
@@ -396,7 +396,7 @@ to v4.30.0-rc2 unblocked:
 
 In addition, the project now vendors `RemyDegenne/brownian-motion` (pinned
 commit `51807683` on `master`) via Lake `require` in `lakefile.lean`
-and an `[[hybrid-verify.lean.extra_requires]]` entry in `hybrid_verify.toml`,
+and an `[[quantfin-verify.lean.extra_requires]]` entry in `quantfin.toml`,
 which lean-interact's `TempRequireProject` reads. That dependency provides
 the concrete `brownian` Brownian-motion construction together with
 `isGaussianProcess_brownian`, `hasIndepIncrements_brownian`, and
@@ -458,7 +458,7 @@ stochastic_calculus.json:     11 verified, 0 partial, 0 failed
 - `mart-thm-2.6.7` — **FTAP, ⇒ direction** (Tier A.12); embeds the martingale-transform helper. Recovered for v4.30 with the same cascade fixes plus two additional `Adapted → StronglyAdapted` renames in the FTAP struct (`S_adapted`) and predicate (`hφ_pred`). End-to-end validation pending the in-flight `verify` rebuild.
 - `mc-thm-1.1.2` — **Markov-chain path factorization** (Tier A.13); constructive `pathProb` def, theorem is `rfl`.
 - `dist-exp-min` — **minimum of independent exponentials** (Tier A.5). Real derivation of the survival-function identity `μ{ω | t < min_i τ_i ω} = exp(-(∑rates) t)` for `t ≥ 0` from joint independence (`iIndepFun.meas_iInter`) + individual exponential laws via `cdf_expMeasure_eq` and `isProbabilityMeasure_expMeasure` (rewritten for v4.30).
-- `bm-thm-5.1.5` — **Brownian motion is a martingale w.r.t. its filtration** (real derivation, 2026-05-09 LocalProject spike). Proof in `HybridVerify/BrownianMartingale.lean` (Lake-built library); benchmark snippet imports the compiled lemma and re-exports it. Uses Mathlib `condExp_indep_eq` + `condExp_of_stronglyMeasurable` + `condExp_add` + Degenne `IsPreBrownian.integrable_eval` + `IsPreBrownian.hasLaw_sub`. The hypothesis structure `BrownianMartingaleHyp` is `IsPreBrownian + StronglyAdapted + (B_t − B_s ⊥ 𝓕 s)` — the standard textbook "BM w.r.t. filtration" condition. Three drafts of this proof OOM'd Lean's elaborator under `TempRequireProject` (the inline-snippet model); moving the proof out to a Lake file resolved that. Axioms-clean per `#print axioms`: `[propext, Classical.choice, Quot.sound]`.
+- `bm-thm-5.1.5` — **Brownian motion is a martingale w.r.t. its filtration** (real derivation, 2026-05-09 LocalProject spike). Proof in `QuantFin/BrownianMartingale.lean` (Lake-built library); benchmark snippet imports the compiled lemma and re-exports it. Uses Mathlib `condExp_indep_eq` + `condExp_of_stronglyMeasurable` + `condExp_add` + Degenne `IsPreBrownian.integrable_eval` + `IsPreBrownian.hasLaw_sub`. The hypothesis structure `BrownianMartingaleHyp` is `IsPreBrownian + StronglyAdapted + (B_t − B_s ⊥ 𝓕 s)` — the standard textbook "BM w.r.t. filtration" condition. Three drafts of this proof OOM'd Lean's elaborator under `TempRequireProject` (the inline-snippet model); moving the proof out to a Lake file resolved that. Axioms-clean per `#print axioms`: `[propext, Classical.choice, Quot.sound]`.
 
 23 `library_wrapper` (direct Mathlib / Isabelle / Degenne library invocation):
 
@@ -503,7 +503,7 @@ Added in the Degenne Doob L¹ continuous-time wrap (1):
 
 Use wording like:
 
-> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-09). Under a strict faithfulness audit, 37 entries are full or direct library-backed theorem formalizations: 14 derive the conclusion from honest hypotheses (or are structural definitions), 23 directly invoke a named Mathlib / Isabelle-AFP / Degenne `brownian-motion` library theorem whose statement matches the benchmark. Every Degenne-derived wrapper has been `#print axioms`-audited to confirm axioms-clean status. Complex Lean derivations that would overrun the REPL elaborator's memory budget live as real files in a Lake-built library (`HybridVerify/`) so `lake build` gives Lean the full incremental-compilation budget per file; benchmark snippets re-export by name. The remaining 28 entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. There are zero placeholders. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required (Itô-integral layer, BM reflection principle / nowhere-differentiability / law of iterated logarithm, Doob L^p, conditional Gaussian, continuous-time hitting times of open sets).
+> We built a reproducible Lean 4 / Isabelle verification artifact covering 65 stochastic-process benchmark statements. All active prover obligations type-check under Mathlib v4.30 / Lean v4.30.0-rc1 with Mathlib pinned to commit `f23306121184` (validated 2026-05-09). Under a strict faithfulness audit, 37 entries are full or direct library-backed theorem formalizations: 14 derive the conclusion from honest hypotheses (or are structural definitions), 23 directly invoke a named Mathlib / Isabelle-AFP / Degenne `brownian-motion` library theorem whose statement matches the benchmark. Every Degenne-derived wrapper has been `#print axioms`-audited to confirm axioms-clean status. Complex Lean derivations that would overrun the REPL elaborator's memory budget live as real files in a Lake-built library (`QuantFin/`) so `lake build` gives Lean the full incremental-compilation budget per file; benchmark snippets re-export by name. The remaining 28 entries are `reduced_core`: the active code is honest but is either a narrower algebraic/analytic check or a Lean specification structure that pins down the textbook STATEMENT (so any inhabitant satisfies it by construction) without DERIVING the conclusion. There are zero placeholders. The artifact identifies precisely where current Lean/Isabelle libraries support the course material, where a meaningful real proof is achievable in the near term, and where genuine new stochastic-process infrastructure is required (Itô-integral layer, BM reflection principle / nowhere-differentiability / law of iterated logarithm, Doob L^p, conditional Gaussian, continuous-time hitting times of open sets).
 
 Avoid:
 

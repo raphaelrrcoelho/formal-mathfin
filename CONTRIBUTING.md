@@ -21,7 +21,7 @@ no extra config needed.
 
 ## Adding a theorem
 
-1. **Pick a home.** The library is organised by topic under `HybridVerify/`:
+1. **Pick a home.** The library is organised by topic under `QuantFin/`:
    - `Foundations/` — probability primitives, Itô, FTAP, pricing kernels.
    - `BlackScholes/` — BS family, Greeks, exotics.
    - `Binomial/` — CRR, American, Snell, reflection.
@@ -30,7 +30,7 @@ no extra config needed.
 2. **Author the proof in a real `.lean` file**, not in a JSON snippet.
    Non-trivial proofs need the full `lake build` memory budget + incremental
    compilation + LSP authoring. The benchmark JSONs are for re-export shims
-   (5-25 lines) that `import HybridVerify.<Section>.<Module>` and reference
+   (5-25 lines) that `import QuantFin.<Section>.<Module>` and reference
    the named lemma. Trivial library wrappers (single-line `:= someLemma`)
    can stay inline in the JSON.
 3. **Iterate fast via the REPL daemon.** Per-file checks in 5-30 sec
@@ -38,7 +38,7 @@ no extra config needed.
    ```bash
    docker compose -f docker/docker-compose.yml up -d lean-repl
    docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
-   ./scripts/lean-check.sh HybridVerify/<Section>/<Module>.lean
+   ./scripts/lean-check.sh QuantFin/<Section>/<Module>.lean
    ```
 4. **Confirm axioms-cleanliness.** Every `full` theorem must depend only on
    the three standard Mathlib axioms:
@@ -86,6 +86,6 @@ Drafts for Mathlib, Degenne's BrownianMotion, and Zulip messages live under
 - `upstream/brownian-motion/` — PR drafts (Lean files + ISSUE_BODY.md).
 - `upstream/zulip/` — discussion drafts.
 
-When a HybridVerify result is general enough to belong upstream, draft it
+When a QuantFin result is general enough to belong upstream, draft it
 here first, get a sign-off on the Lean side, then open the PR against the
 target repo. Keep the in-tree copy until the upstream PR lands.

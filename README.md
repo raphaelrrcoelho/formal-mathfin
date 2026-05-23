@@ -21,7 +21,7 @@ three Mathlib standard axioms `[propext, Classical.choice, Quot.sound]`.
 ## At a glance
 
 ```lean
--- HybridVerify/BlackScholes/PDE.lean — BS delta via the magic identity
+-- QuantFin/BlackScholes/PDE.lean — BS delta via the magic identity
 lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt (fun s => bsV K r σ s τ) (Phi (bsd1 S K r σ τ)) S := by
@@ -37,7 +37,7 @@ lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 
 The `bs_identity` magic-identity collapse drives delta, gamma, theta, vega,
 rho, vanna, volga, and the BS PDE forward direction. See
-[`HybridVerify/Examples.lean`](HybridVerify/Examples.lean) for a curated
+[`QuantFin/Examples.lean`](QuantFin/Examples.lean) for a curated
 five-proof tour.
 
 ## Quick start
@@ -57,7 +57,7 @@ Fast authoring loop (5–30s feedback via persistent REPL daemon):
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d lean-repl
-./scripts/lean-check.sh HybridVerify/<Section>/<Module>.lean
+./scripts/lean-check.sh QuantFin/<Section>/<Module>.lean
 ```
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.

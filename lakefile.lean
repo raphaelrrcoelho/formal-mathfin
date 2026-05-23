@@ -1,14 +1,14 @@
 import Lake
 open Lake DSL
 
-package HybridVerify where
+package QuantFin where
   leanOptions := #[
     ⟨`autoImplicit, false⟩
   ]
 
--- Library `HybridVerify` lives at `HybridVerify/*.lean` (default srcDir = ".").
+-- Library `QuantFin` lives at `QuantFin/*.lean` (default srcDir = ".").
 @[default_target]
-lean_lib HybridVerify where
+lean_lib QuantFin where
 
 -- Pinned to Degenne brownian-motion's lake-manifest commit (so all transitive
 -- versions resolve consistently). Bump together with the BrownianMotion pin.
@@ -19,8 +19,8 @@ require mathlib from git
 -- RemyDegenne/brownian-motion: Brownian motion construction, multivariate
 -- Gaussian, Kolmogorov-Chentsov continuity, Doob's L^p inequality, stochastic
 -- integral approximation. Pinned to a specific commit so toolchain bumps stay
--- deterministic. Mirrored in hybrid_verify.toml's
--- [[hybrid-verify.lean.extra_requires]] so lean-interact also sees it.
+-- deterministic. Mirrored in quantfin.toml's
+-- [[quantfin.lean.extra_requires]] so lean-interact also sees it.
 require BrownianMotion from git
   "https://github.com/RemyDegenne/brownian-motion.git" @
   "16d15eb42c8c4a612bd0aacb28078c1802597216"

@@ -19,7 +19,7 @@ Preferred runner is Docker:
 
 ```bash
 docker compose -f docker/docker-compose.yml build verify
-docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config hybrid_verify.toml --timeout 120
+docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config quantfin.toml --timeout 120
 ```
 
 The default compose command runs `benchmarks/cross_validated.json`:
@@ -32,7 +32,7 @@ Use the local Python CLI only for quick checks or when the local Lean
 toolchain is known to be configured:
 
 ```bash
-python -m tools.verify benchmarks/<file>.json [-v] [--config hybrid_verify.toml] [--timeout 120] [--parallel]
+python -m tools.verify benchmarks/<file>.json [-v] [--config quantfin.toml] [--timeout 120] [--parallel]
 ```
 
 `-v` enables debug logging. `--parallel` verifies all theorems concurrently
@@ -65,8 +65,8 @@ Delivery/status docs:
 - `docs/patterns.md`: distilled Lean proof patterns.
 
 Docker notes:
-- `docker/Dockerfile.verify` is the canonical reproducible environment: Lean (elan) + the `HybridVerify` library prebuilt with `lake exe cache get && lake build`, plus Python + the `tools.verify` package.
-- Compose bind-mounts `tools/`, `benchmarks/`, `tests/`, `hybrid_verify.toml`, and the Lake project pieces at repo root (`HybridVerify/`, `HybridVerify.lean`, `lakefile.lean`, `lake-manifest.json`, `lean-toolchain`).
+- `docker/Dockerfile.verify` is the canonical reproducible environment: Lean (elan) + the `QuantFin` library prebuilt with `lake exe cache get && lake build`, plus Python + the `tools.verify` package.
+- Compose bind-mounts `tools/`, `benchmarks/`, `tests/`, `quantfin.toml`, and the Lake project pieces at repo root (`QuantFin/`, `QuantFin.lean`, `lakefile.lean`, `lake-manifest.json`, `lean-toolchain`).
 - `lean-interact`'s Mathlib cache lives in the `lean_interact_cache` Docker volume.
 - If Docker build fails under Codex because it cannot write under `~/.docker`, rerun with elevated permissions.
 
@@ -95,13 +95,13 @@ active `code.sympy`. Every theorem declares
 placeholder}`. Delivery claims count `full + library_wrapper` only — see
 `docs/coverage.md`.
 
-**Lean proofs live in `HybridVerify/<Section>/<Module>.lean`**, organised
+**Lean proofs live in `QuantFin/<Section>/<Module>.lean`**, organised
 into thematic subdirectories: `Foundations/`, `BlackScholes/`, `Futures/`,
 `Binomial/`, `FixedIncome/`, `Portfolio/`, `Performance/`, `RiskMeasures/`,
 `Actuarial/`, `DeFi/`. The Lean backend uses `lean-interact.LocalProject`
 pointing at the repo root. Non-trivial proofs **must** live as real Lean
 files (full `lake build` memory budget + LSP); benchmark snippets
-`import HybridVerify.<Section>.<Module>` and re-export.
+`import QuantFin.<Section>.<Module>` and re-export.
 
 **SymPy backend** (`tools/verify/sympy_verifier.py`, legacy):
 - Not routed to by default; if `theorem.metadata["sympy_check_kind"]` is set, dispatches to a typed handler (`ALGEBRAIC_IDENTITY` / `MOMENT_COMPUTATION` / etc.).
@@ -109,8 +109,8 @@ files (full `lake build` memory budget + LSP); benchmark snippets
 - All evaluation uses Python's runtime evaluator with a controlled namespace; treat benchmark JSON as trusted input.
 
 **Config** (`tools/verify/config.py`): TOML loader using stdlib `tomllib`
-(Python 3.11+). Searches `hybrid_verify.toml` then
-`pyproject.toml[tool.hybrid-verify]`.
+(Python 3.11+). Searches `quantfin.toml` then
+`pyproject.toml[tool.quantfin-verify]`.
 
 **Models** (`tools/verify/models.py`): `TheoremStatement` is a frozen
 dataclass with mutable `metadata`. `code` keyed by `Backend` enum.

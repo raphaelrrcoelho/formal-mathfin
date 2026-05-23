@@ -32,7 +32,7 @@ Eight concrete problems, ranked by visitor impact:
    what is authoritative versus internal notes versus transient PR drafts.
 
 3. **Naming is vestigial.** The Python package is `hybrid_verify`, the Lean
-   library is `HybridVerify`, the Docker image is `quantfin-verify`. Three
+   library is `QuantFin`, the Docker image is `quantfin-verify`. Three
    names for one thing, all rooted in the abandoned "hybrid 3-backend"
    framing. Current reality is Lean-first across all routes (per
    `CLAUDE.md` routing table and user direction).
@@ -67,8 +67,8 @@ automated_proofs_quantfin/
 ├── lakefile.lean                   # ★ hoisted from lean/
 ├── lean-toolchain                  # ★ hoisted
 ├── lake-manifest.json              # ★ hoisted
-├── HybridVerify.lean               # ★ hoisted (umbrella)
-├── HybridVerify/                   # ★ hoisted (138 files, 10 subdirs unchanged)
+├── QuantFin.lean               # ★ hoisted (umbrella)
+├── QuantFin/                   # ★ hoisted (138 files, 10 subdirs unchanged)
 │   ├── Foundations/                # 32 files: math primitives & bridges
 │   ├── BlackScholes/               # 43 files: BS family & exotics
 │   ├── Binomial/                   # CRR, American, Snell, reflection
@@ -112,7 +112,7 @@ automated_proofs_quantfin/
 ├── docker/                         # kept; mount paths patched
 ├── scripts/                        # kept; paths patched
 ├── tests/                          # kept at root (pytest discovers it)
-├── hybrid_verify.toml              # kept; local_project="." not "lean"
+├── quantfin.toml              # kept; local_project="." not "lean"
 ├── pyproject.toml                  # kept; package path patched
 └── requirements.txt                # kept
 ```
@@ -127,7 +127,7 @@ the artifact is.
 
 Explicit scope discipline to keep this a single-PR change:
 
-- **Lean library name (`HybridVerify`)** — renaming would be 138-file
+- **Lean library name (`QuantFin`)** — renaming would be 138-file
   namespace churn for cosmetics. The Lake name is the install handle; the
   external storefront is the repo name + README. Mathlib lives in a repo
   called `mathlib4`. Fine.
@@ -166,9 +166,9 @@ Quarantine but keep:
 After moves, these files reference `lean/...` or `python/...` paths and
 must be patched:
 
-1. `hybrid_verify.toml` — `local_project = "lean"` → `local_project = "."`
+1. `quantfin.toml` — `local_project = "lean"` → `local_project = "."`
 2. `docker/docker-compose.yml` — bind-mount paths (`./lean`, `./python`,
-   `./tests`, `./benchmarks`, `./hybrid_verify.toml`) and command paths
+   `./tests`, `./benchmarks`, `./quantfin.toml`) and command paths
 3. `docker/Dockerfile.verify` — comment references and `WORKDIR`/`COPY`
    paths
 4. `scripts/lean-check.sh` — usage examples and the file-path argument
@@ -189,8 +189,8 @@ Single PR. Five mechanical steps. Verified at each step.
 
 **Step 1: hoist the Lake project.**
 ```
-git mv lean/HybridVerify HybridVerify
-git mv lean/HybridVerify.lean .
+git mv lean/QuantFin QuantFin
+git mv lean/QuantFin.lean .
 git mv lean/lakefile.lean .
 git mv lean/lean-toolchain .
 git mv lean/lake-manifest.json .
@@ -230,13 +230,13 @@ docker compose -f docker/docker-compose.yml run --rm \
 |---|---|
 | Docker rebuild fails after path changes | Step 5 catches this before commit. Rollback = `git reset --hard HEAD`. |
 | Lean lake-build regression from hoist | Step 5 runs full lake build. Mathlib pin and proof content unchanged; only file locations move. |
-| External consumer hardcoded `lean/HybridVerify` import path | None known. The Lake package is consumed locally; not published. |
+| External consumer hardcoded `lean/QuantFin` import path | None known. The Lake package is consumed locally; not published. |
 | AI-tool config (CLAUDE.md / AGENTS.md) path references go stale | Patched in step 4. Tools re-read on next session. |
 | Git history continuity for moved files | `git mv` preserves rename detection; `git log --follow` works. |
 
 ## Decisions deferred (single follow-up cycle if user wants)
 
-1. **Rename `HybridVerify` → `QuantFin`.** 138-file namespace churn. Real
+1. **Rename `QuantFin` → `QuantFin`.** 138-file namespace churn. Real
    value if the lib is ever published; minor if it stays a private repo.
 2. **Rename `hybrid_verify` Python package → `quantfin_verify`.** Smaller
    churn, same value question.

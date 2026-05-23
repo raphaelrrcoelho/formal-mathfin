@@ -27,7 +27,7 @@ echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
 docker compose -f docker/docker-compose.yml pull verify
 
 # Run a benchmark:
-docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config hybrid_verify.toml --timeout 120
+docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config quantfin.toml --timeout 120
 
 # Force a local rebuild (only when changing Dockerfile/Lean toolchain):
 docker compose -f docker/docker-compose.yml build verify
@@ -77,14 +77,14 @@ Delivery/status docs:
 
 Docker notes:
 - `docker/Dockerfile.verify` installs Lean (via elan), prebuilds the
-  `HybridVerify` library against pinned Mathlib + BrownianMotion via
+  `QuantFin` library against pinned Mathlib + BrownianMotion via
   `lake exe cache get && lake build`, then layers Python + the
   `tools.verify` package.
 - Compose bind-mounts `tools/`, `benchmarks/`, `tests/`,
-  `hybrid_verify.toml`, and the Lake project pieces at repo root
-  (`HybridVerify/`, `HybridVerify.lean`, `lakefile.lean`,
+  `quantfin.toml`, and the Lake project pieces at repo root
+  (`QuantFin/`, `QuantFin.lean`, `lakefile.lean`,
   `lake-manifest.json`, `lean-toolchain`). The Lake bind mount is RW so
-  authoring `HybridVerify/*.lean` on host (VS Code + Lean LSP) propagates
+  authoring `QuantFin/*.lean` on host (VS Code + Lean LSP) propagates
   without a rebuild; `.lake/` lives on the host and survives between runs.
 - `lean-interact`'s own cache is in the `lean_interact_cache` Docker volume.
 - If Docker build fails under Claude/Codex because it cannot write under
@@ -121,21 +121,21 @@ CAS checks are not formal proofs.
 - Every benchmark theorem must declare `metadata.formalization_status`: `full`, `library_wrapper`, `reduced_core`, or `placeholder`. Delivery claims count only `full + library_wrapper`; see `docs/coverage.md`.
 - Do not tell a collaborator that all course theorems are formally proved. Run `python3 -m tools.verify.coverage_report` for the current `full / library_wrapper / reduced_core / placeholder` split.
 
-**Lean proofs live in `HybridVerify/<Section>/<Module>.lean`, not in JSON
+**Lean proofs live in `QuantFin/<Section>/<Module>.lean`, not in JSON
 strings**. The library is organized into thematic subdirectories under the
-repo-root `HybridVerify/`: `Foundations/`, `BlackScholes/`, `Futures/`,
+repo-root `QuantFin/`: `Foundations/`, `BlackScholes/`, `Futures/`,
 `Binomial/`, `FixedIncome/`, `Portfolio/`, `Performance/`, `RiskMeasures/`,
 `Actuarial/`, `DeFi/`. The Lean backend uses `lean-interact.LocalProject`
-pointing at the repo root (configured via `hybrid_verify.toml`
+pointing at the repo root (configured via `quantfin.toml`
 `local_project = "."`). `lakefile.lean` + `lake-manifest.json` +
 `lean-toolchain` are authoritative for Mathlib/Lean versions and transitive
 deps. Non-trivial proofs (multi-step derivations, helper lemmas, structures)
-**must** live as real Lean files under `HybridVerify/<Section>/` so they
+**must** live as real Lean files under `QuantFin/<Section>/` so they
 get the full `lake build` memory budget + incremental compilation + LSP
-authoring; benchmark snippets `import HybridVerify.<Section>.<Module>` and
+authoring; benchmark snippets `import QuantFin.<Section>.<Module>` and
 re-export the named lemma in 5–25 lines. Trivial library wrappers
 (single-line `:= someLemma`) can stay inline in the JSON. To author a new
-proof: edit `HybridVerify/<Section>/<Module>.lean` on host with VS Code +
+proof: edit `QuantFin/<Section>/<Module>.lean` on host with VS Code +
 Lean LSP (`loogle`/`leansearch%`/`apply?` are transitively available
 via Mathlib's `LeanSearchClient`), `lake build` to validate, then update the
 benchmark JSON to import + reference.
@@ -143,7 +143,7 @@ benchmark JSON to import + reference.
 **Fast authoring iteration via persistent REPL daemon (`docker compose
 service lean-repl`)**. The daemon (`tools/verify/lean_repl.py`) boots a
 `lean-interact` server pointing at the repo root once per session, paying
-the ~5-min Mathlib + BrownianMotion + HybridVerify olean-load cost a single
+the ~5-min Mathlib + BrownianMotion + QuantFin olean-load cost a single
 time. It then listens on TCP `127.0.0.1:7878` and processes each "check this
 file" request in 5-30 sec — vs. 5-15 min for the `docker compose run --rm
 verify` cold path. This is the LSP-equivalent for non-editor authoring
@@ -156,7 +156,7 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
 
 # per iteration: edit a .lean file, then check it via the wrapper
-./scripts/lean-check.sh HybridVerify/Foundations/BrownianMartingale.lean
+./scripts/lean-check.sh QuantFin/Foundations/BrownianMartingale.lean
 # Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
 
 # tear down at end of session
@@ -191,8 +191,8 @@ the expensive Mathlib bootstrap to the first `verify()` call. It holds a
 - All evaluation uses Python's runtime evaluator with a controlled namespace; treat benchmark JSON as trusted input.
 
 **Config** (`tools/verify/config.py`): TOML loader using stdlib `tomllib`
-(Python 3.11+). Searches `hybrid_verify.toml` then `pyproject.toml`
-(`[tool.hybrid-verify]`). Defaults are baked into the dataclasses, so a
+(Python 3.11+). Searches `quantfin.toml` then `pyproject.toml`
+(`[tool.quantfin-verify]`). Defaults are baked into the dataclasses, so a
 missing file is fine.
 
 **Models** (`tools/verify/models.py`): `TheoremStatement` is a frozen

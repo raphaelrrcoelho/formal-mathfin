@@ -7,7 +7,7 @@ the daemon elaborates it through the lean-interact server and returns a JSON
 response with errors / warnings / sorry count.
 
 The Lean server is initialized ONCE at daemon startup. The expensive bit
-(loading Mathlib + BrownianMotion + HybridVerify oleans, ~5 min on a cold
+(loading Mathlib + BrownianMotion + QuantFin oleans, ~5 min on a cold
 cache) is paid once per daemon lifetime; subsequent checks just elaborate
 the new file against the loaded environment (~5-30 sec).
 
@@ -22,9 +22,9 @@ Usage from host:
     docker compose -f docker/docker-compose.yml logs -f lean-repl  # watch for READY
 
     # per iteration: send a file, read the JSON response
-    cat HybridVerify/Foo.lean | nc localhost 7878
+    cat QuantFin/Foo.lean | nc localhost 7878
     # or via the wrapper:
-    ./scripts/lean-check.sh HybridVerify/Foo.lean
+    ./scripts/lean-check.sh QuantFin/Foo.lean
 
     # tear down
     docker compose -f docker/docker-compose.yml down lean-repl
@@ -129,7 +129,7 @@ def main() -> int:
         format="%(asctime)s %(name)s %(levelname)s %(message)s",
     )
 
-    config = load_config("hybrid_verify.toml")
+    config = load_config("quantfin.toml")
     backend = LeanBackend(local_project=config.lean.local_project)
 
     print("Initializing Lean server (Mathlib load is ~5 min cold)...", flush=True)
