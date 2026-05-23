@@ -7,8 +7,16 @@ package QuantFin where
   ]
 
 -- Library `QuantFin` lives at `QuantFin/*.lean` (default srcDir = ".").
+-- `globs := .andSubmodules` builds the umbrella `QuantFin` *and every*
+-- `QuantFin.*` submodule, not just those reachable from the umbrella's
+-- imports. This guarantees `lake build` compiles every file under
+-- `QuantFin/` — including leaf modules nothing imports, such as
+-- `QuantFin.AxiomAudit` (the build-enforced axioms-clean harness) and
+-- `QuantFin.Examples` (the curated tour). Without it, an unimported file
+-- could rot silently.
 @[default_target]
 lean_lib QuantFin where
+  globs := #[.andSubmodules `QuantFin]
 
 -- Pinned to Degenne brownian-motion's lake-manifest commit (so all transitive
 -- versions resolve consistently). Bump together with the BrownianMotion pin.

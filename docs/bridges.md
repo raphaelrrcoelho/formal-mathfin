@@ -156,6 +156,7 @@ favor of Mathlib equivalents). Phase 30 (Bridge A,
 | 42 | Multi-state FTAP: **forward direction proved in arbitrary finite state + finite assets** (`noArbitrage_of_emm_multi`: EMM ⟹ no arbitrage via discrete-Lagrangian argument). **Backward direction** factored via `hasEMM_multi_of_candidate` — given a candidate `q` satisfying the EMM identities, it IS the EMM. **The open piece**: constructing `q` from no-arbitrage via Hahn-Banach separation / Farkas (Mathlib has Hahn-Banach in normed spaces but not specialised to finite-dim with positivity cone). Forward direction generalises Phase 37. | `Foundations/FTAPMultiState.lean` | NEW (phase 42 forward + hypothesis-form backward) |
 | 52 | Doob L^p applications to discounted-price martingales: `discounted_price_long_run_limit` specialises `lp_continuous_martingale_full` (existing 725 LOC in `Foundations/LpContinuousMartingaleConvergence.lean`) to financial setup — under `Q`-martingale + L^p bound + right-continuous paths, the discounted price `e^{−rt} · S_t` has an integrable long-run limit `M_∞`. `discounted_price_long_run_bounded` packages the no-blow-up guarantee. **First downstream use** of `LpContinuousMartingaleConvergence.lean` from outside the file itself. | `Foundations/DoobLpApplications.lean` | NEW (phase 52) |
 | 40 (GBM specialisation) | **Itô's lemma L¹-expectation form specialised to GBM-log** (`f = log` on `dS = r S dt + σ S dB`). `bsLogReturn r σ T Z := (r − σ²/2)·T + σ·√T·Z` collapses `log(bsTerminal/S_0)` to a linear function of `Z`. Under `BSCallHyp`: `E_Q[bsLogReturn] = (r − σ²/2)·T` (the Itô-corrected drift integrated) and `Var_Q[bsLogReturn] = σ²·T` (the QV over `[0, T]`). **First L¹-form Itô identity** in the library — the path-wise version remains gated on full L²-density convergence (which Nagy 2026 also leaves "structurally verified"). | `BlackScholes/GBMLogMoments.lean` | NEW (phase 40 GBM specialisation) |
+| 28 | **Forward-rate / hazard / force-of-mortality via Mathlib `intervalIntegral` + the `ExponentialDiscount` principle** (was deferred below). `forwardRate_eq_neg_log_discount`, `force_eq_neg_log_deriv_survival`, `hazard_eq_neg_log_deriv_survival` express `rate = −d/dt log Q` against the actual discount `exp(−H)`, via `rate_eq_neg_log_deriv` + the FTC (`integral_hasDerivAt_right`). Mortality/HazardCurve previously stated this only in prose. Makes `Foundations/ExponentialDiscount` load-bearing (0 → 3 consumers). | `FixedIncome/ForwardRate.lean`, `Actuarial/Mortality.lean`, `FixedIncome/HazardCurve.lean` | NEW (2026-05-23 principle-audit pass) |
 
 ## Bridges planned but deferred
 
@@ -167,7 +168,6 @@ favor of Mathlib equivalents). Phase 30 (Bridge A,
 | 25 | Variance swap from QV | Tractable once BM package QV completes. |
 | 4 | CRR via Mathlib CLT/Skorohod | Significant refactor of `CRRConvergence.lean`. |
 | 6 | NoArbitrage via `LinearMap` | Refactor of `NoArbitrageDerivations.lean`. |
-| 28 | Forward-rate / hazard via Mathlib `intervalIntegral` | Minor cleanup, low priority. |
 
 ## Conclusion
 

@@ -1,0 +1,129 @@
+/-
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+import QuantFin
+
+/-!
+# Axiom audit — the "axioms-clean" claim, build-enforced
+
+The library's headline claim is that every `full` derivation is
+`#print axioms`-clean: it depends only on the three standard Mathlib
+axioms `[propext, Classical.choice, Quot.sound]` — no `sorryAx`, no extra
+axioms.
+
+This file turns that claim from a docstring assertion (in `docs/coverage.md`)
+into a **build-enforced invariant**. Each `#guard_msgs in #print axioms`
+block below pins the axiom dependencies of a headline / load-bearing
+theorem. If any audited theorem ever picks up `sorryAx` (a `sorry` slipped
+in) or a new axiom (a dependency changed), the `#guard_msgs` check fails and
+**the build breaks**.
+
+The audited set spans every area of the library — it is representative, not
+exhaustive; extend it when a new load-bearing theorem lands. A theorem that
+appears here is certified axioms-clean by `lake build`, not by assertion.
+
+Note: pure-algebra theorems (closed by `ring`/`field_simp`) may legitimately
+depend on a *subset* of the three (or none); those are pinned to their
+actual set below. The invariant we enforce is "no `sorryAx`, no axiom
+outside the standard three", which the pinned messages capture exactly.
+-/
+
+namespace QuantFin.AxiomAudit
+
+/-! ## Black-Scholes core -/
+
+/-- info: 'QuantFin.bs_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bs_call_formula
+
+/-- info: 'QuantFin.bsP_eq_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bsP_eq_bsV
+
+/-- info: 'QuantFin.hasDerivAt_bsV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.hasDerivAt_bsV_S
+
+/-- info: 'QuantFin.bs_pde_holds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bs_pde_holds
+
+/-- info: 'QuantFin.expected_terminal_eq_forward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.expected_terminal_eq_forward
+
+/-! ## Garman normal form + consumer-side corollaries -/
+
+/-- info: 'QuantFin.bsV_eq_bsVGarman_standard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bsV_eq_bsVGarman_standard
+
+/-- info: 'QuantFin.black_futures_price_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.black_futures_price_eq_bsVGarman
+
+/-- info: 'QuantFin.bs_dividends_price_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bs_dividends_price_eq_bsVGarman
+
+/-! ## Gaussian MGF + lognormal moments -/
+
+/-- info: 'QuantFin.integral_exp_affine_gaussianPDFReal_univ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.integral_exp_affine_gaussianPDFReal_univ
+
+/-- info: 'QuantFin.nthMoment_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.nthMoment_terminal
+
+/-- info: 'QuantFin.secondMoment_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.secondMoment_terminal
+
+/-- info: 'QuantFin.variance_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.variance_terminal
+
+/-- info: 'QuantFin.bsLogReturn_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bsLogReturn_mean
+
+/-! ## Exponential-discount principle + the rate-recovery retrofits -/
+
+/-- info: 'QuantFin.rate_eq_neg_log_deriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.rate_eq_neg_log_deriv
+
+/-- info: 'QuantFin.forwardRate_eq_neg_log_discount' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.forwardRate_eq_neg_log_discount
+
+/-- info: 'QuantFin.force_eq_neg_log_deriv_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.force_eq_neg_log_deriv_survival
+
+/-- info: 'QuantFin.hazard_eq_neg_log_deriv_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.hazard_eq_neg_log_deriv_survival
+
+/-! ## Convex pricing functional + FTAP / state-price wiring -/
+
+/-- info: 'QuantFin.statePricePricing_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.statePricePricing_convexOn
+
+/-- info: 'QuantFin.callPrice_finiteState_butterfly_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.callPrice_finiteState_butterfly_nonneg
+
+/-- info: 'QuantFin.stateprice_call_butterfly_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.stateprice_call_butterfly_nonneg
+
+/-! ## Binomial trees -/
+
+/-- info: 'QuantFin.americanCallPrice_le_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.americanCallPrice_le_binomialPrice
+
+/-! ## Variance swap (QV limit) -/
+
+/-- info: 'QuantFin.tendsto_expected_bsLogPrice_equipartition_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.tendsto_expected_bsLogPrice_equipartition_sum
+
+/-! ## Portfolio / risk / performance -/
+
+/-- info: 'QuantFin.portfolioVarTwo_ge_min' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.portfolioVarTwo_ge_min
+
+/-- info: 'QuantFin.gaussianVaR_translation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.gaussianVaR_translation
+
+/-- info: 'QuantFin.gaussianCVaR_sub_VaR' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.gaussianCVaR_sub_VaR
+
+/-- info: 'QuantFin.sharpeRatio_affine_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.sharpeRatio_affine_invariant
+
+end QuantFin.AxiomAudit
