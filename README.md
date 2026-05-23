@@ -67,7 +67,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
 | Area | Headline results |
 |---|---|
 | **Black-Scholes** | Call, put, digital (cash + asset) + parity; full Greek matrix (δ, γ, vega, θ, ρ, vanna, volga, ψ); BS-Merton with dividends; Garman-Kohlhagen FX; implied vol uniqueness + bisection bracket; PDE forward direction; strike Greeks (∂_K, ∂²_K); static price bounds; box-spread arbitrage; lognormal moments + n-th moment + power forward; variance swap fair strike (closed-form + QV-limit); Breeden-Litzenberger implied risk-neutral PDF. |
-| **Exotics** | Chooser via PCP; capped call = bull spread; bull-spread + butterfly non-negativity; lookback ≥ vanilla; two-date geometric ≤ arithmetic Asian. |
+| **Exotics** | Chooser via PCP; capped call = bull spread; bull-spread + butterfly non-negativity; lookback ≥ vanilla; two-date geometric ≤ arithmetic Asian; **Margrabe exchange option** (multivariate — effective vol `√(σ₁²+σ₂²−2ρσ₁σ₂)`, parity, and the price as a `bs_call_formula` call on the ratio). |
 | **Bachelier** | Arithmetic-BM option pricing with the truncated-mean primitive; full first-order Greeks. |
 | **Black-76 (Futures)** | Black-76 formula via zero-drift specialisation + full Greek matrix; swaption. |
 | **Binomial trees** | Single-period replication + uniqueness; multi-period backward induction; American options (Snell envelope characterisation); CRR convergence; **Bermudan sandwich** (European ≤ Bermudan ≤ American); **Merton 1973** strict dominance bsV > S − K (American = European for non-dividend call); **André's reflection principle** with full bijection. |
@@ -77,7 +77,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
 | **Risk measures** | Gaussian VaR / CVaR closed forms; coherent axioms (translation, homogeneity, monotonicity, subadditivity) **derived from concave utility**; joint-stdev triangle; VaR/CVaR additivity at ρ=1; **Rockafellar-Uryasev** form; **spectral risk measures**; **Herfindahl-Hirschman** with Cauchy-Schwarz lower bound. |
 | **Actuarial** | Annuity-due closed form; net premium principle; **Gompertz** cumulative force of mortality. |
 | **DeFi** | Constant-product AMM (Uniswap v2) invariants — adapted from Pusceddu-Bartoletti. |
-| **Foundations** | Brownian motion martingales (square-sub-time, Wald exponential); Wiener integral + L² version; quadratic variation; Doob L^p continuous-time convergence; conditional Jensen; **discrete Itô lemma** (after Nagy); simple Itô integral; FTAP (two-state explicit EMM + multi-state forward); pricing kernels; state prices; Itô structural drift (GBM log-drift, log return mean); BS PDE from Itô + no-arbitrage. |
+| **Foundations** | **Static Girsanov** — the risk-neutral measure *derived* from the physical measure via an Esscher density, making `BSCallHyp` a theorem and the discounted asset a proven `Q`-martingale ([`docs/leaps.md`](docs/leaps.md)); Brownian motion martingales (square-sub-time, Wald exponential); Wiener integral + L² version; quadratic variation; Doob L^p continuous-time convergence; conditional Jensen; **discrete Itô lemma** (after Nagy); simple Itô integral; FTAP (two-state explicit EMM + multi-state forward); pricing kernels; state prices; Itô structural drift (GBM log-drift, log return mean); BS PDE from Itô + no-arbitrage. |
 
 The library leans on seven **structural-principle modules** where one named
 fact generates dozens of one-line corollaries (Garman normal form, price
@@ -91,6 +91,7 @@ gaussian MGF, exponential discount, Snell envelope). See
 |---|---|
 | [`docs/coverage.md`](docs/coverage.md) | Per-theorem audit: faithfulness status (`full` / `library_wrapper` / `reduced_core` / `placeholder`), verification evidence, claim-wording guidance. |
 | [`docs/architecture.md`](docs/architecture.md) | Design principles: structural-principle modules, the three-tier honesty model, the Foundations → pricing bridge methodology. |
+| [`docs/leaps.md`](docs/leaps.md) | Static Girsanov (EMM derived), the genesis cascade, and Margrabe's multivariate exchange option — the deductive arc that makes the risk-neutral measure a theorem. |
 | [`docs/bridges.md`](docs/bridges.md) | Catalogue of bridges from `Foundations/` to pricing modules. |
 | [`docs/patterns.md`](docs/patterns.md) | Distilled Lean / Mathlib proof patterns and anti-patterns from prior phases. |
 | [`docs/roadmap.md`](docs/roadmap.md) | Strategic depth-vs-breadth framing and the tactical phase log. |

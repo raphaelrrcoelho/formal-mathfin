@@ -283,3 +283,41 @@ end of 2026-05-18 session:
 - **0 `placeholders`** (unchanged)
 
 the project now contains the most thoroughly formalized treatment of static vanilla derivatives pricing in lean 4 known to the author. it's still niche; the audience is still small. but it's a coherent, complete artifact for the "static" world of black-scholes — call, put, parity, both digitals, forward, vega, rho (delta + gamma + theta were already there), bachelier, implied-vol uniqueness, black-76, and the single-period binomial replication theorem.
+
+## the leaps (2026-05-23) — beyond the static world
+
+three "big leaps" pushed past the static ceiling. full narrative in
+[`leaps.md`](leaps.md); per-theorem audit in [`coverage.md`](coverage.md).
+
+- **leap 1 — static Girsanov.** the risk-neutral measure is now *derived* from
+  the physical measure via an Esscher density (`GaussianGirsanov.lean`,
+  `BSCallHyp.exists_of_physical`). `BSCallHyp` — assumed by 14 pricing files —
+  is a theorem. axioms-clean.
+- **leap 2 — genesis cascade.** `discounted_terminal_eq_S0_of_physical` proves
+  the constructed `Q` is a genuine EMM; `bs_call_formula_of_physical` runs the
+  full physical→price chain. additive bridges, `GaussianGirsanov` load-bearing.
+- **leap 3 — multivariate (Margrabe).** the exchange option, first multivariate
+  result: effective vol, `GarmanNormalForm` slot-in, parity, and the
+  price-level reduction (`margrabe_price_via_call`: exchange = `bs_call_formula`
+  on the ratio). `ExchangeOption.lean`.
+
+all build-enforced axioms-clean via `QuantFin/AxiomAudit.lean`.
+
+### gated frontier (leap 4 + the deeper groundings)
+
+one shared prerequisite: **increment-independence / gaussian-vector structure
+from `IsPreBrownian`**.
+
+- **leap 4 — path-wise Itô.** the L² Wiener integral for *deterministic*
+  integrands exists (`WienerIntegralL2.lean`). the *adapted*-integrand Itô
+  integral + its isometry need increment independence (`E[ΔBₖΔBⱼ]=0`), which
+  `BrownianQuadraticVariation` does not encode — it lives in `IsPreBrownian`
+  (Degenne's stochastic integral, WIP upstream). this is also what would clear
+  the ~12 itô-gated `reduced_core`s.
+- **Margrabe `BSCallHyp`-grounding** — the ratio's risk-neutral lognormality
+  from a joint two-GBM model via the numeraire change; same gaussian-vector
+  machinery. the Margrabe-analog of leap 1.
+
+these are honest dedicated builds, not bolt-ons. a hypothesis-form Itô isometry
+was drafted and **reverted** this session precisely because its orthogonality
+hypothesis had no available discharge — the no-slop line.
