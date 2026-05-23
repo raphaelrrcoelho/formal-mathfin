@@ -36,10 +36,9 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 
 section IsPreBrownian
 
-variable {μ : Measure Ω} [IsProbabilityMeasure μ]
+variable {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
 
-omit [IsProbabilityMeasure μ] in
 /-- For `s ≤ t : ℝ≥0`, the increment `B t − B s` has law `gaussianReal 0 (t − s)`. -/
 private lemma hasLaw_increment {s t : ℝ≥0} (hst : s ≤ t) :
     HasLaw (B t - B s) (gaussianReal 0 (t - s)) μ := by
@@ -48,27 +47,23 @@ private lemma hasLaw_increment {s t : ℝ≥0} (hst : s ≤ t) :
     rw [tsub_eq_zero_iff_le.mpr hst, max_eq_left (zero_le _)]
   rwa [hmax] at hL
 
-omit [IsProbabilityMeasure μ] in
 /-- The increment `B t − B s` has mean zero. -/
 private lemma integral_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ∂μ = 0 := by
   have h := (hasLaw_increment (B := B) (μ := μ) hst).integral_eq
   simpa using h.trans integral_id_gaussianReal
 
-omit [IsProbabilityMeasure μ] in
 /-- The increment `B t − B s` has variance `t − s`. -/
 private lemma variance_increment {s t : ℝ≥0} (hst : s ≤ t) :
     Var[fun ω => B t ω - B s ω; μ] = ((t - s : ℝ≥0) : ℝ) := by
   have h := (hasLaw_increment (B := B) (μ := μ) hst).variance_eq
   simpa using h.trans variance_id_gaussianReal
 
-omit [IsProbabilityMeasure μ] in
 /-- The increment `B t − B s` is in `L²`. -/
 private lemma memLp_increment_two (s t : ℝ≥0) :
     MemLp (fun ω => B t ω - B s ω) 2 μ :=
   hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 
-omit [IsProbabilityMeasure μ] in
 /-- Wiener step-integral isometry. For a pre-Brownian motion `B`, scalar `c`,
 and `s ≤ t : ℝ≥0`, the single-step Wiener integral `c · (B_t − B_s)` satisfies
 
@@ -85,6 +80,8 @@ theorem wiener_step_isometry (c : ℝ) {s t : ℝ≥0} (hst : s ≤ t) :
       ← variance_of_integral_eq_zero (hasLaw_increment (B := B) hst).aemeasurable
         (by simpa using integral_increment_eq_zero (B := B) hst)]
   simpa using variance_increment (B := B) (μ := μ) hst
+
+variable [IsProbabilityMeasure μ]
 
 /-- Finset Wiener isometry. For a monotone partition `p : Fin (n+1) → ℝ≥0`
 and coefficients `c : Fin n → ℝ`, the Wiener step-sum

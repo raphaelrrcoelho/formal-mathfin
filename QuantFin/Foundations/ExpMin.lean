@@ -10,8 +10,7 @@ namespace QuantFin
 
 open MeasureTheory ProbabilityTheory Finset
 
-variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}
+variable {Ω : Type*} {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}
 
 /-- Survival function of `expMeasure r` for `t ≥ 0` (Mathlib v4.30 API). -/
 private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
@@ -32,7 +31,6 @@ private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
   congr 1
   ring
 
-omit m0 in
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
 private lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
     {ω : Ω | t < (Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
@@ -41,7 +39,8 @@ private lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
   ext ω
   simp [Finset.lt_inf'_iff, Set.mem_iInter, Set.mem_preimage, Set.mem_Ioi]
 
-omit [IsProbabilityMeasure μ] in
+variable {m0 : MeasurableSpace Ω} {μ : Measure Ω}
+
 /-- Appendix B.2: minimum of independent exponentials.
 
 For a finite family of jointly independent `Exp(rates i)` random variables `τ : Fin n → Ω → ℝ`,

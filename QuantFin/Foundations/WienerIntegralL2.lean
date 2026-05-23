@@ -55,7 +55,7 @@ open MeasureTheory ProbabilityTheory Finset
 open scoped NNReal ENNReal Topology InnerProductSpace
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
-  {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
 
 /-! ### Step-interval index -/
@@ -111,17 +111,17 @@ noncomputable def stepIndicatorLp (T : ℝ≥0) (i : StepIndex T) :
     Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
   indicatorConstLp 2 i.measurableSet_interval i.restrict_interval_ne_top (1 : ℝ)
 
-omit [IsProbabilityMeasure μ] in
 /-- The Wiener increment `B(hi) - B(lo)` is in `L²(μ)`. -/
 lemma memLp_increment_two {T : ℝ≥0} (i : StepIndex T) :
     MemLp (fun ω => B i.1.2 ω - B i.1.1 ω) 2 μ :=
   hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 
-omit [IsProbabilityMeasure μ] in
 /-- The Wiener increment `B(hi) - B(lo)` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def wienerIncrementLp (B : ℝ≥0 → Ω → ℝ)
     [IsPreBrownian B μ] {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
   (memLp_increment_two (B := B) (μ := μ) i).toLp _
+
+variable [IsProbabilityMeasure μ]
 
 /-! ### Assembly maps on finitely supported coefficients -/
 

@@ -31,9 +31,13 @@ theorem emm_implies_no_arbitrage
       0 ≤ ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)) :
     P {ω | 0 < ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)} = 0 := by
   set V : ℕ → Ω → ℝ := martingaleTransform φ S with hV_def
-  have hV_mart : Martingale V 𝓕 Q :=
-    martingaleTransform_isMartingale hSQ hφ_pred hφ_bdd
-  have hV0_zero : V 0 = 0 := by funext ω; simp [V, martingaleTransform]
+  have hV_mart : Martingale V 𝓕 Q := by
+    obtain ⟨K, hK⟩ := hφ_bdd
+    -- `martingaleTransform_isMartingale` now takes an a.e. boundedness
+    -- hypothesis; our everywhere bound supplies it via `Eventually.of_forall`.
+    exact martingaleTransform_isMartingale hSQ hφ_pred
+      ⟨K, Filter.Eventually.of_forall fun ω n => hK n ω⟩
+  have hV0_zero : V 0 = 0 := by simp [V]
   have hV_T_integral : ∫ ω, V T ω ∂Q = 0 := by
     have : ∫ ω, V T ω ∂Q = ∫ ω, V 0 ω ∂Q := by
       rw [(integral_condExp (𝓕.le 0)).symm]

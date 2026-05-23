@@ -52,7 +52,7 @@ open scoped NNReal
 
 namespace MeasureTheory
 
-variable {Ω : Type*} [m0 : MeasurableSpace Ω] {μ : Measure Ω}
+variable {Ω : Type*}
 
 /-- Internal abbreviation for the running maximum
 `max {f 0 ω, f 1 ω, …, f n ω}`. Kept `private`: the public theorem
@@ -61,11 +61,12 @@ states the bound in terms of the explicit `Finset.sup'` form to match
 private def runMax (f : ℕ → Ω → ℝ) (n : ℕ) (ω : Ω) : ℝ :=
   (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one (fun k ↦ f k ω)
 
-omit m0 in
 private lemma runMax_nonneg {f : ℕ → Ω → ℝ} (hnonneg : ∀ n ω, 0 ≤ f n ω) (n : ℕ) (ω : Ω) :
     0 ≤ runMax f n ω :=
   le_trans (hnonneg 0 ω)
     (Finset.le_sup' (f := fun k ↦ f k ω) (Finset.mem_range.mpr (Nat.succ_pos n)))
+
+variable [m0 : MeasurableSpace Ω] {μ : Measure Ω}
 
 private lemma runMax_measurable {f : ℕ → Ω → ℝ} {𝒢 : Filtration ℕ m0}
     (hsub : Submartingale f 𝒢 μ) (n : ℕ) :
