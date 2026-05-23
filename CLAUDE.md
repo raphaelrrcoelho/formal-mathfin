@@ -10,12 +10,6 @@ Python runner under `tools/verify/` is a CLI harness that drives
 `lean-interact` against benchmark JSONs. The library is self-sufficient: a
 plain `lake build` from the repo root is the canonical verification.
 
-The repo was previously framed as a "hybrid Lean + Isabelle + SymPy
-verification framework." That framing is gone — Isabelle has been removed
-and SymPy is retained only as a legacy fallback (no active route uses it).
-See `docs/superpowers/specs/2026-05-23-repo-reorganization-design.md` for
-the structural rationale.
-
 ## Commands
 
 Preferred runner is Docker. The image is hosted on GHCR
@@ -121,9 +115,8 @@ route uses it.
 SymPy never returns L3+ even on success — this is intentional, encoding that
 CAS checks are not formal proofs.
 
-**Routing table** (`router.DEFAULT_ROUTING`) — all routes are Lean-first or
-Lean-only; the historical Isabelle entries have been removed:
-- Lean-only: `martingales`, `stopping_times`, `brownian_motion`, `measure_theory`, `poisson_processes`, `stochastic_calculus`, `stochastic_differential_equations`, `mathematical_finance`.
+**Routing table** (`router.DEFAULT_ROUTING`) — Lean-only across all domains:
+- `martingales`, `stopping_times`, `brownian_motion`, `measure_theory`, `poisson_processes`, `stochastic_calculus`, `stochastic_differential_equations`, `mathematical_finance`, `markov_chains`, `ergodic_theory`, `central_limit_theorem`.
 - Historical SymPy snippets, if retained, live under `metadata.cas_reference.sympy` — never active `code.sympy`. Run `python3 -m pytest tests/test_router.py` after routing or benchmark-code edits.
 - Every benchmark theorem must declare `metadata.formalization_status`: `full`, `library_wrapper`, `reduced_core`, or `placeholder`. Delivery claims count only `full + library_wrapper`; see `docs/coverage.md`.
 - Do not tell a collaborator that all course theorems are formally proved. Run `python3 -m tools.verify.coverage_report` for the current `full / library_wrapper / reduced_core / placeholder` split.

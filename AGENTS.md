@@ -13,12 +13,6 @@ drives `lean-interact` against benchmark JSONs. The library is
 self-sufficient: a plain `lake build` from the repo root is the canonical
 verification.
 
-The repo was previously framed as a "hybrid Lean + Isabelle + SymPy
-verification framework." That framing is gone — Isabelle has been removed
-and SymPy is retained only as a legacy fallback (no active route uses it).
-See `docs/superpowers/specs/2026-05-23-repo-reorganization-design.md` for
-the structural rationale.
-
 ## Commands
 
 Preferred runner is Docker:

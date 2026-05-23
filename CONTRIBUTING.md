@@ -89,10 +89,3 @@ Drafts for Mathlib, Degenne's BrownianMotion, and Zulip messages live under
 When a HybridVerify result is general enough to belong upstream, draft it
 here first, get a sign-off on the Lean side, then open the PR against the
 target repo. Keep the in-tree copy until the upstream PR lands.
-
-## Reorganization rationale
-
-The repo was previously framed as a "hybrid Lean + Isabelle + SymPy
-verification framework." That framing has been retired — see
-`docs/superpowers/specs/2026-05-23-repo-reorganization-design.md`. The
-artifact is the Lean library; the Python runner is a CLI harness.
