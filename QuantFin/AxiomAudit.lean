@@ -163,6 +163,14 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.ItoIsometryAdapted.ito_isometry_brownian_self' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms QuantFin.ItoIsometryAdapted.ito_isometry_brownian_self
 
+/-! ## Margrabe BSCallHyp grounding (leap-3 closure via gaussian vector) -/
+
+/-- info: 'QuantFin.normalizedSpread_hasLaw_std' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.normalizedSpread_hasLaw_std
+
+/-- info: 'QuantFin.margrabe_bsCallHyp_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.margrabe_bsCallHyp_of_gaussian
+
 /-! ## Portfolio / risk / performance -/
 
 /-- info: 'QuantFin.portfolioVarTwo_ge_min' depends on axioms: [propext, Classical.choice, Quot.sound] -/

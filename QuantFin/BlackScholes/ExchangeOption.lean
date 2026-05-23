@@ -34,9 +34,10 @@ This file establishes the two pieces of the reduction:
 The price-level formula (`margrabe_price_via_call`) prices the exchange option
 in the `S²`-numeraire as a vanilla `bs_call_formula` call on the ratio
 `R = S¹/S²`. Its pricing primitive is `BSCallHyp` for the ratio — the same
-abstraction `bs_call_formula` takes for any underlying. Grounding that
-primitive from a joint two-GBM model via the numeraire change is the
-Margrabe-analog of leap-1 Girsanov (a separate deeper result).
+abstraction `bs_call_formula` takes for any underlying. That primitive is
+*derived* from a joint two-GBM gaussian model in
+`QuantFin/BlackScholes/MargrabeGrounding.lean` (`margrabe_bsCallHyp_of_gaussian`,
+the Margrabe-analog of leap-1 Girsanov), so the reduction is end-to-end.
 
 ## Results
 

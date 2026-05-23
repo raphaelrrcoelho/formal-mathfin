@@ -78,10 +78,18 @@ the same structural-reduction discipline as `PowerCall`.
 | **`margrabe_price_via_call`** | **Price-level reduction.** In the `S²`-numeraire, the exchange option is `bs_call_formula` on the ratio: `S²₀·E_Q[max(R_T − 1, 0)] = margrabePrice`. |
 
 The price-level result takes `BSCallHyp` for the *ratio* `R = S¹/S²` — exactly
-the abstraction `bs_call_formula` takes for any underlying. Grounding that
-primitive from a joint two-GBM model (via the `S²`-numeraire change of
-measure) is the Margrabe-analog of leap 1, and is left as the same kind of
-separate deeper result that `BSCallHyp` itself was until leap 1 derived it.
+the abstraction `bs_call_formula` takes for any underlying.
+
+**Leap 3 grounding (done)** — `QuantFin/BlackScholes/MargrabeGrounding.lean`.
+That `BSCallHyp` for the ratio is now *derived*, the Margrabe-analog of leap 1:
+
+| Theorem | Content |
+|---|---|
+| `normalizedSpread_hasLaw_std` | **Bivariate → univariate reduction.** For a jointly-gaussian pair `(W₁,W₂)` of standard drivers with correlation `ρ`, the normalized log-spread driver `(σ₁W₁ − σ₂W₂)/σ_eff` is `N(0,1)`: gaussianity is preserved under the linear map (`HasGaussianLaw.map_of_measurable`), and the variance is pinned to `1` by covariance bilinearity (`margrabe_effective_variance`) — making `Foundations/BivariateGaussian`'s machinery load-bearing. |
+| **`margrabe_bsCallHyp_of_gaussian`** | **The capstone.** From the joint gaussian model there exists a probability measure `Q` (the explicit Esscher tilt — the `S²`-numeraire change) and a standard-normal driver under which `BSCallHyp` holds for the ratio at the effective vol. The two-asset grounding *reduces to* the one-asset Girsanov (`BSCallHyp.exists_of_physical`, leap 1) applied to the single effective driver — the gaussian-vector reduction is the only new ingredient. |
+
+Composing `margrabe_bsCallHyp_of_gaussian` with `margrabe_price_via_call`
+prices the exchange option with **no** assumed risk-neutral hypothesis.
 
 ## The honest abstraction boundary
 
@@ -89,10 +97,12 @@ Across leaps 1 and 3 there is one consistent, deliberately-drawn line: a
 pricing hypothesis (`BSCallHyp`, or `BSCallHyp` for the ratio) may be taken as
 a primitive at the level the whole library operates, and the *deepest*
 grounding of that primitive from a Brownian motion / a joint model is a
-distinct, harder result. Leap 1 is exactly that grounding for the 1-D
-`BSCallHyp`. This boundary is flagged in every relevant docstring; no
-hypothesis-form theorem is committed unless its hypotheses are discharged in
-the same arc or are the standard library-level pricing primitive.
+distinct, harder result. Leap 1 is that grounding for the 1-D `BSCallHyp`;
+the leap-3 grounding (`MargrabeGrounding.lean`) is the corresponding one for
+the ratio's `BSCallHyp` — both are now *derived*, not assumed. The discipline
+holds: no hypothesis-form theorem is committed unless its hypotheses are
+discharged in the same arc or are the standard library-level pricing
+primitive.
 
 ## Leap 4 — the adapted Itô isometry (done, discrete)
 
@@ -121,7 +131,7 @@ fully proven in Degenne's package. The deductive chain:
 
 All build-enforced axioms-clean (`QuantFin/AxiomAudit.lean`).
 
-## What's still gated (the continuous frontier + Margrabe grounding)
+## What's still gated (the continuous Itô frontier)
 
 - **Leap 4, continuous.** The remaining step is the L²(adapted) Cauchy
   completion over adapted processes — density of adapted simple integrands in
@@ -129,6 +139,6 @@ All build-enforced axioms-clean (`QuantFin/AxiomAudit.lean`).
   deterministic case. This — *not* increment independence — is the open piece,
   and is what would clear the remaining Itô-gated `reduced_core`s in
   [`coverage.md`](coverage.md).
-- **Margrabe `BSCallHyp`-grounding** — the ratio's risk-neutral lognormality
-  from a joint two-GBM model needs the same gaussian-vector machinery
-  (`IsGaussianProcess.iIndepFun''`).
+
+(The Margrabe `BSCallHyp`-grounding, previously gated here, is **done** — see
+Leap 3 above, `MargrabeGrounding.lean`.)

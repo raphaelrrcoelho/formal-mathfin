@@ -322,10 +322,11 @@ proven in Degenne's package. Building directly on it:
   L²), the analogue of `WienerIntegralL2`'s completion for the deterministic
   case. this — *not* increment independence — is the open step, and what would
   clear the remaining itô-gated `reduced_core`s once finished.
-- **Margrabe `BSCallHyp`-grounding** — the ratio's risk-neutral lognormality
-  from a joint two-GBM model via the numeraire change; uses the same
-  gaussian-vector machinery (`IsGaussianProcess.iIndepFun''`). the
-  Margrabe-analog of leap 1.
+- **Margrabe `BSCallHyp`-grounding — done.** `MargrabeGrounding.lean`: the
+  ratio's risk-neutral lognormality is *derived* from a joint two-GBM gaussian
+  model (`normalizedSpread_hasLaw_std` + `margrabe_bsCallHyp_of_gaussian`),
+  reducing to leap-1 Girsanov on the single effective driver. closes leap 3
+  end-to-end; makes `Foundations/BivariateGaussian` load-bearing.
 
 these are honest dedicated builds, not bolt-ons. a hypothesis-form Itô isometry
 was drafted and **reverted** earlier precisely because its orthogonality

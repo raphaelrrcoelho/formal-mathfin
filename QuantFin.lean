@@ -159,6 +159,8 @@ import QuantFin.BlackScholes.StockNumeraire
 -- Phase 24: powered call closed form via reduction to BS-call (effective spot/vol)
 import QuantFin.BlackScholes.PowerCall
 import QuantFin.BlackScholes.ExchangeOption
+-- Margrabe BSCallHyp grounding from a joint two-GBM gaussian model (leap-3 closure)
+import QuantFin.BlackScholes.MargrabeGrounding
 -- Phase 25: chooser option as call + put portfolio via PCP at chooser date
 import QuantFin.BlackScholes.ChooserComposition
 -- Phase 46: BS PDE derived from Itô drift + no-arbitrage
