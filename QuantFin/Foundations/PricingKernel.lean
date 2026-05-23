@@ -4,8 +4,9 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
-import HybridVerify.Foundations.StatePrices
-import HybridVerify.Foundations.FTAPTwoState
+import QuantFin.Foundations.StatePrices
+import QuantFin.Foundations.FTAPTwoState
+import QuantFin.Foundations.ConvexPricingFunctional
 
 /-!
 # Pricing kernel from state prices + FTAP (phase 53)
@@ -48,7 +49,7 @@ in (z_up, z_down) market ⟹ explicit pricing kernel via Phase 37.
   payoff in a two-state market, derived from FTAP.
 -/
 
-namespace HybridVerify
+namespace QuantFin
 
 /-- **Two-state state-price vector**: from Nagy's backward FTAP EMM in
 the two-state market with sign data `(z_up, z_down)`, the discounted
@@ -143,4 +144,27 @@ theorem pricingKernel_two_state_nonneg
   · exact mul_nonneg (stateprices_nonneg z_up z_down rT h_up h_down _) hXu
   · exact mul_nonneg (stateprices_nonneg z_up z_down rT h_up h_down _) hXd
 
-end HybridVerify
+/-- **No-arbitrage ⟹ butterfly spreads cost ≥ 0** (FTAP + convex pricing).
+The FTAP two-state state prices are non-negative (`stateprices_nonneg`, a
+consequence of `z_up > 0 > z_down`), so the finite-state call-price functional
+`K ↦ Σᵢ qᵢ · max(Sᵢ − K, 0)` is convex in the strike and the butterfly
+combination `C(K₁) − 2·C((K₁+K₃)/2) + C(K₃)` is non-negative
+(`Foundations/ConvexPricingFunctional.callPrice_finiteState_butterfly_nonneg`).
+
+This is the canonical static no-arbitrage constraint on observed option
+prices — butterfly spreads cannot have negative cost — derived here from the
+FTAP state-price construction rather than assumed. It is the first downstream
+consumer of `ConvexPricingFunctional`, wiring the convex-pricing principle to
+the FTAP / state-price framework. -/
+theorem stateprice_call_butterfly_nonneg
+    (z_up z_down rT : ℝ) (h_up : 0 < z_up) (h_down : z_down < 0)
+    (S : Fin 2 → ℝ) (K₁ K₃ : ℝ) :
+    0 ≤ (∑ i, stateprices_two_state z_up z_down rT i * max (S i - K₁) 0)
+        - 2 * (∑ i, stateprices_two_state z_up z_down rT i *
+              max (S i - (K₁ + K₃) / 2) 0)
+        + (∑ i, stateprices_two_state z_up z_down rT i * max (S i - K₃) 0) :=
+  callPrice_finiteState_butterfly_nonneg Finset.univ S
+    (stateprices_two_state z_up z_down rT)
+    (fun i _ => stateprices_nonneg z_up z_down rT h_up h_down i) K₁ K₃
+
+end QuantFin

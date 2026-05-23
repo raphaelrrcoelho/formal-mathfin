@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
+import QuantFin.Foundations.ExponentialDiscount
 
 /-!
 # Forward rate from a non-flat spot-rate curve
@@ -17,14 +18,23 @@ This generalizes the flat-curve case (`R(T) ≡ R₀ ⇒ forward = R₀`) covere
 `forwardRate_eq_spot_flat` in `ZCB.lean`. The non-flat case is purely the
 product-rule chain rule applied to `T · R(T)`.
 
+This is an instance of the `Foundations/ExponentialDiscount` principle at
+`H(T) = T · R(T)`: the forward rate is the negative log-derivative of the
+discount factor `exp(−H(T))`. The calculus lemma `hasDerivAt_T_mul_spotRate`
+supplies `H'`, and `forwardRate_eq_neg_log_discount` routes it through the
+principle to express the result in terms of the actual bond price `P(T)`.
+
 Result:
 
 * `hasDerivAt_T_mul_spotRate`: derivative formula `d/dT (T·R(T)) = R(T) + T·R'(T)`.
 * `forwardRate_nonFlat_eq`: closed-form forward rate from spot rate and its
   derivative.
+* `forwardRate_eq_neg_log_discount`: forward rate as `−d/dT log P(T)` with the
+  actual discount factor `P(T) = exp(−T · R(T))`, via the
+  `ExponentialDiscount` principle.
 -/
 
-namespace HybridVerify
+namespace QuantFin
 
 /-- **Forward-rate calculus identity**: `d/dT [T · R(T)] = R(T) + T · R'(T)`
 when `R` is differentiable at `T`. -/
@@ -46,4 +56,16 @@ theorem forwardRate_nonFlat_eq {R : ℝ → ℝ} {R'_T T : ℝ}
     HasDerivAt (fun t => t * R t) (R T + T * R'_T) T :=
   hasDerivAt_T_mul_spotRate hR
 
-end HybridVerify
+/-- **Forward rate as the negative log-derivative of the bond price**
+(`Foundations/ExponentialDiscount`, instantiated at `H(T) = T · R(T)`). The
+zero-coupon bond is `P(T) = exp(−T · R(T))`; the instantaneous forward rate
+`−d/dT log P(T)` equals `R(T) + T · R'(T)`. Unlike `forwardRate_nonFlat_eq`,
+this states the result against the *actual* discount factor rather than the
+`−log P` shortcut, by routing the calculus lemma through the
+`rate_eq_neg_log_deriv` principle. -/
+theorem forwardRate_eq_neg_log_discount {R : ℝ → ℝ} {R'_T T : ℝ}
+    (hR : HasDerivAt R R'_T T) :
+    HasDerivAt (fun t => -(Real.log (Real.exp (-(t * R t))))) (R T + T * R'_T) T :=
+  rate_eq_neg_log_deriv (hasDerivAt_T_mul_spotRate hR)
+
+end QuantFin

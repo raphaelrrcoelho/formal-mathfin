@@ -72,6 +72,26 @@ but no consumer file uses it, the master is a docstring pretending to be a
 module. Where a principle generates corollaries (a master is *used*),
 proofs in the consumer files collapse to one or two lines.
 
+This is enforced by audit, not just asserted. A 2026-05-23 pass checked each
+principle against the actual import graph and wired up the ones whose
+load-bearing claim had outrun their consumers:
+
+- `ExponentialDiscount` — `ForwardRate`, `Mortality`, `HazardCurve` now cite
+  `rate_eq_neg_log_deriv` for the rate-recovery direction `rate = −d/dt log Q`
+  (`Mortality`/`HazardCurve` previously stated this only in prose) and route
+  positivity through `discount_pos`.
+- `GarmanNormalForm` — `Black76` (`black_futures_price_eq_bsVGarman`) and
+  `Dividends` (`bs_dividends_price_eq_bsVGarman`) carry consumer-side
+  corollaries chaining their pricing theorem to the Garman equality, so the
+  "one formula at different `(A, DF)`" unification is cited from both ends.
+- `ConvexPricingFunctional` — `PricingKernel.stateprice_call_butterfly_nonneg`
+  feeds the FTAP-derived (provably non-negative) state prices into
+  `callPrice_finiteState_butterfly_nonneg`, giving "no-arbitrage ⟹ butterfly
+  spreads cost ≥ 0" — the principle's first downstream consumer.
+- `StandardGaussianMGF` — already load-bearing transitively: `PowerOption`
+  consumes it directly and `LognormalMoments` reaches it through the
+  `nthMoment_terminal` hub.
+
 | Principle module | The fact | Where it's load-bearing |
 |---|---|---|
 | `BlackScholes/GarmanNormalForm.lean` | Every BS-family closed form is `V = A · Φ(d_1) − K · DF · Φ(d_2)`, parameterised by `(A, K, DF, σ, T)`. | `bsV` (standard BS), Black-76 RHS, BS-Merton dividends RHS, and KMV-Merton distance-to-default are **provably the same formula** at different `(A, DF)`. Five-plus apparent pricing variants are one. |

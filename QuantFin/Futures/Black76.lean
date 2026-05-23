@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
-import HybridVerify.BlackScholes.Call
+import QuantFin.BlackScholes.Call
+import QuantFin.BlackScholes.GarmanNormalForm
 
 /-!
 # Black-76 formula for options on futures
@@ -27,7 +28,7 @@ BS-drift, then post-discounted by `e^{-rT}` (the discount-rate is now
 direct algebraic specialization.
 -/
 
-namespace HybridVerify
+namespace QuantFin
 
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
@@ -60,6 +61,21 @@ theorem black_futures_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   --        = F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T)
   rw [h_bs]
 
+/-- **Black-76 price is a Garman-normal-form instance**: the discounted
+expected futures-call payoff equals `bsVGarman` at `A = F · e^{−rT}`,
+`DF = e^{−rT}` — the forward numéraire. Routes `black_futures_formula`
+through `BlackScholes/GarmanNormalForm`'s `black76_RHS_eq_bsVGarman`, making
+the "Black-76 is the same formula as standard BS" unification load-bearing
+from the consumer side. -/
+theorem black_futures_price_eq_bsVGarman {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {F K σ T : ℝ} {Z : Ω → ℝ}
+    (h : BSCallHyp Q F K 0 σ T Z) (r : ℝ) :
+    ∫ ω, Real.exp (-r * T) * max (bsTerminal F 0 σ T (Z ω) - K) 0 ∂Q
+      = bsVGarman (F * Real.exp (-(r * T))) K (Real.exp (-(r * T))) σ T := by
+  rw [black_futures_formula h r, neg_mul]
+  exact black76_RHS_eq_bsVGarman F K r σ T h.S_0_pos h.K_pos
+
 /-! ## Black model for swaptions (folded from `Swaption.lean`)
 
 A swaption with strike `K`, forward swap rate `F`, annuity `A`, vol `σ`,
@@ -87,4 +103,4 @@ theorem swaption_payer_receiver_parity (A F K σ T : ℝ) :
   have h_d2 := Phi_add_Phi_neg (bsd2 F K 0 σ T)
   linear_combination A * F * h_d1 - A * K * h_d2
 
-end HybridVerify
+end QuantFin

@@ -4,6 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
+import QuantFin.Foundations.ExponentialDiscount
 
 /-!
 # Force of mortality and survival functions
@@ -38,7 +39,7 @@ Results:
 * `gompertz_cumulative_force`: closed form `(B/c)·(e^{c·t} − 1)` for Gompertz.
 -/
 
-namespace HybridVerify
+namespace QuantFin
 
 open Real MeasureTheory intervalIntegral
 
@@ -57,9 +58,26 @@ lemma survivalFromForce_at_zero (μ : ℝ → ℝ) :
   unfold survivalFromForce forceCumulative
   rw [integral_same, neg_zero, Real.exp_zero]
 
-/-- Survival is strictly positive. -/
+/-- Survival is strictly positive (an instance of the `ExponentialDiscount`
+principle `discount_pos`). -/
 lemma survivalFromForce_pos (μ : ℝ → ℝ) (t : ℝ) :
-    0 < survivalFromForce μ t := Real.exp_pos _
+    0 < survivalFromForce μ t := discount_pos _
+
+/-- **Force of mortality as the negative log-derivative of survival** — the
+recovery direction `μ(t) = −d/dt log S(t)` that the classical definition
+`μ(t) = −S'(t)/S(t)` encodes. For continuous `μ`, the cumulative force
+`H(t) = ∫₀^t μ` has derivative `μ(t)` by the FTC, and the
+`ExponentialDiscount` principle `rate_eq_neg_log_deriv` then gives the
+log-derivative form against `S = survivalFromForce μ`. -/
+theorem force_eq_neg_log_deriv_survival {μ : ℝ → ℝ} (t : ℝ)
+    (hμ : Continuous μ) :
+    HasDerivAt (fun s => -(Real.log (survivalFromForce μ s))) (μ t) t := by
+  have hH : HasDerivAt (forceCumulative μ) (μ t) t :=
+    intervalIntegral.integral_hasDerivAt_right
+      (hμ.intervalIntegrable 0 t)
+      (hμ.stronglyMeasurableAtFilter _ _)
+      hμ.continuousAt
+  simpa only [survivalFromForce] using rate_eq_neg_log_deriv hH
 
 /-- **Gompertz cumulative force** in closed form:
 `∫₀^t B · e^{c u} du = (B/c) · (e^{c t} − 1)` for `c ≠ 0`. -/
@@ -80,7 +98,7 @@ theorem gompertz_cumulative_force (B c t : ℝ) (hc : c ≠ 0) :
     field_simp
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _ => h_anti u)
         (Continuous.intervalIntegrable (by fun_prop) _ _)]
-  simp [Real.exp_zero, mul_comm]
+  simp [Real.exp_zero]
   ring
 
 /-! ## Compound Poisson MGF (folded from `CompoundPoisson.lean`)
@@ -108,4 +126,4 @@ theorem lundberg_zero_at_zero (lam c : ℝ) (M : ℝ → ℝ) (hM0 : M 0 = 1) :
   rw [hM0]
   ring
 
-end HybridVerify
+end QuantFin

@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
-import HybridVerify.FixedIncome.Credit
+import QuantFin.FixedIncome.Credit
+import QuantFin.Foundations.ExponentialDiscount
 
 /-!
 # Time-varying hazard credit curve
@@ -31,7 +32,7 @@ Results:
 * `creditSpread_eq_time_avg_hazard`: `c(T) = H(T) / T`.
 -/
 
-namespace HybridVerify
+namespace QuantFin
 
 open Real MeasureTheory intervalIntegral
 
@@ -49,9 +50,28 @@ lemma hazardSurvival_at_zero (h : ℝ → ℝ) : hazardSurvival h 0 = 1 := by
   unfold hazardSurvival cumHazard
   rw [integral_same, neg_zero, Real.exp_zero]
 
-/-- Hazard survival is strictly positive (regardless of hazard sign / integrability). -/
+/-- Hazard survival is strictly positive (an instance of the
+`ExponentialDiscount` principle `discount_pos`; holds regardless of hazard
+sign / integrability). -/
 lemma hazardSurvival_pos (h : ℝ → ℝ) (t : ℝ) : 0 < hazardSurvival h t :=
-  Real.exp_pos _
+  discount_pos _
+
+/-- **Hazard intensity as the negative log-derivative of survival** — the
+recovery direction `h(t) = −d/dt log S(t)`. For continuous `h`, the
+cumulative hazard `H(t) = ∫₀^t h` has derivative `h(t)` by the FTC, and the
+`ExponentialDiscount` principle `rate_eq_neg_log_deriv` gives the
+log-derivative form against `S = hazardSurvival h`. Mirrors
+`force_eq_neg_log_deriv_survival` in `Actuarial/Mortality.lean` — the credit
+and actuarial recoveries are the same identity. -/
+theorem hazard_eq_neg_log_deriv_survival {h : ℝ → ℝ} (t : ℝ)
+    (hh : Continuous h) :
+    HasDerivAt (fun s => -(Real.log (hazardSurvival h s))) (h t) t := by
+  have hH : HasDerivAt (cumHazard h) (h t) t :=
+    intervalIntegral.integral_hasDerivAt_right
+      (hh.intervalIntegrable 0 t)
+      (hh.stronglyMeasurableAtFilter _ _)
+      hh.continuousAt
+  simpa only [hazardSurvival] using rate_eq_neg_log_deriv hH
 
 /-- For a constant hazard `h_0`, `H(t) = h_0 · t`. -/
 lemma cumHazard_const (h_0 t : ℝ) :
@@ -75,4 +95,4 @@ lemma creditSpread_eq_time_avg_hazard {h : ℝ → ℝ} {T : ℝ} (_hT : 0 < T) 
   unfold hazardSurvival
   rw [Real.log_exp, neg_neg]
 
-end HybridVerify
+end QuantFin

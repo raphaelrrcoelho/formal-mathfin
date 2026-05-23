@@ -4,7 +4,8 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
-import HybridVerify.BlackScholes.Call
+import QuantFin.BlackScholes.Call
+import QuantFin.BlackScholes.GarmanNormalForm
 
 /-!
 # Black-Scholes-Merton call price with continuous dividend yield
@@ -23,7 +24,7 @@ multiply through by the additional discount `e^{-qT}` (since the discount on
 the LHS uses the actual rate `r`, not the drift `r − q`).
 -/
 
-namespace HybridVerify
+namespace QuantFin
 
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
@@ -60,6 +61,21 @@ theorem bs_dividends_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   have h_combine : Real.exp (-(q * T)) * Real.exp (-(r - q) * T) = Real.exp (-(r * T)) := by
     rw [← Real.exp_add]; congr 1; ring
   linear_combination -(K * Phi (bsd2 S_0 K (r - q) σ T)) * h_combine
+
+/-- **BS-Merton dividend price is a Garman-normal-form instance**: the
+discounted expected dividend-adjusted call payoff equals `bsVGarman` at
+`A = S₀ · e^{−qT}`, `DF = e^{−rT}` — the dividend-discounted-asset numéraire.
+Routes `bs_dividends_call_formula` through
+`BlackScholes/GarmanNormalForm`'s `bs_dividends_RHS_eq_bsVGarman`, making the
+unification load-bearing from the consumer side. -/
+theorem bs_dividends_price_eq_bsVGarman {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {S_0 K r q σ T : ℝ} {Z : Ω → ℝ}
+    (h : BSCallHyp Q S_0 K (r - q) σ T Z) :
+    ∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0 ∂Q
+      = bsVGarman (S_0 * Real.exp (-(q * T))) K (Real.exp (-(r * T))) σ T := by
+  rw [bs_dividends_call_formula h]
+  exact bs_dividends_RHS_eq_bsVGarman S_0 K r q σ T h.S_0_pos h.K_pos
 
 /-- **Garman-Kohlhagen FX option pricing formula** for a European call on a
 foreign currency. Identical to the dividends formula with `q = r_f` (the foreign
@@ -105,4 +121,4 @@ theorem quanto_correction_factor (S_0 r_dom ρ σ_S σ_FX T : ℝ) (hS : 0 < S_0
   congr 1
   ring
 
-end HybridVerify
+end QuantFin
