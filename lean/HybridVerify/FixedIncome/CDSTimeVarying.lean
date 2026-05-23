@@ -28,30 +28,24 @@ Under no arbitrage, the fair spread is `c* = (1 − R) · losses(T) /
 annuity(T)`. No integral is evaluated — the balance is stated at the cash-
 flow level.
 
-We also derive a **discrete piecewise-constant** survival decomposition:
-the multi-period survival factorises into a product of per-period
-exponentials, equivalently the exponential of a sum of hazard times
-durations. This is the discrete realisation of `S(T) = exp(−∫_0^T h(u) du)`
-when `h` is step-constant on a partition.
+The discrete piecewise-constant survival decomposition (multi-period
+survival = exp of sum of hazard × duration) is a direct application of
+`Real.exp_sum` and is recorded as `survival_product_eq_exp_sum` for the
+finance-side narrative.
 
 ## Why this is "first principles"
 
-The existing constant-hazard derivation specialises to a single rate `h` for
-all time; this file gives the general cash-flow balance that holds for any
-deterministic hazard curve, and recovers `c = h(1−R)` as the constant
-limit. It also derives the multi-period survival formula from per-period
-hazards (the "calibration to a credit curve" content).
+The existing constant-hazard derivation specialises to a single rate `h`
+for all time; this file gives the general cash-flow balance that holds for
+any deterministic hazard curve.
 
 ## Results
 
 * `cdsFairSpread_TV_cash_flow_balance`: fair-spread iff cash-flow balance,
   for time-varying hazard with constant recovery.
-* `survival_product_eq_exp_sum`: multi-period survival factorisation.
-* `survival_two_period_concat`: composition `S(0, t_2) = S(0, t_1) · S(t_1, t_2)`.
-* `survival_product_one_period_eq_const`: reduction to constant-hazard
-  `survivalProbability` for a single period.
-* `discreteCumHazard_eq_riemann_sum`: discrete cumulative hazard
-  `∑ h_i · Δt_i` as a Riemann-style approximation of `∫_0^T h(s) ds`.
+* `survival_product_eq_exp_sum`: multi-period survival factorisation,
+  i.e. `∏ exp(−h_i Δt_i) = exp(−∑ h_i Δt_i)` (a direct `Real.exp_sum`
+  application stated in finance variables).
 -/
 
 namespace HybridVerify
@@ -92,51 +86,5 @@ theorem survival_product_eq_exp_sum (n : ℕ) (h Δt : Fin n → ℝ) :
   rw [← Real.exp_sum]
   congr 1
   rw [Finset.sum_neg_distrib]
-
-/-- **Two-period concatenation of survival**: the survival from time `0` to
-time `Δt_1 + Δt_2` (with hazards `h_1, h_2` on the two consecutive
-periods) factorises as the product of per-period survivals. -/
-theorem survival_two_period_concat (h_1 h_2 Δt_1 Δt_2 : ℝ) :
-    Real.exp (-(h_1 * Δt_1)) * Real.exp (-(h_2 * Δt_2)) =
-      Real.exp (-(h_1 * Δt_1 + h_2 * Δt_2)) := by
-  rw [← Real.exp_add]
-  congr 1
-  ring
-
-/-- **Single-period reduction**: with one period of duration `T` and hazard
-`h_0`, the multi-period survival reduces to the constant-hazard
-`survivalProbability h_0 0 T`. -/
-lemma survival_product_one_period_eq_const (h_0 T : ℝ) :
-    Real.exp (-(h_0 * T)) = survivalProbability h_0 0 T := by
-  unfold survivalProbability
-  congr 1
-  ring
-
-/-- **Discrete cumulative hazard as a Riemann-style sum**: the cumulative
-hazard for piecewise-constant `h` over partition `{Δt_i}` equals
-`∑ h_i · Δt_i`. This is the discrete realisation of `∫_0^T h(u) du`. -/
-def discreteCumHazard (n : ℕ) (h Δt : Fin n → ℝ) : ℝ :=
-  ∑ i, h i * Δt i
-
-/-- Discrete survival in terms of discrete cumulative hazard: same
-relation `S = exp(-H)` as in the continuous case. -/
-lemma discreteSurvival_eq_exp_neg_discreteCumHazard
-    (n : ℕ) (h Δt : Fin n → ℝ) :
-    Real.exp (-(discreteCumHazard n h Δt)) =
-      ∏ i, Real.exp (-(h i * Δt i)) := by
-  unfold discreteCumHazard
-  rw [survival_product_eq_exp_sum]
-
-/-- **CDS fair spread for constant hazard via the cash-flow balance**:
-specialising `cdsFairSpread_TV_cash_flow_balance` with `h ≡ h_0` and the
-constant-hazard ratio `losses / annuity = h_0` yields the classical
-`c = (1 − R) · h_0` formula. Both legs share the annuity factor; the
-constant-hazard ratio collapses to `h_0`. -/
-theorem cdsFairSpread_const_via_ratio
-    (h_0 R : ℝ) (c : ℝ) :
-    c = (1 - R) * (h_0 * 1) / 1 ↔ c = cdsFairSpread h_0 R := by
-  unfold cdsFairSpread
-  rw [mul_one, div_one]
-  exact ⟨fun heq => by linarith, fun heq => by linarith⟩
 
 end HybridVerify

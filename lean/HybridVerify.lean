@@ -51,6 +51,8 @@ import HybridVerify.Foundations.TriangleArbitrage
 import HybridVerify.Foundations.CarrMadan
 import HybridVerify.Foundations.AlmgrenChriss
 import HybridVerify.Foundations.ConvexPricingFunctional
+-- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
+import HybridVerify.Foundations.BSCallHypFromBrownian
 
 -- BlackScholes
 import HybridVerify.BlackScholes.Call
