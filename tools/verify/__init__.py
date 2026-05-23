@@ -1,1 +1,1 @@
-"""Hybrid Lean 4 + Isabelle verification system for stochastic processes."""
+"""Lean 4 verification runner for the HybridVerify quant-finance library."""
