@@ -132,9 +132,12 @@ favor of Mathlib equivalents). Phase 30 (Bridge A,
 
 | # | Name | File | Status |
 |---|------|------|--------|
-| A | `BSCallHyp.of_isPreBrownian` | `Foundations/BSCallHypFromBrownian.lean` | NEW |
-| A.2 | `BachelierHyp.of_isPreBrownian` | (same file) | NEW |
-| — | Core scaling lemma `scaled_isPreBrownian_eval_law` | (same file) | NEW |
+| A | `BSCallHyp.of_isPreBrownian` | `Foundations/BSCallHypFromBrownian.lean` | NEW (phase 30) |
+| A.2 | `BachelierHyp.of_isPreBrownian` | (same file) | NEW (phase 30) |
+| — | Core scaling lemma `scaled_isPreBrownian_eval_law` | (same file) | NEW (phase 30) |
+| — | `bsTerminal_via_brownian` (S_T = S_0 · exp((r−σ²/2)T + σ·W_T)) | (same file) | NEW (phase 30) |
+| — | `bachelierTerminal_via_brownian` (S_T = S_0 + σ·W_T) | (same file) | NEW (phase 30) |
+| 31 | Full pricing pipeline from `IsPreBrownian` (composite corollaries): BS call, put, put-call parity, Bachelier, cash digital, asset digital, power call, dividends call, stock numeraire, KMV PD, Merton equity | `Foundations/PricingFromBrownian.lean` | NEW (phase 31) |
 
 ## Bridges planned but deferred
 

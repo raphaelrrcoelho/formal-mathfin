@@ -53,6 +53,8 @@ import HybridVerify.Foundations.AlmgrenChriss
 import HybridVerify.Foundations.ConvexPricingFunctional
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
 import HybridVerify.Foundations.BSCallHypFromBrownian
+-- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)
+import HybridVerify.Foundations.PricingFromBrownian
 
 -- BlackScholes
 import HybridVerify.BlackScholes.Call
