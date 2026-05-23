@@ -5,6 +5,7 @@ Authors: Raphael Coelho
 -/
 import Mathlib
 import QuantFin.BlackScholes.Call
+import QuantFin.BlackScholes.Forward
 
 /-!
 # Static Girsanov: the risk-neutral measure as a Gaussian change of measure
@@ -187,5 +188,54 @@ theorem bsTerminal_physical_eq_riskNeutral
       field_simp
     rw [h1, Real.mul_self_sqrt hT]; ring
   rw [hexp]
+
+/-! ## Wiring Girsanov into the pricing artifacts
+
+The two composites below make `GaussianGirsanov` load-bearing: they drive the
+prior pricing results from the *physical* measure through the constructed
+EMM, rather than from an assumed `BSCallHyp`. This is the genesis-cascade
+spine `physical measure → Girsanov → Q → pricing`. -/
+
+/-- **The constructed measure is an equivalent martingale measure** (derived
+from the physical measure). For the Esscher-tilted `Q` of
+`BSCallHyp.exists_of_physical`, the discounted terminal asset is a
+`Q`-martingale: `E_Q[e^{−rT}·S_T] = S_0`. This is the *defining* property of
+an EMM — so the construction yields a genuine risk-neutral measure, not
+merely one under which the driver is standard normal. Composes
+`exists_of_physical` with `discounted_terminal_eq_S0`. -/
+theorem discounted_terminal_eq_S0_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {P : Measure Ω} [IsProbabilityMeasure P]
+    {S_0 K r σ T : ℝ} {W : Ω → ℝ} (c : ℝ)
+    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
+    (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
+    ∃ (Q : Measure Ω) (_ : IsProbabilityMeasure Q),
+      Q = P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
+      ∫ ω, Real.exp (-(r * T)) * bsTerminal S_0 r σ T (W ω - c) ∂Q = S_0 := by
+  obtain ⟨Q, hQ, hQeq, hbs⟩ :=
+    BSCallHyp.exists_of_physical (S_0 := S_0) (K := K) (r := r) (σ := σ) (T := T)
+      c hS_0 hK hσ hT hWmeas hW
+  haveI := hQ
+  exact ⟨Q, hQ, hQeq, discounted_terminal_eq_S0 hbs⟩
+
+/-- **Black-Scholes call price from the physical measure** (full chain). For
+the constructed EMM `Q`, the discounted expected payoff equals the
+Black-Scholes closed form. Every other BS-family result composes the same
+way; this one stands for the pipeline. Composes `exists_of_physical` with
+`bs_call_formula`. -/
+theorem bs_call_formula_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {P : Measure Ω} [IsProbabilityMeasure P]
+    {S_0 K r σ T : ℝ} {W : Ω → ℝ} (c : ℝ)
+    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
+    (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
+    ∃ (Q : Measure Ω) (_ : IsProbabilityMeasure Q),
+      Q = P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
+      ∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 r σ T (W ω - c) - K) 0 ∂Q
+        = S_0 * Phi (bsd1 S_0 K r σ T)
+          - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
+  obtain ⟨Q, hQ, hQeq, hbs⟩ :=
+    BSCallHyp.exists_of_physical (S_0 := S_0) (K := K) (r := r) (σ := σ) (T := T)
+      c hS_0 hK hσ hT hWmeas hW
+  haveI := hQ
+  exact ⟨Q, hQ, hQeq, bs_call_formula hbs⟩
 
 end QuantFin

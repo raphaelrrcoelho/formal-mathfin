@@ -105,6 +105,12 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.bsTerminal_physical_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms QuantFin.bsTerminal_physical_eq_riskNeutral
 
+/-- info: 'QuantFin.discounted_terminal_eq_S0_of_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.discounted_terminal_eq_S0_of_physical
+
+/-- info: 'QuantFin.bs_call_formula_of_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bs_call_formula_of_physical
+
 /-! ## Convex pricing functional + FTAP / state-price wiring -/
 
 /-- info: 'QuantFin.statePricePricing_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
