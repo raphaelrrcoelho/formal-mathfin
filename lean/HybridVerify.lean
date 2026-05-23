@@ -140,6 +140,8 @@ import HybridVerify.Binomial.PathReflection
 import HybridVerify.Binomial.SnellEnvelope
 -- Phase 43: Binomial up-probability as two-state FTAP EMM
 import HybridVerify.Binomial.BinomialFromFTAP
+-- Phase 44: CRR binomial scheme as discrete-Itô process (drift + QV limits)
+import HybridVerify.Binomial.CRRDiscreteIto
 -- Phase 20: first-principles core derivations
 import HybridVerify.Foundations.NoArbitrageDerivations
 import HybridVerify.BlackScholes.RiskNeutralProbabilities
