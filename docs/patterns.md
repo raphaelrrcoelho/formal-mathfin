@@ -311,3 +311,112 @@ a principle.
 
 Rule: fold when the file is one algebraic check. Don't fold when the file
 names a principle that downstream code cites.
+
+### Wrapper lemmas around single Mathlib calls
+
+Don't write a thin finance-specific wrapper around one Mathlib lemma. The
+wrapper adds a layer of name lookup with zero structural content.
+
+Anti-example (deleted):
+
+```lean
+-- DON'T: `pointwiseConvexCombination_eq` was a 4-line wrapper that
+-- restated `ConvexOn.smul` with finance variable names. Consumers should
+-- just call `ConvexOn.smul` directly.
+```
+
+Rule: if your "lemma" is `:= someMathlibLemma` with renamed arguments,
+delete it and have the caller invoke the Mathlib lemma directly. The
+exception is the *principle module* pattern (above), where a structural
+fact is named even though its proof is short.
+
+## Structural-reduction patterns (Phase 24+ batch)
+
+### "This thing IS already that thing under variable renaming"
+
+The cleanest closed-form proofs of recent phases share one shape: showing
+that a seemingly-new construction is *literally* an instance of an existing
+result at a different parameterisation, after which the new result is a
+zero-line corollary of the old.
+
+Phase 24 — **PowerCall**: `(S_T)^a` viewed as a standard BS terminal at
+*effective spot* `S_0^a · exp((a−1)rT + a(a−1)/2 · σ²T)` and *effective
+volatility* `aσ`. Then `e^{−rT} · E[max((S_T)^a − K, 0)] =
+bs_call_formula(Š_0, K, r, aσ, T)` whole — no new gaussian integral.
+
+Phase 25 — **ChooserComposition**: `chooserPrice =
+bsV(K, T) + bsP(K · e^{−r(T−t_1)}, t_1)` falls out of pointwise PCP at
+the chooser date + linearity of expectation. The chooser is *literally*
+a portfolio of call + adjusted-strike put.
+
+Phase 27 — **KMVMertonStructural**: KMV's `kmvPD` is *the same probability*
+as the BS `bsd2`-form `Q(V_T > F)`. The pre-existing algebraic identity
+`1 − kmvPD = Φ(bsd2)` is upgraded to actual probability content via
+`riskNeutralProb_S_T_gt_K`.
+
+Pattern: when a new closed form sits in front of you, before reaching for
+new gaussian integration, ask "what existing closed form is this an
+instance of?" If the answer is "BS-call at a different parameterisation,"
+the proof reduces to algebraic identification + reuse.
+
+This is the same discipline as the principle modules (the consumer of a
+principle is its instance), one level finer-grained: each *new* closed
+form ought to be an instance of an *old* one whenever the algebra allows.
+
+### Factorisation as the bridge between calculus and algebra
+
+When proving `HasDerivAt f f' x` for `f` of polynomial form, factorise
+both `f` and `f'` aggressively before reaching for `convert` or
+`linear_combination`. The proofs collapse when Lean can match the factored
+forms term-by-term.
+
+Used in `DurationSensitivity.lean` (`hasDerivAt_coupon_term`):
+the per-cashflow derivative `d/dy [c / (1+y)^n] = −n c / (1+y)^{n+1}`
+bundles the `n = 0` and `n ≥ 1` cases by `field_simp + ring` *after*
+factoring out the common `c / (1+y)^{n+1}`. Without factoring, ring
+hits a polynomial-degree blowup; with factoring, it's one line.
+
+Same shape in `ConvexitySensitivity.lean` (`hasDerivAt_modNum_term`):
+the second derivative is the first derivative applied a second time, with
+factored intermediates.
+
+Rule: aggressive `field_simp` *before* `ring`; `push_cast` *before*
+`field_simp` if there are `Nat.cast` numerals.
+
+## Workflow additions
+
+### Push to completion when ~80% done
+
+Mid-derivation stopping points are expensive: the proof state is in your
+head but not on disk. If you're 80% through a multi-step derivation and
+the remaining 20% is mostly algebra-chasing, push to completion rather
+than leave a `sorry` for "later." Future-you opening the file cold has to
+re-load the entire proof context, which usually costs more than just
+finishing in the current session.
+
+Counterexample (don't do this): leaving `sorry` placeholders in
+load-bearing files. They block downstream consumers and pollute
+`#print axioms`. Use `sorry` only in scratch / exploratory files that
+won't be imported.
+
+### Cleanup pass after every major proof
+
+After landing a multi-hundred-line proof, do a structural −10–20% line
+trim before closing the milestone. The first version of a complex proof
+tends to over-decompose intermediate steps; the second pass folds them
+back together. The discipline keeps the codebase from accreting noise.
+
+Concrete evidence: `proposals/bm-martingales/Martingale.lean` went from
+392 → 292 lines (−25%) as a single cleanup commit after the proof
+mechanics landed.
+
+### Match domain choice to target benchmark FIRST
+
+When formalising an upstream-targeted result, decide the domain / index
+type / Lp exponent based on what the *target benchmark* expects, *before*
+writing the supporting infrastructure. Choosing first and writing second
+saves a refactor pass.
+
+Concrete evidence: the L^p continuous-martingale-convergence work shipped
+with `p : ℝ`-indexed `eLpNorm` because that's what `Mathlib.MeasureTheory`
+takes. An earlier version with `p : ℕ≥1` had to be rewritten.
