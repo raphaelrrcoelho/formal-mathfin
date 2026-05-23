@@ -19,8 +19,12 @@ properties at the level of real-valued calculus:
 * the closed form satisfies the ODE;
 * limiting value `r(∞) = θ` (asymptotic, via positivity of `κ`).
 
-The full Vasicek model (including the stochastic part) is gated on the Itô
-integral and is not formalized here.
+The full Vasicek model including the stochastic part — the SDE closed-form
+`r_t ~ N(r_0 e^{−κt} + θ(1−e^{−κt}), σ²(1−e^{−2κt})/(2κ))` — is formalized in
+`QuantFin/FixedIncome/VasicekSDE.lean`, where the variance comes from the
+simple-process Itô isometry on the deterministic integrand `e^{−κ(t−s)}`
+(`Foundations/ItoIntegralSimple.lean`). This file covers only the
+deterministic (mean-reversion ODE) part.
 
 ## The half-life
 
