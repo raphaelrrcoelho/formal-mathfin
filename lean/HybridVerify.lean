@@ -25,6 +25,9 @@
   * `RiskMeasures/`  — VaR/CVaR + coherent-risk axioms, Rockafellar-Uryasev,
                        spectral risk, Herfindahl concentration.
   * `Actuarial/`     — net premium, Gompertz force of mortality.
+  * `DeFi/`          — Decentralized-finance market microstructure:
+                       constant-product AMMs (Uniswap v2-style), swap
+                       output, invariant preservation, internal price.
 -/
 
 -- Foundations
@@ -57,6 +60,18 @@ import HybridVerify.Foundations.BSCallHypFromBrownian
 import HybridVerify.Foundations.PricingFromBrownian
 -- Phase 32: Variance-swap log-price squared-increment from BrownianQuadraticVariation
 import HybridVerify.Foundations.VarianceSwapFromQV
+-- Phase 33: Variance-swap equipartition sum from BrownianQuadraticVariation
+import HybridVerify.Foundations.VarianceSwapEquipartition
+-- Phase 34: Variance-swap QV limit theorem (realised-variance → σ²T as n → ∞)
+import HybridVerify.Foundations.VarianceSwapLimit
+-- Phase 35: Discrete Itô formula (adapted from Nagy 2026, SSRN 6336503)
+import HybridVerify.Foundations.DiscreteIto
+-- Phase 36: Itô integral for simple processes (adapted from Nagy 2026)
+import HybridVerify.Foundations.ItoIntegralSimple
+-- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
+import HybridVerify.Foundations.FTAPTwoState
+-- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
+import HybridVerify.DeFi.ConstantProductAMM
 
 -- BlackScholes
 import HybridVerify.BlackScholes.Call
