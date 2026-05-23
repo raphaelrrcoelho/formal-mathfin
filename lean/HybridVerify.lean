@@ -116,6 +116,10 @@ import HybridVerify.Foundations.NoArbitrageDerivations
 import HybridVerify.BlackScholes.RiskNeutralProbabilities
 -- Phase 22: delta as stock-numeraire probability (Φ(d_1) = Q^(S)(S_T > K))
 import HybridVerify.BlackScholes.StockNumeraire
+-- Phase 24: powered call closed form via reduction to BS-call (effective spot/vol)
+import HybridVerify.BlackScholes.PowerCall
+-- Phase 25: chooser option as call + put portfolio via PCP at chooser date
+import HybridVerify.BlackScholes.ChooserComposition
 
 -- FixedIncome
 import HybridVerify.FixedIncome.ZCB
@@ -136,6 +140,10 @@ import HybridVerify.FixedIncome.CDS
 import HybridVerify.FixedIncome.DurationSensitivity
 -- Phase 22: first-principles convexity-as-second-derivative
 import HybridVerify.FixedIncome.ConvexitySensitivity
+-- Phase 27: KMV-Merton structural derivation (probabilistic content of `kmvPD`)
+import HybridVerify.FixedIncome.KMVMertonStructural
+-- Phase 28: CDS fair spread under time-varying hazard (cash-flow balance)
+import HybridVerify.FixedIncome.CDSTimeVarying
 
 -- Portfolio
 import HybridVerify.Portfolio.Markowitz
@@ -152,6 +160,10 @@ import HybridVerify.Portfolio.SharpeFOCDerivation
 import HybridVerify.Portfolio.CAPMEquilibrium
 -- Phase 23: N-asset Markowitz Lagrangian FOC (forward direction)
 import HybridVerify.Portfolio.MarkowitzLagrangian
+-- Phase 26: N-asset risk parity from log-barrier Lagrangian FOC
+import HybridVerify.Portfolio.RiskParityFOC
+-- Phase 29: N-dim Black-Litterman posterior (matrix form)
+import HybridVerify.Portfolio.BlackLittermanND
 
 -- Performance
 import HybridVerify.Performance.Ratios
