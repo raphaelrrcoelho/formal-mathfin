@@ -55,6 +55,8 @@ import HybridVerify.Foundations.ConvexPricingFunctional
 import HybridVerify.Foundations.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)
 import HybridVerify.Foundations.PricingFromBrownian
+-- Phase 32: Variance-swap log-price squared-increment from BrownianQuadraticVariation
+import HybridVerify.Foundations.VarianceSwapFromQV
 
 -- BlackScholes
 import HybridVerify.BlackScholes.Call

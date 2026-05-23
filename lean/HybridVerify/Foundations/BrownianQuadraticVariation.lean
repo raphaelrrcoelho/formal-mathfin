@@ -52,7 +52,7 @@ namespace BrownianQuadraticVariation
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω → ℝ}
 
 /-- The increment `B t − B s` is measurable. -/
-private lemma measurable_increment (hB : BrownianQuadraticVariation μ B)
+theorem measurable_increment (hB : BrownianQuadraticVariation μ B)
     (s t : ℝ) : Measurable (fun ω => B t ω - B s ω) :=
   (hB.measurable t).sub (hB.measurable s)
 
@@ -71,7 +71,7 @@ private lemma integrable_sq_gaussianReal_zero (v : ℝ≥0) :
   exact h_lp.integrable_sq
 
 /-- For `s ≤ t`, the squared increment `(B t − B s)²` has expectation `t − s`. -/
-private lemma integral_sq_increment (hB : BrownianQuadraticVariation μ B)
+theorem integral_sq_increment (hB : BrownianQuadraticVariation μ B)
     {s t : ℝ} (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ^ 2 ∂μ = t - s := by
   obtain ⟨v, hv, h_map⟩ := hB.gaussian_increments hst
@@ -83,7 +83,7 @@ private lemma integral_sq_increment (hB : BrownianQuadraticVariation μ B)
   rw [← h_map_int, h_map, integral_sq_gaussianReal_zero, hv]
 
 /-- The squared increment is integrable. -/
-private lemma integrable_sq_increment (hB : BrownianQuadraticVariation μ B)
+theorem integrable_sq_increment (hB : BrownianQuadraticVariation μ B)
     {s t : ℝ} (hst : s ≤ t) :
     Integrable (fun ω => (B t ω - B s ω) ^ 2) μ := by
   obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hst
@@ -93,6 +93,32 @@ private lemma integrable_sq_increment (hB : BrownianQuadraticVariation μ B)
     Integrable.comp_aemeasurable ?_ h_aem)
   rw [h_map]
   exact integrable_sq_gaussianReal_zero _
+
+/-- **Mean of BM increment is zero**: `E[B_t − B_s] = 0` for `s ≤ t`.
+Pushforward law is `gaussianReal 0 v` with `v = t − s`; the first moment of
+a centred Gaussian is `0`. -/
+theorem integral_increment (hB : BrownianQuadraticVariation μ B)
+    {s t : ℝ} (hst : s ≤ t) :
+    ∫ ω, (B t ω - B s ω) ∂μ = 0 := by
+  obtain ⟨v, _hv, h_map⟩ := hB.gaussian_increments hst
+  have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
+    (hB.measurable_increment s t).aemeasurable
+  have h_map_int : ∫ y : ℝ, y ∂(Measure.map (fun ω => B t ω - B s ω) μ)
+      = ∫ ω, (B t ω - B s ω) ∂μ :=
+    integral_map h_aem (by fun_prop)
+  rw [← h_map_int, h_map, integral_id_gaussianReal]
+
+/-- Integrability of the BM increment `B_t − B_s` under a finite measure. -/
+theorem integrable_increment [IsFiniteMeasure μ]
+    (hB : BrownianQuadraticVariation μ B) {s t : ℝ} (hst : s ≤ t) :
+    Integrable (fun ω => B t ω - B s ω) μ := by
+  obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hst
+  have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
+    (hB.measurable_increment s t).aemeasurable
+  refine (show Integrable ((fun x : ℝ => x) ∘ (fun ω => B t ω - B s ω)) μ from
+    Integrable.comp_aemeasurable ?_ h_aem)
+  rw [h_map]
+  exact (memLp_id_gaussianReal 1).integrable (by norm_num)
 
 /-- Endpoint inequality for the equipartition: `k t / (n + 1) ≤ (k + 1) t / (n + 1)`
 when `0 ≤ t`. -/
