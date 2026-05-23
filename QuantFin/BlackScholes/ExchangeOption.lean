@@ -119,4 +119,37 @@ theorem margrabe_eq_bsVGarman (S1 S2 σ T : ℝ) :
   unfold margrabePrice bsVGarman margrabeD2 gbsd2
   rw [hd1, mul_one]
 
+/-- **Exchange-option parity** — the analog of put-call parity. The option to
+exchange asset 2 for asset 1 minus the option to exchange asset 1 for asset 2
+equals the forward on the spread:
+
+  `Margrabe(S¹, S²) − Margrabe(S², S¹) = S¹ − S²`.
+
+Foundation-certain: swapping the two assets sends `d₁ ↦ −d₂` and `d₂ ↦ −d₁`
+(the `σ²T/(σ√T) = σ√T` identity), and `Φ(x) + Φ(−x) = 1` (the same symmetry
+`Phi_add_Phi_neg` that drives put-call parity) collapses the rest. No
+probability machinery, no assumed moments — pure algebra on the closed form. -/
+theorem margrabe_parity (S1 S2 σ T : ℝ)
+    (hS1 : 0 < S1) (hS2 : 0 < S2) (hσ : σ ≠ 0) (hT : 0 < T) :
+    margrabePrice S1 S2 σ T - margrabePrice S2 S1 σ T = S1 - S2 := by
+  have hσT : σ * Real.sqrt T ≠ 0 := mul_ne_zero hσ (Real.sqrt_pos.mpr hT).ne'
+  -- The swapped d₁ and the original d₁ sum to σ√T.
+  have hsum : margrabeD1 S2 S1 σ T + margrabeD1 S1 S2 σ T = σ * Real.sqrt T := by
+    unfold margrabeD1
+    rw [← add_div, Real.log_div hS2.ne' hS1.ne', Real.log_div hS1.ne' hS2.ne',
+        show (Real.log S2 - Real.log S1 + σ ^ 2 * T / 2)
+              + (Real.log S1 - Real.log S2 + σ ^ 2 * T / 2) = σ ^ 2 * T from by ring,
+        div_eq_iff hσT,
+        show σ * Real.sqrt T * (σ * Real.sqrt T)
+              = σ ^ 2 * (Real.sqrt T * Real.sqrt T) from by ring,
+        Real.mul_self_sqrt hT.le]
+  -- Swap symmetry of the d's.
+  have hd1 : margrabeD1 S2 S1 σ T = -(margrabeD2 S1 S2 σ T) := by
+    unfold margrabeD2; linarith [hsum]
+  have hd2 : margrabeD2 S2 S1 σ T = -(margrabeD1 S1 S2 σ T) := by
+    unfold margrabeD2; linarith [hsum]
+  unfold margrabePrice
+  rw [hd1, hd2, Phi_neg, Phi_neg]
+  ring
+
 end QuantFin
