@@ -91,6 +91,20 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.hazard_eq_neg_log_deriv_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms QuantFin.hazard_eq_neg_log_deriv_survival
 
+/-! ## Static Girsanov: the risk-neutral measure derived -/
+
+/-- info: 'QuantFin.gaussian_esscher_pdf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.gaussian_esscher_pdf
+
+/-- info: 'QuantFin.gaussianReal_withDensity_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.gaussianReal_withDensity_esscher
+
+/-- info: 'QuantFin.BSCallHyp.exists_of_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.BSCallHyp.exists_of_physical
+
+/-- info: 'QuantFin.bsTerminal_physical_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms QuantFin.bsTerminal_physical_eq_riskNeutral
+
 /-! ## Convex pricing functional + FTAP / state-price wiring -/
 
 /-- info: 'QuantFin.statePricePricing_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/

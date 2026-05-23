@@ -34,6 +34,7 @@
 import QuantFin.Foundations.Basic
 import QuantFin.Foundations.BivariateGaussian
 import QuantFin.Foundations.GaussianCDFDeriv
+import QuantFin.Foundations.GaussianGirsanov
 import QuantFin.Foundations.FeynmanKacHeatEquation
 import QuantFin.Foundations.BrownianMartingale
 import QuantFin.Foundations.BrownianQuadraticVariation
