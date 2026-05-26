@@ -111,6 +111,9 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.bs_call_formula_of_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms QuantFin.bs_call_formula_of_physical
 
+/-- info: 'QuantFin.discounted_physical_terminal_eq_S0' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.discounted_physical_terminal_eq_S0
+
 /-! ## Margrabe exchange option (first multivariate result) -/
 
 /-- info: 'QuantFin.margrabe_effective_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -163,6 +166,23 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.ItoIsometryAdapted.ito_isometry_brownian_self' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms QuantFin.ItoIsometryAdapted.ito_isometry_brownian_self
 
+/-- info: 'QuantFin.ItoIsometryAdapted.integral_adapted_mul_increment_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.ItoIsometryAdapted.integral_adapted_mul_increment_sq
+
+/-- info: 'QuantFin.ItoIsometryAdapted.ito_isometry_discrete_bilinear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.ItoIsometryAdapted.ito_isometry_discrete_bilinear
+
+/-! ## Predictable-rectangle pairing (inner-product core of the continuous Itô integral) -/
+
+/-- info: 'QuantFin.ItoIsometryAdapted.adapted_indepFun_forward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.ItoIsometryAdapted.adapted_indepFun_forward
+
+/-- info: 'QuantFin.ItoIsometryAdapted.integral_two_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.ItoIsometryAdapted.integral_two_increment
+
+/-- info: 'QuantFin.ItoIsometryAdapted.rect_increment_pairing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.ItoIsometryAdapted.rect_increment_pairing
+
 /-! ## Margrabe BSCallHyp grounding (leap-3 closure via gaussian vector) -/
 
 /-- info: 'QuantFin.normalizedSpread_hasLaw_std' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -170,6 +190,9 @@ namespace QuantFin.AxiomAudit
 
 /-- info: 'QuantFin.margrabe_bsCallHyp_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.margrabe_bsCallHyp_of_gaussian
+
+/-- info: 'QuantFin.margrabe_price_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.margrabe_price_of_gaussian
 
 /-! ## Portfolio / risk / performance -/
 

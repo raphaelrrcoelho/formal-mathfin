@@ -238,4 +238,32 @@ theorem bs_call_formula_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
   haveI := hQ
   exact ⟨Q, hQ, hQeq, bs_call_formula hbs⟩
 
+/-- **The physical-drift asset reprices to `S_0` under the constructed EMM** —
+the `μ → r` drift elimination, *wired into the chain* (not merely asserted).
+Instantiating the Girsanov shift at the market-price-of-risk value
+`c = (r − μ)·√T/σ`, `bsTerminal_physical_eq_riskNeutral` identifies the physical
+terminal `bsTerminal S_0 μ σ T W` (drift `μ`) with the risk-neutral one, and
+`discounted_terminal_eq_S0_of_physical` supplies the martingale property — so
+`E_Q[e^{−rT}·S_T] = S_0` holds for the asset carrying the *physical* drift `μ`.
+This composes the previously-standalone drift-invariance identity into the EMM
+pipeline, closing the `physical → EMM` step at the level of the physical model. -/
+theorem discounted_physical_terminal_eq_S0 {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {P : Measure Ω} [IsProbabilityMeasure P]
+    {S_0 r μ σ T : ℝ} {W : Ω → ℝ}
+    (hS_0 : 0 < S_0) (hσ : 0 < σ) (hT : 0 < T)
+    (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
+    ∃ (Q : Measure Ω) (_ : IsProbabilityMeasure Q),
+      ∫ ω, Real.exp (-(r * T)) * bsTerminal S_0 μ σ T (W ω) ∂Q = S_0 := by
+  obtain ⟨Q, hQ, _, hbs⟩ :=
+    discounted_terminal_eq_S0_of_physical (K := S_0) (r := r)
+      ((r - μ) * Real.sqrt T / σ) hS_0 hS_0 hσ hT hWmeas hW
+  haveI := hQ
+  refine ⟨Q, hQ, ?_⟩
+  have hfun : ∀ ω, Real.exp (-(r * T)) * bsTerminal S_0 μ σ T (W ω)
+      = Real.exp (-(r * T)) * bsTerminal S_0 r σ T (W ω - (r - μ) * Real.sqrt T / σ) := by
+    intro ω
+    rw [bsTerminal_physical_eq_riskNeutral S_0 μ r σ T (W ω) (ne_of_gt hσ) hT.le]
+  rw [integral_congr_ae (Filter.Eventually.of_forall hfun)]
+  exact hbs
+
 end QuantFin

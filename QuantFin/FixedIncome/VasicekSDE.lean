@@ -56,7 +56,6 @@ explicitly so that downstream consumers can use it without re-deriving.
 * `vasicekSDETerminal`: parametrised terminal `r_t(Z) = mean + √var · Z`.
 * `vasicekSDE_variance_pos`: positivity of variance for `κ > 0`, `σ ≠ 0`.
 * `vasicekSDE_mean_at_zero`: `r_t = r_0` at `t = 0`.
-* `vasicekSDE_mean_asymptotic`: as `t → ∞`, mean → `θ` (mean reversion).
 -/
 
 namespace QuantFin

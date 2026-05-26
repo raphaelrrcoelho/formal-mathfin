@@ -20,11 +20,13 @@ properties at the level of real-valued calculus:
 * limiting value `r(∞) = θ` (asymptotic, via positivity of `κ`).
 
 The full Vasicek model including the stochastic part — the SDE closed-form
-`r_t ~ N(r_0 e^{−κt} + θ(1−e^{−κt}), σ²(1−e^{−2κt})/(2κ))` — is formalized in
-`QuantFin/FixedIncome/VasicekSDE.lean`, where the variance comes from the
-simple-process Itô isometry on the deterministic integrand `e^{−κ(t−s)}`
-(`Foundations/ItoIntegralSimple.lean`). This file covers only the
-deterministic (mean-reversion ODE) part.
+`r_t ~ N(r_0 e^{−κt} + θ(1−e^{−κt}), σ²(1−e^{−2κt})/(2κ))` — is *stated* (in the
+`BSCallHyp` terminal-distribution style) in `QuantFin/FixedIncome/VasicekSDE.lean`.
+There the variance `σ²(1−e^{−2κt})/(2κ)` is the L² norm that the simple-process
+Itô isometry *would* assign to the deterministic integrand `e^{−κ(t−s)}`; the
+SDE→distribution derivation itself is not yet formalized (it is gated on the
+continuous Itô integral). This file covers only the deterministic
+(mean-reversion ODE) part.
 
 ## The half-life
 

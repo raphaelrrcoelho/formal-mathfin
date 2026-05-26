@@ -122,9 +122,9 @@ joint gaussian model of the two unit-variance drivers `(W₁, W₂)` with
 correlation `ρ`, there exists a probability measure `Q` (an explicit Esscher
 tilt — the `S²`-numeraire change of measure) and a standard-normal driver `Z`
 under which `BSCallHyp` holds for the ratio `S¹₀/S²₀` at strike `1`, zero rate,
-and the effective volatility `σ_eff = √(σ₁² + σ₂² − 2ρσ₁σ₂)`. Composing with
-`margrabe_price_via_call` then prices the exchange option with no assumed
-risk-neutral hypothesis. -/
+and the effective volatility `σ_eff = √(σ₁² + σ₂² − 2ρσ₁σ₂)`.
+`margrabe_price_of_gaussian` (below) composes this with `margrabe_price_via_call`
+to price the exchange option with no assumed risk-neutral hypothesis. -/
 theorem margrabe_bsCallHyp_of_gaussian
     {W₁ W₂ : Ω → ℝ} {σ₁ σ₂ ρ σeff S1 S2 T c : ℝ}
     (hjoint : HasGaussianLaw (fun ω => (W₁ ω, W₂ ω)) P)
@@ -142,5 +142,25 @@ theorem margrabe_bsCallHyp_of_gaussian
   obtain ⟨Q, hQ, _, hbs⟩ :=
     BSCallHyp.exists_of_physical c (div_pos hS1 hS2) one_pos hσeff hT hWmeas hW
   exact ⟨Q, hQ, _, hbs⟩
+
+/-- **End-to-end Margrabe price from a joint gaussian model** (no assumed
+risk-neutral hypothesis). Composes `margrabe_bsCallHyp_of_gaussian` (which
+*derives* the ratio's `BSCallHyp`) with `margrabe_price_via_call`. -/
+theorem margrabe_price_of_gaussian
+    {W₁ W₂ : Ω → ℝ} {σ₁ σ₂ ρ σeff S1 S2 T c : ℝ}
+    (hjoint : HasGaussianLaw (fun ω => (W₁ ω, W₂ ω)) P)
+    (hW₁meas : Measurable W₁) (hW₂meas : Measurable W₂)
+    (hW₁ : HasLaw W₁ (gaussianReal 0 1) P) (hW₂ : HasLaw W₂ (gaussianReal 0 1) P)
+    (hcov : cov[W₁, W₂; P] = ρ)
+    (hS1 : 0 < S1) (hS2 : 0 < S2) (hσeff : 0 < σeff) (hT : 0 < T)
+    (hσeff_sq : σeff ^ 2 = σ₁ ^ 2 + σ₂ ^ 2 - 2 * ρ * σ₁ * σ₂) :
+    ∃ (Q : Measure Ω) (_ : IsProbabilityMeasure Q) (Z : Ω → ℝ),
+      S2 * ∫ ω, max (bsTerminal (S1 / S2) 0 σeff T (Z ω) - 1) 0 ∂Q
+        = margrabePrice S1 S2 σeff T := by
+  obtain ⟨Q, hQ, Z, hbs⟩ :=
+    margrabe_bsCallHyp_of_gaussian (c := c) hjoint hW₁meas hW₂meas hW₁ hW₂ hcov
+      hS1 hS2 hσeff hT hσeff_sq
+  haveI := hQ
+  exact ⟨Q, hQ, Z, margrabe_price_via_call hS2 hbs⟩
 
 end QuantFin
