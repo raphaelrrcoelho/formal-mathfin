@@ -183,6 +183,14 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.ItoIsometryAdapted.rect_increment_pairing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.ItoIsometryAdapted.rect_increment_pairing
 
+/-! ## Stochastic intervals + elementary-predictable-set lemma (Degenne issue #440) -/
+
+/-- info: 'QuantFin.stochasticIoc.predictable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.stochasticIoc.predictable
+
+/-- info: 'QuantFin.stochasticIoc.elementaryPredictableSet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.stochasticIoc.elementaryPredictableSet
+
 /-! ## Margrabe BSCallHyp grounding (leap-3 closure via gaussian vector) -/
 
 /-- info: 'QuantFin.normalizedSpread_hasLaw_std' depends on axioms: [propext, Classical.choice, Quot.sound] -/

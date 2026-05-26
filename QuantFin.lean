@@ -71,6 +71,8 @@ import QuantFin.Foundations.DiscreteIto
 import QuantFin.Foundations.ItoIntegralSimple
 -- The adapted Itô isometry (increment-independence cornerstone)
 import QuantFin.Foundations.ItoIsometryAdapted
+-- Stochastic intervals + elementary-predictable-set lemma (Degenne issue #440)
+import QuantFin.Foundations.StochasticInterval
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import QuantFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
