@@ -231,10 +231,4 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.portfolioVarN_diag_eq_herfindahl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.portfolioVarN_diag_eq_herfindahl
 
-/-- info: 'QuantFin.survivalFromForce_eq_hazardSurvival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms QuantFin.survivalFromForce_eq_hazardSurvival
-
-/-- info: 'QuantFin.gompertz_cumHazard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms QuantFin.gompertz_cumHazard
-
 end QuantFin.AxiomAudit
