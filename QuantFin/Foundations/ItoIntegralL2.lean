@@ -53,7 +53,7 @@ namespace QuantFin
 namespace ItoIntegralL2
 
 open MeasureTheory ProbabilityTheory
-open scoped NNReal ENNReal
+open scoped NNReal ENNReal InnerProductSpace
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ}
@@ -173,6 +173,31 @@ theorem itoSimple_sq_integral (hBmeas : ∀ t, Measurable (B t))
           (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
           (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
           (V.le_of_mem_support_value p hp) (V.le_of_mem_support_value q hq)
+
+omit [hB : IsPreBrownian B μ] in
+/-- For `g : Lp ℝ 2 μ`, `‖g‖² = ∫ (g ω)² ∂μ` (the real `L²` norm-square as an integral). -/
+private lemma lp_two_norm_sq (g : Lp ℝ 2 μ) : ‖g‖ ^ 2 = ∫ ω, (g ω) ^ 2 ∂μ := by
+  have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
+  rw [L2.inner_def] at h
+  rw [← h]
+  refine integral_congr_ae ?_
+  filter_upwards with ω
+  show (g ω) * (g ω) = (g ω) ^ 2
+  ring
+
+/-- **The Itô isometry in `Lp`-norm form.** `‖itoSimpleLp V‖²` equals the predictable-
+rectangle double sum — i.e. `‖V‖²` in the predictable `L²` space. This is the norm
+identity that `extendOfNorm` consumes to build the continuous Itô integral. -/
+theorem itoSimpleLp_norm_sq (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    ‖(itoSimpleLp hBmeas V : Lp ℝ 2 μ)‖ ^ 2
+      = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
+          (∫ ω, V.value p ω * V.value q ω ∂μ)
+            * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
+  rw [lp_two_norm_sq, ← itoSimple_sq_integral hBmeas V]
+  refine integral_congr_ae ?_
+  filter_upwards [(memLp_itoSimple hBmeas V).coeFn_toLp] with ω hω
+  rw [show (itoSimpleLp hBmeas V : Ω → ℝ) ω = itoSimple hBmeas V ω from hω]
 
 end ItoIntegralL2
 end QuantFin
