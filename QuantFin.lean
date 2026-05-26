@@ -30,7 +30,9 @@
                        output, invariant preservation, internal price.
 -/
 
--- Foundationsimport QuantFin.Foundations.BivariateGaussian
+-- Foundations
+import QuantFin.Foundations.GaussianMoments
+import QuantFin.Foundations.BivariateGaussian
 import QuantFin.Foundations.GaussianCDFDeriv
 import QuantFin.Foundations.GaussianGirsanov
 import QuantFin.Foundations.FeynmanKacHeatEquation
@@ -81,7 +83,6 @@ import QuantFin.Foundations.VarianceSwapEquivalence
 import QuantFin.Foundations.PricingKernel
 -- Phase 42: Multi-state FTAP backward (hypothesis-form, forward direction proved)
 import QuantFin.Foundations.FTAPMultiState
--- Phase 52: Doob L^p applications to discounted-price martingales
 -- BlackScholes
 import QuantFin.BlackScholes.Call
 import QuantFin.BlackScholes.Put
@@ -145,7 +146,7 @@ import QuantFin.Binomial.SnellEnvelope
 import QuantFin.Binomial.BinomialFromFTAP
 -- Phase 44: CRR binomial scheme as discrete-Itô process (drift + QV limits)
 import QuantFin.Binomial.CRRDiscreteIto
--- Phase 44c: CRR distributional-convergence transfer (hypothesis-form via continuous-mapping)-- Phase 20: first-principles core derivations
+-- Phase 20: first-principles core derivations
 import QuantFin.Foundations.NoArbitrageDerivations
 import QuantFin.BlackScholes.RiskNeutralProbabilities
 -- Phase 22: delta as stock-numeraire probability (Φ(d_1) = Q^(S)(S_T > K))

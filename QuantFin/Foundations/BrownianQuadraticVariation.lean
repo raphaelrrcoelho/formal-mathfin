@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import QuantFin.Foundations.GaussianMoments
 
 /-!
 # Quadratic variation of Brownian motion (L¹ expectation)
@@ -56,14 +57,6 @@ theorem measurable_increment (hB : BrownianQuadraticVariation μ B)
     (s t : ℝ) : Measurable (fun ω => B t ω - B s ω) :=
   (hB.measurable t).sub (hB.measurable s)
 
-/-- Second moment of a centered real Gaussian: `∫ x, x² ∂(gaussianReal 0 v) = v`. -/
-private lemma integral_sq_gaussianReal_zero (v : ℝ≥0) :
-    ∫ x, x ^ 2 ∂(gaussianReal 0 v) = (v : ℝ) := by
-  have h_var : variance id (gaussianReal 0 v) = (v : ℝ) := variance_id_gaussianReal
-  have h_mean : ∫ x, x ∂(gaussianReal 0 v) = 0 := integral_id_gaussianReal
-  rw [variance_of_integral_eq_zero aemeasurable_id h_mean] at h_var
-  exact h_var
-
 /-- Integrability of `x²` under any centered real Gaussian. -/
 private lemma integrable_sq_gaussianReal_zero (v : ℝ≥0) :
     Integrable (fun x : ℝ => x ^ 2) (gaussianReal 0 v) := by
@@ -80,7 +73,7 @@ theorem integral_sq_increment (hB : BrownianQuadraticVariation μ B)
   have h_map_int : ∫ y : ℝ, y ^ 2 ∂(Measure.map (fun ω => B t ω - B s ω) μ)
       = ∫ ω, (B t ω - B s ω) ^ 2 ∂μ :=
     integral_map h_aem (by fun_prop)
-  rw [← h_map_int, h_map, integral_sq_gaussianReal_zero, hv]
+  rw [← h_map_int, h_map, QuantFin.integral_sq_gaussianReal, hv]
 
 /-- The squared increment is integrable. -/
 theorem integrable_sq_increment (hB : BrownianQuadraticVariation μ B)

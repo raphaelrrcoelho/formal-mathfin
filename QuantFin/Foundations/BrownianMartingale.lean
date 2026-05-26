@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
+public import QuantFin.Foundations.GaussianMoments
 
 /-!
 # Martingale properties of Brownian motion
@@ -49,14 +50,6 @@ private lemma integral_exp_mul_gaussianReal_zero (α : ℝ) (v : ℝ≥0) :
   show mgf id (gaussianReal 0 v) α = _
   rw [h]
   ring_nf
-
-/-- Second moment of a centered real Gaussian: `∫ x, x² ∂(gaussianReal 0 v) = v`. -/
-private lemma integral_sq_gaussianReal (v : ℝ≥0) :
-    ∫ x, x ^ 2 ∂(gaussianReal 0 v) = (v : ℝ) := by
-  have h_var : variance id (gaussianReal 0 v) = (v : ℝ) := variance_id_gaussianReal
-  have h_mean : ∫ x, x ∂(gaussianReal 0 v) = 0 := integral_id_gaussianReal
-  rw [variance_of_integral_eq_zero aemeasurable_id h_mean] at h_var
-  exact h_var
 
 /-- `Real.exp (α · X) ∘ Z` is integrable when `Z` has a Gaussian law.
 Shared helper for `waldExponential_isMartingale` (used 3× there). -/
@@ -142,7 +135,7 @@ theorem squareSubTime_isMartingale :
     have h_change : ∫ ω, (X t ω - X s ω) ^ 2 ∂P
         = ∫ x, x ^ 2 ∂(gaussianReal 0 (max (t - s) (s - t))) := by
       simpa [Function.comp] using hL_diff.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
-    rw [h_change, integral_sq_gaussianReal]
+    rw [h_change, QuantFin.integral_sq_gaussianReal]
     exact NNReal.max_sub_eq_of_le hst
   -- `𝓕_s`-measurability of `X_s` and `(X_s)²`.
   have h_smeas_s : StronglyMeasurable[𝓕 s] (X s) := hX.stronglyAdapted s
