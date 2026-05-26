@@ -99,5 +99,80 @@ lemma itoSimple_apply (hBmeas : ∀ t, Measurable (B t))
       = V.value.sum fun p v => v ω * (B p.2 ω - B p.1 ω) := by
   simp only [itoSimple, SimpleProcess.integral_top, ContinuousLinearMap.mul_apply']
 
+variable [hB : IsPreBrownian B μ]
+
+/-- **Step 1 — `L²` membership.** The terminal Itô integral of a simple process is in
+`L²(μ)`: it is the finite sum `∑ₚ V(p)·(B_{p.2}−B_{p.1})`, and each summand is in `L²`
+by `memLp_adapted_mul_increment` — the coefficient `V(p)` is `𝓕_{p.1}`-measurable (hence
+`AdaptedAt` by the bridge) and bounded (hence `L²` on the probability space). -/
+theorem memLp_itoSimple (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    MemLp (itoSimple hBmeas V) 2 μ := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  rw [show itoSimple hBmeas V
+        = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
+      from funext fun ω => by rw [itoSimple_apply]; rfl]
+  refine memLp_finset_sum V.value.support (fun p hp => ?_)
+  refine ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (V.le_of_mem_support_value p hp)
+    (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
+  exact MemLp.of_bound
+    ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
+    V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+
+/-- The terminal Itô integral of a simple process as an element of `Lp ℝ 2 μ`. -/
+noncomputable def itoSimpleLp (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) : Lp ℝ 2 μ :=
+  (memLp_itoSimple hBmeas V).toLp _
+
+/-- **Step 2 — the Itô isometry on simple processes** (the predictable-rectangle double
+sum). For a simple process `V`,
+
+  `∫ (itoSimple V)² dμ = Σ_{p,q} E[V(p)·V(q)] · vol((p.1,p.2] ∩ (q.1,q.2])`,
+
+where `vol((p.1,p.2] ∩ (q.1,q.2]) = max 0 (min p.2 q.2 − max p.1 q.1)`. The square of the
+increment sum expands into a double sum whose every term collapses by
+`rect_increment_pairing` — the genuinely-stochastic content (cross terms vanish by the
+weak Markov property, diagonal terms give the deterministic overlap). The right-hand side
+is exactly `‖V‖²` in the predictable `L²` space, so this is the Itô isometry. -/
+theorem itoSimple_sq_integral (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    ∫ ω, (itoSimple hBmeas V ω) ^ 2 ∂μ
+      = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
+          (∫ ω, V.value p ω * V.value q ω ∂μ)
+            * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  classical
+  set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω => V.value p ω * (B p.2 ω - B p.1 ω) with ha_def
+  have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp =>
+    ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (V.le_of_mem_support_value p hp)
+      (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
+      (MemLp.of_bound
+        ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
+        V.valueBound (ae_of_all _ (V.value_le_valueBound p)))
+  have hint : ∀ p ∈ V.value.support, ∀ q ∈ V.value.support,
+      Integrable (fun ω => a p ω * a q ω) μ :=
+    fun p hp q hq => (ha_L2 p hp).integrable_mul (ha_L2 q hq)
+  calc ∫ ω, (itoSimple hBmeas V ω) ^ 2 ∂μ
+      = ∫ ω, ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω ∂μ := by
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        show itoSimple hBmeas V ω ^ 2
+          = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω
+        rw [show itoSimple hBmeas V ω = ∑ p ∈ V.value.support, a p ω from by
+              rw [itoSimple_apply]; rfl, sq, Finset.sum_mul_sum]
+    _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, ∫ ω, a p ω * a q ω ∂μ := by
+        rw [integral_finset_sum _ (fun p hp => integrable_finset_sum _ fun q hq => hint p hp q hq)]
+        exact Finset.sum_congr rfl fun p hp =>
+          integral_finset_sum _ (fun q hq => hint p hp q hq)
+    _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
+          (∫ ω, V.value p ω * V.value q ω ∂μ)
+            * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
+        refine Finset.sum_congr rfl fun p hp => Finset.sum_congr rfl fun q hq => ?_
+        exact ItoIsometryAdapted.rect_increment_pairing hBmeas
+          (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
+          (adaptedAt_of_measurable_natural hBmeas (V.measurable_value q))
+          (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
+          (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
+          (V.le_of_mem_support_value p hp) (V.le_of_mem_support_value q hq)
+
 end ItoIntegralL2
 end QuantFin
