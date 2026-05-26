@@ -13,8 +13,6 @@
         "chapter": 9,
         "reference": "Theorem 9.1.7",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Theorem 9.1.7: Novikov's condition. For constant \u03b8 on [0, T]:\n# E[exp((1/2) \u03b8\u00b2 T)] = exp(\u03b8\u00b2 T/2) < \u221e trivially (any T < \u221e).\n# Hence Z_t = exp(\u03b8 B_t - \u03b8\u00b2 t/2) is a martingale (already verified in Brownian benchmark).\n#\n# Verify Novikov holds for any constant \u03b8 and finite T, and that the Doleans-Dade\n# stochastic exponential equals 1 in expectation.\n\ntheta, T = sp.symbols('theta T', positive=True)\n\n# Novikov LHS: E[exp((1/2) \u03b8\u00b2 T)]\nnovikov_lhs = sp.exp(theta**2 * T / 2)\n# This is finite for any finite T\nfinite_check = (novikov_lhs.subs(T, 1) < sp.oo)\n\n# Z_t mean = 1 for all t (martingale property)\n# E[exp(\u03b8 B_t)] * exp(-\u03b8\u00b2 t / 2) = exp(\u03b8\u00b2 t / 2) * exp(-\u03b8\u00b2 t / 2) = 1\nt = sp.Symbol('t', positive=True)\nE_Z_t = sp.exp(theta**2 * t / 2) * sp.exp(-theta**2 * t / 2)\nverified = (sp.simplify(E_Z_t - 1) == 0) and bool(finite_check)\n\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'Novikov LHS (T=1)': str(novikov_lhs.subs(T, 1)),\n    'E[Z_t]': str(sp.simplify(E_Z_t)),\n    'note': 'Constant \u03b8 trivially satisfies Novikov; full theorem extends to L\u00b2_loc[0,T]'\n}"
         },
@@ -35,8 +33,6 @@
         "chapter": 9,
         "reference": "Theorem 9.1.8",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Theorem 9.1.8 (Girsanov, 1st version).\n# Verify the moment-generating function of B^\u03b8_t under P^\u03b8:\n# E^\u03b8[exp(\u03bb B^\u03b8_t)] = E[Z_t exp(\u03bb (B_t - \u03b8 t))]\n#                  = E[exp(\u03b8 B_t - \u03b8\u00b2 t/2 + \u03bb B_t - \u03bb \u03b8 t)]\n#                  = exp(-\u03b8\u00b2 t/2 - \u03bb \u03b8 t) E[exp((\u03b8+\u03bb) B_t)]\n#                  = exp(-\u03b8\u00b2 t/2 - \u03bb \u03b8 t + (\u03b8+\u03bb)\u00b2 t / 2)\n#                  = exp(\u03bb\u00b2 t / 2)\n# = MGF of N(0, t) \u21d2 B^\u03b8_t ~ N(0, t) under P^\u03b8. \u2713\n\ntheta, lam, t = sp.symbols('theta lambda t', real=True)\n# Joint exponent\nexponent = (theta * 0 - theta**2 * t / 2) + lam * (0 - theta * t) + (theta + lam)**2 * t / 2\n# B_0 = 0 substituted; this is the log of E^\u03b8[exp(\u03bb B^\u03b8_t)]\nexpected_log_mgf = lam**2 * t / 2\n\ndiff = sp.simplify(exponent - expected_log_mgf)\n\nresult = {\n    'verified': diff == 0,\n    'mode': 'symbolic',\n    'log MGF of B^\u03b8_t under P^\u03b8': str(sp.expand(exponent)),\n    'log MGF of N(0, t)': str(expected_log_mgf),\n    'diff': str(diff)\n}"
         },
@@ -57,8 +53,6 @@
         "chapter": 9,
         "reference": "Section 9.4 (BS pricing)",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Black-Scholes formula: verify the put-call parity at maturity.\n# At T: C(T) = max(S_T - K, 0), P(T) = max(K - S_T, 0).\n# Put-call parity: C - P = S - K e^{-r(T-t)}.\n# Verify both at maturity (t = T) and away from maturity.\n\nS, K, r, sig, T, t = sp.symbols('S K r sigma T t', positive=True)\ntau = T - t\n\nN = lambda x: (1 + sp.erf(x / sp.sqrt(2))) / 2\nd1 = (sp.log(S/K) + (r + sig**2 / 2) * tau) / (sig * sp.sqrt(tau))\nd2 = d1 - sig * sp.sqrt(tau)\n\nC = S * N(d1) - K * sp.exp(-r * tau) * N(d2)\nP = K * sp.exp(-r * tau) * N(-d2) - S * N(-d1)\n\n# Put-call parity: C - P = S - K exp(-r\u03c4)\nCP_diff = sp.simplify(C - P)\nexpected = S - K * sp.exp(-r * tau)\nparity_residual = sp.simplify(CP_diff - expected)\n\nresult = {\n    'verified': parity_residual == 0,\n    'mode': 'symbolic',\n    'put-call parity residual': str(parity_residual),\n    'note': 'C - P = S - K exp(-r\u03c4) verified symbolically'\n}"
         },
@@ -79,8 +73,6 @@
         "chapter": 9,
         "reference": "Corollary 9.3.4",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Corollary 9.3.4: every L\u00b2 BM-martingale equals a stochastic integral.\n# Verify the structural identity for two examples:\n# (a) M_t = B_t: trivially M_t = \u222b\u2080\u1d57 1 dB_s, so \u03d5_s = 1.\n# (b) M_t = B_t\u00b2 - t: by It\u00f4, d(B_t\u00b2 - t) = 2 B_t dB_t, so \u03d5_s = 2 B_s.\n# Both have \u222b\u2080\u1d57 E[\u03d5_s\u00b2] ds < \u221e for finite T.\n\nt = sp.Symbol('t', positive=True)\nB_s = sp.Symbol('B_s', real=True)\n\n# Example (a): \u03d5 \u2261 1; \u27e8M\u27e9_t = t.\nphi_a_squared_integrand = 1\nQV_a = sp.integrate(phi_a_squared_integrand, (sp.Symbol('s'), 0, t))\nQV_a_expected = t\nverified_a = sp.simplify(QV_a - QV_a_expected) == 0\n\n# Example (b): M_t = B_t\u00b2 - t, \u03d5_s = 2 B_s.\n# \u27e8M\u27e9_t = \u222b\u2080\u1d57 E[(2 B_s)\u00b2] ds = \u222b\u2080\u1d57 4 s ds = 2 t\u00b2.\n# E[(B_s)\u00b2] = s.\nQV_b = sp.integrate(4 * sp.Symbol('s'), (sp.Symbol('s'), 0, t))\nQV_b_expected = 2 * t**2\nverified_b = sp.simplify(QV_b - QV_b_expected) == 0\n\nresult = {\n    'verified': verified_a and verified_b,\n    'mode': 'symbolic',\n    'QV(B)': str(QV_a),\n    'QV(B\u00b2-t) via E[\u03d5\u00b2]': str(QV_b),\n    'note': '\u03c6 exists and is L\u00b2 for both examples; full MRT requires It\u00f4 isometry density argument'\n}"
         },

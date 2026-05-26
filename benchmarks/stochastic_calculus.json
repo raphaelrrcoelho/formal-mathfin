@@ -53,8 +53,6 @@
         "chapter": 7,
         "reference": "Theorem 7.1.1",
         "difficulty": "intermediate",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Itô's formula verification for f(x) = x^2\n# f(B_t) = B_t^2 = B_0^2 + 2*int_0^t B_s dB_s + (1/2)*2*t\n# => B_t^2 = 2*int_0^t B_s dB_s + t\n# Equivalently: int_0^t B_s dB_s = (B_t^2 - t) / 2\n\nx = sp.Symbol('x')\nf = x**2\nf_prime = sp.diff(f, x)   # 2x\nf_double_prime = sp.diff(f, x, 2)  # 2\n\n# Check that f''(x)/2 = 1 (the drift coefficient)\nhalf_f_pp = f_double_prime / 2\nverified = sp.simplify(half_f_pp - 1) == 0\n\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'f': str(f),\n    'f_prime': str(f_prime),\n    'f_double_prime': str(f_double_prime),\n    'drift_coeff': str(half_f_pp)\n}"
         },
@@ -75,8 +73,6 @@
         "chapter": 9,
         "reference": "Theorem 9.1.8",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Girsanov: verify Radon-Nikodym derivative structure\n# Z_t = exp(theta*B_t - theta^2*t/2) is a martingale (for constant theta)\ntheta, t = sp.symbols('theta t', real=True)\n\n# E[Z_t] should equal Z_0 = 1 for Z_t to be a martingale\n# Using MGF of N(0,t): E[exp(theta*B_t)] = exp(theta^2*t/2)\nZ_t_expectation = sp.exp(theta**2 * t / 2) * sp.exp(-theta**2 * t / 2)\nverified = sp.simplify(Z_t_expectation - 1) == 0\n\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'note': 'E[Z_t] = 1 confirms Z_t is a martingale (Novikov condition satisfied for constant theta)'\n}"
         },
@@ -97,8 +93,6 @@
         "chapter": 7,
         "reference": "Theorem 7.1.2",
         "difficulty": "intermediate",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Theorem 7.1.2: time-dependent Itô formula.\n# Verify via two consistency checks:\n# (a) Martingale criterion: if ∂_t f + (1/2) ∂_xx f = 0, then f(t, B_t) is a martingale.\n#     Test on f(t,x) = exp(α x - α² t / 2) (Wald exponential).\n# (b) Compute E[f(t, B_t)] for f(t,x) = t · x² and compare against the formula.\n#     Predicted: ∫₀ᵗ E[B_s² + s] ds = ∫₀ᵗ 2s ds = t².\n#     Direct: E[t · B_t²] = t · t = t². ✓\n\nt, x, alpha = sp.symbols('t x alpha', real=True)\n\n# (a) Wald exponential martingale criterion\nf_wald = sp.exp(alpha*x - alpha**2*t/2)\nL_wald = sp.diff(f_wald, t) + sp.Rational(1,2) * sp.diff(f_wald, x, 2)\nmartingale_ok = sp.simplify(L_wald) == 0\n\n# (b) f(t,x) = t * x²\nf = t * x**2\ndft = sp.diff(f, t)        # x²\ndfx = sp.diff(f, x)        # 2 t x\ndfxx = sp.diff(f, x, 2)    # 2 t\n\n# Drift integrand at (s, B_s): ∂_t f + (1/2) ∂_xx f = B_s² + s\ns = sp.Symbol('s', positive=True)\nB_s = sp.Symbol('B_s', real=True)\ndrift_integrand_at_s = dft.subs({t: s, x: B_s}) + sp.Rational(1,2) * dfxx.subs({t: s, x: B_s})\nE_drift = sp.integrate(drift_integrand_at_s.subs(B_s**2, s), (s, 0, t))  # E[B_s²] = s\n\n# Direct: E[t * B_t²] = t * t\nE_direct = t * t\n\nverified = martingale_ok and (sp.simplify(E_drift - E_direct) == 0)\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'wald_generator': str(L_wald),\n    'E_via_formula': str(E_drift),\n    'E_direct': str(E_direct)\n}"
         },
@@ -119,8 +113,6 @@
         "chapter": 7,
         "reference": "Theorem 7.5.2",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Theorem 7.5.2: 2D Itô formula.\n# Verify via the product rule for correlated BMs B and W with d<B,W>_t = rho dt.\n# d(B_t W_t) = B_t dW + W_t dB + d<B,W> = B_t dW + W_t dB + rho dt.\n#\n# Take expectations: dE[B_t W_t] = rho dt ⇒ E[B_t W_t] = rho * t.\n# (Initial: E[B_0 W_0] = 0.)\n#\n# Cross-check via direct definition: Cov(B_t, W_t) = rho * t (correlated BMs by construction).\n\nt, rho = sp.symbols('t rho', real=True)\n\n# Direct: Cov(B_t, W_t) = rho * t for correlated BMs (assuming zero means)\nE_BW_direct = rho * t\n\n# Via 2D Itô: d(B W) = B dW + W dB + rho dt\n# Taking expectations: E[B dW] = E[W dB] = 0 (Itô integral is martingale, mean 0)\n# So d/dt E[B W] = rho ⇒ E[B_t W_t] = rho * t (with E[B_0 W_0] = 0)\nE_BW_via_ito = sp.integrate(rho, (t, 0, t))\n\nverified = sp.simplify(E_BW_via_ito - E_BW_direct) == 0\n\n# Also verify: f(x,y) = x*y has ∂_xy f = 1, which is the cross-term coefficient.\nx, y = sp.symbols('x y', real=True)\nf = x * y\nfxy = sp.diff(f, x, y)\ncoefficient_check = sp.simplify(fxy - 1) == 0\n\nresult = {\n    'verified': verified and coefficient_check,\n    'mode': 'symbolic',\n    'E[B_t W_t] via 2D Itô': str(E_BW_via_ito),\n    'E[B_t W_t] direct': str(E_BW_direct),\n    'd^2(xy)/dxdy': str(fxy)\n}"
         },
@@ -141,8 +133,6 @@
         "chapter": 7,
         "reference": "Theorem 7.4.5",
         "difficulty": "intermediate",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Theorem 7.4.5: <X>_t = int_0^t sigma(s)^2 ds for an Ito process X = X_0 + int mu ds + int sigma dB.\n# Verify: drift dt-term has finite variation ⇒ contributes 0 to QV.\n# QV is built up only from the dB integrand.\n#\n# Concrete check: X_t = mu*t + sigma*B_t (constants).\n# Direct: <X>_t = sigma^2 * t (since <B>_t = t and Var contributions of drift are 0).\n# Formula: int_0^t sigma^2 ds = sigma^2 * t. ✓\n\nt, mu, sigma = sp.symbols('t mu sigma', positive=True)\nQV_formula = sp.integrate(sigma**2, (sp.Symbol('s'), 0, t))\nQV_direct = sigma**2 * t\nverified = sp.simplify(QV_formula - QV_direct) == 0\n\n# Time-dependent sigma: sigma(s) = s\nsigma_fn = sp.Symbol('s')\nQV_time_dep = sp.integrate(sigma_fn**2, (sigma_fn, 0, t))  # = t³/3\nverified_td = sp.simplify(QV_time_dep - t**3 / 3) == 0\n\nresult = {\n    'verified': verified and verified_td,\n    'mode': 'symbolic',\n    'QV_constant_sigma': str(QV_formula),\n    'QV_sigma_eq_s': str(QV_time_dep)\n}"
         },
@@ -163,8 +153,6 @@
         "chapter": 9,
         "reference": "Theorem 9.1.1",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Theorem 9.1.1 (Lévy's characterization).\n# Sanity check: take X = B (true BM) and verify all hypotheses are satisfied.\n# (1) Continuous paths: yes for BM.\n# (2) X_0 = 0: yes.\n# (3) X is a martingale: E[B_t | F_s] = B_s.\n# (4) <X>_t = t: by Itô, d(B_t²) = 2 B_t dB_t + dt, so <B>_t = t.\n#\n# Stronger: verify the characterization implies E[exp(i u X_t) | F_s] = exp(i u X_s - u²(t-s)/2).\n# (Characteristic function of N(X_s, t-s).)\n# This identity is what proves the converse — increments are N(0, t-s) and independent of past.\n\nt, s, u = sp.symbols('t s u', real=True)\nX_s = sp.Symbol('X_s', real=True)\n\n# Characteristic function of normal increment X_t - X_s ~ N(0, t-s)\n# E[exp(i u (X_t - X_s)) | F_s] = exp(-u²(t-s)/2)\nchar_inc = sp.exp(-u**2 * (t - s) / 2)\nE_chf = sp.exp(sp.I * u * X_s) * char_inc\nexpected = sp.exp(sp.I * u * X_s - u**2 * (t - s) / 2)\n\ndiff = sp.simplify(E_chf / expected - 1)\n\nresult = {\n    'verified': diff == 0,\n    'mode': 'symbolic',\n    'identity_residual': str(diff),\n    'note': 'Lévy: continuous martingale with <X>_t = t ⇒ X is Brownian motion'\n}"
         },
@@ -205,8 +193,6 @@
         "chapter": 8,
         "reference": "Theorem 8.2.5",
         "difficulty": "advanced",
-        "formal_status": "lean_symbolic_core",
-        "formal_scope": "Formal Lean proof of the symbolic/algebraic proof obligation currently checked by SymPy; not a full stochastic-integral formalization of the textbook theorem.",
         "cas_reference": {
           "sympy": "import sympy as sp\n\n# Theorem 8.2.5: Verify existence/uniqueness on a concrete linear SDE,\n# Geometric Brownian Motion (GBM): dX = a X dt + sigma X dB.\n# Coefficients mu(x) = a*x, sigma(x) = sigma*x are Lipschitz (with constant max(|a|, sigma)).\n# Closed-form solution: X_t = X_0 exp((a - sigma²/2) t + sigma B_t).\n# Verify by Ito's formula: f(t, B) = X_0 exp((a - sigma²/2) t + sigma B).\n# df = ∂_t f dt + ∂_B f dB + (1/2) ∂_BB f dt\n#    = (a - sigma²/2) f dt + sigma f dB + (1/2) sigma² f dt\n#    = a f dt + sigma f dB.\n# So df = a X dt + sigma X dB. ✓ (existence)\n# Uniqueness follows from Lipschitz + Gronwall.\n\nt, B, a, sigma, X0 = sp.symbols('t B a sigma X0', positive=True)\nf = X0 * sp.exp((a - sigma**2 / 2) * t + sigma * B)\n\n# Drift term from Ito\ndrift = sp.diff(f, t) + sp.Rational(1, 2) * sp.diff(f, B, 2)\ndrift_target = a * f\ndrift_ok = sp.simplify(drift - drift_target) == 0\n\n# Diffusion term\ndiff = sp.diff(f, B)\ndiff_target = sigma * f\ndiff_ok = sp.simplify(diff - diff_target) == 0\n\n# Initial condition\ninit_ok = sp.simplify(f.subs([(t, 0), (B, 0)]) - X0) == 0\n\n# Lipschitz check (locally, on bounded set [-M, M]):\n# |mu(x) - mu(y)| = |a||x-y|, |sigma(x) - sigma(y)| = |sigma||x-y|.\n# Both have linear growth: |mu(x)| <= |a||x|, |sigma(x)| <= sigma |x|.\n# Conditions of Theorem 8.2.5 satisfied.\n\nresult = {\n    'verified': drift_ok and diff_ok and init_ok,\n    'mode': 'symbolic',\n    'drift_residual': str(sp.simplify(drift - drift_target)),\n    'diffusion_residual': str(sp.simplify(diff - diff_target)),\n    'note': 'GBM closed form satisfies SDE; mu, sigma linear ⇒ Lipschitz + linear growth ⇒ unique strong solution'\n}"
         },
