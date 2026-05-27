@@ -2,6 +2,7 @@
 
 [![build](https://github.com/raphaelrrcoelho/automated_proofs_quantfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/automated_proofs_quantfin/actions/workflows/build.yml)
 [![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](QuantFin/AxiomAudit.lean)
+[![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
 [![Lean](https://img.shields.io/badge/Lean-4.30.0--rc2-blue)](lean-toolchain)
 [![license](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
 
@@ -98,6 +99,7 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 | File | Contents |
 |---|---|
+| [`docs/blueprint.md`](docs/blueprint.md) | **The deductive spine** — a dependency graph from Brownian motion to Black–Scholes (the risk-neutral measure *derived*, the Itô gate marked), each node linked to its Lean proof. |
 | [`docs/coverage.md`](docs/coverage.md) | Per-theorem audit: faithfulness status (`full` / `library_wrapper` / `reduced_core` / `placeholder`), verification evidence, claim-wording guidance. |
 | [`docs/architecture.md`](docs/architecture.md) | Design principles: structural-principle modules, the three-tier honesty model, the Foundations → pricing bridge methodology. |
 | [`docs/leaps.md`](docs/leaps.md) | Static Girsanov (EMM derived), the genesis cascade, and Margrabe's multivariate exchange option — the deductive arc that makes the risk-neutral measure a theorem. |
