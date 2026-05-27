@@ -96,6 +96,18 @@ theorem integral_increment_centered_mean {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t�
   rw [hmax] at hcomp
   exact hcomp
 
+/-- A Brownian increment has finite fourth moment (`MemLp 4`) — a centered Gaussian has all
+moments. Needed for the `L²`-integrability of products of squared increments in the
+quadratic-variation assembly. -/
+theorem memLp_increment_four (t₀ t₁ : ℝ≥0) :
+    MemLp (fun ω => B t₁ ω - B t₀ ω) 4 μ := by
+  have hmap : MemLp (id : ℝ → ℝ) 4 (Measure.map (fun ω => B t₁ ω - B t₀ ω) μ) := by
+    rw [show Measure.map (fun ω => B t₁ ω - B t₀ ω) μ
+          = gaussianReal 0 (max (t₁ - t₀) (t₀ - t₁)) from (hB.hasLaw_sub t₁ t₀).map_eq]
+    exact memLp_id_gaussianReal (μ := 0) 4
+  exact (memLp_map_measure_iff measurable_id.aestronglyMeasurable
+    (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hmap
+
 /-- **Pairwise orthogonality of centered squared increments** (the vanishing cross terms).
 For disjoint ordered intervals `a ≤ b ≤ c ≤ d`,
 `E[((ΔB_{a,b})² − (b−a)) · ((ΔB_{c,d})² − (d−c))] = 0`. The two centered squares are functions
@@ -117,6 +129,108 @@ theorem integral_increment_sq_centered_cross (hBmeas : ∀ t, Measurable (B t))
   have hYm : Measurable (fun ω => (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) := by fun_prop
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
       integral_increment_centered_mean hcd, mul_zero]
+
+/-- A centered squared Brownian increment is in `L²` (`Yₖ = (ΔB)² − Δt`): the squared
+increment is `L²` since the increment is `L⁴`, and a constant is `L²` on a probability space. -/
+theorem memLp_increment_sq_centered_two (t₀ t₁ : ℝ≥0) (r : ℝ) :
+    MemLp (fun ω => (B t₁ ω - B t₀ ω) ^ 2 - r) 2 μ := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  haveI : ENNReal.HolderTriple 4 4 2 := ⟨by
+    have h2 : (2 : ℝ≥0∞) ≠ 0 := by norm_num
+    have ht : (2 : ℝ≥0∞) ≠ ∞ := ENNReal.ofNat_ne_top
+    rw [show (4 : ℝ≥0∞) = 2 * 2 from by norm_num,
+      ENNReal.mul_inv (Or.inl h2) (Or.inl ht), ← two_mul, ← mul_assoc,
+      ENNReal.mul_inv_cancel h2 ht, one_mul]⟩
+  have hmul : MemLp (fun ω => (B t₁ ω - B t₀ ω) * (B t₁ ω - B t₀ ω)) 2 μ :=
+    (memLp_increment_four t₀ t₁).mul (memLp_increment_four t₀ t₁)
+  have hsq : MemLp (fun ω => (B t₁ ω - B t₀ ω) ^ 2) 2 μ := by
+    simpa only [← pow_two] using hmul
+  exact hsq.sub (memLp_const r)
+
+/-- **Quadratic variation of Brownian motion, L² form** (Saporito Theorem 6.1.1, the strong
+form). Along any monotone partition `0 = s₀ ≤ s₁ ≤ ⋯` of `[0, sₙ]`, the squared-increment sum
+converges to `sₙ` in mean square, with the *exact* rate
+
+  `E[(∑ₖ (B_{sₖ₊₁} − B_{sₖ})² − sₙ)²] = ∑ₖ 2(sₖ₊₁ − sₖ)²`.
+
+This is the Pythagorean identity for the centered squared increments `Yₖ = (ΔBₖ)² − Δsₖ`:
+they are pairwise orthogonal (`integral_increment_sq_centered_cross`, weak Markov), so the
+mean-square error is the sum of their individual variances `E[Yₖ²] = 2(Δsₖ)²`
+(`integral_increment_sq_centered`, the Gaussian kurtosis). For the uniform partition
+`sₖ = kt/n` the right side is `2t²/n → 0` — the precise reason `(dB)² = dt` and Itô's lemma
+carries a second-order term. -/
+theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
+    {s : ℕ → ℝ≥0} (hmono : Monotone s) (hs0 : s 0 = 0) (n : ℕ) :
+    ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
+      = ∑ k ∈ Finset.range n, 2 * ((s (k + 1) : ℝ) - s k) ^ 2 := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  classical
+  set Y : ℕ → Ω → ℝ :=
+    fun k ω => (B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k) with hY
+  have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k => memLp_increment_sq_centered_two _ _ _
+  have hint : ∀ k l, Integrable (fun ω => Y k ω * Y l ω) μ :=
+    fun k l => (hYL2 k).integrable_mul (hYL2 l)
+  -- Telescoping: `∑ Δsₖ = sₙ − s₀ = sₙ`, so `∑ (ΔBₖ)² − sₙ = ∑ Yₖ`.
+  have htel : ∑ k ∈ Finset.range n, ((s (k + 1) : ℝ) - s k) = (s n : ℝ) := by
+    rw [Finset.sum_range_sub (fun k => (s k : ℝ))]; simp [hs0]
+  have hrw : ∀ ω, ∑ k ∈ Finset.range n, Y k ω
+      = (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2) - (s n : ℝ) := by
+    intro ω; simp only [hY, Finset.sum_sub_distrib, htel]
+  -- Off-diagonal terms vanish (orthogonality); diagonal terms give `2(Δsₖ)²`.
+  have hcross : ∀ k ∈ Finset.range n, ∀ l ∈ Finset.range n, l ≠ k →
+      ∫ ω, Y k ω * Y l ω ∂μ = 0 := by
+    intro k _ l _ hlk
+    rcases lt_or_gt_of_ne hlk with hlt | hgt
+    · -- l < k
+      rw [show (fun ω => Y k ω * Y l ω) = fun ω => Y l ω * Y k ω from funext fun ω => mul_comm _ _]
+      exact integral_increment_sq_centered_cross hBmeas (hmono (Nat.le_succ l))
+        (hmono (Nat.succ_le_of_lt hlt)) (hmono (Nat.le_succ k))
+    · -- k < l
+      exact integral_increment_sq_centered_cross hBmeas (hmono (Nat.le_succ k))
+        (hmono (Nat.succ_le_of_lt hgt)) (hmono (Nat.le_succ l))
+  calc ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
+      = ∫ ω, (∑ k ∈ Finset.range n, Y k ω) ^ 2 ∂μ := by
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        show (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2
+          = (∑ k ∈ Finset.range n, Y k ω) ^ 2
+        rw [hrw ω]
+    _ = ∫ ω, ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, Y k ω * Y l ω ∂μ := by
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        show (∑ k ∈ Finset.range n, Y k ω) ^ 2
+          = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, Y k ω * Y l ω
+        rw [sq, Finset.sum_mul_sum]
+    _ = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, ∫ ω, Y k ω * Y l ω ∂μ := by
+        rw [integral_finsetSum _ fun k _ => integrable_finsetSum _ fun l _ => hint k l]
+        exact Finset.sum_congr rfl fun k _ => integral_finsetSum _ fun l _ => hint k l
+    _ = ∑ k ∈ Finset.range n, 2 * ((s (k + 1) : ℝ) - s k) ^ 2 := by
+        refine Finset.sum_congr rfl fun k hk => ?_
+        rw [Finset.sum_eq_single k (fun l hl hlk => hcross k hk l hl hlk)
+          (fun hk' => absurd hk hk')]
+        show ∫ ω, Y k ω * Y k ω ∂μ = 2 * ((s (k + 1) : ℝ) - s k) ^ 2
+        rw [show (fun ω => Y k ω * Y k ω)
+              = fun ω => ((B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k)) ^ 2
+            from funext fun ω => by rw [hY]; ring]
+        exact integral_increment_sq_centered (hmono (Nat.le_succ k))
+
+/-- **Quadratic variation converges as the mesh shrinks.** If every gap `sₖ₊₁ − sₖ ≤ δ`, the
+mean-square error of the squared-increment sum is at most `2δ·sₙ`. Hence along any sequence of
+partitions of `[0, T]` with mesh `→ 0`, `∑ₖ (B_{sₖ₊₁} − B_{sₖ})² → T` in `L²` — Brownian
+motion has quadratic variation `T`. (From the exact identity `∑ 2(Δsₖ)² ≤ 2δ·∑ Δsₖ = 2δ·sₙ`.) -/
+theorem sum_increment_sq_sub_sq_le (hBmeas : ∀ t, Measurable (B t))
+    {s : ℕ → ℝ≥0} (hmono : Monotone s) (hs0 : s 0 = 0) (n : ℕ) {δ : ℝ}
+    (hδ : ∀ k ∈ Finset.range n, (s (k + 1) : ℝ) - s k ≤ δ) :
+    ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
+      ≤ 2 * δ * (s n : ℝ) := by
+  rw [sum_increment_sq_sub_sq_integral hBmeas hmono hs0 n]
+  have htel : ∑ k ∈ Finset.range n, ((s (k + 1) : ℝ) - s k) = (s n : ℝ) := by
+    rw [Finset.sum_range_sub (fun k => (s k : ℝ))]; simp [hs0]
+  calc ∑ k ∈ Finset.range n, 2 * ((s (k + 1) : ℝ) - s k) ^ 2
+      ≤ ∑ k ∈ Finset.range n, 2 * δ * ((s (k + 1) : ℝ) - s k) := by
+        refine Finset.sum_le_sum fun k hk => ?_
+        have hΔ0 : 0 ≤ (s (k + 1) : ℝ) - s k :=
+          sub_nonneg.mpr (NNReal.coe_le_coe.mpr (hmono (Nat.le_succ k)))
+        nlinarith [hδ k hk, hΔ0]
+    _ = 2 * δ * (s n : ℝ) := by rw [← Finset.mul_sum, htel]
 
 end QuadraticVariationL2
 end QuantFin
