@@ -169,6 +169,10 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.FeynmanKacHeatEquation.expectation_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.FeynmanKacHeatEquation.expectation_ito
 
+/-- info: 'QuantFin.FeynmanKacHeatEquation.expectation_ito_isPreBrownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms QuantFin.FeynmanKacHeatEquation.expectation_ito_isPreBrownian
+
 /-! ## Adapted Itô isometry (increment-independence cornerstone) -/
 
 /-- info: 'QuantFin.ItoIsometryAdapted.integral_adapted_mul_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/

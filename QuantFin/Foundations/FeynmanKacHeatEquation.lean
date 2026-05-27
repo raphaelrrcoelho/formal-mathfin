@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import BrownianMotion.Gaussian.BrownianMotion
 
 /-!
 # Feynman–Kac for the heat equation
@@ -562,6 +563,40 @@ private lemma integral_shift_eq_feynmanU (g : ℝ → ℝ) (t x : ℝ) :
 
 variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
 
+/-- **Core transfer.** If `B_t` has law `N(0, t)` (`Measure.map (B t) μ = gaussianReal 0 t.toNNReal`),
+the heat-kernel form `feynmanU g t x` equals the expectation `E[g(x + B_t)]`. Factored out of
+`feynmanU_eq_expectation` so the same transfer serves both the increment-hypothesis bundle and the
+`IsPreBrownian` marginal law. -/
+theorem feynmanU_eq_integral_of_map
+    {B : ℝ → Ω → ℝ} {g : ℝ → ℝ} {t : ℝ}
+    (h_aem : AEMeasurable (B t) μ)
+    (h_map : Measure.map (B t) μ = gaussianReal 0 t.toNNReal)
+    (hg_cont : Continuous g) (ht : 0 < t) (x : ℝ) :
+    feynmanU g t x = ∫ ω, g (x + B t ω) ∂μ := by
+  have h_eg_cont : Continuous (fun y => g (x + y)) :=
+    hg_cont.comp (continuous_const.add continuous_id)
+  have h_eg_smeas_map : AEStronglyMeasurable (fun y => g (x + y)) (Measure.map (B t) μ) :=
+    h_eg_cont.aestronglyMeasurable
+  have h_expect_eq_gauss :
+      ∫ ω, g (x + B t ω) ∂μ = ∫ y, g (x + y) ∂(gaussianReal 0 t.toNNReal) := by
+    have h_map' : ∫ y, g (x + y) ∂(Measure.map (B t) μ) = ∫ ω, g (x + B t ω) ∂μ :=
+      integral_map h_aem h_eg_smeas_map
+    rw [← h_map', h_map]
+  have h_tN_ne : (t.toNNReal : ℝ≥0) ≠ 0 := (Real.toNNReal_pos.mpr ht).ne'
+  have h_gauss_eq_pdf :
+      ∫ y, g (x + y) ∂(gaussianReal 0 t.toNNReal) =
+        ∫ y, gaussianPDFReal 0 t.toNNReal y • g (x + y) ∂volume :=
+    integral_gaussianReal_eq_integral_smul (μ := 0) (v := t.toNNReal)
+      (f := fun y => g (x + y)) h_tN_ne
+  have h_pdf_eq_heat : ∀ y,
+      gaussianPDFReal 0 t.toNNReal y • g (x + y) = g (x + y) * heatKernel t y := by
+    intro y
+    rw [← heatKernel_eq_gaussianPDFReal ht y, smul_eq_mul, mul_comm]
+  rw [h_expect_eq_gauss, h_gauss_eq_pdf,
+    show (fun y => gaussianPDFReal 0 t.toNNReal y • g (x + y))
+        = (fun y => g (x + y) * heatKernel t y) from funext h_pdf_eq_heat]
+  exact (integral_shift_eq_feynmanU g t x).symm
+
 /-- For `t > 0`, the heat-kernel form `feynmanU g t x` equals the Feynman–Kac
 expectation `E[g(x + B_t)]`, assuming:
 * `B 0 = 0` a.s.
@@ -591,34 +626,8 @@ theorem feynmanU_eq_expectation
   have h_map_Bt : Measure.map (B t) μ = gaussianReal 0 t.toNNReal := by
     rw [← hv_t, ← h_map_diff]
     exact (Measure.map_congr h_diff_eq).symm
-  -- Step 2: Transfer the expectation to a Lebesgue integral via Measure.map.
-  have h_aem_Bt : AEMeasurable (B t) μ := (hB_meas t).aemeasurable
-  have h_eg_cont : Continuous (fun y => g (x + y)) :=
-    hg_cont.comp (continuous_const.add continuous_id)
-  have h_eg_smeas_map : AEStronglyMeasurable (fun y => g (x + y)) (Measure.map (B t) μ) :=
-    h_eg_cont.aestronglyMeasurable
-  have h_expect_eq_gauss :
-      ∫ ω, g (x + B t ω) ∂μ = ∫ y, g (x + y) ∂(gaussianReal 0 t.toNNReal) := by
-    have h_map : ∫ y, g (x + y) ∂(Measure.map (B t) μ) = ∫ ω, g (x + B t ω) ∂μ :=
-      integral_map h_aem_Bt h_eg_smeas_map
-    rw [← h_map, h_map_Bt]
-  -- Step 3: Convert gaussianReal integral to Lebesgue via gaussianPDFReal.
-  have h_tN_ne : (t.toNNReal : ℝ≥0) ≠ 0 := (Real.toNNReal_pos.mpr ht).ne'
-  have h_gauss_eq_pdf :
-      ∫ y, g (x + y) ∂(gaussianReal 0 t.toNNReal) =
-        ∫ y, gaussianPDFReal 0 t.toNNReal y • g (x + y) ∂volume :=
-    integral_gaussianReal_eq_integral_smul (μ := 0) (v := t.toNNReal)
-      (f := fun y => g (x + y)) h_tN_ne
-  -- Step 4: Replace gaussianPDFReal with heatKernel.
-  have h_pdf_eq_heat : ∀ y,
-      gaussianPDFReal 0 t.toNNReal y • g (x + y) = g (x + y) * heatKernel t y := by
-    intro y
-    rw [← heatKernel_eq_gaussianPDFReal ht y, smul_eq_mul, mul_comm]
-  rw [h_expect_eq_gauss, h_gauss_eq_pdf,
-    show (fun y => gaussianPDFReal 0 t.toNNReal y • g (x + y))
-        = (fun y => g (x + y) * heatKernel t y) from funext h_pdf_eq_heat]
-  -- Step 5: Apply the shift identity to fold back to feynmanU.
-  exact (integral_shift_eq_feynmanU g t x).symm
+  -- Steps 2–5 are the core transfer, now factored out:
+  exact feynmanU_eq_integral_of_map (hB_meas t).aemeasurable h_map_Bt hg_cont ht x
 
 /-- The boundary condition: at `t = 0`, the Feynman-Kac expectation equals `g(x)`
 (since `B 0 = 0` a.s. and `μ` is a probability measure). -/
@@ -663,6 +672,35 @@ theorem expectation_ito
   refine intervalIntegral.integral_congr_ae (ae_of_all _ fun s hs => ?_)
   rw [Set.uIoc_of_le ht.le] at hs
   show (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume = (1 / 2) * ∫ ω, f'' (B s ω) ∂μ
+  rw [hbridge f'' hf''c hs.1]
+
+/-- **Itô's formula in expectation for a pre-Brownian motion** — the repo-standard `IsPreBrownian`
+(Degenne) reading of `expectation_ito`. For `f ∈ C²_b` and `t > 0`,
+`E[f(X_t)] = f(0) + ½·∫₀ᵗ E[f″(X_s)] ds`. The increment-law hypotheses are discharged from the
+marginal law `IsPreBrownian.hasLaw_eval` through the shared transfer `feynmanU_eq_integral_of_map`.
+(`X` is `ℝ≥0`-indexed; the `∫₀ᵗ` runs over real `s`, so `X` is read at `·.toNNReal`.) -/
+theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} [IsPreBrownian X μ]
+    {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
+    (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
+    (∫ ω, f (X t.toNNReal ω) ∂μ)
+      = f 0 + ∫ s in (0:ℝ)..t, (1 / 2) * ∫ ω, f'' (X s.toNNReal ω) ∂μ := by
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  have hbridge : ∀ (g : ℝ → ℝ), Continuous g → ∀ {r : ℝ}, 0 < r →
+      (∫ y, g y * heatKernel r y ∂volume) = ∫ ω, g (X r.toNNReal ω) ∂μ := by
+    intro g hgc r hr
+    have h1 := integral_shift_eq_feynmanU g r 0
+    simp only [zero_add] at h1
+    rw [h1, feynmanU_eq_integral_of_map (B := fun s => X s.toNNReal) (t := r)
+      (IsPreBrownian.aemeasurable (P := μ) r.toNNReal)
+      (IsPreBrownian.hasLaw_eval (P := μ) r.toNNReal).map_eq hgc hr 0]
+    simp only [zero_add]
+  rw [← hbridge f hfc ht, heatConvolution_eq_add_integral_deriv ht hf hf' hf''c hCf hCf' hCf'']
+  congr 1
+  refine intervalIntegral.integral_congr_ae (ae_of_all _ fun s hs => ?_)
+  rw [Set.uIoc_of_le ht.le] at hs
+  show (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume = (1 / 2) * ∫ ω, f'' (X s.toNNReal ω) ∂μ
   rw [hbridge f'' hf''c hs.1]
 
 end FeynmanKacHeatEquation
