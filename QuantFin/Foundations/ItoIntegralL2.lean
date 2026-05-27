@@ -43,7 +43,8 @@ this library: pricing here goes through static Gaussian methods (the static-Girs
 EMM, Black–Scholes, Margrabe — leaps 1–3 bypass the Itô integral entirely). A continuous Itô
 *integral* only pays off as the base of a full continuous-time Itô-*calculus* layer (Itô's
 lemma, SDEs, continuous Girsanov) — a separate, upstream-Mathlib-scale program. The isometry
-above is the self-contained cornerstone of the L²-adapted construction.
+above is the self-contained cornerstone of the L²-adapted construction. The verified `ν`
+midpoint and the full CLM resume-plan are preserved in `docs/ito-integral-clm-deferred.md`.
 -/
 
 namespace QuantFin
