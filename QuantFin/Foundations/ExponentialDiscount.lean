@@ -53,7 +53,7 @@ identity as `rate_eq_neg_log_deriv` below.
 
 namespace QuantFin
 
-open Real
+open Real MeasureTheory intervalIntegral
 
 /-- **The universal rate-recovery identity**: if `H` is differentiable at
 `t` with derivative `H'`, then `−d/dt log(exp(−H(t))) = H'(t)` at `t`.
@@ -89,5 +89,19 @@ of variance bounds. -/
 lemma discount_strictAnti {H₁ H₂ : ℝ} (h : H₁ < H₂) :
     Real.exp (-H₂) < Real.exp (-H₁) :=
   Real.exp_lt_exp.mpr (by linarith)
+
+/-- **Cumulative intensity** `∫₀ᵗ r(u) du` — the domain-neutral cumulative of a
+rate/intensity/force. The single definition that the actuarial cumulative force
+(`Mortality.forceCumulative`) and the credit cumulative hazard
+(`FixedIncome.HazardCurve.cumHazard`) share. -/
+noncomputable def cumulativeIntensity (r : ℝ → ℝ) (t : ℝ) : ℝ :=
+  ∫ u in (0:ℝ)..t, r u
+
+/-- **Survival from an intensity** `S(t) = exp(−∫₀ᵗ r(u) du)` — the domain-neutral
+survival function. The single definition shared by the actuarial survival
+(`Mortality.survivalFromForce`) and the credit survival
+(`FixedIncome.HazardCurve.hazardSurvival`): one calculus, two domains. -/
+noncomputable def survivalFromIntensity (r : ℝ → ℝ) (t : ℝ) : ℝ :=
+  Real.exp (-(cumulativeIntensity r t))
 
 end QuantFin

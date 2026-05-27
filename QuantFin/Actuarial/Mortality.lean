@@ -43,19 +43,20 @@ namespace QuantFin
 
 open Real MeasureTheory intervalIntegral
 
-/-- Cumulative force of mortality `∫₀^t μ(u) du`. -/
+/-- Cumulative force of mortality `∫₀^t μ(u) du` — the mortality instance of the
+shared `cumulativeIntensity` (`Foundations/ExponentialDiscount`). -/
 noncomputable def forceCumulative (μ : ℝ → ℝ) (t : ℝ) : ℝ :=
-  ∫ u in (0:ℝ)..t, μ u
+  cumulativeIntensity μ t
 
-/-- Survival probability from the force of mortality:
-`S(t) = exp(-∫₀^t μ(u) du)`. -/
+/-- Survival probability from the force of mortality `S(t) = exp(-∫₀^t μ(u) du)` —
+the mortality instance of the shared `survivalFromIntensity`. -/
 noncomputable def survivalFromForce (μ : ℝ → ℝ) (t : ℝ) : ℝ :=
-  Real.exp (-(forceCumulative μ t))
+  survivalFromIntensity μ t
 
 /-- `S(0) = 1` (no mortality before age `0`). -/
 lemma survivalFromForce_at_zero (μ : ℝ → ℝ) :
     survivalFromForce μ 0 = 1 := by
-  unfold survivalFromForce forceCumulative
+  unfold survivalFromForce survivalFromIntensity cumulativeIntensity
   rw [integral_same, neg_zero, Real.exp_zero]
 
 /-- Survival is strictly positive (an instance of the `ExponentialDiscount`
@@ -77,7 +78,8 @@ theorem force_eq_neg_log_deriv_survival {μ : ℝ → ℝ} (t : ℝ)
       (hμ.intervalIntegrable 0 t)
       (hμ.stronglyMeasurableAtFilter _ _)
       hμ.continuousAt
-  simpa only [survivalFromForce] using rate_eq_neg_log_deriv hH
+  simpa only [survivalFromForce, survivalFromIntensity, forceCumulative] using
+    rate_eq_neg_log_deriv hH
 
 /-- **Gompertz cumulative force** in closed form:
 `∫₀^t B · e^{c u} du = (B/c) · (e^{c t} − 1)` for `c ≠ 0`. -/

@@ -39,15 +39,17 @@ open Real MeasureTheory intervalIntegral
 /-- Cumulative hazard `H(t) = ∫₀^t h(u) du` for a deterministic hazard
 function `h`. -/
 noncomputable def cumHazard (h : ℝ → ℝ) (t : ℝ) : ℝ :=
-  ∫ u in (0:ℝ)..t, h u
+  cumulativeIntensity h t
 
-/-- Survival probability with time-varying hazard: `S(t) = exp(-H(t))`. -/
+/-- Survival probability with time-varying hazard `S(t) = exp(-H(t))` — the credit
+instance of the shared `survivalFromIntensity` (`Foundations/ExponentialDiscount`).
+The same calculus as `Actuarial.survivalFromForce`. -/
 noncomputable def hazardSurvival (h : ℝ → ℝ) (t : ℝ) : ℝ :=
-  Real.exp (-(cumHazard h t))
+  survivalFromIntensity h t
 
 /-- `S(0) = 1`. -/
 lemma hazardSurvival_at_zero (h : ℝ → ℝ) : hazardSurvival h 0 = 1 := by
-  unfold hazardSurvival cumHazard
+  unfold hazardSurvival survivalFromIntensity cumulativeIntensity
   rw [integral_same, neg_zero, Real.exp_zero]
 
 /-- Hazard survival is strictly positive (an instance of the
@@ -71,12 +73,12 @@ theorem hazard_eq_neg_log_deriv_survival {h : ℝ → ℝ} (t : ℝ)
       (hh.intervalIntegrable 0 t)
       (hh.stronglyMeasurableAtFilter _ _)
       hh.continuousAt
-  simpa only [hazardSurvival] using rate_eq_neg_log_deriv hH
+  simpa only [hazardSurvival, survivalFromIntensity, cumHazard] using rate_eq_neg_log_deriv hH
 
 /-- For a constant hazard `h_0`, `H(t) = h_0 · t`. -/
 lemma cumHazard_const (h_0 t : ℝ) :
     cumHazard (fun _ => h_0) t = h_0 * t := by
-  unfold cumHazard
+  unfold cumHazard cumulativeIntensity
   rw [intervalIntegral.integral_const]
   simp [mul_comm]
 
@@ -84,15 +86,15 @@ lemma cumHazard_const (h_0 t : ℝ) :
 under `t = 0` and constant hazard. -/
 lemma hazardSurvival_eq_const_survival (h_0 T : ℝ) :
     hazardSurvival (fun _ => h_0) T = survivalProbability h_0 0 T := by
-  unfold hazardSurvival survivalProbability
-  rw [cumHazard_const]
+  unfold hazardSurvival survivalFromIntensity survivalProbability
+  rw [show cumulativeIntensity (fun _ => h_0) T = h_0 * T from cumHazard_const h_0 T]
   congr 1; ring
 
 /-- **Credit spread as time-averaged hazard**: for `T > 0`,
 `c(T) = -log(S(T)) / T = H(T) / T = (1/T) · ∫₀^T h(u) du`. -/
 lemma creditSpread_eq_time_avg_hazard {h : ℝ → ℝ} {T : ℝ} (_hT : 0 < T) :
     -Real.log (hazardSurvival h T) / T = cumHazard h T / T := by
-  unfold hazardSurvival
+  unfold hazardSurvival survivalFromIntensity cumHazard
   rw [Real.log_exp, neg_neg]
 
 end QuantFin
