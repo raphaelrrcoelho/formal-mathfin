@@ -9,44 +9,41 @@ import BrownianMotion.StochasticIntegral.SimpleProcess
 import QuantFin.Foundations.ItoIsometryAdapted
 
 /-!
-# The continuous L²-adapted Itô integral (construction, anchored on Degenne's `SimpleProcess`)
+# The L²-adapted Itô isometry, anchored on Degenne's `SimpleProcess`
 
-This file builds the continuous Itô integral as a continuous linear isometry
-extending the elementary (simple-process) integral, **anchored on Degenne's
-`BrownianMotion.StochasticIntegral` objects** (the maximally-coherent /
-upstream-track choice). The algebraic core is the adapted Itô isometry from
-`ItoIsometryAdapted.lean` — in particular the predictable-rectangle pairing
-`rect_increment_pairing`, which is exactly the right tool because Degenne's
-`SimpleProcess` allows *overlapping* intervals.
+This file establishes the **Itô isometry for adapted simple processes** — the substantive
+analytic content of the L² Itô integral — built on Degenne's
+`BrownianMotion.StochasticIntegral` objects (the maximally-coherent choice). The cornerstone
+is that the cross-terms vanish by the **weak Markov property** (`rect_increment_pairing`,
+from `ItoIsometryAdapted.lean`), *not* by deterministic covariance — the precise distinction
+between the Itô integral (random adapted integrands) and the Wiener integral (deterministic
+integrands, `WienerIntegralL2.lean`). Degenne's `SimpleProcess` allows *overlapping*
+intervals, which is exactly why `rect_increment_pairing` is the right tool.
 
-## Setup
+## Results
 
-* `natFiltration` — the natural Brownian filtration `𝓕ᴮ_t = σ(B_u : u ≤ t)`
-  (Mathlib `Filtration.natural`). By `IsPreBrownian.isFilteredPreBrownian` a
-  pre-Brownian motion is automatically `IsFilteredPreBrownian` for it.
-* `adaptedAt_of_measurable_natural` — **the bridge** connecting Degenne's
-  filtration-measurability (which `SimpleProcess.value` carries) to this
-  library's `ItoIsometryAdapted.AdaptedAt` (factoring through the past process),
-  via Doob–Dynkin (`Measurable.exists_eq_measurable_comp`). This is what lets the
-  `AdaptedAt`-stated isometry core consume Degenne's `SimpleProcess`.
-* `itoSimple` — the elementary Itô integral `(V ● B)_⊤ = ∑ₚ V(p)·(B_{p.2}−B_{p.1})`
-  of a simple process `V` against Brownian motion, as a function `Ω → ℝ`
-  (Degenne's `SimpleProcess.integral` against the multiplication bilinear map,
-  evaluated at the terminal time `⊤`).
+* `natFiltration` — the natural Brownian filtration `𝓕ᴮ_t = σ(B_u : u ≤ t)`.
+* `adaptedAt_of_measurable_natural` — the bridge from `natural B`-measurability (which
+  `SimpleProcess.value` carries) to `ItoIsometryAdapted.AdaptedAt` (factoring through the
+  past process), via Doob–Dynkin (`Measurable.exists_eq_measurable_comp`). This is what
+  lets the `AdaptedAt`-stated isometry core consume Degenne's `SimpleProcess`.
+* `itoSimple` / `itoSimple_apply` — the elementary Itô integral
+  `(V ● B)_⊤ = ∑ₚ V(p)·(B_{p.2}−B_{p.1})` (Degenne's `SimpleProcess.integral` against
+  multiplication, at the terminal time `⊤`).
+* `memLp_itoSimple` / `itoSimpleLp` — it lies in `L²(μ)`.
+* `itoSimple_sq_integral` / `itoSimpleLp_norm_sq` — **the Itô isometry**:
+  `‖itoSimpleLp V‖² = ∫ (itoSimple V)² dμ = Σ_{p,q} E[V(p)·V(q)] · vol((p]∩(q])`.
 
-## Construction roadmap (mirrors `WienerIntegralL2.lean`, integrand space adapted)
+## Scope (why this stops at the isometry)
 
-1. [done here] `itoSimple V` and its `⊤`-unfolding `itoSimple_apply`.
-2. [next] `itoSimple V ∈ L²(μ)`: a finite sum of `V(p)·ΔB_p`, each in `L²` by
-   `memLp_adapted_mul_increment` (via the bridge + `V`'s boundedness).
-3. [next] the **isometry on simple processes**:
-   `‖itoSimple V‖²_{L²(μ)} = ‖V‖²_{L2Predictable}` — the diagonal/off-diagonal
-   double sum collapses by `rect_increment_pairing`.
-4. [next] **density** of `SimpleProcess` images in `L2Predictable` via Degenne's
-   `ElementaryPredictableSet.generateFrom_eq_predictable` + the Wiener
-   orthogonal-complement route over the trimmed (predictable) measure.
-5. [next] `LinearMap.extendOfNorm` ⇒ `itoIntegralL2 : L2Predictable ν μ →L[ℝ] Lp ℝ 2 μ`,
-   with the Itô isometry `‖itoIntegralL2 φ‖² = ∫₀ᵀ E[φ_t²] dt`.
+The continuous extension to a CLM `L2Predictable ν μ →L[ℝ] Lp ℝ 2 μ` (density of simple
+processes in the predictable `L²` via `generateFrom_eq_predictable` + `LinearMap.extendOfNorm`)
+is **deliberately not built**. It is standard L²-completion packaging with no consumer in
+this library: pricing here goes through static Gaussian methods (the static-Girsanov/Esscher
+EMM, Black–Scholes, Margrabe — leaps 1–3 bypass the Itô integral entirely). A continuous Itô
+*integral* only pays off as the base of a full continuous-time Itô-*calculus* layer (Itô's
+lemma, SDEs, continuous Girsanov) — a separate, upstream-Mathlib-scale program. The isometry
+above is the self-contained cornerstone of the L²-adapted construction.
 -/
 
 namespace QuantFin
@@ -198,34 +195,6 @@ theorem itoSimpleLp_norm_sq (hBmeas : ∀ t, Measurable (B t))
   refine integral_congr_ae ?_
   filter_upwards [(memLp_itoSimple hBmeas V).coeFn_toLp] with ω hω
   rw [show (itoSimpleLp hBmeas V : Ω → ℝ) ω = itoSimple hBmeas V ω from hω]
-
-/-! ### Step 3 setup — the time measure on `ℝ≥0`
-
-`L2Predictable` needs a measure on the time axis. To match the Itô isometry — whose
-interval overlap `max 0 (min − max)` is a *Lebesgue length* (it comes from
-`E[(Bₜ−Bₛ)²] = t − s`) — that measure must be Lebesgue. `ℝ≥0` has no canonical `volume`,
-so we take the pushforward of Lebesgue on `ℝ` along the coercion. -/
-
-/-- The coercion `ℝ≥0 → ℝ` as a measurable embedding (it is a closed embedding). -/
-lemma measurableEmbedding_nnrealCoe : MeasurableEmbedding ((↑) : ℝ≥0 → ℝ) :=
-  NNReal.isClosedEmbedding_coe.measurableEmbedding
-
-/-- **Lebesgue measure on the time axis `ℝ≥0`** — the comap of `volume` along `ℝ≥0 ↪ ℝ`. -/
-noncomputable def timeMeasure : Measure ℝ≥0 := Measure.comap ((↑) : ℝ≥0 → ℝ) volume
-
-/-- The time measure of a half-open interval is its length. -/
-lemma timeMeasure_Ioc (a b : ℝ≥0) :
-    timeMeasure (Set.Ioc a b) = ENNReal.ofReal ((b : ℝ) - a) := by
-  have himg : ((↑) : ℝ≥0 → ℝ) '' Set.Ioc a b = Set.Ioc (a : ℝ) b := by
-    ext x
-    simp only [Set.mem_image, Set.mem_Ioc]
-    constructor
-    · rintro ⟨y, ⟨hay, hyb⟩, rfl⟩
-      exact ⟨by exact_mod_cast hay, by exact_mod_cast hyb⟩
-    · rintro ⟨hax, hxb⟩
-      have hx0 : 0 ≤ x := le_of_lt (lt_of_le_of_lt a.coe_nonneg hax)
-      exact ⟨⟨x, hx0⟩, ⟨by exact_mod_cast hax, by exact_mod_cast hxb⟩, rfl⟩
-  rw [timeMeasure, measurableEmbedding_nnrealCoe.comap_apply, himg, Real.volume_Ioc]
 
 end ItoIntegralL2
 end QuantFin
