@@ -1,0 +1,26 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+# Build and verify the whole library on the pinned toolchain (lean-toolchain).
+# lean-action installs elan, fetches the Mathlib olean cache, and runs
+# `lake build`; BrownianMotion + QuantFin build from source.
+#
+# A green build is *also* the axiom-cleanliness proof: QuantFin/AxiomAudit.lean
+# #guard_msgs-pins every headline theorem to [propext, Classical.choice,
+# Quot.sound], so `lake build` fails if any of them drifts.
+
+jobs:
+  build:
+    name: lake build + axiom audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build (elan + Mathlib cache + lake build)
+        uses: leanprover/lean-action@v1

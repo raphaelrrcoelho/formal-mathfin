@@ -1,5 +1,10 @@
 # Quant finance, formally verified
 
+[![build](https://github.com/raphaelrrcoelho/automated_proofs_quantfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/automated_proofs_quantfin/actions/workflows/build.yml)
+[![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](QuantFin/AxiomAudit.lean)
+[![Lean](https://img.shields.io/badge/Lean-4.30.0--rc2-blue)](lean-toolchain)
+[![license](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
+
 A Lean 4 library of machine-checked quant-finance theorems, built on Mathlib
 and Degenne's BrownianMotion. 251 theorems across 11 areas — Black-Scholes
 with the full Greek matrix and the exotics, binomial trees with American /
