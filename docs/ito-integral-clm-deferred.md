@@ -1,23 +1,50 @@
-# Continuous Itô integral (CLM extension) — deferred work + verified midpoint
+# Continuous Itô integral (CLM extension) — progress + remaining density gap
 
-**Status:** deliberately **deferred**. The L²-adapted Itô **isometry** (the substantive
-analytic content) is delivered and on `main` in
-`QuantFin/Foundations/ItoIntegralL2.lean` (`memLp_itoSimple`, `itoSimple_sq_integral`,
-`itoSimpleLp_norm_sq`) and `QuantFin/Foundations/ItoIsometryAdapted.lean`
-(`rect_increment_pairing` etc.). The continuous extension to a `ContinuousLinearMap`
-`itoIntegralL2 : L2Predictable ν μ →L[ℝ] Lp ℝ 2 μ` is **not built**, because:
+**Status (2026-05-27): CLM steps 1–3 BUILT on `main`; only density + `extendOfNorm` remain.**
+The L²-completion was resumed (this supersedes the earlier "deferred" status). All of the
+following are on `main` in `QuantFin/Foundations/ItoIntegralL2.lean`, full build green
+(8646 jobs), AxiomAudit-clean, sorry-free:
 
-- Nothing in the library consumes a continuous Itô *integral* — pricing goes through
-  static Gaussian methods (static-Girsanov/Esscher EMM, Black–Scholes, Margrabe; leaps
-  1–3 bypass Itô entirely).
-- It only pays off as the base of a full continuous-time Itô-*calculus* layer (Itô's
-  lemma, SDE existence/uniqueness, continuous Girsanov) — a separate, upstream-Mathlib-scale
-  program.
-- It is ~160 lines of *standard* L²-completion packaging (large because Mathlib lacks the
-  Itô integral, not because it is deep).
+- **ν time-measure** (`timeMeasure` = Lebesgue on `ℝ≥0`): `SigmaFinite`, `timeMeasure_Ioc`,
+  `timeMeasure_Ioc_inter`, `timeMeasure_singleton`.
+- **Embedding** `simpleProcessL2 : SimpleProcess → Lp ℝ 2 ((timeMeasure.prod μ).trim …)`
+  (= Degenne's `L2Predictable timeMeasure μ`, kept unfolded for the `Lp` norm instance):
+  `rectTerm` / `memLp_rectTerm` (finite-time-support L² bound), `uncurry_ae_eq_sum_rectTerm`
+  (the `{⊥}`-fibre is null), `memLp_uncurry_trim` (`eLpNorm_trim`), `simpleProcessL2`.
+- **Itô isometry** `simpleProcessL2_norm_sq`: `‖simpleProcessL2 V‖²` = the SAME predictable-
+  rectangle double sum as `itoSimpleLp` (Fubini, `integral_prod_mul`, `integral_rectTerm_mul`).
+- **Linear maps + isometry bound**: `itoAssembly : SimpleProcess →ₗ[ℝ] Lp ℝ 2 μ`,
+  `simpleAssembly : SimpleProcess →ₗ[ℝ] Lp ℝ 2 (trim)`, and
+  `assembly_isometry : ‖itoAssembly V‖ = ‖simpleAssembly V‖`.
 
-This note preserves the verified **midpoint** (the time-measure `ν`) and the full plan, so
-the CLM is turnkey to resume if/when the Itô-calculus layer is pursued.
+**Remaining: `DenseRange simpleAssembly`, then `itoAssembly.extendOfNorm simpleAssembly`.**
+The density is the genuine remaining work, harder than the Wiener analogue
+(`stepAssembly_denseRange`) for two reasons:
+
+1. **The orthogonal-complement route needs a *finite* measure.** Wiener's `compl` step uses
+   `∫_{sᶜ} g = ∫_univ g − ∫_s g`, valid because `volume.restrict (Ioc 0 T)` is finite. Our
+   `timeMeasure` is horizon-free hence **infinite** (σ-finite). `Lp.ae_eq_zero_of_forall_-`
+   `setIntegral_eq_zero` only needs `∫_s g = 0` on **finite-measure** sets (no σ-finite
+   hypothesis — good), but the π-system induction proving that must avoid `∫_univ`; it needs a
+   σ-finite **exhaustion** of the predictable σ-algebra by finite-measure predictable sets
+   (e.g. `Iic n ×ˢ univ`), not the finite-measure shortcut.
+2. **Elementary-predictable-set π-system is a Degenne gap.** `induction_on_inter` over
+   `generateFrom_eq_predictable` needs `IsPiSystem {↑S | S : ElementaryPredictableSet 𝓕}`.
+   Degenne supplies `generateFrom_eq_predictable` but **not** the π-system property. The
+   intersection of two elementary predictable sets IS elementary (rectangles:
+   `(Ioc p × A) ∩ (Ioc q × B) = Ioc(max p.1 q.1)(min p.2 q.2) × (A∩B)`; `{⊥}×_ ∩ Ioc _ = ∅`),
+   so it holds — but constructing the intersected `ElementaryPredictableSet` (with its
+   disjointness field) is ~40–60 lines and **belongs upstream in brownian-motion** (like the
+   `StochasticInterval` #440 contribution), then consumed here.
+
+The orthogonality base case is in hand: `⟪simpleProcessL2 (SimpleProcess.indicator S 1), g⟫`
+`= ∫_{S.toSet} g d(trim)` via `coe_indicator` (`uncurry ⇑(indicator S e) = (S:Set).indicator …`)
++ `L2.inner_def` + `integral_indicator`; and `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`
+needs no σ-finiteness. So the resume path is: (a) upstream the elementary-set π-system, (b)
+finite-measure predictable exhaustion, (c) `induction_on_inter`, (d) `extendOfNorm`.
+
+This note also preserves the verified `ν` midpoint below. The CLM only fully pays off as the
+base of a continuous-time Itô-*calculus* layer (Itô's lemma, SDEs) — a separate program.
 
 ## Verified midpoint — the time measure `ν` (Lebesgue on `ℝ≥0`)
 
