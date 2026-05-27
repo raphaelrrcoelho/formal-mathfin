@@ -215,6 +215,62 @@ private lemma integrable_sq_mul_heatKernel {t : ℝ} (ht : 0 < t) :
   integrable_mul_heatKernel_of_gaussian ht
     (memLp_id_gaussianReal (μ := 0) (v := t.toNNReal) 2).integrable_sq
 
+/-- `∂_y K = -(y/t)·K` is integrable. -/
+private lemma integrable_dK {t : ℝ} (ht : 0 < t) :
+    Integrable (fun y => -(y / t) * heatKernel t y) volume := by
+  refine ((integrable_id_mul_heatKernel ht).const_mul (-(1 / t))).congr
+    (Filter.Eventually.of_forall fun y => ?_)
+  show -(1 / t) * (y * heatKernel t y) = -(y / t) * heatKernel t y
+  ring
+
+/-- `∂²_y K = K·(y²−t)/t²` is integrable. -/
+private lemma integrable_ddK {t : ℝ} (ht : 0 < t) :
+    Integrable (fun y => heatKernel t y * (y ^ 2 - t) / t ^ 2) volume := by
+  have ht_ne : t ≠ 0 := ht.ne'
+  refine (((integrable_sq_mul_heatKernel ht).const_mul (1 / t ^ 2)).sub
+    ((integrable_heatKernel ht).const_mul (1 / t))).congr (Filter.Eventually.of_forall fun y => ?_)
+  show 1 / t ^ 2 * (y ^ 2 * heatKernel t y) - 1 / t * heatKernel t y
+      = heatKernel t y * (y ^ 2 - t) / t ^ 2
+  field_simp
+
+/-- **Integration by parts against the heat kernel** (the analytic heart of expectation-Itô).
+For `f ∈ C²_b`, two improper integrations by parts over `ℝ` move both derivatives off the kernel
+onto `f`: `∫ f(y)·∂²_y K(t,y) dy = ∫ f″(y)·K(t,y) dy`. The boundary terms vanish (`f, f′` bounded,
+`K, ∂_y K` Gaussian-decaying), which is encoded by `integral_mul_deriv_eq_deriv_mul_of_integrable`
+(the integrable-product form needs no explicit boundary hypothesis). -/
+private lemma ibp_heatKernel {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
+    (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
+    ∫ y, f y * (heatKernel t y * (y ^ 2 - t) / t ^ 2) ∂volume
+      = ∫ y, f'' y * heatKernel t y ∂volume := by
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  have hf'c : Continuous f' := continuous_iff_continuousAt.mpr fun x => (hf' x).continuousAt
+  have hi_f_ddK : Integrable (fun y => f y * (heatKernel t y * (y ^ 2 - t) / t ^ 2)) volume :=
+    (integrable_ddK ht).bdd_mul hfc.aestronglyMeasurable
+      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf y)
+  have hi_f'_dK : Integrable (fun y => f' y * (-(y / t) * heatKernel t y)) volume :=
+    (integrable_dK ht).bdd_mul hf'c.aestronglyMeasurable
+      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf' y)
+  have hi_f_dK : Integrable (fun y => f y * (-(y / t) * heatKernel t y)) volume :=
+    (integrable_dK ht).bdd_mul hfc.aestronglyMeasurable
+      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf y)
+  have hi_f''_K : Integrable (fun y => f'' y * heatKernel t y) volume :=
+    (integrable_heatKernel ht).bdd_mul hf''c.aestronglyMeasurable
+      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf'' y)
+  have hi_f'_K : Integrable (fun y => f' y * heatKernel t y) volume :=
+    (integrable_heatKernel ht).bdd_mul hf'c.aestronglyMeasurable
+      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf' y)
+  have ibp1 := integral_mul_deriv_eq_deriv_mul_of_integrable
+    (u := f) (v := fun z => -(z / t) * heatKernel t z)
+    (v' := fun z => heatKernel t z * (z ^ 2 - t) / t ^ 2)
+    (fun x _ => hf x) (fun x _ => hasDerivAt_heatKernel_y_y ht x) hi_f_ddK hi_f'_dK hi_f_dK
+  have ibp2 := integral_mul_deriv_eq_deriv_mul_of_integrable
+    (u := f') (v := fun z => heatKernel t z)
+    (v' := fun z => -(z / t) * heatKernel t z)
+    (fun x _ => hf' x) (fun x _ => hasDerivAt_heatKernel_y ht x) hi_f'_dK hi_f''_K hi_f'_K
+  rw [ibp1, ibp2, neg_neg]
+
 /-! ### The Feynman–Kac function `u(t, x) = ∫ z, g(z) · K(t, z - x) dz`
 
 We define `u` directly via the heat-kernel representation, then show it equals
