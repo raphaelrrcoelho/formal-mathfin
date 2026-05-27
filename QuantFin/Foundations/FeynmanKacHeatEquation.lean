@@ -388,6 +388,68 @@ private lemma hasDerivAt_phi_heatEq {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → �
   refine integral_congr_ae (Filter.Eventually.of_forall fun y => ?_)
   ring
 
+/-- **The heat kernel is an approximate identity** (`ε → 0⁺`): for `f` continuous and bounded
+(`|f| ≤ Cf`), `∫ f(y)·K(ε, y) dy → f(0)`. Proof by the rescaling `y = √ε·u`, which turns the
+integral into `∫ f(√ε·u)·φ(u) du` against the *fixed* standard-normal density
+`φ(u) = (2π)^{-1/2} e^{-u²/2}`, followed by dominated convergence (`f(√ε·u) → f(0)` pointwise,
+dominated by the integrable `Cf·φ`). This supplies the `ε → 0` boundary value for the FTC. -/
+private lemma tendsto_integral_heatKernel_zero {f : ℝ → ℝ} (hfc : Continuous f)
+    {Cf : ℝ} (hCf : ∀ x, |f x| ≤ Cf) :
+    Tendsto (fun ε => ∫ y, f y * heatKernel ε y ∂volume) (nhdsWithin 0 (Set.Ioi 0))
+      (nhds (f 0)) := by
+  set g : ℝ → ℝ := fun u => (Real.sqrt (2 * Real.pi))⁻¹ * Real.exp (-(1 / 2) * u ^ 2) with hg
+  have hgc : Continuous g := by rw [hg]; fun_prop
+  have hgnn : ∀ u, 0 ≤ g u := fun u => by rw [hg]; positivity
+  have hg_int : Integrable g volume :=
+    (integrable_exp_neg_mul_sq (by norm_num : (0:ℝ) < 1 / 2)).const_mul (Real.sqrt (2 * Real.pi))⁻¹
+  have hg_int1 : ∫ u, g u ∂volume = 1 := by
+    simp only [hg]
+    rw [integral_const_mul, integral_gaussian, show Real.pi / (1 / 2) = 2 * Real.pi from by ring,
+      inv_mul_cancel₀ (by positivity : Real.sqrt (2 * Real.pi) ≠ 0)]
+  -- rescaling identity `φ(ε) = ∫ u, f(√ε·u)·g(u)` for ε > 0
+  have hrw : ∀ ε : ℝ, 0 < ε →
+      (∫ y, f y * heatKernel ε y ∂volume) = ∫ u, f (Real.sqrt ε * u) * g u ∂volume := by
+    intro ε hε
+    have hsε : 0 < Real.sqrt ε := Real.sqrt_pos.mpr hε
+    have hεne : ε ≠ 0 := hε.ne'
+    have hscale : ∀ u, Real.sqrt ε * heatKernel ε (Real.sqrt ε * u) = g u := by
+      intro u
+      simp only [hg, heatKernel]
+      have hse2 : Real.sqrt ε ^ 2 = ε := Real.sq_sqrt hε.le
+      have hexp : -(Real.sqrt ε * u) ^ 2 / (2 * ε) = -(1 / 2) * u ^ 2 := by
+        rw [mul_pow, hse2]; field_simp
+      rw [hexp, Real.sqrt_mul (by positivity : (0:ℝ) ≤ 2 * Real.pi) ε, mul_inv]
+      field_simp
+    have hcomp := Measure.integral_comp_mul_left (fun y => f y * heatKernel ε y) (Real.sqrt ε)
+    rw [abs_of_pos (by positivity : (0:ℝ) < (Real.sqrt ε)⁻¹), smul_eq_mul] at hcomp
+    have hkey : ∀ u, f (Real.sqrt ε * u) * g u
+        = Real.sqrt ε * (f (Real.sqrt ε * u) * heatKernel ε (Real.sqrt ε * u)) := by
+      intro u; rw [← hscale u]; ring
+    rw [integral_congr_ae (Filter.Eventually.of_forall hkey), integral_const_mul, hcomp,
+      ← mul_assoc, mul_inv_cancel₀ hsε.ne', one_mul]
+  -- dominated convergence on the rescaled integrand
+  have hlimeq : f 0 = ∫ u, f 0 * g u ∂volume := by rw [integral_const_mul, hg_int1, mul_one]
+  rw [hlimeq]
+  refine Tendsto.congr' (f₁ := fun ε => ∫ u, f (Real.sqrt ε * u) * g u ∂volume)
+    (by filter_upwards [self_mem_nhdsWithin] with ε hε using (hrw ε hε).symm) ?_
+  refine tendsto_integral_filter_of_dominated_convergence (fun u => Cf * g u) ?_ ?_
+    (hg_int.const_mul Cf) ?_
+  · filter_upwards [self_mem_nhdsWithin] with ε _hε
+    exact ((hfc.comp (continuous_const.mul continuous_id)).mul hgc).aestronglyMeasurable
+  · filter_upwards [self_mem_nhdsWithin] with ε _hε
+    refine Filter.Eventually.of_forall fun u => ?_
+    rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (hgnn u)]
+    exact mul_le_mul_of_nonneg_right (hCf _) (hgnn u)
+  · refine Filter.Eventually.of_forall fun u => ?_
+    apply Tendsto.mul_const
+    have hsqrt0 : Tendsto Real.sqrt (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have h := (Real.continuous_sqrt.tendsto 0).mono_left
+        (nhdsWithin_le_nhds (a := (0:ℝ)) (s := Set.Ioi 0))
+      rwa [Real.sqrt_zero] at h
+    have h_inner : Tendsto (fun ε : ℝ => Real.sqrt ε * u) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+      have := hsqrt0.mul_const u; rwa [zero_mul] at this
+    exact (hfc.tendsto 0).comp h_inner
+
 /-! ### The Feynman–Kac function `u(t, x) = ∫ z, g(z) · K(t, z - x) dz`
 
 We define `u` directly via the heat-kernel representation, then show it equals
