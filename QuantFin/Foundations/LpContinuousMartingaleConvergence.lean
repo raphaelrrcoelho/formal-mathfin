@@ -490,7 +490,7 @@ private lemma eLpNorm_increment_p_tendsto_zero
       Filter.Tendsto.add hL_shift hL_step5
     rwa [add_zero] at h
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le
-    (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_rhs (fun _ => zero_le _) h_triangle
+    (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_rhs (fun _ => zero_le) h_triangle
 
 /-- L^1 triangle: `eLpNorm (M_(n+1) - M_n) 1 μ → 0` via Hölder from `p → 0`. -/
 private lemma eLpNorm_increment_one_tendsto_zero
@@ -526,7 +526,7 @@ private lemma eLpNorm_increment_one_tendsto_zero
     have h := ENNReal.Tendsto.mul_const hLp (Or.inr hC_ne_top)
     rwa [zero_mul] at h
   exact tendsto_of_tendsto_of_tendsto_of_le_of_le
-    (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_bound_tendsto (fun _ => zero_le _) h_holder
+    (tendsto_const_nhds (x := (0 : ℝ≥0∞))) h_bound_tendsto (fun _ => zero_le) h_holder
 
 /-- The increment's `L^1` integral, in real-valued form. -/
 private lemma integral_norm_increment_tendsto_zero

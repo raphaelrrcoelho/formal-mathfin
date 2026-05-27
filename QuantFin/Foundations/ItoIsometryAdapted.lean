@@ -159,7 +159,7 @@ theorem integral_increment_sq
     have h := (hB.hasLaw_sub t₁ t₀).integral_eq
     rwa [integral_id_gaussianReal] at h
   have hmax : (max (t₁ - t₀) (t₀ - t₁) : ℝ≥0) = t₁ - t₀ :=
-    max_eq_left (by rw [tsub_eq_zero_of_le ht]; exact zero_le _)
+    max_eq_left (by rw [tsub_eq_zero_of_le ht]; exact zero_le)
   rw [← variance_of_integral_eq_zero hΔm.aemeasurable hmean]
   show Var[B t₁ - B t₀; μ] = (t₁ : ℝ) - t₀
   rw [(hB.hasLaw_sub t₁ t₀).variance_eq, variance_id_gaussianReal, hmax, NNReal.coe_sub ht]
@@ -294,9 +294,9 @@ theorem ito_isometry_discrete_bilinear
           = ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, a j ω * b k ω
         rw [Finset.sum_mul_sum]
     _ = ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, ∫ ω, a j ω * b k ω ∂μ := by
-        rw [integral_finset_sum _ (fun j _ => integrable_finset_sum _ (fun k _ => hint j k))]
+        rw [integral_finsetSum _ (fun j _ => integrable_finsetSum _ (fun k _ => hint j k))]
         exact Finset.sum_congr rfl
-          (fun j _ => integral_finset_sum _ (fun k _ => hint j k))
+          (fun j _ => integral_finsetSum _ (fun k _ => hint j k))
     _ = ∑ j ∈ Finset.range N, ∫ ω, a j ω * b j ω ∂μ := by
         refine Finset.sum_congr rfl (fun j hj => ?_)
         exact Finset.sum_eq_single j (fun k hk hkj => hcross j hj k hk (Ne.symm hkj))

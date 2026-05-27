@@ -22,13 +22,13 @@ lean_lib QuantFin where
 -- versions resolve consistently). Bump together with the BrownianMotion pin.
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4" @
-  "f23306121184"
+  "c87cc975222146012dc1c942c109f2decf536045"
 
 -- RemyDegenne/brownian-motion: Brownian motion construction, multivariate
 -- Gaussian, Kolmogorov-Chentsov continuity, Doob's L^p inequality, stochastic
 -- integral approximation. Pinned to a specific commit so toolchain bumps stay
--- deterministic. Mirrored in quantfin.toml's
--- [[quantfin.lean.extra_requires]] so lean-interact also sees it.
+-- deterministic. The repo-root lakefile.lean + lake-manifest.json +
+-- lean-toolchain are authoritative (quantfin.toml just sets local_project = ".").
 require BrownianMotion from git
   "https://github.com/RemyDegenne/brownian-motion.git" @
-  "16d15eb42c8c4a612bd0aacb28078c1802597216"
+  "fa590b1a198cb464357c5b773c7451da941acb43"

@@ -128,7 +128,7 @@ private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ 
     ∫ ω, ∑ k ∈ Finset.range n,
         (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
       = n * t / (n + 1) := by
-  rw [integral_finset_sum _
+  rw [integral_finsetSum _
     (fun k _ => hB.integrable_sq_increment (equipartition_endpoint_le ht n k))]
   have hsum : ∀ k ∈ Finset.range n,
       ∫ ω, (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ

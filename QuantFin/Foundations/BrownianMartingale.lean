@@ -39,7 +39,7 @@ coerces to `(t : ℝ) - (s : ℝ)` (since truncated `s - t = 0` when `s ≤ t`).
 private lemma NNReal.max_sub_eq_of_le {s t : ℝ≥0} (hst : s ≤ t) :
     ((max (t - s) (s - t) : ℝ≥0) : ℝ) = (t : ℝ) - (s : ℝ) := by
   have hst_zero : s - t = (0 : ℝ≥0) := tsub_eq_zero_of_le hst
-  rw [hst_zero, max_eq_left (zero_le _)]
+  rw [hst_zero, max_eq_left zero_le]
   exact NNReal.coe_sub hst
 
 /-- MGF specialization: for `α : ℝ` and `v : ℝ≥0`,

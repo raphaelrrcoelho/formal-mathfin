@@ -33,13 +33,13 @@ lemma cappedCall_eq_bull_spread (S K₁ K₂ : ℝ) (h : K₁ ≤ K₂) :
     have e2 : max (S - K₂) 0 = 0 := max_eq_right (by linarith)
     rw [e1, e2]
     rw [min_eq_left (by linarith : (0:ℝ) ≤ K₂ - K₁)]; ring
-  push_neg at h1
+  push Not at h1
   by_cases h2 : S ≤ K₂
   · have e1 : max (S - K₁) 0 = S - K₁ := max_eq_left (by linarith)
     have e2 : max (S - K₂) 0 = 0 := max_eq_right (by linarith)
     rw [e1, e2]
     rw [min_eq_left (by linarith : S - K₁ ≤ K₂ - K₁)]; ring
-  · push_neg at h2
+  · push Not at h2
     have e1 : max (S - K₁) 0 = S - K₁ := max_eq_left (by linarith)
     have e2 : max (S - K₂) 0 = S - K₂ := max_eq_left (by linarith)
     rw [e1, e2]

@@ -66,7 +66,7 @@ private lemma integrable_martingaleTransform
     (hM : Martingale M 𝓕 μ) (hA : StronglyAdapted 𝓕 (fun n ↦ A (n + 1)))
     (hA_bdd : ∃ K : ℝ, ∀ᵐ ω ∂μ, ∀ n, |A n ω| ≤ K) (n : ℕ) :
     Integrable (martingaleTransform A M n) μ :=
-  integrable_finset_sum _ fun k _ ↦ integrable_summand hM hA hA_bdd k
+  integrable_finsetSum _ fun k _ ↦ integrable_summand hM hA hA_bdd k
 
 variable [IsFiniteMeasure μ]
 

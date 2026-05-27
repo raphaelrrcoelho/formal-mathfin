@@ -33,7 +33,7 @@ lemma chooser_payoff_decompose (C P : ℝ) :
     max C P = C + max 0 (P - C) := by
   by_cases h : C ≤ P
   · rw [max_eq_right h, max_eq_right (by linarith : (0:ℝ) ≤ P - C)]; ring
-  · push_neg at h
+  · push Not at h
     rw [max_eq_left h.le, max_eq_left (by linarith : P - C ≤ 0)]; ring
 
 /-- **Chooser option payoff** via put-call parity at the chooser date.

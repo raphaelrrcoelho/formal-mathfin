@@ -102,7 +102,7 @@ theorem expected_bsLogPrice_equipartition_sum
     field_simp
     ring
   -- swap sum and integral
-  rw [integral_finset_sum _ (fun k _ =>
+  rw [integral_finsetSum _ (fun k _ =>
     integrable_bsLogPrice_sq_increment hB S_0 r σ (h_endpt_le k))]
   -- per-summand QV identity
   have h_each : ∀ k ∈ Finset.range (n + 1),

@@ -110,7 +110,7 @@ theorem memLp_itoSimple (hBmeas : ∀ t, Measurable (B t))
   rw [show itoSimple hBmeas V
         = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
       from funext fun ω => by rw [itoSimple_apply]; rfl]
-  refine memLp_finset_sum V.value.support (fun p hp => ?_)
+  refine memLp_finsetSum V.value.support (fun p hp => ?_)
   refine ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (V.le_of_mem_support_value p hp)
     (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
   exact MemLp.of_bound
@@ -158,9 +158,9 @@ theorem itoSimple_sq_integral (hBmeas : ∀ t, Measurable (B t))
         rw [show itoSimple hBmeas V ω = ∑ p ∈ V.value.support, a p ω from by
               rw [itoSimple_apply]; rfl, sq, Finset.sum_mul_sum]
     _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, ∫ ω, a p ω * a q ω ∂μ := by
-        rw [integral_finset_sum _ (fun p hp => integrable_finset_sum _ fun q hq => hint p hp q hq)]
+        rw [integral_finsetSum _ (fun p hp => integrable_finsetSum _ fun q hq => hint p hp q hq)]
         exact Finset.sum_congr rfl fun p hp =>
-          integral_finset_sum _ (fun q hq => hint p hp q hq)
+          integral_finsetSum _ (fun q hq => hint p hp q hq)
     _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by

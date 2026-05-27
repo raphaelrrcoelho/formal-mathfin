@@ -44,7 +44,7 @@ private lemma hasLaw_increment {s t : ℝ≥0} (hst : s ≤ t) :
     HasLaw (B t - B s) (gaussianReal 0 (t - s)) μ := by
   have hL := IsPreBrownian.hasLaw_sub (X := B) (P := μ) t s
   have hmax : max (t - s) (s - t) = t - s := by
-    rw [tsub_eq_zero_iff_le.mpr hst, max_eq_left (zero_le _)]
+    rw [tsub_eq_zero_iff_le.mpr hst, max_eq_left zero_le]
   rwa [hmax] at hL
 
 /-- The increment `B t − B s` has mean zero. -/
@@ -107,7 +107,7 @@ theorem wiener_finset_isometry
     exact ((IsPreBrownian.hasIndepIncrements (X := B) (P := μ) n p hp).comp
       (fun k x => c k * x) (fun _ => measurable_const.mul measurable_id)).indepFun hij
   have h_mean_sum : ∫ ω, (∑ k : Fin n, X k) ω ∂μ = 0 := by
-    simp_rw [Finset.sum_apply, integral_finset_sum _
+    simp_rw [Finset.sum_apply, integral_finsetSum _
       (fun k _ => (h_memLp k).integrable one_le_two)]
     exact Finset.sum_eq_zero fun k _ => by
       simp [hX, integral_const_mul, integral_increment_eq_zero (B := B) (hpk k)]
