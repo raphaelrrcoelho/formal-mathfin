@@ -38,8 +38,8 @@ the precise reason the quadratic variation is `t` and not, say, `0`. For the uni
 namespace QuantFin
 namespace QuadraticVariationL2
 
-open MeasureTheory ProbabilityTheory ItoIsometryAdapted
-open scoped NNReal ENNReal
+open MeasureTheory ProbabilityTheory ItoIsometryAdapted Filter
+open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
@@ -231,6 +231,38 @@ theorem sum_increment_sq_sub_sq_le (hBmeas : ∀ t, Measurable (B t))
           sub_nonneg.mpr (NNReal.coe_le_coe.mpr (hmono (Nat.le_succ k)))
         nlinarith [hδ k hk, hΔ0]
     _ = 2 * δ * (s n : ℝ) := by rw [← Finset.mul_sum, htel]
+
+/-- The uniform partition of `[0, T]`: the `n`-th refinement places its `k`-th node at `kT/n`. -/
+noncomputable def unifPart (T : ℝ≥0) (n k : ℕ) : ℝ≥0 := (k : ℝ≥0) / (n : ℝ≥0) * T
+
+/-- **Brownian motion has quadratic variation `T` (textbook L² form).** Along the uniform
+partition of `[0, T]` into `n` pieces, the sum of squared increments converges to `T` in mean
+square: `E[(∑_{k<n} (B_{(k+1)T/n} − B_{kT/n})² − T)²] → 0`. Immediate from the mesh bound
+(`sum_increment_sq_sub_sq_le`, here mesh `= T/n`) with explicit rate `2T²/n`, squeezed to `0`. -/
+theorem tendsto_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
+    Tendsto (fun n : ℕ => ∫ ω, (∑ k ∈ Finset.range n,
+        (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 - (T : ℝ)) ^ 2 ∂μ)
+      atTop (𝓝 0) := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  refine squeeze_zero' (g := fun n : ℕ => 2 * (T : ℝ) ^ 2 / (n : ℝ))
+    (Eventually.of_forall fun n => integral_nonneg fun ω => sq_nonneg _) ?_
+    (tendsto_const_div_atTop_nhds_zero_nat (2 * (T : ℝ) ^ 2))
+  filter_upwards [eventually_gt_atTop 0] with n hn
+  have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+  have hnR : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+  have hmono : Monotone (unifPart T n) := fun a b hab => by
+    simp only [unifPart]; gcongr
+  have hs0 : unifPart T n 0 = 0 := by simp [unifPart]
+  have hsn : unifPart T n n = T := by simp only [unifPart, div_self hn0, one_mul]
+  have hgap : ∀ k ∈ Finset.range n, (unifPart T n (k + 1) : ℝ) - unifPart T n k ≤ (T : ℝ) / n := by
+    intro k _
+    have : (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n := by
+      simp only [unifPart]; push_cast; field_simp; ring
+    exact le_of_eq this
+  have hbound := sum_increment_sq_sub_sq_le (μ := μ) hBmeas hmono hs0 n hgap
+  rw [hsn] at hbound
+  rw [show (2 : ℝ) * (T : ℝ) ^ 2 / (n : ℝ) = 2 * ((T : ℝ) / n) * T from by ring]
+  exact hbound
 
 end QuadraticVariationL2
 end QuantFin
