@@ -152,6 +152,15 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.tendsto_expected_bsLogPrice_equipartition_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms QuantFin.tendsto_expected_bsLogPrice_equipartition_sum
 
+/-! ## Expectation-form Itô / Feynman–Kac (the QV → ½f″ correction, from first principles) -/
+
+/-- info: 'QuantFin.FeynmanKacHeatEquation.heatConvolution_eq_add_integral_deriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms QuantFin.FeynmanKacHeatEquation.heatConvolution_eq_add_integral_deriv
+
+/-- info: 'QuantFin.FeynmanKacHeatEquation.expectation_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.FeynmanKacHeatEquation.expectation_ito
+
 /-! ## Adapted Itô isometry (increment-independence cornerstone) -/
 
 /-- info: 'QuantFin.ItoIsometryAdapted.integral_adapted_mul_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/

@@ -631,5 +631,39 @@ theorem feynmanKac_boundary [IsProbabilityMeasure μ]
     rw [hω, add_zero]
   rw [integral_congr_ae h_pt, integral_const, probReal_univ, one_smul]
 
+/-- **Itô's formula in expectation** (Dynkin / Kolmogorov form). For a Brownian motion `B`
+(`B 0 = 0` a.s., Gaussian increments `B_t − B_s ∼ N(0, t−s)`, each `B_t` measurable) and
+`f ∈ C²_b`, `E[f(Bₜ)] = f(0) + ½·∫₀ᵗ E[f″(Bₛ)] ds` for `t > 0`. This is the expectation form of
+the analytic Feynman–Kac identity `heatConvolution_eq_add_integral_deriv`, transported across the
+bridge `feynmanU_eq_expectation` (`∫ g·K(r,·) = E[g(B_r)]`). The `½ f″` term is the signature of
+the quadratic variation of Brownian motion — the source of the Itô correction. -/
+theorem expectation_ito
+    {B : ℝ → Ω → ℝ}
+    (hB_meas : ∀ t, Measurable (B t))
+    (hB_zero : ∀ᵐ ω ∂μ, B 0 ω = 0)
+    (hB_gauss : ∀ ⦃s t : ℝ⦄, s ≤ t →
+      ∃ v : NNReal, (v : ℝ) = t - s ∧
+        Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v)
+    {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
+    (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
+    (∫ ω, f (B t ω) ∂μ) = f 0 + ∫ s in (0:ℝ)..t, (1 / 2) * ∫ ω, f'' (B s ω) ∂μ := by
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  -- the heat-kernel ↔ expectation bridge, for any continuous `g` and time `r > 0`
+  have hbridge : ∀ (g : ℝ → ℝ), Continuous g → ∀ {r : ℝ}, 0 < r →
+      (∫ y, g y * heatKernel r y ∂volume) = ∫ ω, g (B r ω) ∂μ := by
+    intro g hgc r hr
+    have h1 := integral_shift_eq_feynmanU g r 0
+    simp only [zero_add] at h1
+    rw [h1, feynmanU_eq_expectation hB_meas hB_zero hB_gauss hgc hr 0]
+    simp only [zero_add]
+  rw [← hbridge f hfc ht, heatConvolution_eq_add_integral_deriv ht hf hf' hf''c hCf hCf' hCf'']
+  congr 1
+  refine intervalIntegral.integral_congr_ae (ae_of_all _ fun s hs => ?_)
+  rw [Set.uIoc_of_le ht.le] at hs
+  show (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume = (1 / 2) * ∫ ω, f'' (B s ω) ∂μ
+  rw [hbridge f'' hf''c hs.1]
+
 end FeynmanKacHeatEquation
 end QuantFin
