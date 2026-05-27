@@ -17,6 +17,11 @@ Drafts targeting [`RemyDegenne/brownian-motion`](https://github.com/RemyDegenne/
   - `IsFilteredPreBrownian.squareSubTime_isMartingale` (`t ↦ X_t² − t`)
   - `IsFilteredPreBrownian.waldExponential_isMartingale` (`t ↦ exp(α X_t − α² t / 2)` for any `α : ℝ`)
 - `ISSUE_BODY.md` — draft GitHub issue / PR body for the same.
+- `StochasticInterval.lean` — stochastic intervals + that `]]σ,τ]]` is predictable
+  and an elementary predictable set (issue #440, blueprint `def:stochasticInterval`,
+  `lem:predictable_stochasticInterval`, `lem:elementaryPredictableSet_stochasticInterval`):
+  - `ProbabilityTheory.stochasticIoc.measurableSet_predictable` (ℕ stopping times)
+  - `ProbabilityTheory.stochasticIoc.exists_elementaryPredictableSet` (ℕ, `τ` bounded)
 
 ## mathlib/
 
