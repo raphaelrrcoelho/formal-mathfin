@@ -450,6 +450,89 @@ private lemma tendsto_integral_heatKernel_zero {f : ℝ → ℝ} (hfc : Continuo
       have := hsqrt0.mul_const u; rwa [zero_mul] at this
     exact (hfc.tendsto 0).comp h_inner
 
+/-- The heat kernel integrates to `1` over `ℝ` (it is a probability density), for `s > 0`. -/
+private lemma integral_heatKernel_eq_one {s : ℝ} (hs : 0 < s) :
+    ∫ y, heatKernel s y ∂volume = 1 := by
+  rw [integral_congr_ae (Filter.Eventually.of_forall (heatKernel_eq_gaussianPDFReal hs))]
+  exact integral_gaussianPDFReal_eq_one 0 (Real.toNNReal_pos.mpr hs).ne'
+
+/-- Uniform bound on the time-derivative `φ′(s) = ½∫f″·K(s,·)`: `|φ′(s)| ≤ ½·Cf″` for `s > 0`
+(since `∫ K(s,·) = 1` and `|f″| ≤ Cf″`). The majorant making `φ′` interval-integrable on `[0, t]`. -/
+private lemma abs_half_integral_ddf_heatKernel_le {s : ℝ} (hs : 0 < s) {f'' : ℝ → ℝ}
+    (hf''c : Continuous f'') {Cf'' : ℝ} (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
+    |(1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume| ≤ (1 / 2) * Cf'' := by
+  rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1 / 2)]
+  refine mul_le_mul_of_nonneg_left ?_ (by norm_num : (0:ℝ) ≤ 1 / 2)
+  calc |∫ y, f'' y * heatKernel s y ∂volume|
+      ≤ ∫ y, |f'' y * heatKernel s y| ∂volume := abs_integral_le_integral_abs
+    _ ≤ ∫ y, Cf'' * heatKernel s y ∂volume := by
+        refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun y => abs_nonneg _)
+          ((integrable_heatKernel hs).const_mul Cf'') (Filter.Eventually.of_forall fun y => ?_)
+        show |f'' y * heatKernel s y| ≤ Cf'' * heatKernel s y
+        rw [abs_mul, abs_of_nonneg (heatKernel_nonneg hs y)]
+        exact mul_le_mul_of_nonneg_right (hCf'' y) (heatKernel_nonneg hs y)
+    _ = Cf'' := by rw [integral_const_mul, integral_heatKernel_eq_one hs, mul_one]
+
+/-- **Itô's formula in expectation — analytic core (Feynman–Kac).** For `f ∈ C²_b` and `t > 0`,
+`∫ f(y)·K(t,y) dy = f(0) + ∫₀ᵗ ½·(∫ f″(y)·K(s,y) dy) ds`. The Gaussian convolution at time `t`
+equals its `t→0` boundary value `f(0)` plus the integral of its time-derivative
+`φ′(s) = ½∫f″·K(s,·)`. Proof: the fundamental theorem of calculus for the continuous-corrected
+`Φ` (value `φ(s)` for `s>0`, `f(0)` at `s=0`), whose right derivative on `(0,t)` is `φ′`
+(`hasDerivAt_phi_heatEq`), whose boundary value is the approximate-identity limit
+(`tendsto_integral_heatKernel_zero`), and whose derivative is interval-integrable (bounded by
+`½Cf″`). Under the standard Brownian hypotheses this reads `E[f(Bₜ)] = f(0) + ½∫₀ᵗ E[f″(Bₛ)] ds`
+via `feynmanU_eq_expectation`. -/
+theorem heatConvolution_eq_add_integral_deriv {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
+    (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
+    (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
+    (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
+    (∫ y, f y * heatKernel t y ∂volume)
+      = f 0 + ∫ s in (0:ℝ)..t, (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume := by
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  set φ : ℝ → ℝ := fun s => ∫ y, f y * heatKernel s y ∂volume with hφdef
+  set ψ : ℝ → ℝ := fun s => (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume with hψdef
+  set Φ : ℝ → ℝ := fun s => if 0 < s then φ s else f 0 with hΦdef
+  -- (a) `ψ = φ′` is interval-integrable on `[0, t]` (continuous on `(0,t]`, bounded by `½Cf″`)
+  have hψ_cont : ∀ s : ℝ, 0 < s → ContinuousAt ψ s := fun s hs =>
+    (hasDerivAt_phi hs hf''c hCf'').continuousAt.const_mul (1 / 2)
+  have hψ_int : IntervalIntegrable ψ volume 0 t := by
+    rw [intervalIntegrable_iff_integrableOn_Ioc_of_le ht.le]
+    refine Integrable.mono' (g := fun _ : ℝ => (1 / 2) * Cf'')
+      (integrableOn_const (hs := measure_Ioc_lt_top.ne))
+      (ContinuousOn.aestronglyMeasurable (fun s hs => (hψ_cont s hs.1).continuousWithinAt)
+        measurableSet_Ioc)
+      (ae_restrict_of_forall_mem measurableSet_Ioc fun s hs => ?_)
+    show ‖(1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume‖ ≤ (1 / 2) * Cf''
+    rw [Real.norm_eq_abs]
+    exact abs_half_integral_ddf_heatKernel_le hs.1 hf''c hCf''
+  -- (b) `Φ` is continuous on `[0, t]`
+  have hΦ_cont : ContinuousOn Φ (Set.Icc 0 t) := by
+    intro s hs
+    rcases eq_or_lt_of_le hs.1 with h0 | h0
+    · rw [← h0, ContinuousWithinAt, show Φ 0 = f 0 from if_neg (lt_irrefl 0),
+        show Set.Icc (0:ℝ) t = {0} ∪ Set.Ioc 0 t from by
+          rw [Set.union_comm, Set.Ioc_union_left ht.le],
+        nhdsWithin_union, nhdsWithin_singleton, tendsto_sup]
+      refine ⟨by rw [← show Φ 0 = f 0 from if_neg (lt_irrefl 0)]; exact tendsto_pure_nhds Φ 0, ?_⟩
+      refine Filter.Tendsto.congr' ?_ ((tendsto_integral_heatKernel_zero hfc hCf).mono_left
+        (nhdsWithin_mono 0 Set.Ioc_subset_Ioi_self))
+      filter_upwards [self_mem_nhdsWithin] with x hx using (if_pos hx.1).symm
+    · have hca : ContinuousAt Φ s := by
+        refine (hasDerivAt_phi h0 hfc hCf).continuousAt.congr ?_
+        filter_upwards [lt_mem_nhds h0] with x hx using (if_pos hx).symm
+      exact hca.continuousWithinAt
+  -- (c) right derivative of `Φ` on `(0, t)` is `ψ`
+  have hΦ_deriv : ∀ s ∈ Set.Ioo (0:ℝ) t, HasDerivWithinAt Φ (ψ s) (Set.Ioi s) s := by
+    intro s hs
+    have heq : Φ =ᶠ[nhds s] φ := by
+      filter_upwards [lt_mem_nhds hs.1] with x hx using if_pos hx
+    exact ((hasDerivAt_phi_heatEq hs.1 hf hf' hf''c hCf hCf' hCf'').congr_of_eventuallyEq
+      heq).hasDerivWithinAt
+  -- (d) FTC, then read off the boundary values `Φ t = φ t`, `Φ 0 = f 0`
+  have hFTC := intervalIntegral.integral_eq_sub_of_hasDeriv_right_of_le ht.le hΦ_cont hΦ_deriv hψ_int
+  rw [show Φ t = φ t from if_pos ht, show Φ 0 = f 0 from if_neg (lt_irrefl 0)] at hFTC
+  linarith [hFTC]
+
 /-! ### The Feynman–Kac function `u(t, x) = ∫ z, g(z) · K(t, z - x) dz`
 
 We define `u` directly via the heat-kernel representation, then show it equals
