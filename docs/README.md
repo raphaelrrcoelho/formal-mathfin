@@ -8,6 +8,7 @@
 | [`bridges.md`](bridges.md) | Catalogue of bridges from `Foundations/` to pricing modules — the additive constructors that connect BM/martingale infra to BS/Bachelier/binomial. | When extending Foundations and wanting to make it usable from a pricing module without breaking existing consumers. |
 | [`patterns.md`](patterns.md) | Distilled Lean / Mathlib proof patterns + technical idioms + workflow notes + anti-patterns. | Before writing a non-trivial proof, especially if it touches gaussian / martingale / convexity / Lp machinery. |
 | [`roadmap.md`](roadmap.md) | Strategic depth-vs-breadth framing + tactical phase log of completed milestones. | When picking the next theorem to formalise, or to understand the historical trajectory. |
+| [`upstreaming.md`](upstreaming.md) | Log + playbook for contributing QuantFin results upstream to brownian-motion / Mathlib (live: issue #440 → PR #446). | When submitting a `Foundations/` result upstream, or checking a contribution's status. |
 | [`superpowers/specs/`](superpowers/specs/) | Design specs for major changes (e.g. the 2026-05-23 reorganization). | Historical context for why the repo is structured this way. |
 
 ## Cross-references
