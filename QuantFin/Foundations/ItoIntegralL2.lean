@@ -199,5 +199,33 @@ theorem itoSimpleLp_norm_sq (hBmeas : ∀ t, Measurable (B t))
   filter_upwards [(memLp_itoSimple hBmeas V).coeFn_toLp] with ω hω
   rw [show (itoSimpleLp hBmeas V : Ω → ℝ) ω = itoSimple hBmeas V ω from hω]
 
+/-! ### Step 3 setup — the time measure on `ℝ≥0`
+
+`L2Predictable` needs a measure on the time axis. To match the Itô isometry — whose
+interval overlap `max 0 (min − max)` is a *Lebesgue length* (it comes from
+`E[(Bₜ−Bₛ)²] = t − s`) — that measure must be Lebesgue. `ℝ≥0` has no canonical `volume`,
+so we take the pushforward of Lebesgue on `ℝ` along the coercion. -/
+
+/-- The coercion `ℝ≥0 → ℝ` as a measurable embedding (it is a closed embedding). -/
+lemma measurableEmbedding_nnrealCoe : MeasurableEmbedding ((↑) : ℝ≥0 → ℝ) :=
+  NNReal.isClosedEmbedding_coe.measurableEmbedding
+
+/-- **Lebesgue measure on the time axis `ℝ≥0`** — the comap of `volume` along `ℝ≥0 ↪ ℝ`. -/
+noncomputable def timeMeasure : Measure ℝ≥0 := Measure.comap ((↑) : ℝ≥0 → ℝ) volume
+
+/-- The time measure of a half-open interval is its length. -/
+lemma timeMeasure_Ioc (a b : ℝ≥0) :
+    timeMeasure (Set.Ioc a b) = ENNReal.ofReal ((b : ℝ) - a) := by
+  have himg : ((↑) : ℝ≥0 → ℝ) '' Set.Ioc a b = Set.Ioc (a : ℝ) b := by
+    ext x
+    simp only [Set.mem_image, Set.mem_Ioc]
+    constructor
+    · rintro ⟨y, ⟨hay, hyb⟩, rfl⟩
+      exact ⟨by exact_mod_cast hay, by exact_mod_cast hyb⟩
+    · rintro ⟨hax, hxb⟩
+      have hx0 : 0 ≤ x := le_of_lt (lt_of_le_of_lt a.coe_nonneg hax)
+      exact ⟨⟨x, hx0⟩, ⟨by exact_mod_cast hax, by exact_mod_cast hxb⟩, rfl⟩
+  rw [timeMeasure, measurableEmbedding_nnrealCoe.comap_apply, himg, Real.volume_Ioc]
+
 end ItoIntegralL2
 end QuantFin
