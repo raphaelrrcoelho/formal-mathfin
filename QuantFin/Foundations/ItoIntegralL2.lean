@@ -400,5 +400,74 @@ theorem simpleProcessL2_norm_sq (hBmeas : ∀ t, Measurable (B t))
   rw [integral_finsetSum _ fun q hq => hint p hp q hq]
   exact Finset.sum_congr rfl fun q _ => integral_rectTerm_mul hBmeas V p q
 
+/-! ### Linear assembly maps and the isometry on simple processes -/
+
+/-- The elementary Itô integral is additive in the simple process. -/
+lemma itoSimple_add (hBmeas : ∀ t, Measurable (B t))
+    (V W : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    itoSimple hBmeas (V + W) = itoSimple hBmeas V + itoSimple hBmeas W := by
+  funext ω; simp only [itoSimple, SimpleProcess.integral_add_left, Pi.add_apply]
+
+/-- The elementary Itô integral is homogeneous in the simple process. -/
+lemma itoSimple_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    itoSimple hBmeas (c • V) = c • itoSimple hBmeas V := by
+  funext ω; simp only [itoSimple, SimpleProcess.integral_smul_left, Pi.smul_apply]
+
+/-- **The elementary Itô integral as a linear map** `SimpleProcess →ₗ[ℝ] Lp ℝ 2 μ`. -/
+noncomputable def itoAssembly (hBmeas : ∀ t, Measurable (B t)) :
+    SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas) →ₗ[ℝ] Lp ℝ 2 μ where
+  toFun V := itoSimpleLp hBmeas V
+  map_add' V W := by
+    rw [itoSimpleLp, itoSimpleLp, itoSimpleLp,
+        ← MemLp.toLp_add (memLp_itoSimple hBmeas V) (memLp_itoSimple hBmeas W)]
+    congr 1
+    exact itoSimple_add hBmeas V W
+  map_smul' c V := by
+    rw [itoSimpleLp, itoSimpleLp, RingHom.id_apply,
+        ← MemLp.toLp_const_smul c (memLp_itoSimple hBmeas V)]
+    congr 1
+    exact itoSimple_smul hBmeas c V
+
+/-- The uncurried simple process is additive. -/
+lemma uncurry_coe_add (hBmeas : ∀ t, Measurable (B t))
+    (V W : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    Function.uncurry ⇑(V + W) = Function.uncurry ⇑V + Function.uncurry ⇑W := by
+  rw [SimpleProcess.coe_add]; rfl
+
+/-- The uncurried simple process is homogeneous. -/
+lemma uncurry_coe_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    Function.uncurry ⇑(c • V) = c • Function.uncurry ⇑V := by
+  rw [SimpleProcess.coe_smul]; rfl
+
+/-- **The embedding into the predictable `L²` as a linear map**
+`SimpleProcess →ₗ[ℝ] Lp ℝ 2 ((timeMeasure.prod μ).trim …)`. -/
+noncomputable def simpleAssembly (hBmeas : ∀ t, Measurable (B t)) :
+    SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)
+      →ₗ[ℝ] Lp ℝ 2 ((timeMeasure.prod μ).trim (natFiltration hBmeas).predictable_le_prod) where
+  toFun V := simpleProcessL2 (μ := μ) hBmeas V
+  map_add' V W := by
+    rw [simpleProcessL2, simpleProcessL2, simpleProcessL2,
+        ← MemLp.toLp_add (memLp_uncurry_trim hBmeas V) (memLp_uncurry_trim hBmeas W)]
+    congr 1
+    exact uncurry_coe_add hBmeas V W
+  map_smul' c V := by
+    rw [simpleProcessL2, simpleProcessL2, RingHom.id_apply,
+        ← MemLp.toLp_const_smul c (memLp_uncurry_trim hBmeas V)]
+    congr 1
+    exact uncurry_coe_smul hBmeas c V
+
+/-- **The Itô isometry on simple processes.** `‖itoAssembly V‖ = ‖simpleAssembly V‖`: both
+squared norms equal the predictable-rectangle double sum (`itoSimpleLp_norm_sq`,
+`simpleProcessL2_norm_sq`). This is the bound `extendOfNorm` consumes. -/
+theorem assembly_isometry (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    ‖itoAssembly (μ := μ) hBmeas V‖ = ‖simpleAssembly (μ := μ) hBmeas V‖ := by
+  have hsq : ‖itoAssembly (μ := μ) hBmeas V‖ ^ 2 = ‖simpleAssembly (μ := μ) hBmeas V‖ ^ 2 := by
+    show ‖(itoSimpleLp hBmeas V : Lp ℝ 2 μ)‖ ^ 2 = ‖simpleProcessL2 (μ := μ) hBmeas V‖ ^ 2
+    rw [itoSimpleLp_norm_sq hBmeas V, simpleProcessL2_norm_sq hBmeas V]
+  exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
+
 end ItoIntegralL2
 end QuantFin
