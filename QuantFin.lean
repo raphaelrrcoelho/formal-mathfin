@@ -164,6 +164,9 @@ import QuantFin.BlackScholes.RiskNeutralProbabilities
 import QuantFin.BlackScholes.StockNumeraire
 -- Phase 24: powered call closed form via reduction to BS-call (effective spot/vol)
 import QuantFin.BlackScholes.PowerCall
+-- BS-family Garman normal form (`V = A·Φ(d_1) − K·DF·Φ(d_2)`): the single
+-- numéraire-parameterised template consumed by ExchangeOption, Black-76, KMVMerton
+import QuantFin.BlackScholes.GarmanNormalForm
 import QuantFin.BlackScholes.ExchangeOption
 -- Margrabe BSCallHyp grounding from a joint two-GBM gaussian model (leap-3 closure)
 import QuantFin.BlackScholes.MargrabeGrounding

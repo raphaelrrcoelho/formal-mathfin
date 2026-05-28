@@ -9,8 +9,17 @@ This file is a **Lean 4 derivative work** based on Definition 4.1, Theorem
 The simple-process Itô integral definition and its linearity / constant-
 isometry properties are adapted from Nagy's Section 4. The L² extension
 via Cauchy completeness (Nagy Section 4.3) is deferred — see
-`Foundations/WienerIntegralL2.lean` for our existing parallel work via a
-different construction path.
+`Foundations/WienerIntegralL2.lean` for the deterministic-integrand parallel
+and `Foundations/ItoIntegralCLM.lean` for the genuine random-integrand L²
+extension via `LinearMap.extendOfNorm` (the canonical track).
+
+**Legacy / attribution note.** This file is retained for attribution to
+Nagy 2026 §4 and to anchor the `DiscreteIto.lean` / `ItoLemma.lean` tracks
+that build on the simple-process notation here. New work should use
+`ItoIntegralL2.itoSimple` / `ItoIntegralCLM_T` (the canonical
+Degenne-anchored construction); the three theorems below
+(`itoIntegralSimple_linear`, `_isometry_constant_integrand`, `_scale`) live
+inside `ItoIntegralL2.itoAssembly`'s span.
 
 Author of this QuantFin Lean 4 adaptation: Raphael Coelho.
 Original Lean derivation: Tamás Nagy (SSRN 6336503, 2026).
