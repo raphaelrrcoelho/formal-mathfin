@@ -1,6 +1,6 @@
 # Quant finance, formally verified
 
-[![build](https://github.com/raphaelrrcoelho/automated_proofs_quantfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/automated_proofs_quantfin/actions/workflows/build.yml)
+[![build](https://github.com/raphaelrrcoelho/formal-quantfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/formal-quantfin/actions/workflows/build.yml)
 [![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](QuantFin/AxiomAudit.lean)
 [![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
 [![Lean](https://img.shields.io/badge/Lean-4.30.0--rc2-blue)](lean-toolchain)
