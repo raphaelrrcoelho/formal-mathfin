@@ -156,7 +156,7 @@ noncomputable def bachelierTerminal (S_0 σ T : ℝ) (z : ℝ) : ℝ :=
 
 /-- Exercise-region identification for the Bachelier model: `S_T(z) > K ↔ z > -d`. -/
 private lemma bachelierTerminal_gt_K_iff {S_0 K σ T : ℝ}
-    (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
+    (_hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
     bachelierTerminal S_0 σ T z > K ↔ z > -bachelierD S_0 K σ T := by
   have h_σsqT_pos : 0 < σ * Real.sqrt T := mul_pos hσ (Real.sqrt_pos.mpr hT)
   unfold bachelierTerminal bachelierD

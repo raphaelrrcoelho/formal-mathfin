@@ -78,7 +78,7 @@ log-payoff portfolio replication, realised variance over fine partitions
 — you get the same number. This is the model-level equivalence of the
 two variance-swap fair-strike characterisations. -/
 theorem varianceSwap_log_eq_QV_limit_value {S_0 : ℝ} (hS : 0 < S_0)
-    (r σ T : ℝ) (hT_pos : T ≠ 0) (hT_nonneg : 0 ≤ T) :
+    (r σ T : ℝ) (hT_pos : T ≠ 0) (_hT_nonneg : 0 ≤ T) :
     -- Log-payoff form
     (2 / T) * (∫ z, Real.log ((S_0 * Real.exp (r * T)) /
         (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))) ∂(gaussianReal 0 1))

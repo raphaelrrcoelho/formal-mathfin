@@ -281,7 +281,7 @@ theorem tendstoInMeasure_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     intro n
     have hsum : MemLp (fun ω => ∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
-      apply memLp_finset_sum
+      apply memLp_finsetSum
       intro k _
       simpa using memLp_increment_sq_centered_two (unifPart T n k) (unifPart T n (k + 1)) 0
     exact hsum.sub (memLp_const (T : ℝ))

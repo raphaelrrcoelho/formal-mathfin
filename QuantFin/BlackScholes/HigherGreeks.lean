@@ -84,7 +84,7 @@ Strategy: vega-as-function-of-σ is `S · ϕ(d₁(σ)) · √τ`. Chain rule via
 clean derivative `∂_σ d₁ = -d₂/σ` (above) and `ϕ'(d₁) = -d₁ ϕ(d₁)`:
 `d/dσ[ϕ(d₁(σ))] = -d₁ ϕ(d₁) · (-d₂/σ) = d₁ d₂ ϕ(d₁) / σ`. Multiply by
 constants S and √τ. -/
-lemma hasDerivAt_bsV_volga {K r : ℝ} (hK : 0 < K)
+lemma hasDerivAt_bsV_volga {K r : ℝ} (_hK : 0 < K)
     {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
     HasDerivAt (fun s => S * gaussianPDFReal 0 1 (bsd1 S K r s τ) * Real.sqrt τ)
       (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ

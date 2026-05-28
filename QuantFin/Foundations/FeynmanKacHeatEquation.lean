@@ -460,7 +460,7 @@ private lemma integral_heatKernel_eq_one {s : ℝ} (hs : 0 < s) :
 /-- Uniform bound on the time-derivative `φ′(s) = ½∫f″·K(s,·)`: `|φ′(s)| ≤ ½·Cf″` for `s > 0`
 (since `∫ K(s,·) = 1` and `|f″| ≤ Cf″`). The majorant making `φ′` interval-integrable on `[0, t]`. -/
 private lemma abs_half_integral_ddf_heatKernel_le {s : ℝ} (hs : 0 < s) {f'' : ℝ → ℝ}
-    (hf''c : Continuous f'') {Cf'' : ℝ} (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
+    (_hf''c : Continuous f'') {Cf'' : ℝ} (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
     |(1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume| ≤ (1 / 2) * Cf'' := by
   rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1 / 2)]
   refine mul_le_mul_of_nonneg_left ?_ (by norm_num : (0:ℝ) ≤ 1 / 2)

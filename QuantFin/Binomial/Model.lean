@@ -197,7 +197,7 @@ lemma binomialPrice_smul (u d r c : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
 
 /-- **Constant-payoff price**: a deterministic payoff `c` at maturity has time-0
 price `e^{-rn} · c` for `n` steps. -/
-theorem binomialPrice_const (u d r c : ℝ) (h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
+theorem binomialPrice_const (u d r c : ℝ) (_h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
     binomialPrice u d r (fun _ => c) n S = Real.exp (-(n : ℝ) * r) * c := by
   induction n generalizing S with
   | zero => simp

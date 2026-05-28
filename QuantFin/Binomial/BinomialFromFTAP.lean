@@ -77,7 +77,7 @@ from the excess-return data via Nagy's backward FTAP formula. With
 The two characterisations of the risk-neutral up-probability — *binomial
 replicating-portfolio formula* (current `Binomial/Model.lean`) and
 *EMM constructed from no-arbitrage* (Phase 37 backward FTAP) — coincide. -/
-theorem binomial_q_eq_emm {u d r : ℝ} (h : BinomialNoArb u d r) :
+theorem binomial_q_eq_emm {u d r : ℝ} (_h : BinomialNoArb u d r) :
     -(d - Real.exp r) / ((u - Real.exp r) - (d - Real.exp r)) =
       crrUpProb u d r := by
   unfold crrUpProb

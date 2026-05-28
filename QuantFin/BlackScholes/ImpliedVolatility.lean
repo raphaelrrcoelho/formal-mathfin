@@ -33,8 +33,8 @@ open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal Topology
 
 /-- **Vega is strictly positive** for `S > 0, T > 0` and any `σ > 0`. -/
-lemma bsV_vega_pos {K r : ℝ} (hK : 0 < K)
-    {S σ T : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hT : 0 < T) :
+lemma bsV_vega_pos {K r : ℝ} (_hK : 0 < K)
+    {S σ T : ℝ} (hS : 0 < S) (_hσ : 0 < σ) (hT : 0 < T) :
     0 < S * gaussianPDFReal 0 1 (bsd1 S K r σ T) * Real.sqrt T := by
   have h_pdf_pos : 0 < gaussianPDFReal 0 1 (bsd1 S K r σ T) :=
     gaussianPDFReal_pos 0 1 _ (one_ne_zero : (1 : ℝ≥0) ≠ 0)

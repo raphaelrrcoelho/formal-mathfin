@@ -44,7 +44,9 @@ i.e. multiplying both sides by `D` we get a polynomial identity. Stated as
 the cross-product form `r₂ · D · ((Σw)_1) = r₁ · D · ((Σw)_2)` to avoid the
 division. -/
 theorem tangentTwo_satisfies_FOC (r₁ r₂ σ₁ σ₂ ρ : ℝ) :
-    let D := σ₂^2 * r₁ + σ₁^2 * r₂ - ρ * σ₁ * σ₂ * (r₁ + r₂)
+    -- `D` is the common denominator `σ₂² r₁ + σ₁² r₂ − ρ σ₁ σ₂ (r₁ + r₂)` —
+    -- not referenced in the statement itself (the FOC is stated in
+    -- multiplied-out cross-product form, so the division by `D` cancels).
     let w_num := σ₂^2 * r₁ - ρ * σ₁ * σ₂ * r₂  -- D · w
     let one_sub_w_num := σ₁^2 * r₂ - ρ * σ₁ * σ₂ * r₁  -- D · (1 - w)
     r₂ * (w_num * σ₁^2 + one_sub_w_num * ρ * σ₁ * σ₂) =

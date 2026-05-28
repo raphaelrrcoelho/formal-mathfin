@@ -86,7 +86,7 @@ lemma vasicekSDE_mean_at_zero (r_0 θ κ : ℝ) :
   simp
 
 /-- **Variance at `t = 0`** is zero (no diffusion yet). -/
-lemma vasicekSDE_variance_at_zero (σ κ : ℝ) (hκ : κ ≠ 0) :
+lemma vasicekSDE_variance_at_zero (σ κ : ℝ) (_hκ : κ ≠ 0) :
     vasicekSDEVariance σ κ 0 = 0 := by
   unfold vasicekSDEVariance
   simp

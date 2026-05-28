@@ -321,12 +321,12 @@ lemma uncurry_eq_zero_of_lt {T : ℝ≥0} {hBmeas : ∀ t, Measurable (B t)}
   intro _
   exact lt_of_le_of_lt (V.property p hp) ht
 
+omit hB in
 /-- For T-bounded `V`, the `L²` norm of `uncurry V` in `trim_T` equals the norm
 in the full trim. Both integrate `|uncurry V|²` over the same effective support:
 trim_T integrates over `[0,T] × Ω`, and `uncurry V` vanishes off it (the bot
-fibre `{0} × Ω` has measure zero in `timeMeasure.prod μ`).
-(The `IsPreBrownian B μ` instance is in section scope but unused here — this is a
-pure measure-theoretic equality. The linter notes this but doesn't error.) -/
+fibre `{0} × Ω` has measure zero in `timeMeasure.prod μ`). Pure
+measure-theoretic equality — `[IsPreBrownian B μ]` is omitted. -/
 private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : TBoundedSP T hBmeas) :
     eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure_T (μ := μ) T hBmeas)
@@ -443,6 +443,7 @@ instance (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
   unfold trimMeasure_T
   infer_instance
 
+omit hB in
 private lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
     (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
@@ -601,6 +602,7 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
 
 /-! ### Density of `simpleAssembly_T` -/
 
+omit hB in
 /-- Bridge lemma: integrating any `g : Lp 2 trim_T` over a predictable-measurable
 `R` equals the integral over `R ∩ (Ioc 0 T × univ)`. The complement of
 `Ioc 0 T × univ` is `trim_T`-null because `trim_T = trim_full.restrict
