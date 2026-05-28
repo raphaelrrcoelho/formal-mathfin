@@ -195,20 +195,27 @@ the Itô-specific tail *after*). Pure cleanup; no proof changes.
 
 ## Summary
 
-| Item | Severity | Action |
-|---|---|---|
-| F1. Foundations→pricing bridge gap | **structural** | one pricing-side consumer in the next session |
-| F2. Two Itô-simple tracks | minor slop | one-line "legacy" header on `ItoIntegralSimple.lean` |
-| F3. Garman missing from umbrella | minor index | add the import line |
-| F4. `import Mathlib` everywhere | cumulative cosmetic | tighten opportunistically |
-| O1. Discrete-squaring → L²-Itô | high leverage | next phase, ~400 LOC |
-| O2. `adaptedAt_of_measurable_natural` → `@[fun_prop]` | medium | one attribute |
-| O3. `ItoIntegralCLM.lean` linter hints | low cosmetic | split the section |
+| Item | Severity | Action | **Status after follow-up sweep** |
+|---|---|---|---|
+| F1. Foundations→pricing bridge gap | **structural** | one pricing-side consumer in the next session | **partial** — `BlackScholes/PDEFromIto.lean` docstring now names the chain (`itoIntegralCLM_T`, `itoSquared_L2_tendsto_div2` ✓, then `C²`-Itô + GBM-SDE = multi-session). Full refactor deferred. |
+| F2. Two Itô-simple tracks | minor slop | one-line "legacy" header on `ItoIntegralSimple.lean` | **done** (`414a034`) |
+| F3. Garman missing from umbrella | minor index | add the import line | **done** (`ae9f1fc`) |
+| F4. `import Mathlib` everywhere | cumulative cosmetic | tighten opportunistically | **partial** — narrowed `Foundations/ItoFormulaSquaredL2.lean` (one file, opportunistic-as-you-go per the review). |
+| O1. Discrete-squaring → L²-Itô | high leverage | next phase, ~400 LOC | **done** (`99d11fb`) — actual landing was 141 LOC because the proof reduces to one algebraic step + `tendsto_qv`. `Foundations/ItoFormulaSquaredL2.lean` proves `∑ B·ΔB → ½(B_T² − B_0² − T)` in L²(μ). |
+| O2. `adaptedAt_of_measurable_natural` → `@[fun_prop]` | medium | one attribute | **closed-as-deferred** — `ItoIsometryAdapted.AdaptedAt` isn't a registered `fun_prop` property; the attribute is rejected by the elaborator. Closing O2 properly requires registering `AdaptedAt` upstream (single-line attribute on the definition itself), a deeper change than the review estimated. Tracked. |
+| O3. `ItoIntegralCLM.lean` linter hints | low cosmetic | split the section | **done** (`2b37b44`) — `omit hB in` on the three private lemmas (placed BEFORE the docstring to satisfy the parser; the section split was unnecessary). |
+
+Commits in the sweep:
+* `414a034` — Itô-process scaffold + discrete squaring identity.
+* `ae9f1fc` — Portfolio review + F2 / F3 cheap fixes.
+* `2b37b44` — Slop sweep: O3 + 8 unused-var fixes + 1 deprecated alias.
+* `99d11fb` — Itô's lemma for `f(x)=x²` continuous L² form (O1 done).
+* `68c2ebf` — F1 status note in `PDEFromIto.lean` + F4 partial.
 
 The contract is intact. The single architectural debt (F1) is the same
 one the project has carried since the foundations layer began landing —
-it is real, it is named, and shipping the CLM today *unblocked* the
-canonical path to closing it. The Itô calculus useful-for-quant-finance
-work proposed by the user is exactly the bridge: the next pricing
-identity that goes through `itoIntegralCLM_T` + Itô's lemma instead of
-positing GBM closes F1 by one consumer.
+it is real, it is named, and shipping the CLM + L² Itô squaring formula
+makes the canonical closing path concrete. The next session's deliverable
+is the `C²` Itô extension (general `f`, not just `x²`) plus GBM-as-SDE-
+solution, which then makes `bsItoDrift` (the algebraic target in
+`PDEFromIto.lean`) a *derived* coefficient rather than a posited one.
