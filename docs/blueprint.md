@@ -42,6 +42,8 @@ graph TD
   BM --> BCH
   BCH --> BSF
   BSF --> MAR
+  BSF --> GRK
+  BSF --> PDE
   BID --> GRK
   BID --> PDE
   GRK --> PDE
@@ -126,7 +128,9 @@ Under `BSCallHyp`, the call price is `S₀ Φ(d₁) − K e^{−rT} Φ(d₂)`
 
 ### `bs_identity` — the magic collapse ✅
 The algebraic identity `S · φ(d₁) = K e^{−rτ} · φ(d₂)` (`bs_identity`) that makes
-the pdf cross-terms cancel.
+the pdf cross-terms cancel. It depends only on the `d₁`/`d₂` definitions and the
+Gaussian density — a self-contained algebraic input, so it is a *root* in the
+graph above (nothing in the spine proves it); it feeds the Greeks and the PDE.
 → *Finance:* the cancellation behind every clean Greek formula.
 [`BlackScholes/PDE.lean`](../QuantFin/BlackScholes/PDE.lean)
 
