@@ -40,6 +40,37 @@ martingale-property derivation requires the integral form of Itô's lemma
 (see `Foundations/ItoLemma.lean` note); the drift-coefficient version
 here is the algebraic core.
 
+## The bridge to the continuous-time foundations (status, 2026-05-28)
+
+The closing of the `Foundations/` → pricing-modules bridge gap (F1 in
+`docs/portfolio-review-2026-05-28.md`) for this file requires Itô's
+lemma for general `C²(ℝ², ℝ)` functions `(s, t) ↦ V(s, t)` applied to
+GBM `S_t`. We now have:
+
+* `Foundations/ItoIntegralCLM.itoIntegralCLM_T` — the continuous Itô
+  integral as a continuous linear isometry `Lp 2 trim_T →L[ℝ] Lp 2 μ`.
+* `Foundations/ItoFormulaSquaredL2.itoSquared_L2_tendsto_div2` — Itô's
+  lemma for `f(x) = x²` in continuous L² form: the Riemann sums
+  `∑ B·ΔB` converge in `L²(μ)` to `½·(B_T² − B_0² − T)`.
+
+What remains for a full refactor consuming the continuous Itô integral:
+
+1. **Itô's lemma for general `C²(ℝ → ℝ)`** at the L² level — extending
+   `itoSquared_L2_tendsto_div2` from `x²` to arbitrary smooth `f`. The
+   bound on the discrete Taylor remainder under `f ∈ C³` is the missing
+   ingredient (`Foundations/DiscreteIto.discreteTaylorRemainder` exists;
+   the third-order bound is documented as deferred).
+2. **Itô's lemma for `C²(ℝ² → ℝ)`** with time dependence — adds the
+   `∂_t V dt` term used here as `V_t` in `bsItoDrift`.
+3. **Geometric Brownian motion as an SDE solution** — `S_t = S_0 exp((r −
+   ½σ²)t + σB_t)` solves `dS = rS dt + σS dB`, derived via (2). Then
+   plugging into (2) gives the BS PDE.
+
+The algebraic identity in this file pre-figures the drift coefficient
+the continuous derivation will produce; the `bsItoDrift` definition is
+the right *target*. A multi-session continuation closes the bridge by
+deriving rather than positing it.
+
 ## Result
 
 * `bs_drift_under_riskNeutral`: under risk-neutral GBM `dS = r S dt + σ

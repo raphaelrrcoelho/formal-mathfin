@@ -3,8 +3,8 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import BrownianMotion.Gaussian.BrownianMotion
+-- `import Mathlib` and `BrownianMotion.*` come transitively through
+-- `QuadraticVariationL2`; this file's own surface needs only:
 import QuantFin.Foundations.ItoSquaringIdentity
 import QuantFin.Foundations.QuadraticVariationL2
 
