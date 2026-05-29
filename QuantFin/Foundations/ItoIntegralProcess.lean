@@ -13,18 +13,26 @@ to a **process** indexed by finite time `t : ℝ≥0`. At each `t`,
   `(V ● B)_t ω = ∑_p V(p)(ω) · (B_{p.2 ∧ t}(ω) − B_{p.1 ∧ t}(ω))`,
 
 so intervals `(p.1, p.2]` past `t` are truncated to their `t`-prefix, and
-intervals starting after `t` contribute zero. This is the process structure
-that downstream Itô calculus (the L²-Itô formula `B_t² = 2·∫₀ᵗ B dB + t`,
-SDEs, stopping-time arguments) consumes.
+intervals starting after `t` contribute zero.
 
-The present file is the **structural scaffold**: a single `noncomputable def`
-fixing the multiplication-CLM and the finite-time `(t : WithTop ℝ≥0)`
-projection of upstream `SimpleProcess.integral`, together with the
-`V`-linearity lemmas. The substantive analytic content — `L²` at each `t`,
-adaptedness to `𝓕_t`, pathwise continuity, the martingale property,
-the time-indexed Itô isometry — is deferred. The exported name
-`itoSimpleProcess` lets downstream files refer to "the process-form Itô
-integral" uniformly without re-introducing the WithTop coercion every time.
+**STATUS — staging only, no current consumer.** This file is a structural
+scaffold: a single `noncomputable def` fixing the multiplication-CLM and the
+finite-time `(t : WithTop ℝ≥0)` projection of upstream `SimpleProcess.integral`,
+plus its `V`-linearity lemmas. All substantive analytic content — `L²` at each
+`t`, adaptedness to `𝓕_t`, pathwise continuity, the martingale property, the
+time-indexed Itô isometry — is **deferred**.
+
+Honesty note (portfolio review 2026-05-29): nothing in the library currently
+consumes `itoSimpleProcess`. The L²-Itô-squared formula
+(`ItoFormulaSquaredL2`) is built on the *partition / quadratic-variation*
+track (`QuadraticVariationL2.tendsto_qv`), **not** on this process-form
+integral. Per the project's own rule — "Foundations machinery becomes
+load-bearing only when downstream modules can consume it"
+(`docs/architecture.md`) — this file is *premature* until the continuous
+Itô-integral-as-process is built against the CLM (`ItoIntegralCLM`) with real
+analytic content. It is retained as a deliberate landing-pad for that work;
+if the next continuation builds the process integral directly against the CLM
+instead, this scaffold should be deleted rather than grown.
 -/
 
 namespace QuantFin

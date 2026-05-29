@@ -11,8 +11,10 @@ their faithfulness status in [`coverage.md`](coverage.md).
 
 **Status legend.** ✅ machine-checked in Lean 4, and — for the headline nodes —
 `#print axioms`-clean ([`AxiomAudit.lean`](../QuantFin/AxiomAudit.lean) build-pins
-them to `[propext, Classical.choice, Quot.sound]`). ⏳ stated but not yet
-formalized — the Mathlib-gated frontier. No node is colored proved unless it is.
+them to `[propext, Classical.choice, Quot.sound]`). 🚧 *partially* formalized — a
+genuine machine-checked core with an explicitly deferred lifting step (the gap
+is named in the file, never papered over). ⏳ stated but not yet formalized — the
+Mathlib-gated frontier. No node is colored proved unless it is.
 
 ```mermaid
 graph TD
@@ -126,20 +128,28 @@ and Doob's stochastic-integral definition.
 [`Foundations/ItoFormulaSquaredL2.lean`](../QuantFin/Foundations/ItoFormulaSquaredL2.lean),
 [`Foundations/ItoLemma2D.lean`](../QuantFin/Foundations/ItoLemma2D.lean)
 
-### Geometric Brownian motion solves the GBM SDE ✅
-For `S(t, x) = S₀·exp((μ − ½σ²)t + σx)`, the *genuine* partials
-(`hasDerivAt_gbmValue_space/_time/_space_space`, proved from the `Real.exp`
-chain rule) plug into the 2D Itô drift with the Brownian generator
-`(μ_X, σ_X) = (0, 1)` to give drift `μ·S` and diffusion `σ·S` (`gbm_solves_sde`,
-`gbm_diffusion`): `S_t = S(t, B_t)` satisfies `dS_t = μ S_t dt + σ S_t dB_t`.
-The `−½σ²` in the exponent cancels the `+½σ²` Itô second-order term — that
-cancellation *is* the Itô correction. Routed into the BS PDE
-(`bsItoDrift_eq_itoDrift2D`, `bs_pde_eq_itoDrift2D_minus_rV`): the BS PDE LHS
-*is* `itoDrift2D V_t V_S V_SS (rS) (σS) − rV`, so no-arbitrage (driftless
-discounted price) gives the PDE through the general Itô machinery, not a
-bespoke algebra.
-→ *Finance:* the asset dynamics underlying every BS-family closed form, now a
-*derived* SDE solution rather than a posited model.
+### Geometric Brownian motion — SDE coefficient matching 🚧
+Two honestly-distinct layers, NOT a continuous SDE-solution theorem:
+* **Genuine (full):** the partials of `S(t, x) = S₀·exp((μ − ½σ²)t + σx)` are
+  real `HasDerivAt` derivations from the `Real.exp` chain rule —
+  `hasDerivAt_gbmValue_space` (`∂_x = σS`), `_time` (`∂_t = (μ−½σ²)S`),
+  `_space_space` (`∂_xx = σ²S`).
+* **Coefficient matching (algebraic):** `gbm_solves_sde` takes those partials as
+  `HasDerivAt` hypotheses (so `HasDerivAt.unique` *forces* them to the genuine
+  derivatives) and shows the 2D Itô drift under the Brownian generator
+  `(0, 1)` is `μ·S` with diffusion `σ·S` — i.e. `S(t, B_t)` matches the Itô
+  coefficients of `dS = μS dt + σS dB`. The `−½σ²` exponent cancels the `+½σ²`
+  Itô term — that cancellation *is* the Itô correction.
+
+What is **deferred**: lifting coefficient-matching to a genuine continuous SDE
+*solution* (the partition-limit Itô lemma for general `C²`). Likewise, the BS
+PDE is *routed* through the shared drift — `bs_pde_eq_itoDrift2D_minus_rV`:
+`BS-PDE-LHS = itoDrift2D V_t V_S V_SS (rS) (σS) − rV` is a **polynomial
+identity** — but deriving "drift `= 0`" *from* a no-arbitrage `Q`-martingale is
+deferred (not yet proved). The win is structural: the BS coefficient is one
+instance of the general `itoDrift2D`, not a bespoke algebra.
+→ *Finance:* the asset dynamics underlying every BS-family closed form — the
+genuine GBM derivatives in hand, the SDE-solution limit still to come.
 [`Foundations/ItoLemma2D.lean`](../QuantFin/Foundations/ItoLemma2D.lean),
 [`BlackScholes/PDEFromIto.lean`](../QuantFin/BlackScholes/PDEFromIto.lean)
 
@@ -197,10 +207,14 @@ graph above (nothing in the spine proves it); it feeds the Greeks and the PDE.
 form via the Greeks and `bs_identity`.
 [`BlackScholes/PDE.lean`](../QuantFin/BlackScholes/PDE.lean)
 
-### BS PDE from no-arbitrage + Itô ✅
-The same PDE emerges from the Itô drift and a no-arbitrage argument
-(`bs_pde_from_no_arbitrage`, `bsItoDrift`) — the dynamic-hedging derivation,
-meeting the closed-form route at the PDE.
+### BS PDE from no-arbitrage + Itô 🚧
+The PDE is shown *algebraically equal* to the Itô-drift balance: the iff
+`bsItoDrift − rV = 0 ↔ BS-PDE` (`bs_pde_from_no_arbitrage`) and the routing
+`BS-PDE-LHS = itoDrift2D (rS) (σS) − rV` (`bs_pde_eq_itoDrift2D_minus_rV`) are
+both polynomial identities (`ring`). What is **deferred**: deriving "drift `= 0`"
+*from* a no-arbitrage `Q`-martingale (the dynamic-hedging derivation proper),
+which needs the continuous-time Itô lemma. So this meets the closed-form route
+at the PDE *coefficient*, with the martingale step still to come.
 [`BlackScholes/PDEFromIto.lean`](../QuantFin/BlackScholes/PDEFromIto.lean)
 
 ### Margrabe exchange option ✅

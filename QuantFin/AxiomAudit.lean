@@ -235,15 +235,12 @@ namespace QuantFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
   #print axioms QuantFin.ItoIntegralCLM.itoIntegralCLM_T_norm
 
-/-! ## Itô integral as a process + discrete squaring identity -/
+/-! ## Discrete squaring identity (the pathwise Itô keystone)
 
-/-- info: 'QuantFin.ItoIntegralProcess.itoSimpleProcess_add' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-  #print axioms QuantFin.ItoIntegralProcess.itoSimpleProcess_add
-
-/-- info: 'QuantFin.ItoIntegralProcess.itoSimpleProcess_smul' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in
-  #print axioms QuantFin.ItoIntegralProcess.itoSimpleProcess_smul
+(The `ItoIntegralProcess.itoSimpleProcess_*` linearity lemmas are intentionally
+NOT pinned here: they are trivial `simp`-wrappers over Degenne's
+`SimpleProcess.integral_*` in a currently-unconsumed staging file, not
+load-bearing theorems. See the status note in `ItoIntegralProcess.lean`.) -/
 
 /-- info: 'QuantFin.discrete_squaring_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in

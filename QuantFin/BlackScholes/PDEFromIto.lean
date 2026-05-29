@@ -3,7 +3,7 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+-- `import Mathlib` comes transitively through `ItoLemma` / `BlackScholes.PDE`.
 import QuantFin.Foundations.ItoLemma
 import QuantFin.Foundations.ItoLemma2D
 import QuantFin.BlackScholes.PDE
@@ -154,13 +154,19 @@ lemma bsItoDrift_eq_itoDrift2D (r σ S V_S V_SS V_t : ℝ) :
   unfold bsItoDrift itoDrift2D
   ring
 
-/-- **The Black–Scholes PDE is the vanishing of the discounted-price 2D Itô
-drift.** Its LHS equals `itoDrift2D V_t V_S V_SS (r·S) (σ·S) − r·V` — the
-2D-Itô drift of `V(t, S_t)` under risk-neutral GBM, minus the `r·V` from
-differentiating the discount factor `e^{−rt}`. No-arbitrage (`e^{−rt} V_t`
-is a `Q`-martingale, so its drift is zero) is *exactly* this expression
-set to `0`. This routes the BS PDE through the general
-`Foundations.ItoLemma2D.itoDrift2D`, not the bespoke `bsItoDrift`. -/
+/-- **The Black–Scholes PDE LHS, routed through the general 2D Itô drift.**
+A *polynomial identity*: the BS-PDE LHS equals `itoDrift2D V_t V_S V_SS (r·S)
+(σ·S) − r·V`, i.e. the general 2D-Itô drift (`Foundations.ItoLemma2D`)
+specialised to the risk-neutral GBM generator `(r·S, σ·S)`, minus `r·V`.
+This is the value of routing through the shared `itoDrift2D` rather than the
+bespoke `bsItoDrift`: the BS-PDE coefficient is one instance of the general
+Itô-drift definition.
+
+NOTE — what this does NOT prove: that the discounted price `e^{−rt} V_t` is a
+`Q`-martingale (hence driftless), which is what makes "drift `= 0`" the
+*no-arbitrage* condition. That continuous-time martingale step is deferred
+(see module header); here `… = 0` is only the **algebraic form** of the
+no-arbitrage PDE, established by `ring`, not derived from a martingale. -/
 theorem bs_pde_eq_itoDrift2D_minus_rV (r σ S V V_S V_SS V_t : ℝ) :
     V_t + r * S * V_S + (1 / 2) * σ ^ 2 * S ^ 2 * V_SS - r * V =
       itoDrift2D V_t V_S V_SS (r * S) (σ * S) - r * V := by

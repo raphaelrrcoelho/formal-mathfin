@@ -3,7 +3,8 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+-- `import Mathlib` comes transitively through `ItoLemma`; this file's surface
+-- needs only the `Real.exp` chain rule + `Finset` sum lemmas it already pulls.
 import QuantFin.Foundations.ItoLemma
 
 /-! # Itô's lemma for `f(t, x)` — time-dependent (2D), items 4 & 5
@@ -168,32 +169,35 @@ lemma hasDerivAt_gbmValue_space_space (S₀ μ σ t x : ℝ) :
   convert h using 1
   ring
 
-/-- **Geometric Brownian motion solves the GBM SDE — drift.** Plugging the
-genuine partials of `S(t, x)` (`∂_t = (μ−½σ²)S`, `∂_x = σS`, `∂_xx = σ²S`)
-into the 2D Itô drift with the Brownian generator `(μ_X, σ_X) = (0, 1)`
-gives `μ · S`:
+/-- **Geometric Brownian motion solves the GBM SDE (drift + diffusion).** The
+partials enter as `HasDerivAt` hypotheses — so by `HasDerivAt.unique` they are
+*forced* to be the genuine derivatives of `gbmValue` (`∂_t = (μ−½σ²)S`,
+`∂_x = σS`, `∂_xx = σ²S`), not free parameters a caller could fake. Under the
+Brownian generator `(μ_X, σ_X) = (0, 1)`, the 2D Itô drift of `f(t, B_t)` is
 
-  `(μ − ½σ²) S + 0 · σS + ½ · 1² · σ²S = μ S`.
+  `(μ − ½σ²) S + 0 · σS + ½ · 1² · σ²S = μ S`,
 
-The `−½σ²` from the exponent and the `+½σ²` from the Itô second-order term
-cancel — this *is* the Itô correction, and the reason GBM with exponent
-drift `μ − ½σ²` has actual ("physical") drift rate `μ`. -/
-theorem gbm_solves_sde (S₀ μ σ t x : ℝ) :
-    itoDrift2D
-        ((μ - σ ^ 2 / 2) * gbmValue S₀ μ σ t x)   -- ∂_t S
-        (σ * gbmValue S₀ μ σ t x)                  -- ∂_x S
-        (σ ^ 2 * gbmValue S₀ μ σ t x)              -- ∂_xx S
-        0 1                                         -- Brownian generator: drift 0, vol 1
-      = μ * gbmValue S₀ μ σ t x := by
-  unfold itoDrift2D
-  ring
+and the diffusion coefficient `σ_X · ∂_x S = σ S`. Reading both off:
+`S_t := S(t, B_t)` matches `dS_t = μ S_t dt + σ S_t dB_t` at the level of Itô
+coefficients (the coefficient-matching the continuous Itô lemma turns into a
+genuine SDE solution; that limit step is deferred — see module header).
 
-/-- **Geometric Brownian motion solves the GBM SDE — diffusion.** The `dB`
-coefficient `σ_X · ∂_x S = 1 · σS = σ S`. Together with `gbm_solves_sde`
-this is the full SDE `dS_t = μ S_t dt + σ S_t dB_t`. -/
-theorem gbm_diffusion (S₀ μ σ t x : ℝ) :
-    (1 : ℝ) * (σ * gbmValue S₀ μ σ t x) = σ * gbmValue S₀ μ σ t x := by
-  ring
+The `−½σ²` carried in the exponent cancels the `+½σ²` of the Itô second-order
+term — this cancellation *is* the Itô correction, and the reason a GBM with
+exponent drift `μ − ½σ²` has physical drift rate `μ`. -/
+theorem gbm_solves_sde (S₀ μ σ t x : ℝ) {f_t f_x f_xx : ℝ}
+    (h_t : HasDerivAt (fun s => gbmValue S₀ μ σ s x) f_t t)
+    (h_x : HasDerivAt (fun y => gbmValue S₀ μ σ t y) f_x x)
+    (h_xx : HasDerivAt (fun y => σ * gbmValue S₀ μ σ t y) f_xx x) :
+    itoDrift2D f_t f_x f_xx 0 1 = μ * gbmValue S₀ μ σ t x
+      ∧ (1 : ℝ) * f_x = σ * gbmValue S₀ μ σ t x := by
+  -- The `HasDerivAt` hypotheses pin the partials to their computed values.
+  obtain rfl := h_t.unique (hasDerivAt_gbmValue_time S₀ μ σ t x)
+  obtain rfl := h_x.unique (hasDerivAt_gbmValue_space S₀ μ σ t x)
+  obtain rfl := h_xx.unique (hasDerivAt_gbmValue_space_space S₀ μ σ t x)
+  refine ⟨?_, ?_⟩
+  · unfold itoDrift2D; ring
+  · ring
 
 /-- **Sanity check via the 1D `itoDrift_log_gbm`**: the GBM drift identity
 is consistent with the log-price drift `μ − ½σ²` (`ItoLemma.itoDrift_log_gbm`).
