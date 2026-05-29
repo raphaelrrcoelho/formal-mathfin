@@ -1,0 +1,58 @@
+name: publish-verify-image
+
+# Keep the prebuilt `verify`/`lean-repl` Docker image (GHCR) in lock-step with
+# `main`. The image bakes in `lake exe cache get && lake build` of the whole
+# QuantFin library (see docker/Dockerfile.verify); if it drifts behind `main`,
+# every cold container — and the lean-repl daemon on every boot — must rebuild
+# the drift from source (minutes per heavy Foundations file). Republishing on
+# each source-affecting push to `main` means a fresh `docker pull` always gives
+# a `.lake` matching `main`, so the daemon boots load-only (~3–5 min, no rebuild).
+#
+# Triggers: source/toolchain/Dockerfile changes on `main`, plus manual dispatch.
+# Doc-only / tooling-only commits don't rebuild the image (path filter).
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'QuantFin/**'
+      - 'QuantFin.lean'
+      - 'lakefile.lean'
+      - 'lake-manifest.json'
+      - 'lean-toolchain'
+      - 'docker/Dockerfile.verify'
+  workflow_dispatch:
+
+# One republish at a time; cancel any superseded in-flight build.
+concurrency:
+  group: publish-verify-image
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: build + push verify image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push (Dockerfile.verify bakes `lake build` of QuantFin)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile.verify
+          push: true
+          tags: |
+            ghcr.io/raphaelrrcoelho/quantfin-verify:latest
+            ghcr.io/raphaelrrcoelho/quantfin-verify:${{ github.sha }}

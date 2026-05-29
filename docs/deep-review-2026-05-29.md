@@ -31,7 +31,7 @@ continuation.**
 
 ---
 
-## The deepest finding — the L²-Itô formula bypassed the CLM (raised by RC)
+## The deepest finding — the L²-Itô formula bypassed the CLM (raised by RC) — RESOLVED (2026-05-29)
 
 `itoSquared_L2_tendsto` proves `∑ B_{t_k}·ΔB_k → ½(B_T²−B_0²−T)` in L² via the
 discrete squaring identity + `tendsto_qv` (the quadratic-variation track). It
@@ -51,17 +51,25 @@ Honest grade: **expedient and true, but sub-principled.** The QV route is a
 legitimate, transparent elementary proof (the `+T` term *is* the quadratic
 variation), but it is a *parallel* proof, not a *structural* one.
 
-**The principled fix (next continuation, ~300-400 LOC):**
+**The principled fix — DONE (2026-05-29), `Foundations/ItoIntegralBrownian.lean`:**
 ```
-itoIntegralCLM_T_of_brownian :
-    itoIntegralCLM_T T hBmeas ⟦s ↦ B s⟧ = ½ • ⟦B_T² − B_0² − T⟧
+itoIntegralCLM_T_brownian :
+    ∃ gB, itoIntegralCLM_T T hBmeas gB = ½ • ⟦B_T² − B₀² − T⟧
 ```
-— approximate `s ↦ B_s` by left-endpoint step processes in `Lp 2 (trim_T)`,
-push through CLM-continuity (`itoIntegralCLM_T V_n` evaluates *by construction*
-to the Riemann sum), identify the limit via `itoSquared_L2_tendsto`. This
-bridges the two notions and gives the CLM its first genuine consumer —
-collapsing F1 and the no-consumer finding at once. It is the single
-highest-value next step in the whole Itô track.
+where `gB` is the Itô-`L²` realisation of `s ↦ Bₛ` (the `trim_T`-limit of its
+truncated left-endpoint step approximations). This **bridges the two notions and
+gives the CLM its first genuine consumer**, collapsing F1 and the no-consumer
+finding at once.
+
+The one-line sketch hid a real obstruction the implementation had to confront:
+Degenne's `SimpleProcess` mandates *bounded* coefficients (`bounded_value`), but
+`B_{t_k}` is an unbounded Gaussian — so `∑ B_{t_k}·ΔB_k` is **not** the elementary
+integral of any simple process. The honest fix clamp-truncates the coefficients
+(`clamp_m(B_{t_k})`, a genuine bounded `TBoundedSP`) and recovers the untruncated
+Riemann sum in the `L²` limit via the *unbounded*-`L²` discrete isometry
+(`ito_isometry_discrete` + dominated convergence on the clamp error), a diagonal
+`M(n)` choice, the QV-keystone convergence (`itoSquared_L2_tendsto_div2`), and an
+isometry-Cauchy completion. Build-enforced axioms-clean (`AxiomAudit.lean`).
 
 ---
 

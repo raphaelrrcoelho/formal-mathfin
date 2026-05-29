@@ -49,13 +49,22 @@ services:
       - ../tests:/app/tests:ro
       - ../quantfin.toml:/app/quantfin.toml:ro
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
+      # SHARED olean cache with the `lean-repl` daemon (same named volume).
+      # Without this, `verify` built oleans into its own ephemeral container
+      # layer (lost on `--rm`), so a `verify` lake build did NOT help the
+      # daemon — the daemon then re-built the same files from scratch on its
+      # next boot (observed 2026-05-29: a 655s rebuild of a file `verify` had
+      # just built). Sharing `lake_build_cache` means one `lake build` (via
+      # either service) populates a single consistent olean store both reuse.
+      # INVARIANT: never run `verify` and `lean-repl` concurrently — they share
+      # this volume and Lake's build lock (one writer at a time).
+      - lake_build_cache:/app/.lake
       # The repo root is the Lake project root (see
       # `tools.verify.config.LeanConfig.local_project`, default ".").
       # The lake-relevant pieces (lakefile.lean, lean-toolchain,
       # lake-manifest.json, QuantFin/, QuantFin.lean) are
       # bind-mounted RW so authoring on host (VS Code + Lean LSP) propagates
-      # into the container with no rebuild. Lake build artifacts (`.lake/`)
-      # end up on the host as well — gitignored.
+      # into the container with no rebuild.
       - ../QuantFin:/app/QuantFin
       - ../QuantFin.lean:/app/QuantFin.lean
       - ../lakefile.lean:/app/lakefile.lean

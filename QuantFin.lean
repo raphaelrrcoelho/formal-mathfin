@@ -86,6 +86,9 @@ import QuantFin.Foundations.ItoSquaringIdentity
 import QuantFin.Foundations.DiscreteItoPolynomial
 -- Continuous-time L² Itô formula for `f(x) = x²`: `∑ B ΔB → ½(B_T² − B_0² − T)`
 import QuantFin.Foundations.ItoFormulaSquaredL2
+-- Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a genuine `itoIntegralCLM_T` identity
+-- (the continuous Itô integral's first real consumer)
+import QuantFin.Foundations.ItoIntegralBrownian
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import QuantFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)

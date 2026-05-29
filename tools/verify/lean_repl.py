@@ -155,7 +155,23 @@ def main() -> int:
     print("Initializing Lean server (Mathlib + QuantFin load, ~3-5 min cold "
           "with persistent .lake volume; ~10-15 min cold on first ever start)...",
           flush=True)
-    backend._ensure_server()
+    try:
+        backend._ensure_server()
+    except Exception as exc:  # noqa: BLE001 — startup build/load is the failure point
+        # lean-interact's LocalProject runs `lake build` on init; a Lean error
+        # anywhere in the working tree (classically: a file edited *while* the
+        # daemon was booting) makes that build fail and would otherwise surface
+        # as an opaque traceback + container exit. Make the failure mode legible
+        # and actionable instead.
+        print(
+            "DAEMON STARTUP FAILED — the Lean project did not build. Almost always "
+            "this means the working tree has a Lean error (e.g. a file was edited "
+            "while the daemon was booting, or `lake build` was not green before "
+            "`up -d lean-repl`). Fix it so a plain `lake build` is green, then "
+            "restart the daemon. Underlying error:\n"
+            f"{exc}",
+            file=sys.stderr, flush=True)
+        return 1
     print(f"READY: listening on {HOST}:{PORT}", flush=True)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

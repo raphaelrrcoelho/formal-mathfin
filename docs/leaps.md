@@ -131,14 +131,24 @@ fully proven in Degenne's package. The deductive chain:
 
 All build-enforced axioms-clean (`QuantFin/AxiomAudit.lean`).
 
-## What's still gated (the continuous Itô frontier)
+## Leap 4, continuous — the bounded-horizon CLM, now consumed (2026-05-29)
 
-- **Leap 4, continuous.** The remaining step is the L²(adapted) Cauchy
-  completion over adapted processes — density of adapted simple integrands in
-  the adapted `L²`, the analogue of `WienerIntegralL2`'s completion for the
-  deterministic case. This — *not* increment independence — is the open piece,
-  and is what would clear the remaining Itô-gated `reduced_core`s in
-  [`coverage.md`](coverage.md).
+The L²(adapted) Cauchy completion is **built**: `ItoIntegralCLM.itoIntegralCLM_T`
+is the continuous Itô integral as a CLM `Lp 2 trim_T →L[ℝ] Lp 2 μ` with the
+isometry `‖∫₀ᵀ f dB‖ = ‖f‖` (density via `simpleAssembly_T_denseRange`, the
+orthogonal-complement → π-λ argument). Bounded horizon `[0,T]`; the unbounded-`ℝ≥0`
+CLM (σ-finite predictable exhaustion) stays gated.
+
+It now has its **first genuine consumer** (`Foundations/ItoIntegralBrownian.lean`,
+`itoIntegralCLM_T_brownian`): `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a real
+`itoIntegralCLM_T` identity, bridging the abstract CLM to the concrete
+quadratic-variation limit. The unbounded Gaussian integrand `s ↦ Bₛ` is realised
+as the `trim_T`-limit of its clamp-truncated left-endpoint step processes — the
+genuine construction of the Itô integral for an unbounded `L²` integrand.
+
+Still open: the *general* Itô formula / path-wise SDE form and the time-indexed
+martingale/isometry on `t ↦ (V●B)_t`, which would clear the remaining Itô-gated
+`reduced_core`s in [`coverage.md`](coverage.md).
 
 (The Margrabe `BSCallHyp`-grounding, previously gated here, is **done** — see
 Leap 3 above, `MargrabeGrounding.lean`.)

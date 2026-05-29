@@ -245,6 +245,12 @@ namespace QuantFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
   #print axioms QuantFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple
 
+/-! ## Keystone `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` through the CLM (its first genuine consumer) -/
+
+/-- info: 'QuantFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms QuantFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian
+
 /-! ## Discrete squaring identity (the pathwise Itô keystone) -/
 
 /-- info: 'QuantFin.discrete_squaring_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/

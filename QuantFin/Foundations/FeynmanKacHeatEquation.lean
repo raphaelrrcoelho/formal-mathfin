@@ -288,6 +288,51 @@ private lemma integrable_poly_heatKernel {s : ℝ} (hs : 0 < s) (c : ℝ) :
     ((integrable_heatKernel hs).const_mul c)).congr (Filter.Eventually.of_forall fun y => ?_)
   simp only [Pi.add_apply]; ring
 
+/-- **One-sided exponential growth is dominated by the heat kernel.** `e^w · K(t, w)` is
+integrable: dominated by `(e^t·√2)·K(2t, w)`, since completing the square gives
+`w − w²/(4t) − t = −(w−2t)²/(4t) ≤ 0`, i.e. `e^w·e^{−w²/2t} ≤ e^t·e^{−w²/4t}`. This is the
+integrability backbone for growth-controlled payoffs (the call satisfies `|g(z)| ≤ e^z`). -/
+private lemma integrable_exp_mul_heatKernel {t : ℝ} (ht : 0 < t) :
+    Integrable (fun w => Real.exp w * heatKernel t w) volume := by
+  have h2t : (0 : ℝ) < 2 * t := by positivity
+  refine Integrable.mono' ((integrable_heatKernel h2t).const_mul (Real.exp t * Real.sqrt 2))
+    ((Real.continuous_exp.mul (continuous_heatKernel t)).aestronglyMeasurable)
+    (ae_of_all _ fun w => ?_)
+  rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg (Real.exp_nonneg w) (heatKernel_nonneg ht w))]
+  have hsqrt : Real.sqrt (2 * Real.pi * (2 * t)) = Real.sqrt 2 * Real.sqrt (2 * Real.pi * t) := by
+    rw [show 2 * Real.pi * (2 * t) = 2 * (2 * Real.pi * t) from by ring,
+        Real.sqrt_mul (by norm_num : (0:ℝ) ≤ 2)]
+  have hexp : Real.exp w * Real.exp (-(w ^ 2) / (2 * t))
+      ≤ Real.exp t * Real.exp (-(w ^ 2) / (2 * (2 * t))) := by
+    rw [← Real.exp_add, ← Real.exp_add]
+    apply Real.exp_le_exp.mpr
+    have hkey : (0:ℝ) ≤ (w - 2 * t) ^ 2 / (4 * t) := by positivity
+    have hexpand : (w - 2 * t) ^ 2 / (4 * t)
+        = (t + -(w ^ 2) / (2 * (2 * t))) - (w + -(w ^ 2) / (2 * t)) := by
+      field_simp
+      ring
+    linarith [hexpand ▸ hkey]
+  rw [heatKernel, heatKernel, hsqrt]
+  rw [show Real.exp t * Real.sqrt 2 * ((Real.sqrt 2 * Real.sqrt (2 * Real.pi * t))⁻¹
+        * Real.exp (-(w ^ 2) / (2 * (2 * t))))
+      = (Real.sqrt (2 * Real.pi * t))⁻¹ * (Real.exp t * Real.exp (-(w ^ 2) / (2 * (2 * t)))) from by
+    rw [mul_inv]
+    have h2 : Real.sqrt 2 ≠ 0 := (Real.sqrt_pos.mpr (by norm_num)).ne'
+    field_simp]
+  rw [show Real.exp w * ((Real.sqrt (2 * Real.pi * t))⁻¹ * Real.exp (-(w ^ 2) / (2 * t)))
+      = (Real.sqrt (2 * Real.pi * t))⁻¹ * (Real.exp w * Real.exp (-(w ^ 2) / (2 * t))) from by ring]
+  exact mul_le_mul_of_nonneg_left hexp (by positivity)
+
+/-- `x`-derivative of the kernel `x ↦ K(t, z − x)`: `∂_x K(t, z−x) = ((z−x)/t)·K(t, z−x)`.
+The chain rule on `hasDerivAt_heatKernel_y` (`∂_y K = −(y/t)K`) composed with `∂_x(z−x) = −1`.
+This is what lets us differentiate `feynmanU g t x = ∫ g(z)·K(t,z−x) dz` in `x` by moving the
+derivative onto the (smooth) kernel — so `g` need only be continuous, never differentiated. -/
+private lemma hasDerivAt_heatKernel_sub {t : ℝ} (ht : 0 < t) (z x : ℝ) :
+    HasDerivAt (fun x => heatKernel t (z - x))
+      ((z - x) / t * heatKernel t (z - x)) x := by
+  have h := (hasDerivAt_heatKernel_y ht (z - x)).comp x ((hasDerivAt_id x).const_sub z)
+  simpa using h
+
 /-- **Differentiation under the integral for the Gaussian convolution.** For `t > 0` and `f`
 continuous and bounded (`|f| ≤ Cf`), `φ(s) = ∫ f(y)·K(s, y) dy` is differentiable at `t` with
 `φ′(t) = ∫ f(y)·∂_t K(t, y) dy`. The `s`-derivative `f(y)·K(s,y)·(y²−s)/(2s²)` is dominated,
