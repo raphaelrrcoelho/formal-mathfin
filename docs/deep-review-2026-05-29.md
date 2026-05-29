@@ -221,3 +221,47 @@ the current Mathlib pin — `mart-thm-2.2.9` (`hA_bdd` shape mismatch vs
 doesn't compile but is declared delivery-ready is itself an honesty risk;
 recommended to run `docker compose … verify benchmarks/<file>.json` on these
 three and fix or downgrade. Held for a verify-harness pass.
+
+## Upgrade-properly round — earning `full` back by doing the real work
+
+In response to "can't we move them all to full *properly*?": the answer is *only
+where the genuine derivation can be supplied* — relabeling up is the very
+overclaim this review removed. Going through the 13 reclassified entries:
+
+* **Already had the genuine derivation in the library** (the benchmark was just
+  wrapping the shallow lemma) — re-pointed, **earned back to `full`**, both
+  compile-verified:
+  - `mf-tangent-portfolio-foc` → `sharpeSqTwo_critical_iff_crossProduct_FOC`
+    (`SharpeFOCDerivation.lean`): the Sharpe FOC as a genuine `HasDerivAt`
+    critical-point characterisation (derivative + uniqueness + factorisation),
+    not the `ring` cross-product shadow `tangentTwo_satisfies_FOC`.
+  - `mf-kmv-merton-pd` → `kmvPD_eq_one_sub_survival_probability`
+    (`KMVMertonStructural.lean`): KMV PD = the *actual* risk-neutral default
+    probability `1 − Q(V_T>F)`, via `riskNeutralProb_S_T_gt_K` — not the `≤1`
+    bound.
+  - This also surfaced a NEW shadow: `mf-kmv-survival-Phi-d2` was `full` but
+    only proves the normal-CDF symmetry `1 − Φ(−x) = Φ(x)` (algebra), with the
+    *probabilistic* survival content actually living in the lemma now wrapped by
+    `mf-kmv-merton-pd`. Demoted `full`→`reduced_core`. (Net: 222→223 delivery,
+    now genuine.)
+* **Inherently not `full`** — no deeper theorem exists; they are one-line
+  definitional facts: `mf-american-intrinsic-bound` (`g ≤ max(g,·)` is true *by
+  definition*), `mf-newton-raphson-fixed-at-root` (the deeper theorem would be
+  Newton *convergence*, a different statement). Honest `reduced_core`.
+* **Gated on machinery not in Lean** — `full` needs a real new development:
+  `mf-american-supermartingale` (measure-theoretic conditional expectation /
+  filtration on the binomial model), `mf-markowitz-n-psd` (a probability space
+  of random returns to *derive* covariance-PSD instead of assuming it),
+  `mart-thm-2.3.6` (UI-martingale optional-stopping *equality* — the bounded
+  martingale equality is achievable from the submartingale inequality both ways,
+  a genuine but non-trivial follow-up), the 5 `markov_chains` (deep
+  ergodic / Perron-Frobenius theory). Honest `reduced_core` / `library_wrapper`
+  until that machinery lands.
+* **Genuinely a wrapper** — `bm-thm-5.1.5` is a faithful one-line Degenne
+  re-export: `library_wrapper` is the correct tier and already counts as
+  delivery-ready.
+
+A tangent-weight-*specific* full statement (`tangentWeightTwo` *is* a Sharpe
+critical point) is achievable — the algebra reduces to `tangentTwo_satisfies_FOC`
+after clearing the denominator `D` — but the denominator-cancellation needs
+careful Lean iteration; deferred rather than shipped unverified.

@@ -2547,18 +2547,18 @@
     },
     {
       "id": "mf-tangent-portfolio-foc",
-      "name": "Tangent Portfolio First-Order Condition (Two-Asset)",
-      "description": "At the closed-form tangent weight w₁^T = (σ₂²r₁ - ρσ₁σ₂r₂)/D, the Sharpe-ratio FOC r₂(Σw)₁ = r₁(Σw)₂ holds: marginal-variance contributions are proportional to marginal excess returns.",
+      "name": "Sharpe-ratio FOC via calculus (two-asset)",
+      "description": "The squared Sharpe ratio Sh²(w) has a critical point (HasDerivAt = 0) at weight w iff the cross-product condition r₂·(Σw)₁ = r₁·(Σw)₂ holds — the genuine first-order condition derived from HasDerivAt of Sh² (not an algebraic identity). Non-degeneracy: variance ≠ 0, expected excess return ≠ 0.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport QuantFin.Portfolio.TangentPortfolio\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen QuantFin\n\ntheorem tangentTwo_satisfies_FOC_thm (r₁ r₂ σ₁ σ₂ ρ : ℝ) :\n    let D := σ₂^2 * r₁ + σ₁^2 * r₂ - ρ * σ₁ * σ₂ * (r₁ + r₂)\n    let w_num := σ₂^2 * r₁ - ρ * σ₁ * σ₂ * r₂\n    let one_sub_w_num := σ₁^2 * r₂ - ρ * σ₁ * σ₂ * r₁\n    r₂ * (w_num * σ₁^2 + one_sub_w_num * ρ * σ₁ * σ₂) =\n      r₁ * (w_num * ρ * σ₁ * σ₂ + one_sub_w_num * σ₂^2) :=\n  QuantFin.tangentTwo_satisfies_FOC r₁ r₂ σ₁ σ₂ ρ\n"
+        "lean": "import Mathlib\nimport QuantFin.Portfolio.SharpeFOCDerivation\n\nopen MeasureTheory ProbabilityTheory Real\nopen QuantFin\n\ntheorem sharpe_foc_via_calculus_thm\n    (w r₁ r₂ σ₁ σ₂ ρ : ℝ)\n    (hV : QuantFin.varianceTwo w σ₁ σ₂ ρ ≠ 0)\n    (hE : QuantFin.expectedReturnTwo w r₁ r₂ ≠ 0) :\n    HasDerivAt (fun w' => QuantFin.sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔\n      r₂ * QuantFin.marginalVarOne w σ₁ σ₂ ρ = r₁ * QuantFin.marginalVarTwo w σ₁ σ₂ ρ :=\n  QuantFin.sharpeSqTwo_critical_iff_crossProduct_FOC w r₁ r₂ σ₁ σ₂ ρ hV hE\n"
       },
       "metadata": {
         "chapter": 10,
         "reference": "Tangent portfolio (Markowitz 1952, Sharpe 1964)",
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: an algebraic cross-product identity (`ring`) that the closed-form tangent weight satisfies. It is NOT a derivation of the first-order condition from Sharpe maximization — no calculus/gradient is taken here (that derivation lives in QuantFin/Portfolio/SharpeFOCDerivation.lean). Axioms-clean."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation: the FOC is the critical-point condition of the squared Sharpe ratio, proved via HasDerivAt + derivative-uniqueness + numerator factorisation (QuantFin.sharpeSqTwo_critical_iff_crossProduct_FOC). Axioms-clean."
       }
     },
     {
@@ -2707,24 +2707,24 @@
     },
     {
       "id": "mf-kmv-merton-pd",
-      "name": "KMV-Merton Risk-Neutral Probability of Default",
-      "description": "Under the Merton (1974) structural credit model, the risk-neutral PD at maturity is defined as kmvPD = Phi(-d_2^KMV), with firm value V_0 as spot and face debt F as strike. The proven theorem is the valid-probability bound kmvPD <= 1; the structural derivation that Phi(-d_2) equals Q(V_T < F) is not formalized.",
+      "name": "KMV-Merton risk-neutral probability of default = Q(V_T ≤ F)",
+      "description": "Under the Merton structural model with the firm value's risk-neutral law (BSCallHyp), the KMV default probability kmvPD equals the actual risk-neutral default probability 1 − Q({V_T > F}) — the genuine probabilistic content (via the BS risk-neutral exercise probability), not the algebraic Φ-symmetry identity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport QuantFin.FixedIncome.KMVMerton\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen QuantFin\n\ntheorem kmvPD_le_one_thm (V_0 F r σ_V T : ℝ) :\n    QuantFin.kmvPD V_0 F r σ_V T ≤ 1 :=\n  QuantFin.kmvPD_le_one V_0 F r σ_V T\n"
+        "lean": "import Mathlib\nimport QuantFin.FixedIncome.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen QuantFin\n\ntheorem kmv_pd_eq_risk_neutral_default_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : QuantFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    QuantFin.kmvPD V_0 F r σ_V T =\n      1 - (Q {ω | QuantFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal :=\n  QuantFin.kmvPD_eq_one_sub_survival_probability hV hF h\n"
       },
       "metadata": {
         "chapter": 12,
         "reference": "Merton 1974 structural credit; KMV (Moody's) commercial implementation",
         "difficulty": "advanced",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: kmvPD := Phi(-d_2^KMV) is the model definition; the proven content is the probability bound <= 1 (via Phi(x)+Phi(-x)=1 and Phi>=0). Lives in QuantFin/FixedIncome/KMVMerton.lean. Axioms-clean."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation: kmvPD = 1 − Q({V_T > F}) via QuantFin.kmvPD_eq_one_sub_survival_probability, which routes through riskNeutralProb_S_T_gt_K (the genuine BS risk-neutral exercise probability). Axioms-clean."
       }
     },
     {
       "id": "mf-kmv-survival-Phi-d2",
       "name": "KMV-Merton Survival Probability = Φ(d_2^KMV)",
-      "description": "1 − PD = Φ(d_2^KMV): the risk-neutral probability that the firm does not default at maturity.",
+      "description": "1 − kmvPD = Φ(d_2^KMV): the algebraic normal-CDF symmetry 1 − Φ(−x) = Φ(x). This is the algebraic identity only — NOT the probabilistic claim that 1 − kmvPD equals the survival probability Q({V_T > F}); that genuine probabilistic content is mf-kmv-merton-pd.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.FixedIncome.KMVMerton\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen QuantFin\n\ntheorem kmv_survival_eq_Phi_d2_thm (V_0 F r σ_V T : ℝ) :\n    1 - QuantFin.kmvPD V_0 F r σ_V T = Phi (QuantFin.kmvDistanceToDefault V_0 F r σ_V T) :=\n  QuantFin.kmv_survival_eq_Phi_d2 V_0 F r σ_V T\n"
@@ -2733,8 +2733,8 @@
         "chapter": 12,
         "reference": "Merton 1974 / KMV survival probability",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from QuantFin. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: the normal-CDF symmetry 1 − Φ(−DD) = Φ(DD) (= 1 − kmvPD = Φ(DD)), an algebraic identity. The probabilistic survival statement is covered by mf-kmv-merton-pd (kmvPD_eq_one_sub_survival_probability). Axioms-clean."
       }
     },
     {
