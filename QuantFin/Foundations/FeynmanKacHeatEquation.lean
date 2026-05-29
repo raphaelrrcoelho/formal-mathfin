@@ -29,9 +29,11 @@ This proof does **not** use Itô calculus. The mechanism is:
 
 ## Main results
 
-* `gaussianPDFReal_zero_heat_kernel` — the heat-kernel PDE on the Gaussian density.
-* `FeynmanKacHeatEquation.heat_equation` — `u(t, x) = E[g(x + B_t)]` satisfies
-  `∂_t u = (1/2) ∂²_x u`.
+* `heatConvolution_eq_add_integral_deriv` — the integrated heat-equation form
+  `u(t, x) = u(0, x) + ½ ∫₀ᵗ ∂²_x u(s, x) ds` for the Gaussian convolution.
+* `feynmanKac_boundary` / `feynmanU_eq_expectation` — `u(t, x) = E[g(x + B_t)]`.
+* `expectation_ito` / `expectation_ito_isPreBrownian` — the expectation-form Itô
+  identity `E[f(B_t)] = f(0) + ½ ∫₀ᵗ E[f''(B_s)] ds`.
 -/
 
 @[expose] public section

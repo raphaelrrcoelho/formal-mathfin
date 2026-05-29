@@ -15,7 +15,7 @@ such that `bsV(σ) = C_obs`. This is the bisection method's correctness
 statement: an initial bracket suffices for convergence to the unique implied
 vol.
 
-Built on `bsV_strictMono_in_σ` (from `ImpliedVolatility.lean`) which provides
+Built on `bsV_strictMonoOn_sigma` (from `ImpliedVolatility.lean`) which provides
 strict monotonicity, plus the intermediate value theorem on `Real.exp`-based
 continuity of `bsV` in `σ`.
 

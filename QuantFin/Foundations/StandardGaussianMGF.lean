@@ -49,8 +49,6 @@ for re-use, and serves as a navigational guide to the structural unification.
 
 * `integral_exp_affine_gaussianPDFReal_univ`: the affine-shifted MGF
   `∫ exp(α + β · z) · pdf(0, 1, z) = exp(α + β²/2)`.
-* `integral_exp_affine_standardNormal`: same, expressed via `gaussianReal 0 1`
-  measure (the form the existing BS proofs use after `integral_gaussianReal_eq_integral_smul`).
 
 The single-line corollary pattern: each downstream theorem unfolds a payoff
 of the form `S_0^k · exp(α + β · Z)`, factors `S_0^k · exp(α)` out, and applies

@@ -13,9 +13,12 @@ Two classical performance and money-management identities:
 * **Sharpe ratio** `S(μ, r_f, σ) = (μ - r_f) / σ` measures excess return per unit
   of risk. Under iid time aggregation, `L_T ~ N(T·μ, T·σ²)`, so the Sharpe ratio
   scales as `√T`.
-* **Kelly fraction** `f*(p, b) = (p·b - q) / b` (with `q = 1 - p`) maximizes the
-  expected log-growth `g(f) = p · log(1 + f·b) + q · log(1 - f)` of a wealth
-  process under a binary bet with win-probability `p` and payoff ratio `b`.
+* **Kelly fraction** `f*(p, b) = (p·b - q) / b` (with `q = 1 - p`) is the
+  *critical point* (`g'(f*) = 0`, the first-order condition — what is proved
+  here as `kellyGrowth_deriv_at_kelly`) of the expected log-growth
+  `g(f) = p · log(1 + f·b) + q · log(1 - f)` under a binary bet with
+  win-probability `p` and payoff ratio `b`. It is the maximizer because `g` is
+  concave — concavity is not formalized here.
 
 Results:
 

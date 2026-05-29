@@ -28,7 +28,7 @@ The proof leverages:
 
 * `bs_identity` — `S · ϕ(d₁) = K · e^{-r τ} · ϕ(d₂)`,
 * `hasDerivAt_bsd1_S`, `hasDerivAt_bsd1_tau` — chain-rule pieces for d₁,
-* `bs_pde_satisfied` — the BS price satisfies the BS PDE.
+* `bs_pde_holds` — the BS price satisfies the BS PDE.
 -/
 
 namespace QuantFin

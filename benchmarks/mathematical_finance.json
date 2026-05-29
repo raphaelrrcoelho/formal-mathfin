@@ -2595,18 +2595,18 @@
     },
     {
       "id": "mf-cvar-rockafellar-uryasev",
-      "name": "Rockafellar-Uryasev Form for Gaussian CVaR",
-      "description": "Gaussian CVaR rewrites as CVaR_α = VaR_α + σ · (ϕ(z)/(1-α) - z), the additive form of CVaR that motivates the variational characterization CVaR = inf_c [c + (1/(1-α))·E[(L-c)⁺]].",
+      "name": "Gaussian CVaR additive (Rockafellar-Uryasev-form) identity",
+      "description": "Gaussian CVaR rewrites as CVaR_α = VaR_α + σ · (ϕ(z)/(1-α) - z), the additive form. This is the algebraic identity only; it is NOT the Rockafellar-Uryasev variational theorem CVaR = inf_c [c + (1/(1-α))·E[(L-c)⁺]] (no infimum / E[(L-c)⁺] is formalized), which it merely motivates.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport QuantFin.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen QuantFin\n\ntheorem gaussianCVaR_rockafellarUryasev_thm (μ σ z α : ℝ) :\n    QuantFin.gaussianCVaR μ σ z α =\n      QuantFin.gaussianVaR μ σ z +\n        σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  QuantFin.gaussianCVaR_rockafellarUryasev μ σ z α\n"
+        "lean": "import Mathlib\nimport QuantFin.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen QuantFin\n\ntheorem gaussianCVaR_rockafellarUryasev_thm (μ σ z α : ℝ) :\n    QuantFin.gaussianCVaR μ σ z α =\n      QuantFin.gaussianVaR μ σ z +\n        σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  QuantFin.gaussianCVaR_eq_VaR_plus_tail_term μ σ z α\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Rockafellar-Uryasev 2000 (CVaR optimization)",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from QuantFin. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Algebraic additive-form identity (ring rearrangement of the gaussian CVaR/VaR closed forms), re-exported. Axioms-clean. NOT the R-U variational/infimum theorem, which is not formalized — hence reduced_core, not full."
       }
     },
     {

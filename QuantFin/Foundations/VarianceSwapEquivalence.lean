@@ -37,32 +37,33 @@ Both being equal to σ² is a structural identity of the BS model: the
 agrees with *two distinct empirical / replication-based measurements* of
 volatility.
 
-## Result
+## Results
 
-* `varianceSwap_equivalence`: at the BS model parameter level, both
-  forms equal `σ²`, hence agree.
+* `varianceSwap_equivalence`: the log-payoff functional `(2/T)·E[log(F/S_T)]`
+  equals `σ²` (a re-export of `varianceSwap_log_contribution`, the
+  static-replication half).
+* `varianceSwap_log_eq_QV_limit_value`: the **genuine two-functional
+  agreement** — the log-payoff form equals `σ²` AND the realised-variance
+  QV-limit `lim_n E_Q[Σ_k (Δlog S)²] → σ²·T` (the actual equipartition
+  `Tendsto`, `tendsto_expected_bsLogPrice_equipartition_sum`), under a
+  Brownian-quadratic-variation hypothesis on the driver.
 
-The full equivalence at the *random-variable* level (i.e., showing both
-functionals coincide on the path of `S_t`) would require the full
-Itô-to-log identity, which is gated. The model-parameter equivalence
-proved here is the structural fact downstream consumers actually need.
+The full equivalence at the *random-variable* level (showing both functionals
+coincide on the path of `S_t`, not just on their values) would require the
+continuous Itô-to-log identity, which is gated.
 -/
 
 namespace QuantFin
 
 open MeasureTheory ProbabilityTheory Real
 
-/-- **Variance-swap form equivalence** at the BS-model-parameter level.
-
-The log-payoff functional `(2/T) · E[log(F/S_T)]` equals `σ²`
-(`varianceSwap_log_contribution` from `BlackScholes/VarianceSwap.lean`),
-and the QV-limit functional `lim_n (1/T) · E[Σ (Δlog S)²]` also equals
-`σ²` (Phase 34). Both yielding the *same* `σ²` is the structural
-agreement that justifies calling either functional "the variance swap
-fair strike".
-
-This theorem packages both equalities as a single statement:
-**both are equal to `σ²` (hence to each other)**. -/
+/-- **Variance-swap log-payoff fair strike** `(2/T) · E[log(F/S_T)] = σ²` — the
+static-replication (Demeterfi-Derman-Kamal) half. A direct re-export of
+`varianceSwap_log_contribution` from `BlackScholes/VarianceSwap.lean`, kept here
+as the companion to the genuine two-functional agreement
+`varianceSwap_log_eq_QV_limit_value` below (which adds the realised-variance
+QV-limit side). This lemma alone is *only* the log-payoff equality, not the
+two-form agreement. -/
 theorem varianceSwap_equivalence {S_0 : ℝ} (hS : 0 < S_0)
     (r σ T : ℝ) (hT_pos : T ≠ 0) :
     -- Log-payoff form yields σ²:
@@ -71,20 +72,38 @@ theorem varianceSwap_equivalence {S_0 : ℝ} (hS : 0 < S_0)
       = σ ^ 2 :=
   varianceSwap_log_contribution hS r σ T hT_pos
 
-/-- **σ² is the unique value** of the model variance parameter
-identified by *both* the log-payoff replication form and the QV limit
-form. Whatever empirical / structural definition of σ² you take —
-log-payoff portfolio replication, realised variance over fine partitions
-— you get the same number. This is the model-level equivalence of the
-two variance-swap fair-strike characterisations. -/
-theorem varianceSwap_log_eq_QV_limit_value {S_0 : ℝ} (hS : 0 < S_0)
-    (r σ T : ℝ) (hT_pos : T ≠ 0) (_hT_nonneg : 0 ≤ T) :
-    -- Log-payoff form
+/-- **The two variance-swap characterisations agree** — both genuinely
+recover the model variance. For Brownian dynamics `B` (a
+`BrownianQuadraticVariation`), the two *distinct functionals* of the BS
+log-price both yield `σ²`:
+
+* the **log-payoff static-replication** integral equals `σ²`
+  (`varianceSwap_log_contribution`), and
+* the **realised-variance QV limit** — the *actual* equipartition functional
+  `lim_n E_Q[Σ_k (Δlog S)²]` — converges to `σ²·T`
+  (`tendsto_expected_bsLogPrice_equipartition_sum`, Phase 34).
+
+Unlike a tautological `σ² = σ²` restatement, **both conjuncts here are the
+genuine functionals**: the second is the honest `Tendsto` of the squared-
+increment sum, not a placeholder. `hB` and `hT_nonneg` are load-bearing (they
+feed the QV-limit theorem). This is the real model-level equivalence of the
+static-replication and realised-variance characterisations of the fair
+strike. -/
+theorem varianceSwap_log_eq_QV_limit_value
+    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
+    {B : ℝ → Ω → ℝ} (hB : BrownianQuadraticVariation μ B)
+    {S_0 : ℝ} (hS : 0 < S_0) (r σ : ℝ) {T : ℝ} (hT_pos : T ≠ 0) (hT_nonneg : 0 ≤ T) :
+    -- Log-payoff (static-replication) form = σ²
     (2 / T) * (∫ z, Real.log ((S_0 * Real.exp (r * T)) /
         (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))) ∂(gaussianReal 0 1))
       = σ ^ 2 ∧
-    -- QV-limit form yields the same σ² (× T, so dividing by T gives σ²)
-    σ ^ 2 * T = σ ^ 2 * T := by
-  refine ⟨varianceSwap_log_contribution hS r σ T hT_pos, rfl⟩
+    -- Realised-variance QV-limit form → σ²·T (the genuine equipartition functional)
+    Filter.Tendsto
+      (fun n : ℕ => ∫ ω, ∑ k ∈ Finset.range (n + 1),
+        (bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -
+         bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ)
+      Filter.atTop (nhds (σ ^ 2 * T)) :=
+  ⟨varianceSwap_log_contribution hS r σ T hT_pos,
+   tendsto_expected_bsLogPrice_equipartition_sum hB S_0 r σ hT_nonneg⟩
 
 end QuantFin

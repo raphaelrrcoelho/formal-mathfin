@@ -115,3 +115,62 @@ options:
 
 I lean to (2) on zero-slop grounds, but it touches your Itô-climb staging, so
 it's your call. Everything else in this review is already applied and builds.
+
+---
+
+# Library-wide sweep (2026-05-29) — "are there more like this?"
+
+Four adversarial reviewers fanned out over all 148 files / 10 directories,
+hunting the same deviation patterns (overclaiming docstring on `ring`/`rfl`
+proofs; spec-with-axiomatized-conclusion; wrapper lemmas; premature infra;
+vacuity; tautology-dressed-as-connection). Every substantive finding was
+re-verified against source before action. **Verdict: the library is
+overwhelmingly clean and honest** — consistent with the 2026-05-26 audit. The
+residual deviations were few, and notably the *same two patterns* this session
+introduced in the Itô files recurred in a handful of older files. All
+Lean-level + doc-level findings are FIXED; one benchmark-status overclaim
+FIXED; build green 8653/8653, router test green, 0 placeholders.
+
+## Genuine deviations found + fixed
+
+| # | File | Pattern | Severity | Fix |
+|---|---|---|---|---|
+| L1 | `Foundations/VarianceSwapEquivalence.lean` `varianceSwap_log_eq_QV_limit_value` | **tautology-dressed-as-connection** — second conjunct was `σ²·T = σ²·T` by `rfl`, with an "equivalence of two characterisations" docstring; the imported QV-limit functional was never referenced (the *exact* `gbm_diffusion` pattern). | moderate→serious | **FIXED, principled** — restated to consume the genuine `tendsto_expected_bsLogPrice_equipartition_sum` (a real `Tendsto → σ²·T`) under a `BrownianQuadraticVariation` hypothesis; both conjuncts now real, `hB`/`hT_nonneg` load-bearing. Mirrors the `gbm_solves_sde` fix. |
+| L2 | `docs/bridges.md` row 41 (Vasicek) | **overclaim contradicting the file's own docstring** — "First full SDE pricing in the library — variance computation uses simple-Itô-isometry", but `VasicekSDE.lean` posits mean/variance as bare `def`s, imports no isometry, proves only `positivity` + `t=0`. (The GBM-SDE overclaim pattern.) | serious (docs) | **FIXED** — row rewritten to match the file: "terminal-distribution form (stated, not derived)", SDE→law derivation "open, gated on the continuous Itô integral". |
+| L3 | `RiskMeasures/RockafellarUryasev.lean` + benchmark `mf-cvar-rockafellar-uryasev` | **named after a famous variational theorem, proves a `ring` identity** — `unfold;ring` rearrangement of the CVaR/VaR defs (no `inf`, no `E[(L−c)⁺]`); declared `formalization_status: full` in the benchmark (the `bs_pde`-named-after-no-arbitrage pattern, in the delivery layer). | moderate | **FIXED** — lemma renamed `gaussianCVaR_rockafellarUryasev → gaussianCVaR_eq_VaR_plus_tail_term` (the honest name the Results list already used); title/docstring reframed to "additive form, NOT the variational theorem"; benchmark status `full → reduced_core` with honest scope; lean ref updated. (full 211→210, reduced 16→17.) |
+| L4 | 5 stale docstrings: `FeynmanKacHeatEquation` (listed 2 nonexistent thms), `StandardGaussianMGF` (1 nonexistent), `StatePrices` (name drift), `BlackScholes/PDE` (`bs_pde_satisfied`→`bs_pde_holds`), `BisectionIV` (`bsV_strictMono_in_σ`→`bsV_strictMonoOn_sigma`) | zero-slop / concept-clarity (docstrings naming theorems that don't exist) | minor | **FIXED** — all corrected to the actual theorem names. |
+| L5 | `Performance/Ratios.lean` module docstring | FOC-as-optimality — "Kelly fraction *maximizes* log-growth" but only `g'(f*)=0` (the FOC) is proved (per-lemma docstrings were already correct). | minor | **FIXED** — reworded to "critical point (`g'(f*)=0`, the FOC proved here); maximizer because `g` concave — concavity not formalized." |
+
+## Deferred (structural, NOT honesty violations — flagged, not yet acted)
+
+- **Wrapper lemmas** (`feedback_avoid_wrapper_lemmas`): `FixedIncome/ForwardRate.lean`
+  `forwardRate_nonFlat_eq` (a byte-identical re-export of the lemma above it);
+  `Binomial/Bermudan.lean` `bermudan_le_american`/`european_le_bermudan` (one-line
+  `Finset.sup'_mono` wrappers). Honestly disclosed in their headers (no
+  overclaim), so deferred — delete/inline in a structural-cleanup pass.
+- **Benchmark `formalization_status` re-audit**: the Rockafellar mislabel
+  (`full` that was `reduced_core`) surfaced *by accident* via the rename. The
+  agents audited the Lean files, not systematically the 234 benchmark status
+  *declarations*. `mathematical_finance.json` is 185/186 `full` — mostly
+  justified (closed-form Greeks ARE genuine `HasDerivAt` derivations, per the
+  BS audit), but a dedicated pass cross-checking every `full` declaration
+  against its proof tactic is the natural next sweep. Recommended, not yet run.
+
+## What the sweep confirmed is genuinely sound (spot-checked, not adjusted)
+
+- The deep Foundations probability machinery (BrownianMartingale, WienerIntegralL2,
+  ItoIsometryAdapted, QuadraticVariationL2, FeynmanKac, LpContinuousMartingaleConvergence,
+  GaussianGirsanov) — genuine multi-step derivations, accurate docstrings.
+- BlackScholes (40 files) — **entire cluster clean**: every Greek a real
+  `HasDerivAt` derivation; pricing via genuine Gaussian integration; `*Hyp`
+  bundles pin the *law of the driver*, not the price (no conclusion-smuggling);
+  unused hypotheses are `_`-prefixed AND disclosed.
+- Binomial/Futures/FixedIncome (35 files) — clean apart from L2 + the two
+  wrappers; the substantive files (PathReflection, CRRConvergence, DriftLimit,
+  DurationSensitivity, FTAPTwoState, ReplicatingUniqueness) are real
+  first-principles derivations.
+- Portfolio/Performance/RiskMeasures/Actuarial/DeFi (27 files) — clean apart
+  from L3 + L5; the FOC files (`SharpeFOCDerivation`, `RiskParityFOC`,
+  `TangentPortfolio`) are *scrupulously* honest (explicit "verifies by algebra,
+  does not derive from maximization" disclaimers); `Markowitz` genuinely proves
+  global minimality (companion `_ge_min` via completing-the-square).

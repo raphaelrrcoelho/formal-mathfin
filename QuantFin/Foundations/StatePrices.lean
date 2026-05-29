@@ -30,7 +30,8 @@ specific `q` given by the model.
 ## Results
 
 * `statePricePricing`: definition `V_0 = ∑ q_i · X_i`.
-* `statePricePricing_zero_payoff`: `V_0(0) = 0`.
+* `statePricePricing_zero`: `V_0(0) = 0`.
+* `statePricePricing_one`: `V_0(1) = ∑ q_i` (unit-payoff price = ∑ state prices).
 * `statePricePricing_const`: `V_0(c · 1) = c · ∑ q_i` (unit-payoff times constant).
 * `statePricePricing_add`: linearity in `X`.
 * `statePricePricing_smul`: scalar homogeneity in `X`.

@@ -7,46 +7,44 @@ import Mathlib
 import QuantFin.RiskMeasures.Gaussian
 
 /-!
-# Rockafellar-Uryasev CVaR identity for gaussian losses
+# Gaussian CVaR additive decomposition (the Rockafellar-Uryasev *form*)
 
-The Rockafellar-Uryasev variational form of CVaR is
-
-  `CVaR_α(L) = inf_{c ∈ ℝ} {c + (1/(1−α)) · E[(L − c)⁺]}`,
-
-and the infimum is achieved at `c* = VaR_α(L)`. Under continuous
-distributions this yields the *additive identity*
-
-  `CVaR_α = VaR_α + (1/(1−α)) · E[(L − VaR_α)⁺]`.
-
-For gaussian losses `L ~ N(μ, σ²)` with right-tail quantile `z = Φ⁻¹(α)`,
-the conditional expectation `E[(L − VaR_α)⁺] = σ · ϕ(z)`, so the additive
-identity becomes
+**Scope (honest).** This file formalizes ONLY the *algebraic* additive
+decomposition of the gaussian closed-form CVaR
 
   `CVaR_α = VaR_α + (σ / (1−α)) · ϕ(z)`,
 
-which is the equation we already have closed-form forms for. This file
-states the algebraic identity directly.
+written in the additive shape `VaR + (1/(1−α)) · tail-term`. It does **not**
+formalize the Rockafellar-Uryasev *variational theorem*
+
+  `CVaR_α(L) = inf_{c} {c + (1/(1−α)) · E[(L − c)⁺]}, attained at c* = VaR_α`,
+
+which is the deep content of R-U (no `inf`, no `E[(L−c)⁺]`, no minimization is
+proved here). The variational form is given as background motivation only; what
+is machine-checked is the gaussian additive identity, equivalent to (a
+rearrangement of) `RiskMeasures.Gaussian.gaussianCVaR_sub_VaR`.
 
 Result:
 
-* `gaussianCVaR_eq_VaR_plus_tail_term`: `CVaR = VaR + (σ/(1−α)) · ϕ(z)`,
-  the Rockafellar-Uryasev decomposition of CVaR for gaussian losses.
+* `gaussianCVaR_eq_VaR_plus_tail_term`: `CVaR = VaR + σ·(ϕ(z)/(1−α) − z)`, the
+  additive (R-U-shaped) decomposition of the gaussian CVaR closed form.
 -/
 
 namespace QuantFin
 
 open ProbabilityTheory Real
 
-/-- **Rockafellar-Uryasev decomposition** for gaussian losses, after
-computing `E[(Z − z)⁺] = ϕ(z) − z·(1 − α)` (the gaussian tail mean):
+/-- **Gaussian CVaR additive decomposition** (the Rockafellar-Uryasev *shape*,
+not the variational theorem — see module header). Rearranging the gaussian
+closed forms,
 
 `CVaR_α = VaR_α + (σ / (1 − α)) · [ϕ(z) − z · (1 − α)]
        = VaR_α + σ · [ϕ(z)/(1 − α) − z]`.
 
-This is the same identity as `gaussianCVaR_sub_VaR`, rearranged into the
-R-U form `VaR + (1/(1−α)) · tail-expectation` that motivates the variational
-characterization `CVaR_α = min_c [c + (1/(1−α)) · E[(L − c)⁺]]`. -/
-lemma gaussianCVaR_rockafellarUryasev (μ σ z α : ℝ) :
+Pure algebraic rearrangement (`ring`) of the definitions `gaussianCVaR` and
+`gaussianVaR` — the same content as `gaussianCVaR_sub_VaR`, in additive form.
+It does not establish the R-U infimum characterization. -/
+lemma gaussianCVaR_eq_VaR_plus_tail_term (μ σ z α : ℝ) :
     gaussianCVaR μ σ z α =
       gaussianVaR μ σ z +
         σ * (gaussianPDFReal 0 1 z / (1 - α) - z) := by
