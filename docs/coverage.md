@@ -33,6 +33,28 @@ python3 -m tools.verify.coverage_report
 ```
 
 Coverage as of 2026-05-20 (extended quant-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work; ninth pass: Phase 5 broader quant-finance — fixed-income ZCB pricing/yield/duration/convexity, two-asset Markowitz portfolio theory with completing-the-square factorization, CAPM beta + portfolio linearity — 12 theorems extending the project beyond derivatives pricing into fixed income and portfolio theory; tenth pass: Phase 6 quant-risk + N-asset portfolio + bond immunization — Gaussian VaR/CVaR closed forms with affine/scaling identities, bond portfolio rate sensitivity + Redington-style first-order immunization, N-asset Markowitz variance via Finset double sum with diagonal/iid/PSD/two-asset specializations — 15 theorems; eleventh pass: Phase 7 performance / coherent risk / fixed-income depth / static bounds / two-fund separation — Sharpe (√T scaling + scale invariance) + Kelly criterion, gaussian VaR/CVaR coherent risk-measure axioms (translation, homogeneity, monotonicity, gaussian subadditivity via joint-stdev triangle inequality), annuity geometric-series closed form + forward/spot consistency + coupon-bond YTM monotonicity, Phi ≤ 1 + BS call/put price upper bounds + box-spread arbitrage identity, capital market line equation + Sharpe invariance + two-fund decomposition — 23 theorems extending the project into performance measurement, axiomatic risk, and multi-fund portfolio theory; twelfth pass: Phase 8 extended performance / second-order immunization / Asian option inequality — Sortino/Treynor/Information ratios + tracking-error decomposition, second-derivative bond rate sensitivity ∂²P/∂r² = C_P·P + Redington second-order convexity-matching immunization, two-element and equal-weight n-element AM-GM with two-date geometric ≤ arithmetic Asian payoff bound — 13 theorems; **thirteenth pass: Phase 9 credit-risk + strike Greeks + multi-period Kelly** — reduced-form credit spread under constant hazard with survival monotonicity, BS strike-direction derivatives (∂_K bsV, ∂_K bsP, ∂²_K bsV) via magic-identity collapse + put-call parity, multi-period Kelly criterion with myopia + fraction sign analysis — 14 theorems):
+**222 / 251 delivery-ready** (203 full + 19 library wrappers), 29 reduced cores, 0 placeholders.
+
+> **Honesty re-audit (2026-05-29).** A dedicated benchmark-`formalization_status`
+> sweep (four adversarial reviewers over all 11 files / 251 theorems, every
+> finding source-verified) reclassified **13 over-credited entries**, dropping
+> delivery-ready from 235→222. The pattern was the same one found in the Itô
+> stack: a benchmark named after a deep theorem but proving only an algebraic
+> shadow / a conclusion read off a hypothesis / an unfaithful library wrapper.
+> Reclassified `full`→`reduced_core`: `mf-tangent-portfolio-foc` (FOC by `ring`,
+> no calculus), `mf-american-supermartingale` + `mf-american-intrinsic-bound`
+> (`le_max` on the Bellman def, not the measure-theoretic supermartingale),
+> `mf-kmv-merton-pd` (only the ≤1 bound proved), `mf-markowitz-n-psd`
+> (conclusion-in-hypothesis), `mf-newton-raphson-fixed-at-root` (definitional
+> unfold), `mart-thm-2.3.6` (wraps the bounded-time submartingale *inequality*,
+> not the UI optional-stopping *equality*). `full`→`library_wrapper`:
+> `bm-thm-5.1.5` (one-line Degenne re-export). `library_wrapper`→`reduced_core`:
+> the 5 `markov_chains` entries whose `library_wrapper` credit rested on the
+> **dropped Isabelle backend** while the active Lean code is a structural
+> specification (matching how `poisson_processes` already marks its Isabelle-
+> backed items). See `docs/deep-review-2026-05-29.md`.
+
+The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 
 **Sixteenth pass (Phase 12, 2026-05-20)**: broad quant-finance breadth expansion — chooser / capped / spreads / butterfly / lookback / Bermudan-sandwich (Wave 1), n-th moment + power forward + time-varying hazard credit (Wave 2), Breeden-Litzenberger + bisection IV bracket (Wave 3), risk parity + Black-Litterman 1D + tangent portfolio FOC (Wave 4), forward rate from non-flat spot + Vasicek deterministic ODE (Wave 5), Rockafellar-Uryasev CVaR + spectral risk + Herfindahl-Hirschman (Wave 6), annuity-due + Gompertz cumulative force (Wave 7), Merton-1973 strict-dominance American = European (Wave 9) — 26 new benchmark entries spanning 17 new Lean modules.

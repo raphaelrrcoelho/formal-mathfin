@@ -20,7 +20,7 @@
     {
       "id": "bm-thm-5.1.5",
       "name": "BM Martingale Property",
-      "description": "Theorem 5.1.5: B_t is a martingale w.r.t. its natural filtration. Also B_t² - t is a martingale.",
+      "description": "Theorem 5.1.5: B_t is a martingale w.r.t. its natural filtration -- a single-line re-export of Degenne's IsPreBrownian.isMartingale. (The companion 'B_t^2 - t is a martingale' is squareSubTime_isMartingale in QuantFin/Foundations/BrownianMartingale.lean, a separate result, not this entry.)",
       "domain": "brownian_motion",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.Foundations.BrownianMartingale\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Theorem 5.1.5: a pre-Brownian motion adapted to a filtration with future\n    increments independent of the past is a martingale w.r.t. that\n    filtration. Direct re-export of Degenne's `IsPreBrownian.isMartingale`\n    from `BrownianMotion/Gaussian/BrownianMotion.lean`. -/\ntheorem brownian_is_martingale\n    {P : Measure Ω} [IsProbabilityMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian B 𝓕 P] :\n    Martingale B 𝓕 P :=\n  IsPreBrownian.isMartingale B 𝓕 P\n"
@@ -33,8 +33,8 @@
           "sympy": "import sympy as sp\n\n# Verify E[B_t - B_s | F_s] = 0 using Gaussian properties\n# B_t - B_s ~ N(0, t-s), independent of F_s\n# So E[B_t | F_s] = E[B_s + (B_t - B_s) | F_s] = B_s + 0 = B_s\nt, s = sp.symbols('t s', positive=True)\nmu = 0  # E[B_t - B_s] = 0\nresult = {'verified': mu == 0, 'mode': 'symbolic', 'note': 'E[increment] = 0 confirms martingale property'}"
         },
         "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
-        "formalization_status": "full",
-        "formalization_scope": "Real Lean derivation of Theorem 5.1.5 (Brownian motion is a martingale w.r.t. its filtration). The proof lives in lean/QuantFin/BrownianMartingale.lean (part of a real Lake-built library; see python.config.LeanConfig.local_project) and uses Mathlib condExp_indep_eq + condExp_of_stronglyMeasurable + condExp_add together with Degenne IsPreBrownian.integrable_eval + IsPreBrownian.hasLaw_sub. Hypothesis structure is BrownianMartingaleHyp (IsPreBrownian + StronglyAdapted + future-increment-independent-of-past). The benchmark snippet just imports the compiled lemma and re-exports it as a top-level theorem. Axioms-clean per #print axioms.",
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "library_wrapper: single-line re-export of IsPreBrownian.isMartingale from the BrownianMotion (Degenne) package; statement matches. Axioms-clean.",
         "v430_recovery": {
           "from": "reduced_core",
           "to": "full",

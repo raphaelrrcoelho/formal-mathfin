@@ -589,14 +589,14 @@
         "chapter": 9,
         "reference": "American option intrinsic bound (Shreve I 4.4)",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Immediate from americanPrice (n+1) S = max(g S, continuation) ≥ g S. Lives in lean/QuantFin/AmericanBinomial.lean. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: le_max_left on the definitional Bellman max (American price >= intrinsic g). Lives in QuantFin/Binomial/American.lean. Axioms-clean."
       }
     },
     {
       "id": "mf-american-supermartingale",
-      "name": "American Discounted Price is Supermartingale",
-      "description": "The one-period continuation at V_{n+1} is bounded above by V_{n+1} itself: discounted American price is a supermartingale under the risk-neutral measure.",
+      "name": "American Price Dominates One-Step Continuation (Bellman max)",
+      "description": "The one-period continuation value at V_{n+1} is bounded above by V_{n+1} = max(g, continuation), by le_max_right. This is the Bellman-max dominance; it is NOT the measure-theoretic supermartingale property (no conditional expectation / filtration statement is formalized).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.Binomial.American\n\nopen QuantFin\n\ntheorem american_supermartingale_thm (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    QuantFin.binomialOptionPriceOnePeriod u d r\n        (QuantFin.americanPrice u d r g n (S * u))\n        (QuantFin.americanPrice u d r g n (S * d))\n      ≤ QuantFin.americanPrice u d r g (n + 1) S :=\n  QuantFin.americanPrice_supermartingale u d r g n S\n"
@@ -605,8 +605,8 @@
         "chapter": 9,
         "reference": "American supermartingale property (Shreve I 4.4, Hull 21.5)",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct from Bellman max: V_{n+1} = max(g S, continuation) ≥ continuation. Lives in lean/QuantFin/AmericanBinomial.lean. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: le_max_right on the definitional Bellman max. Lives in QuantFin/Binomial/American.lean. Axioms-clean. The risk-neutral supermartingale property proper is not formalized."
       }
     },
     {
@@ -1261,8 +1261,8 @@
         "chapter": 11,
         "reference": "Positive-semidefinite covariance (Bodie-Kane-Marcus Ch 7; Markowitz 1952)",
         "difficulty": "beginner",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof from definitional unfolding (PSD hypothesis applied at w). Lives in lean/QuantFin/MarkowitzNAsset.lean. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: conclusion-in-hypothesis. The PSD hypothesis (forall v, 0 <= sum sum v_i v_j sigma_ij) is instantiated at the specific weights w (h_psd w); there is no derivation that the covariance matrix IS PSD. Lives in QuantFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
       }
     },
     {
@@ -2557,8 +2557,8 @@
         "chapter": 10,
         "reference": "Tangent portfolio (Markowitz 1952, Sharpe 1964)",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from QuantFin. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: an algebraic cross-product identity (`ring`) that the closed-form tangent weight satisfies. It is NOT a derivation of the first-order condition from Sharpe maximization — no calculus/gradient is taken here (that derivation lives in QuantFin/Portfolio/SharpeFOCDerivation.lean). Axioms-clean."
       }
     },
     {
@@ -2708,7 +2708,7 @@
     {
       "id": "mf-kmv-merton-pd",
       "name": "KMV-Merton Risk-Neutral Probability of Default",
-      "description": "Under the Merton (1974) structural credit model, the risk-neutral PD at maturity equals Φ(−d_2^KMV), where d_2^KMV is the BS d_2 with firm value V_0 as spot and face debt F as strike.",
+      "description": "Under the Merton (1974) structural credit model, the risk-neutral PD at maturity is defined as kmvPD = Phi(-d_2^KMV), with firm value V_0 as spot and face debt F as strike. The proven theorem is the valid-probability bound kmvPD <= 1; the structural derivation that Phi(-d_2) equals Q(V_T < F) is not formalized.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.FixedIncome.KMVMerton\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen QuantFin\n\ntheorem kmvPD_le_one_thm (V_0 F r σ_V T : ℝ) :\n    QuantFin.kmvPD V_0 F r σ_V T ≤ 1 :=\n  QuantFin.kmvPD_le_one V_0 F r σ_V T\n"
@@ -2717,8 +2717,8 @@
         "chapter": 12,
         "reference": "Merton 1974 structural credit; KMV (Moody's) commercial implementation",
         "difficulty": "advanced",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from QuantFin. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: kmvPD := Phi(-d_2^KMV) is the model definition; the proven content is the probability bound <= 1 (via Phi(x)+Phi(-x)=1 and Phi>=0). Lives in QuantFin/FixedIncome/KMVMerton.lean. Axioms-clean."
       }
     },
     {
@@ -2941,8 +2941,8 @@
         "chapter": 14,
         "reference": "Newton-Raphson root-finding (classical numerical analysis)",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from QuantFin. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: definitional unfold (f sigma = 0 implies sigma - f sigma / f' sigma = sigma). Honestly named (no Newton convergence/rate claimed). Lives in QuantFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
       }
     },
     {

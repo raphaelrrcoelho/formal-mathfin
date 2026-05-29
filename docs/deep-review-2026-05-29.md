@@ -174,3 +174,50 @@ FIXED; build green 8653/8653, router test green, 0 placeholders.
   `TangentPortfolio`) are *scrupulously* honest (explicit "verifies by algebra,
   does not derive from maximization" disclaimers); `Markowitz` genuinely proves
   global minimality (companion `_ge_min` via completing-the-square).
+
+---
+
+# Benchmark-status re-audit (2026-05-29) — the delivery-counting layer
+
+The library files were clean; the *benchmark `formalization_status` declarations*
+were a separate surface the file-audit didn't systematically cover (the
+Rockafellar mislabel had surfaced only by accident, via a rename). So: four
+adversarial reviewers over all 11 benchmark files / 251 theorems, tracing each
+declared status to the underlying lemma's actual statement+proof. Criterion: the
+disqualifier is NOT "uses `ring`" (put-call parity by `ring` is genuinely
+`full`); it is the *Rockafellar gap* — name/description evoking more than the
+proof delivers (mode A), conclusion-smuggled-into-a-hypothesis (mode B), or an
+unfaithful library wrapper (mode C).
+
+**Result: 13 over-credited entries reclassified; delivery-ready 234 → 222**
+(full 210→203, library 24→19, reduced 17→29, placeholder 0). Router test green.
+The vast majority of `full` declarations are genuine (BS Greeks are real
+`HasDerivAt` derivations; pricing is real Gaussian integration; closed-form
+algebra on independently-defined quantities is legitimately `full`). The 13:
+
+| benchmark | was | now | why |
+|---|---|---|---|
+| `mf-tangent-portfolio-foc` | full | reduced_core | `by ring` cross-product identity named "FOC from Sharpe maximization" — no calculus (mode A; exact Rockafellar twin) |
+| `mf-american-supermartingale` | full | reduced_core | `le_max_right` on the Bellman def; "supermartingale under risk-neutral measure" not formalized (A) |
+| `mf-american-intrinsic-bound` | full | reduced_core | `le_max_left` on the Bellman def (definitional) |
+| `mf-kmv-merton-pd` | full | reduced_core | only the `≤1` probability bound proved; "PD = Φ(−d₂)" is the model def (A) |
+| `mf-markowitz-n-psd` | full | reduced_core | `h_psd w` — PSD hypothesis instantiated at `w` (mode B, conclusion-in-hypothesis) |
+| `mf-newton-raphson-fixed-at-root` | full | reduced_core | definitional unfold (`f σ=0 ⟹ σ−f σ/f' σ=σ`) |
+| `mart-thm-2.3.6` "Optional Stopping" | library_wrapper | reduced_core | wraps the **bounded-time submartingale inequality**, claims the **UI-martingale equality** `E[M_τ]=E[M_0]` (mode C) |
+| `bm-thm-5.1.5` "BM Martingale" | full | library_wrapper | one-line `:= IsPreBrownian.isMartingale` (Degenne re-export); also "B²−t" claim isn't in the snippet |
+| `mc-thm-1.2.11/1.3.12/1.4.25/1.4.32/1.4.40` (×5) | library_wrapper | reduced_core | `library_wrapper` credit rested on the **dropped Isabelle backend**; active Lean is a structure-with-conclusion-field + projection (matches how `poisson_processes` already tiers its Isabelle-backed items) |
+
+Also softened (kept `library_wrapper`, faithful for the a.s. part): `mart-thm-2.5.1`
+("L² convergence" → a.s.; the in-L² half isn't wrapped) and `mart-thm-2.5.3`
+(integrability of the limit not separately wrapped). The benchmark *code* was
+untouched in all cases — only metadata/name/description.
+
+**Build-staleness flagged (separate from status, NOT yet fixed — needs the
+verify harness to confirm):** three benchmark snippets may not compile against
+the current Mathlib pin — `mart-thm-2.2.9` (`hA_bdd` shape mismatch vs
+`martingaleTransform_isMartingale`), `cv-cond-exp-tower` (lowercase
+`condexp_condexp_of_le`, renamed to `condExp_…`), `dist-thm-B.1.2-affine`
+(`gaussianReal_const_mul`/`_add_const` possibly renamed). A benchmark that
+doesn't compile but is declared delivery-ready is itself an honesty risk;
+recommended to run `docker compose … verify benchmarks/<file>.json` on these
+three and fix or downgrade. Held for a verify-harness pass.

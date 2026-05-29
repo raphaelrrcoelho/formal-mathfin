@@ -19,8 +19,8 @@
     },
     {
       "id": "mart-thm-2.3.6",
-      "name": "Optional Stopping Theorem",
-      "description": "Theorem 2.3.6: If M is a uniformly integrable martingale and τ is a stopping time, then E[M_τ] = E[M_0]",
+      "name": "Optional Sampling Inequality (bounded times, submartingale)",
+      "description": "Submartingale optional-sampling inequality: for stopping times tau <= sigma bounded by some n, E[stoppedValue f tau] <= E[stoppedValue f sigma] (Mathlib Submartingale.expected_stoppedValue_mono). This is the bounded-time submartingale inequality, NOT the uniformly-integrable-martingale equality E[M_tau] = E[M_0] (which needs the UI + unbounded-tau argument, not wrapped here).",
       "domain": "stopping_times",
       "code": {
         "lean": "import Mathlib.Probability.Martingale.OptionalStopping\n\nopen MeasureTheory ProbabilityTheory\n\n-- Submartingale version of the optional stopping theorem (Mathlib's\n-- `Submartingale.expected_stoppedValue_mono`): for stopping times τ ≤ σ\n-- bounded by some n, E[stoppedValue f τ] ≤ E[stoppedValue f σ].\n-- For a martingale this gives equality both ways and hence E[M_τ] = E[M_0].\nexample {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    {𝒢 : Filtration ℕ m0} [SigmaFiniteFiltration μ 𝒢]\n    {f : ℕ → Ω → ℝ} (hf : Submartingale f 𝒢 μ)\n    {τ σ : Ω → ℕ∞} (hτ : MeasureTheory.IsStoppingTime 𝒢 τ)\n    (hσ : MeasureTheory.IsStoppingTime 𝒢 σ) (hle : τ ≤ σ)\n    {n : ℕ} (hn : ∀ ω, σ ω ≤ n) :\n    μ[MeasureTheory.stoppedValue f τ] ≤ μ[MeasureTheory.stoppedValue f σ] :=\n  hf.expected_stoppedValue_mono hτ hσ hle hn"
@@ -29,8 +29,8 @@
         "chapter": 2,
         "reference": "Theorem 2.3.6",
         "difficulty": "advanced",
-        "formalization_status": "library_wrapper",
-        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "reduced_core: faithfully wraps the bounded-time submartingale monotonicity; the optional stopping EQUALITY for UI martingales is not delivered."
       }
     },
     {
@@ -55,8 +55,8 @@
     },
     {
       "id": "mart-thm-2.5.1",
-      "name": "L² Martingale Convergence",
-      "description": "Theorem 2.5.1: A martingale bounded in L² converges almost surely and in L²",
+      "name": "Martingale a.s. Convergence (L1/L2-bounded)",
+      "description": "An L1-bounded (in particular L2-bounded) submartingale converges almost surely to limitProcess (Mathlib Submartingale.ae_tendsto_limitProcess). The in-L2 convergence is NOT wrapped here -- only the a.s. part (identical content to mart-thm-2.5.3).",
       "domain": "martingales",
       "code": {
         "lean": "import Mathlib.Probability.Martingale.Convergence\n\nopen MeasureTheory ProbabilityTheory Filter\n\n-- A submartingale bounded in L¹ (in particular bounded in L²) converges almost everywhere.\n-- Mathlib's `Submartingale.ae_tendsto_limitProcess` gives the a.s. convergence;\n-- L² convergence follows from `Submartingale.memLp_limitProcess` + uniform integrability.\nexample {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ]\n    {ℱ : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {R : NNReal}\n    (hf : Submartingale f ℱ μ)\n    (hbdd : ∀ n, eLpNorm (f n) 1 μ ≤ R) :\n    ∀ᵐ ω ∂μ, Tendsto (fun n => f n ω) atTop (nhds (ℱ.limitProcess f μ ω)) :=\n  hf.ae_tendsto_limitProcess hbdd"
@@ -66,7 +66,7 @@
         "reference": "Theorem 2.5.1",
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+        "formalization_scope": "library_wrapper of the a.s.-convergence theorem; faithful for the a.s. claim only. The L2-convergence conclusion is not formalized."
       }
     },
     {
@@ -134,7 +134,7 @@
     {
       "id": "mart-thm-2.5.3",
       "name": "L¹ Martingale Convergence",
-      "description": "Theorem 2.5.3: A martingale (M_n) bounded in L¹ converges a.s. to an integrable limit M_∞",
+      "description": "An L1-bounded submartingale converges almost surely to limitProcess (Mathlib Submartingale.ae_tendsto_limitProcess). Integrability of the limit is not separately wrapped here.",
       "domain": "martingales",
       "code": {
         "lean": "import Mathlib.Probability.Martingale.Convergence\n\nopen MeasureTheory ProbabilityTheory Filter\n\n-- Direct wrapper: Mathlib's L1-bounded submartingale a.s. convergence theorem.\nexample {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ]\n    {ℱ : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {R : NNReal}\n    (hf : Submartingale f ℱ μ)\n    (hbdd : ∀ n, eLpNorm (f n) 1 μ ≤ R) :\n    ∀ᵐ ω ∂μ, Tendsto (fun n => f n ω) atTop (nhds (ℱ.limitProcess f μ ω)) :=\n  hf.ae_tendsto_limitProcess hbdd\n"
@@ -148,7 +148,7 @@
         },
         "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+        "formalization_scope": "library_wrapper of the a.s.-convergence theorem; faithful for the a.s. claim."
       }
     },
     {
