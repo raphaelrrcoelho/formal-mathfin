@@ -20,9 +20,8 @@ tree directly produces.
 
 Results:
 
-* `bermudan_le_american`: `Berm ⊆ Amer ⇒ sup_Berm ≤ sup_Amer`.
-* `european_le_bermudan`: `Eur ⊆ Berm ⇒ sup_Eur ≤ sup_Berm`.
-* `bermudan_sandwich`: the two-sided combination.
+* `bermudan_sandwich`: `Eur ⊆ Berm ⊆ Amer ⇒ sup_Eur ≤ sup_Berm ≤ sup_Amer`
+  (both inequalities, via `Finset.sup'_mono`).
 -/
 
 namespace QuantFin
@@ -31,31 +30,18 @@ open Finset
 
 variable {ι : Type*} {v : ι → ℝ}
 
-/-- **Bermudan ≤ American**: extending the exercise set never lowers the
-optimal-stopping value. -/
-lemma bermudan_le_american
-    {Berm Amer : Finset ι} (hBA : Berm ⊆ Amer) (hBermNE : Berm.Nonempty)
-    (v : ι → ℝ) :
-    Berm.sup' hBermNE v ≤ Amer.sup' (hBermNE.mono hBA) v :=
-  sup'_mono v hBA hBermNE
-
-/-- **European ≤ Bermudan**: the European exercise set (which in practice is
-the singleton maturity date) is contained in the Bermudan set. -/
-lemma european_le_bermudan
-    {Eur Berm : Finset ι} (hEB : Eur ⊆ Berm) (hEurNE : Eur.Nonempty)
-    (v : ι → ℝ) :
-    Eur.sup' hEurNE v ≤ Berm.sup' (hEurNE.mono hEB) v :=
-  sup'_mono v hEB hEurNE
-
-/-- **Bermudan sandwich**: `Eur ⊆ Berm ⊆ Amer` ⇒ values are sandwiched
-in the same order. -/
+/-- **Bermudan sandwich**: `Eur ⊆ Berm ⊆ Amer` ⇒ the optimal-stopping values
+are ordered `European ≤ Bermudan ≤ American` — enlarging the exercise set never
+lowers the value. The financial content is the monotonicity of `Finset.sup'`
+over the exercise set (`Finset.sup'_mono`); we state the full two-step ordering
+directly rather than via single-`sup'_mono` wrapper lemmas. -/
 lemma bermudan_sandwich
     {Eur Berm Amer : Finset ι}
     (hEB : Eur ⊆ Berm) (hBA : Berm ⊆ Amer) (hEurNE : Eur.Nonempty)
     (v : ι → ℝ) :
     Eur.sup' hEurNE v ≤ Berm.sup' (hEurNE.mono hEB) v ∧
       Berm.sup' (hEurNE.mono hEB) v ≤ Amer.sup' (hEurNE.mono (hEB.trans hBA)) v :=
-  ⟨european_le_bermudan hEB hEurNE v,
-   bermudan_le_american hBA (hEurNE.mono hEB) v⟩
+  ⟨sup'_mono v hEB hEurNE,
+   sup'_mono v hBA (hEurNE.mono hEB)⟩
 
 end QuantFin
