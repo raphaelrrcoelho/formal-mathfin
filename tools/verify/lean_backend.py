@@ -19,6 +19,35 @@ from .models import (
 logger = logging.getLogger(__name__)
 
 
+# Substrings that mark a *dead REPL process* (as opposed to a normal Lean
+# elaboration error, which comes back as a response, not an exception). When
+# `lean-interact`'s underlying REPL subprocess dies — OOM kill, internal Lean
+# crash, slow memory accumulation over a long-lived daemon session — `run()`
+# raises rather than returning, and the server handle is then permanently
+# unusable until respawned.
+_SERVER_DEATH_MARKERS = (
+    "closed unexpectedly",
+    "server closed",
+    "connection abort",
+    "broken pipe",
+    "not enough memory",
+    "eof",
+)
+
+
+def _looks_like_server_death(exc: Exception) -> bool:
+    """Heuristic: did this exception come from the REPL subprocess dying
+    (so a restart can recover), rather than from the Lean code itself?"""
+    if isinstance(
+        exc,
+        (ConnectionAbortedError, ConnectionResetError, ConnectionError,
+         BrokenPipeError, EOFError),
+    ):
+        return True
+    msg = str(exc).lower()
+    return any(marker in msg for marker in _SERVER_DEATH_MARKERS)
+
+
 class LeanBackend:
     """Lean 4 backend driving lean-interact's AutoLeanServer against the
     in-repo Lake project (repo root by default).
@@ -59,6 +88,7 @@ class LeanBackend:
         self._local_project = local_project
         self._server: Any = None
         self._project: Any = None
+        self._config: Any = None
         self._lock = threading.Lock()
         self._memory_hard_limit_mb = memory_hard_limit_mb
         self._max_total_memory = max_total_memory
@@ -89,7 +119,7 @@ class LeanBackend:
             directory=self._local_project,
             auto_build=True,
         )
-        config = LeanREPLConfig(
+        self._config = LeanREPLConfig(
             project=self._project,
             verbose=False,
             memory_hard_limit_mb=self._memory_hard_limit_mb,
@@ -98,7 +128,7 @@ class LeanBackend:
             # at modest memory cost.
         )
         self._server = AutoLeanServer(
-            config,
+            self._config,
             max_total_memory=self._max_total_memory,
             max_process_memory=self._max_process_memory,
         )
@@ -110,6 +140,66 @@ class LeanBackend:
             self._max_total_memory,
             self._max_process_memory,
         )
+
+    def _restart_server(self) -> None:
+        """Respawn a fresh REPL process against the **already-built** project.
+
+        Reuses ``self._config`` (which holds the built ``LocalProject``), so this
+        does NOT re-run ``lake build`` — it just starts a new REPL subprocess and
+        reloads the prebuilt oleans (~30-60s warm), not the multi-minute cold
+        build. Used to recover from a dead REPL mid-session. Caller must hold
+        ``self._lock``.
+        """
+        if self._server is not None:
+            try:
+                self._server.close()
+            except Exception:
+                pass
+            self._server = None
+        if self._config is None:
+            # Never successfully initialized — fall back to the full init path.
+            self._ensure_server()
+            return
+        from lean_interact import AutoLeanServer
+
+        self._server = AutoLeanServer(
+            self._config,
+            max_total_memory=self._max_total_memory,
+            max_process_memory=self._max_process_memory,
+        )
+        logger.warning("Lean server respawned (fresh REPL against prebuilt project)")
+
+    def run_raw(self, code: str, *, attempts: int = 2) -> Any:
+        """Run one Lean command with **self-healing**.
+
+        If the REPL subprocess dies (OOM / crash / accumulation over a long
+        daemon session → ``run()`` raises, server handle then unusable), respawn
+        a fresh REPL and retry — so a single heavy file cannot brick the daemon
+        for the rest of the session. A genuine Lean *elaboration* error is
+        returned as a response (not an exception) and is never retried.
+
+        On exhausting retries the exception is re-raised, but the server is left
+        freshly respawned so subsequent (different) requests still work. Caller
+        must hold ``self._lock``.
+        """
+        from lean_interact import Command
+
+        self._ensure_server()
+        last_exc: Exception | None = None
+        for attempt in range(attempts):
+            try:
+                return self._server.run(Command(cmd=code))
+            except Exception as e:  # noqa: BLE001 — classify, then recover or re-raise
+                last_exc = e
+                if not _looks_like_server_death(e):
+                    raise
+                logger.warning(
+                    "Lean REPL died (attempt %d/%d): %s — respawning",
+                    attempt + 1, attempts, e,
+                )
+                self._restart_server()
+        assert last_exc is not None
+        raise last_exc
 
     async def verify(
         self,
@@ -150,9 +240,7 @@ class LeanBackend:
 
     def _run_verification(self, code: str, start: float) -> BackendResult:
         """Execute Lean code and parse the response."""
-        from lean_interact import Command
-
-        response = self._server.run(Command(cmd=code))
+        response = self.run_raw(code)
         elapsed = time.monotonic() - start
         raw = str(response)
 
@@ -233,5 +321,7 @@ class LeanBackend:
                 except Exception:
                     pass
                 self._project = None
+
+            self._config = None
 
         logger.info("Lean backend shut down")

@@ -96,10 +96,11 @@ def handle(conn: socket.socket, backend: LeanBackend, addr) -> None:
             return
         logger.info("check from %s: %d bytes", addr, len(code))
 
-        from lean_interact import Command
-
+        # `run_raw` self-heals: if the REPL subprocess has died (OOM/crash), it
+        # respawns a fresh one against the prebuilt project and retries, so a
+        # single heavy file can't brick the daemon for the rest of the session.
         with backend._lock:
-            response = backend._server.run(Command(cmd=code))
+            response = backend.run_raw(code)
         result = parse_response(response)
         logger.info(
             "result: success=%s errors=%d warnings=%d sorries=%d",
