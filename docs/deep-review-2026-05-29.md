@@ -73,7 +73,7 @@ highest-value next step in the whole Itô track.
 | R2 | `gbm_diffusion` was literally `(1:ℝ)*(σS) = σS` (= `one_mul`) with a docstring claiming "Together with gbm_solves_sde this is the full SDE." A forbidden wrapper (`feedback_avoid_wrapper_lemmas`) + an overclaim. | moderate | **FIXED** — deleted; the diffusion coefficient is now a conjunct of the (full) `gbm_solves_sde`, where `f_x` is pinned to `σS` by hypothesis, so it is no longer a free-standing `one_mul`. |
 | R3 | `bs_pde_eq_itoDrift2D_minus_rV` docstring narrated "No-arbitrage (`e^{−rt}V` is a Q-martingale...) is exactly this set to 0" — a derivation that is **not stated or proved** here (the theorem is an `unfold; ring` polynomial identity). | moderate | **FIXED** — docstring rewritten: states plainly it is a polynomial identity routing the PDE LHS through the shared `itoDrift2D`, with an explicit "what this does NOT prove" note (the martingale step is deferred). |
 | R4 | `docs/blueprint.md` presented the GBM-SDE and BS-PDE-from-Itô nodes as ✅ ("solves the GBM SDE", "a *derived* SDE solution rather than a posited model", "no-arbitrage gives the PDE"), erasing the `full`/`reduced_core` split the contract requires. The blueprint is where readers calibrate depth. | **serious** | **FIXED** — both nodes demoted to a new 🚧 status ("partially formalized — genuine core + explicitly deferred lift"), added to the legend. The genuine pieces (partials, L² Itô-squared) and the deferred pieces (continuous SDE solution, martingale→PDE) are now separated in the prose. |
-| R5 | `ItoIntegralProcess.lean` — unconsumed scaffold whose docstring claimed downstream consumers (the L²-Itô formula, SDEs, stopping times) that **do not exist** (the L²-Itô work bypassed it via QV). Premature infra under the project's own "load-bearing only when consumed" rule. | **serious** | **PARTIALLY FIXED** — docstring rewritten with a prominent "STATUS — staging only, no current consumer" honesty note citing the architecture rule; its two non-load-bearing linearity-lemma pins removed from `AxiomAudit.lean`. **Deletion deferred to RC's call** (see open question). |
+| R5 | `ItoIntegralProcess.lean` — unconsumed scaffold whose docstring claimed downstream consumers (the L²-Itô formula, SDEs, stopping times) that **do not exist** (the L²-Itô work bypassed it via QV). Premature infra under the project's own "load-bearing only when consumed" rule. | **serious** | **RESOLVED** — deleted as the hollow projection it was (option 2 below), then *recreated principled* per RC. The new file carries genuine analytic content rather than a deferred-everything stub: `memLp_itoSimpleProcess` (`(V●B)_t ∈ L²(μ)` at **every** `t`, via the active/past truncation case-split on the same adapted-increment engine as `memLp_itoSimple`), the explicit truncated increment-sum `itoSimpleProcess_apply`, and `itoSimpleProcess_eq_itoSimple` tying the process to the **terminal CLM base object**. Built on Degenne's `SimpleProcess.integral` (so `V`-linearity is inherited, not re-proved). Two genuine-content pins re-added to `AxiomAudit.lean`; honest docstring scopes what is still deferred (adaptedness/continuity/martingale/time-indexed isometry) as the *next, consuming* layer. |
 | R6 | Redundant `import Mathlib` in `ItoLemma2D.lean` and `PDEFromIto.lean` (both get Mathlib transitively via `ItoLemma`). | minor | **FIXED** — dropped, with the same transitive-import comment the F4 fix used on `ItoFormulaSquaredL2.lean`. |
 | R7 | `bs_pde_from_no_arbitrage` (pre-existing) named/blueprint-titled as a no-arbitrage derivation, but is a polynomial iff. | minor | **FIXED (blueprint)** — node demoted to 🚧 with the deferred-martingale-step note. Theorem name left (rename is churn; docstring already honest). |
 | R8 | The `'` rearrangement lemmas (`discrete_squaring_identity'`, `discrete_cubing_identity'`) are `linarith`-restatements with no consumer. | minor (low-harm) | **LEFT** — kept; they are cheap canonical-shape variants. Flagged for trim if no consumer appears. |
@@ -100,21 +100,26 @@ highest-value next step in the whole Itô track.
   theorem (the discrete remainder is a deliberately different formal object);
   exp chain-rule correctly reused; naming consistent.
 
-## Open question for RC (the one judgment call I did not unilaterally make)
+## Open question for RC — RESOLVED (2026-05-29)
 
-`ItoIntegralProcess.lean` (R5): the overclaim is fixed (honest status note), but
-the file remains *premature infrastructure* — a thin `SimpleProcess.integral`
-projection with no consumer, which the actual L²-Itô work bypassed. Two honest
-options:
-1. **Keep as staging** (current state) — a labelled landing-pad for the
-   continuous-Itô-integral-as-process, on the bet the next continuation builds
-   on it.
-2. **Delete it** — and build the process integral *directly against the CLM*
-   when the time comes (which is the more principled construction anyway, per
-   the deepest finding above). Git preserves it.
+`ItoIntegralProcess.lean` (R5): RC took option (2) — delete the thin projection —
+**and then** asked to add it back "in a principled way". Both halves are now done.
+The hollow scaffold is gone; the file that replaced it is not a projection-with-a-
+status-note but a real layer: it proves `(V●B)_t ∈ L²(μ)` at every `t`
+(`memLp_itoSimpleProcess`), the explicit truncated increment-sum, and the terminal
+agreement with the CLM base object (`itoSimpleProcess_eq_itoSimple`) — i.e. it
+*connects to* the L²/CLM foundation instead of paralleling it, and inherits
+`V`-linearity from Degenne's `SimpleProcess.integral` rather than re-deriving it.
+What stays deferred (adaptedness of `t ↦ (V●B)_t`, pathwise continuity, the
+martingale property, the time-indexed isometry) is now the honestly-scoped *next*
+layer that will **consume** `memLp_itoSimpleProcess`, not an unconsumed promise.
 
-I lean to (2) on zero-slop grounds, but it touches your Itô-climb staging, so
-it's your call. Everything else in this review is already applied and builds.
+The two earlier options, for the record:
+1. ~~Keep as staging~~ — rejected (zero-slop: a labelled landing-pad with no
+   consumer is still premature infra).
+2. **Delete, then rebuild with genuine content connected to the CLM** — taken.
+
+Everything in this review is applied and the full library + `AxiomAudit` pins build.
 
 ---
 

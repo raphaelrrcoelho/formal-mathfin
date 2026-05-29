@@ -78,6 +78,8 @@ import QuantFin.Foundations.StochasticInterval
 import QuantFin.Foundations.ItoIntegralL2
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
 import QuantFin.Foundations.ItoIntegralCLM
+-- The elementary Itô integral as a process `t ↦ (V●B)_t`, with genuine `L²` content
+import QuantFin.Foundations.ItoIntegralProcess
 -- Pathwise discrete Itô identity for `f(x) = x²` (the squaring keystone)
 import QuantFin.Foundations.ItoSquaringIdentity
 -- Polynomial Itô remainders (x³, x⁴) + the pathwise discrete cubing identity

@@ -235,6 +235,16 @@ namespace QuantFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
   #print axioms QuantFin.ItoIntegralCLM.itoIntegralCLM_T_norm
 
+/-! ## Process-level elementary Itô integral `t ↦ (V●B)_t` — genuine `L²` content -/
+
+/-- info: 'QuantFin.ItoIntegralProcess.memLp_itoSimpleProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms QuantFin.ItoIntegralProcess.memLp_itoSimpleProcess
+
+/-- info: 'QuantFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms QuantFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple
+
 /-! ## Discrete squaring identity (the pathwise Itô keystone) -/
 
 /-- info: 'QuantFin.discrete_squaring_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
