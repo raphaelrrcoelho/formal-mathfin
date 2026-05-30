@@ -1,11 +1,17 @@
 /-
-  QuantFin.Foundations.CondExpJensen
-  Proposition 2.1.11(9): conditional Jensen's inequality, parametrized by an
-  explicit subgradient (Mathlib v4.30 has no general subgradient API for
-  convex functions on ℝ; any convex `φ` has such a `g`, e.g. its right
-  derivative).
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
 -/
 import Mathlib
+
+/-!
+# Conditional Jensen's inequality (Proposition 2.1.11(9))
+
+Conditional Jensen, parametrized by an explicit subgradient (Mathlib v4.30 has
+no general subgradient API for convex functions on `ℝ`; any convex `φ` has such
+a `g`, e.g. its right derivative).
+-/
 
 namespace QuantFin
 

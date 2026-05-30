@@ -1,10 +1,17 @@
 /-
-  QuantFin.Foundations.MartingaleTransform
-  Theorem 2.2.9: the martingale transform of a martingale by a bounded
-  predictable process is itself a martingale (discrete stochastic integral).
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
 -/
 import Mathlib.Probability.Martingale.Basic
 import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
+
+/-!
+# Martingale transform (Theorem 2.2.9)
+
+The martingale transform of a martingale by a bounded predictable process is
+itself a martingale (the discrete stochastic integral).
+-/
 
 namespace QuantFin
 

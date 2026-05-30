@@ -168,6 +168,8 @@ import QuantFin.Binomial.BinomialFromFTAP
 import QuantFin.Binomial.CRRDiscreteIto
 -- CRR → BS characteristic-function convergence (the distributional CLT heart)
 import QuantFin.Binomial.CRRCharFun
+-- CRR → BS in literal closed form `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` (Φ-landing corollary)
+import QuantFin.Binomial.CRRClosedForm
 -- Phase 20: first-principles core derivations
 import QuantFin.Foundations.NoArbitrageDerivations
 import QuantFin.BlackScholes.RiskNeutralProbabilities

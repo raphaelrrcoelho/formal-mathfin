@@ -1,12 +1,18 @@
 /-
-  QuantFin.Foundations.BivariateGaussian
-  Conditional expectation of a bivariate Gaussian.
-
-  For (X, Y) jointly Gaussian with positive marginal variances and correlation
-  ρ ∈ (−1, 1):
-      E[X | σ(Y)] = μ_X + (ρ σ_X / σ_Y) (Y − μ_Y)   a.s.
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
 -/
 import Mathlib
+
+/-!
+# Conditional expectation of a bivariate Gaussian
+
+For `(X, Y)` jointly Gaussian with positive marginal variances and correlation
+`ρ ∈ (−1, 1)`:
+
+    E[X | σ(Y)] = μ_X + (ρ σ_X / σ_Y) (Y − μ_Y)   a.s.
+-/
 
 namespace QuantFin
 

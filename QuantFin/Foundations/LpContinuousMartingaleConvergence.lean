@@ -1,8 +1,18 @@
 /-
-  QuantFin.Foundations.LpContinuousMartingaleConvergence
-  Theorem 4.3.10 (Saporito): A continuous martingale `(M_t)` bounded in
-  `L^p` (`p ≥ 1`) converges almost surely to an integrable `M_∞`; for
-  `p > 1` it also converges in `L^p`.
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+import Mathlib
+import QuantFin.Foundations.MathlibLp
+import BrownianMotion.StochasticIntegral.UniformIntegrable
+import BrownianMotion.StochasticIntegral.DoobLp
+
+/-!
+# Lp continuous-martingale convergence (Theorem 4.3.10, Saporito)
+
+A continuous martingale `(M_t)` bounded in `L^p` (`p ≥ 1`) converges almost
+surely to an integrable `M_∞`; for `p > 1` it also converges in `L^p`.
 
   Proof strategy:
     1. Sample at natural times: `N_k(ω) := M (k : ℝ) ω` is a discrete
@@ -55,10 +65,6 @@
   only right-continuity. The in-measure form is the canonical conclusion
   for right-continuous martingales.
 -/
-import Mathlib
-import QuantFin.Foundations.MathlibLp
-import BrownianMotion.StochasticIntegral.UniformIntegrable
-import BrownianMotion.StochasticIntegral.DoobLp
 
 namespace QuantFin
 
@@ -72,7 +78,7 @@ noncomputable def discreteSample (M : ℝ → Ω → ℝ) (n : ℕ) (ω : Ω) : 
   M (n : ℝ) ω
 
 /-- Sub-filtration at natural times. -/
-def natFiltration (𝓕 : Filtration ℝ mΩ) : Filtration ℕ mΩ where
+def natTimeSubfiltration (𝓕 : Filtration ℝ mΩ) : Filtration ℕ mΩ where
   seq n := 𝓕 (n : ℝ)
   mono' n m hnm := 𝓕.mono (by exact_mod_cast hnm)
   le' n := 𝓕.le _
@@ -82,7 +88,7 @@ def natFiltration (𝓕 : Filtration ℝ mΩ) : Filtration ℕ mΩ where
 private lemma discreteSample_martingale
     {μ : Measure Ω} {𝓕 : Filtration ℝ mΩ} {M : ℝ → Ω → ℝ}
     (hM : Martingale M 𝓕 μ) :
-    Martingale (discreteSample M) (natFiltration 𝓕) μ := by
+    Martingale (discreteSample M) (natTimeSubfiltration 𝓕) μ := by
   refine ⟨?_, ?_⟩
   · intro n
     exact hM.stronglyAdapted (n : ℝ)
@@ -133,7 +139,7 @@ private lemma discreteSample_l1_bounded
 noncomputable def discreteSampleLimit
     (μ : Measure Ω) (𝓕 : Filtration ℝ mΩ)
     (M : ℝ → Ω → ℝ) : Ω → ℝ :=
-  (natFiltration 𝓕).limitProcess (discreteSample M) μ
+  (natTimeSubfiltration 𝓕).limitProcess (discreteSample M) μ
 
 /-- The discrete sample converges a.s. to its limit process. -/
 private lemma discreteSample_ae_tendsto_limitProcess
@@ -156,7 +162,7 @@ private lemma discreteSampleLimit_integrable
   obtain ⟨R', hR'⟩ := discreteSample_l1_bounded hp hM hbound
   have hAE : ∀ n, AEStronglyMeasurable (discreteSample M n) μ := fun n =>
     (((discreteSample_martingale hM).stronglyMeasurable n).mono
-        ((natFiltration 𝓕).le _)).aestronglyMeasurable
+        ((natTimeSubfiltration 𝓕).le _)).aestronglyMeasurable
   have h_memLp : MemLp (discreteSampleLimit μ 𝓕 M) 1 μ :=
     MeasureTheory.Filtration.memLp_limitProcess_of_eLpNorm_bdd hAE hR'
   exact h_memLp.integrable le_rfl
@@ -165,7 +171,7 @@ private lemma discreteSampleLimit_integrable
 
     A continuous-time martingale `(M_t)` bounded in `L^p` (`p ≥ 1`)
     sampled at natural times `t = n : ℕ` converges almost surely to an
-    integrable limit `M_∞ := (natFiltration 𝓕).limitProcess`.
+    integrable limit `M_∞ := (natTimeSubfiltration 𝓕).limitProcess`.
 
     This is the discrete-time skeleton of Theorem 4.3.10. The full
     continuous-time conclusion `Tendsto (fun t : ℝ => M t ω) atTop ...`
@@ -359,7 +365,7 @@ theorem lp_continuous_martingale_tendsto_eLpNorm_at_naturals
   have hp_one_enn : (1 : ℝ≥0∞) ≤ ENNReal.ofReal p := ENNReal.one_le_ofReal.mpr hp.le
   have h_sample_meas : ∀ n, AEStronglyMeasurable (discreteSample M n) μ := fun n =>
     (((discreteSample_martingale hM).stronglyMeasurable n).mono
-        ((natFiltration 𝓕).le _)).aestronglyMeasurable
+        ((natTimeSubfiltration 𝓕).le _)).aestronglyMeasurable
   exact tendsto_Lp_finite_of_tendsto_ae hp_one_enn ENNReal.ofReal_ne_top h_sample_meas
     (Submartingale.memLp_limitProcess (discreteSample_martingale hM).submartingale
       (fun _ => hbound _))

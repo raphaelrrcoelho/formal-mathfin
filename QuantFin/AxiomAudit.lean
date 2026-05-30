@@ -350,4 +350,9 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.binomialPrice_call_tendsto_bs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.binomialPrice_call_tendsto_bs
 
+/-! ## CRR → Black–Scholes call price in literal closed form `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` -/
+
+/-- info: 'QuantFin.binomialPrice_call_tendsto_bs_closed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.binomialPrice_call_tendsto_bs_closed
+
 end QuantFin.AxiomAudit

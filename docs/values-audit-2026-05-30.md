@@ -88,13 +88,17 @@ variation split (distinct benchmark deliverables, not accidental duplication);
 `MarkowitzNAsset`'s Finset-form variance; `PDEFromIto`'s `ring`-closed theorem
 names (docstrings are exemplary and the 2026-05-29 review adjudicated "keep").
 
-## Deferred (minor clarity/style nits)
+## Follow-ups completed
 
-A few `FixedIncome` docstring sibling-filename references, three "see also"
-signpost pointers (`FTAP` / `Kelly` / `ItoIntegralL2`), a `natFiltration`
-shadow rename, a `ProbabilityTheory.NNReal.…` namespace-path nit, the
-density-form CRR→BS closed-form landing corollary, and 7 files' header-style
-uniformity — all reviewer-rated nit, tracked for a follow-up.
+All the minor items flagged in the audit were subsequently completed (verified
+by a full `lake build`): the `FixedIncome` docstring sibling-filename refs, the
+`FTAP`/`Kelly`/`ItoIntegralL2` signpost pointers, the `NNReal`-prefix and
+`natFiltration` renames, the 7-file header-style uniformity, and the **CRR→BS
+closed-form Φ-landing** — `binomialPrice_call_tendsto_bs_closed`
+(`Binomial/CRRClosedForm.lean`, AxiomAudit-pinned) lands the binomial call price
+on the literal `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)`, by instantiating `bs_put_formula`
+on the standardised terminal law `Z = (· − (r−σ²/2)T)/(σ√T)` and applying the
+CDF symmetry `Phi_neg`.
 
 ## Verification
 

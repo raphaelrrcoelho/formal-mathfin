@@ -1,8 +1,15 @@
 /-
-  QuantFin.BlackScholes.Call
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+import Mathlib
 
-  Derivation of the Black-Scholes European call pricing formula from the
-  risk-neutral lognormal hypothesis:
+/-!
+# Black-Scholes European call pricing formula
+
+Derivation of the Black-Scholes European call pricing formula from the
+risk-neutral lognormal hypothesis:
 
     C(S_0, K, r, σ, T) = S_0 · Φ(d_1) − K · e^{-rT} · Φ(d_2)
 
@@ -62,7 +69,6 @@
   - `bsd2_eq`, `bsTerminal_gt_K_iff`, `max_payoff_eq_indicator` helpers.
   - `bs_call_formula` main theorem.
 -/
-import Mathlib
 
 namespace QuantFin
 
