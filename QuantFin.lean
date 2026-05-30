@@ -166,6 +166,8 @@ import QuantFin.Binomial.SnellEnvelope
 import QuantFin.Binomial.BinomialFromFTAP
 -- Phase 44: CRR binomial scheme as discrete-Itô process (drift + QV limits)
 import QuantFin.Binomial.CRRDiscreteIto
+-- CRR → BS characteristic-function convergence (the distributional CLT heart)
+import QuantFin.Binomial.CRRCharFun
 -- Phase 20: first-principles core derivations
 import QuantFin.Foundations.NoArbitrageDerivations
 import QuantFin.BlackScholes.RiskNeutralProbabilities

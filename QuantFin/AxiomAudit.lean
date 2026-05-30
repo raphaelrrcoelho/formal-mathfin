@@ -324,4 +324,9 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.portfolioVarN_diag_eq_herfindahl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.portfolioVarN_diag_eq_herfindahl
 
+/-! ## CRR → Black–Scholes characteristic-function convergence (the distributional CLT heart) -/
+
+/-- info: 'QuantFin.crr_charFun_pow_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.crr_charFun_pow_tendsto
+
 end QuantFin.AxiomAudit
