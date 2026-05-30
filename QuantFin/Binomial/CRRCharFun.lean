@@ -363,13 +363,13 @@ theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 
 
 /-! ### CRR → BS price convergence (`binomialPrice → bs_call_price`) -/
 
-/-- A bounded measurable payoff composed with `x ↦ a·eˣ` is integrable against any
-finite measure. -/
+/-- A measurable payoff bounded on `(0,∞)`, composed with `x ↦ a·eˣ` for `a > 0`
+(so the argument stays positive), is integrable against any finite measure. -/
 lemma integrable_comp_exp_of_bdd {μ : Measure ℝ} [IsFiniteMeasure μ] {g : ℝ → ℝ}
-    (hg : Measurable g) {C : ℝ} (hC : ∀ x, |g x| ≤ C) (a : ℝ) :
+    (hg : Measurable g) {C : ℝ} {a : ℝ} (ha : 0 < a) (hC : ∀ y, 0 < y → |g y| ≤ C) :
     Integrable (fun x => g (a * Real.exp x)) μ :=
   Integrable.of_bound ((hg.comp (by fun_prop)).aestronglyMeasurable) C
-    (ae_of_all _ fun x => by rw [Real.norm_eq_abs]; exact hC _)
+    (ae_of_all _ fun x => by rw [Real.norm_eq_abs]; exact hC _ (mul_pos ha (Real.exp_pos x)))
 
 /-- **Two-point integral against the CRR step law** (real-valued): for any `h`,
 `∫ h ∂(crrStepMeasure) = pₙ·h(σ√Δt) + (1−pₙ)·h(−σ√Δt)` under no-arbitrage `0 ≤ pₙ ≤ 1`. -/
@@ -393,17 +393,23 @@ law (`r' = crrPerStepRate`). Proof: induction on `k`, the recursion step matched
 convolution via `integral_conv` + the two-point step integral. -/
 lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
     (hp0 : 0 ≤ crrProb r σ T n) (hp1 : crrProb r σ T n ≤ 1)
-    {g : ℝ → ℝ} (hg : Measurable g) {C : ℝ} (hC : ∀ x, |g x| ≤ C) (k : ℕ) (S : ℝ) :
-    binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n) g k S
-      = Real.exp (-(crrPerStepRate r T n) * k) *
-        ∫ x, g (S * Real.exp x) ∂(convPow (crrStepMeasure r σ T n) k) := by
+    {g : ℝ → ℝ} (hg : Measurable g) {C : ℝ} (hC : ∀ y, 0 < y → |g y| ≤ C) :
+    ∀ (k : ℕ) (S : ℝ), 0 < S →
+      binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n) g k S
+        = Real.exp (-(crrPerStepRate r T n) * k) *
+          ∫ x, g (S * Real.exp x) ∂(convPow (crrStepMeasure r σ T n) k) := by
   haveI : IsProbabilityMeasure (crrStepMeasure r σ T n) :=
     isProbabilityMeasure_crrStepMeasure hp0 hp1
-  induction k generalizing S with
+  have hcrrUp : (0 : ℝ) < crrUp σ T n := crrUp_pos σ T n
+  have hcrrDown : (0 : ℝ) < crrDown σ T n := crrDown_pos σ T n
+  intro k
+  induction k with
   | zero =>
+    intro S _
     simp only [binomialPrice_zero, Nat.cast_zero, mul_zero, Real.exp_zero, one_mul,
       convPow, integral_dirac, mul_one]
   | succ k ih =>
+    intro S hS
     haveI : IsProbabilityMeasure (convPow (crrStepMeasure r σ T n) k) :=
       convPow_isProbabilityMeasure _ k
     have hprob : crrUpProb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
@@ -417,11 +423,12 @@ lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
             rw [Real.exp_add, crrUp, crrStep]; ring,
           show S * Real.exp (x + -(σ * Real.sqrt (T / n))) = S * crrDown σ T n * Real.exp x from by
             rw [Real.exp_add, crrDown, crrStep]; ring]
-    rw [binomialPrice_succ, hprob, ih (S * crrUp σ T n), ih (S * crrDown σ T n), convPow,
-        integral_conv (integrable_comp_exp_of_bdd hg hC S)]
+    rw [binomialPrice_succ, hprob, ih (S * crrUp σ T n) (mul_pos hS hcrrUp),
+        ih (S * crrDown σ T n) (mul_pos hS hcrrDown), convPow,
+        integral_conv (integrable_comp_exp_of_bdd hg hS hC)]
     simp_rw [hinner]
-    rw [integral_add ((integrable_comp_exp_of_bdd hg hC _).const_mul _)
-          ((integrable_comp_exp_of_bdd hg hC _).const_mul _),
+    rw [integral_add ((integrable_comp_exp_of_bdd hg (mul_pos hS hcrrUp) hC).const_mul _)
+          ((integrable_comp_exp_of_bdd hg (mul_pos hS hcrrDown) hC).const_mul _),
         integral_const_mul, integral_const_mul]
     have hexp : Real.exp (-(crrPerStepRate r T n) * (↑(k + 1) : ℝ))
         = Real.exp (-(crrPerStepRate r T n)) * Real.exp (-(crrPerStepRate r T n) * (k : ℝ)) := by
@@ -464,6 +471,80 @@ lemma integral_const_mul_exp_gaussian {r σ T S₀ : ℝ} (hT : 0 < T) :
       show ((σ ^ 2 * T).toNNReal : ℝ) = σ ^ 2 * T from
         Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hT.le),
       show (r - σ ^ 2 / 2) * T * 1 + σ ^ 2 * T * 1 ^ 2 / 2 = r * T from by ring]
+
+/-- **The CRR put expectation converges weakly to the BS put expectation.** Since the
+put payoff `x ↦ max(K − S₀eˣ, 0)` is bounded and continuous, this is immediate from
+the convergence in distribution `crr_tendsto_gaussian_inDistribution`. -/
+lemma tendsto_integral_put {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
+    (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
+    Tendsto (fun n : ℕ => ∫ x, max (K - S₀ * Real.exp x) 0
+        ∂(convPow (crrStepMeasure r σ T n) n)) atTop
+      (𝓝 (∫ x, max (K - S₀ * Real.exp x) 0
+        ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
+  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n =>
+    ⟨(crrUpProb_mem_Ioo (hna n)).1.le, (crrUpProb_mem_Ioo (hna n)).2.le⟩
+  have hcont : Continuous (fun x : ℝ => max (K - S₀ * Real.exp x) 0) := by fun_prop
+  have hbound : ∀ x : ℝ, ‖max (K - S₀ * Real.exp x) 0‖ ≤ |K| := fun x => by
+    rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _)]
+    calc max (K - S₀ * Real.exp x) 0
+        ≤ max K 0 := max_le_max (by nlinarith [mul_pos hS₀ (Real.exp_pos x)]) le_rfl
+      _ ≤ |K| := max_le (le_abs_self K) (abs_nonneg K)
+  have hconv := (ProbabilityMeasure.tendsto_iff_forall_integral_tendsto.mp
+    (crr_tendsto_gaussian_inDistribution hσ hT hp))
+    (BoundedContinuousFunction.ofNormedAddCommGroup _ hcont _ hbound)
+  simpa only [BoundedContinuousFunction.coe_ofNormedAddCommGroup, crrRowProbMeasure,
+    bsLimitProbMeasure] using hconv
+
+/-- **Cox–Ross–Rubinstein → Black–Scholes, the call-price convergence.** Under
+no-arbitrage at every step, the `n`-step CRR binomial price of a European call
+converges to the Black–Scholes call price, written in put-call-parity form as
+`e^{−rT}·E[(K − S_T)₊] + (S₀ − K e^{−rT})` — the discounted put expectation plus the
+forward, with `S_T = S₀ e^X`, `X ∼ N((r − σ²/2)T, σ²T)`.
+
+No uniform integrability is needed: the *put* payoff is bounded, so the binomial put
+price equals a discounted expectation (`binomialPrice_eq_integral_convPow`) that
+converges weakly (`tendsto_integral_put`); binomial put-call parity
+(`binomialPrice_callPut_parity`) lifts this to the (unbounded) call. -/
+theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
+    (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
+    Tendsto (fun n : ℕ => binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x => max (x - K) 0) n S₀) atTop
+      (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
+          ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal)
+        + (S₀ - K * Real.exp (-(r * T))))) := by
+  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n =>
+    ⟨(crrUpProb_mem_Ioo (hna n)).1.le, (crrUpProb_mem_Ioo (hna n)).2.le⟩
+  -- Put payoff: measurable, and bounded on `(0,∞)` by `|K|` (since `S₀eˣ > 0`).
+  have hmeas : Measurable (fun y : ℝ => max (K - y) 0) := by fun_prop
+  have hbd : ∀ y : ℝ, 0 < y → |max (K - y) 0| ≤ |K| := fun y hy => by
+    rw [abs_of_nonneg (le_max_right _ _)]
+    exact (max_le_max (by linarith) le_rfl).trans (max_le (le_abs_self K) (abs_nonneg K))
+  -- Eventually (`n ≥ 1`) the total discount `n · crrPerStepRate = rT`.
+  have hdisc : ∀ n : ℕ, 1 ≤ n → (n : ℝ) * crrPerStepRate r T n = r * T := fun n hn => by
+    have hn0 : (n : ℝ) ≠ 0 := by positivity
+    unfold crrPerStepRate crrStep; field_simp
+  -- The binomial put price converges to `e^{−rT}·∫ put` over the BS gaussian.
+  have hput : Tendsto (fun n : ℕ =>
+      binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x => max (K - x) 0) n S₀) atTop
+      (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
+        ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
+    refine ((tendsto_integral_put hσ hT hS₀ hna).const_mul (Real.exp (-(r * T)))).congr'
+      (Filter.eventually_atTop.mpr ⟨1, fun n hn => ?_⟩)
+    show Real.exp (-(r * T)) * (∫ x, max (K - S₀ * Real.exp x) 0
+          ∂(convPow (crrStepMeasure r σ T n) n))
+        = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+          (fun x => max (K - x) 0) n S₀
+    rw [binomialPrice_eq_integral_convPow (hp n).1 (hp n).2 hmeas hbd n S₀ hS₀,
+        neg_mul, mul_comm (crrPerStepRate r T n) (n : ℝ), hdisc n hn]
+  -- Binomial put-call parity (eventually) lifts the convergence to the call.
+  refine (hput.add_const (S₀ - K * Real.exp (-(r * T)))).congr'
+    (Filter.eventually_atTop.mpr ⟨1, fun n hn => ?_⟩)
+  show binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x => max (K - x) 0) n S₀ + (S₀ - K * Real.exp (-(r * T)))
+      = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x => max (x - K) 0) n S₀
+  rw [binomialPrice_callPut_parity (hna n) n S₀, neg_mul, hdisc n hn]
 
 end Distributional
 

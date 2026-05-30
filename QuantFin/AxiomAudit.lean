@@ -345,4 +345,9 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.binomialPrice_eq_integral_convPow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.binomialPrice_eq_integral_convPow
 
+/-! ## CRR → Black–Scholes call-price convergence (the named theorem) -/
+
+/-- info: 'QuantFin.binomialPrice_call_tendsto_bs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.binomialPrice_call_tendsto_bs
+
 end QuantFin.AxiomAudit
