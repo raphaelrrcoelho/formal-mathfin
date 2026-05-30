@@ -253,6 +253,7 @@ import QuantFin.RiskMeasures.UtilityDerivation
 
 -- Bridges (certified cross-domain unifications)
 import QuantFin.Bridges.ConcentrationVariance
+import QuantFin.Bridges.SurvivalUnification
 
 -- Actuarial
 import QuantFin.Actuarial.Insurance
