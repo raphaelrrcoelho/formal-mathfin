@@ -335,4 +335,9 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.crr_tendsto_gaussian_inDistribution' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.crr_tendsto_gaussian_inDistribution
 
+/-! ## Continuous-time first FTAP (discounted GBM price is a Q-martingale) -/
+
+/-- info: 'QuantFin.discountedGBM_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.discountedGBM_isMartingale
+
 end QuantFin.AxiomAudit

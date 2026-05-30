@@ -37,6 +37,8 @@ import QuantFin.Foundations.GaussianCDFDeriv
 import QuantFin.Foundations.GaussianGirsanov
 import QuantFin.Foundations.FeynmanKacHeatEquation
 import QuantFin.Foundations.BrownianMartingale
+-- Continuous-time first FTAP: discounted GBM price is a Q-martingale (Wald exponential)
+import QuantFin.Foundations.ContinuousFTAP
 import QuantFin.Foundations.BrownianQuadraticVariation
 import QuantFin.Foundations.QuadraticVariationL2
 import QuantFin.Foundations.CondExpJensen
