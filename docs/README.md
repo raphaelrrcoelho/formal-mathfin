@@ -2,6 +2,7 @@
 
 | File | One-line | When to read |
 |---|---|---|
+| [`blueprint.md`](blueprint.md) | The deductive spine — a dependency graph from Brownian motion to Black–Scholes, each node linked to its Lean proof. | **First**, to see the BM → Black-Scholes deductive arc and what's proved vs gated. |
 | [`coverage.md`](coverage.md) | Per-theorem audit with faithfulness status and verification evidence. | Before claiming any specific theorem is "proved." Source of truth for what's `full` vs `library_wrapper` vs `reduced_core`. |
 | [`architecture.md`](architecture.md) | Design principles: the seven structural-principle modules, the three-tier honesty model, the bridge methodology. | When deciding where a new theorem belongs, or to understand why the library is shaped the way it is. |
 | [`leaps.md`](leaps.md) | The 2026-05-23 "leaps": static Girsanov (the risk-neutral measure *derived*, `BSCallHyp` made a theorem), the genesis cascade (physical→EMM→pricing spine), and Margrabe's multivariate exchange option. Includes the honest abstraction boundary and what stays gated. | To understand how the EMM stops being an axiom, and how the multivariate / change-of-measure results compose. |

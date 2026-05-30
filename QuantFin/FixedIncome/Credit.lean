@@ -18,7 +18,7 @@ equals the hazard rate itself:
 
   `c(t, T) = -log(S(t, T)) / (T - t) = h`.
 
-This is structurally identical to the ZCB-yield identity in `FixedIncome.lean`
+This is structurally identical to the ZCB-yield identity in `ZCB.lean`
 (`zcb_yield_eq_rate`), with the hazard `h` playing the role of the risk-free
 rate. The continuous-time stochastic-intensity model (Cox process / doubly
 stochastic Poisson) is gated on the Itô integral and is not formalized here.

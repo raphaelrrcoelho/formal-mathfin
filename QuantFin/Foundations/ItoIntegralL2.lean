@@ -14,7 +14,9 @@ import QuantFin.Foundations.ItoIsometryAdapted
 
 This file establishes the **Itô isometry for adapted simple processes** — the substantive
 analytic content of the L² Itô integral — built on Degenne's
-`BrownianMotion.StochasticIntegral` objects (the maximally-coherent choice). The cornerstone
+`BrownianMotion.StochasticIntegral` objects (the maximally-coherent choice). The Itô integral
+*operator* itself (the CLM `itoIntegralCLM_T`) is assembled from this isometry in
+`ItoIntegralCLM.lean`; the *discrete* isometry core is `ItoIsometryAdapted.lean`. The cornerstone
 is that the cross-terms vanish by the **weak Markov property** (`rect_increment_pairing`,
 from `ItoIsometryAdapted.lean`), *not* by deterministic covariance — the precise distinction
 between the Itô integral (random adapted integrands) and the Wiener integral (deterministic

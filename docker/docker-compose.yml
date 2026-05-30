@@ -1,8 +1,8 @@
 services:
   verify:
     # Pull-first, build-as-fallback. `docker compose run` checks the local
-    # image cache first; if missing, pulls from GHCR (much faster than the
-    # ~50 min Isabelle/AFP build); if pull fails, falls back to the Dockerfile.
+    # image cache first; if missing, pulls from GHCR (much faster than a
+    # local Lean + Mathlib build); if pull fails, falls back to the Dockerfile.
     # The :latest tag tracks the most recent push; pin to a dated tag (e.g.
     # quantfin-verify:2026-05-09) for reproducible CI/old-machine runs.
     #

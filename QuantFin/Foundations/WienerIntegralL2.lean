@@ -12,12 +12,12 @@ public import QuantFin.Foundations.WienerIntegral
 /-!
 # Wiener integral on L²([0, T])
 
-Extends the step-function Itô isometry (`wiener_finset_isometry`) to a
-continuous linear isometry
+Builds the continuous linear isometry
 
   `wienerIntegralLp : Lp ℝ 2 (volume.restrict (Set.Ioc 0 T)) →L[ℝ] Lp ℝ 2 μ`
 
-via the standard density / `LinearMap.extendOfNorm` construction.
+from the formal-combination assembly isometry (`assembly_isometry`) via the
+standard density / `LinearMap.extendOfNorm` construction.
 
 ## Construction
 

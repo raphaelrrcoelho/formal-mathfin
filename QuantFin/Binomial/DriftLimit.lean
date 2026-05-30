@@ -17,9 +17,9 @@ correspondence (the variance step `crr_variance_limit` is already in
 
 This combined with `crrProb_tendsto_half` and `crr_variance_limit` pins down
 the BS log-return moments matched by the CRR tree. Full distributional
-convergence `binomialPrice → bs_call_price` remains upstream-gated on a
-triangular-array CLT (Mathlib at the current pin only ships the fixed-iid
-CLT).
+convergence `binomialPrice → bs_call_price` is proved in
+`Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`), via a
+characteristic-function/Lévy route plus put-call parity.
 
 ## Main results
 
@@ -63,8 +63,6 @@ lemma tendsto_exp_sym_sub_two_div_sq (σ : ℝ) :
   filter_upwards [self_mem_nhdsWithin] with h hh
   have hh_ne : h ≠ 0 := hh
   have h_sq_ne : h^2 ≠ 0 := pow_ne_zero 2 hh_ne
-  have h_exp_id : Real.exp (-(σ * h)) * Real.exp (σ * h) = 1 := by
-    rw [← Real.exp_add, neg_add_cancel, Real.exp_zero]
   -- (e^{σh}-1)/h squared = (e^{σh}-1)² / h²
   -- Goal: (e^σh + e^{-σh} - 2)/h² = e^{-σh} · ((e^σh - 1)/h)²
   rw [div_pow, mul_div_assoc']
@@ -138,10 +136,7 @@ For `σ ≠ 0`, as `h → 0` (`h ≠ 0`):
 
 To extract the textbook `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T` form,
 substitute `h = √(T/n)`, multiply by `σT`, and use `n · √(T/n) · √(T/n) = T`.
-The substitution step is mechanical but the resulting Lean expression
-requires algebraic manipulation through several real arithmetic
-identities; this is left as integration work. The analytic content above
-captures the substantive limit. -/
+That n-indexed form is completed below in `crr_drift_limit_n`. -/
 theorem crr_drift_limit_h {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
     Tendsto (fun h : ℝ =>
         (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))

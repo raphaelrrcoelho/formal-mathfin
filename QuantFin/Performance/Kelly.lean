@@ -9,6 +9,10 @@ import QuantFin.Performance.Ratios
 /-!
 # Multi-period Kelly criterion and Kelly fraction bounds
 
+The single-period Kelly fraction (`kellyFraction`, `kellyGrowth`) and its
+first-order optimality live in `Performance/Ratios.lean`; this file adds the
+multi-period / horizon-myopia / fraction-bound extensions.
+
 For `T` periods of iid binary bets at the same fraction `f`, the expected
 log-growth aggregates linearly:
 

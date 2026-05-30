@@ -70,7 +70,7 @@ lemma statePricePricing_const (s : Finset ι) (q : ι → ℝ) (c : ℝ) :
     statePricePricing s q (fun _ => c) = c * ∑ i ∈ s, q i := by
   unfold statePricePricing
   rw [show (fun i => q i * c) = (fun i => c * q i) from funext (fun i => by ring)]
-  · rw [← Finset.mul_sum]
+  rw [← Finset.mul_sum]
 
 
 /-- **Linearity in payoff** (sum): `V_0(X + Y) = V_0(X) + V_0(Y)`. -/

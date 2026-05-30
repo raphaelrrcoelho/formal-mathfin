@@ -11,5 +11,4 @@
 local_project = "."
 
 [quantfin.orchestrator]
-max_workers = 3
 default_timeout = 60.0

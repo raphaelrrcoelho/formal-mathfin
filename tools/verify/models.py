@@ -24,17 +24,13 @@ class Domain(Enum):
 
 
 class Backend(Enum):
-    """Available verification backends."""
+    """Verification backends. Lean is the sole backend."""
     LEAN = "lean"
-    ISABELLE = "isabelle"
-    SYMPY = "sympy"
 
 
 class ConfidenceLevel(Enum):
     """Tiered confidence levels L0-L5."""
     L0 = 0  # No verification attempted or all failed
-    L1 = 1  # Numerical spot-check only (SymPy numerical)
-    L2 = 2  # Symbolic CAS verification (SymPy algebraic)
     L3 = 3  # Partial formal proof (sorry/admit present)
     L4 = 4  # Formal proof with caveats (axioms, partial)
     L5 = 5  # Full machine-checked formal proof

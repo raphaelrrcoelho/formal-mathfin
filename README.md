@@ -20,10 +20,15 @@ statement of what is proved and what is assumed.
 |  | count |
 |---|---:|
 | total theorems | 251 |
-| **full derivations** | **211** |
-| library wrappers | 24 |
-| reduced cores (Mathlib-gated) | 16 |
+| **full derivations** | **204** |
+| library wrappers | 19 |
+| reduced cores | 28 |
 | placeholders | **0** |
+
+**223 of the 251 are delivery-ready** (`full` + `library_wrapper`); the 28
+`reduced_core` entries are honest special cases or algebraic/structural cores
+of results whose general form is gated on upstream Mathlib (see *What's not
+done*).
 
 Every `full` derivation is `#print axioms`-clean: it depends only on the
 three Mathlib standard axioms `[propext, Classical.choice, Quot.sound]`.
@@ -111,15 +116,30 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-The 16 remaining `reduced_core` theorems are Mathlib-gated:
+28 of the 251 theorems are `reduced_core` — an honest special case or
+algebraic/structural core of a result whose fully general form is gated on
+upstream Mathlib. By area:
 
-- **Itô calculus** (~12 theorems including Itô's lemma path-wise form, time-dependent Itô, Lévy's martingale characterisation, SDE existence + uniqueness, the four Girsanov entries): the deterministic Wiener integral and the **discrete adapted Itô isometry** are now built (`Foundations/ItoIsometryAdapted.lean`, on `IsPreBrownian.hasIndepIncrements`); what remains is the continuous-time L²(adapted) Itô integral — the Cauchy completion over adapted processes.
-- **Continuous-time Poisson processes** (3 theorems: interarrival exponential, superposition, thinning): Mathlib has only the discrete `PoissonPMF`.
-- **Fine BM path machinery** (3 theorems: reflection principle on Brownian paths, nowhere-differentiability, law of iterated logarithm).
+- **Itô calculus** (`stochastic_calculus`, 7): the path-wise Itô lemma,
+  time-dependent Itô, Lévy's martingale characterisation, SDE existence +
+  uniqueness.
+- **Risk / portfolio / pricing cores** (`mathematical_finance`, 6): e.g.
+  Rockafellar-Uryasev, the American discounted-price supermartingale, the
+  N-asset PSD variance bound — algebraic or structural cores rather than the
+  full measure-theoretic statements.
+- **Markov chains** (5) and **martingales** (1): finite-state / structural
+  specifications standing in for the general library theorems.
+- **Girsanov** (`girsanov_finance`, 3).
+- **Continuous-time Poisson processes** (3): interarrival exponential,
+  superposition, thinning — Mathlib has only the discrete `PoissonPMF`.
+- **Fine Brownian path machinery** (3): path-wise reflection,
+  nowhere-differentiability, law of iterated logarithm.
 
-The library will revisit these when the supporting Mathlib infrastructure
-lands. Algebraic / structural cores are already in place; only the L²-limit
-glue layer is gated. See [`docs/roadmap.md`](docs/roadmap.md).
+The continuous-time L²-adapted **Itô integral itself is built** — the bounded
+linear map `itoIntegralCLM_T` on `[0,T]` (`Foundations/ItoIntegralCLM.lean`,
+axioms-clean, with `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` as its first consumer). What
+remains gated is the downstream path-wise Itô lemma and the SDE / Lévy layer
+that builds on it. See [`docs/roadmap.md`](docs/roadmap.md).
 
 ## Related upstream contributions
 
@@ -143,7 +163,7 @@ These are frozen in [`lakefile.lean`](lakefile.lean) + [`lake-manifest.json`](la
 Three modules adapt published Lean 4 formalisations by other authors, with
 explicit attribution headers on each file:
 
-- `Foundations/DiscreteIto.lean`, `Foundations/ItoIntegralSimple.lean`, `Foundations/FTAPTwoState.lean` adapt the discretization framework from Tamás Nagy, *"From Itô to Black-Scholes: A Machine-Verified Derivation in Lean 4"*, SSRN [6336503](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6336503), 2026.
+- `Foundations/DiscreteIto.lean` and `Foundations/FTAPTwoState.lean` adapt the discretization framework from Tamás Nagy, *"From Itô to Black-Scholes: A Machine-Verified Derivation in Lean 4"*, SSRN [6336503](https://papers.ssrn.com/sol3/papers.cfm?abstract_id=6336503), 2026.
 - `DeFi/ConstantProductAMM.lean` adapts Pusceddu & Bartoletti, *"Formalizing Automated Market Makers in the Lean 4 Theorem Prover"*, [OASIcs FMBC 2024.5](https://doi.org/10.4230/OASIcs.FMBC.2024.5) (companion code: <https://github.com/dpusceddu/lean4-amm>); underlying economic theory from Bartoletti, Chiang, Lluch-Lafuente, *"A theory of Automated Market Makers in DeFi"*, LMCS 2022.
 
 Adaptations re-implement these results in this library's framework

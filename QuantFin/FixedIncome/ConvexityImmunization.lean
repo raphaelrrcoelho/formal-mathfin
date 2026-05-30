@@ -9,7 +9,7 @@ import QuantFin.FixedIncome.Immunization
 /-!
 # Second-order bond portfolio immunization
 
-The first-order immunization in `BondImmunization.lean` only neutralizes
+The first-order immunization in `Immunization.lean` only neutralizes
 `∂(A - L)/∂r` at the current rate. Larger parallel rate shifts are picked up
 by the second-order term `(1/2) ∂²(A - L)/∂r² · (Δr)²`, governed by the
 **convexity** of the cash-flow stream.

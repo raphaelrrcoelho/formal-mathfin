@@ -2,7 +2,7 @@
 
 How option-pricing theory is built here, starting from Brownian motion: the
 risk-neutral measure is *derived* (not assumed), the Black–Scholes formula and
-PDE follow, and the point where the continuous Itô integral becomes the next
+PDE follow, and the point where the pathwise Itô / SDE layer becomes the next
 gate is marked precisely.
 
 This is the spine — the load-bearing arc. The other ~200 results (the full Greek
@@ -31,7 +31,7 @@ graph TD
   PDE["Black–Scholes PDE (forward)"]:::proved
   IPDE["BS PDE from Itô + no-arbitrage"]:::proved
   MAR["Margrabe exchange option"]:::proved
-  CONT["Continuous Itô integral (L², adapted)"]:::gated
+  CONT["Continuous Itô integral (L², adapted) on [0,T]"]:::proved
   PATH["Pathwise Itô · Lévy · SDEs"]:::gated
 
   BM --> QV
@@ -229,11 +229,11 @@ the ratio, with effective volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)`
 These are stated honestly as **not yet formalized**, gated on Mathlib
 infrastructure. See [`roadmap.md`](roadmap.md).
 
-- **Continuous-time L²-adapted Itô integral** — the Cauchy completion of adapted
-  simple integrands, consuming both the Wiener and adapted-isometry layers above.
-  The next gate.
 - **Pathwise Itô's lemma, Lévy's characterization, SDE existence/uniqueness,
-  dynamic Girsanov** — downstream of the continuous integral.
+  dynamic Girsanov** — downstream of the (built) `[0,T]` continuous Itô integral;
+  this is the next gate. The infinite-horizon `L2Predictable` variant of the
+  integral itself also remains open — see
+  [`ito-integral-clm-deferred.md`](ito-integral-clm-deferred.md).
 
 ---
 

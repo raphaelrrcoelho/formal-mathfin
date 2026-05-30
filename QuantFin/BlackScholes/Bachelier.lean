@@ -63,6 +63,18 @@ lemma hasDerivAt_neg_gaussianPDFReal_zero_one (z : ℝ) :
   convert h_neg using 1
   ring
 
+/-- `ϕ(0,1,·)' = -z · ϕ(0,1,z)` — the standard-normal PDF derivative (the
+`.neg`-flip of `hasDerivAt_neg_gaussianPDFReal_zero_one`). The single
+standard-normal first-derivative reused across the Greeks files. -/
+theorem hasDerivAt_gaussianPDFReal_zero_one (z : ℝ) :
+    HasDerivAt (fun z' : ℝ => gaussianPDFReal 0 1 z')
+      (-(z * gaussianPDFReal 0 1 z)) z := by
+  have h := (hasDerivAt_neg_gaussianPDFReal_zero_one z).neg
+  have h_eq : ((-fun z' : ℝ => -gaussianPDFReal 0 1 z') : ℝ → ℝ)
+            = fun z' : ℝ => gaussianPDFReal 0 1 z' := by funext z'; simp
+  rw [h_eq] at h
+  exact h
+
 /-! ### Integrability of `z ↦ z · ϕ(0, 1, z)` -/
 
 /-- The function `z ↦ z · ϕ(0, 1, z)` is integrable on `ℝ` (against Lebesgue).

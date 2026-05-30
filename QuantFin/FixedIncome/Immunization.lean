@@ -30,7 +30,7 @@ Results:
 * `hasDerivAt_bondPortfolioValue_r`: `∂P/∂r = −D_P · P`.
 * `bondPortfolio_single_bond_dur`: a single-bond portfolio's duration-value
   equals `w · (T − t) · exp(−r·(T − t))`, recovering the ZCB result in
-  `FixedIncome.lean`.
+  `ZCB.lean`.
 * `bondPortfolio_immunization_first_order`: when the duration-weighted asset
   and liability values match, the net portfolio's first-order rate sensitivity
   is zero.

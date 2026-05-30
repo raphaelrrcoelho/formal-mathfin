@@ -74,16 +74,6 @@ lemma hasDerivAt_bsAssetDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   simp only [Function.comp_apply]
   field_simp
 
-/-- `(d/dz) ϕ(0, 1, z) = -z · ϕ(0, 1, z)`. -/
-private lemma hasDerivAt_pdf_digital (z : ℝ) :
-    HasDerivAt (fun z' : ℝ => gaussianPDFReal 0 1 z')
-      (-(z * gaussianPDFReal 0 1 z)) z := by
-  have h := (QuantFin.hasDerivAt_neg_gaussianPDFReal_zero_one z).neg
-  have h_eq : ((-fun z' : ℝ => -gaussianPDFReal 0 1 z') : ℝ → ℝ)
-            = fun z' : ℝ => gaussianPDFReal 0 1 z' := by funext z'; simp
-  rw [h_eq] at h
-  exact h
-
 /-- **Asset-or-nothing gamma**: `∂²V_asset/∂S² = -ϕ(d₁) · d₂ / (S σ² τ)`.
 
 Differentiating δ_asset = Φ(d₁) + ϕ(d₁)/(σ√τ): the Φ-term contributes
@@ -105,7 +95,7 @@ lemma hasDerivAt_bsAssetDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   -- ∂_S Φ(d₁) = ϕ(d₁) · ∂_S d₁
   have h_Phi := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
   -- ∂_S ϕ(d₁) = -d₁ ϕ(d₁) · ∂_S d₁
-  have h_pdf := (hasDerivAt_pdf_digital (bsd1 S K r σ τ)).comp S h_d1_S
+  have h_pdf := (hasDerivAt_gaussianPDFReal_zero_one (bsd1 S K r σ τ)).comp S h_d1_S
   -- ∂_S [ϕ(d₁) / (σ √τ)] = (∂_S ϕ(d₁)) / (σ √τ)
   have h_pdf_div := h_pdf.div_const (σ * Real.sqrt τ)
   have h_full := h_Phi.add h_pdf_div
@@ -257,7 +247,7 @@ lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_denom_ne : S * σ * Real.sqrt τ ≠ 0 :=
     mul_ne_zero (mul_ne_zero hS_ne hσ_ne) h_sqrt_ne
   have h_d2_S := hasDerivAt_bsd2_S (r := r) hK hσ hτ hS
-  have h_pdf := (hasDerivAt_pdf_digital (bsd2 S K r σ τ)).comp S h_d2_S
+  have h_pdf := (hasDerivAt_gaussianPDFReal_zero_one (bsd2 S K r σ τ)).comp S h_d2_S
   -- Numerator f(s) = e^{-rτ} · ϕ(d₂(s)).
   have h_num := h_pdf.const_mul (Real.exp (-(r * τ)))
   -- Denominator g(s) = s · σ · √τ.

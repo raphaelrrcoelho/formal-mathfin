@@ -42,7 +42,6 @@ router).
 Install (only needed for non-Docker workflows):
 
 ```bash
-pip install -r requirements.txt                # SymPy only (Lean skipped if missing)
 pip install -e ".[all]"                        # adds lean-interact
 pip install -e ".[dev]"                        # pytest + pytest-asyncio
 ```
@@ -54,9 +53,9 @@ python3 -m pytest tests/test_router.py
 python3 -m tools.verify.coverage_report
 ```
 
-`tests/test_router.py` enforces formal-only routing, no active `code.sympy`,
-no active `sorry`/`admit`, and a declared formalization-faithfulness status
-for every benchmark theorem.
+`tests/test_router.py` enforces Lean-only routing, Lean-only `code` keys (no
+dropped-backend residue), no `sorry`/`admit`, and a declared
+formalization-faithfulness status for every benchmark theorem.
 
 Delivery/status docs:
 - `docs/coverage.md`: per-theorem audit, safe claim wording, verification evidence, and remaining placeholders.
@@ -72,8 +71,8 @@ Docker notes:
 
 ## Architecture
 
-Single Lean 4 backend, driven by a thin Python orchestrator. SymPy is kept
-as a legacy/manual backend but no active route uses it.
+Single Lean 4 backend, driven by a thin Python orchestrator. (The SymPy and
+Isabelle backends from the early hybrid era have been removed entirely.)
 
 **Dispatch** (`tools/verify/orchestrator.py`):
 1. `Router.route(domain)` returns a `RoutingDecision`.
@@ -83,14 +82,11 @@ as a legacy/manual backend but no active route uses it.
 
 **Confidence tiers** (`tools/verify/models.py`):
 - L5 = Lean SUCCESS (no sorries)
-- L4 = Lean PARTIAL with 1 sorry; L3 = >1 sorry
-- L2 = SymPy symbolic SUCCESS (cap for SymPy backend)
-- L1 = SymPy numerical SUCCESS
+- L4 = Lean PARTIAL with ≤1 sorry; L3 = >1 sorry
 - L0 = nothing succeeded
 
 **Routing table** (`router.DEFAULT_ROUTING`) — all routes Lean-only.
-Historical SymPy snippets live under `metadata.cas_reference.sympy`, never
-active `code.sympy`. Every theorem declares
+Every theorem declares
 `metadata.formalization_status ∈ {full, library_wrapper, reduced_core,
 placeholder}`. Delivery claims count `full + library_wrapper` only — see
 `docs/coverage.md`.
@@ -102,11 +98,6 @@ into thematic subdirectories: `Foundations/`, `BlackScholes/`, `Futures/`,
 pointing at the repo root. Non-trivial proofs **must** live as real Lean
 files (full `lake build` memory budget + LSP); benchmark snippets
 `import QuantFin.<Section>.<Module>` and re-export.
-
-**SymPy backend** (`tools/verify/sympy_verifier.py`, legacy):
-- Not routed to by default; if `theorem.metadata["sympy_check_kind"]` is set, dispatches to a typed handler (`ALGEBRAIC_IDENTITY` / `MOMENT_COMPUTATION` / etc.).
-- Otherwise the verifier evaluates the code and reads a `result` dict.
-- All evaluation uses Python's runtime evaluator with a controlled namespace; treat benchmark JSON as trusted input.
 
 **Config** (`tools/verify/config.py`): TOML loader using stdlib `tomllib`
 (Python 3.11+). Searches `quantfin.toml` then
@@ -121,9 +112,8 @@ Either a top-level list of theorem dicts, or
 `{"theorems": [...], "description": "..."}`. Each theorem requires `id`,
 `name`, `domain` (must match a `Domain` enum value), and a `code` map with
 active formal backend-name keys (`"lean"`). Optional: `description`,
-`metadata`. Historical CAS snippets, if retained, belong under
-`metadata.cas_reference.sympy`. Files are organized by Saporito
-stochastic-processes textbook chapters.
+`metadata`. Files are organized by Saporito stochastic-processes textbook
+chapters.
 
 ## Codex-specific notes
 

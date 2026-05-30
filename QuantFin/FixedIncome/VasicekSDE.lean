@@ -7,7 +7,7 @@ import Mathlib
 import QuantFin.FixedIncome.Vasicek
 
 /-!
-# Vasicek SDE closed-form solution (phase 41)
+# Vasicek SDE terminal-distribution form (stated, not derived) (phase 41)
 
 The pre-existing `FixedIncome/Vasicek.lean` derives only the
 **deterministic part** of the Vasicek mean-reverting short-rate model
@@ -20,9 +20,10 @@ whose closed-form solution is
   `r_t = r_0 · e^{−κt} + θ · (1 − e^{−κt}) + σ · ∫_0^t e^{−κ(t−s)} dB_s`.
 
 The Itô integral `∫_0^t e^{−κ(t−s)} dB_s` is of a *deterministic*
-integrand, so it has Gaussian distribution by the simple-process Itô
-isometry (`Foundations/ItoIntegralSimple.lean`, phase 36, with deterministic
-weights). The integrand's L² norm gives the variance:
+integrand, so its law is Gaussian (an Itô integral of a deterministic
+integrand is an L² limit of independent Gaussian increments; see the
+continuous construction in `Foundations/ItoIntegralL2.lean`). The integrand's
+L² norm gives the variance:
 
   `Var = σ² · ∫_0^t e^{−2κ(t−s)} ds = σ² · (1 − e^{−2κt}) / (2κ)`.
 

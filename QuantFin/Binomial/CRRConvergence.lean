@@ -26,22 +26,21 @@ This file proves:
    `4 p_n (1 − p_n) → 1`, which gives the variance limit
    `n · σ² Δt · 4 p_n (1 − p_n) → σ² T`.
 
-## Scope (honest)
+## Scope
 
 The **full pricing convergence**
 
     `binomialPrice (u_n) (d_n) (rΔt) (max(· − K, 0)) n S_0  →  bs_call_price`
 
-requires a **triangular-array CLT** (Lindeberg-Feller) applied to the row-wise
-iid binary log-return increments under the n-th risk-neutral measure, plus a
-continuous-mapping + uniform-integrability argument. Mathlib at the current
-pin only provides the fixed-iid CLT (`tendstoInDistribution_inv_sqrt_mul_sum_sub`),
-not the triangular-array version. We document the missing piece here and leave
-the full convergence theorem as future upstream work.
+is **proved** in `Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`):
+a characteristic-function + Lévy-continuity route gives convergence in
+distribution, and a put-call-parity argument sidesteps the triangular-array
+CLT and the uniform-integrability/Vitali step entirely (the put payoff is
+bounded, so weak convergence applies directly; parity lifts it to the call).
 
-What IS proved in this file: the **classical analytic CRR↔BS correspondence**
-on mean and variance of one log-return increment. These are the substantive
-textbook computations that lead to the CLT application.
+What this file provides is the **classical analytic CRR↔BS correspondence**
+on the mean and variance of one log-return increment — the substantive
+textbook computations feeding that limit.
 -/
 
 namespace QuantFin
@@ -132,10 +131,6 @@ lemma tendsto_exp_sub_one_div (c : ℝ) :
     rw [slope_def_field]
     simp [Real.exp_zero]
   exact h_slope.congr' (Eventually.of_forall h_eq)
-
-/-- `Tendsto (fun h => h²) (𝓝[≠] 0) (𝓝[≠] 0)`. -/
-lemma tendsto_sq_nhds_within_ne (a : ℝ) : a^2 ≠ 0 ↔ a ≠ 0 :=
-  ⟨fun h ha => h (by simp [ha]), fun h => pow_ne_zero 2 h⟩
 
 private lemma tendsto_sq_nhdsWithin_ne_zero :
     Tendsto (fun h : ℝ => h^2) (𝓝[≠] 0) (𝓝[≠] 0) := by
@@ -327,17 +322,14 @@ theorem crr_variance_limit {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
   filter_upwards with n
   ring
 
-/-! ### Future work: full pricing convergence
+/-! ### Full pricing convergence (done elsewhere)
 
-The remaining `binomialPrice → bs_call_price` convergence needs a
-triangular-array CLT applied to the n-th risk-neutral log-return increments,
-plus a continuous-mapping + uniform-integrability argument. Mathlib lacks
-the triangular-array CLT at the current pin.
-
-The classical-pedagogical content (drift+variance matching) is captured above
-via `crrProb_tendsto_half` (which implies the variance limit `crr_variance_limit`).
-A drift-matching theorem `n · (2 p_n − 1) · σ √Δt → (r − σ²/2) T` requires
-second-order Taylor on the numerator `2 e^{r Δt} − e^{σ√Δt} − e^{-σ√Δt}` and is
-left as further analytic work. -/
+The `binomialPrice → bs_call_price` convergence is **proved** in
+`Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`) via a
+characteristic-function/Lévy route plus put-call parity — no triangular-array
+CLT needed. The drift limit `n · (2 p_n − 1) · σ √Δt → (r − σ²/2) T` is proved
+in `Binomial/DriftLimit.lean` (`crr_drift_limit_n`); the variance limit
+`crr_variance_limit` is above. Together they pin the matched BS log-return
+moments feeding that convergence. -/
 
 end QuantFin

@@ -31,7 +31,6 @@ _SERVER_DEATH_MARKERS = (
     "connection abort",
     "broken pipe",
     "not enough memory",
-    "eof",
 )
 
 

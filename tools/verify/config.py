@@ -28,13 +28,11 @@ class LeanConfig:
 
 @dataclass
 class OrchestratorConfig:
-    max_workers: int = 3
     default_timeout: float = 60.0
 
     @classmethod
     def from_dict(cls, d: dict[str, Any]) -> OrchestratorConfig:
         return cls(
-            max_workers=d.get("max_workers", cls.max_workers),
             default_timeout=d.get("default_timeout", cls.default_timeout),
         )
 

@@ -1332,7 +1332,7 @@
     {
       "id": "mf-gaussian-var-translation",
       "name": "Gaussian VaR Translation Invariance",
-      "description": "VaR(L + c) = VaR(L) + c — the translation-invariance axiom of coherent risk measures (Artzner-Delbaen-Eber-Heath 1999).",
+      "description": "VaR(L + c) = VaR(L) + c — the closed-form Gaussian VaR functional satisfies translation invariance (the Artzner-Delbaen-Eber-Heath coherent-risk axiom).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.RiskMeasures.CoherentAxioms\n\nopen QuantFin\n\ntheorem gaussian_var_translation_thm (μ σ z c : ℝ) :\n    QuantFin.gaussianVaR (μ + c) σ z = QuantFin.gaussianVaR μ σ z + c :=\n  QuantFin.gaussianVaR_translation μ σ z c\n"
@@ -1348,7 +1348,7 @@
     {
       "id": "mf-gaussian-cvar-translation",
       "name": "Gaussian CVaR Translation Invariance",
-      "description": "CVaR(L + c) = CVaR(L) + c — translation-invariance axiom for CVaR.",
+      "description": "CVaR(L + c) = CVaR(L) + c — translation invariance of the closed-form Gaussian CVaR.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.RiskMeasures.CoherentAxioms\n\nopen QuantFin\n\ntheorem gaussian_cvar_translation_thm (μ σ z α c : ℝ) :\n    QuantFin.gaussianCVaR (μ + c) σ z α =\n      QuantFin.gaussianCVaR μ σ z α + c :=\n  QuantFin.gaussianCVaR_translation μ σ z α c\n"
@@ -1364,7 +1364,7 @@
     {
       "id": "mf-gaussian-var-pos-homog",
       "name": "Gaussian VaR Positive Homogeneity",
-      "description": "VaR(λ·L) = λ·VaR(L) for λ ≥ 0 — positive-homogeneity axiom of coherent risk measures.",
+      "description": "VaR(λ·L) = λ·VaR(L) for λ ≥ 0 — positive homogeneity of the closed-form Gaussian VaR (an Artzner-Delbaen-Eber-Heath coherent-risk axiom).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.RiskMeasures.CoherentAxioms\n\nopen QuantFin\n\ntheorem gaussian_var_pos_homog_thm (μ σ z : ℝ) {l : ℝ} (hl : 0 ≤ l) :\n    QuantFin.gaussianVaR (l * μ) (|l| * σ) z = l * QuantFin.gaussianVaR μ σ z :=\n  QuantFin.gaussianVaR_positiveHomogeneity μ σ z hl\n"
@@ -1396,7 +1396,7 @@
     {
       "id": "mf-gaussian-var-monotone",
       "name": "Gaussian VaR Monotonicity in Mean",
-      "description": "If μ₁ ≤ μ₂ and the volatilities match, VaR(L₁) ≤ VaR(L₂) — monotonicity axiom (parameter form).",
+      "description": "If μ₁ ≤ μ₂ and the volatilities match, VaR(L₁) ≤ VaR(L₂) — monotonicity of the closed-form Gaussian VaR (parameter form).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.RiskMeasures.CoherentAxioms\n\nopen QuantFin\n\ntheorem gaussian_var_monotone_thm {μ₁ μ₂ σ z : ℝ} (hμ : μ₁ ≤ μ₂) :\n    QuantFin.gaussianVaR μ₁ σ z ≤ QuantFin.gaussianVaR μ₂ σ z :=\n  QuantFin.gaussianVaR_monotone_mean hμ\n"
@@ -1444,7 +1444,7 @@
     {
       "id": "mf-gaussian-var-subadditive",
       "name": "Gaussian VaR Subadditivity",
-      "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂). Subadditivity axiom (gaussian family).",
+      "description": "For joint-gaussian losses L_i ~ N(μ_i, σ_i²) with correlation ρ ≤ 1 and right-tail z ≥ 0: VaR(L₁+L₂) ≤ VaR(L₁) + VaR(L₂) — subadditivity of the closed-form Gaussian VaR (the genuine content is the joint-stdev triangle inequality).",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport QuantFin.RiskMeasures.CoherentAxioms\n\nopen QuantFin\n\ntheorem gaussian_var_subadditive_thm {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}\n    (h₁ : 0 ≤ σ₁) (h₂ : 0 ≤ σ₂) (hρ : ρ ≤ 1) (hz : 0 ≤ z) :\n    QuantFin.gaussianVaR (μ₁ + μ₂)\n        (Real.sqrt (σ₁ ^ 2 + 2 * ρ * σ₁ * σ₂ + σ₂ ^ 2)) z ≤\n      QuantFin.gaussianVaR μ₁ σ₁ z + QuantFin.gaussianVaR μ₂ σ₂ z :=\n  QuantFin.gaussianVaR_subadditive h₁ h₂ hρ hz\n"

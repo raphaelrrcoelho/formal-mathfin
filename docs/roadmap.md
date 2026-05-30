@@ -41,7 +41,7 @@ round should pursue.
   SABR — need Mathlib's stochastic-calculus layer, which isn't there
   yet. We can't fix that with more `field_simp`.
 
-* **The slop ratio sharpens with more breadth.** Of the 211 "full"
+* **The slop ratio sharpens with more breadth.** Of the 204 "full"
   derivations, roughly 30 are genuinely non-trivial (Doob L^p,
   Wiener L² isometry, joint-stdev triangle, Kelly FOC, Sharpe √T,
   second-order immunization, Asian AM-GM, Merton-tree one-period
@@ -66,8 +66,8 @@ Concretely:
    one-period, replicating uniqueness). Target ~15.
 
 2. **At least one genuinely-non-trivial theorem per category** —
-   not just a definition + ring. Currently ~8 (listed above). Target
-   ~15–20.
+   not just a definition + ring. Currently ~8 categories are represented
+   among the ~30 non-trivial results above. Target ~15–20.
 
 3. **An honest hierarchy** between foundational math, principles, and
    verifications. README now distinguishes the three tiers; file
@@ -317,11 +317,12 @@ proven in Degenne's package. Building directly on it:
   integral from the Wiener integral (`WienerIntegralL2.lean`, deterministic
   integrands). capstone: the fully-discharged `∫₀ᵀ B dB` Riemann-sum isometry
   `ito_isometry_brownian_self`. build-enforced axioms-clean.
-- **continuous frontier.** what remains is the L²(adapted) Cauchy completion
+- **continuous integral — done on `[0,T]`.** the L²(adapted) Cauchy completion
   over adapted processes (density of adapted simple integrands in the adapted
-  L²), the analogue of `WienerIntegralL2`'s completion for the deterministic
-  case. this — *not* increment independence — is the open step, and what would
-  clear the remaining itô-gated `reduced_core`s once finished.
+  L²) is **built**: `itoIntegralCLM_T` (`ItoIntegralCLM.lean`), with
+  `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` as its first consumer. what remains is the
+  downstream pathwise Itô / Lévy / SDE layer (and the infinite-horizon
+  `L2Predictable` variant — see `ito-integral-clm-deferred.md`).
 - **Margrabe `BSCallHyp`-grounding — done.** `MargrabeGrounding.lean`: the
   ratio's risk-neutral lognormality is *derived* from a joint two-GBM gaussian
   model (`normalizedSpread_hasLaw_std` + `margrabe_bsCallHyp_of_gaussian`),
@@ -334,12 +335,15 @@ hypothesis had no available discharge; leap 4 (discrete) is now the genuine
 discharge of exactly that orthogonality, via the weak Markov property — the
 no-slop line, held.
 
-## next big build — the continuous L²(adapted) Itô integral
+## the continuous L²(adapted) Itô integral on `[0,T]` — DONE
 
-This is the one remaining genuine connection for leap 4, and the gate for the
-itô-gated `reduced_core`s. It is a dedicated multi-session build (≈ the size of
-`WienerIntegralL2.lean`, ~500 lines), **not** a corollary — do not attempt to
-fake it with a leaf lemma.
+**Built (2026-05-30):** `itoIntegralCLM_T` (`Foundations/ItoIntegralCLM.lean`),
+the continuous linear isometry on `[0,T]`, axioms-clean and AxiomAudit-pinned,
+with `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` (`ItoIntegralBrownian.lean`) as its first
+consumer. The construction sketch below is kept as a reference record of how it
+was built; the still-open downstream layer is the pathwise Itô / Lévy / SDE
+results (and the infinite-horizon `L2Predictable` variant,
+`ito-integral-clm-deferred.md`).
 
 **Goal.** A continuous linear isometry
 `itoIntegralL2 : {adapted L²(Ω×[0,T])} →L[ℝ] Lp ℝ 2 μ` extending the discrete

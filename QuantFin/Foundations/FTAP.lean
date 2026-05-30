@@ -1,10 +1,21 @@
 /-
-  QuantFin.Foundations.FTAP
-  Theorem 2.6.7: First Fundamental Theorem of Asset Pricing (⇒ direction).
-  EMM existence ⇒ no arbitrage. Uses QuantFin.MartingaleTransform.
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
 -/
 import Mathlib
 import QuantFin.Foundations.MartingaleTransform
+
+/-!
+# FTAP (Theorem 2.6.7), forward (⇒) direction: EMM ⇒ no arbitrage
+
+The abstract discrete-time **forward** direction only: existence of an
+equivalent martingale measure precludes arbitrage, via the martingale-transform
+argument. This is the narrowest of the FTAP files — for the *both-directions*
+explicit two-state theorem (with the backward EMM construction) see
+`FTAPTwoState.lean`, and for the finite-state forward direction see
+`FTAPMultiState.lean`.
+-/
 
 namespace QuantFin
 

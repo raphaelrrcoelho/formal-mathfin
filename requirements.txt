@@ -1,4 +1,4 @@
-sympy>=1.13
-# Optional: uncomment when Lean is available locally (otherwise install via
-#   pip install -e ".[all]"
-# lean-interact>=0.11.0
+# Core runtime needs only the Python standard library (tomllib, json, asyncio).
+# Lean verification needs lean-interact — install via the extras:
+#   pip install -e ".[all]"     # adds lean-interact
+#   pip install -e ".[dev]"     # adds pytest + pytest-asyncio

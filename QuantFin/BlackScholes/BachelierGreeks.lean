@@ -34,16 +34,6 @@ noncomputable def bachelierV (K σ T : ℝ) (S : ℝ) : ℝ :=
   (S - K) * Phi (bachelierD S K σ T) +
     σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S K σ T)
 
-/-- `(d/dz) ϕ(0, 1, z) = -z · ϕ(0, 1, z)`. -/
-private lemma hasDerivAt_pdf (z : ℝ) :
-    HasDerivAt (fun z' : ℝ => gaussianPDFReal 0 1 z')
-      (-(z * gaussianPDFReal 0 1 z)) z := by
-  have h := (hasDerivAt_neg_gaussianPDFReal_zero_one z).neg
-  have h_eq : ((-fun z' : ℝ => -gaussianPDFReal 0 1 z') : ℝ → ℝ)
-            = fun z' : ℝ => gaussianPDFReal 0 1 z' := by funext z'; simp
-  rw [h_eq] at h
-  exact h
-
 /-- `∂_S [bachelierD S K σ T] = 1 / (σ √T)`. -/
 private lemma hasDerivAt_bachelierD_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : ℝ) :
     HasDerivAt (fun s => bachelierD s K σ T) (1 / (σ * Real.sqrt T)) S := by
@@ -63,7 +53,7 @@ lemma hasDerivAt_bachelierV_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : �
   -- Chain rule: ∂_S Φ(d(S)) = ϕ(d) · ∂_S d
   have h_Phi_chain := (hasDerivAt_Phi (bachelierD S K σ T)).comp S h_d_S
   -- Chain rule: ∂_S ϕ(d(S)) = -d · ϕ(d) · ∂_S d
-  have h_pdf_chain := (hasDerivAt_pdf (bachelierD S K σ T)).comp S h_d_S
+  have h_pdf_chain := (hasDerivAt_gaussianPDFReal_zero_one (bachelierD S K σ T)).comp S h_d_S
   -- ∂_S [(S - K)] = 1
   have h_S_sub : HasDerivAt (fun s : ℝ => s - K) 1 S := by
     simpa using (hasDerivAt_id S).sub_const K
@@ -107,7 +97,7 @@ lemma hasDerivAt_bachelierV_sigma {K T : ℝ} (hT : 0 < T)
     ring
   -- Chain rules
   have h_Phi_chain := (hasDerivAt_Phi (bachelierD S K σ T)).comp σ h_d_σ
-  have h_pdf_chain := (hasDerivAt_pdf (bachelierD S K σ T)).comp σ h_d_σ
+  have h_pdf_chain := (hasDerivAt_gaussianPDFReal_zero_one (bachelierD S K σ T)).comp σ h_d_σ
   -- ∂_σ [(S-K) Φ(d(σ))] = (S-K) ϕ(d) · ∂_σ d
   have h_term1 := h_Phi_chain.const_mul (S - K)
   -- ∂_σ [σ √T] = √T
@@ -160,7 +150,7 @@ lemma hasDerivAt_bachelierV_T {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < 
     ring
   -- Chain rules
   have h_Phi := (hasDerivAt_Phi (bachelierD S K σ T)).comp T h_d_T
-  have h_pdf := (hasDerivAt_pdf (bachelierD S K σ T)).comp T h_d_T
+  have h_pdf := (hasDerivAt_gaussianPDFReal_zero_one (bachelierD S K σ T)).comp T h_d_T
   -- ∂_T [(S - K) Φ(d(T))] = (S - K) · ϕ(d) · ∂_T d
   have h_term1 := h_Phi.const_mul (S - K)
   -- ∂_T [σ √T] = σ / (2√T)

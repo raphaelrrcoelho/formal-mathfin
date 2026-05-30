@@ -51,10 +51,12 @@ router).
 Install (only needed if running outside Docker):
 
 ```bash
-pip install -r requirements.txt                # SymPy only (Lean skipped if missing)
 pip install -e ".[all]"                        # adds lean-interact
 pip install -e ".[dev]"                        # pytest + pytest-asyncio
 ```
+
+(Core needs only the Python standard library; the extras add lean-interact /
+pytest.)
 
 Fast regression checks (run inside the verify container so versions match):
 
@@ -65,9 +67,9 @@ docker compose -f docker/docker-compose.yml run --rm \
     --entrypoint python3 verify -m tools.verify.coverage_report
 ```
 
-`tests/test_router.py` enforces formal-only routing, no active `code.sympy`,
-no active `sorry`/`admit`, and a declared formalization-faithfulness status
-for every benchmark theorem.
+`tests/test_router.py` enforces Lean-only routing, Lean-only `code` keys (no
+dropped-backend residue), no `sorry`/`admit`, and a declared
+formalization-faithfulness status for every benchmark theorem.
 
 Delivery/status docs:
 - `docs/coverage.md`: per-theorem audit, safe claim wording, verification evidence, and remaining placeholders.
@@ -94,30 +96,25 @@ Docker notes:
 ## Architecture
 
 Single Lean 4 verification backend, driven by a thin Python orchestrator.
-Each theorem in a benchmark JSON file carries a `code` map keyed by backend;
-the router decides which backends to attempt and in what order, based on the
-theorem's `domain`. SymPy is kept as a legacy/manual backend but no active
-route uses it.
+Each theorem in a benchmark JSON file carries a `code` map with a single
+`"lean"` key; the router maps the theorem's `domain` to the Lean backend.
+(The SymPy and Isabelle backends from the early hybrid era have been removed
+entirely.)
 
 **Dispatch flow** (`tools/verify/orchestrator.py`):
-1. `Router.route(domain)` returns a `RoutingDecision` (ordered backend list + parallel flag).
-2. Sequential mode tries backends in order and stops on first SUCCESS (early exit).
-3. Parallel mode dispatches to all backends via `asyncio.gather` (legacy from the hybrid era; with one active backend it degenerates to single-backend dispatch).
-4. `compute_overall_confidence` picks the best backend confidence.
+1. `Router.route(domain)` returns a `RoutingDecision` (backend list + parallel flag) — always `[Backend.LEAN]`.
+2. The theorem's `"lean"` code is dispatched to the Lean backend.
+3. The routing/parallel scaffolding is retained from the hybrid era but degenerates to single-backend dispatch.
+4. `compute_overall_confidence` reports the Lean result's confidence.
 
 **Confidence tiers** (`tools/verify/models.py` + scoring in `confidence.py`):
 - L5 = Lean SUCCESS (no sorries)
-- L4 = Lean PARTIAL with 1 sorry; L3 = >1 sorry
-- L2 = SymPy symbolic SUCCESS (cap for SymPy backend)
-- L1 = SymPy numerical SUCCESS
+- L4 = Lean PARTIAL with ≤1 sorry; L3 = >1 sorry
 - L0 = nothing succeeded
-
-SymPy never returns L3+ even on success — this is intentional, encoding that
-CAS checks are not formal proofs.
 
 **Routing table** (`router.DEFAULT_ROUTING`) — Lean-only across all domains:
 - `martingales`, `stopping_times`, `brownian_motion`, `measure_theory`, `poisson_processes`, `stochastic_calculus`, `stochastic_differential_equations`, `mathematical_finance`, `markov_chains`, `ergodic_theory`, `central_limit_theorem`.
-- Historical SymPy snippets, if retained, live under `metadata.cas_reference.sympy` — never active `code.sympy`. Run `python3 -m pytest tests/test_router.py` after routing or benchmark-code edits.
+- Every benchmark theorem's `code` map has a single `"lean"` key. Run `python3 -m pytest tests/test_router.py` after routing or benchmark-code edits.
 - Every benchmark theorem must declare `metadata.formalization_status`: `full`, `library_wrapper`, `reduced_core`, or `placeholder`. Delivery claims count only `full + library_wrapper`; see `docs/coverage.md`.
 - Do not tell a collaborator that all course theorems are formally proved. Run `python3 -m tools.verify.coverage_report` for the current `full / library_wrapper / reduced_core / placeholder` split.
 
@@ -183,29 +180,20 @@ the expensive Mathlib bootstrap to the first `verify()` call. It holds a
 `threading.Lock` since `lean-interact`'s server is not thread-safe — async
 `verify()` calls serialize through the lock.
 
-**SymPy backend dispatch** (`tools/verify/sympy_verifier.py`, legacy):
-- SymPy is not used by default routing and should not appear as active `code.sympy` in benchmark JSON. Treat it as an explicit/manual backend only.
-- If `theorem.metadata["sympy_check_kind"]` is set, dispatches to a typed handler (`ALGEBRAIC_IDENTITY` expects `lhs`/`rhs`; `MOMENT_COMPUTATION` expects `expected`/`computed`; `DERIVATIVE_CHECK` expects `expr`/`var`/`expected`; `INTEGRAL_CHECK` expects `integrand`/`var`/`limits`/`expected`; etc.).
-- Otherwise the verifier evaluates the code and reads a `result` dict (must contain `"verified"`).
-- **Convention**: if a benchmark's SymPy code already builds its own `result` dict, do NOT also set `sympy_check_kind` — the typed handlers will look for handler-specific variables (`lhs`/`rhs`/etc.) and fail. Pick one or the other.
-- All evaluation uses Python's runtime evaluator with a controlled namespace; treat benchmark JSON as trusted input.
-
 **Config** (`tools/verify/config.py`): TOML loader using stdlib `tomllib`
 (Python 3.11+). Searches `quantfin.toml` then `pyproject.toml`
 (`[tool.quantfin-verify]`). Defaults are baked into the dataclasses, so a
 missing file is fine.
 
 **Models** (`tools/verify/models.py`): `TheoremStatement` is a frozen
-dataclass — but `metadata` is a mutable dict by reference, which is how
-`annotate_cross_validation` writes back results. `code` is keyed by
-`Backend` enum (not strings); `from_dict` does the conversion at load time.
+dataclass; `metadata` is a mutable dict by reference. `code` is keyed by the
+`Backend` enum (just `Backend.LEAN`); `from_dict` does the conversion at load
+time.
 
 ## Benchmark JSON shape
 
 Either a top-level list of theorem dicts, or
 `{"theorems": [...], "description": "..."}`. Each theorem requires `id`,
-`name`, `domain` (must match a `Domain` enum value), and a `code` map with
-active formal backend-name keys (`"lean"`). Optional: `description`,
-`metadata`. Historical CAS snippets, if retained, belong under
-`metadata.cas_reference.sympy`, never active `code.sympy`. Files are
-organized by Saporito stochastic-processes textbook chapters.
+`name`, `domain` (must match a `Domain` enum value), and a `code` map with a
+single `"lean"` key. Optional: `description`, `metadata`. Files are organized
+by Saporito stochastic-processes textbook chapters.

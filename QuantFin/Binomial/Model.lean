@@ -28,8 +28,8 @@ This file contains:
    equals `binomialOptionPriceOnePeriod`.
 4. Multi-period (`N`-step) backward-induction price `binomialPrice`.
 
-The bridge to Black-Scholes (CRR convergence) is left as future upstream
-work — see `docs/roadmap.md` Phase 3.
+The bridge to Black-Scholes (CRR convergence) is proved in
+`Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`).
 -/
 
 namespace QuantFin

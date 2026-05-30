@@ -42,20 +42,32 @@ def _iter_theorems():
             yield path, theorem
 
 
-def test_default_routes_do_not_use_sympy() -> None:
+def test_default_routes_are_lean_only() -> None:
     router = Router()
 
     for domain in Domain:
         decision = router.route(domain)
-        assert Backend.SYMPY not in decision.backends
+        assert decision.backends == [Backend.LEAN], (domain, decision.backends)
 
 
-def test_benchmarks_do_not_expose_sympy_as_active_code() -> None:
+def test_benchmarks_do_not_expose_nonlean_code() -> None:
+    # Lean is the sole backend; sympy/isabelle were stripped from the repo.
     for path, theorem in _iter_theorems():
-        assert "sympy" not in theorem.get("code", {}), (
-            path,
-            theorem["id"],
-        )
+        code_keys = set(theorem.get("code", {}))
+        assert code_keys <= {"lean"}, (path, theorem["id"], code_keys)
+
+
+def test_benchmarks_have_no_dropped_backend_residue() -> None:
+    # No leftover sympy CAS references or isabelle_* metadata anywhere.
+    for path, theorem in _iter_theorems():
+        metadata = theorem.get("metadata", {})
+        assert "cas_reference" not in metadata, (path, theorem["id"])
+        assert "cas_reference_note" not in metadata, (path, theorem["id"])
+        residue = [
+            k for k in metadata
+            if "isabelle" in k.lower() or "sympy" in k.lower() or "cas_" in k.lower()
+        ]
+        assert not residue, (path, theorem["id"], residue)
 
 
 def test_benchmarks_do_not_contain_sorry_or_admit() -> None:

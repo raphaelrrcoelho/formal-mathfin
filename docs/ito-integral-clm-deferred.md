@@ -1,5 +1,12 @@
 # Continuous Itô integral (CLM extension) — progress + remaining density gap
 
+> **Note (2026-05-30): the finite-horizon `[0,T]` Itô integral CLM is DONE.**
+> `itoIntegralCLM_T` in `Foundations/ItoIntegralCLM.lean` is built, axioms-clean,
+> AxiomAudit-pinned, with `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` (`ItoIntegralBrownian.lean`)
+> as its first consumer. This document tracks only the *separate* infinite-horizon
+> variant — the `L2Predictable timeMeasure μ` integral over all of `ℝ≥0` — whose
+> density step remains open.
+
 **Status (2026-05-27): CLM steps 1–3 BUILT on `main`; only density + `extendOfNorm` remain.**
 The L²-completion was resumed (this supersedes the earlier "deferred" status). All of the
 following are on `main` in `QuantFin/Foundations/ItoIntegralL2.lean`, full build green

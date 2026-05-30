@@ -1,5 +1,5 @@
 {
-  "description": "Stochastic calculus theorems from Saporito Ch 6-10 — SymPy fallback (no formal library coverage)",
+  "description": "Stochastic calculus theorems from Saporito Ch 6-10 (stochastic_calculus).",
   "theorems": [
     {
       "id": "sc-thm-6.1.1",
@@ -13,10 +13,6 @@
         "chapter": 6,
         "reference": "Theorem 6.1.1",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Quadratic variation of BM: [B,B]_t = t\n# For partition {0, t/n, 2t/n, ..., t}, sum of (B_{t_{i+1}} - B_{t_i})^2 -> t\n# Each increment B_{t_{i+1}} - B_{t_i} ~ N(0, t/n)\n# E[(B_{t_{i+1}} - B_{t_i})^2] = t/n\n# Sum of n terms = n * (t/n) = t\n\nt, n = sp.symbols('t n', positive=True)\nincrement_var = t / n\nqv_sum = n * increment_var\nresult = {'verified': sp.simplify(qv_sum - t) == 0, 'mode': 'symbolic', 'qv': str(qv_sum)}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "full",
         "formalization_scope": "Full derivation: from measurability + Gaussian increments, ∫ (B_t − B_s)² ∂μ = t − s (via `Measure.map` transfer + `variance_id_gaussianReal`); summing along the equipartition gives n t/(n+1) by `integral_finset_sum`, which tends to t. No axioms beyond Mathlib defaults `[propext, Classical.choice, Quot.sound]`. Hypotheses are weaker than the textbook (independence + continuity not used)."
       }
@@ -33,10 +29,6 @@
         "chapter": 6,
         "reference": "Theorem 6.2.5",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Itô isometry: E[(int_0^t f dB)^2] = E[int_0^t f^2 ds]\n# Verify for f(s) = s: int_0^t s dB_s\n# E[(int_0^t s dB_s)^2] = int_0^t s^2 ds = t^3/3\n\nt, s = sp.symbols('t s', positive=True)\nf = s  # f(s) = s\n\nrhs = sp.integrate(f**2, (s, 0, t))\nexpected = t**3 / 3\n\nverified = sp.simplify(rhs - expected) == 0\nresult = {'verified': verified, 'mode': 'symbolic', 'rhs': str(rhs), 'expected': str(expected)}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "full",
         "formalization_scope": "Full derivation: the Itô isometry is proved from BM covariance + step-function finset isometry + L²-density of step indicators + LinearMap.extendOfNorm extension, no axioms beyond Mathlib defaults."
       }
@@ -53,10 +45,6 @@
         "chapter": 7,
         "reference": "Theorem 7.1.1",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Itô's formula verification for f(x) = x^2\n# f(B_t) = B_t^2 = B_0^2 + 2*int_0^t B_s dB_s + (1/2)*2*t\n# => B_t^2 = 2*int_0^t B_s dB_s + t\n# Equivalently: int_0^t B_s dB_s = (B_t^2 - t) / 2\n\nx = sp.Symbol('x')\nf = x**2\nf_prime = sp.diff(f, x)   # 2x\nf_double_prime = sp.diff(f, x, 2)  # 2\n\n# Check that f''(x)/2 = 1 (the drift coefficient)\nhalf_f_pp = f_double_prime / 2\nverified = sp.simplify(half_f_pp - 1) == 0\n\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'f': str(f),\n    'f_prime': str(f_prime),\n    'f_double_prime': str(f_double_prime),\n    'drift_coeff': str(half_f_pp)\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
       }
@@ -73,10 +61,6 @@
         "chapter": 9,
         "reference": "Theorem 9.1.8",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Girsanov: verify Radon-Nikodym derivative structure\n# Z_t = exp(theta*B_t - theta^2*t/2) is a martingale (for constant theta)\ntheta, t = sp.symbols('theta t', real=True)\n\n# E[Z_t] should equal Z_0 = 1 for Z_t to be a martingale\n# Using MGF of N(0,t): E[exp(theta*B_t)] = exp(theta^2*t/2)\nZ_t_expectation = sp.exp(theta**2 * t / 2) * sp.exp(-theta**2 * t / 2)\nverified = sp.simplify(Z_t_expectation - 1) == 0\n\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'note': 'E[Z_t] = 1 confirms Z_t is a martingale (Novikov condition satisfied for constant theta)'\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
       }
@@ -93,10 +77,6 @@
         "chapter": 7,
         "reference": "Theorem 7.1.2",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 7.1.2: time-dependent Itô formula.\n# Verify via two consistency checks:\n# (a) Martingale criterion: if ∂_t f + (1/2) ∂_xx f = 0, then f(t, B_t) is a martingale.\n#     Test on f(t,x) = exp(α x - α² t / 2) (Wald exponential).\n# (b) Compute E[f(t, B_t)] for f(t,x) = t · x² and compare against the formula.\n#     Predicted: ∫₀ᵗ E[B_s² + s] ds = ∫₀ᵗ 2s ds = t².\n#     Direct: E[t · B_t²] = t · t = t². ✓\n\nt, x, alpha = sp.symbols('t x alpha', real=True)\n\n# (a) Wald exponential martingale criterion\nf_wald = sp.exp(alpha*x - alpha**2*t/2)\nL_wald = sp.diff(f_wald, t) + sp.Rational(1,2) * sp.diff(f_wald, x, 2)\nmartingale_ok = sp.simplify(L_wald) == 0\n\n# (b) f(t,x) = t * x²\nf = t * x**2\ndft = sp.diff(f, t)        # x²\ndfx = sp.diff(f, x)        # 2 t x\ndfxx = sp.diff(f, x, 2)    # 2 t\n\n# Drift integrand at (s, B_s): ∂_t f + (1/2) ∂_xx f = B_s² + s\ns = sp.Symbol('s', positive=True)\nB_s = sp.Symbol('B_s', real=True)\ndrift_integrand_at_s = dft.subs({t: s, x: B_s}) + sp.Rational(1,2) * dfxx.subs({t: s, x: B_s})\nE_drift = sp.integrate(drift_integrand_at_s.subs(B_s**2, s), (s, 0, t))  # E[B_s²] = s\n\n# Direct: E[t * B_t²] = t * t\nE_direct = t * t\n\nverified = martingale_ok and (sp.simplify(E_drift - E_direct) == 0)\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'wald_generator': str(L_wald),\n    'E_via_formula': str(E_drift),\n    'E_direct': str(E_direct)\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
       }
@@ -113,10 +93,6 @@
         "chapter": 7,
         "reference": "Theorem 7.5.2",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 7.5.2: 2D Itô formula.\n# Verify via the product rule for correlated BMs B and W with d<B,W>_t = rho dt.\n# d(B_t W_t) = B_t dW + W_t dB + d<B,W> = B_t dW + W_t dB + rho dt.\n#\n# Take expectations: dE[B_t W_t] = rho dt ⇒ E[B_t W_t] = rho * t.\n# (Initial: E[B_0 W_0] = 0.)\n#\n# Cross-check via direct definition: Cov(B_t, W_t) = rho * t (correlated BMs by construction).\n\nt, rho = sp.symbols('t rho', real=True)\n\n# Direct: Cov(B_t, W_t) = rho * t for correlated BMs (assuming zero means)\nE_BW_direct = rho * t\n\n# Via 2D Itô: d(B W) = B dW + W dB + rho dt\n# Taking expectations: E[B dW] = E[W dB] = 0 (Itô integral is martingale, mean 0)\n# So d/dt E[B W] = rho ⇒ E[B_t W_t] = rho * t (with E[B_0 W_0] = 0)\nE_BW_via_ito = sp.integrate(rho, (t, 0, t))\n\nverified = sp.simplify(E_BW_via_ito - E_BW_direct) == 0\n\n# Also verify: f(x,y) = x*y has ∂_xy f = 1, which is the cross-term coefficient.\nx, y = sp.symbols('x y', real=True)\nf = x * y\nfxy = sp.diff(f, x, y)\ncoefficient_check = sp.simplify(fxy - 1) == 0\n\nresult = {\n    'verified': verified and coefficient_check,\n    'mode': 'symbolic',\n    'E[B_t W_t] via 2D Itô': str(E_BW_via_ito),\n    'E[B_t W_t] direct': str(E_BW_direct),\n    'd^2(xy)/dxdy': str(fxy)\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
       }
@@ -133,10 +109,6 @@
         "chapter": 7,
         "reference": "Theorem 7.4.5",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 7.4.5: <X>_t = int_0^t sigma(s)^2 ds for an Ito process X = X_0 + int mu ds + int sigma dB.\n# Verify: drift dt-term has finite variation ⇒ contributes 0 to QV.\n# QV is built up only from the dB integrand.\n#\n# Concrete check: X_t = mu*t + sigma*B_t (constants).\n# Direct: <X>_t = sigma^2 * t (since <B>_t = t and Var contributions of drift are 0).\n# Formula: int_0^t sigma^2 ds = sigma^2 * t. ✓\n\nt, mu, sigma = sp.symbols('t mu sigma', positive=True)\nQV_formula = sp.integrate(sigma**2, (sp.Symbol('s'), 0, t))\nQV_direct = sigma**2 * t\nverified = sp.simplify(QV_formula - QV_direct) == 0\n\n# Time-dependent sigma: sigma(s) = s\nsigma_fn = sp.Symbol('s')\nQV_time_dep = sp.integrate(sigma_fn**2, (sigma_fn, 0, t))  # = t³/3\nverified_td = sp.simplify(QV_time_dep - t**3 / 3) == 0\n\nresult = {\n    'verified': verified and verified_td,\n    'mode': 'symbolic',\n    'QV_constant_sigma': str(QV_formula),\n    'QV_sigma_eq_s': str(QV_time_dep)\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
       }
@@ -153,10 +125,6 @@
         "chapter": 9,
         "reference": "Theorem 9.1.1",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 9.1.1 (Lévy's characterization).\n# Sanity check: take X = B (true BM) and verify all hypotheses are satisfied.\n# (1) Continuous paths: yes for BM.\n# (2) X_0 = 0: yes.\n# (3) X is a martingale: E[B_t | F_s] = B_s.\n# (4) <X>_t = t: by Itô, d(B_t²) = 2 B_t dB_t + dt, so <B>_t = t.\n#\n# Stronger: verify the characterization implies E[exp(i u X_t) | F_s] = exp(i u X_s - u²(t-s)/2).\n# (Characteristic function of N(X_s, t-s).)\n# This identity is what proves the converse — increments are N(0, t-s) and independent of past.\n\nt, s, u = sp.symbols('t s u', real=True)\nX_s = sp.Symbol('X_s', real=True)\n\n# Characteristic function of normal increment X_t - X_s ~ N(0, t-s)\n# E[exp(i u (X_t - X_s)) | F_s] = exp(-u²(t-s)/2)\nchar_inc = sp.exp(-u**2 * (t - s) / 2)\nE_chf = sp.exp(sp.I * u * X_s) * char_inc\nexpected = sp.exp(sp.I * u * X_s - u**2 * (t - s) / 2)\n\ndiff = sp.simplify(E_chf / expected - 1)\n\nresult = {\n    'verified': diff == 0,\n    'mode': 'symbolic',\n    'identity_residual': str(diff),\n    'note': 'Lévy: continuous martingale with <X>_t = t ⇒ X is Brownian motion'\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
       }
@@ -173,10 +141,6 @@
         "chapter": 9,
         "reference": "Theorem 9.2.1",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 9.2.1 (Feynman-Kac, simplest form).\n# Verify: u(t,x) = E[g(x + B_t)] solves ∂_t u = (1/2) ∂_xx u with u(0,x) = g(x).\n# Test on three explicit g: polynomial, exponential, cosine.\n\nt, x, alpha = sp.symbols('t x alpha', real=True)\n\nresults = []\nfor g_name, u_expr in [\n    # g(x) = x²: u = E[(x+B_t)²] = x² + t\n    ('x^2', x**2 + t),\n    # g(x) = e^{α x}: u = E[e^{α(x+B_t)}] = e^{α x + α² t / 2}\n    ('exp(αx)', sp.exp(alpha * x + alpha**2 * t / 2)),\n    # g(x) = cos(αx): u = E[cos(α(x+B_t))] = e^{-α²t/2} cos(αx)\n    ('cos(αx)', sp.exp(-alpha**2 * t / 2) * sp.cos(alpha * x)),\n]:\n    pde = sp.diff(u_expr, t) - sp.Rational(1,2) * sp.diff(u_expr, x, 2)\n    initial = u_expr.subs(t, 0)\n    pde_ok = sp.simplify(pde) == 0\n    results.append((g_name, pde_ok, str(sp.simplify(pde)), str(sp.simplify(initial))))\n\nverified = all(r[1] for r in results)\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'tests': [{'g': r[0], 'pde_residual': r[2], 'u(0,x)': r[3]} for r in results]\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "full",
         "formalization_scope": "Full derivation of the Feynman–Kac formula direction. The heat-kernel convolution `∫ z, g(z) · K(t, z − x) ∂volume` is proved equal to the BM expectation `E[g(x + B_t)]` from primitives (`B_0 = 0` a.s., Gaussian increments, `g` continuous, `t > 0`) via Measure.map transfer through `gaussianReal 0 t.toNNReal` + density representation + Lebesgue translation invariance. Boundary condition `u(0, x) = g(x)` derived from `B_0 = 0` + probability measure. Heat-kernel PDE on `K` (`∂_t K = (1/2) ∂²_y K`) is also proved as part of the supporting infrastructure (via product/chain rule on `(2π t)^{-1/2} exp(-y²/(2t))`). Scope note: the heat-equation PDE for `u` itself (passing the kernel PDE through the integral via differentiation under the integral sign) is not derived here — it requires ~300–500 lines of uniform-domination bounds for the Gaussian-shifted parametric integral, left as upstream work. Axioms: only `[propext, Classical.choice, Quot.sound]`."
       }
@@ -193,10 +157,6 @@
         "chapter": 8,
         "reference": "Theorem 8.2.5",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 8.2.5: Verify existence/uniqueness on a concrete linear SDE,\n# Geometric Brownian Motion (GBM): dX = a X dt + sigma X dB.\n# Coefficients mu(x) = a*x, sigma(x) = sigma*x are Lipschitz (with constant max(|a|, sigma)).\n# Closed-form solution: X_t = X_0 exp((a - sigma²/2) t + sigma B_t).\n# Verify by Ito's formula: f(t, B) = X_0 exp((a - sigma²/2) t + sigma B).\n# df = ∂_t f dt + ∂_B f dB + (1/2) ∂_BB f dt\n#    = (a - sigma²/2) f dt + sigma f dB + (1/2) sigma² f dt\n#    = a f dt + sigma f dB.\n# So df = a X dt + sigma X dB. ✓ (existence)\n# Uniqueness follows from Lipschitz + Gronwall.\n\nt, B, a, sigma, X0 = sp.symbols('t B a sigma X0', positive=True)\nf = X0 * sp.exp((a - sigma**2 / 2) * t + sigma * B)\n\n# Drift term from Ito\ndrift = sp.diff(f, t) + sp.Rational(1, 2) * sp.diff(f, B, 2)\ndrift_target = a * f\ndrift_ok = sp.simplify(drift - drift_target) == 0\n\n# Diffusion term\ndiff = sp.diff(f, B)\ndiff_target = sigma * f\ndiff_ok = sp.simplify(diff - diff_target) == 0\n\n# Initial condition\ninit_ok = sp.simplify(f.subs([(t, 0), (B, 0)]) - X0) == 0\n\n# Lipschitz check (locally, on bounded set [-M, M]):\n# |mu(x) - mu(y)| = |a||x-y|, |sigma(x) - sigma(y)| = |sigma||x-y|.\n# Both have linear growth: |mu(x)| <= |a||x|, |sigma(x)| <= sigma |x|.\n# Conditions of Theorem 8.2.5 satisfied.\n\nresult = {\n    'verified': drift_ok and diff_ok and init_ok,\n    'mode': 'symbolic',\n    'drift_residual': str(sp.simplify(drift - drift_target)),\n    'diffusion_residual': str(sp.simplify(diff - diff_target)),\n    'note': 'GBM closed form satisfies SDE; mu, sigma linear ⇒ Lipschitz + linear growth ⇒ unique strong solution'\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
       }
@@ -213,10 +173,6 @@
         "chapter": 10,
         "reference": "Black-Scholes PDE",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Verify the Black-Scholes call price satisfies the BS PDE\nS, t, K, r, sigma, T = sp.symbols('S t K r sigma T', positive=True)\ntau = T - t  # time to maturity\n\n# Standard normal CDF\nfrom sympy.stats import Normal\nfrom sympy import erfc, sqrt, exp, log\n\nd1 = (log(S/K) + (r + sigma**2/2)*tau) / (sigma*sqrt(tau))\nd2 = d1 - sigma*sqrt(tau)\n\n# BS call price: C = S*N(d1) - K*exp(-r*tau)*N(d2)\n# where N is the standard normal CDF\nN = lambda x: (1 + sp.erf(x/sqrt(2))) / 2\nC = S * N(d1) - K * exp(-r*tau) * N(d2)\n\n# Verify PDE: dC/dt + 0.5*sigma^2*S^2*d2C/dS2 + r*S*dC/dS - r*C = 0\ndC_dt = sp.diff(C, t)\ndC_dS = sp.diff(C, S)\nd2C_dS2 = sp.diff(C, S, 2)\n\npde = dC_dt + sp.Rational(1,2)*sigma**2*S**2*d2C_dS2 + r*S*dC_dS - r*C\npde_simplified = sp.simplify(pde)\n\nverified = pde_simplified == 0\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'pde_residual': str(pde_simplified),\n    'note': 'Black-Scholes PDE verification via symbolic differentiation'\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "full",
         "formalization_scope": "Full derivation of the BS PDE forward direction. The European call price V(S,t) = S Φ(d₁) − K e^{-r(T-t)} Φ(d₂) is shown to satisfy the BS PDE for S > 0, t < T, K > 0, σ > 0. Proof chain: hasDerivAt_Phi (FTC on Iic-Lebesgue) → bs_identity (the magic algebraic identity S φ(d₁) = K e^{-rτ} φ(d₂)) → ∂_S d₁, ∂_S d₂ (chain rule on log + division) → ∂_τ d₁, ∂_τ d₂ (quotient rule) → ∂_S V, ∂²_S V, ∂_τ V (chain + product + magic identity for term cancellation) → ∂_t V = −∂_τ V (chain on τ = T − t) → bs_pde_holds (algebraic check via field_simp + ring). No Itô calculus required; pure calculus + the magic identity. Axioms: only `[propext, Classical.choice, Quot.sound]`. Confirmed via `#print axioms` on every supporting lemma."
       }

@@ -23,8 +23,6 @@ risk-free gain; if `< 1`, the reverse trip is.
 * `TriangleNoArb`: definition `S_AB · S_BC · S_CA = 1`.
 * `triangleNoArb_solve_third`: given two rates (non-zero), the no-arb constraint
   uniquely determines the third: `S_CA = 1 / (S_AB · S_BC)`.
-* `triangleNoArb_inverse_consistency`: if `S_CA = 1 / (S_AC)` and similarly
-  for the other pairs, no-arb is equivalent to `S_AC · S_CB · S_BA = 1`.
 -/
 
 namespace QuantFin

@@ -1,10 +1,8 @@
 """Domain-based routing to verification backends.
 
-All active routes are Lean-only. The historical Isabelle entries (CLT,
-Markov chains, ergodic theory) have been removed; SymPy is kept as an
-explicit/manual fallback but no default route uses it. See
-``docs/superpowers/specs/2026-05-23-repo-reorganization-design.md`` for the
-rationale.
+Lean is the sole verification backend; every domain routes to it. The
+routing layer (table + parallel flag) is retained from the multi-backend
+era but now degenerates to single-backend dispatch.
 """
 
 from __future__ import annotations
@@ -27,9 +25,8 @@ DEFAULT_ROUTING: dict[Domain, list[Backend]] = {
     Domain.POISSON_PROCESSES:    [Backend.LEAN],
 }
 
-# Domains where parallel dispatch was useful in the hybrid era. Now Lean-only;
-# the flag is retained for legacy benchmark consumers but degenerates to
-# single-backend dispatch.
+# Parallel dispatch is a no-op with a single backend; retained so the
+# RoutingDecision shape stays stable for callers.
 PARALLEL_DOMAINS: set[Domain] = set()
 
 

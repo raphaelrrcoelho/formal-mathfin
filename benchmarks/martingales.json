@@ -14,7 +14,7 @@
         "reference": "Theorem 2.2.12",
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+        "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
       }
     },
     {
@@ -45,12 +45,8 @@
         "chapter": 2,
         "reference": "Theorem 2.4.3",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Numerical verification of Doob's inequality for a simple random walk\n# E[|S_n|] for symmetric random walk = sqrt(2n/pi) asymptotically\nn = sp.Symbol('n', positive=True, integer=True)\nlam = sp.Symbol('lambda', positive=True)\n\n# For symmetric RW, P(max_{k<=n} S_k >= lambda) <= E[S_n^+] / lambda\n# This is just a structural check\nresult = {'verified': True, 'mode': 'symbolic', 'note': 'Inequality structure verified'}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+        "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
       }
     },
     {
@@ -82,7 +78,7 @@
         "reference": "Proposition 2.5.5",
         "difficulty": "advanced",
         "formalization_status": "library_wrapper",
-        "formalization_scope": "Direct Lean/Isabelle wrapper around an existing library theorem closely matching the benchmark statement."
+        "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
       }
     },
     {
@@ -97,10 +93,6 @@
         "chapter": 2,
         "reference": "Theorem 2.2.9",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 2.2.9: martingale transform (A·M) is a martingale.\n# Verify on a 3-step toy example.\n# M = symmetric simple random walk: M_n - M_{n-1} = epsilon_n (P=1/2 each of +/-1)\n# A_n is F_{n-1}-measurable; e.g., A_n = sign(M_{n-1}) — predictable.\n# E[(A·M)_n - (A·M)_{n-1} | F_{n-1}] = A_n · E[M_n - M_{n-1} | F_{n-1}] = A_n · 0 = 0.\n#\n# Encode this symbolically: let a be the (F_{n-1}-measurable) value of A_n.\n# E[increment_M | F_{n-1}] = 0, so E[a * increment_M | F_{n-1}] = a * 0 = 0.\n\na = sp.Symbol('a', real=True)  # F_{n-1}-measurable value of A_n\nE_increment_M = 0  # martingale property\nE_increment_AM = a * E_increment_M  # by linearity, A_n known\n\nresult = {\n    'verified': sp.simplify(E_increment_AM) == 0,\n    'mode': 'symbolic',\n    'E[(A·M)_n - (A·M)_{n-1}|F_{n-1}]': str(E_increment_AM),\n    'note': 'A_n is F_{n-1}-measurable, so factors out of conditional expectation'\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "full",
         "formalization_scope": "Real Lean derivation: the structure encodes the textbook hypotheses (martingale M, predictable bounded A, transform formula) and the theorem `transform_is_martingale` derives the martingale conclusion via Mathlib's `martingale_nat` characterization. Adaptedness uses `Finset.stronglyMeasurable_sum`; integrability uses `Integrable.bdd_mul`; the martingale step uses `condExp_mul_of_stronglyMeasurable_left` (pull-out) on the new summand `A_{n+1} (M_{n+1} − M_n)` and the martingale increment property of M."
       }
@@ -117,10 +109,6 @@
         "chapter": 2,
         "reference": "Theorem 2.4.6",
         "difficulty": "intermediate",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 2.4.6: Doob's L^p inequality\n# ||M_n*||_p ≤ q ||M_n||_p where q = p/(p-1) is the conjugate exponent\n# Verify the constant has the right behavior:\n# - As p -> infinity: q -> 1 (sharper bound)\n# - At p = 2: q = 2 (classic L² Doob)\n# - As p -> 1+: q -> infinity (inequality fails at p=1, hence the L log L variant)\n\np = sp.Symbol('p', positive=True)\nq = p / (p - 1)\n\nq_at_2 = q.subs(p, 2)         # 2\nq_at_4 = q.subs(p, 4)         # 4/3\nq_limit_inf = sp.limit(q, p, sp.oo)   # 1\nq_limit_one = sp.limit(q, p, 1, '+')  # +infinity\n\n# Conjugate exponent property: 1/p + 1/q = 1\nconjugate = sp.simplify(1/p + 1/q - 1)\n\nverified = (q_at_2 == 2) and (q_at_4 == sp.Rational(4,3)) \\\n    and (q_limit_inf == 1) and (q_limit_one == sp.oo) \\\n    and (conjugate == 0)\n\nresult = {\n    'verified': verified,\n    'mode': 'symbolic',\n    'q(2)': str(q_at_2),\n    'q(4)': str(q_at_4),\n    'lim_p->inf q': str(q_limit_inf),\n    'lim_p->1+ q': str(q_limit_one),\n    'conjugacy_check': str(conjugate)\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof of Doob's L^p maximal inequality. End-to-end derivation (no sorries, no library wrapper) from Mathlib primitives: layer cake (MeasureTheory.lintegral_rpow_eq_lintegral_meas_le_mul) + Doob's L^1 maximal inequality (MeasureTheory.maximal_ineq) + Fubini/Tonelli swap (MeasureTheory.lintegral_lintegral_swap) + Hölder inequality (ENNReal.lintegral_mul_le_Lp_mul_Lq with HolderConjugate p (p/(p-1))) + rpow inversion (ENNReal.rpow_add_of_nonneg + ENNReal.div_le_iff) + truncation argument (min(runMax, K) + monotone convergence via lintegral_iSup) for the A=infty, B<infty corner. Lives at lean/QuantFin/MathlibLp.lean (18 helper lemmas + MeasureTheory.maximal_ineq_Lp). Axioms-clean: depends only on propext, Classical.choice, Quot.sound.",
         "v430_recovery": {
@@ -143,10 +131,6 @@
         "chapter": 2,
         "reference": "Theorem 2.5.3",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 2.5.3: L¹ bounded martingale converges a.s.\n# Concrete example: M_n = sum_{k=1}^n epsilon_k / 2^k where epsilon_k iid {-1,+1} with mean 0.\n# This is a martingale (sum of zero-mean increments) and ||M_n||_1 ≤ sum 1/2^k = 1 < infinity.\n# Pointwise it converges (geometric series convergence) — verify the bound.\n\nn = sp.Symbol('n', positive=True, integer=True)\nk = sp.Symbol('k', positive=True, integer=True)\n\n# L¹ bound: E[|M_n|] ≤ sum_{k=1}^n 1/2^k = 1 - 1/2^n < 1\nL1_bound = sp.summation(sp.Rational(1, 2)**k, (k, 1, n))\nlimit_bound = sp.limit(L1_bound, n, sp.oo)\n\n# A.s. convergence: the partial sum series sum 1/2^k * eps_k converges absolutely a.s.\n# Show absolute summability of the variance bound\nvariance_sum = sp.summation((sp.Rational(1, 2)**k)**2, (k, 1, sp.oo))  # = 1/3\n\nresult = {\n    'verified': (limit_bound == 1) and (variance_sum == sp.Rational(1, 3)),\n    'mode': 'symbolic',\n    'L1_bound_partial': str(L1_bound),\n    'L1_bound_limit': str(limit_bound),\n    'variance_sum': str(variance_sum),\n    'note': 'Uniformly L¹-bounded martingale; converges a.s. by Doob/upcrossing'\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "library_wrapper",
         "formalization_scope": "library_wrapper of the a.s.-convergence theorem; faithful for the a.s. claim."
       }
@@ -163,10 +147,6 @@
         "chapter": 2,
         "reference": "Theorem 2.6.7",
         "difficulty": "advanced",
-        "cas_reference": {
-          "sympy": "import sympy as sp\n\n# Theorem 2.6.7: existence of EMM Q ⇒ no arbitrage.\n# Sketch: under Q, discounted prices S* are a Q-martingale.\n# For any self-financing strategy with V_0 = 0,\n# V*_T = V_0 + (phi · S*)_T is a Q-martingale starting at 0,\n# so E_Q[V*_T] = 0. Since Q ~ P, V*_T >= 0 a.s.(P) implies V*_T = 0 a.s.(P).\n# Hence no arbitrage.\n\n# Concrete check: 1-period 2-state model.\n# S_0 = 1; S_1 = 2 with P-prob p, S_1 = 0.5 with P-prob 1-p.\n# Risk-free rate = 0.\n# EMM Q satisfies E_Q[S_1] = S_0 = 1 ⇒ 2*q + 0.5*(1-q) = 1 ⇒ q = 1/3.\n# Q ~ P iff 0 < q < 1 (here q = 1/3 ∈ (0,1)). EMM exists.\n# Strategy phi (in stock) and psi (cash). V_0 = 0 ⇒ psi = -phi.\n# V_1 = phi*(S_1 - S_0) = phi*(S_1 - 1).\n# Arbitrage requires V_1 >= 0 a.s.(P) and P(V_1 > 0) > 0.\n# But V_1 = phi*(S_1 - 1): outcomes phi or -phi/2.\n#   - phi > 0: V_1 = -phi/2 < 0 in down state — not arbitrage.\n#   - phi < 0: V_1 = phi < 0 in up state — not arbitrage.\n#   - phi = 0: V_1 = 0 a.s. — not arbitrage (no profit).\n# So no arbitrage exists.\n\nphi = sp.Symbol('phi', real=True)\nV1_up = phi * 1     # S_1 - S_0 = 1 in up state\nV1_down = phi * (-sp.Rational(1, 2))  # S_1 - S_0 = -1/2 in down\n\n# Under Q: q = 1/3 makes E_Q[S_1 - S_0] = 0\nq = sp.Rational(1, 3)\nE_Q_dS = q * 1 + (1 - q) * (-sp.Rational(1, 2))\nverified_emm = sp.simplify(E_Q_dS) == 0\n\n# E_Q[V_1] = phi * E_Q[dS] = 0 for any phi (martingale property)\nE_Q_V1 = phi * E_Q_dS\nverified_mart = sp.simplify(E_Q_V1) == 0\n\n# No arbitrage: V_1 cannot be a.s. >= 0 with positive prob > 0 unless phi = 0\n# phi > 0: V1_down < 0\n# phi < 0: V1_up < 0\nresult = {\n    'verified': verified_emm and verified_mart,\n    'mode': 'symbolic',\n    'E_Q[dS]': str(E_Q_dS),\n    'E_Q[V_1]': str(E_Q_V1),\n    'note': 'EMM (q=1/3) makes discounted price a martingale; precludes arbitrage'\n}"
-        },
-        "cas_reference_note": "Historical SymPy check retained for reference only; default routing is formal-only.",
         "formalization_status": "full",
         "formalization_scope": "Real derivation of FTAP (⇒ direction): embeds the martingale-transform theorem (mart-thm-2.2.9 inlined as helper since each benchmark is verified in isolation), applies it to the discounted price `S` under the EMM `Q`, then uses `Q ≪ P`, `integral_eq_zero_iff_of_nonneg_ae`, and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero."
       }

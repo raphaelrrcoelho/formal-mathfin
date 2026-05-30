@@ -42,10 +42,10 @@ on `crrUp, crrDown, crrProb`.
 drift and QV. Pure composition of existing `crr_drift_limit_n` (drift)
 and `crr_variance_limit` (QV) with the per-step identities.
 
-**Not done (44c, deferred)**: The triangular-array CLT applied to the
-sum of log-returns, yielding distributional convergence to BS lognormal.
-Mathlib pin has fixed-iid CLT but not triangular-array; documented as
-future work in `CRRConvergence.lean` line 36 already.
+**44c (distributional convergence)**: the binomial call price converges to
+the BS call price — proved in `Binomial/CRRCharFun.lean`
+(`binomialPrice_call_tendsto_bs`) via characteristic functions + Lévy
+continuity + put-call parity (no triangular-array CLT needed).
 
 ## Results
 
@@ -153,9 +153,8 @@ theorem tendsto_sum_QV_atTop_BS_QV
 summary). The binomial scheme, parameterised by CRR, is a discrete-Itô
 process whose per-step drift and QV — when summed over `n` steps — limit
 to the BS log-price drift `(r − σ²/2)·T` and QV `σ²·T`. The full
-distributional convergence to BS lognormal (the actual CRR → BS theorem)
-requires a triangular-array CLT, deferred per the docstring of
-`CRRConvergence.lean`.
+distributional convergence to the BS call price is proved separately in
+`Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`).
 
 Packaged as a single conjunction for downstream consumption. -/
 theorem binomial_discrete_ito_convergence

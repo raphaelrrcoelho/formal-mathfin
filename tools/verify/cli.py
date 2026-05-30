@@ -15,10 +15,9 @@ from pathlib import Path
 
 from .config import load_config
 from .lean_backend import LeanBackend
-from .models import Backend, TheoremStatement, VerificationStatus
+from .models import TheoremStatement, VerificationStatus
 from .orchestrator import Orchestrator
 from .router import Router
-from .sympy_verifier import SymPyVerifier
 
 
 def load_theorems(path: str | Path) -> list[TheoremStatement]:
@@ -126,17 +125,13 @@ def main(argv: list[str] | None = None) -> int:
     theorems = load_theorems(theorem_path)
     print(f"Loaded {len(theorems)} theorems from {theorem_path}")
 
-    # Create backends. Lean is the only formal backend; SymPy is kept as a
-    # legacy/manual fallback (no active route uses it).
+    # Lean is the sole verification backend.
     lean = LeanBackend(local_project=config.lean.local_project)
-    sympy_backend = SymPyVerifier()
 
     # Create orchestrator
     orchestrator = Orchestrator(
         router=Router(),
         lean=lean,
-        sympy=sympy_backend,
-        max_workers=config.orchestrator.max_workers,
         default_timeout=timeout,
     )
 

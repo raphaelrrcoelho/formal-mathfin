@@ -39,8 +39,8 @@ the completing-the-square step, and the BS algebraic identity
 density `e^{−rT} · S_T / S_0` and the resulting measure via
 `Measure.withDensity`.
 
-`stockNumeraireMeasure_isProbabilityMeasure`: the density integrates to 1
-(this is `discounted_terminal_eq_S0` from `Forward.lean`).
+The density integrates to 1 (`discounted_terminal_eq_S0` from `Forward.lean`),
+so `stockNumeraireMeasure` is a probability measure.
 
 ## Part 3: the identification
 

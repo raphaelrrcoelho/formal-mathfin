@@ -36,7 +36,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
 
 /-- For `s ≤ t : ℝ≥0`, the NNReal-valued increment-variance `max (t-s) (s-t)`
 coerces to `(t : ℝ) - (s : ℝ)` (since truncated `s - t = 0` when `s ≤ t`). -/
-private lemma NNReal.max_sub_eq_of_le {s t : ℝ≥0} (hst : s ≤ t) :
+private lemma max_sub_coe_eq_of_le {s t : ℝ≥0} (hst : s ≤ t) :
     ((max (t - s) (s - t) : ℝ≥0) : ℝ) = (t : ℝ) - (s : ℝ) := by
   have hst_zero : s - t = (0 : ℝ≥0) := tsub_eq_zero_of_le hst
   rw [hst_zero, max_eq_left zero_le]
@@ -136,7 +136,7 @@ theorem squareSubTime_isMartingale :
         = ∫ x, x ^ 2 ∂(gaussianReal 0 (max (t - s) (s - t))) := by
       simpa [Function.comp] using hL_diff.integral_comp (f := fun x : ℝ ↦ x ^ 2) (by fun_prop)
     rw [h_change, QuantFin.integral_sq_gaussianReal]
-    exact NNReal.max_sub_eq_of_le hst
+    exact max_sub_coe_eq_of_le hst
   -- `𝓕_s`-measurability of `X_s` and `(X_s)²`.
   have h_smeas_s : StronglyMeasurable[𝓕 s] (X s) := hX.stronglyAdapted s
   have h_smeas_s_sq : StronglyMeasurable[𝓕 s] (fun ω ↦ (X s ω) ^ 2) := by
@@ -315,7 +315,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
   have h_int_Dst : Integrable Dst P := hDst_factor ▸ h_int_exp_diff.const_mul _
   -- Mean of `D_{st}` is 1.
   have h_int_Dst_eq_one : ∫ ω, Dst ω ∂P = 1 := by
-    rw [hDst_factor, integral_const_mul, h_int_exp_diff_eq, NNReal.max_sub_eq_of_le hst,
+    rw [hDst_factor, integral_const_mul, h_int_exp_diff_eq, max_sub_coe_eq_of_le hst,
         ← Real.exp_add]
     rw [show -(α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) + α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2 = 0
         from by ring, Real.exp_zero]

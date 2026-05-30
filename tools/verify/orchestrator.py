@@ -5,10 +5,9 @@ from __future__ import annotations
 import asyncio
 import logging
 import time
-from concurrent.futures import ThreadPoolExecutor
 from typing import Any
 
-from .confidence import annotate_cross_validation, compute_overall_confidence
+from .confidence import compute_overall_confidence
 from .lean_backend import LeanBackend
 from .models import (
     Backend,
@@ -18,7 +17,6 @@ from .models import (
     VerificationStatus,
 )
 from .router import Router
-from .sympy_verifier import SymPyVerifier
 
 logger = logging.getLogger(__name__)
 
@@ -30,26 +28,17 @@ class Orchestrator:
         self,
         router: Router | None = None,
         lean: LeanBackend | None = None,
-        sympy: SymPyVerifier | None = None,
-        max_workers: int = 3,
         default_timeout: float = 60.0,
     ):
         self._router = router or Router()
         self._backends: dict[Backend, Any] = {}
         self._default_timeout = default_timeout
-        self._executor = ThreadPoolExecutor(max_workers=max_workers)
 
-        # Register available backends. Lean is the only formal backend;
-        # SymPy is kept as a legacy/manual fallback (no active route uses it).
+        # Lean is the sole verification backend.
         if lean is not None:
             self._backends[Backend.LEAN] = lean
         else:
             self._backends[Backend.LEAN] = LeanBackend()
-
-        if sympy is not None:
-            self._backends[Backend.SYMPY] = sympy
-        else:
-            self._backends[Backend.SYMPY] = SymPyVerifier()
 
     async def verify(
         self,
@@ -67,7 +56,6 @@ class Orchestrator:
             await self._dispatch_sequential(theorem, decision.backends, result, timeout)
 
         result.overall_confidence = compute_overall_confidence(result)
-        annotate_cross_validation(result)
         return result
 
     async def _dispatch_sequential(
@@ -185,5 +173,4 @@ class Orchestrator:
                 backend.shutdown()
             except Exception as e:
                 logger.warning("Error shutting down backend: %s", e)
-        self._executor.shutdown(wait=False)
         logger.info("Orchestrator shut down")

@@ -70,8 +70,6 @@ import QuantFin.Foundations.VarianceSwapEquipartition
 import QuantFin.Foundations.VarianceSwapLimit
 -- Phase 35: Discrete Itô formula (adapted from Nagy 2026, SSRN 6336503)
 import QuantFin.Foundations.DiscreteIto
--- Phase 36: Itô integral for simple processes (adapted from Nagy 2026)
-import QuantFin.Foundations.ItoIntegralSimple
 -- The adapted Itô isometry (increment-independence cornerstone)
 import QuantFin.Foundations.ItoIsometryAdapted
 -- Stochastic intervals + elementary-predictable-set lemma (Degenne issue #440)

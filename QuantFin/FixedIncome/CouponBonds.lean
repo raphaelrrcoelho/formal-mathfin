@@ -9,7 +9,7 @@ import QuantFin.FixedIncome.ZCB
 /-!
 # Coupon bonds, annuities, and rate-curve identities
 
-Extensions of the deterministic-short-rate framework in `FixedIncome.lean`:
+Extensions of the deterministic-short-rate framework in `ZCB.lean`:
 
 * **Annuity closed form**: `A_n(c, r, Δt) = c · e^{-rΔt} · (1 − x^n) / (1 − x)`,
   with `x = e^{-rΔt}`. Standard geometric-series identity.

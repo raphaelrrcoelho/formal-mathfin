@@ -27,16 +27,6 @@ namespace QuantFin
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
 
-/-- `(d/dz) ϕ(0, 1, z) = -z · ϕ(0, 1, z)` — derivative of standard-normal density. -/
-private lemma hasDerivAt_gaussianPDFReal_zero_one (z : ℝ) :
-    HasDerivAt (fun z' : ℝ => gaussianPDFReal 0 1 z')
-      (-(z * gaussianPDFReal 0 1 z)) z := by
-  have h := (hasDerivAt_neg_gaussianPDFReal_zero_one z).neg
-  have h_eq : ((-fun z' : ℝ => -gaussianPDFReal 0 1 z') : ℝ → ℝ)
-            = fun z' : ℝ => gaussianPDFReal 0 1 z' := by funext z'; simp
-  rw [h_eq] at h
-  exact h
-
 /-- Clean form: `∂_σ d₁ = -d₂/σ`. Algebraic shortcut for the quotient-rule
 expression in `hasDerivAt_bsd1_sigma`. Useful for higher-order Greeks. -/
 private lemma hasDerivAt_bsd1_sigma_clean (S K r : ℝ) {σ τ : ℝ}

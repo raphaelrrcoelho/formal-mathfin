@@ -148,7 +148,7 @@ consumers gain an optional BM-based path.
 The first complete bridge programme is documented in
 [`bridges.md`](bridges.md): `BSCallHypFromBrownian`,
 `PricingFromBrownian`, the variance-swap QV chain, `DiscreteIto`,
-`ItoIntegralSimple`, `FTAPTwoState`, etc. Each "phase" in the bridge log
+`FTAPTwoState`, etc. Each "phase" in the bridge log
 adds one constructor and one or more one-line corollaries downstream.
 
 Anti-pattern recognised early: a `Foundations/` file with great
