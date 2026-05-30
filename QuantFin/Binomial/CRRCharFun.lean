@@ -361,6 +361,74 @@ theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 
   rw [heq]
   exact crr_charFun_pow_tendsto_gaussian hσ hT t
 
+/-! ### CRR → BS price convergence (`binomialPrice → bs_call_price`) -/
+
+/-- A bounded measurable payoff composed with `x ↦ a·eˣ` is integrable against any
+finite measure. -/
+lemma integrable_comp_exp_of_bdd {μ : Measure ℝ} [IsFiniteMeasure μ] {g : ℝ → ℝ}
+    (hg : Measurable g) {C : ℝ} (hC : ∀ x, |g x| ≤ C) (a : ℝ) :
+    Integrable (fun x => g (a * Real.exp x)) μ :=
+  Integrable.of_bound ((hg.comp (by fun_prop)).aestronglyMeasurable) C
+    (ae_of_all _ fun x => by rw [Real.norm_eq_abs]; exact hC _)
+
+/-- **Two-point integral against the CRR step law** (real-valued): for any `h`,
+`∫ h ∂(crrStepMeasure) = pₙ·h(σ√Δt) + (1−pₙ)·h(−σ√Δt)` under no-arbitrage `0 ≤ pₙ ≤ 1`. -/
+lemma integral_crrStepMeasure {r σ T : ℝ} {n : ℕ}
+    (hp0 : 0 ≤ crrProb r σ T n) (hp1 : crrProb r σ T n ≤ 1) (h : ℝ → ℝ) :
+    ∫ z, h z ∂(crrStepMeasure r σ T n)
+      = crrProb r σ T n * h (σ * Real.sqrt (T / n))
+        + (1 - crrProb r σ T n) * h (-(σ * Real.sqrt (T / n))) := by
+  unfold crrStepMeasure
+  rw [integral_add_measure ((integrable_dirac (by finiteness)).smul_measure (by finiteness))
+        ((integrable_dirac (by finiteness)).smul_measure (by finiteness)),
+      integral_smul_measure, integral_smul_measure, integral_dirac, integral_dirac,
+      ENNReal.toReal_ofReal hp0, ENNReal.toReal_ofReal (by linarith)]
+  simp [smul_eq_mul]
+
+/-- **The binomial price is the discounted risk-neutral expectation** (the bridge from
+the backward-recursion pricer to the probabilistic row-law form). For a bounded
+measurable payoff `g`, the `k`-step CRR binomial price of `g` equals `e^{−r'k}` times
+the expectation of `g(S·eˣ)` over the `k`-fold convolution of the per-step log-return
+law (`r' = crrPerStepRate`). Proof: induction on `k`, the recursion step matched to one
+convolution via `integral_conv` + the two-point step integral. -/
+lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
+    (hp0 : 0 ≤ crrProb r σ T n) (hp1 : crrProb r σ T n ≤ 1)
+    {g : ℝ → ℝ} (hg : Measurable g) {C : ℝ} (hC : ∀ x, |g x| ≤ C) (k : ℕ) (S : ℝ) :
+    binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n) g k S
+      = Real.exp (-(crrPerStepRate r T n) * k) *
+        ∫ x, g (S * Real.exp x) ∂(convPow (crrStepMeasure r σ T n) k) := by
+  haveI : IsProbabilityMeasure (crrStepMeasure r σ T n) :=
+    isProbabilityMeasure_crrStepMeasure hp0 hp1
+  induction k generalizing S with
+  | zero =>
+    simp only [binomialPrice_zero, Nat.cast_zero, mul_zero, Real.exp_zero, one_mul,
+      convPow, integral_dirac, mul_one]
+  | succ k ih =>
+    haveI : IsProbabilityMeasure (convPow (crrStepMeasure r σ T n) k) :=
+      convPow_isProbabilityMeasure _ k
+    have hprob : crrUpProb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        = crrProb r σ T n := rfl
+    have hinner : ∀ x : ℝ, (∫ z, g (S * Real.exp (x + z)) ∂(crrStepMeasure r σ T n))
+        = crrProb r σ T n * g (S * crrUp σ T n * Real.exp x)
+          + (1 - crrProb r σ T n) * g (S * crrDown σ T n * Real.exp x) := by
+      intro x
+      rw [integral_crrStepMeasure hp0 hp1 (fun z => g (S * Real.exp (x + z))),
+          show S * Real.exp (x + σ * Real.sqrt (T / n)) = S * crrUp σ T n * Real.exp x from by
+            rw [Real.exp_add, crrUp, crrStep]; ring,
+          show S * Real.exp (x + -(σ * Real.sqrt (T / n))) = S * crrDown σ T n * Real.exp x from by
+            rw [Real.exp_add, crrDown, crrStep]; ring]
+    rw [binomialPrice_succ, hprob, ih (S * crrUp σ T n), ih (S * crrDown σ T n), convPow,
+        integral_conv (integrable_comp_exp_of_bdd hg hC S)]
+    simp_rw [hinner]
+    rw [integral_add ((integrable_comp_exp_of_bdd hg hC _).const_mul _)
+          ((integrable_comp_exp_of_bdd hg hC _).const_mul _),
+        integral_const_mul, integral_const_mul]
+    have hexp : Real.exp (-(crrPerStepRate r T n) * (↑(k + 1) : ℝ))
+        = Real.exp (-(crrPerStepRate r T n)) * Real.exp (-(crrPerStepRate r T n) * (k : ℝ)) := by
+      rw [← Real.exp_add]; congr 1; push_cast; ring
+    rw [hexp]
+    ring
+
 end Distributional
 
 end QuantFin

@@ -340,4 +340,9 @@ namespace QuantFin.AxiomAudit
 /-- info: 'QuantFin.discountedGBM_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms QuantFin.discountedGBM_isMartingale
 
+/-! ## Binomial pricing as discounted risk-neutral expectation (CRR→BS price bridge) -/
+
+/-- info: 'QuantFin.binomialPrice_eq_integral_convPow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms QuantFin.binomialPrice_eq_integral_convPow
+
 end QuantFin.AxiomAudit
