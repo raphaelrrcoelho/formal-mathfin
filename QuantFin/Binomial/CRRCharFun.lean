@@ -257,4 +257,110 @@ theorem crr_charFun_pow_tendsto_gaussian (hσ : 0 < σ) (hT : 0 < T) (t : ℝ) :
   rw [hgauss]
   exact crr_charFun_pow_tendsto hσ hT t
 
+/-! ### Convergence in distribution to the Black–Scholes Gaussian -/
+
+section Distributional
+
+open MeasureTheory ProbabilityTheory
+
+/-- `n`-fold additive convolution of `ν` with itself: `convPow ν 0 = δ₀`,
+`convPow ν (n+1) = convPow ν n ∗ ν`. This is the law of `∑_{k < n} Xₖ` for
+`Xₖ` i.i.d. `∼ ν` — in particular the law of an `n`-step sum of i.i.d. increments. -/
+noncomputable def convPow (ν : Measure ℝ) : ℕ → Measure ℝ
+  | 0 => Measure.dirac 0
+  | n + 1 => convPow ν n ∗ ν
+
+/-- A convolution power of a probability measure is a probability measure. -/
+lemma convPow_isProbabilityMeasure (ν : Measure ℝ) [IsProbabilityMeasure ν] :
+    ∀ n, IsProbabilityMeasure (convPow ν n)
+  | 0 => by unfold convPow; infer_instance
+  | n + 1 => by
+    unfold convPow
+    haveI := convPow_isProbabilityMeasure ν n
+    infer_instance
+
+/-- **The characteristic function of an `n`-fold convolution is the `n`-th power**
+of the characteristic function — the measure-level statement that the charFun of a
+sum of `n` i.i.d. variables is `(charFun)ⁿ`. -/
+lemma charFun_convPow (ν : Measure ℝ) [IsProbabilityMeasure ν] (n : ℕ) (t : ℝ) :
+    charFun (convPow ν n) t = (charFun ν t) ^ n := by
+  induction n with
+  | zero => simp [convPow, charFun_dirac]
+  | succ k ih =>
+    haveI := convPow_isProbabilityMeasure ν k
+    rw [convPow, charFun_conv, ih, pow_succ]
+
+/-- The law of one CRR risk-neutral log-return increment: mass `pₙ` at the up-move
+`+σ√Δt` and `1−pₙ` at the down-move `−σ√Δt` (`pₙ = crrProb`, `Δt = T/n`). -/
+noncomputable def crrStepMeasure (r σ T : ℝ) (n : ℕ) : Measure ℝ :=
+  ENNReal.ofReal (crrProb r σ T n) • Measure.dirac (σ * Real.sqrt (T / n))
+    + ENNReal.ofReal (1 - crrProb r σ T n) • Measure.dirac (-(σ * Real.sqrt (T / n)))
+
+/-- `crrStepMeasure` is a probability measure exactly when the step is arbitrage-free
+(`0 ≤ pₙ ≤ 1`). -/
+lemma isProbabilityMeasure_crrStepMeasure {r σ T : ℝ} {n : ℕ}
+    (hp0 : 0 ≤ crrProb r σ T n) (hp1 : crrProb r σ T n ≤ 1) :
+    IsProbabilityMeasure (crrStepMeasure r σ T n) := by
+  refine ⟨?_⟩
+  unfold crrStepMeasure
+  simp only [Measure.coe_add, Measure.coe_smul, Pi.add_apply, Pi.smul_apply, smul_eq_mul,
+    measure_univ, mul_one]
+  rw [← ENNReal.ofReal_add hp0 (by linarith), show crrProb r σ T n + (1 - crrProb r σ T n) = 1
+    from by ring, ENNReal.ofReal_one]
+
+/-- **`crrStepCharFun` is the characteristic function of `crrStepMeasure`** (the
+actual CRR per-step log-return law), under no-arbitrage `0 ≤ pₙ ≤ 1`. -/
+lemma charFun_crrStepMeasure {r σ T : ℝ} {n : ℕ} (t : ℝ)
+    (hp0 : 0 ≤ crrProb r σ T n) (hp1 : crrProb r σ T n ≤ 1) :
+    charFun (crrStepMeasure r σ T n) t = crrStepCharFun r σ T n t := by
+  unfold crrStepMeasure
+  rw [charFun_apply,
+      integral_add_measure ((integrable_dirac (by finiteness)).smul_measure (by finiteness))
+        ((integrable_dirac (by finiteness)).smul_measure (by finiteness)),
+      integral_smul_measure, integral_smul_measure, integral_dirac, integral_dirac,
+      ENNReal.toReal_ofReal hp0, ENNReal.toReal_ofReal (by linarith)]
+  unfold crrStepCharFun
+  simp only [RCLike.inner_apply', conj_trivial, Complex.real_smul, mul_comm Complex.I]
+  push_cast
+  ring
+
+/-- The `n`-step CRR risk-neutral log-return law (the `n`-fold convolution of the
+per-step law), bundled as a `ProbabilityMeasure` — needs no-arbitrage `0 ≤ pₙ ≤ 1`. -/
+noncomputable def crrRowProbMeasure (r σ T : ℝ) (n : ℕ)
+    (h0 : 0 ≤ crrProb r σ T n) (h1 : crrProb r σ T n ≤ 1) : ProbabilityMeasure ℝ :=
+  haveI := isProbabilityMeasure_crrStepMeasure h0 h1
+  haveI := convPow_isProbabilityMeasure (crrStepMeasure r σ T n) n
+  ⟨convPow (crrStepMeasure r σ T n) n, inferInstance⟩
+
+/-- The Black–Scholes limiting normal `N((r−σ²/2)T, σ²T)`, bundled as a
+`ProbabilityMeasure`. -/
+noncomputable def bsLimitProbMeasure (r σ T : ℝ) : ProbabilityMeasure ℝ :=
+  ⟨gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal, inferInstance⟩
+
+/-- **Cox–Ross–Rubinstein → Black–Scholes, convergence in distribution.** Under
+no-arbitrage at every step (`0 ≤ pₙ ≤ 1`), the law of the `n`-step CRR risk-neutral
+log-return converges weakly to the Black–Scholes normal `N((r − σ²/2)T, σ²T)`.
+
+This is the genuine distributional CLT for the binomial tree: the charFun-power
+convergence `crr_charFun_pow_tendsto_gaussian` is upgraded to weak convergence of
+probability measures by Lévy's continuity theorem
+(`ProbabilityMeasure.tendsto_of_tendsto_charFun`), using
+`charFun (convPow ν n) = (charFun ν)ⁿ` and `charFun (crrStepMeasure) = crrStepCharFun`. -/
+theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)
+    (hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1) :
+    Tendsto (fun n : ℕ => crrRowProbMeasure r σ T n (hp n).1 (hp n).2) atTop
+      (𝓝 (bsLimitProbMeasure r σ T)) := by
+  refine ProbabilityMeasure.tendsto_of_tendsto_charFun (fun t => ?_)
+  have heq : (fun n : ℕ => charFun (convPow (crrStepMeasure r σ T n) n) t)
+      = (fun n => crrStepCharFun r σ T n t ^ n) := by
+    funext n
+    haveI := isProbabilityMeasure_crrStepMeasure (hp n).1 (hp n).2
+    rw [charFun_convPow, charFun_crrStepMeasure t (hp n).1 (hp n).2]
+  show Tendsto (fun n : ℕ => charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
+    (𝓝 (charFun (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) t))
+  rw [heq]
+  exact crr_charFun_pow_tendsto_gaussian hσ hT t
+
+end Distributional
+
 end QuantFin
