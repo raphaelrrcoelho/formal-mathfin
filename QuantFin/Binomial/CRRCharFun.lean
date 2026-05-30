@@ -429,6 +429,42 @@ lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
     rw [hexp]
     ring
 
+/-- **Put-call parity at the binomial level**: `call = put + (S − K·e^{−nr})`, from
+linearity of `binomialPrice` plus the stock-price (`binomialPrice_id`) and constant
+(`binomialPrice_const`) values. -/
+lemma binomialPrice_callPut_parity {u d r K : ℝ} (h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
+    binomialPrice u d r (fun x => max (x - K) 0) n S
+      = binomialPrice u d r (fun x => max (K - x) 0) n S
+        + (S - K * Real.exp (-(n : ℝ) * r)) := by
+  have hpay : (fun x : ℝ => max (x - K) 0) = (fun x => max (K - x) 0 + (x - K)) := by
+    funext x
+    rcases le_total x K with hx | hx
+    · rw [max_eq_right (by linarith), max_eq_left (by linarith)]; ring
+    · rw [max_eq_left (by linarith), max_eq_right (by linarith)]; ring
+  rw [hpay,
+      show (fun x : ℝ => max (K - x) 0 + (x - K))
+        = (fun x => (fun y => max (K - y) 0) x + (fun y => y - K) x) from rfl,
+      binomialPrice_add,
+      show (fun y : ℝ => y - K) = (fun x => (fun y : ℝ => y) x + (fun _ => -K) x) from by
+        funext x; ring,
+      binomialPrice_add, binomialPrice_id u d r h, binomialPrice_const u d r (-K) h]
+  ring
+
+/-- **Stock-price MGF under the BS Gaussian**: `∫ S₀·eˣ d N((r−σ²/2)T, σ²T) = S₀·e^{rT}`
+(the martingale/forward identity for the discounted stock). -/
+lemma integral_const_mul_exp_gaussian {r σ T S₀ : ℝ} (hT : 0 < T) :
+    ∫ x, S₀ * Real.exp x ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal)
+      = S₀ * Real.exp (r * T) := by
+  rw [integral_const_mul]
+  have hmgf := congr_fun (mgf_id_gaussianReal (μ := (r - σ ^ 2 / 2) * T)
+    (v := (σ ^ 2 * T).toNNReal)) 1
+  rw [mgf] at hmgf
+  simp only [one_mul, id_eq] at hmgf
+  rw [hmgf,
+      show ((σ ^ 2 * T).toNNReal : ℝ) = σ ^ 2 * T from
+        Real.coe_toNNReal _ (mul_nonneg (sq_nonneg σ) hT.le),
+      show (r - σ ^ 2 / 2) * T * 1 + σ ^ 2 * T * 1 ^ 2 / 2 = r * T from by ring]
+
 end Distributional
 
 end QuantFin
