@@ -5,6 +5,7 @@
 [![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
 [![Lean](https://img.shields.io/badge/Lean-4.30.0--rc2-blue)](lean-toolchain)
 [![license](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20477782.svg)](https://doi.org/10.5281/zenodo.20477782)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
 and Degenne's BrownianMotion. 251 theorems across 11 areas — Black-Scholes
