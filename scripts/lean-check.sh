@@ -17,12 +17,12 @@
 #   docker compose -f docker/docker-compose.yml down lean-repl
 #
 # Usage:
-#   scripts/lean-check.sh QuantFin/Foundations/BrownianMartingale.lean
+#   scripts/lean-check.sh MathFin/Foundations/BrownianMartingale.lean
 set -euo pipefail
 
 if [[ $# -lt 1 ]]; then
   echo "usage: $0 <path-to-lean-file>" >&2
-  echo "  e.g. $0 QuantFin/Foundations/BrownianMartingale.lean" >&2
+  echo "  e.g. $0 MathFin/Foundations/BrownianMartingale.lean" >&2
   exit 2
 fi
 

@@ -1,12 +1,12 @@
-# Quant finance, formally verified
+# Mathematical finance, formally verified
 
-[![build](https://github.com/raphaelrrcoelho/formal-quantfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/formal-quantfin/actions/workflows/build.yml)
-[![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](QuantFin/AxiomAudit.lean)
+[![build](https://github.com/raphaelrrcoelho/formal-mathfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/formal-mathfin/actions/workflows/build.yml)
+[![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](MathFin/AxiomAudit.lean)
 [![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
 [![Lean](https://img.shields.io/badge/Lean-4.30.0--rc2-blue)](lean-toolchain)
 [![license](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
 
-A Lean 4 library of machine-checked quant-finance theorems, built on Mathlib
+A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
 and Degenne's BrownianMotion. 251 theorems across 11 areas — Black-Scholes
 with the full Greek matrix and the exotics, binomial trees with American /
 Bermudan / Snell envelope, fixed income with hazard credit and Vasicek SDE,
@@ -14,7 +14,7 @@ portfolio theory from Markowitz to Black-Litterman, coherent risk measures,
 Kelly, mortality, and constant-product AMMs.
 
 The aim is a comprehensive, honest reference for formally-verified
-quantitative finance: broad coverage, and — for every result — an exact
+mathematical finance: broad coverage, and — for every result — an exact
 statement of what is proved and what is assumed.
 
 |  | count |
@@ -36,7 +36,7 @@ three Mathlib standard axioms `[propext, Classical.choice, Quot.sound]`.
 ## At a glance
 
 ```lean
--- QuantFin/BlackScholes/PDE.lean — BS delta via the magic identity
+-- MathFin/BlackScholes/PDE.lean — BS delta via the magic identity
 lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt (fun s => bsV K r σ s τ) (Phi (bsd1 S K r σ τ)) S := by
@@ -52,7 +52,7 @@ lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 
 The `bs_identity` magic-identity collapse drives delta, gamma, theta, vega,
 rho, vanna, volga, and the BS PDE forward direction. See
-[`QuantFin/Examples.lean`](QuantFin/Examples.lean) for a curated
+[`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated
 five-proof tour.
 
 ## Quick start
@@ -72,7 +72,7 @@ Fast authoring loop (5–30s feedback via persistent REPL daemon):
 
 ```bash
 docker compose -f docker/docker-compose.yml up -d lean-repl
-./scripts/lean-check.sh QuantFin/<Section>/<Module>.lean
+./scripts/lean-check.sh MathFin/<Section>/<Module>.lean
 ```
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.

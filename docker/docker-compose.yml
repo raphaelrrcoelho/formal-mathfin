@@ -4,7 +4,7 @@ services:
     # image cache first; if missing, pulls from GHCR (much faster than a
     # local Lean + Mathlib build); if pull fails, falls back to the Dockerfile.
     # The :latest tag tracks the most recent push; pin to a dated tag (e.g.
-    # quantfin-verify:2026-05-09) for reproducible CI/old-machine runs.
+    # mathfin-verify:2026-05-09) for reproducible CI/old-machine runs.
     #
     # Refresh: `docker compose -f docker/docker-compose.yml pull verify`
     # Force rebuild: `docker compose -f docker/docker-compose.yml build verify`
@@ -12,11 +12,11 @@ services:
     #   TOKEN=$(grep -E '^[[:space:]]+oauth_token:' ~/.config/gh/hosts.yml | head -1 | awk '{print $2}')
     #   echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
     #   DATE=$(date -u +%Y-%m-%d)
-    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/quantfin-verify:$DATE
-    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/quantfin-verify:latest
-    #   docker push ghcr.io/raphaelrrcoelho/quantfin-verify:$DATE
-    #   docker push ghcr.io/raphaelrrcoelho/quantfin-verify:latest
-    image: ghcr.io/raphaelrrcoelho/quantfin-verify:latest
+    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/mathfin-verify:$DATE
+    #   docker tag docker-verify:latest ghcr.io/raphaelrrcoelho/mathfin-verify:latest
+    #   docker push ghcr.io/raphaelrrcoelho/mathfin-verify:$DATE
+    #   docker push ghcr.io/raphaelrrcoelho/mathfin-verify:latest
+    image: ghcr.io/raphaelrrcoelho/mathfin-verify:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile.verify
@@ -47,7 +47,7 @@ services:
       - ../tools:/app/tools:ro
       - ../benchmarks:/app/benchmarks:ro
       - ../tests:/app/tests:ro
-      - ../quantfin.toml:/app/quantfin.toml:ro
+      - ../mathfin.toml:/app/mathfin.toml:ro
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
       # SHARED olean cache with the `lean-repl` daemon (same named volume).
       # Without this, `verify` built oleans into its own ephemeral container
@@ -62,16 +62,16 @@ services:
       # The repo root is the Lake project root (see
       # `tools.verify.config.LeanConfig.local_project`, default ".").
       # The lake-relevant pieces (lakefile.lean, lean-toolchain,
-      # lake-manifest.json, QuantFin/, QuantFin.lean) are
+      # lake-manifest.json, MathFin/, MathFin.lean) are
       # bind-mounted RW so authoring on host (VS Code + Lean LSP) propagates
       # into the container with no rebuild.
-      - ../QuantFin:/app/QuantFin
-      - ../QuantFin.lean:/app/QuantFin.lean
+      - ../MathFin:/app/MathFin
+      - ../MathFin.lean:/app/MathFin.lean
       - ../lakefile.lean:/app/lakefile.lean
       - ../lake-manifest.json:/app/lake-manifest.json
       - ../lean-toolchain:/app/lean-toolchain
     working_dir: /app
-    command: ["benchmarks/cross_validated.json", "-v", "--config", "quantfin.toml", "--timeout", "120"]
+    command: ["benchmarks/cross_validated.json", "-v", "--config", "mathfin.toml", "--timeout", "120"]
     # The same `verify` service can run the fast static lints inside docker by
     # overriding the entrypoint, so version drift (Python 3.12, pytest, etc.)
     # is impossible across machines:
@@ -81,17 +81,17 @@ services:
     #       --entrypoint python3 verify -m tools.verify.coverage_report
 
   # Persistent Lean-interact REPL daemon. Pays the ~5-min Mathlib + BrownianMotion
-  # + QuantFin olean-load cost ONCE at startup, then handles each lake-check
+  # + MathFin olean-load cost ONCE at startup, then handles each lake-check
   # request in 5-30 sec instead of 5-15 min. See `tools/verify/lean_repl.py` for
   # the protocol (TCP 7878, send raw .lean text, receive JSON response).
   #
   # Usage:
   #   docker compose -f docker/docker-compose.yml up -d lean-repl
   #   docker compose -f docker/docker-compose.yml logs -f lean-repl   # wait for READY
-  #   ./scripts/lean-check.sh QuantFin/<Section>/<Module>.lean    # fast iteration
+  #   ./scripts/lean-check.sh MathFin/<Section>/<Module>.lean    # fast iteration
   #   docker compose -f docker/docker-compose.yml down lean-repl       # tear down
   lean-repl:
-    image: ghcr.io/raphaelrrcoelho/quantfin-verify:latest
+    image: ghcr.io/raphaelrrcoelho/mathfin-verify:latest
     build:
       context: ..
       dockerfile: docker/Dockerfile.verify
@@ -100,12 +100,12 @@ services:
       - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
     volumes:
       - ../tools:/app/tools:ro
-      - ../QuantFin:/app/QuantFin
-      - ../QuantFin.lean:/app/QuantFin.lean
+      - ../MathFin:/app/MathFin
+      - ../MathFin.lean:/app/MathFin.lean
       - ../lakefile.lean:/app/lakefile.lean
       - ../lake-manifest.json:/app/lake-manifest.json
       - ../lean-toolchain:/app/lean-toolchain
-      - ../quantfin.toml:/app/quantfin.toml:ro
+      - ../mathfin.toml:/app/mathfin.toml:ro
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
       # Olean cache persistence: without this, every daemon restart re-runs
       # `lake build` from scratch on whatever's stale since the image was

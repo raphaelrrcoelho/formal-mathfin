@@ -1,15 +1,15 @@
 # Upstreaming to `brownian-motion`
 
 **Date:** 2026-05-27
-**Scope:** How QuantFin Lean results get contributed back to
+**Scope:** How MathFin Lean results get contributed back to
 [`RemyDegenne/brownian-motion`](https://github.com/RemyDegenne/brownian-motion)
 (and Mathlib): the live submission status, the per-contribution record, and the
 reusable workflow.
 
 ## Executive summary
 
-Some `QuantFin/Foundations/` results are general-interest probability /
-stochastic-process lemmas that belong *upstream*, not in a quant-finance library.
+Some `MathFin/Foundations/` results are general-interest probability /
+stochastic-process lemmas that belong *upstream*, not in a mathematical-finance library.
 Draft files targeting other repos' module trees live under `upstream/` (our `lake`
 never builds them; catalogue in `upstream/README.md`). This doc logs what has been
 *submitted* as a PR and how to do it again.
@@ -32,14 +32,14 @@ Staged but not yet submitted (drafts only, under `upstream/`): `brownian-motion/
 + its import line. Five interval defs over a general `[Preorder ι]` (`stochasticIcc/Ico/Ioc/Ioo`,
 `stochasticGraph`) and, on `ℕ`: `stochasticIoc.measurableSet_predictable` (any stopping times)
 and `stochasticIoc.exists_elementaryPredictableSet` (bounded `τ`). The math lives in our repo at
-`QuantFin/Foundations/StochasticInterval.lean` (dc17e84); the ported draft at
+`MathFin/Foundations/StochasticInterval.lean` (dc17e84); the ported draft at
 `upstream/brownian-motion/StochasticInterval.lean` (283b8ce).
 
-**Porting deltas (our repo → upstream).** `namespace QuantFin` → `ProbabilityTheory`;
+**Porting deltas (our repo → upstream).** `namespace MathFin` → `ProbabilityTheory`;
 `import Mathlib` → specific `public import Mathlib.Probability.Process.Stopping`; def typeclass
 `[PartialOrder ι]` → `[Preorder ι]` (minimal; `stochasticGraph_eq` split into its own
 `[PartialOrder ι]` section to avoid an instance diamond); `fun =>` → `fun ↦`. Validated green
-against our pin via the lean-repl daemon (overwrite onto a `QuantFin` module path →
+against our pin via the lean-repl daemon (overwrite onto a `MathFin` module path →
 `scripts/lean-check.sh` → `git checkout` to restore; the daemon only fast-checks files it
 recognises as modules).
 
@@ -66,7 +66,7 @@ is a problem-specific left-endpoint reformulation, not a verbatim duplicate. Not
 
 **Version reconciliation.** Our pin (BrownianMotion `16d15eb`, Lean `rc1`, Mathlib `f233061`) is
 ~10 commits behind upstream `master` (`fa590b1`, Lean `rc2`, Mathlib `c87cc97`, incl. Mathlib
-bump #443). We **decoupled**: did *not* bump the whole QuantFin portfolio; their CI built against
+bump #443). We **decoupled**: did *not* bump the whole MathFin portfolio; their CI built against
 their toolchain and passed (10m41s). Verified the API we depend on is unchanged on latest master
 (`ElementaryPredictableSet` byte-identical; stopping times modelled `Ω → WithTop ι` against
 `Filtration ι` throughout). The `kex-y/BP-cadlag` branch that appears to delete the interval
@@ -79,7 +79,7 @@ statements is a stale Dec-2025 branch (it predates them), not an active rework.
 `upstreaming-dashboard` branch is stale — always `git fetch origin` and branch off `origin/master`.
 
 1. **Author + validate in our repo first.** Stage the file under `upstream/brownian-motion/`;
-   validate green via the lean-repl daemon (overwrite-onto-a-`QuantFin`-module-path trick above).
+   validate green via the lean-repl daemon (overwrite-onto-a-`MathFin`-module-path trick above).
 2. **Branch off latest master in a worktree** (keeps the user's fork checkout untouched):
    `git worktree add -b <branch> ../<dir> origin/master`.
 3. **Drop the file in** at its module path, add an alphabetical `public import` line to
@@ -92,7 +92,7 @@ statements is a stale Dec-2025 branch (it predates them), not an active rework.
 **Conventions / lessons.**
 - *Code-only PRs.* Degenne manages the blueprint `\leanok`/`\lean{}` himself (said so on #439) —
   don't touch `cadlag.tex`/`lean_decls` and risk a `checkdecls` red.
-- *Decoupled validation.* Don't drag the whole QuantFin portfolio onto upstream's pin to validate
+- *Decoupled validation.* Don't drag the whole MathFin portfolio onto upstream's pin to validate
   one file; their CI is the source of truth for the upstream build.
 - *Claiming an issue needs an explicit user directive* — it's a public post under the user's
   identity (the agent's auto-classifier blocks it from a mere question).

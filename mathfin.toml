@@ -1,0 +1,14 @@
+[mathfin]
+
+[mathfin.lean]
+# Path to the Lake project the Lean backend elaborates against. The project's
+# own ``lakefile.lean`` (Mathlib pin, BrownianMotion pin, etc.) +
+# ``lake-manifest.json`` (transitive freeze) + ``lean-toolchain`` are
+# authoritative. Benchmark snippets just `import MathFin.X` and reference
+# compiled lemmas. Path is relative to the CWD when the verifier runs (in
+# Docker that's ``/app``, which is the repo root with ``lakefile.lean`` and
+# ``MathFin/`` directly under it).
+local_project = "."
+
+[mathfin.orchestrator]
+default_timeout = 60.0

@@ -54,7 +54,7 @@ class LeanBackend:
     All authoritative project state lives in the Lake project: ``lakefile.lean``
     declares the dependency set, ``lake-manifest.json`` freezes transitive
     revisions, ``lean-toolchain`` pins the Lean version, and
-    ``QuantFin/*.lean`` holds the proof library. Benchmark snippets only
+    ``MathFin/*.lean`` holds the proof library. Benchmark snippets only
     typecheck against the prebuilt library, so complex derivations live as
     real Lean files (full ``lake build`` memory budget + incremental
     compilation + LSP authoring) and benchmarks just import + reference them

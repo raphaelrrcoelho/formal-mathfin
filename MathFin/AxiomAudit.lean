@@ -1,0 +1,359 @@
+/-
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+import MathFin
+
+/-!
+# Axiom audit — the "axioms-clean" claim, build-enforced
+
+The library's headline claim is that every `full` derivation is
+`#print axioms`-clean: it depends only on the three standard Mathlib
+axioms `[propext, Classical.choice, Quot.sound]` — no `sorryAx`, no extra
+axioms.
+
+This file turns that claim from a docstring assertion (in `docs/coverage.md`)
+into a **build-enforced invariant**. Each `#guard_msgs in #print axioms`
+block below pins the axiom dependencies of a headline / load-bearing
+theorem. If any audited theorem ever picks up `sorryAx` (a `sorry` slipped
+in) or a new axiom (a dependency changed), the `#guard_msgs` check fails and
+**the build breaks**.
+
+The audited set spans every area of the library — it is representative, not
+exhaustive; extend it when a new load-bearing theorem lands. A theorem that
+appears here is certified axioms-clean by `lake build`, not by assertion.
+
+Note: pure-algebra theorems (closed by `ring`/`field_simp`) may legitimately
+depend on a *subset* of the three (or none); those are pinned to their
+actual set below. The invariant we enforce is "no `sorryAx`, no axiom
+outside the standard three", which the pinned messages capture exactly.
+-/
+
+namespace MathFin.AxiomAudit
+
+/-! ## Black-Scholes core -/
+
+/-- info: 'MathFin.bs_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bs_call_formula
+
+/-- info: 'MathFin.bsP_eq_bsV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bsP_eq_bsV
+
+/-- info: 'MathFin.hasDerivAt_bsV_S' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.hasDerivAt_bsV_S
+
+/-- info: 'MathFin.bs_pde_holds' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bs_pde_holds
+
+/-- info: 'MathFin.expected_terminal_eq_forward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.expected_terminal_eq_forward
+
+/-! ## Garman normal form + consumer-side corollaries -/
+
+/-- info: 'MathFin.bsV_eq_bsVGarman_standard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bsV_eq_bsVGarman_standard
+
+/-- info: 'MathFin.black_futures_price_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.black_futures_price_eq_bsVGarman
+
+/-- info: 'MathFin.bs_dividends_price_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bs_dividends_price_eq_bsVGarman
+
+/-! ## Gaussian MGF + lognormal moments -/
+
+/-- info: 'MathFin.integral_exp_affine_gaussianPDFReal_univ' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.integral_exp_affine_gaussianPDFReal_univ
+
+/-- info: 'MathFin.nthMoment_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.nthMoment_terminal
+
+/-- info: 'MathFin.secondMoment_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.secondMoment_terminal
+
+/-- info: 'MathFin.variance_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.variance_terminal
+
+/-- info: 'MathFin.bsLogReturn_mean' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bsLogReturn_mean
+
+/-! ## Exponential-discount principle + the rate-recovery retrofits -/
+
+/-- info: 'MathFin.rate_eq_neg_log_deriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.rate_eq_neg_log_deriv
+
+/-- info: 'MathFin.forwardRate_eq_neg_log_discount' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.forwardRate_eq_neg_log_discount
+
+/-- info: 'MathFin.force_eq_neg_log_deriv_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.force_eq_neg_log_deriv_survival
+
+/-- info: 'MathFin.hazard_eq_neg_log_deriv_survival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.hazard_eq_neg_log_deriv_survival
+
+/-! ## Static Girsanov: the risk-neutral measure derived -/
+
+/-- info: 'MathFin.gaussian_esscher_pdf' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.gaussian_esscher_pdf
+
+/-- info: 'MathFin.gaussianReal_withDensity_esscher' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.gaussianReal_withDensity_esscher
+
+/-- info: 'MathFin.BSCallHyp.exists_of_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.BSCallHyp.exists_of_physical
+
+/-- info: 'MathFin.bsTerminal_physical_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bsTerminal_physical_eq_riskNeutral
+
+/-- info: 'MathFin.discounted_terminal_eq_S0_of_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.discounted_terminal_eq_S0_of_physical
+
+/-- info: 'MathFin.bs_call_formula_of_physical' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bs_call_formula_of_physical
+
+/-- info: 'MathFin.discounted_physical_terminal_eq_S0' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discounted_physical_terminal_eq_S0
+
+/-! ## Margrabe exchange option (first multivariate result) -/
+
+/-- info: 'MathFin.margrabe_effective_variance' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.margrabe_effective_variance
+
+/-- info: 'MathFin.exchange_payoff_eq_ratio' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.exchange_payoff_eq_ratio
+
+/-- info: 'MathFin.margrabe_eq_bsVGarman' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.margrabe_eq_bsVGarman
+
+/-- info: 'MathFin.margrabe_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.margrabe_parity
+
+/-- info: 'MathFin.margrabe_price_via_call' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.margrabe_price_via_call
+
+/-! ## Convex pricing functional + FTAP / state-price wiring -/
+
+/-- info: 'MathFin.statePricePricing_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.statePricePricing_convexOn
+
+/-- info: 'MathFin.callPrice_finiteState_butterfly_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.callPrice_finiteState_butterfly_nonneg
+
+/-- info: 'MathFin.stateprice_call_butterfly_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.stateprice_call_butterfly_nonneg
+
+/-! ## Binomial trees -/
+
+/-- info: 'MathFin.americanCallPrice_le_binomialPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.americanCallPrice_le_binomialPrice
+
+/-! ## Variance swap (QV limit) -/
+
+/-- info: 'MathFin.tendsto_expected_bsLogPrice_equipartition_sum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.tendsto_expected_bsLogPrice_equipartition_sum
+
+/-! ## L² quadratic variation of Brownian motion (Summit 1) + its in-probability corollary -/
+
+/-- info: 'MathFin.QuadraticVariationL2.tendsto_qv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.QuadraticVariationL2.tendsto_qv
+
+/-- info: 'MathFin.QuadraticVariationL2.tendstoInMeasure_qv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.QuadraticVariationL2.tendstoInMeasure_qv
+
+/-! ## Expectation-form Itô / Feynman–Kac (the QV → ½f″ correction, from first principles) -/
+
+/-- info: 'MathFin.FeynmanKacHeatEquation.heatConvolution_eq_add_integral_deriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.FeynmanKacHeatEquation.heatConvolution_eq_add_integral_deriv
+
+/-- info: 'MathFin.FeynmanKacHeatEquation.expectation_ito' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.FeynmanKacHeatEquation.expectation_ito
+
+/-- info: 'MathFin.FeynmanKacHeatEquation.expectation_ito_isPreBrownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+#print axioms MathFin.FeynmanKacHeatEquation.expectation_ito_isPreBrownian
+
+/-! ## Adapted Itô isometry (increment-independence cornerstone) -/
+
+/-- info: 'MathFin.ItoIsometryAdapted.integral_adapted_mul_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.ItoIsometryAdapted.integral_adapted_mul_increment
+
+/-- info: 'MathFin.ItoIsometryAdapted.integral_adapted_sq_mul_increment_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIsometryAdapted.integral_adapted_sq_mul_increment_sq
+
+/-- info: 'MathFin.ItoIsometryAdapted.ito_isometry_discrete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.ItoIsometryAdapted.ito_isometry_discrete
+
+/-- info: 'MathFin.ItoIsometryAdapted.ito_isometry_brownian_self' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.ItoIsometryAdapted.ito_isometry_brownian_self
+
+/-- info: 'MathFin.ItoIsometryAdapted.integral_adapted_mul_increment_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIsometryAdapted.integral_adapted_mul_increment_sq
+
+/-- info: 'MathFin.ItoIsometryAdapted.ito_isometry_discrete_bilinear' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIsometryAdapted.ito_isometry_discrete_bilinear
+
+/-! ## Predictable-rectangle pairing (inner-product core of the continuous Itô integral) -/
+
+/-- info: 'MathFin.ItoIsometryAdapted.adapted_indepFun_forward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIsometryAdapted.adapted_indepFun_forward
+
+/-- info: 'MathFin.ItoIsometryAdapted.integral_two_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIsometryAdapted.integral_two_increment
+
+/-- info: 'MathFin.ItoIsometryAdapted.rect_increment_pairing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIsometryAdapted.rect_increment_pairing
+
+/-! ## Stochastic intervals + elementary-predictable-set lemma (Degenne issue #440) -/
+
+/-- info: 'MathFin.stochasticIoc.predictable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.stochasticIoc.predictable
+
+/-- info: 'MathFin.stochasticIoc.elementaryPredictableSet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.stochasticIoc.elementaryPredictableSet
+
+/-! ## Continuous Itô integral — foundational bridge (AdaptedAt ↔ natural filtration) -/
+
+/-- info: 'MathFin.ItoIntegralL2.adaptedAt_of_measurable_natural' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralL2.adaptedAt_of_measurable_natural
+
+/-! ## Continuous Itô integral as a CLM on `[0,T]` — the headline -/
+
+/-- info: 'MathFin.ItoIntegralCLM.generateFrom_predictableRect' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralCLM.generateFrom_predictableRect
+
+/-- info: 'MathFin.ItoIntegralCLM.assembly_isometry_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralCLM.assembly_isometry_T
+
+/-- info: 'MathFin.ItoIntegralCLM.simpleAssembly_T_denseRange' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralCLM.simpleAssembly_T_denseRange
+
+/-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm
+
+/-! ## Process-level elementary Itô integral `t ↦ (V●B)_t` — genuine `L²` content -/
+
+/-- info: 'MathFin.ItoIntegralProcess.memLp_itoSimpleProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralProcess.memLp_itoSimpleProcess
+
+/-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralProcess.itoSimpleProcess_eq_itoSimple
+
+/-! ## Keystone `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` through the CLM (its first genuine consumer) -/
+
+/-- info: 'MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralBrownian.itoIntegralCLM_T_brownian
+
+/-! ## Discrete squaring identity (the pathwise Itô keystone) -/
+
+/-- info: 'MathFin.discrete_squaring_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.discrete_squaring_identity
+
+/-! ## Itô's lemma for f(x) = x² — the L² continuous form (the QF-keystone) -/
+
+/-- info: 'MathFin.itoSquared_L2_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.itoSquared_L2_tendsto
+
+/-- info: 'MathFin.itoSquared_L2_tendsto_div2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.itoSquared_L2_tendsto_div2
+
+/-! ## Itô chain items 3-6: polynomial remainders, 2D Itô, GBM-SDE, BS-PDE -/
+
+/-- info: 'MathFin.discrete_cubing_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.discrete_cubing_identity
+
+/-- info: 'MathFin.discrete_ito_formula_2d' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.discrete_ito_formula_2d
+
+/-- info: 'MathFin.hasDerivAt_gbmValue_space' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.hasDerivAt_gbmValue_space
+
+/-- info: 'MathFin.gbm_solves_sde' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.gbm_solves_sde
+
+/-- info: 'MathFin.bs_pde_eq_itoDrift2D_minus_rV' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.bs_pde_eq_itoDrift2D_minus_rV
+
+/-! ## Margrabe BSCallHyp grounding (leap-3 closure via gaussian vector) -/
+
+/-- info: 'MathFin.normalizedSpread_hasLaw_std' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.normalizedSpread_hasLaw_std
+
+/-- info: 'MathFin.margrabe_bsCallHyp_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.margrabe_bsCallHyp_of_gaussian
+
+/-- info: 'MathFin.margrabe_price_of_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.margrabe_price_of_gaussian
+
+/-! ## Portfolio / risk / performance -/
+
+/-- info: 'MathFin.portfolioVarTwo_ge_min' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.portfolioVarTwo_ge_min
+
+/-- info: 'MathFin.gaussianVaR_translation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.gaussianVaR_translation
+
+/-- info: 'MathFin.gaussianCVaR_sub_VaR' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.gaussianCVaR_sub_VaR
+
+/-- info: 'MathFin.sharpeRatio_affine_invariant' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.sharpeRatio_affine_invariant
+
+/-! ## Certified cross-domain bridges -/
+
+/-- info: 'MathFin.portfolioVarN_diag_eq_herfindahl' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.portfolioVarN_diag_eq_herfindahl
+
+/-- info: 'MathFin.survivalFromForce_eq_hazardSurvival' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.survivalFromForce_eq_hazardSurvival
+
+/-- info: 'MathFin.gompertz_cumHazard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.gompertz_cumHazard
+
+/-! ## CRR → Black–Scholes characteristic-function convergence (the distributional CLT heart) -/
+
+/-- info: 'MathFin.crr_charFun_pow_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.crr_charFun_pow_tendsto
+
+/-- info: 'MathFin.crr_charFun_pow_tendsto_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.crr_charFun_pow_tendsto_gaussian
+
+/-- info: 'MathFin.crr_tendsto_gaussian_inDistribution' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.crr_tendsto_gaussian_inDistribution
+
+/-! ## Continuous-time first FTAP (discounted GBM price is a Q-martingale) -/
+
+/-- info: 'MathFin.discountedGBM_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_isMartingale
+
+/-! ## Binomial pricing as discounted risk-neutral expectation (CRR→BS price bridge) -/
+
+/-- info: 'MathFin.binomialPrice_eq_integral_convPow' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.binomialPrice_eq_integral_convPow
+
+/-! ## CRR → Black–Scholes call-price convergence (the named theorem) -/
+
+/-- info: 'MathFin.binomialPrice_call_tendsto_bs' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.binomialPrice_call_tendsto_bs
+
+/-! ## CRR → Black–Scholes call price in literal closed form `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` -/
+
+/-- info: 'MathFin.binomialPrice_call_tendsto_bs_closed' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.binomialPrice_call_tendsto_bs_closed
+
+end MathFin.AxiomAudit

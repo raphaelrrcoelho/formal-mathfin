@@ -9,7 +9,7 @@
 
 **Status (2026-05-27): CLM steps 1–3 BUILT on `main`; only density + `extendOfNorm` remain.**
 The L²-completion was resumed (this supersedes the earlier "deferred" status). All of the
-following are on `main` in `QuantFin/Foundations/ItoIntegralL2.lean`, full build green
+following are on `main` in `MathFin/Foundations/ItoIntegralL2.lean`, full build green
 (8646 jobs), AxiomAudit-clean, sorry-free:
 
 - **ν time-measure** (`timeMeasure` = Lebesgue on `ℝ≥0`): `SigmaFinite`, `timeMeasure_Ioc`,

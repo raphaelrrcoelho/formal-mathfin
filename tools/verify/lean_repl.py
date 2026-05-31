@@ -7,7 +7,7 @@ the daemon elaborates it through the lean-interact server and returns a JSON
 response with errors / warnings / sorry count.
 
 The Lean server is initialized ONCE at daemon startup. The expensive bit
-(loading Mathlib + BrownianMotion + QuantFin oleans, ~5 min on a cold
+(loading Mathlib + BrownianMotion + MathFin oleans, ~5 min on a cold
 cache) is paid once per daemon lifetime; subsequent checks just elaborate
 the new file against the loaded environment (~5-30 sec).
 
@@ -22,9 +22,9 @@ Usage from host:
     docker compose -f docker/docker-compose.yml logs -f lean-repl  # watch for READY
 
     # per iteration: send a file, read the JSON response
-    cat QuantFin/Foo.lean | nc localhost 7878
+    cat MathFin/Foo.lean | nc localhost 7878
     # or via the wrapper:
-    ./scripts/lean-check.sh QuantFin/Foo.lean
+    ./scripts/lean-check.sh MathFin/Foo.lean
 
     # tear down
     docker compose -f docker/docker-compose.yml down lean-repl
@@ -130,7 +130,7 @@ def main() -> int:
         format="%(asctime)s %(name)s %(levelname)s %(message)s",
     )
 
-    config = load_config("quantfin.toml")
+    config = load_config("mathfin.toml")
 
     # Daemon-tuned memory + thread settings (long-lived session, heavier
     # workload than ad-hoc verify pathway). See `LeanBackend.__init__`
@@ -153,7 +153,7 @@ def main() -> int:
         max_process_memory=None,
     )
 
-    print("Initializing Lean server (Mathlib + QuantFin load, ~3-5 min cold "
+    print("Initializing Lean server (Mathlib + MathFin load, ~3-5 min cold "
           "with persistent .lake volume; ~10-15 min cold on first ever start)...",
           flush=True)
     try:

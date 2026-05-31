@@ -157,7 +157,7 @@ module. Bridges promote it to actually load-bearing.
 
 ## Naming and organisation
 
-- Files are organised by topic under `QuantFin/<Section>/`. One
+- Files are organised by topic under `MathFin/<Section>/`. One
   theorem per file when the theorem is non-trivial; helper lemmas in the
   same file as `private`.
 - Section names are user-facing: `BlackScholes/`, `Binomial/`, `Portfolio/`,

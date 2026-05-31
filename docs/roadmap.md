@@ -1,7 +1,7 @@
 # Math depth roadmap
 
 This document captures the strategic discussion from 2026-05-22 on what
-"ultimate Lean/Mathlib quant finance repo" actually means, why depth beats
+"ultimate Lean/Mathlib mathematical finance repo" actually means, why depth beats
 breadth at this stage, and what the concrete next round would look like.
 
 ## The honest distinction
@@ -55,7 +55,7 @@ round should pursue.
   the library. A discrete martingale representation makes hedging
   discussions tractable. Each depth theorem leverages future ones.
 
-## What "ultimate Lean/Mathlib quant finance" looks like
+## What "ultimate Lean/Mathlib mathematical finance" looks like
 
 Concretely:
 
@@ -172,11 +172,11 @@ Honest scope statement:
   Mathlib's `BrownianMotion`.
 
 The library can be excellent without these. It cannot be "complete"
-quant finance without them.
+mathematical finance without them.
 
 ## Conclusion
 
-The path to "the formalization library that defines what quant finance
+The path to "the formalization library that defines what mathematical finance
 looks like in Lean/Mathlib" runs through structural depth, not theorem
 count. Three depth theorems plus continued slop-folding plus honest
 documentation get us a coherent library that a quant practitioner would
@@ -185,9 +185,9 @@ mathematics, which is a different project.
 
 ---
 
-# quant-finance roadmap (unblocked path)
+# mathematical-finance roadmap (unblocked path)
 
-the 16 remaining `reduced_core` theorems in `docs/coverage.md` are upstream-gated on the itô integral, measure-change machinery, and continuous-time poisson processes. this document captures what can be built **without** waiting on upstream mathlib or degenne work, framed as a quant-finance project rather than a textbook audit.
+the 16 remaining `reduced_core` theorems in `docs/coverage.md` are upstream-gated on the itô integral, measure-change machinery, and continuous-time poisson processes. this document captures what can be built **without** waiting on upstream mathlib or degenne work, framed as a mathematical-finance project rather than a textbook audit.
 
 all of it either (a) reuses the existing `bsd1`/`bsd2`/`Phi`/`bs_identity`/`hasDerivAt_Phi`/`bsV` infrastructure, (b) is a parallel construction to black-scholes using the same gaussian machinery, or (c) is discrete-time / classical-analysis material that doesn't touch the itô integral.
 
@@ -236,7 +236,7 @@ milestone (achieved): the CRR↔BS correspondence is complete — the variance l
 real upstream contributions that would land in mathlib or degenne. each is a separate PR. all four items are ready to submit; awaiting an upstream-PR session.
 
 - [ ] **`Real.erf` for mathlib**. mathlib has no error function. drafting it would unlock cleaner standard-normal-CDF APIs across this project and the broader probability ecosystem. ~300 lines plus the `Real.erfc`, `Real.erfinv` companions and basic identities. would also let us replace our local `Phi` definition with `(1 + erf(x/√2))/2`. **status**: not yet drafted; multi-day work.
-- [x] **`gaussianReal_Iic_hasDerivAt` for mathlib**: proved as `hasDerivAt_Phi` in `QuantFin/GaussianCDFDeriv.lean` (~80 lines via FTC). ready to upstream as a separate PR (`Φ' = ϕ` is the missing piece).
+- [x] **`gaussianReal_Iic_hasDerivAt` for mathlib**: proved as `hasDerivAt_Phi` in `MathFin/GaussianCDFDeriv.lean` (~80 lines via FTC). ready to upstream as a separate PR (`Φ' = ϕ` is the missing piece).
 - [x] **mathlib PR (drafted in `staging/mathlib-pr/`)**: the 4 gaussian tail / completing-the-square lemmas. ready to submit.
 - [x] **degenne PR (drafted in `staging/degenne-pr/`)**: the two BM martingales `IsFilteredPreBrownian.squareSubTime_isMartingale` and `IsFilteredPreBrownian.waldExponential_isMartingale`. ready to submit.
 
@@ -301,7 +301,7 @@ three "big leaps" pushed past the static ceiling. full narrative in
   price-level reduction (`margrabe_price_via_call`: exchange = `bs_call_formula`
   on the ratio). `ExchangeOption.lean`.
 
-all build-enforced axioms-clean via `QuantFin/AxiomAudit.lean`.
+all build-enforced axioms-clean via `MathFin/AxiomAudit.lean`.
 
 ### leap 4 — the adapted Itô isometry (done, discrete) + the continuous frontier
 

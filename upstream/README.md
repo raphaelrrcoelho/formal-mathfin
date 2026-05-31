@@ -6,7 +6,7 @@ and they target *other* repositories' module trees.
 
 Each builds clean against the same Lean/Mathlib/BrownianMotion pins used
 in the main project (see `lake-manifest.json` at the repo root). Nothing
-under `QuantFin/` imports any of these files; they live here so the
+under `MathFin/` imports any of these files; they live here so the
 proposed code is reviewable before a PR is open.
 
 ## brownian-motion/
