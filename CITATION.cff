@@ -10,6 +10,7 @@ type: software
 license: Apache-2.0
 repository-code: "https://github.com/raphaelrrcoelho/formal-mathfin"
 url: "https://github.com/raphaelrrcoelho/formal-mathfin"
+doi: 10.5281/zenodo.20477782
 version: "1.0.0"
 date-released: "2026-05-31"
 keywords:
