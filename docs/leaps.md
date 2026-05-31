@@ -5,7 +5,7 @@ but for a long time it rested on one *assumption*: `BSCallHyp` — "the driver
 `Z` is standard normal under the risk-neutral measure `Q`" — was a hypothesis
 that 14 pricing files took on faith. The 2026-05-23 "leaps" close that gap and
 push past it. Each leap is foundation-certain and build-enforced
-(`QuantFin/AxiomAudit.lean`); none introduces a hypothesis-form theorem whose
+(`MathFin/AxiomAudit.lean`); none introduces a hypothesis-form theorem whose
 substantive hypothesis is left undischarged.
 
 This document is the narrative. For the per-theorem audit see
@@ -14,7 +14,7 @@ This document is the narrative. For the per-theorem audit see
 
 ## Leap 1 — static Girsanov: the risk-neutral measure is *derived*
 
-`QuantFin/Foundations/GaussianGirsanov.lean`.
+`MathFin/Foundations/GaussianGirsanov.lean`.
 
 `BSCallHyp` is no longer an axiom. The risk-neutral measure `Q` is
 *constructed* from the physical measure `P` by an explicit Radon-Nikodym
@@ -38,7 +38,7 @@ slice of Girsanov tractable without the path-wise stochastic integral.
 
 ## Leap 2 — the genesis cascade: physical → EMM → pricing
 
-`QuantFin/Foundations/GaussianGirsanov.lean` (same file).
+`MathFin/Foundations/GaussianGirsanov.lean` (same file).
 
 Two composites wire the Girsanov construction into the prior pricing
 artifacts — making `GaussianGirsanov` load-bearing rather than a dead leaf:
@@ -59,7 +59,7 @@ The spine is `physical measure → Girsanov → Q → BSCallHyp → pricing`.
 
 ## Leap 3 — multivariate: Margrabe's exchange option
 
-`QuantFin/BlackScholes/ExchangeOption.lean`.
+`MathFin/BlackScholes/ExchangeOption.lean`.
 
 The first genuinely multivariate result. The exchange option pays
 `max(S¹_T − S²_T, 0)`; its structural fact (Margrabe 1978) is that it depends
@@ -80,7 +80,7 @@ the same structural-reduction discipline as `PowerCall`.
 The price-level result takes `BSCallHyp` for the *ratio* `R = S¹/S²` — exactly
 the abstraction `bs_call_formula` takes for any underlying.
 
-**Leap 3 grounding (done)** — `QuantFin/BlackScholes/MargrabeGrounding.lean`.
+**Leap 3 grounding (done)** — `MathFin/BlackScholes/MargrabeGrounding.lean`.
 That `BSCallHyp` for the ratio is now *derived*, the Margrabe-analog of leap 1:
 
 | Theorem | Content |
@@ -106,7 +106,7 @@ primitive.
 
 ## Leap 4 — the adapted Itô isometry (done, discrete)
 
-`QuantFin/Foundations/ItoIsometryAdapted.lean`.
+`MathFin/Foundations/ItoIsometryAdapted.lean`.
 
 The Wiener integral (`Foundations/WienerIntegralL2.lean`) handles
 *deterministic* integrands, where cross-terms vanish by the BM covariance.
@@ -129,7 +129,7 @@ fully proven in Degenne's package. The deductive chain:
 | **`ito_isometry_discrete`** | **The discrete Itô isometry.** `E[(Σₖ φₖ·ΔBₖ)²] = Σₖ E[φₖ²]·(t_{k+1}−t_k)` for adapted `L²` integrands. Diagonal = variance kernel; off-diagonal = 0 by the martingale-difference property. |
 | **`ito_isometry_brownian_self`** | **The `∫₀ᵀ B dB` Riemann-sum isometry**, `E[(Σₖ B(tₖ)·ΔBₖ)²] = Σₖ tₖ·Δtₖ` — a fully-discharged instance (no remaining hypotheses beyond measurability + a monotone partition). |
 
-All build-enforced axioms-clean (`QuantFin/AxiomAudit.lean`).
+All build-enforced axioms-clean (`MathFin/AxiomAudit.lean`).
 
 ## Leap 4, continuous — the bounded-horizon CLM, now consumed (2026-05-29)
 

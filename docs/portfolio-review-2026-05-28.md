@@ -11,7 +11,7 @@ values:
 6. **Superior genius concept clarity**
 
 Snapshot: 148 Lean files, 22,975 LOC; cold `lake build` green (8,650/8,650);
-zero `sorry`/`admit`/`TODO`/`FIXME` anywhere in `QuantFin/`. The last
+zero `sorry`/`admit`/`TODO`/`FIXME` anywhere in `MathFin/`. The last
 contract-aligned review was 2026-05-26 ("library fundamentally sound +
 honest, bounded slop fixed in 6 commits"); this review re-runs the same
 lens against the state two days later, post-CLM landing.
@@ -88,9 +88,9 @@ attribution is honest and the file is small.
 ### F3. `BlackScholes.GarmanNormalForm` is imported but not in the umbrella
 **Verdict: minor index gap.**
 
-`QuantFin.BlackScholes.GarmanNormalForm` is imported by three downstream
+`MathFin.BlackScholes.GarmanNormalForm` is imported by three downstream
 modules (`ExchangeOption`, `Futures.Black76`, `FixedIncome.KMVMerton`)
-and the umbrella file `QuantFin.lean` has explicit `import` lines for
+and the umbrella file `MathFin.lean` has explicit `import` lines for
 every other authored file *except* this one. Lake's `globs :=
 .andSubmodules` picks it up regardless, but the umbrella's role is
 "single grep target for the human reader" and the omission is jarring.
@@ -180,7 +180,7 @@ the Itô-specific tail *after*). Pure cleanup; no proof changes.
   `[propext, Classical.choice, Quot.sound]`. The CLM + the four new pins
   (including `simpleAssembly_T_denseRange`, `itoIntegralCLM_T_norm`,
   `discrete_squaring_identity`) maintain the invariant. This is on track.
-* **`sorry` / `admit`.** None anywhere in `QuantFin/`. (One `sorry` literal
+* **`sorry` / `admit`.** None anywhere in `MathFin/`. (One `sorry` literal
   appears inside a *docstring* in `AxiomAudit.lean`, explaining what the
   audit prevents — that is not a proof obligation.)
 * **`TODO` / `FIXME` / `XXX`.** None.

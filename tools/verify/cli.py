@@ -1,7 +1,7 @@
 """CLI entry point for the Lean verification runner.
 
 Usage:
-    python -m tools.verify.cli benchmarks/stochastic_calculus.json [-v] [--config quantfin.toml] [--timeout 120]
+    python -m tools.verify.cli benchmarks/stochastic_calculus.json [-v] [--config mathfin.toml] [--timeout 120]
 """
 
 from __future__ import annotations
@@ -72,8 +72,8 @@ def format_result(vr) -> str:
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        prog="quantfin-verify",
-        description="Lean 4 verification runner for the QuantFin formal-finance library",
+        prog="mathfin-verify",
+        description="Lean 4 verification runner for the MathFin formal-finance library",
     )
     parser.add_argument(
         "theorems",

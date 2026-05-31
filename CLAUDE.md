@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this repo is
 
-A Lean 4 library of formally verified quant-finance theorems, built on Mathlib
+A Lean 4 library of formally verified mathematical-finance theorems, built on Mathlib
 and Degenne's BrownianMotion package. The Lean library is the artifact; the
 Python runner under `tools/verify/` is a CLI harness that drives
 `lean-interact` against benchmark JSONs. The library is self-sufficient: a
@@ -13,7 +13,7 @@ plain `lake build` from the repo root is the canonical verification.
 ## Commands
 
 Preferred runner is Docker. The image is hosted on GHCR
-(`ghcr.io/raphaelrrcoelho/quantfin-verify`, private). Pull-first,
+(`ghcr.io/raphaelrrcoelho/mathfin-verify`, private). Pull-first,
 build-fallback:
 
 ```bash
@@ -27,7 +27,7 @@ echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
 docker compose -f docker/docker-compose.yml pull verify
 
 # Run a benchmark:
-docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config quantfin.toml --timeout 120
+docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config mathfin.toml --timeout 120
 
 # Force a local rebuild (only when changing Dockerfile/Lean toolchain):
 docker compose -f docker/docker-compose.yml build verify
@@ -79,14 +79,14 @@ Delivery/status docs:
 
 Docker notes:
 - `docker/Dockerfile.verify` installs Lean (via elan), prebuilds the
-  `QuantFin` library against pinned Mathlib + BrownianMotion via
+  `MathFin` library against pinned Mathlib + BrownianMotion via
   `lake exe cache get && lake build`, then layers Python + the
   `tools.verify` package.
 - Compose bind-mounts `tools/`, `benchmarks/`, `tests/`,
-  `quantfin.toml`, and the Lake project pieces at repo root
-  (`QuantFin/`, `QuantFin.lean`, `lakefile.lean`,
+  `mathfin.toml`, and the Lake project pieces at repo root
+  (`MathFin/`, `MathFin.lean`, `lakefile.lean`,
   `lake-manifest.json`, `lean-toolchain`). The Lake bind mount is RW so
-  authoring `QuantFin/*.lean` on host (VS Code + Lean LSP) propagates
+  authoring `MathFin/*.lean` on host (VS Code + Lean LSP) propagates
   without a rebuild; `.lake/` lives on the host and survives between runs.
 - `lean-interact`'s own cache is in the `lean_interact_cache` Docker volume.
 - If Docker build fails under Claude/Codex because it cannot write under
@@ -118,21 +118,21 @@ entirely.)
 - Every benchmark theorem must declare `metadata.formalization_status`: `full`, `library_wrapper`, `reduced_core`, or `placeholder`. Delivery claims count only `full + library_wrapper`; see `docs/coverage.md`.
 - Do not tell a collaborator that all course theorems are formally proved. Run `python3 -m tools.verify.coverage_report` for the current `full / library_wrapper / reduced_core / placeholder` split.
 
-**Lean proofs live in `QuantFin/<Section>/<Module>.lean`, not in JSON
+**Lean proofs live in `MathFin/<Section>/<Module>.lean`, not in JSON
 strings**. The library is organized into thematic subdirectories under the
-repo-root `QuantFin/`: `Foundations/`, `BlackScholes/`, `Futures/`,
+repo-root `MathFin/`: `Foundations/`, `BlackScholes/`, `Futures/`,
 `Binomial/`, `FixedIncome/`, `Portfolio/`, `Performance/`, `RiskMeasures/`,
 `Actuarial/`, `DeFi/`. The Lean backend uses `lean-interact.LocalProject`
-pointing at the repo root (configured via `quantfin.toml`
+pointing at the repo root (configured via `mathfin.toml`
 `local_project = "."`). `lakefile.lean` + `lake-manifest.json` +
 `lean-toolchain` are authoritative for Mathlib/Lean versions and transitive
 deps. Non-trivial proofs (multi-step derivations, helper lemmas, structures)
-**must** live as real Lean files under `QuantFin/<Section>/` so they
+**must** live as real Lean files under `MathFin/<Section>/` so they
 get the full `lake build` memory budget + incremental compilation + LSP
-authoring; benchmark snippets `import QuantFin.<Section>.<Module>` and
+authoring; benchmark snippets `import MathFin.<Section>.<Module>` and
 re-export the named lemma in 5–25 lines. Trivial library wrappers
 (single-line `:= someLemma`) can stay inline in the JSON. To author a new
-proof: edit `QuantFin/<Section>/<Module>.lean` on host with VS Code +
+proof: edit `MathFin/<Section>/<Module>.lean` on host with VS Code +
 Lean LSP (`loogle`/`leansearch%`/`apply?` are transitively available
 via Mathlib's `LeanSearchClient`), `lake build` to validate, then update the
 benchmark JSON to import + reference.
@@ -140,7 +140,7 @@ benchmark JSON to import + reference.
 **Fast authoring iteration via persistent REPL daemon (`docker compose
 service lean-repl`)**. The daemon (`tools/verify/lean_repl.py`) boots a
 `lean-interact` server pointing at the repo root once per session, paying
-the ~5-min Mathlib + BrownianMotion + QuantFin olean-load cost a single
+the ~5-min Mathlib + BrownianMotion + MathFin olean-load cost a single
 time. It then listens on TCP `127.0.0.1:7878` and processes each "check this
 file" request in 5-30 sec — vs. 5-15 min for the `docker compose run --rm
 verify` cold path. This is the LSP-equivalent for non-editor authoring
@@ -153,7 +153,7 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
 
 # per iteration: edit a .lean file, then check it via the wrapper
-./scripts/lean-check.sh QuantFin/Foundations/BrownianMartingale.lean
+./scripts/lean-check.sh MathFin/Foundations/BrownianMartingale.lean
 # Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
 
 # tear down at end of session
@@ -181,8 +181,8 @@ the expensive Mathlib bootstrap to the first `verify()` call. It holds a
 `verify()` calls serialize through the lock.
 
 **Config** (`tools/verify/config.py`): TOML loader using stdlib `tomllib`
-(Python 3.11+). Searches `quantfin.toml` then `pyproject.toml`
-(`[tool.quantfin-verify]`). Defaults are baked into the dataclasses, so a
+(Python 3.11+). Searches `mathfin.toml` then `pyproject.toml`
+(`[tool.mathfin-verify]`). Defaults are baked into the dataclasses, so a
 missing file is fine.
 
 **Models** (`tools/verify/models.py`): `TheoremStatement` is a frozen

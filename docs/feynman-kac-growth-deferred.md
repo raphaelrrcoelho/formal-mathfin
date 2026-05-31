@@ -1,7 +1,7 @@
 # Feynman–Kac (growth-controlled heat equation) — explored, then deferred
 
 **Status:** built + verified, then **reverted on 2026-05-29** (commit `9b016b1`; the
-lemmas lived in-tree at `eaa5c59`). **Not needed for quant finance as the library
+lemmas lived in-tree at `eaa5c59`). **Not needed for mathematical finance as the library
 currently stands** — see *Why deferred*. The three verified foundation lemmas are
 preserved verbatim below for posterity / revival.
 
@@ -35,7 +35,7 @@ the obstruction that blocks the existing bounded-`C²` FK proof
    proves the risk-neutral expectation equals `bsV`. Compose them ⇒ "risk-neutral price
    solves the BS PDE" is already a theorem. A second, structural derivation of the same
    fact adds depth but fills no capability gap.
-2. **Doesn't reach where FK earns its keep.** FK's real quant-finance job is pricing
+2. **Doesn't reach where FK earns its keep.** FK's real mathematical-finance job is pricing
    things with **no closed form** — local vol `σ(S,t)`, stochastic vol (Heston), exotics —
    which are **variable-coefficient** parabolic PDEs needing FK for *general diffusions*
    (built on the general Itô/SDE layer). That is a different, much harder theorem. The
@@ -55,7 +55,7 @@ majorants), reusable as-is.
 
 ## The verified foundation lemmas (verbatim)
 
-These were `private` lemmas **inside `QuantFin/Foundations/FeynmanKacHeatEquation.lean`**
+These were `private` lemmas **inside `MathFin/Foundations/FeynmanKacHeatEquation.lean`**
 and reuse its private kernel helpers (`heatKernel`, `hasDerivAt_heatKernel_y`,
 `integrable_heatKernel`, `continuous_heatKernel`, `heatKernel_nonneg`,
 `integrable_mul_heatKernel_of_gaussian`) plus Mathlib's

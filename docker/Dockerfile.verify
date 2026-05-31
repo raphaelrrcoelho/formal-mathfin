@@ -26,11 +26,11 @@ WORKDIR /app
 # Lean toolchain + Lake project prebuild. `lake exe cache get` downloads
 # precompiled Mathlib oleans from the leanprover-community reservoir (~3 min
 # download vs ~30 min Mathlib build from source). `lake build` then elaborates
-# the QuantFin library + its direct deps (BrownianMotion etc.). This bakes
+# the MathFin library + its direct deps (BrownianMotion etc.). This bakes
 # the olean tree into the image at /app/.lake/, so the first verify call no
 # longer pays for a cold Lake build.
-COPY lakefile.lean lean-toolchain lake-manifest.json QuantFin.lean ./
-COPY QuantFin/ QuantFin/
+COPY lakefile.lean lean-toolchain lake-manifest.json MathFin.lean ./
+COPY MathFin/ MathFin/
 RUN elan toolchain install "$(cat lean-toolchain)" \
     && lean --version \
     && lake --version \
@@ -50,6 +50,6 @@ COPY tools/ tools/
 RUN python3 -m pip install --break-system-packages -e ".[all,dev]"
 
 COPY benchmarks/ benchmarks/
-COPY quantfin.toml ./
+COPY mathfin.toml ./
 
 ENTRYPOINT ["python3", "-m", "tools.verify"]

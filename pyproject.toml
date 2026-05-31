@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "quantfin"
+name = "mathfin"
 version = "0.1.0"
-description = "Lean 4 verification runner for the QuantFin formal-finance library"
+description = "Lean 4 verification runner for the MathFin formal-finance library"
 requires-python = ">=3.11"
 dependencies = []
 
@@ -20,24 +20,24 @@ dev = [
 ]
 
 [project.scripts]
-quantfin-verify = "tools.verify.cli:main"
+mathfin-verify = "tools.verify.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["tools*"]
 namespaces = true
 
-[tool.quantfin]
-[tool.quantfin.lean]
+[tool.mathfin]
+[tool.mathfin.lean]
 version = "v4.30.0-rc1"
 mathlib = true
 
-# Mirror of quantfin.toml's extra_requires; kept here so coverage tooling
+# Mirror of mathfin.toml's extra_requires; kept here so coverage tooling
 # that reads pyproject as a fallback config sees the same dependency set.
-[[tool.quantfin.lean.extra_requires]]
+[[tool.mathfin.lean.extra_requires]]
 name = "BrownianMotion"
 git = "https://github.com/RemyDegenne/brownian-motion.git"
 rev = "51807683c5130238fd4013b2fbee314135e3d8d9"
 
-[tool.quantfin.orchestrator]
+[tool.mathfin.orchestrator]
 default_timeout = 60.0

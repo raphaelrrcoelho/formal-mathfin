@@ -8,9 +8,9 @@ on:
 
 # Build and verify the whole library on the pinned toolchain (lean-toolchain).
 # lean-action installs elan, fetches the Mathlib olean cache, and runs
-# `lake build`; BrownianMotion + QuantFin build from source.
+# `lake build`; BrownianMotion + MathFin build from source.
 #
-# A green build is *also* the axiom-cleanliness proof: QuantFin/AxiomAudit.lean
+# A green build is *also* the axiom-cleanliness proof: MathFin/AxiomAudit.lean
 # #guard_msgs-pins every headline theorem to [propext, Classical.choice,
 # Quot.sound], so `lake build` fails if any of them drifts.
 
