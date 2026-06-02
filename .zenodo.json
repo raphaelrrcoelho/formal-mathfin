@@ -4,7 +4,10 @@
   "access_right": "open",
   "license": "Apache-2.0",
   "creators": [
-    { "name": "Coelho, Raphael" }
+    {
+      "name": "Coelho, Raphael",
+      "orcid": "0009-0001-6601-1023"
+    }
   ],
   "description": "A Lean 4 library of machine-checked mathematical-finance theorems: 251 sorry-free theorems across eleven areas (Black-Scholes pricing with the full Greek matrix and exotics; binomial trees including the CRR-to-Black-Scholes scaling limit and American/Snell options; fixed income; portfolio theory; coherent risk measures; actuarial mathematics; DeFi; and the continuous-time stochastic-calculus foundations: the Wiener/Ito L2 isometry, the continuous Ito integral, and a static-Girsanov derivation of the risk-neutral measure). Built on Mathlib and Remy Degenne's BrownianMotion package. Every result is classified by faithfulness tier, and a build-enforced AxiomAudit pins the axioms each proof depends on.",
   "keywords": [
@@ -14,6 +17,20 @@
     "mathematical finance",
     "Mathlib",
     "stochastic calculus",
-    "Black-Scholes"
+    "Black-Scholes",
+    "autoformalization",
+    "reproducible research"
+  ],
+  "related_identifiers": [
+    {
+      "relation": "isSupplementedBy",
+      "identifier": "https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems",
+      "scheme": "url"
+    },
+    {
+      "relation": "isSupplementTo",
+      "identifier": "10.48550/arXiv.2606.01356",
+      "scheme": "doi"
+    }
   ]
 }
