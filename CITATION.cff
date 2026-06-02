@@ -6,6 +6,7 @@ title: >-
 authors:
   - family-names: Coelho
     given-names: Raphael
+    orcid: "https://orcid.org/0009-0001-6601-1023"
 type: software
 license: Apache-2.0
 repository-code: "https://github.com/raphaelrrcoelho/formal-mathfin"
@@ -26,6 +27,14 @@ abstract: >-
   Rémy Degenne's BrownianMotion package. Every result is classified by
   how faithfully its Lean statement matches the mathematical claim, and
   a build-enforced axiom audit pins the axioms each proof depends on.
-# Once the arXiv paper is live, add a `preferred-citation:` block of
-# type: article (with the arXiv id/doi) so GitHub's "Cite this
-# repository" surfaces the paper as the preferred reference.
+preferred-citation:
+  type: article
+  title: A Formally Verified Library of Mathematical Finance in Lean 4
+  authors:
+    - family-names: Coelho
+      given-names: Raphael
+      orcid: "https://orcid.org/0009-0001-6601-1023"
+  doi: 10.48550/arXiv.2606.01356
+  url: "https://arxiv.org/abs/2606.01356"
+  journal: arXiv
+  year: 2026
