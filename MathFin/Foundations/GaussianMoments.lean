@@ -55,6 +55,26 @@ lemma integral_pow4_gaussianReal (v : ℝ≥0) :
   push_cast
   ring
 
+/-- Sixth moment of a centered real Gaussian: `∫ x, x⁶ ∂(gaussianReal 0 v) = 15 v³`
+(`E[X⁶] = 15·Var³`). It controls the `L²` size of the Itô–Taylor remainder
+(`E[(ΔB)⁶] = 15(Δt)³`, so `‖|ΔB|³‖_{L²} = √15·(Δt)^{3/2}` sums to `O(n^{-1/2})`).
+Via the `(2n)`-th central-moment formula `centralMoment_two_mul_gaussianReal` at
+`n = 3` (`(2·3−1)!! = 5!! = 15`). -/
+lemma integral_pow6_gaussianReal (v : ℝ≥0) :
+    ∫ x, x ^ 6 ∂(gaussianReal 0 v) = 15 * (v : ℝ) ^ 3 := by
+  have hmean : ∫ x, x ∂(gaussianReal 0 v) = 0 := integral_id_gaussianReal
+  have hcm : centralMoment id 6 (gaussianReal 0 v) = ∫ x, x ^ 6 ∂(gaussianReal 0 v) := by
+    unfold centralMoment
+    simp only [id_eq, hmean, Pi.pow_apply, Pi.sub_apply, sub_zero]
+  have key := centralMoment_two_mul_gaussianReal 0 (NNReal.sqrt v) 3
+  rw [NNReal.sq_sqrt] at key
+  have h6 : ((NNReal.sqrt v : ℝ)) ^ (2 * 3) = (v : ℝ) ^ 3 := by
+    rw [pow_mul, ← NNReal.coe_pow, NNReal.sq_sqrt]
+  have hdf : (2 * 3 - 1 : ℕ).doubleFactorial = 15 := rfl
+  rw [← hcm, key, h6, hdf]
+  push_cast
+  ring
+
 /-- **Mean-square fluctuation of a squared centered Gaussian**: `∫ (x² − v)² ∂N(0,v) = 2v²`,
 i.e. `Var(X²) = 2·Var(X)²` for `X ~ N(0,v)`. This is the kurtosis `E[X⁴] = 3v²` minus
 `(E[X²])² = v²`. It is exactly the per-interval term `E[((ΔB)² − Δt)²] = 2(Δt)²` whose sum
