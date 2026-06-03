@@ -30,12 +30,6 @@ open ItoIntegralL2 ItoIntegralCLM ItoIsometryAdapted ItoIntegralBrownian
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
 
-omit mΩ in
-/-- `φ(B u)` is adapted at any later time `t₀ ≥ u`, for measurable `φ`. -/
-lemma adaptedAt_phi_eval {φ : ℝ → ℝ} (hφ : Measurable φ) {t₀ u : ℝ≥0} (hu : u ≤ t₀) :
-    AdaptedAt B t₀ (fun ω => φ (B u ω)) :=
-  ⟨fun p => φ (p ⟨u, hu⟩), hφ.comp (measurable_pi_apply _), rfl⟩
-
 /-- The uniform-partition Riemann–Itô sum for integrand `φ∘B`:
 `∑_{k<n} φ(B_{tₖ})·(B_{t_{k+1}} − B_{tₖ})`. -/
 noncomputable def riemannφ (_hBmeas : ∀ t, Measurable (B t)) (φ : ℝ → ℝ) (T : ℝ≥0) (n : ℕ)
@@ -50,7 +44,7 @@ lemma memLp_riemannφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (hφ
   unfold riemannφ
   refine memLp_finsetSum _ fun k _ => ?_
   exact memLp_adapted_mul_increment hBmeas (unifPart_mono T n (Nat.le_succ k))
-    (adaptedAt_phi_eval hφ_meas le_rfl)
+    (adaptedAt_comp_eval le_rfl hφ_meas)
     (MemLp.of_bound ((hφ_meas.comp (hBmeas _)).aestronglyMeasurable) C
       (ae_of_all _ fun ω => by rw [Real.norm_eq_abs]; exact hφ_bdd _))
 
@@ -165,32 +159,17 @@ lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s �
     have hTn : (0 : ℝ) ≤ (T : ℝ) / n := div_nonneg (NNReal.coe_nonneg T) (Nat.cast_nonneg n)
     exact ⟨by nlinarith [hcoe_low, hcoe_hi, hg], by nlinarith [hcoe_low, hTn]⟩
 
-/-- `‖g‖² = ∫ (g z)² ∂ν` for `g ∈ Lp 2 ν` (real `L²` norm-square as an integral), any `ν`. -/
-lemma lp_norm_sq' {α : Type*} {m : MeasurableSpace α} {ν : Measure α} (g : Lp ℝ 2 ν) :
-    ‖g‖ ^ 2 = ∫ z, (g z) ^ 2 ∂ν := by
-  have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
-  rw [L2.inner_def] at h
-  rw [← h]
-  exact integral_congr_ae (Filter.Eventually.of_forall fun a => by show g a * g a = g a ^ 2; ring)
-
-/-- The squared `L²`-distance of two `toLp` classes is `∫ (f − g)²`, any measure. -/
-lemma lp_dist_sq' {α : Type*} {m : MeasurableSpace α} {ν : Measure α} {f g : α → ℝ}
-    (hf : MemLp f 2 ν) (hg : MemLp g 2 ν) :
-    ‖hf.toLp f - hg.toLp g‖ ^ 2 = ∫ z, (f z - g z) ^ 2 ∂ν := by
-  rw [lp_norm_sq']
-  refine integral_congr_ae ?_
-  filter_upwards [Lp.coeFn_sub (hf.toLp f) (hg.toLp g), hf.coeFn_toLp, hg.coeFn_toLp]
-    with z h1 h2 h3
-  rw [h1]; simp only [Pi.sub_apply]; rw [h2, h3]
-
-/-- If `∫ (Fₙ − G)² → 0` then `‖⟦Fₙ⟧ − ⟦G⟧‖ → 0`, any measure. -/
+/-- If `∫ (Fₙ − G)² → 0` then `‖⟦Fₙ⟧ − ⟦G⟧‖ → 0`, any measure. The single-fixed-limit
+variant of `ItoIntegralBrownian.tendsto_norm_toLp_sub` (which compares two *sequences*
+`Fₙ, Gₙ`); kept as a separate lemma because the `G`-shape genuinely differs. The generic
+`L²` facts `lp_norm_sq` / `lp_dist_sq` it rests on now live once in `ItoIntegralBrownian`. -/
 lemma tendsto_norm_toLp_sub' {α : Type*} {m : MeasurableSpace α} {ν : Measure α}
     {F : ℕ → α → ℝ} {G : α → ℝ} (hF : ∀ n, MemLp (F n) 2 ν) (hG : MemLp G 2 ν)
     (h : Tendsto (fun n => ∫ z, (F n z - G z) ^ 2 ∂ν) atTop (𝓝 0)) :
     Tendsto (fun n => ‖(hF n).toLp (F n) - hG.toLp G‖) atTop (𝓝 0) := by
   have heq : (fun n => ‖(hF n).toLp (F n) - hG.toLp G‖)
       = fun n => Real.sqrt (∫ z, (F n z - G z) ^ 2 ∂ν) := by
-    funext n; rw [← lp_dist_sq' (hF n) hG, Real.sqrt_sq (norm_nonneg _)]
+    funext n; rw [← lp_dist_sq (hF n) hG, Real.sqrt_sq (norm_nonneg _)]
   rw [heq]; simpa using (Real.continuous_sqrt.tendsto 0).comp h
 
 /-- **Riemann ↔ CLM bridge.** For bounded continuous `φ`, the uniform-partition

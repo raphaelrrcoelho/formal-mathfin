@@ -88,6 +88,13 @@ cross-term factor `φⱼ · ΔBⱼ · φₖ` is `𝓕_{tₖ}`-measurable. -/
 theorem adaptedAt_eval {t₀ u : ℝ≥0} (hu : u ≤ t₀) : AdaptedAt B t₀ (B u) :=
   ⟨fun p => p ⟨u, hu⟩, measurable_pi_apply _, rfl⟩
 
+/-- `g (B u)` is adapted at any later time `t₀ ≥ u`, for measurable `g` (it factors
+through the past process as `(fun p => g (p ⟨u,_⟩)) ∘ pastProcess`). Generalizes
+`adaptedAt_eval` (the `g = id` case). -/
+theorem adaptedAt_comp_eval {t₀ u : ℝ≥0} (hu : u ≤ t₀) {g : ℝ → ℝ} (hg : Measurable g) :
+    AdaptedAt B t₀ (fun ω => g (B u ω)) :=
+  ⟨fun p => g (p ⟨u, hu⟩), hg.comp (measurable_pi_apply _), rfl⟩
+
 /-- Adaptedness is monotone in the time index. -/
 theorem AdaptedAt.mono {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) {φ : Ω → ℝ}
     (hφ : AdaptedAt B t₀ φ) : AdaptedAt B t₁ φ := by

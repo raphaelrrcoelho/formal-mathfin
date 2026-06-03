@@ -166,7 +166,14 @@ private lemma hasDerivAt_heatKernel_y_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
 
 /-- **Heat-kernel PDE on `heatKernel`**: `∂_t K = (1/2) ∂²_y K`. As an algebraic
 identity on the derivative values from `hasDerivAt_heatKernel_t` and
-`hasDerivAt_heatKernel_y_y`. -/
+`hasDerivAt_heatKernel_y_y`.
+
+Not consumed by the proved Feynman–Kac chain here (which delivers the heat-kernel
+convolution identity + the boundary condition); retained deliberately as the
+proved kernel-side input to the **deferred heat-PDE direction** `∂_t u = ½ ∂_xx u`
+documented in benchmark `sc-thm-9.2.1` (the remaining gap there is the uniform
+domination for differentiating under the Gaussian-shifted integral). Do not
+remove as "dead": it is the load-bearing building block for that extension. -/
 private lemma heatKernel_t_eq_half_y_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
     heatKernel t y * (y ^ 2 - t) / (2 * t ^ 2)
       = (1 / 2) * (heatKernel t y * (y ^ 2 - t) / t ^ 2) := by

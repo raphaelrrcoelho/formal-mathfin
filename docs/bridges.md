@@ -111,9 +111,12 @@ favor of Mathlib equivalents). Phase 30 (Bridge A,
   complete (currently has sorries), our L² Wiener integral could be derived
   as a special case of theirs. **Defer until BM package stabilises.**
 
-### Foundations/MathlibLp.lean (1019 LOC) — LARGEST
+### Foundations/DoobLpMaximalInequality.lean (1019 LOC) — LARGEST
 
-- **Status:** Substantial Mathlib `Lp` extensions. Not audited in detail.
+- **Status:** Original proof of Doob's **strong-type** `Lᵖ` maximal
+  inequality (`MeasureTheory.maximal_ineq_Lp`) — a genuine gap-fill over
+  Mathlib's weak-type form, via ~18 private helpers (layer cake + Fubini +
+  Hölder + truncation/monotone convergence). Axioms-clean.
 - **Bridge opportunity:** This file deserves a dedicated audit pass; out of
   scope for current bridging session. **TODO.**
 
@@ -180,8 +183,9 @@ new pricing entry points (BS, Bachelier, eventually Vasicek/CIR via Itô)
 gain optional BM-based constructors that compose with existing pricing
 machinery.
 
-The biggest remaining audit target is `MathlibLp.lean` (1019 LOC) — its
-relationship to Mathlib's current `Lp` machinery deserves a dedicated pass.
+The largest single foundation file is `DoobLpMaximalInequality.lean` (1019
+LOC) — the original strong-type Doob `Lᵖ` maximal inequality, which consumes
+Mathlib's weak-type `maximal_ineq` and fills in the strong-type form.
 
 ## Summit A — continuous-time Itô formula (2026-06-02)
 

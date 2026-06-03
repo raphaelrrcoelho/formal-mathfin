@@ -46,7 +46,7 @@ import MathFin.Foundations.ExpMin
 import MathFin.Foundations.FTAP
 import MathFin.Foundations.LpContinuousMartingaleConvergence
 import MathFin.Foundations.MartingaleTransform
-import MathFin.Foundations.MathlibLp
+import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.WienerIntegral
 import MathFin.Foundations.WienerIntegralL2
 -- Structural / principle modules:

@@ -50,12 +50,6 @@ private theorem integral_adapted_mul_centered_sq
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
       integral_increment_centered_mean ht, mul_zero]
 
-/-- `g(B u)` is adapted at any later time `t₀ ≥ u`, for measurable `g`
-(it factors through the past process as `(fun p => g (p ⟨u,_⟩)) ∘ pastProcess`). -/
-private theorem adaptedAt_comp_eval {t₀ u : ℝ≥0} (hu : u ≤ t₀) {g : ℝ → ℝ}
-    (hg : Measurable g) : AdaptedAt B t₀ (fun ω => g (B u ω)) :=
-  ⟨fun p => g (p ⟨u, hu⟩), hg.comp (measurable_pi_apply _), rfl⟩
-
 /-- **Term I, per-`n` bound.** The `L²` norm² of the weighted fluctuation
 `∑ₖ g(B_{tₖ})·((ΔBₖ)² − Δtₖ)` is at most `∑ₖ C²·2(Δtₖ)²`: the cross terms vanish
 (`integral_adapted_mul_centered_sq`), and each diagonal term is `≤ C²·2(Δtₖ)²`
@@ -300,6 +294,44 @@ private theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Contin
     (ae_restrict_of_forall_mem measurableSet_Ioc hptwise)
   exact (tendsto_congr hstep_integ).mp hconv
 
+/-- The uniform-partition mesh telescopes: `∑_{k<n} (t_{k+1} − t_k) = T` for `n > 0`. -/
+private lemma unifPart_mesh_sum (T : ℝ≥0) {n : ℕ} (hn : 0 < n) :
+    ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) := by
+  rw [Finset.sum_range_sub (fun k => (unifPart T n k : ℝ))]
+  have h1 : unifPart T n n = T := by
+    have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+    simp only [unifPart, div_self hne, one_mul]
+  have h0 : unifPart T n 0 = 0 := by simp [unifPart]
+  rw [h1, h0]; simp
+
+/-- A left-endpoint Riemann weight-sum of a bounded function is bounded by `C·T`:
+`|∑_{k<n} g(B_{t_k} ω)·(t_{k+1} − t_k)| ≤ C·T`. Shared left-endpoint bound for
+`tendsto_weighted_qv` (the `Rsum` term) and `memLp_pathIntegral`. -/
+private lemma abs_riemann_weight_sum_le {g : ℝ → ℝ} {C : ℝ} (hC0 : 0 ≤ C)
+    (hg_bdd : ∀ x, |g x| ≤ C) (T : ℝ≥0) (n : ℕ) (ω : Ω) :
+    |∑ k ∈ Finset.range n,
+        g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)| ≤ C * T := by
+  have hΔnn : ∀ k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k := fun k =>
+    sub_nonneg.mpr (by
+      exact_mod_cast (show Monotone (unifPart T n) from fun a b hab => by
+        simp only [unifPart]; gcongr) (Nat.le_succ k))
+  rcases Nat.eq_zero_or_pos n with hn0 | hn
+  · subst hn0
+    simp only [Finset.range_zero, Finset.sum_empty, abs_zero]
+    exact mul_nonneg hC0 (NNReal.coe_nonneg T)
+  · calc |∑ k ∈ Finset.range n,
+            g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)|
+        ≤ ∑ k ∈ Finset.range n,
+            |g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)| :=
+          Finset.abs_sum_le_sum_abs _ _
+      _ ≤ ∑ k ∈ Finset.range n, C * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
+          Finset.sum_le_sum fun k _ => by
+            rw [abs_mul, abs_of_nonneg (hΔnn k)]
+            exact mul_le_mul_of_nonneg_right (hg_bdd _) (hΔnn k)
+      _ = C * ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
+          rw [Finset.mul_sum]
+      _ = C * T := by rw [unifPart_mesh_sum T hn]
+
 /-- **Weighted quadratic variation.** For bounded continuous `g`, the `g(B)`-weighted sum
 of squared increments along the uniform partition of `[0,T]` converges in `L²(μ)` to
 `∫₀ᵀ g(B_s) ds`. The continuous-weight generalization of `tendsto_qv`. -/
@@ -316,10 +348,6 @@ theorem tendsto_weighted_qv
   classical
   have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hg_bdd 0)
   have hg_meas : Measurable g := hg_cont.measurable
-  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab => by
-    simp only [unifPart]; gcongr
-  have hΔnn : ∀ n k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k :=
-    fun n k => sub_nonneg.mpr (by exact_mod_cast hmono n (Nat.le_succ k))
   set Ssum : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
       g (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hSsum
   set Rsum : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
@@ -335,34 +363,8 @@ theorem tendsto_weighted_qv
   have hI_meas : Measurable Ipath :=
     measurable_of_tendsto_metrizable hR_meas (tendsto_pi_nhds.mpr hpath)
   -- both `Rsum n` and `Ipath` are bounded by `C·T` (mesh sums telescope to `T`)
-  have hsum_gap : ∀ n, 0 < n →
-      ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) := by
-    intro n hn
-    rw [Finset.sum_range_sub (fun k => (unifPart T n k : ℝ))]
-    have h1 : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have h0 : unifPart T n 0 = 0 := by simp [unifPart]
-    rw [h1, h0]; simp
-  have hR_bdd : ∀ n ω, |Rsum n ω| ≤ C * T := by
-    intro n ω
-    rcases Nat.eq_zero_or_pos n with hn0 | hn
-    · subst hn0
-      simp only [hRsum, Finset.range_zero, Finset.sum_empty, abs_zero]
-      exact mul_nonneg hC0 (NNReal.coe_nonneg T)
-    · simp only [hRsum]
-      calc |∑ k ∈ Finset.range n,
-              g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)|
-          ≤ ∑ k ∈ Finset.range n,
-              |g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)| :=
-            Finset.abs_sum_le_sum_abs _ _
-        _ ≤ ∑ k ∈ Finset.range n, C * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
-            Finset.sum_le_sum fun k _ => by
-              rw [abs_mul, abs_of_nonneg (hΔnn n k)]
-              exact mul_le_mul_of_nonneg_right (hg_bdd _) (hΔnn n k)
-        _ = C * ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
-            rw [Finset.mul_sum]
-        _ = C * T := by rw [hsum_gap n hn]
+  have hR_bdd : ∀ n ω, |Rsum n ω| ≤ C * T := fun n ω => by
+    simp only [hRsum]; exact abs_riemann_weight_sum_le hC0 hg_bdd T n ω
   have hI_bdd : ∀ ω, |Ipath ω| ≤ C * T := fun ω =>
     le_of_tendsto ((hpath ω).abs) (Eventually.of_forall fun n => hR_bdd n ω)
   -- the Riemann remainder `(Rsum − Ipath)²` is bounded by `(2CT)²` and measurable
@@ -453,9 +455,6 @@ theorem memLp_pathIntegral (hBmeas : ∀ t, Measurable (B t))
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hg_bdd 0)
   have hg_meas : Measurable g := hg_cont.measurable
-  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab => by simp only [unifPart]; gcongr
-  have hΔnn : ∀ n k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k :=
-    fun n k => sub_nonneg.mpr (by exact_mod_cast hmono n (Nat.le_succ k))
   have hpath : ∀ ω, Tendsto (fun n => ∑ k ∈ Finset.range n,
       g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) atTop
       (𝓝 (∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure)) := fun ω =>
@@ -466,34 +465,9 @@ theorem memLp_pathIntegral (hBmeas : ∀ t, Measurable (B t))
     Finset.measurable_sum _ (fun k _ => (hg_meas.comp (hBmeas _)).mul_const _)
   have hI_meas : Measurable (fun ω => ∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure) :=
     measurable_of_tendsto_metrizable hR_meas (tendsto_pi_nhds.mpr hpath)
-  have hsum_gap : ∀ n, 0 < n →
-      ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) := by
-    intro n hn
-    rw [Finset.sum_range_sub (fun k => (unifPart T n k : ℝ))]
-    have h1 : unifPart T n n = T := by
-      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-      simp only [unifPart, div_self hne, one_mul]
-    have h0 : unifPart T n 0 = 0 := by simp [unifPart]
-    rw [h1, h0]; simp
   have hR_bdd : ∀ n ω, |∑ k ∈ Finset.range n,
-      g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)| ≤ C * T := by
-    intro n ω
-    rcases Nat.eq_zero_or_pos n with hn0 | hn
-    · subst hn0
-      simp only [Finset.range_zero, Finset.sum_empty, abs_zero]
-      exact mul_nonneg hC0 (NNReal.coe_nonneg T)
-    · calc |∑ k ∈ Finset.range n,
-              g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)|
-          ≤ ∑ k ∈ Finset.range n,
-              |g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)| :=
-            Finset.abs_sum_le_sum_abs _ _
-        _ ≤ ∑ k ∈ Finset.range n, C * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
-            Finset.sum_le_sum fun k _ => by
-              rw [abs_mul, abs_of_nonneg (hΔnn n k)]
-              exact mul_le_mul_of_nonneg_right (hg_bdd _) (hΔnn n k)
-        _ = C * ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
-            rw [Finset.mul_sum]
-        _ = C * T := by rw [hsum_gap n hn]
+      g (B (unifPart T n k) ω) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)| ≤ C * T :=
+    fun n ω => abs_riemann_weight_sum_le hC0 hg_bdd T n ω
   have hI_bdd : ∀ ω, |∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure| ≤ C * T :=
     fun ω => le_of_tendsto ((hpath ω).abs) (Eventually.of_forall fun n => hR_bdd n ω)
   exact MemLp.of_bound hI_meas.aestronglyMeasurable (C * T)
