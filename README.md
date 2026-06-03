@@ -26,13 +26,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 254 |
-| **full derivations** | **208** |
+| total theorems | 258 |
+| **full derivations** | **212** |
 | library wrappers | 19 |
 | reduced cores | 27 |
 | placeholders | **0** |
 
-**227 of the 254 are delivery-ready** (`full` + `library_wrapper`); the 27
+**231 of the 258 are delivery-ready** (`full` + `library_wrapper`); the 27
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is gated on upstream Mathlib (see *What's not
 done*).

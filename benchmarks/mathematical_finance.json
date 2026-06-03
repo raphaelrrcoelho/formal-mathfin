@@ -3024,6 +3024,36 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-no-arb-putcall-parity",
+      "name": "Put-Call Parity from No-Arbitrage",
+      "description": "Under a positive linear pricing functional (state prices q summing to the discount factor and pricing the spot), the call minus put portfolio is worth S0 - K*DF. First-principles parity, no distributional hypothesis.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Foundations.NoArbitrageDerivations\n\nopen MathFin\n\ntheorem putCall_parity_from_no_arbitrage_thm\n    {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)\n    (DF S₀ K : ℝ)\n    (h_bond : ∑ i ∈ s, q i = DF)\n    (h_stock : ∑ i ∈ s, q i * S i = S₀) :\n    (∑ i ∈ s, q i * max (S i - K) 0) - (∑ i ∈ s, q i * max (K - S i) 0)\n      = S₀ - K * DF :=\n  MathFin.putCall_parity_from_no_arbitrage s q S DF S₀ K h_bond h_stock\n"
+      },
+      "metadata": {
+        "reference": "First fundamental theorem of asset pricing (put-call parity, state-price form)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.NoArbitrageDerivations. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-no-arb-forward-price",
+      "name": "Forward Price from No-Arbitrage",
+      "description": "The unique fair forward strike making the contract (S_T - F) worth zero at inception is F = S0 / DF (cash-and-carry). Existence and uniqueness from linearity of the pricing functional.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Foundations.NoArbitrageDerivations\n\nopen MathFin\n\ntheorem forward_price_eq_spot_div_discount_thm\n    {ι : Type*} (s : Finset ι) (q : ι → ℝ) (S : ι → ℝ)\n    (DF S₀ : ℝ) (hDF : DF ≠ 0)\n    (h_bond : ∑ i ∈ s, q i = DF)\n    (h_stock : ∑ i ∈ s, q i * S i = S₀) :\n    ∃! F : ℝ, ∑ i ∈ s, q i * (S i - F) = 0 :=\n  MathFin.forward_price_eq_spot_div_discount s q S DF S₀ hDF h_bond h_stock\n"
+      },
+      "metadata": {
+        "reference": "No-arbitrage forward price F = S0/DF (cash-and-carry)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.NoArbitrageDerivations. Axioms-clean."
+      }
     }
   ]
 }

@@ -176,6 +176,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full derivation of the BS PDE forward direction. The European call price V(S,t) = S Φ(d₁) − K e^{-r(T-t)} Φ(d₂) is shown to satisfy the BS PDE for S > 0, t < T, K > 0, σ > 0. Proof chain: hasDerivAt_Phi (FTC on Iic-Lebesgue) → bs_identity (the magic algebraic identity S φ(d₁) = K e^{-rτ} φ(d₂)) → ∂_S d₁, ∂_S d₂ (chain rule on log + division) → ∂_τ d₁, ∂_τ d₂ (quotient rule) → ∂_S V, ∂²_S V, ∂_τ V (chain + product + magic identity for term cancellation) → ∂_t V = −∂_τ V (chain on τ = T − t) → bs_pde_holds (algebraic check via field_simp + ring). No Itô calculus required; pure calculus + the magic identity. Axioms: only `[propext, Classical.choice, Quot.sound]`. Confirmed via `#print axioms` on every supporting lemma."
       }
+    },
+    {
+      "id": "sc-discrete-cubing-identity",
+      "name": "Discrete Ito Identity for Cubing",
+      "description": "Pathwise X_N^3 - X_0^3 decomposition into the third-power discrete Ito integral (3 sum X^2 dX), the QV-weighted cross sum (3 sum X (dX)^2), and the cubic remainder. Specialisation of the discrete Ito formula to f(x)=x^3.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Foundations.DiscreteItoPolynomial\n\nopen MathFin\n\ntheorem discrete_cubing_identity_thm (N : ℕ) (X : ℕ → ℝ) :\n    X N ^ 3 - X 0 ^ 3 =\n      3 * (∑ k ∈ Finset.range N, X k ^ 2 * (X (k + 1) - X k)) +\n      3 * (∑ k ∈ Finset.range N, X k * (X (k + 1) - X k) ^ 2) +\n      ∑ k ∈ Finset.range N, (X (k + 1) - X k) ^ 3 :=\n  MathFin.discrete_cubing_identity N X\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Discrete Ito formula, cubic case (Saporito Ch 7)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.DiscreteItoPolynomial. Axioms-clean."
+      }
+    },
+    {
+      "id": "sc-memlp-ito-simple-process",
+      "name": "Elementary Ito Integral is L2 at Every Time",
+      "description": "For a pre-Brownian motion B and a simple (elementary) adapted process V, the process-level Ito integral (V dot B)_t lies in L2(mu) at every finite time t. The analytic content underpinning the L2 Ito-integral construction.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcess\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcess\nopen scoped NNReal ENNReal\n\ntheorem memLp_itoSimpleProcess_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ t, Measurable (B t))\n    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))\n    (t : ℝ≥0) :\n    MemLp (itoSimpleProcess hBmeas V t) 2 μ :=\n  memLp_itoSimpleProcess hBmeas V t\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "L2 membership of the elementary Ito integral (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcess (memLp_itoSimpleProcess). Built on Degenne's SimpleProcess. Axioms-clean."
+      }
     }
   ]
 }
