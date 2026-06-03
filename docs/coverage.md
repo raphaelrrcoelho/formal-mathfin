@@ -83,6 +83,19 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > `#print axioms`-clean (AxiomAudit-pinned). `coverage_report`: `stochastic_calculus.json`
 > 4→5 full, 7→6 reduced.
 
+> **Engine→pricing coherence — deliberate stop (2026-06-03).** The continuous Itô
+> engine `itoIntegralCLM_T` has its flagship consumer (`itoIntegralCLM_T_brownian`:
+> `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` through the CLM), and the operational continuous-time
+> pricing result — the discounted GBM is a `Q`-martingale (`discountedGBM_isMartingale`,
+> via the Wald exponential) — is already proved (an AxiomAudit-pinned library theorem). The one *missing* link, identifying the
+> discounted price *with* the engine (`e^{−rt}S_t = S₀ + itoIntegralCLM_T(σ·e^{−r·}S_·)`),
+> was scoped and **declined**: the GBM exponential is unbounded, so it is not a short
+> argument but a second keystone (~400 lines — a parallel clamp-truncation layer plus the
+> martingale-difference L² limit `∑σM_{t_k}ΔB → M_T−1`). It would yield an *alternative
+> derivation route* to a theorem already held, not a new result, so it is recorded here as
+> a known, bounded, **not-pursued** build. See *Geometric Brownian motion* /
+> *Continuous-time first FTAP* in `blueprint.md`.
+
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 

@@ -104,7 +104,11 @@ predictable rectangles (`isPiSystem_predictableRect`,
 every basic rect `R = (a, b] × F` with `F ∈ ℱ_a`, then to all measurable sets
 via `setIntegral_eq_zero_of_orthogonal_pred`, and finally to `g = 0` via
 `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`. The CLM falls out of
-`LinearMap.extendOfNorm`.
+`LinearMap.extendOfNorm`. Its first genuine consumer is
+`itoIntegralCLM_T_brownian`: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` *through the CLM* —
+bridging the abstract integral to the concrete quadratic-variation limit, and
+itself the template (clamp-truncation + isometry-Cauchy completion) any
+unbounded-coefficient consumer would reuse.
 → *Finance:* the analytic foundation for the Itô calculus layer — every
 predictable `L²` integrand on `[0, T]` has a well-defined Itô integral with
 the isometry norm identity, the bedrock of SDE existence/uniqueness and the
@@ -141,9 +145,20 @@ Two honestly-distinct layers, NOT a continuous SDE-solution theorem:
   coefficients of `dS = μS dt + σS dB`. The `−½σ²` exponent cancels the `+½σ²`
   Itô term — that cancellation *is* the Itô correction.
 
-What is **deferred**: lifting coefficient-matching to a genuine continuous SDE
-*solution* (the partition-limit Itô lemma for general `C²`). Likewise, the BS
-PDE is *routed* through the shared drift — `bs_pde_eq_itoDrift2D_minus_rV`:
+What is **deferred** — and why it is *deferral, not absence*: the continuous-time
+partition-limit Itô formula now **exists** as Summit A (`ito_formula_L2_bddDeriv`,
+the L² Itô formula for `C³` functions with *bounded* derivatives), but it does not
+directly reach GBM, whose exponential has *unbounded* derivatives. Bridging the
+engine to GBM needs an unbounded-coefficient lift — a second keystone in the shape
+of `itoIntegralCLM_T_brownian` (clamp-truncation + a martingale-difference L²
+limit `∑ σM_{t_k} ΔB → M_T − 1`), or Summit-C localization. This is **deliberately
+not built**: the operational result it would prove — *the discounted GBM is a
+`Q`-martingale* — is already established directly via the Wald exponential
+(`discountedGBM_isMartingale`; see *Continuous-time first FTAP* below). The lift
+would buy an alternative *derivation route* to a theorem we already hold, not a new
+result, so it is a poor trade against ~400 lines of parallel keystone.
+
+The BS PDE is *routed* through the shared drift — `bs_pde_eq_itoDrift2D_minus_rV`:
 `BS-PDE-LHS = itoDrift2D V_t V_S V_SS (rS) (σS) − rV` is a **polynomial
 identity** — but deriving "drift `= 0`" *from* a no-arbitrage `Q`-martingale is
 deferred (not yet proved). The win is structural: the BS coefficient is one
@@ -179,6 +194,21 @@ directly (`BSCallHyp.of_isPreBrownian`, `bsTerminal_via_brownian`) — the secon
 route into `BSCallHyp`.
 [`Foundations/BSCallHypFromBrownian.lean`](../MathFin/Foundations/BSCallHypFromBrownian.lean)
 
+### Continuous-time first FTAP — discounted price is a `Q`-martingale ✅
+Under the risk-neutral measure, the discounted Black–Scholes price
+`e^{−rt} S_t = S₀ · exp(σ X_t − σ² t / 2)` is a continuous-time martingale w.r.t.
+the Brownian filtration (`discountedGBM_isMartingale`) — the defining property of
+the equivalent martingale measure, and the operational content of the first FTAP
+in continuous time. It falls out *directly* from the **Wald exponential
+martingale** (`IsFilteredPreBrownian.waldExponential_isMartingale`), with no
+stochastic-integral machinery: the `− σ² t / 2` correction is exactly what makes
+the conditional mean of the increment one. This is *why* the engine→GBM
+Itô-representation bridge (see *Geometric Brownian motion* above) is deferral, not
+a gap — the martingale property is already in hand.
+→ *Finance:* the continuous-time EMM property — the discounted price is a fair
+game under `Q`, the bedrock of arbitrage-free pricing.
+[`Foundations/ContinuousFTAP.lean`](../MathFin/Foundations/ContinuousFTAP.lean)
+
 ## Pricing
 
 ### Black–Scholes call formula ✅
@@ -212,8 +242,11 @@ The PDE is shown *algebraically equal* to the Itô-drift balance: the iff
 `bsItoDrift − rV = 0 ↔ BS-PDE` (`bs_pde_from_no_arbitrage`) and the routing
 `BS-PDE-LHS = itoDrift2D (rS) (σS) − rV` (`bs_pde_eq_itoDrift2D_minus_rV`) are
 both polynomial identities (`ring`). What is **deferred**: deriving "drift `= 0`"
-*from* a no-arbitrage `Q`-martingale (the dynamic-hedging derivation proper),
-which needs the continuous-time Itô lemma. So this meets the closed-form route
+*from* a no-arbitrage `Q`-martingale (the dynamic-hedging derivation proper). The
+bounded-derivative, time-*independent* Summit A (`ito_formula_L2_bddDeriv`) does
+not reach it: the genuine derivation needs the *time-dependent* Itô formula (the
+`∂_t`/θ term — `sc-thm-7.1.2`, still `reduced_core`) applied to the BS value
+function, whose `Γ` is unbounded as `S → 0`. So this meets the closed-form route
 at the PDE *coefficient*, with the martingale step still to come.
 [`BlackScholes/PDEFromIto.lean`](../MathFin/BlackScholes/PDEFromIto.lean)
 
