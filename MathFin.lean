@@ -89,6 +89,12 @@ import MathFin.Foundations.ItoFormulaSquaredL2
 -- Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` as a genuine `itoIntegralCLM_T` identity
 -- (the continuous Itô integral's first real consumer)
 import MathFin.Foundations.ItoIntegralBrownian
+-- Summit A: bounded-derivative continuous-time Itô formula in L² (CLM-identified)
+import MathFin.Foundations.WeightedQuadraticVariation
+import MathFin.Foundations.ItoFormulaRemainder
+import MathFin.Foundations.ItoFormulaC2
+import MathFin.Foundations.ItoIntegralRiemannBridge
+import MathFin.Foundations.ItoFormulaCLM
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)

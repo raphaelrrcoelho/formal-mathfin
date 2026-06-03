@@ -182,3 +182,27 @@ machinery.
 
 The biggest remaining audit target is `MathlibLp.lean` (1019 LOC) — its
 relationship to Mathlib's current `Lp` machinery deserves a dedicated pass.
+
+## Summit A — continuous-time Itô formula (2026-06-02)
+
+The bounded-derivative continuous-time L² Itô formula (`ito_formula_L2_bddDeriv`,
+`Foundations/ItoFormulaCLM.lean`) is a five-module chain that reuses, rather than
+reinvents, the Mathlib / BrownianMotion-package machinery:
+
+- **A1** `WeightedQuadraticVariation.lean` — weighted QV via the weak-Markov/Gaussian-
+  kurtosis engine (`memLp_increment_sq_centered_two`, `IsPreBrownian.hasLaw_sub`); the
+  Riemann-sum convergence is built from scratch (Mathlib has no Riemann-sum lemma) with a
+  `Nat.find` partition-cell argument + `tendsto_integral_of_dominated_convergence`.
+- **A2** `ItoFormulaRemainder.lean` + `GaussianMoments.integral_pow6_gaussianReal` — the
+  Gaussian 6th moment reuses Degenne's `centralMoment_two_mul_gaussianReal` (package); the
+  cubic Taylor bound reuses Mathlib's `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`.
+- **A3** `ItoIntegralRiemannBridge.lean` — generalizes `ItoIntegralBrownian.itoIntegralCLM_T_brownian`
+  (integrand `id → φ`), reusing the entire `stepSP` / `simpleAssembly_T` / `itoIntegralCLM_T`
+  CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
+  `aestronglyMeasurable_of_tendsto_ae` / `tendsto_integral_of_dominated_convergence`.
+- **A-core / A4** `ItoFormulaC2.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula`
+  with A1/A2/A3 via uniqueness of L² limits.
+
+**Bridge opportunity:** the one clean upstream candidate remains `IsPiSystem` for
+`ElementaryPredictableSet` (off the Summit-A critical path; see
+`docs/ito-integral-clm-deferred.md`). No reinvention introduced.

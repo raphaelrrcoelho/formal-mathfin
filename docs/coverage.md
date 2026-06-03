@@ -70,6 +70,19 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > machinery not yet in Lean — relabeling *those* up would re-introduce the
 > overclaim.
 
+> **Summit A — continuous-time Itô formula (2026-06-02).** Promoted `sc-thm-7.1.1`
+> (Itô's Formula) `reduced_core`→`full`: the bounded-derivative continuous-time L² Itô
+> formula `f(B_T)−f(B_0) = itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds` is now *derived* from
+> foundational primitives, with the stochastic integral the genuine continuous Itô integral
+> `itoIntegralCLM_T gf'` (the L²-limit of the Riemann–Itô sums). The proof chain (Summit A):
+> `tendsto_weighted_qv` (weighted quadratic variation) + `tendsto_ito_remainder` (vanishing
+> Itô–Taylor remainder) + `itoIntegralCLM_T_of_bdd_cont` (Riemann↔CLM bridge), assembled in
+> `ito_formula_L2_bddDeriv`. Scope: `f ∈ C³` with bounded `f′,f″,f‴` — a faithful but
+> strictly C³-bounded specialization of the C² textbook statement (the gap to unrestricted
+> C² is Summit C localization, not yet formalized). All four Summit-A theorems are
+> `#print axioms`-clean (AxiomAudit-pinned). `coverage_report`: `stochastic_calculus.json`
+> 4→5 full, 7→6 reduced.
+
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 

@@ -44,6 +44,16 @@ The density is the genuine remaining work, harder than the Wiener analogue
    disjointness field) is ~40–60 lines and **belongs upstream in brownian-motion** (like the
    `StochasticInterval` #440 contribution), then consumed here.
 
+   > **Re-verified 2026-05-31 against the current pin (`fa590b1`, = upstream `main` tip).**
+   > The gap **stands**: the package now ships `ElementaryPredictableSet` (structure, with its
+   > disjointness field), `ElementaryPredictableSet.generateFrom_eq_predictable`,
+   > `measurableSet_predictable`, and `indicator`/`coe_indicator` — but **no `IsPiSystem`
+   > lemma** for `{↑S | S : ElementaryPredictableSet 𝓕}` (the actual prerequisite for
+   > `induction_on_inter`). So the ~40–60-line π-system lemma is still the missing piece, and
+   > remains a clean, well-scoped **upstream contribution** to `brownian-motion` (it would
+   > unblock the package's own WIP integral *and* this infinite-horizon CLM at once). The
+   > finite-horizon `[0,T]` CLM does not need it (it uses our own `predictableRect` π-system).
+
 The orthogonality base case is in hand: `⟪simpleProcessL2 (SimpleProcess.indicator S 1), g⟫`
 `= ∫_{S.toSet} g d(trim)` via `coe_indicator` (`uncurry ⇑(indicator S e) = (S:Set).indicator …`)
 + `L2.inner_def` + `integral_indicator`; and `Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`
