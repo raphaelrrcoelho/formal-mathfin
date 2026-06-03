@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
-import MathFin.BlackScholes.Call
+import MathFin.Foundations.StandardNormal
 
 /-!
 # Derivative of the standard normal CDF: `Φ'(x) = ϕ(x)`

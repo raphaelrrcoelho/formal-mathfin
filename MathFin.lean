@@ -31,6 +31,7 @@
 -/
 
 -- Foundations
+import MathFin.Foundations.StandardNormal
 import MathFin.Foundations.GaussianMoments
 import MathFin.Foundations.BivariateGaussian
 import MathFin.Foundations.GaussianCDFDeriv

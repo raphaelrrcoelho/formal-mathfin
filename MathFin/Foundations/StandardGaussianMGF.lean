@@ -4,8 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.Forward
+import MathFin.Foundations.StandardNormal
 
 /-!
 # Standard normal moment-generating function: the one computation in BS
@@ -16,7 +15,7 @@ reduces to a single identity:
   `∫ exp(c · Z) ∂N(0,1) = exp(c² / 2)`.
 
 This is the *moment-generating function (MGF) of the standard normal*. It is
-proved in `Foundations.Forward` as `integral_exp_mul_gaussianPDFReal_univ`
+proved in `Foundations.StandardNormal` as `integral_exp_mul_gaussianPDFReal_univ`
 by completing-the-square (`exp(c · z) · pdf(0, 1, z) = exp(c²/2) · pdf(c, 1, z)`)
 followed by integration of the shifted PDF against Lebesgue.
 

@@ -41,20 +41,6 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
 
-/-! ### Standard-normal moment generating function -/
-
-/-- **MGF of the standard normal**: `∫ z, exp(c·z) · pdf(0,1,z) dz = exp(c²/2)`.
-
-Combines `exp_mul_gaussianPDFReal_zero_one` (completing-the-square) with
-Mathlib's `integral_gaussianPDFReal_eq_one`. -/
-lemma integral_exp_mul_gaussianPDFReal_univ (c : ℝ) :
-    ∫ z, Real.exp (c * z) * gaussianPDFReal 0 1 z = Real.exp (c^2 / 2) := by
-  rw [show (fun z => Real.exp (c * z) * gaussianPDFReal 0 1 z)
-        = (fun z => Real.exp (c^2 / 2) * gaussianPDFReal c 1 z) from
-      funext (exp_mul_gaussianPDFReal_zero_one c),
-      integral_const_mul,
-      integral_gaussianPDFReal_eq_one c (one_ne_zero : (1 : ℝ≥0) ≠ 0), mul_one]
-
 /-! ### Risk-neutral expectation of terminal asset price -/
 
 /-- **No-arbitrage forward price**: under `BSCallHyp`,
