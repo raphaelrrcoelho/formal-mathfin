@@ -33,7 +33,7 @@ python3 -m tools.verify.coverage_report
 ```
 
 Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work; ninth pass: Phase 5 broader mathematical-finance — fixed-income ZCB pricing/yield/duration/convexity, two-asset Markowitz portfolio theory with completing-the-square factorization, CAPM beta + portfolio linearity — 12 theorems extending the project beyond derivatives pricing into fixed income and portfolio theory; tenth pass: Phase 6 quant-risk + N-asset portfolio + bond immunization — Gaussian VaR/CVaR closed forms with affine/scaling identities, bond portfolio rate sensitivity + Redington-style first-order immunization, N-asset Markowitz variance via Finset double sum with diagonal/iid/PSD/two-asset specializations — 15 theorems; eleventh pass: Phase 7 performance / coherent risk / fixed-income depth / static bounds / two-fund separation — Sharpe (√T scaling + scale invariance) + Kelly criterion, gaussian VaR/CVaR coherent risk-measure axioms (translation, homogeneity, monotonicity, gaussian subadditivity via joint-stdev triangle inequality), annuity geometric-series closed form + forward/spot consistency + coupon-bond YTM monotonicity, Phi ≤ 1 + BS call/put price upper bounds + box-spread arbitrage identity, capital market line equation + Sharpe invariance + two-fund decomposition — 23 theorems extending the project into performance measurement, axiomatic risk, and multi-fund portfolio theory; twelfth pass: Phase 8 extended performance / second-order immunization / Asian option inequality — Sortino/Treynor/Information ratios + tracking-error decomposition, second-derivative bond rate sensitivity ∂²P/∂r² = C_P·P + Redington second-order convexity-matching immunization, two-element and equal-weight n-element AM-GM with two-date geometric ≤ arithmetic Asian payoff bound — 13 theorems; **thirteenth pass: Phase 9 credit-risk + strike Greeks + multi-period Kelly** — reduced-form credit spread under constant hazard with survival monotonicity, BS strike-direction derivatives (∂_K bsV, ∂_K bsP, ∂²_K bsV) via magic-identity collapse + put-call parity, multi-period Kelly criterion with myopia + fraction sign analysis — 14 theorems):
-**223 / 251 delivery-ready** (204 full + 19 library wrappers), 28 reduced cores, 0 placeholders.
+**224 / 251 delivery-ready** (205 full + 19 library wrappers), 27 reduced cores, 0 placeholders.
 
 > **Honesty re-audit (2026-05-29).** A dedicated benchmark-`formalization_status`
 > sweep (four adversarial reviewers over all 11 files / 251 theorems, every
@@ -69,6 +69,19 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > either inherently one-line facts (no deeper theorem exists) or gated on
 > machinery not yet in Lean — relabeling *those* up would re-introduce the
 > overclaim.
+
+> **Summit A — continuous-time Itô formula (2026-06-02).** Promoted `sc-thm-7.1.1`
+> (Itô's Formula) `reduced_core`→`full`: the bounded-derivative continuous-time L² Itô
+> formula `f(B_T)−f(B_0) = itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds` is now *derived* from
+> foundational primitives, with the stochastic integral the genuine continuous Itô integral
+> `itoIntegralCLM_T gf'` (the L²-limit of the Riemann–Itô sums). The proof chain (Summit A):
+> `tendsto_weighted_qv` (weighted quadratic variation) + `tendsto_ito_remainder` (vanishing
+> Itô–Taylor remainder) + `itoIntegralCLM_T_of_bdd_cont` (Riemann↔CLM bridge), assembled in
+> `ito_formula_L2_bddDeriv`. Scope: `f ∈ C³` with bounded `f′,f″,f‴` — a faithful but
+> strictly C³-bounded specialization of the C² textbook statement (the gap to unrestricted
+> C² is Summit C localization, not yet formalized). All four Summit-A theorems are
+> `#print axioms`-clean (AxiomAudit-pinned). `coverage_report`: `stochastic_calculus.json`
+> 4→5 full, 7→6 reduced.
 
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.

@@ -9,9 +9,7 @@
       "code": {
         "lean": "import Mathlib.MeasureTheory.Measure.Typeclasses\n\nopen MeasureTheory\n\ntheorem prob_univ {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)\n    [IsProbabilityMeasure μ] : μ Set.univ = 1 :=\n  measure_univ\n\ntheorem prob_empty {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)\n    [IsProbabilityMeasure μ] : μ ∅ = 0 :=\n  measure_empty"
       },
-      "metadata": {
-        "cross_validation_target": true,
-        "difficulty": "foundational",
+      "metadata": {        "difficulty": "foundational",
         "formalization_status": "full",
         "formalization_scope": "Faithful formal statement/proof for the benchmark theorem as encoded, not merely a reduced algebraic check."
       }
@@ -24,9 +22,7 @@
       "code": {
         "lean": "import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic\n\nopen MeasureTheory\nopen scoped MeasureTheory\n\n-- Tower property of conditional expectation: μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] when m₁ ≤ m₂.\n-- (Equality is almost-everywhere via Mathlib's `condexp_condexp_of_le`.)\ntheorem cond_exp_tower {α : Type*} {m₁ m₂ m₀ : MeasurableSpace α} {μ : Measure α}\n    (hm₁₂ : m₁ ≤ m₂) (hm₂ : m₂ ≤ m₀) [SigmaFinite (μ.trim hm₂)]\n    {f : α → ℝ} :\n    μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] :=\n  condexp_condexp_of_le hm₁₂ hm₂"
       },
-      "metadata": {
-        "cross_validation_target": true,
-        "difficulty": "intermediate",
+      "metadata": {        "difficulty": "intermediate",
         "formalization_status": "library_wrapper",
         "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
       }
@@ -39,9 +35,7 @@
       "code": {
         "lean": "import Mathlib\n\nopen ProbabilityTheory MeasureTheory\n\n-- Formal homogeneous Poisson-process specification: zero start, Poisson-distributed\n-- increments with rate λ(t-s), and independence for disjoint increments.\nstructure PoissonProcess {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (N : ℝ → Ω → ℕ) (rate : NNReal) : Prop where\n  zero_at_zero : ∀ᵐ ω ∂μ, N 0 ω = 0\n  poisson_increments : ∀ ⦃s t : ℝ⦄, (hs0 : 0 ≤ s) → (hst : s ≤ t) →\n    Measure.map (fun ω => N t ω - N s ω) μ =\n      poissonMeasure (rate * ⟨t - s, sub_nonneg.mpr hst⟩)\n  independent_increments : ∀ ⦃s t u v : ℝ⦄, 0 ≤ s → s ≤ t → t ≤ u → u ≤ v →\n    IndepFun (fun ω => N t ω - N s ω) (fun ω => N v ω - N u ω) μ\n\nexample {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    {N : ℝ → Ω → ℕ} {rate : NNReal} (hN : PoissonProcess μ N rate)\n    {s t : ℝ} (hs0 : 0 ≤ s) (hst : s ≤ t) :\n    Measure.map (fun ω => N t ω - N s ω) μ =\n      poissonMeasure (rate * ⟨t - s, sub_nonneg.mpr hst⟩) :=\n  hN.poisson_increments hs0 hst"
       },
-      "metadata": {
-        "cross_validation_target": true,
-        "difficulty": "foundational",
+      "metadata": {        "difficulty": "foundational",
         "formalization_status": "full",
         "formalization_scope": "Faithful Lean encoding of a homogeneous Poisson-process specification: zero start, Poisson increments at rate λ(t-s), and independent disjoint increments."
       }

@@ -31,7 +31,7 @@ Modules: `Foundations/*` (Wiener integral, Brownian martingales, quadratic
 variation, Doob L^p convergence, conditional Jensen, FTAP variants, Itô
 drift, pricing kernels), `Binomial/Model`, `Binomial/CRRConvergence`,
 `BlackScholes/Call`, `BlackScholes/Put`, `BlackScholes/Forward`, the
-various `*Greeks`, `MathlibLp`, `WienerIntegralL2`.
+various `*Greeks`, `DoobLpMaximalInequality`, `WienerIntegralL2`.
 
 Proof shape: many tactics, real lemma deployment, multi-page derivations.
 `#print axioms` is clean; nothing imported from outside Mathlib / Degenne's

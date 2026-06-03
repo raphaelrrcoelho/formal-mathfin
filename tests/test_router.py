@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from tools.verify.models import Backend, Domain
@@ -10,6 +11,31 @@ ALLOWED_FORMALIZATION_STATUSES = {
     "library_wrapper",
     "reduced_core",
     "placeholder",
+}
+
+# Word-boundary match so legitimate words ("admitted", "admittedly", "sorries")
+# don't false-positive; the real guarantee is AxiomAudit's build-time `sorryAx`
+# check, this is the cheap textual gate.
+SORRY_ADMIT_RE = re.compile(r"\b(?:sorry|admit)\b")
+
+# A `full` benchmark must not encode its conclusion as an *assumed* field of a
+# `Prop`-valued structure that the proof merely projects — that is the
+# `reduced_core` pattern (the textbook statement bundled as a hypothesis and read
+# off by a structural projection). The lazy match runs `structure` → the first
+# `: Prop where`.
+PROP_STRUCTURE_RE = re.compile(r"\bstructure\b[\s\S]*?:\s*Prop\s+where")
+
+# The only legitimate `full` benchmarks that define a Prop-valued structure are
+# those *defining a stochastic object* as a predicate: its bundled fields are the
+# object's defining properties (not theorems), so projecting/deriving one is
+# faithful for a *definition* benchmark. Any new `full` benchmark bundling a
+# Prop-structure trips the test below, forcing a conscious choice between
+# "genuine definition → allowlist with justification" and "assumed conclusion
+# → reduced_core".
+DEFINITIONAL_FULL_ALLOWLIST = {
+    "bm-def-5.1.1",    # StandardBrownianMotion definition (Saporito Def 5.1.1)
+    "cv-poisson-def",  # PoissonProcess definition
+    "pp-thm-3.3.5",    # PoissonProcess def + derived marginal law N_t ~ Poisson(λt)
 }
 
 PLACEHOLDER_PATTERNS = (
@@ -73,9 +99,27 @@ def test_benchmarks_have_no_dropped_backend_residue() -> None:
 def test_benchmarks_do_not_contain_sorry_or_admit() -> None:
     for path, theorem in _iter_theorems():
         for backend, code in theorem.get("code", {}).items():
-            lowered = code.lower()
-            assert "sorry" not in lowered, (path, theorem["id"], backend)
-            assert "admit" not in lowered, (path, theorem["id"], backend)
+            match = SORRY_ADMIT_RE.search(code.lower())
+            assert match is None, (path, theorem["id"], backend, match and match.group())
+
+
+def test_full_benchmarks_do_not_bundle_assumed_prop_structures() -> None:
+    # Turns the full-vs-reduced_core honesty convention into an enforced
+    # invariant: a `full` benchmark may not bundle its conclusion as an assumed
+    # Prop-structure field unless it is an explicitly-justified definitional
+    # benchmark (see DEFINITIONAL_FULL_ALLOWLIST).
+    for path, theorem in _iter_theorems():
+        status = theorem.get("metadata", {}).get("formalization_status")
+        if status != "full":
+            continue
+        code = "\n".join(theorem.get("code", {}).values())
+        if PROP_STRUCTURE_RE.search(code) and theorem["id"] not in DEFINITIONAL_FULL_ALLOWLIST:
+            raise AssertionError(
+                f"{theorem['id']} ({path}) is `full` but defines a Prop-valued "
+                "structure. If the proof projects an assumed conclusion it must be "
+                "`reduced_core`; if it genuinely defines a stochastic object, add "
+                "it to DEFINITIONAL_FULL_ALLOWLIST with a justification comment."
+            )
 
 
 def test_benchmarks_declare_formalization_status() -> None:

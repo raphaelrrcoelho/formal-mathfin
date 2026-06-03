@@ -4,7 +4,7 @@ Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
 import Mathlib
-import MathFin.Foundations.MathlibLp
+import MathFin.Foundations.DoobLpMaximalInequality
 import BrownianMotion.StochasticIntegral.UniformIntegrable
 import BrownianMotion.StochasticIntegral.DoobLp
 
@@ -51,7 +51,7 @@ surely to an integrable `M_∞`; for `p > 1` it also converges in `L^p`.
 
   Step 5 (`p > 1`, natural-time `L^p` convergence): proved as
   `lp_continuous_martingale_tendsto_eLpNorm_at_naturals`. Doob's `L^p`
-  maximal inequality (`MathlibLp.maximal_ineq_Lp`) bounds the running max;
+  maximal inequality (`MeasureTheory.maximal_ineq_Lp`) bounds the running max;
   monotone convergence (`lintegral_iSup'`) lifts it to the infinite sup
   `S ω := ⨆_k ‖N_k ω‖ₑ`, yielding `MemLp ((S ω).toReal) p`. Degenne's
   `uniformIntegrable_of_dominated_singleton`

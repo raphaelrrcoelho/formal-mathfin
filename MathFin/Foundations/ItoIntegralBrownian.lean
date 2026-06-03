@@ -244,9 +244,11 @@ noncomputable def riemannFn (_hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n
   ∑ k ∈ Finset.range n, B (unifPart T n k) ω
     * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)
 
-omit [IsProbabilityMeasure μ] in
-/-- `‖g‖² = ∫ (g ω)² ∂μ` for `g ∈ Lp 2 μ` (the real `L²` norm-square as an integral). -/
-lemma lp_norm_sq (g : Lp ℝ 2 μ) : ‖g‖ ^ 2 = ∫ ω, (g ω) ^ 2 ∂μ := by
+/-- `‖g‖² = ∫ (g z)² ∂ν` for `g ∈ Lp 2 ν` (the real `L²` norm-square as an integral),
+for any measure `ν`. The single home for this generic `L²` fact; the
+`Riemann↔CLM` bridge re-uses it at a different measure. -/
+lemma lp_norm_sq {α : Type*} {m : MeasurableSpace α} {ν : Measure α} (g : Lp ℝ 2 ν) :
+    ‖g‖ ^ 2 = ∫ z, (g z) ^ 2 ∂ν := by
   have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
   rw [L2.inner_def] at h
   rw [← h]
@@ -347,14 +349,15 @@ lemma memLp_halfD (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
   simp only [Pi.zero_apply] at hω
   rw [hω]; ring
 
-omit [IsProbabilityMeasure μ] in
-/-- The squared `L²`-distance of two `toLp` classes is the integral of the squared difference. -/
-lemma lp_dist_sq {f g : Ω → ℝ} (hf : MemLp f 2 μ) (hg : MemLp g 2 μ) :
-    ‖hf.toLp f - hg.toLp g‖ ^ 2 = ∫ ω, (f ω - g ω) ^ 2 ∂μ := by
+/-- The squared `L²`-distance of two `toLp` classes is the integral of the squared
+difference, for any measure `ν`. -/
+lemma lp_dist_sq {α : Type*} {m : MeasurableSpace α} {ν : Measure α} {f g : α → ℝ}
+    (hf : MemLp f 2 ν) (hg : MemLp g 2 ν) :
+    ‖hf.toLp f - hg.toLp g‖ ^ 2 = ∫ z, (f z - g z) ^ 2 ∂ν := by
   rw [lp_norm_sq]
   refine integral_congr_ae ?_
   filter_upwards [Lp.coeFn_sub (hf.toLp f) (hg.toLp g), hf.coeFn_toLp, hg.coeFn_toLp]
-    with ω h1 h2 h3
+    with z h1 h2 h3
   rw [h1]; simp only [Pi.sub_apply]; rw [h2, h3]
 
 omit [IsProbabilityMeasure μ] in

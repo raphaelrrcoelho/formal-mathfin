@@ -111,9 +111,12 @@ favor of Mathlib equivalents). Phase 30 (Bridge A,
   complete (currently has sorries), our L² Wiener integral could be derived
   as a special case of theirs. **Defer until BM package stabilises.**
 
-### Foundations/MathlibLp.lean (1019 LOC) — LARGEST
+### Foundations/DoobLpMaximalInequality.lean (1019 LOC) — LARGEST
 
-- **Status:** Substantial Mathlib `Lp` extensions. Not audited in detail.
+- **Status:** Original proof of Doob's **strong-type** `Lᵖ` maximal
+  inequality (`MeasureTheory.maximal_ineq_Lp`) — a genuine gap-fill over
+  Mathlib's weak-type form, via ~18 private helpers (layer cake + Fubini +
+  Hölder + truncation/monotone convergence). Axioms-clean.
 - **Bridge opportunity:** This file deserves a dedicated audit pass; out of
   scope for current bridging session. **TODO.**
 
@@ -180,5 +183,30 @@ new pricing entry points (BS, Bachelier, eventually Vasicek/CIR via Itô)
 gain optional BM-based constructors that compose with existing pricing
 machinery.
 
-The biggest remaining audit target is `MathlibLp.lean` (1019 LOC) — its
-relationship to Mathlib's current `Lp` machinery deserves a dedicated pass.
+The largest single foundation file is `DoobLpMaximalInequality.lean` (1019
+LOC) — the original strong-type Doob `Lᵖ` maximal inequality, which consumes
+Mathlib's weak-type `maximal_ineq` and fills in the strong-type form.
+
+## Summit A — continuous-time Itô formula (2026-06-02)
+
+The bounded-derivative continuous-time L² Itô formula (`ito_formula_L2_bddDeriv`,
+`Foundations/ItoFormulaCLM.lean`) is a five-module chain that reuses, rather than
+reinvents, the Mathlib / BrownianMotion-package machinery:
+
+- **A1** `WeightedQuadraticVariation.lean` — weighted QV via the weak-Markov/Gaussian-
+  kurtosis engine (`memLp_increment_sq_centered_two`, `IsPreBrownian.hasLaw_sub`); the
+  Riemann-sum convergence is built from scratch (Mathlib has no Riemann-sum lemma) with a
+  `Nat.find` partition-cell argument + `tendsto_integral_of_dominated_convergence`.
+- **A2** `ItoFormulaRemainder.lean` + `GaussianMoments.integral_pow6_gaussianReal` — the
+  Gaussian 6th moment reuses Degenne's `centralMoment_two_mul_gaussianReal` (package); the
+  cubic Taylor bound reuses Mathlib's `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`.
+- **A3** `ItoIntegralRiemannBridge.lean` — generalizes `ItoIntegralBrownian.itoIntegralCLM_T_brownian`
+  (integrand `id → φ`), reusing the entire `stepSP` / `simpleAssembly_T` / `itoIntegralCLM_T`
+  CLM stack; the trim-L² limit reuses `memLp_uncurry_trim_T` + Mathlib's
+  `aestronglyMeasurable_of_tendsto_ae` / `tendsto_integral_of_dominated_convergence`.
+- **A-core / A4** `ItoFormulaC2.lean` / `ItoFormulaCLM.lean` — assemble `DiscreteIto.discrete_ito_formula`
+  with A1/A2/A3 via uniqueness of L² limits.
+
+**Bridge opportunity:** the one clean upstream candidate remains `IsPiSystem` for
+`ElementaryPredictableSet` (off the Summit-A critical path; see
+`docs/ito-integral-clm-deferred.md`). No reinvention introduced.
