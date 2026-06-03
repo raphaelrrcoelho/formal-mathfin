@@ -257,6 +257,33 @@ the ratio, with effective volatility `√(σ₁² + σ₂² − 2ρσ₁σ₂)`
 `normalizedSpread_hasLaw_std`) — the multivariate corollary.
 [`BlackScholes/MargrabeGrounding.lean`](../MathFin/BlackScholes/MargrabeGrounding.lean)
 
+### Carr–Madan static replication — spanning formula ✅
+Any twice-differentiable payoff `f` decomposes, around a reference level `κ`, as cash, a
+forward, and a static book of out-of-the-money options weighted by its convexity `f''`:
+`f S = f κ + f' κ·(S − κ) + ∫_L^κ f''(K)·(K − S)⁺ dK + ∫_κ^U f''(K)·(S − K)⁺ dK`
+(`carrMadan_spanning`, the honest compact strike-range form). One integration by parts — the
+second-order Taylor remainder `∫_κ^S (S−t) f''(t) dt = f S − f κ − f' κ (S−κ)` — plus a case
+split in which each option leg's positive part either vanishes or reproduces the remainder. The
+log payoff specialises to the **variance-swap log-contract** (`carrMadan_log_spanning`):
+`−1/K²`-weighted strips of OTM puts and calls.
+→ *Finance:* model-free static replication — every European claim is a portfolio of vanilla
+options, and the `1/K²` density is exactly what a variance swap holds.
+[`Foundations/CarrMadan.lean`](../MathFin/Foundations/CarrMadan.lean)
+
+### Binomial martingale representation — market completeness ✅
+On the binomial tree (coin-flip paths, with the node-wise risk-neutral condition
+`q·X^U + (1−q)·X^D = X` — the explicit binomial conditional expectation), every martingale `M`
+is the discrete stochastic integral of a **predictable** hedge against the discounted asset:
+`M_N = M_0 + ∑_{k<N} H_k·(S_{k+1} − S_k)` (`binomial_martingale_representation`). The hedge is
+the node-wise delta `H = ΔM/ΔS`, predictable because it is fixed *before* the next flip is
+revealed; the proof is purely algebraic and pathwise (no measure theory), telescoping the
+one-step identity. The discrete companion of the abstract martingale-transform converse
+(`Foundations/MartingaleTransform.lean`).
+→ *Finance:* **completeness** — the second pillar of the FTAP: every contingent claim is
+replicable by a self-financing strategy, so the risk-neutral price is the *unique* arbitrage-free
+price.
+[`Binomial/MartingaleRepresentation.lean`](../MathFin/Binomial/MartingaleRepresentation.lean)
+
 ## The frontier ⏳
 
 These are stated honestly as **not yet formalized**, gated on Mathlib

@@ -2898,6 +2898,54 @@
       }
     },
     {
+      "id": "mf-carr-madan-spanning",
+      "name": "Carr-Madan Spanning Formula",
+      "description": "Static replication: any C-two payoff f decomposes as cash + forward + a continuum of OTM puts and calls weighted by f'', over a compact strike range [L,U].",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Foundations.CarrMadan\n\nopen MathFin\n\ntheorem carrMadan_spanning_thm {f f' f'' : ℝ → ℝ} {L U κ S : ℝ}\n    (hLκ : L ≤ κ) (hκU : κ ≤ U) (hS : S ∈ Set.Icc L U)\n    (hf : ∀ t ∈ Set.Icc L U, HasDerivAt f (f' t) t)\n    (hf' : ∀ t ∈ Set.Icc L U, HasDerivAt f' (f'' t) t)\n    (hf'' : ContinuousOn f'' (Set.Icc L U)) :\n    f S = f κ + f' κ * (S - κ)\n      + (∫ K in L..κ, f'' K * max (K - S) 0)\n      + (∫ K in κ..U, f'' K * max (S - K) 0) :=\n  MathFin.carrMadan_spanning hLκ hκU hS hf hf' hf''\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Carr-Madan static replication (Carr-Madan 2001)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the spanning formula (compact strike range) via Taylor integral remainder + positive-part case split. Lives in MathFin/Foundations/CarrMadan.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-carr-madan-log-contract",
+      "name": "Carr-Madan Log-Contract Replication",
+      "description": "The log payoff log(S) replicates as a forward plus a strip of OTM options weighted by 1/K-squared -- the variance-swap building block.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Foundations.CarrMadan\n\nopen MathFin\n\ntheorem carrMadan_log_spanning_thm {L U κ S : ℝ} (hL : 0 < L)\n    (hLκ : L ≤ κ) (hκU : κ ≤ U) (hS : S ∈ Set.Icc L U) :\n    Real.log S = Real.log κ + κ⁻¹ * (S - κ)\n      + (∫ K in L..κ, -(K ^ 2)⁻¹ * max (K - S) 0)\n      + (∫ K in κ..U, -(K ^ 2)⁻¹ * max (S - K) 0) :=\n  MathFin.carrMadan_log_spanning hL hLκ hκU hS\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Variance-swap log-contract replication (Carr-Madan 2001; Demeterfi-Derman-Kamal 1999)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the log payoff's Carr-Madan strip, specialising carrMadan_spanning to f = log. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-binomial-martingale-representation",
+      "name": "Binomial Martingale Representation (Completeness)",
+      "description": "On the binomial tree, every martingale is the discrete stochastic integral of a predictable hedge against the discounted asset -- market completeness, the second pillar of the FTAP.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Binomial.MartingaleRepresentation\n\nopen MathFin\n\ntheorem binomial_martingale_representation_thm {q : ℝ} {M S : ℕ → (ℕ → Bool) → ℝ}\n    (hM_adapt : ∀ n, MathFin.PathAdaptedAt n (M n)) (hS_adapt : ∀ n, MathFin.PathAdaptedAt n (S n))\n    (hM_mart : ∀ n ω, q * M (n + 1) (Function.update ω n true) + (1 - q) * M (n + 1) (Function.update ω n false) = M n ω)\n    (hS_mart : ∀ n ω, q * S (n + 1) (Function.update ω n true) + (1 - q) * S (n + 1) (Function.update ω n false) = S n ω)\n    (hS_nondeg : ∀ n ω, S (n + 1) (Function.update ω n true) ≠ S (n + 1) (Function.update ω n false)) :\n    ∃ H : ℕ → (ℕ → Bool) → ℝ, (∀ n, MathFin.PathAdaptedAt n (H n)) ∧\n      ∀ N ω, M N ω = M 0 ω + ∑ k ∈ Finset.range N, H k ω * (S (k + 1) ω - S k ω) :=\n  MathFin.binomial_martingale_representation hM_adapt hS_adapt hM_mart hS_mart hS_nondeg\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Discrete martingale representation / market completeness (Harrison-Pliska 1981)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: pathwise node-wise representation, hedge = (delta M)/(delta S), telescoped. Lives in MathFin/Binomial/MartingaleRepresentation.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-second-FTAP-single-period",
       "name": "Second FTAP (Single-Period Binomial)",
       "description": "Under no-arbitrage, the risk-neutral measure in the single-period binomial is uniquely determined by the martingale condition.",

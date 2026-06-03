@@ -156,6 +156,7 @@ import MathFin.Binomial.American
 import MathFin.Binomial.CRRConvergence
 import MathFin.Binomial.DriftLimit
 import MathFin.Binomial.Bermudan
+import MathFin.Binomial.MartingaleRepresentation
 import MathFin.Binomial.AmericanCallNoDividend
 -- Phase 13 additions:
 import MathFin.Binomial.Girsanov

@@ -371,4 +371,17 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ito_formula_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_L2_bddDeriv
 
+/-! ## Carr–Madan static replication / spanning formula -/
+
+/-- info: 'MathFin.carrMadan_spanning' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.carrMadan_spanning
+
+/-- info: 'MathFin.carrMadan_log_spanning' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.carrMadan_log_spanning
+
+/-! ## Binomial martingale representation (market completeness) -/
+
+/-- info: 'MathFin.binomial_martingale_representation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.binomial_martingale_representation
+
 end MathFin.AxiomAudit
