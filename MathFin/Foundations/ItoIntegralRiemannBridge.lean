@@ -30,6 +30,7 @@ open ItoIntegralL2 ItoIntegralCLM ItoIsometryAdapted ItoIntegralBrownian
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
 
+omit mΩ in
 /-- `φ(B u)` is adapted at any later time `t₀ ≥ u`, for measurable `φ`. -/
 lemma adaptedAt_phi_eval {φ : ℝ → ℝ} (hφ : Measurable φ) {t₀ u : ℝ≥0} (hu : u ≤ t₀) :
     AdaptedAt B t₀ (fun ω => φ (B u ω)) :=
