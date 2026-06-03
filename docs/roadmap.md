@@ -21,8 +21,9 @@ math library":
 
 Our library is at *medium coverage + partial structural depth + no
 original mathematics*. The third tier is out of reach: original quant-
-finance mathematics either needs Mathlib's stochastic calculus (Itô,
-Girsanov continuous-time, BSDEs — all upstream-gated) or is research-
+finance mathematics either needs a fuller stochastic-calculus layer
+(unrestricted Itô, continuous-time Girsanov, BSDEs — beyond the `[0,T]`
+L² slice the library builds) or is research-
 grade work (Föllmer-Schied dual, robust price bounds under model
 uncertainty, Lee 2004 moment formula at full rigor).
 
@@ -36,13 +37,16 @@ round should pursue.
   change what the library *is*. The proof shape (`unfold; field_simp;
   ring`) tells the reader what the additions are.
 
-* **Coverage gaps are mostly upstream-gated.** The missing items —
-  Itô calculus, Margrabe via change of numéraire, Heston, local vol,
-  SABR — need Mathlib's stochastic-calculus layer, which isn't there
-  yet. We can't fix that with more `field_simp`.
+* **Coverage gaps are mostly upstream-gated.** The remaining missing
+  items — Heston, local vol, SABR, continuous-time Girsanov, BSDEs —
+  need a fuller stochastic-calculus layer than the `[0,T]` L² Itô
+  integral the library builds for itself. We can't fix that with more
+  `field_simp`. (Itô's formula and Margrabe have since been delivered —
+  see the phase log below.)
 
-* **The slop ratio sharpens with more breadth.** Of the 204 "full"
-  derivations, roughly 30 are genuinely non-trivial (Doob L^p,
+* **The slop ratio sharpens with more breadth.** Of the 205 "full"
+  derivations, roughly 30 are genuinely non-trivial (the continuous-time
+  L² Itô formula, Doob L^p,
   Wiener L² isometry, joint-stdev triangle, Kelly FOC, Sharpe √T,
   second-order immunization, Asian AM-GM, Merton-tree one-period
   dominance, etc.). The other ~180 are closed-form verifications.
@@ -156,10 +160,13 @@ If the project continues beyond the next round:
 
 Honest scope statement:
 
-* **Continuous-time Itô calculus**: Mathlib does not ship the Itô
-  integral at the current pin. Until it does, results that *require*
-  it (Itô's lemma, Girsanov continuous-time, Margrabe, Heston, local
-  volatility, SABR, BSDEs) are out of reach.
+* **Continuous-time Itô calculus**: Mathlib does not ship a general Itô
+  integral at the current pin, so the library builds its own L²-adapted
+  integral on `[0,T]` (`itoIntegralCLM_T`) and the bounded-derivative L²
+  Itô formula on top of it (`ito_formula_L2_bddDeriv`); Margrabe is
+  delivered via change of numéraire. Still out of reach without a fuller
+  (localized / unbounded) stochastic-calculus layer: unrestricted-`C²`
+  Itô, continuous-time Girsanov, Heston, local volatility, SABR, BSDEs.
 
 * **Continuous Poisson processes**: Mathlib has the discrete
   `PoissonPMF`; continuous-time Poisson processes (interarrival

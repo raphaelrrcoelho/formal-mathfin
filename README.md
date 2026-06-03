@@ -27,18 +27,21 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 |  | count |
 |---|---:|
 | total theorems | 251 |
-| **full derivations** | **204** |
+| **full derivations** | **205** |
 | library wrappers | 19 |
-| reduced cores | 28 |
+| reduced cores | 27 |
 | placeholders | **0** |
 
-**223 of the 251 are delivery-ready** (`full` + `library_wrapper`); the 28
+**224 of the 251 are delivery-ready** (`full` + `library_wrapper`); the 27
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is gated on upstream Mathlib (see *What's not
 done*).
 
-Every `full` derivation is `#print axioms`-clean: it depends only on the
-three Mathlib standard axioms `[propext, Classical.choice, Quot.sound]`.
+Every `full` derivation depends only on the three Mathlib standard axioms
+`[propext, Classical.choice, Quot.sound]` — there is no `sorry` and no
+project-local axiom anywhere in the library. For the load-bearing derivations
+(~90 declarations) this is `#print axioms`-pinned as a build invariant in
+`MathFin/AxiomAudit.lean`.
 
 ## At a glance
 
@@ -123,13 +126,14 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-28 of the 251 theorems are `reduced_core` — an honest special case or
+27 of the 251 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is gated on
 upstream Mathlib. By area:
 
-- **Itô calculus** (`stochastic_calculus`, 7): the path-wise Itô lemma,
-  time-dependent Itô, Lévy's martingale characterisation, SDE existence +
-  uniqueness.
+- **Itô calculus** (`stochastic_calculus`, 6): time-dependent Itô, the
+  two-dimensional Itô formula, quadratic variation of an Itô process, Lévy's
+  martingale characterisation, SDE existence + uniqueness, and Girsanov. (The
+  one-dimensional path-wise Itô lemma itself is now `full` — see below.)
 - **Risk / portfolio / pricing cores** (`mathematical_finance`, 6): e.g.
   Rockafellar-Uryasev, the American discounted-price supermartingale, the
   N-asset PSD variance bound — algebraic or structural cores rather than the
@@ -144,9 +148,16 @@ upstream Mathlib. By area:
 
 The continuous-time L²-adapted **Itô integral itself is built** — the bounded
 linear map `itoIntegralCLM_T` on `[0,T]` (`Foundations/ItoIntegralCLM.lean`,
-axioms-clean, with `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` as its first consumer). What
-remains gated is the downstream path-wise Itô lemma and the SDE / Lévy layer
-that builds on it. See [`docs/roadmap.md`](docs/roadmap.md).
+axioms-clean, with `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` as its first consumer) — and on
+top of it the **continuous-time L² Itô formula** `f(B_T)−f(B_0) =
+itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds` is now `full`
+(`Foundations/ItoFormulaCLM.lean`, `ito_formula_L2_bddDeriv`), derived from
+primitives (weighted quadratic variation + vanishing Itô–Taylor remainder +
+Riemann↔CLM bridge) and AxiomAudit-pinned. Its scope is `f ∈ C³` with bounded
+`f′,f″,f‴`; the gap to the unrestricted-`C²` textbook statement is a
+localization step (Summit C), not yet formalized. What remains gated beyond
+that is the SDE / Lévy layer that builds on it. See
+[`docs/roadmap.md`](docs/roadmap.md).
 
 ## Related upstream contributions
 
