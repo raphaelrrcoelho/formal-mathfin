@@ -580,7 +580,7 @@
     {
       "id": "mf-american-intrinsic-bound",
       "name": "American Option ≥ Intrinsic",
-      "description": "For every n, S: g(S) ≤ americanPrice u d r g n S. The American option is always worth at least its immediate exercise value. Direct from the Bellman max.",
+      "description": "Along every coin-flip path the discounted intrinsic payoff is dominated by the discounted American value: e^(−rk)·g(S_k(ω)) ≤ e^(−rk)·americanPrice(N−k, S_k(ω)) — the dominance clause of the Snell-envelope characterization at path level, routed through the identification theorem rather than the scalar Bellman max.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_intrinsic_le_americanPrice_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (N k : ℕ) (ω : ℕ → Bool) :\n    Real.exp (-r * k) * g (MathFin.spotPath S₀ u d k ω)\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_intrinsic_le_americanPrice u d r g S₀ N k ω\n"
@@ -596,7 +596,7 @@
     {
       "id": "mf-american-supermartingale",
       "name": "American Value Process is a Supermartingale (Snell Envelope)",
-      "description": "The one-period continuation value at V_{n+1} is bounded above by V_{n+1} = max(g, continuation), by le_max_right. This is the Bellman-max dominance; it is NOT the measure-theoretic supermartingale property (no conditional expectation / filtration statement is formalized).",
+      "description": "The discounted American value process X_k(ω) = e^(−rk)·americanPrice(N−k, S_k(ω)) on coin-flip paths is a supermartingale under the risk-neutral node average: q·X_{k+1}(up) + (1−q)·X_{k+1}(down) ≤ X_k — the conditional-expectation form E[X_{k+1}|ℱ_k] ≤ X_k on the finite tree, via the identification snellAux = e^(−rk)·americanPrice: the discounted American value is the Snell envelope of the discounted payoff.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_americanPrice_supermartingale_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) {N k : ℕ} (hk : k < N) (ω : ℕ → Bool) :\n    MathFin.crrUpProb u d r * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k true)))\n      + (1 - MathFin.crrUpProb u d r) * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k false)))\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_americanPrice_supermartingale u d r g S₀ hk ω\n"
@@ -1251,8 +1251,8 @@
     },
     {
       "id": "mf-markowitz-n-psd",
-      "name": "N-Asset Portfolio Variance Non-Negativity from PSD Kernel",
-      "description": "If the covariance kernel σ defines a non-negative quadratic form (∀ v, ∑∑ v_i v_j σ_ij ≥ 0), then portfolio variance is non-negative for any weights.",
+      "name": "N-Asset Covariance Kernel PSD: Portfolio Variance Non-Negativity",
+      "description": "PSD derived, not assumed: the Markowitz quadratic form at the genuine covariance kernel σ_ij = cov(R_i, R_j) of square-integrable returns equals Var[∑ wᵢ • Rᵢ] ≥ 0 — the self-dot variance identity, via Mathlib's variance_sum' with covariance_smul_left/right peeling the weights — discharging the PSD hypothesis of portfolioVarN_nonneg_of_psd from first principles.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport MathFin.Portfolio.CovariancePSD\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\ntheorem markowitz_covariance_psd_nonneg_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsFiniteMeasure μ] {ι : Type*} (s : Finset ι) (w : ι → ℝ)\n    (R : ι → Ω → ℝ) (hR : ∀ i ∈ s, MeasureTheory.MemLp (R i) 2 μ) :\n    0 ≤ MathFin.portfolioVarN s w (fun i j => cov[R i, R j; μ]) :=\n  MathFin.portfolioVarN_covariance_nonneg s w R hR\n"
@@ -1262,7 +1262,7 @@
         "reference": "Positive-semidefinite covariance (Bodie-Kane-Marcus Ch 7; Markowitz 1952)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the PSD property is DERIVED, not assumed. portfolioVarN_covariance_nonneg (Portfolio/CovariancePSD.lean) proves the Markowitz quadratic form with the genuine covariance kernel cov(R_i, R_j) of L2 random returns equals Var[sum w_i R_i] >= 0 — the self-dot variance identity, via Mathlib's covariance bilinearity (covariance_sum_left'/right', covariance_smul_*, covariance_self). Replaces the former conclusion-in-hypothesis form (PSD assumed, instantiated at w). Axioms-clean."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the PSD property is DERIVED, not assumed. portfolioVarN_covariance_nonneg (Portfolio/CovariancePSD.lean) proves the Markowitz quadratic form with the genuine covariance kernel cov(R_i, R_j) of L2 random returns equals Var[sum w_i R_i] >= 0 — the self-dot variance identity, via Mathlib's variance_sum' (variance of a sum = double sum of covariances) with covariance_smul_left/right peeling the weights. Replaces the former conclusion-in-hypothesis form (PSD assumed, instantiated at w). Axioms-clean."
       }
     },
     {
@@ -2596,7 +2596,7 @@
     {
       "id": "mf-cvar-rockafellar-uryasev",
       "name": "Gaussian CVaR: Rockafellar-Uryasev Variational Characterization",
-      "description": "Gaussian CVaR rewrites as CVaR_α = VaR_α + σ · (ϕ(z)/(1-α) - z), the additive form. This is the algebraic identity only; it is NOT the Rockafellar-Uryasev variational theorem CVaR = inf_c [c + (1/(1-α))·E[(L-c)⁺]] (no infimum / E[(L-c)⁺] is formalized), which it merely motivates.",
+      "description": "The Rockafellar–Uryasev variational theorem for the Gaussian loss L = μ + σ·Z: CVaR_α is the least value of the objective c ↦ c + E[(L−c)⁺]/(1−α), attained at c = VaR_α (IsLeast, gaussianCVaR_isLeast_ruObjective). Minimality by the pointwise tail certificate (L−c)⁺ ≥ (L−c)·𝟙_{Z>z}; the additive form CVaR = VaR + σ·(ϕ(z)/(1−α) − z) is the objective evaluated at the minimizer.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport MathFin.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem gaussian_cvar_rockafellar_uryasev_thm (μ σ z α : ℝ) (hσ : 0 < σ)\n    (hzα : MathFin.Phi z = α) (hα1 : α < 1) :\n    IsLeast (Set.range (MathFin.ruObjective μ σ α)) (MathFin.gaussianCVaR μ σ z α) :=\n  MathFin.gaussianCVaR_isLeast_ruObjective μ σ z α hσ hzα hα1\n"
@@ -2724,7 +2724,7 @@
     {
       "id": "mf-kmv-survival-Phi-d2",
       "name": "KMV-Merton Survival Probability = Φ(d_2^KMV)",
-      "description": "1 − kmvPD = Φ(d_2^KMV): the algebraic normal-CDF symmetry 1 − Φ(−x) = Φ(x). This is the algebraic identity only — NOT the probabilistic claim that 1 − kmvPD equals the survival probability Q({V_T > F}); that genuine probabilistic content is mf-kmv-merton-pd.",
+      "description": "The probabilistic survival statement of the KMV–Merton model: under risk-neutral lognormal firm-value dynamics, Q({V_T > F}).toReal = Φ(DD) — the measure of the no-default event equals the standard-normal CDF of the distance to default (survival_probability_eq_Phi_distanceToDefault), routed through the lognormal tail computation riskNeutralProb_S_T_gt_K and kmvDistanceToDefault_eq_bsd2.",
       "domain": "mathematical_finance",
       "code": {
         "lean": "import Mathlib\nimport MathFin.FixedIncome.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_survival_probability_eq_Phi_dd_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal =\n      Phi (MathFin.kmvDistanceToDefault V_0 F r σ_V T) :=\n  MathFin.survival_probability_eq_Phi_distanceToDefault hV hF h\n"
@@ -2980,17 +2980,17 @@
     {
       "id": "mf-newton-raphson-fixed-at-root",
       "name": "Newton-Raphson Iteration: Local Quadratic Convergence",
-      "description": "If f(σ) = 0, then the Newton iteration σ_{n+1} = σ_n - f(σ_n)/f'(σ_n) leaves σ unchanged.",
+      "description": "Local quadratic convergence of Newton–Raphson at a simple root: one step contracts quadratically at the sharp Newton–Kantorovich constant, |newtonStep f f' x − r| ≤ (L/(2m))·(x − r)², under HasDerivAt f + L-Lipschitz f' + |f'| ≥ m > 0 near r; in the basin |x₀ − r| ≤ δ with L·δ ≤ m the error halves each step, giving (1/2)ⁿ geometric decay and newtonSeq → r.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.BlackScholes.NewtonConvergence\n\nopen Filter Topology MathFin\n\ntheorem newton_quadratic_error_and_tendsto_thm {f f' : ℝ → ℝ} {r δ m L x₀ : ℝ}\n    (hroot : f r = 0) (hm0 : 0 < m) (hL : 0 ≤ L)\n    (hd : ∀ y ∈ Set.Icc (r - δ) (r + δ), HasDerivAt f (f' y) y)\n    (hlip : ∀ y ∈ Set.Icc (r - δ) (r + δ), ∀ w ∈ Set.Icc (r - δ) (r + δ),\n      |f' y - f' w| ≤ L * |y - w|)\n    (hm : ∀ y ∈ Set.Icc (r - δ) (r + δ), m ≤ |f' y|)\n    (hx₀ : |x₀ - r| ≤ δ) (hbasin : L * δ ≤ m / 2) :\n    (∀ x ∈ Set.Icc (r - δ) (r + δ),\n        |MathFin.newtonStep f f' x - r| ≤ L / m * (x - r) ^ 2) ∧\n      Tendsto (MathFin.newtonSeq f f' x₀) atTop (𝓝 r) :=\n  ⟨fun _ hx => MathFin.newtonStep_quadratic_error hroot hm0 hL hd hlip hm hx,\n    MathFin.newtonSeq_tendsto_root hroot hm0 hL hd hlip hm hx₀ hbasin⟩\n"
+        "lean": "import Mathlib\nimport MathFin.BlackScholes.NewtonConvergence\n\nopen Filter Topology MathFin\n\ntheorem newton_quadratic_error_and_tendsto_thm {f f' : ℝ → ℝ} {r δ m L x₀ : ℝ}\n    (hroot : f r = 0) (hm0 : 0 < m) (hL : 0 ≤ L)\n    (hd : ∀ y ∈ Set.Icc (r - δ) (r + δ), HasDerivAt f (f' y) y)\n    (hlip : ∀ y ∈ Set.Icc (r - δ) (r + δ), ∀ w ∈ Set.Icc (r - δ) (r + δ),\n      |f' y - f' w| ≤ L * |y - w|)\n    (hm : ∀ y ∈ Set.Icc (r - δ) (r + δ), m ≤ |f' y|)\n    (hx₀ : |x₀ - r| ≤ δ) (hbasin : L * δ ≤ m) :\n    (∀ x ∈ Set.Icc (r - δ) (r + δ),\n        |MathFin.newtonStep f f' x - r| ≤ L / (2 * m) * (x - r) ^ 2) ∧\n      Tendsto (MathFin.newtonSeq f f' x₀) atTop (𝓝 r) :=\n  ⟨fun _ hx => MathFin.newtonStep_quadratic_error hroot hm0 hL hd hlip hm hx,\n    MathFin.newtonSeq_tendsto_root hroot hm0 hL hd hlip hm hx₀ hbasin⟩\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Newton-Raphson root-finding (classical numerical analysis)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): genuine Newton-Raphson convergence theory replacing the definitional fixed-point unfold. (i) One-step quadratic error |newtonStep x - r| <= (L/m)(x-r)^2 under HasDerivAt + L-Lipschitz f' + |f'| >= m > 0 on [r-d, r+d] — proved via one mean-value bound applied to the linearization-subtracted auxiliary w ↦ f w - f'(x)w on the segment (no second derivative); (ii) basin convergence: |x0 - r| <= d with L*d <= m/2 gives the halving invariant and (1/2)^n geometric decay, hence newtonSeq → r (BlackScholes/NewtonConvergence.lean). In the implied-vol application f' = vega > 0 (bsV_vega_pos) discharges the simple-root hypothesis. The old fixed-point identity remains as the trivial lemma newtonStep_fixed_at_root in ImpliedVolatility.lean. Axioms-clean."
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04, sharpened same day): genuine Newton-Raphson convergence theory replacing the definitional fixed-point unfold. (i) One-step quadratic error |newtonStep x - r| <= (L/(2m))(x-r)^2 — the sharp Newton-Kantorovich constant — under HasDerivAt + L-Lipschitz f' + |f'| >= m > 0 on [r-d, r+d], proved via the integral form of the Taylor remainder: the FTC for the linearization-subtracted auxiliary w ↦ f w - f'(x)w turns the remainder into ∫(f'(t) - f'(x))dt, and the Lipschitz bound, linear in |t - x|, integrates to (L/2)(x-r)^2 (no second derivative anywhere); (ii) basin convergence: |x0 - r| <= d with L*d <= m gives the halving invariant and (1/2)^n geometric decay, hence newtonSeq → r (BlackScholes/NewtonConvergence.lean). In the implied-vol application f' = vega > 0 (bsV_vega_pos) discharges the simple-root hypothesis. The old fixed-point identity remains as the trivial lemma newtonStep_fixed_at_root in ImpliedVolatility.lean. Axioms-clean."
       }
     },
     {

@@ -72,7 +72,7 @@ theorem nthMoment_terminal
     intro z
     unfold bsTerminal
     rw [mul_pow, ← Real.exp_nat_mul]
-    congr 1
+    congr 2
     rw [α_def, β_def]; ring
   -- HasLaw transfer + change to `pdf`-against-Lebesgue form.
   have h_meas : Measurable fun z : ℝ => (bsTerminal S_0 r σ T z)^n := by

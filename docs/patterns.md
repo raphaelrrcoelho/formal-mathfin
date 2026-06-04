@@ -441,18 +441,22 @@ and at `c = VaR` the positive part vanishes exactly off the tail — equality.
 The certificate *is* the reason the minimum sits at VaR; a `deriv`-based proof
 would hide it.
 
-### Linearization-subtracted mean value bound
+### Linearization-subtracted integral remainder
 
-Second-order Taylor control from a *first-order* tool: to bound
-`f y − f x − f'(x)(y − x)`, apply the plain MVT bound
-(`Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`) to the auxiliary
+Second-order Taylor control from *first-order* tools, at the sharp constant:
+to bound `f y − f x − f'(x)(y − x)`, apply the FTC
+(`intervalIntegral.integral_eq_sub_of_hasDerivAt`) to the auxiliary
 `g w := f w − f'(x)·w` on the segment — its derivative is `f' w − f'(x)`,
-which a Lipschitz hypothesis on `f'` bounds by `L·|y − x|`. Total:
-`|remainder| ≤ L·|y − x|²` with no `ContDiff`, no `iteratedDeriv`, no second
-derivative anywhere.
+which a Lipschitz hypothesis on `f'` bounds by `L·|w − x|`, *linear* in the
+distance to `x`. Integrating the linear bound gives `(L/2)·|y − x|²` — the
+sharp Newton–Kantorovich constant — with no `ContDiff`, no `iteratedDeriv`,
+no second derivative anywhere. (The uniform mean-value bound
+`Convex.norm_image_sub_le_of_norm_hasDerivWithin_le` proves the same shape
+but doubles the constant: the derivative deviation *vanishes at* `x`, and
+only the integral sees that.)
 
 Concrete: `newtonStep_quadratic_error` (`BlackScholes/NewtonConvergence.lean`)
-— the whole "Newton is quadratic" content is one application of this plus the
+— the whole "Newton is quadratic at `L/(2m)`" content is this plus the
 error–times–derivative identity `(x⁺ − r)·f'(x) = f'(x)(x − r) − f(x)`.
 
 ### Inequality = equality + monotone part (decomposition transport)

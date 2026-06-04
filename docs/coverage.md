@@ -133,14 +133,15 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > absent from Mathlib, derived as *optional sampling equality + monotone
 > compensator* through the Doob decomposition;
 > `mf-markowitz-n-psd` — PSD **derived** from genuine L² random returns via the
-> self-dot variance identity on Mathlib's covariance API
+> self-dot variance identity, consuming Mathlib's `variance_sum'`
 > (`Portfolio/CovariancePSD.lean`);
 > `mf-cvar-rockafellar-uryasev` — the genuine **Rockafellar–Uryasev variational
 > theorem** (`IsLeast`) for the Gaussian loss, minimality by the pointwise tail
 > certificate (`RiskMeasures/RockafellarUryasev.lean`, which previously recorded
 > only the additive identity and explicitly deferred this);
 > `mf-newton-raphson-fixed-at-root` — genuine **local quadratic convergence**
-> `(L/m)·e²` + basin convergence of the Newton iterates
+> at the sharp Newton–Kantorovich constant `(L/(2m))·e²` (integral form of the
+> Taylor remainder) + basin convergence of the Newton iterates
 > (`BlackScholes/NewtonConvergence.lean`);
 > `mf-kmv-survival-Phi-d2` — re-pointed at the probabilistic survival statement
 > `Q(V_T > F) = Φ(DD)` through the lognormal tail;
@@ -153,6 +154,26 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > average, which on a finite tree it *is* — same pathwise idiom as
 > `Binomial/MartingaleRepresentation.lean`).
 > All new load-bearing theorems are AxiomAudit-pinned.
+
+> **Post-audit values sweep (2026-06-04, follow-up).** A second adversarial
+> audit (four fresh reviewers over the Path-1 commit) confirmed the
+> load-bearing layer — counts, statuses, scope notes, axiom pins, and the
+> absence of all five headline theorems from Mathlib/BrownianMotion all
+> re-verified independently — and surfaced finishing work, applied in full:
+> `submartingale_optional_sampling` now consumes Mathlib's
+> `Submartingale.monotone_predictablePart` (the local helper had re-derived it
+> verbatim) and documents the BrownianMotion package's `sorry`-stubbed `⊓`-form
+> sibling as an upstream-donation candidate;
+> `portfolioVarN_covariance_eq_variance` consumes `variance_sum'` instead of
+> re-tracing its bilinearity chain; **Newton sharpened to the textbook
+> constant** — `(L/(2m))·e²` via the integral form of the Taylor remainder,
+> basin relaxed to `L·δ ≤ m` (the uniform mean-value bound had silently cost a
+> factor 2); two dead `have`s and an orphaned `@[simp]` lemma removed; the
+> seven upgraded entries' stale `description` fields rewritten (four still
+> asserted pre-upgrade "NOT the stronger result" disclaimers); and the build
+> log swept clean — six `ring`-falls-back-to-`ring_nf` info sites and one
+> `simpa` lint fixed at root (`congr`/`convert` depth bumps so `ring` sees a
+> genuine ring goal instead of `exp A = exp B`).
 
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.

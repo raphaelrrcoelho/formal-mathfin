@@ -129,9 +129,7 @@ lemma integral_id_mul_gaussianPDFReal_Ioi (a : ℝ) :
     refine Tendsto.neg ?_
     -- gaussianPDFReal 0 1 z = (sqrt(2π))⁻¹ · exp(-z²/2). Both factors handled separately.
     have h_atBot : Tendsto (fun z : ℝ => -(z - 0)^2/2) atTop atBot := by
-      have h_sq : Tendsto (fun z : ℝ => z^2) atTop atTop :=
-        tendsto_pow_atTop two_ne_zero
-      have h_sub : Tendsto (fun z : ℝ => (z - 0)^2) atTop atTop := by simpa using h_sq
+      have h_sub : Tendsto (fun z : ℝ => (z - 0)^2) atTop atTop := by simp
       have h_neg : Tendsto (fun z : ℝ => -((z - 0)^2)) atTop atBot :=
         tendsto_neg_atTop_atBot.comp h_sub
       have h_div := h_neg.atBot_div_const (by norm_num : (0 : ℝ) < 2)

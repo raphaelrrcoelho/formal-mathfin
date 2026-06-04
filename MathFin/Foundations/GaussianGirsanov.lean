@@ -57,7 +57,7 @@ theorem gaussian_esscher_pdf (c x : ℝ) :
   simp only [gaussianPDFReal, NNReal.coe_one, mul_one, sub_zero]
   rw [← mul_assoc, mul_comm (Real.exp (c * x - c ^ 2 / 2)) _, mul_assoc,
       ← Real.exp_add]
-  congr 1
+  congr 2
   ring
 
 /-- **Gaussian Esscher change of measure** (measure level): tilting the

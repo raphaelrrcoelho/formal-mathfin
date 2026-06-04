@@ -94,7 +94,7 @@ theorem acceptableUnderUtility_convex
       u (W + (α * X i + (1 - α) * Y i)) := by
     intro i _
     have h := h_concave (W + X i) (W + Y i) α hα hα1
-    convert h using 1
+    convert h using 2
     ring
   have h_p_mult : ∀ i ∈ s,
       p i * (α * u (W + X i) + (1 - α) * u (W + Y i)) ≤

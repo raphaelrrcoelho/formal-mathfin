@@ -138,10 +138,6 @@ variable {q : ℝ} {Z U : ℕ → (ℕ → Bool) → ℝ}
 noncomputable def spotPath (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) : ℝ :=
   S₀ * ∏ i ∈ Finset.range k, (if ω i then u else d)
 
-@[simp]
-lemma spotPath_zero (S₀ u d : ℝ) (ω : ℕ → Bool) : spotPath S₀ u d 0 ω = S₀ := by
-  simp [spotPath]
-
 /-- One-step spot recursion along the `k`-th flip. -/
 lemma spotPath_update_succ (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) (b : Bool) :
     spotPath S₀ u d (k + 1) (Function.update ω k b)

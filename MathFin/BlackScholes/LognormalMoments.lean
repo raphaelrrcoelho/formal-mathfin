@@ -53,7 +53,7 @@ theorem secondMoment_terminal
   --   ∫ ... = S_0^2 * exp((↑(2:ℕ))·r·T + (↑(2:ℕ))·((↑(2:ℕ))-1)/2 · σ²·T)
   -- which equals S_0^2 * exp(2·r·T + σ²·T) after pushing the cast and
   -- simplifying `2·(2-1)/2 = 1`.
-  convert h_general using 2
+  convert h_general using 3
   push_cast
   ring
 

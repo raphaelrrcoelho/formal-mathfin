@@ -563,7 +563,7 @@ private lemma integral_shift_eq_feynmanU (g : ℝ → ℝ) (t x : ℝ) :
   rw [feynmanU]
   have h_fun_eq : (fun z => g z * heatKernel t (z - x))
         = (fun z => g (x + (z - x)) * heatKernel t (z - x)) := by
-    funext z; congr 1; ring
+    funext z; congr 2; ring
   rw [h_fun_eq]
   exact (MeasureTheory.integral_sub_right_eq_self
     (fun z => g (x + z) * heatKernel t z) x).symm

@@ -33,7 +33,7 @@ open Real ProbabilityTheory
 lemma gaussianPDFReal_zero_one_neg (z : ℝ) :
     gaussianPDFReal 0 1 (-z) = gaussianPDFReal 0 1 z := by
   unfold gaussianPDFReal
-  congr 1
+  congr 2
   ring
 
 /-- **Put-price convexity in `K`**: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)`,

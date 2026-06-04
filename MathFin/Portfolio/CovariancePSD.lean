@@ -14,9 +14,10 @@ hypothesis on the kernel. This file discharges that hypothesis from first
 principles for the kernel that finance actually uses: the covariance kernel
 `σ_{ij} = cov(R_i, R_j)` of genuine square-integrable random returns.
 
-The whole argument is the **self-dot identity**: bilinearity of covariance
-(Mathlib's `covariance_sum_left'`/`covariance_sum_right'`/`covariance_smul_*`)
-collapses the Markowitz double sum onto a single self-covariance,
+The whole argument is the **self-dot identity**: Mathlib's `variance_sum'`
+("the variance of a sum is the double sum of covariances") read backwards,
+with `covariance_smul_left`/`covariance_smul_right` peeling the weights,
+collapses the Markowitz double sum onto a single variance,
 
   `∑_{i,j} w_i w_j · cov(R_i, R_j) = cov(∑ w_i R_i, ∑ w_j R_j) = Var(∑ w_i R_i)`,
 
@@ -45,22 +46,20 @@ random returns, is exactly the variance of the portfolio return `∑ wᵢ Rᵢ`:
 
   `portfolioVarN s w (cov(R_·, R_·)) = Var[∑ i ∈ s, wᵢ • Rᵢ]`.
 
-Covariance bilinearity unfolds the self-covariance of the portfolio into the
-double sum; no PSD assumption appears anywhere. -/
+Mathlib's `variance_sum'` unfolds the portfolio variance into the double sum
+of covariances; the `smul` lemmas peel the weights. No PSD assumption appears
+anywhere. -/
 theorem portfolioVarN_covariance_eq_variance
     (s : Finset ι) (w : ι → ℝ) (R : ι → Ω → ℝ)
     (hR : ∀ i ∈ s, MemLp (R i) 2 μ) :
     portfolioVarN s w (fun i j => cov[R i, R j; μ]) =
       Var[∑ i ∈ s, w i • R i; μ] := by
   have hwR : ∀ i ∈ s, MemLp (w i • R i) 2 μ := fun i hi => (hR i hi).const_smul (w i)
-  have hsum : MemLp (∑ i ∈ s, w i • R i) 2 μ := memLp_finsetSum' s hwR
-  rw [← covariance_self hsum.aestronglyMeasurable.aemeasurable,
-    covariance_sum_left' hwR hsum]
+  rw [variance_sum' hwR]
   unfold portfolioVarN
   refine Finset.sum_congr rfl fun i hi => ?_
-  rw [covariance_smul_left, covariance_sum_right' hwR (hR i hi), Finset.mul_sum]
   refine Finset.sum_congr rfl fun j hj => ?_
-  rw [covariance_smul_right]
+  rw [covariance_smul_left, covariance_smul_right]
   ring
 
 /-- **Covariance kernels are PSD** — the hypothesis of

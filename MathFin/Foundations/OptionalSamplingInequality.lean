@@ -25,7 +25,7 @@ existence-and-uniqueness theorem in `Foundations/DoobDecomposition.lean`):
 * the martingale part transports across stopping times by Mathlib's
   *equality* (`M_σ =ᵐ μ[M_τ | ℱ_σ]`);
 * the compensator `A` of a submartingale is a.s. *nondecreasing*
-  (`predictablePart_mono_of_submartingale` — its increments are
+  (Mathlib's `Submartingale.monotone_predictablePart` — its increments are
   `μ[f_{k+1} − f_k | ℱ_k] ≥ᵐ 0`, which is exactly the submartingale
   property), so `A_σ ≤ A_τ` pathwise and `condExp_mono` gives the
   inequality on the compensator side.
@@ -36,10 +36,15 @@ drift `A` — nothing else.
 
 ## Results
 
-* `predictablePart_mono_of_submartingale`: a submartingale's Doob compensator
-  is a.s. pointwise nondecreasing.
 * `submartingale_optional_sampling`: the optional sampling inequality
   `f_σ ≤ᵐ μ[f_τ | ℱ_σ]` for bounded stopping times `σ ≤ τ`.
+
+The Degenne `BrownianMotion` package states a `⊓`-form sibling
+(`Submartingale.stoppedValue_min_ae_le_condExp_nat`,
+`BrownianMotion/StochasticIntegral/OptionalSampling.lean`) whose proof is a
+`sorry` stub at the current pin; this file's derivation is sorry-free, and a
+candidate upstream donation alongside the `L2MartingaleConvergence` bridge
+recorded in `docs/bridges.md`.
 -/
 
 namespace MathFin
@@ -49,28 +54,6 @@ open MeasureTheory ProbabilityTheory Filter
 variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
   {ℱ : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {τ σ : Ω → ℕ∞} {n : ℕ}
 
-/-- **A submartingale's Doob compensator is a.s. nondecreasing.** The
-increment of `predictablePart f ℱ μ` at `k` is `μ[f (k+1) − f k | ℱ k]`,
-whose a.e. non-negativity is precisely the submartingale property
-`f k ≤ᵐ μ[f (k+1) | ℱ k]`; a countable intersection upgrades the per-step
-statement to a.e. monotonicity of the whole path. -/
-lemma predictablePart_mono_of_submartingale [SigmaFiniteFiltration μ ℱ]
-    (hf : Submartingale f ℱ μ) :
-    ∀ᵐ ω ∂μ, Monotone fun k => predictablePart f ℱ μ k ω := by
-  have h_step : ∀ k : ℕ, ∀ᵐ ω ∂μ,
-      predictablePart f ℱ μ k ω ≤ predictablePart f ℱ μ (k + 1) ω := by
-    intro k
-    simp only [predictablePart_add_one, Pi.add_apply, le_add_iff_nonneg_right]
-    have h_self : μ[f k | ℱ k] = f k :=
-      condExp_of_stronglyMeasurable (ℱ.le k) (hf.1 k) (hf.integrable k)
-    filter_upwards [hf.ae_le_condExp (Nat.le_succ k),
-      condExp_sub (hf.integrable (k + 1)) (hf.integrable k) (ℱ k)] with ω h_le h_sub
-    rw [h_sub, Pi.sub_apply, h_self]
-    exact sub_nonneg.2 h_le
-  rw [← ae_all_iff] at h_step
-  filter_upwards [h_step] with ω hω
-  exact monotone_nat_of_le_succ hω
-
 /-- **Optional sampling inequality** (Saporito, Theorem 2.3.6): for a
 submartingale `f` and stopping times `σ ≤ τ` with `τ ≤ n` bounded,
 
@@ -78,8 +61,9 @@ submartingale `f` and stopping times `σ ≤ τ` with `τ ≤ n` bounded,
 
 Derivation: Doob-decompose `f = martingalePart + predictablePart`. The
 martingale part satisfies Mathlib's optional sampling *equality*; the
-compensator is a.s. nondecreasing (`predictablePart_mono_of_submartingale`),
-so its stopped values compare pathwise and `condExp_mono` transports the
+compensator is a.s. nondecreasing (Mathlib's
+`Submartingale.monotone_predictablePart`), so its stopped values compare
+pathwise and `condExp_mono` transports the
 comparison. Summing the two statements gives the theorem. -/
 theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
     (hf : Submartingale f ℱ μ)
@@ -91,9 +75,6 @@ theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
   -- the two halves of the Doob decomposition
   have hM : Martingale (martingalePart f ℱ μ) ℱ μ :=
     martingale_martingalePart hf.1 hf.integrable
-  have hA_int : ∀ k, Integrable (predictablePart f ℱ μ k) μ := fun k => by
-    unfold predictablePart
-    exact integrable_finsetSum' _ fun i _ => integrable_condExp
   -- stopped values split exactly along the decomposition
   have h_split : ∀ ρ : Ω → ℕ∞, stoppedValue f ρ
       = stoppedValue (martingalePart f ℱ μ) ρ
@@ -102,8 +83,6 @@ theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
     simp only [stoppedValue, Pi.add_apply, martingalePart, Pi.sub_apply,
       sub_add_cancel]
   -- integrability of all stopped values in play
-  have hfτ_int : Integrable (stoppedValue f τ) μ :=
-    hf.integrable_stoppedValue hτ hτ_le
   have hMτ_int : Integrable (stoppedValue (martingalePart f ℱ μ) τ) μ :=
     hM.submartingale.integrable_stoppedValue hτ hτ_le
   have hMσ_int : Integrable (stoppedValue (martingalePart f ℱ μ) σ) μ :=
@@ -142,7 +121,7 @@ theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
     simpa using hab
   have hA_le : stoppedValue (predictablePart f ℱ μ) σ
       ≤ᵐ[μ] stoppedValue (predictablePart f ℱ μ) τ := by
-    filter_upwards [predictablePart_mono_of_submartingale hf] with ω hω
+    filter_upwards [hf.monotone_predictablePart] with ω hω
     exact hω (h_untopA_mono ω)
   have hAσ_meas : StronglyMeasurable[hσ.measurableSpace]
       (stoppedValue (predictablePart f ℱ μ) σ) :=
