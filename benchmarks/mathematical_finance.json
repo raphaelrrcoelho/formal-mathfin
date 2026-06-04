@@ -206,7 +206,7 @@
         "reference": "CRR convergence (analytic step), Hull 21.1, Shreve I 3.2",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in lean/MathFin/BinomialCRRConvergence.lean. Axioms-clean. (Full distributional convergence binomialPrice → bs_call_price is upstream-gated on triangular-array CLT.)"
+        "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in lean/MathFin/BinomialCRRConvergence.lean. Axioms-clean. The full distributional convergence binomialPrice → bs_call_price is now proved: see mf-crr-gaussian-limit and mf-crr-bs-call-convergence."
       }
     },
     {
@@ -223,6 +223,38 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in lean/MathFin/BinomialCRRConvergence.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-crr-gaussian-limit",
+      "name": "CRR to Black-Scholes: Log-Return Convergence in Distribution",
+      "description": "Under no-arbitrage at every step, the law of the n-step CRR risk-neutral log-return — the n-fold convolution of the two-point per-step law — converges weakly to the Black-Scholes normal N((r − σ²/2)T, σ²T). The genuine distributional CLT for the binomial tree, via characteristic functions and Lévy's continuity theorem.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Binomial.CRRCharFun\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- CRR → Black–Scholes, convergence in distribution: under no-arbitrage at every\n    step (`0 ≤ pₙ ≤ 1`), the `n`-step CRR risk-neutral log-return law — the `n`-fold\n    convolution `crrRowProbMeasure` of the two-point per-step law — converges weakly\n    to the Black–Scholes normal `N((r − σ²/2)T, σ²T)`. Re-export of\n    `MathFin.crr_tendsto_gaussian_inDistribution` (real derivation in\n    `MathFin/Binomial/CRRCharFun.lean`: the per-step charFun is computed exactly,\n    its `n`-th power converges to the Gaussian charFun\n    (`crr_charFun_pow_tendsto_gaussian`), and Lévy's continuity theorem\n    (`ProbabilityMeasure.tendsto_of_tendsto_charFun`) upgrades charFun convergence\n    to weak convergence, via `charFun_convPow` for the `n`-fold row law). -/\ntheorem crr_log_return_tendsto_gaussian {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)\n    (hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1) :\n    Tendsto (fun n : ℕ => crrRowProbMeasure r σ T n (hp n).1 (hp n).2) atTop\n      (𝓝 (bsLimitProbMeasure r σ T)) :=\n  MathFin.crr_tendsto_gaussian_inDistribution hσ hT hp\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "CRR to BS distributional convergence (Cox-Ross-Rubinstein 1979; Hull 21.1, Shreve I 3.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The per-step CRR charFun is computed exactly from the two-point step law; its n-th power converges to the Gaussian charFun (crr_charFun_pow_tendsto_gaussian, via real cos/sin splitting of the complex exponential and second-order asymptotics of the CRR parameters); charFun_convPow identifies the n-step row law's charFun as that power; and Lévy's continuity theorem (ProbabilityMeasure.tendsto_of_tendsto_charFun) upgrades charFun convergence to weak convergence of the bundled ProbabilityMeasures. Lives in MathFin/Binomial/CRRCharFun.lean (crr_tendsto_gaussian_inDistribution). Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-crr-bs-call-convergence",
+      "name": "CRR to Black-Scholes: Binomial Call Price Convergence (Closed Form)",
+      "description": "The n-step Cox-Ross-Rubinstein binomial price of a European call converges, as n → ∞, to the Black-Scholes call price S₀Φ(d₁) − Ke^{−rT}Φ(d₂). The classical CRR→BS convergence theorem, completing the discrete-to-continuous pricing correspondence.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Binomial.CRRClosedForm\n\nopen MathFin Filter\nopen scoped Topology\n\n/-- **Cox–Ross–Rubinstein → Black–Scholes.** Under no-arbitrage at every step, the\n    `n`-step CRR binomial price of a European call converges to the literal\n    Black–Scholes call price `S₀·Φ(d₁) − K·e^{−rT}·Φ(d₂)`. Re-export of\n    `MathFin.binomialPrice_call_tendsto_bs_closed`\n    (`MathFin/Binomial/CRRClosedForm.lean`). The route needs no uniform-integrability\n    machinery: the bounded *put* payoff passes to the limit under the distributional\n    CLT (`binomialPrice_call_tendsto_bs`), binomial put-call parity lifts the limit\n    to the unbounded call, and instantiating `bs_put_formula` on the limiting\n    Gaussian lands the closed Φ-form. -/\ntheorem binomial_call_price_tendsto_black_scholes {r σ T S₀ K : ℝ}\n    (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)\n    (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :\n    Tendsto (fun n : ℕ => binomialPrice (crrUp σ T n) (crrDown σ T n)\n        (crrPerStepRate r T n) (fun x => max (x - K) 0) n S₀) atTop\n      (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T)\n          - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) :=\n  MathFin.binomialPrice_call_tendsto_bs_closed hσ hT hS₀ hK hna\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "CRR to BS call-price convergence (Cox-Ross-Rubinstein 1979; Hull 21.1, Shreve I 3.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof of the headline CRR→BS convergence. Chain: binomialPrice_eq_integral_convPow identifies the binomial price with a discounted expectation against the n-fold convolution row law; the bounded put payoff passes to the limit under weak convergence (the distributional CLT of mf-crr-gaussian-limit); binomial put-call parity (binomialPrice_callPut_parity) lifts the limit to the unbounded call — no uniform-integrability/Vitali machinery needed; exp_neg_mul_integral_put_gaussian_eq instantiates bs_put_formula on the limiting Gaussian N((r−σ²/2)T, σ²T) through the standardisation Z = (· − (r−σ²/2)T)/(σ√T), and Phi_neg lands the literal closed form. Lives in MathFin/Binomial/CRRCharFun.lean + MathFin/Binomial/CRRClosedForm.lean. Axioms-clean."
       }
     },
     {

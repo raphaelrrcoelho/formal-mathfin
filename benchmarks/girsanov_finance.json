@@ -50,6 +50,22 @@
       }
     },
     {
+      "id": "gir-continuous-ftap",
+      "name": "Continuous-Time First FTAP: Discounted GBM is a Martingale",
+      "description": "Under the risk-neutral measure, the discounted geometric Brownian motion price e^{−rt}S_t is a martingale with respect to the Brownian filtration — the defining property of the equivalent martingale measure and the operational content of the first fundamental theorem of asset pricing in continuous time.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import Mathlib\nimport MathFin.Foundations.ContinuousFTAP\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\n\n/-- Continuous-time first FTAP, martingale property: under the risk-neutral measure,\n    the discounted Black–Scholes price `e^{−rt}·S_t`, with\n    `S_t = S₀·exp((r − σ²/2)t + σX_t)` driven by a filtered pre-Brownian motion `X`,\n    is a martingale w.r.t. the Brownian filtration — the defining property of the\n    equivalent martingale measure. Re-export of `MathFin.discountedGBM_isMartingale`\n    (`MathFin/Foundations/ContinuousFTAP.lean`: the discounted price IS `S₀` times\n    the Wald exponential `exp(σX_t − σ²t/2)`, a martingale by\n    `IsFilteredPreBrownian.waldExponential_isMartingale`). -/\ntheorem discounted_gbm_is_Q_martingale\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}\n    {𝓕 : Filtration ℝ≥0 mΩ} {X : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian X 𝓕 P] [IsFiniteMeasure P] (S_0 r σ : ℝ) :\n    Martingale (fun (t : ℝ≥0) ω => Real.exp (-r * t) *\n        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) 𝓕 P :=\n  MathFin.discountedGBM_isMartingale S_0 r σ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Risk-neutral pricing / first FTAP, continuous time (Saporito Ch 9; Shreve II Ch 5)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. The discounted price e^{−rt}·S_t = S₀·exp(σX_t − σ²t/2) is S₀ • (Wald exponential), and IsFilteredPreBrownian.waldExponential_isMartingale (MathFin/Foundations/BrownianMartingale.lean: pull-out + condExp_indep_eq + Gaussian MGF) plus Martingale.smul give the martingale property — no further stochastic-calculus machinery. Continuous-time analogue of the discrete binomial EMM (Binomial/SecondFTAP.lean). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "gir-thm-9.3.4",
       "name": "Martingale Representation Theorem",
       "description": "Corollary 9.3.4: Every square-integrable martingale M adapted to the BM filtration can be written M_t = M_0 + ∫₀ᵗ ϕ_s dB_s for some ϕ ∈ H²",

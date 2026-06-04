@@ -10,7 +10,7 @@
 [![dataset](https://img.shields.io/badge/HF-dataset-ffcc4d)](https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 251 theorems across 11 areas — Black-Scholes
+and Degenne's BrownianMotion. 261 theorems across 11 areas — Black-Scholes
 with the full Greek matrix and the exotics, binomial trees with American /
 Bermudan / Snell envelope, fixed income with hazard credit and Vasicek SDE,
 portfolio theory from Markowitz to Black-Litterman, coherent risk measures,
@@ -26,15 +26,15 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 258 |
-| **full derivations** | **216** |
-| library wrappers | 15 |
-| reduced cores | 27 |
+| total theorems | 261 |
+| **full derivations** | **221** |
+| library wrappers | 18 |
+| reduced cores | 22 |
 | placeholders | **0** |
 
-**231 of the 258 are delivery-ready** (`full` + `library_wrapper`); the 27
+**239 of the 261 are delivery-ready** (`full` + `library_wrapper`); the 22
 `reduced_core` entries are honest special cases or algebraic/structural cores
-of results whose general form is gated on upstream Mathlib (see *What's not
+of results whose general form is not yet formalized here (see *What's not
 done*).
 
 Every `full` derivation depends only on the three Mathlib standard axioms
@@ -126,23 +126,23 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-27 of the 251 theorems are `reduced_core` — an honest special case or
-algebraic/structural core of a result whose fully general form is gated on
-upstream Mathlib. By area:
+22 of the 261 theorems are `reduced_core` — an honest special case or
+algebraic/structural core of a result whose fully general form is not yet
+formalized here. By area:
 
 - **Itô calculus** (`stochastic_calculus`, 6): time-dependent Itô, the
   two-dimensional Itô formula, quadratic variation of an Itô process, Lévy's
   martingale characterisation, SDE existence + uniqueness, and Girsanov. (The
   one-dimensional path-wise Itô lemma itself is now `full` — see below.)
-- **Risk / portfolio / pricing cores** (`mathematical_finance`, 6): e.g.
-  Rockafellar-Uryasev, the American discounted-price supermartingale, the
-  N-asset PSD variance bound — algebraic or structural cores rather than the
-  full measure-theoretic statements.
-- **Markov chains** (5) and **martingales** (1): finite-state / structural
-  specifications standing in for the general library theorems.
 - **Girsanov** (`girsanov_finance`, 3).
-- **Continuous-time Poisson processes** (3): interarrival exponential,
-  superposition, thinning — Mathlib has only the discrete `PoissonPMF`.
+- **Markov chains** (6): finite-state structural specifications, one of them a
+  definitional identity pinned `reduced_core` by convention. No longer
+  upstream-gated — Mathlib now ships the Ionescu–Tulcea trajectory-measure
+  machinery (`Kernel.traj`).
+- **Continuous-time Poisson processes** (4): the marginal law (a
+  field-projection pinned `reduced_core` by convention), interarrival
+  exponential, superposition, thinning — Mathlib has only the discrete
+  `PoissonPMF`.
 - **Fine Brownian path machinery** (3): path-wise reflection,
   nowhere-differentiability, law of iterated logarithm.
 
