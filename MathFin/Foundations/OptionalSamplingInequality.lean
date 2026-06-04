@@ -1,0 +1,174 @@
+/-
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+import Mathlib
+
+/-!
+# Optional sampling inequality for submartingales (bounded stopping times)
+
+Mathlib's `Martingale.stoppedValue_ae_eq_condExp_of_le` is the optional
+sampling **equality** for martingales: for stopping times `σ ≤ τ` with `τ`
+bounded, `f_σ =ᵐ μ[f_τ | ℱ_σ]`. For submartingales it provides only the
+**expectation-form** inequality (`Submartingale.expected_stoppedValue_mono`).
+The conditional-expectation-form inequality — Saporito, Theorem 2.3.6 —
+
+  `stoppedValue f σ ≤ᵐ[μ] μ[stoppedValue f τ | ℱ_σ]`
+
+is absent. This file derives it, and the derivation *is* the textbook
+conceptual picture: **optional sampling inequality = optional sampling
+equality + monotone compensator**, through the Doob decomposition
+`f = M + A` (Mathlib's `martingalePart` / `predictablePart`, packaged as the
+existence-and-uniqueness theorem in `Foundations/DoobDecomposition.lean`):
+
+* the martingale part transports across stopping times by Mathlib's
+  *equality* (`M_σ =ᵐ μ[M_τ | ℱ_σ]`);
+* the compensator `A` of a submartingale is a.s. *nondecreasing*
+  (`predictablePart_mono_of_submartingale` — its increments are
+  `μ[f_{k+1} − f_k | ℱ_k] ≥ᵐ 0`, which is exactly the submartingale
+  property), so `A_σ ≤ A_τ` pathwise and `condExp_mono` gives the
+  inequality on the compensator side.
+
+Adding the two statements yields the theorem. The submartingale inequality is
+thus exhibited as the shadow of the martingale equality under the upward
+drift `A` — nothing else.
+
+## Results
+
+* `predictablePart_mono_of_submartingale`: a submartingale's Doob compensator
+  is a.s. pointwise nondecreasing.
+* `submartingale_optional_sampling`: the optional sampling inequality
+  `f_σ ≤ᵐ μ[f_τ | ℱ_σ]` for bounded stopping times `σ ≤ τ`.
+-/
+
+namespace MathFin
+
+open MeasureTheory ProbabilityTheory Filter
+
+variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
+  {ℱ : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {τ σ : Ω → ℕ∞} {n : ℕ}
+
+/-- **A submartingale's Doob compensator is a.s. nondecreasing.** The
+increment of `predictablePart f ℱ μ` at `k` is `μ[f (k+1) − f k | ℱ k]`,
+whose a.e. non-negativity is precisely the submartingale property
+`f k ≤ᵐ μ[f (k+1) | ℱ k]`; a countable intersection upgrades the per-step
+statement to a.e. monotonicity of the whole path. -/
+lemma predictablePart_mono_of_submartingale [SigmaFiniteFiltration μ ℱ]
+    (hf : Submartingale f ℱ μ) :
+    ∀ᵐ ω ∂μ, Monotone fun k => predictablePart f ℱ μ k ω := by
+  have h_step : ∀ k : ℕ, ∀ᵐ ω ∂μ,
+      predictablePart f ℱ μ k ω ≤ predictablePart f ℱ μ (k + 1) ω := by
+    intro k
+    simp only [predictablePart_add_one, Pi.add_apply, le_add_iff_nonneg_right]
+    have h_self : μ[f k | ℱ k] = f k :=
+      condExp_of_stronglyMeasurable (ℱ.le k) (hf.1 k) (hf.integrable k)
+    filter_upwards [hf.ae_le_condExp (Nat.le_succ k),
+      condExp_sub (hf.integrable (k + 1)) (hf.integrable k) (ℱ k)] with ω h_le h_sub
+    rw [h_sub, Pi.sub_apply, h_self]
+    exact sub_nonneg.2 h_le
+  rw [← ae_all_iff] at h_step
+  filter_upwards [h_step] with ω hω
+  exact monotone_nat_of_le_succ hω
+
+/-- **Optional sampling inequality** (Saporito, Theorem 2.3.6): for a
+submartingale `f` and stopping times `σ ≤ τ` with `τ ≤ n` bounded,
+
+  `stoppedValue f σ ≤ᵐ[μ] μ[stoppedValue f τ | ℱ_σ]`.
+
+Derivation: Doob-decompose `f = martingalePart + predictablePart`. The
+martingale part satisfies Mathlib's optional sampling *equality*; the
+compensator is a.s. nondecreasing (`predictablePart_mono_of_submartingale`),
+so its stopped values compare pathwise and `condExp_mono` transports the
+comparison. Summing the two statements gives the theorem. -/
+theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
+    (hf : Submartingale f ℱ μ)
+    (hτ : IsStoppingTime ℱ τ) (hσ : IsStoppingTime ℱ σ)
+    (hσ_le_τ : σ ≤ τ) (hτ_le : ∀ ω, τ ω ≤ n)
+    [SigmaFinite (μ.trim hσ.measurableSpace_le)] :
+    stoppedValue f σ ≤ᵐ[μ] μ[stoppedValue f τ | hσ.measurableSpace] := by
+  have hσ_le : ∀ ω, σ ω ≤ n := fun ω => (hσ_le_τ ω).trans (hτ_le ω)
+  -- the two halves of the Doob decomposition
+  have hM : Martingale (martingalePart f ℱ μ) ℱ μ :=
+    martingale_martingalePart hf.1 hf.integrable
+  have hA_int : ∀ k, Integrable (predictablePart f ℱ μ k) μ := fun k => by
+    unfold predictablePart
+    exact integrable_finsetSum' _ fun i _ => integrable_condExp
+  -- stopped values split exactly along the decomposition
+  have h_split : ∀ ρ : Ω → ℕ∞, stoppedValue f ρ
+      = stoppedValue (martingalePart f ℱ μ) ρ
+        + stoppedValue (predictablePart f ℱ μ) ρ := fun ρ => by
+    funext ω
+    simp only [stoppedValue, Pi.add_apply, martingalePart, Pi.sub_apply,
+      sub_add_cancel]
+  -- integrability of all stopped values in play
+  have hfτ_int : Integrable (stoppedValue f τ) μ :=
+    hf.integrable_stoppedValue hτ hτ_le
+  have hMτ_int : Integrable (stoppedValue (martingalePart f ℱ μ) τ) μ :=
+    hM.submartingale.integrable_stoppedValue hτ hτ_le
+  have hMσ_int : Integrable (stoppedValue (martingalePart f ℱ μ) σ) μ :=
+    hM.submartingale.integrable_stoppedValue hσ hσ_le
+  have hAτ_int : Integrable (stoppedValue (predictablePart f ℱ μ) τ) μ := by
+    have h := (hf.integrable_stoppedValue hτ hτ_le).sub hMτ_int
+    have h_eq : stoppedValue f τ - stoppedValue (martingalePart f ℱ μ) τ
+        = stoppedValue (predictablePart f ℱ μ) τ := by
+      rw [h_split τ, add_sub_cancel_left]
+    rwa [h_eq] at h
+  have hAσ_int : Integrable (stoppedValue (predictablePart f ℱ μ) σ) μ := by
+    have h := (hf.integrable_stoppedValue hσ hσ_le).sub hMσ_int
+    have h_eq : stoppedValue f σ - stoppedValue (martingalePart f ℱ μ) σ
+        = stoppedValue (predictablePart f ℱ μ) σ := by
+      rw [h_split σ, add_sub_cancel_left]
+    rwa [h_eq] at h
+  -- martingale half: optional sampling EQUALITY (Mathlib)
+  have hM_eq : stoppedValue (martingalePart f ℱ μ) σ
+      =ᵐ[μ] μ[stoppedValue (martingalePart f ℱ μ) τ | hσ.measurableSpace] :=
+    hM.stoppedValue_ae_eq_condExp_of_le hτ hσ hσ_le_τ hτ_le
+  -- compensator half: pathwise monotone, then condExp_mono
+  have h_untopA_mono : ∀ ω, (σ ω).untopA ≤ (τ ω).untopA := by
+    intro ω
+    have hτ_ne : τ ω ≠ ⊤ := fun h => by
+      have hle := hτ_le ω
+      rw [h] at hle
+      exact WithTop.not_top_le_coe n hle
+    have hσ_ne : σ ω ≠ ⊤ := fun h => hτ_ne (top_le_iff.1 (h ▸ hσ_le_τ ω))
+    obtain ⟨a, ha⟩ := WithTop.ne_top_iff_exists.1 hσ_ne
+    obtain ⟨b, hb⟩ := WithTop.ne_top_iff_exists.1 hτ_ne
+    have hab : a ≤ b := by
+      have h := hσ_le_τ ω
+      rw [← ha, ← hb] at h
+      exact WithTop.coe_le_coe.1 h
+    rw [← ha, ← hb]
+    simpa using hab
+  have hA_le : stoppedValue (predictablePart f ℱ μ) σ
+      ≤ᵐ[μ] stoppedValue (predictablePart f ℱ μ) τ := by
+    filter_upwards [predictablePart_mono_of_submartingale hf] with ω hω
+    exact hω (h_untopA_mono ω)
+  have hAσ_meas : StronglyMeasurable[hσ.measurableSpace]
+      (stoppedValue (predictablePart f ℱ μ) σ) :=
+    (measurable_stoppedValue
+      (stronglyAdapted_predictablePart'.isStronglyProgressive_of_discrete) hσ
+      ).stronglyMeasurable
+  have hAσ_eq : μ[stoppedValue (predictablePart f ℱ μ) σ | hσ.measurableSpace]
+      = stoppedValue (predictablePart f ℱ μ) σ :=
+    condExp_of_stronglyMeasurable hσ.measurableSpace_le hAσ_meas hAσ_int
+  have hA_condExp_le :
+      μ[stoppedValue (predictablePart f ℱ μ) σ | hσ.measurableSpace]
+        ≤ᵐ[μ] μ[stoppedValue (predictablePart f ℱ μ) τ | hσ.measurableSpace] :=
+    condExp_mono hAσ_int hAτ_int hA_le
+  -- assemble: f_σ = M_σ + A_σ ≤ᵐ μ[M_τ|ℱ_σ] + μ[A_τ|ℱ_σ] =ᵐ μ[f_τ|ℱ_σ]
+  have h_condExp_split : μ[stoppedValue f τ | hσ.measurableSpace]
+      =ᵐ[μ] μ[stoppedValue (martingalePart f ℱ μ) τ | hσ.measurableSpace]
+        + μ[stoppedValue (predictablePart f ℱ μ) τ | hσ.measurableSpace] := by
+    rw [h_split τ]
+    exact condExp_add hMτ_int hAτ_int _
+  rw [h_split σ]
+  filter_upwards [hM_eq, hA_condExp_le, h_condExp_split] with ω hMω hAω hsplitω
+  have hAσω : stoppedValue (predictablePart f ℱ μ) σ ω
+      = μ[stoppedValue (predictablePart f ℱ μ) σ | hσ.measurableSpace] ω := by
+    rw [hAσ_eq]
+  simp only [Pi.add_apply] at hsplitω ⊢
+  rw [hsplitω, hMω, hAσω]
+  exact add_le_add le_rfl hAω
+
+end MathFin

@@ -35,7 +35,10 @@ PROP_STRUCTURE_RE = re.compile(r"\bstructure\b[\s\S]*?:\s*Prop\s+where")
 DEFINITIONAL_FULL_ALLOWLIST = {
     "bm-def-5.1.1",    # StandardBrownianMotion definition (Saporito Def 5.1.1)
     "cv-poisson-def",  # PoissonProcess definition
-    "pp-thm-3.3.5",    # PoissonProcess def + derived marginal law N_t ~ Poisson(λt)
+    # "pp-thm-3.3.5" was removed 2026-06-03: it is a THEOREM entry (marginal law)
+    # whose conclusion is a projected structure field, so it was demoted to
+    # reduced_core (see EXPECTED_REDUCED_CORE_THEOREMS) — definition entries keep
+    # the allowlist convention; theorem entries do not.
 }
 
 PLACEHOLDER_PATTERNS = (
@@ -52,7 +55,16 @@ EXPECTED_FULL_THEOREMS = {
     "mc-def-1.1.1",
     "mc-prop-1.2.3",
     "mc-prop-1.4.13",
+}
+
+# Deliberate 2026-06-03 audit demotions: THEOREM-named entries whose textbook
+# conclusion is a projected structure field / definitional `rfl`. Pinned as
+# exactly `reduced_core` so they can neither silently regress to placeholder
+# nor be re-promoted without a genuine derivation (the Poisson construction /
+# Ionescu-Tulcea path measure, respectively).
+EXPECTED_REDUCED_CORE_THEOREMS = {
     "pp-thm-3.3.5",
+    "mc-thm-1.1.2",
 }
 
 EXPECTED_NON_PLACEHOLDER_THEOREMS = {
@@ -153,6 +165,19 @@ def test_expected_promotions_are_full_theorems() -> None:
 
     for theorem_id in EXPECTED_FULL_THEOREMS:
         assert statuses.get(theorem_id) == "full", (
+            theorem_id,
+            statuses.get(theorem_id),
+        )
+
+
+def test_expected_reduced_cores_stay_reduced_core() -> None:
+    statuses = {
+        theorem["id"]: theorem.get("metadata", {}).get("formalization_status")
+        for _, theorem in _iter_theorems()
+    }
+
+    for theorem_id in EXPECTED_REDUCED_CORE_THEOREMS:
+        assert statuses.get(theorem_id) == "reduced_core", (
             theorem_id,
             statuses.get(theorem_id),
         )

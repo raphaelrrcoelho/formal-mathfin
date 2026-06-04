@@ -210,3 +210,11 @@ reinvents, the Mathlib / BrownianMotion-package machinery:
 **Bridge opportunity:** the one clean upstream candidate remains `IsPiSystem` for
 `ElementaryPredictableSet` (off the Summit-A critical path; see
 `docs/ito-integral-clm-deferred.md`). No reinvention introduced.
+
+**Upstream opportunity (2026-06-03 audit):** the BrownianMotion package ships
+`StochasticIntegral/SquareIntegrable.lean` with sorry'd
+`IsSquareIntegrable.ae_tendsto_limitProcess` and `tendsto_eLpNorm_two_limitProcess`;
+our sorry-free `L2MartingaleConvergence` engine (a.e. + L² convergence off our Doob
+L^p maximal inequality) is the natural donor toward discharging both upstream. The
+package's `QuadraticVariation.lean` (Doob–Meyer predictable-part abstraction, sorry'd)
+is orthogonal to our partition-limit QV files — no overlap either way.

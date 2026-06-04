@@ -46,9 +46,9 @@ import MathFin.Foundations.BrownianMartingale
 import MathFin.Foundations.ContinuousFTAP
 import MathFin.Foundations.BrownianQuadraticVariation
 import MathFin.Foundations.QuadraticVariationL2
-import MathFin.Foundations.CondExpJensen
 import MathFin.Foundations.ExpMin
 import MathFin.Foundations.FTAP
+import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
@@ -146,6 +146,7 @@ import MathFin.BlackScholes.StrikeConvexity
 import MathFin.BlackScholes.PriceBounds
 -- Phase 13 additions:
 import MathFin.BlackScholes.Quanto
+import MathFin.BlackScholes.NewtonConvergence
 import MathFin.BlackScholes.NewtonRaphsonIV
 import MathFin.BlackScholes.LognormalCOV
 
@@ -230,6 +231,7 @@ import MathFin.FixedIncome.VasicekSDE
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz
+import MathFin.Portfolio.CovariancePSD
 import MathFin.Portfolio.MarkowitzNAsset
 import MathFin.Portfolio.CAPM
 import MathFin.Portfolio.TwoFundSeparation

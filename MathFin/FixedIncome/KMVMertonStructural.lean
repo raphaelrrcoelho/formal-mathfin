@@ -64,6 +64,29 @@ theorem kmvPD_eq_one_sub_survival_probability
   have := kmv_survival_eq_Phi_d2 V_0 F r σ_V T
   linarith
 
+/-- **KMV-Merton survival probability closed form**: under the BS lognormal
+hypothesis for the firm asset value `V_T = bsTerminal V_0 r σ_V T (Z ·)`, the
+risk-neutral survival (no-default) probability *is* `Φ` of the distance to
+default:
+
+  `Q({ω | V_T(ω) > F}).toReal = Phi (kmvDistanceToDefault V_0 F r σ_V T)`.
+
+This is the genuinely probabilistic survival statement — it computes the
+measure of the no-default event itself through the lognormal tail
+(`riskNeutralProb_S_T_gt_K`), not merely the CDF symmetry
+`1 − Φ(−DD) = Φ(DD)` recorded in `KMVMerton.lean`. Complements
+`kmvPD_eq_one_sub_survival_probability` (the PD identification) with the
+closed form on the survival side. -/
+theorem survival_probability_eq_Phi_distanceToDefault
+    {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {Q : Measure Ω} [IsProbabilityMeasure Q]
+    {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}
+    (hV : 0 < V_0) (hF : 0 < F)
+    (h : BSCallHyp Q V_0 F r σ_V T Z) :
+    (Q {ω | bsTerminal V_0 r σ_V T (Z ω) > F}).toReal =
+      Phi (kmvDistanceToDefault V_0 F r σ_V T) := by
+  rw [riskNeutralProb_S_T_gt_K h, kmvDistanceToDefault_eq_bsd2 V_0 F r σ_V T hV hF]
+
 /-- **Equity-as-call-on-assets structural identity** (Merton 1974). In the
 structural credit model, equity holders are protected by limited liability,
 so the equity payoff at maturity is `max(V_T − F, 0)` (debt holders are

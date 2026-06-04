@@ -13,8 +13,8 @@
         "chapter": 3,
         "reference": "Theorem 3.3.5",
         "difficulty": "foundational",
-        "formalization_status": "full",
-        "formalization_scope": "Faithful Lean proof that a homogeneous Poisson process with zero start and Poisson increments has one-time marginal law N_t ~ Poisson(rate * t)."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Structural specification: the Poisson marginal law is a structure field (poisson_increments) and the proof reads it off at s = 0 (plus the zero-start rewrite). The textbook derivation of the marginal law from a more primitive Poisson-process definition is NOT formalized. Demoted full->reduced_core in the 2026-06-03 duplication/honesty audit, matching how this file already tiers its other structural entries (pp-prop-3.3.6, pp-thm-3.3.9, pp-thm-3.3.10). Re-earnable via the interarrival-construction route (ErlangSum gives the arrival-time law)."
       }
     },
     {

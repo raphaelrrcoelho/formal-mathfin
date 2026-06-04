@@ -160,7 +160,13 @@ lemma integral_exp_mul_gaussianPDFReal_Ioi (a c : ℝ) :
 /-- **MGF of the standard normal**: `∫ z, exp(c·z) · pdf(0,1,z) dz = exp(c²/2)`.
 
 Combines `exp_mul_gaussianPDFReal_zero_one` (completing-the-square) with
-Mathlib's `integral_gaussianPDFReal_eq_one`. -/
+Mathlib's `integral_gaussianPDFReal_eq_one`.
+
+Mathlib's `mgf_gaussianReal` gives the same value as an integral against the
+`gaussianReal` *measure*; this is the explicit Lebesgue/pdf form the Black–Scholes
+integrals consume directly, and the completing-the-square shift it factors through
+(`exp_mul_gaussianPDFReal_zero_one`) plus the truncated `Ioi` sibling above are the
+load-bearing primitives with no Mathlib analogue. -/
 lemma integral_exp_mul_gaussianPDFReal_univ (c : ℝ) :
     ∫ z, Real.exp (c * z) * gaussianPDFReal 0 1 z = Real.exp (c^2 / 2) := by
   rw [show (fun z => Real.exp (c * z) * gaussianPDFReal 0 1 z)

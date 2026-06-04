@@ -111,8 +111,8 @@
         "chapter": 1,
         "reference": "Theorem 1.1.2",
         "difficulty": "foundational",
-        "formalization_status": "full",
-        "formalization_scope": "Constructive definition: `pathProb` is defined as `initial × ∏ transitions` directly. Theorem 1.1.2 is the structural identity, proved by `rfl`. Same definitional pattern as `bm-def-5.1.1` and `cv-poisson-def`."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Definitional identity: pathProb is DEFINED as initial x prod(transitions), so Theorem 1.1.2 is rfl. The textbook content (deriving the factorization FROM the Markov property of a path measure) is not formalized — that needs the Ionescu-Tulcea path-space construction. Demoted full->reduced_core in the 2026-06-03 audit (same definitional-unfold pattern as the 2026-05-29 mf-newton-raphson demotion)."
       }
     },
     {

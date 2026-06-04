@@ -33,7 +33,37 @@ python3 -m tools.verify.coverage_report
 ```
 
 Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, higher-order BS greeks, Bachelier greeks, digital greeks, BS-Merton with dividends, Garman-Kohlhagen FX, Black-76 greeks; second pass: Bachelier γ/θ, asset-or-nothing γ, BS-Merton δ/γ/vega, American options in binomial tree; third pass: CRR drift-quotient limit closing the analytic content of CRR-to-BS; fifth pass: cash-or-nothing digital gamma closing the previously deferred quotient-rule item; sixth pass: full digital ρ/vega/θ matrix for cash and asset variants — 6 theorems closing the remaining digital Greek gap; seventh pass: Black-76 ρ and θ closing the futures-options Greek set; eighth pass: CRR drift limit n-form `n·(2p_n−1)·σ·√(T/n) → (r−σ²/2)T` closing the previously deferred substitution work; ninth pass: Phase 5 broader mathematical-finance — fixed-income ZCB pricing/yield/duration/convexity, two-asset Markowitz portfolio theory with completing-the-square factorization, CAPM beta + portfolio linearity — 12 theorems extending the project beyond derivatives pricing into fixed income and portfolio theory; tenth pass: Phase 6 quant-risk + N-asset portfolio + bond immunization — Gaussian VaR/CVaR closed forms with affine/scaling identities, bond portfolio rate sensitivity + Redington-style first-order immunization, N-asset Markowitz variance via Finset double sum with diagonal/iid/PSD/two-asset specializations — 15 theorems; eleventh pass: Phase 7 performance / coherent risk / fixed-income depth / static bounds / two-fund separation — Sharpe (√T scaling + scale invariance) + Kelly criterion, gaussian VaR/CVaR coherent risk-measure axioms (translation, homogeneity, monotonicity, gaussian subadditivity via joint-stdev triangle inequality), annuity geometric-series closed form + forward/spot consistency + coupon-bond YTM monotonicity, Phi ≤ 1 + BS call/put price upper bounds + box-spread arbitrage identity, capital market line equation + Sharpe invariance + two-fund decomposition — 23 theorems extending the project into performance measurement, axiomatic risk, and multi-fund portfolio theory; twelfth pass: Phase 8 extended performance / second-order immunization / Asian option inequality — Sortino/Treynor/Information ratios + tracking-error decomposition, second-derivative bond rate sensitivity ∂²P/∂r² = C_P·P + Redington second-order convexity-matching immunization, two-element and equal-weight n-element AM-GM with two-date geometric ≤ arithmetic Asian payoff bound — 13 theorems; **thirteenth pass: Phase 9 credit-risk + strike Greeks + multi-period Kelly** — reduced-form credit spread under constant hazard with survival monotonicity, BS strike-direction derivatives (∂_K bsV, ∂_K bsP, ∂²_K bsV) via magic-identity collapse + put-call parity, multi-period Kelly criterion with myopia + fraction sign analysis — 14 theorems):
-**231 / 258 delivery-ready** (216 full + 15 library wrappers), 27 reduced cores, 0 placeholders.
+**236 / 258 delivery-ready** (218 full + 18 library wrappers), 22 reduced cores, 0 placeholders.
+
+> **Duplication + status audit (2026-06-03).** A five-reviewer sweep of all 216
+> then-`full` entries asked two questions: does any MathFin module re-derive
+> content already in pinned Mathlib / Degenne's BrownianMotion package, and is
+> any `full` really a wrapper? The foundations tower came back clean — the
+> package at pin `fa590b1` has **no** sorry-free L²-adapted stochastic integral
+> (it stops at the elementary simple-process integral), no strong-type Doob L^p
+> (weak-type only — same as Mathlib, whose own docstring defers the L^p version),
+> no Wald/X²−t martingales, no Itô formula; our Wiener-vs-Itô division and the
+> BrownianMartingale division-of-labor header were re-verified accurate. The
+> Portfolio/Performance/Risk/FixedIncome slice had zero findings (geometric
+> series, Cauchy–Schwarz etc. are consumed from Mathlib, never re-proved).
+> Verified findings, all applied: `full`→`library_wrapper`:
+> `ce-prop-2.1.11-jensen` (Mathlib's `ConvexOn.map_condExp_le_of_finiteDimensional`
+> proves textbook Jensen from bare convexity; our explicit-subgradient derivation
+> was strictly weaker — `Foundations/CondExpJensen.lean` deleted, benchmark now
+> wraps Mathlib), `mf-carr-madan-log` (was a `Real.log_div` alias; alias lemma
+> deleted), `cv-prob-space` (`measure_univ`/`measure_empty`).
+> `full`→`reduced_core`: `pp-thm-3.3.5` and `mc-thm-1.1.2` (THEOREM-named entries
+> whose conclusion is a projected structure field / definitional `rfl`; definition
+> entries `bm-def-5.1.1`/`cv-poisson-def`/`mc-def-1.1.1` keep the documented
+> definitional-`full` convention). Coherence fix: `am_gm_two` now specializes
+> Mathlib's `Real.geom_mean_le_arith_mean2_weighted` instead of re-proving it;
+> documented-distinction cross-references added for the Carr–Madan second-order
+> remainder (the `n = 1` case of Mathlib's `taylor_integral_remainder`, kept in
+> explicit-`HasDerivAt` form) and the StandardNormal MGF (pdf-form vs Mathlib's
+> measure-form `mgf_gaussianReal`). New guardrail:
+> `test_expected_reduced_cores_stay_reduced_core`. Upstream opportunity recorded
+> in `docs/bridges.md` (our L² martingale convergence could discharge the
+> package's sorry'd `SquareIntegrable` targets).
 
 > **Honesty re-audit (2026-05-29).** A dedicated benchmark-`formalization_status`
 > sweep (four adversarial reviewers over all 11 files / 251 theorems, every
@@ -95,6 +125,34 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > derivation route* to a theorem already held, not a new result, so it is recorded here as
 > a known, bounded, **not-pursued** build. See *Geometric Brownian motion* /
 > *Continuous-time first FTAP* in `blueprint.md`.
+
+> **Path-1 upgrades (2026-06-04).** Seven reduced cores earned `full` by the
+> upgrade-properly discipline (build the genuinely deeper theorem; never relabel):
+> `mart-thm-2.3.6` — the conditional-expectation-form **optional sampling
+> inequality** for submartingales (`Foundations/OptionalSamplingInequality.lean`),
+> absent from Mathlib, derived as *optional sampling equality + monotone
+> compensator* through the Doob decomposition;
+> `mf-markowitz-n-psd` — PSD **derived** from genuine L² random returns via the
+> self-dot variance identity on Mathlib's covariance API
+> (`Portfolio/CovariancePSD.lean`);
+> `mf-cvar-rockafellar-uryasev` — the genuine **Rockafellar–Uryasev variational
+> theorem** (`IsLeast`) for the Gaussian loss, minimality by the pointwise tail
+> certificate (`RiskMeasures/RockafellarUryasev.lean`, which previously recorded
+> only the additive identity and explicitly deferred this);
+> `mf-newton-raphson-fixed-at-root` — genuine **local quadratic convergence**
+> `(L/m)·e²` + basin convergence of the Newton iterates
+> (`BlackScholes/NewtonConvergence.lean`);
+> `mf-kmv-survival-Phi-d2` — re-pointed at the probabilistic survival statement
+> `Q(V_T > F) = Φ(DD)` through the lognormal tail;
+> `mf-american-supermartingale` + `mf-american-intrinsic-bound` — the
+> **path-space Snell envelope** (`Binomial/SnellEnvelope.lean`): payoff
+> dominance, supermartingale property, adaptedness, and minimality over
+> arbitrary path-processes, plus the identification theorem
+> `snell = e^{−rk}·americanPrice` exhibiting the scalar Bellman recursion as
+> the Markov instance (the conditional expectation is the explicit node
+> average, which on a finite tree it *is* — same pathwise idiom as
+> `Binomial/MartingaleRepresentation.lean`).
+> All new load-bearing theorems are AxiomAudit-pinned.
 
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.

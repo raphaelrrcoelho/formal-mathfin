@@ -420,3 +420,68 @@ saves a refactor pass.
 Concrete evidence: the L^p continuous-martingale-convergence work shipped
 with `p : ℝ`-indexed `eLpNorm` because that's what `Mathlib.MeasureTheory`
 takes. An earlier version with `p : ℕ≥1` had to be rewritten.
+
+## Upgrade-properly patterns (2026-06-04 batch)
+
+Patterns from the Path-1 session that converted seven reduced cores to full
+derivations (optional sampling inequality, covariance-PSD, Rockafellar–Uryasev,
+Newton convergence, KMV survival, the American/Snell pair).
+
+### Pointwise-certificate minimality
+
+To prove a variational characterization `m = min_c g(c)` — attained at `c*` —
+hunt for a *pointwise* inequality whose integral collapses to `m` for *every*
+`c`, with equality exactly at `c*`. No calculus, no convexity machinery, no
+derivative of the objective.
+
+Concrete: Rockafellar–Uryasev (`RiskMeasures/RockafellarUryasev.lean`). The
+certificate is `(L − c)⁺ ≥ (L − c)·𝟙_{Z > z}` (the `α`-tail event); integrating
+against the Gaussian density gives `g(c) ≥ CVaR` in three integral evaluations,
+and at `c = VaR` the positive part vanishes exactly off the tail — equality.
+The certificate *is* the reason the minimum sits at VaR; a `deriv`-based proof
+would hide it.
+
+### Linearization-subtracted mean value bound
+
+Second-order Taylor control from a *first-order* tool: to bound
+`f y − f x − f'(x)(y − x)`, apply the plain MVT bound
+(`Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`) to the auxiliary
+`g w := f w − f'(x)·w` on the segment — its derivative is `f' w − f'(x)`,
+which a Lipschitz hypothesis on `f'` bounds by `L·|y − x|`. Total:
+`|remainder| ≤ L·|y − x|²` with no `ContDiff`, no `iteratedDeriv`, no second
+derivative anywhere.
+
+Concrete: `newtonStep_quadratic_error` (`BlackScholes/NewtonConvergence.lean`)
+— the whole "Newton is quadratic" content is one application of this plus the
+error–times–derivative identity `(x⁺ − r)·f'(x) = f'(x)(x − r) − f(x)`.
+
+### Inequality = equality + monotone part (decomposition transport)
+
+To upgrade an *equality* theorem about martingales to the *inequality* version
+for submartingales, do not re-run the equality's proof with inequalities
+threaded through. Doob-decompose `f = M + A`, transport the equality on `M`
+(Mathlib's theorem, consumed as-is), prove the compensator `A` monotone
+(its increments are `μ[f_{k+1} − f_k | ℱ_k] ≥ 0` — literally the submartingale
+property), and recombine with `condExp_mono`.
+
+Concrete: `submartingale_optional_sampling`
+(`Foundations/OptionalSamplingInequality.lean`) = Mathlib's
+`Martingale.stoppedValue_ae_eq_condExp_of_le` + `predictablePart` monotonicity.
+The decomposition is the *conceptual* picture, and the proof is exactly it.
+
+### Identification theorems ground scalar recursions in path space
+
+When the library holds a scalar/Markov recursion (a function of the current
+state) and the textbook theorem is about an adapted *process* on paths, do not
+rebuild the scalar layer. Build the path-space object abstractly, prove its
+clauses there (dominance, supermartingale, adaptedness, minimality), then prove
+ONE induction — the identification `scalar recursion = discounted path object`
+— and every clause transports to the scalar object for free.
+
+Concrete: `snellAux_eq_discounted_americanPrice`
+(`Binomial/SnellEnvelope.lean`): `snell q Z N k ω = e^{−rk}·americanPrice
+(N−k) (S_k ω)`. Four abstract Snell clauses + one induction = the genuine
+supermartingale/intrinsic statements about `americanPrice`, with the
+node-average conditional expectation made explicit. Same instrument as the
+"this IS already that" structural reduction, but for *recursions* rather than
+single formulas.

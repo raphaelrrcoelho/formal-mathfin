@@ -25,9 +25,11 @@ the geometric Asian price is bounded above by the arithmetic Asian price.
 
 Results:
 
-* `am_gm_two`: `√(a · b) ≤ (a + b) / 2` for `a, b ≥ 0` (the two-element case).
+* `am_gm_two`: `√(a · b) ≤ (a + b) / 2` for `a, b ≥ 0` — Mathlib's
+  `Real.geom_mean_le_arith_mean2_weighted` at weights `1/2`, bridged from
+  `rpow` to `sqrt`.
 * `geom_mean_le_arith_mean_n`: weighted AM-GM specialized to equal weights
-  `1/n` (uses `Real.inner_le_iff`-style argument via Mathlib).
+  `1/n` (Mathlib's `Real.geom_mean_le_arith_mean_weighted`).
 * `asian_payoff_geom_le_arith_two`: two-time-point geometric Asian payoff is
   bounded above by the arithmetic Asian payoff.
 -/
@@ -36,14 +38,18 @@ namespace MathFin
 
 open Real
 
-/-- **Two-element AM-GM**: `√(a · b) ≤ (a + b) / 2` for `a, b ≥ 0`. -/
+/-- **Two-element AM-GM**: `√(a · b) ≤ (a + b) / 2` for `a, b ≥ 0`. Mathlib's
+weighted two-element AM-GM `Real.geom_mean_le_arith_mean2_weighted` at weights
+`w₁ = w₂ = 1/2`, with `√x = x^(1/2)` bridging `sqrt` to `rpow`. -/
 lemma am_gm_two (a b : ℝ) (ha : 0 ≤ a) (hb : 0 ≤ b) :
     Real.sqrt (a * b) ≤ (a + b) / 2 := by
-  have h_half_nn : 0 ≤ (a + b) / 2 := by linarith
-  have h_diff_sq : 0 ≤ (a - b) ^ 2 := sq_nonneg _
-  have h_ab_le : a * b ≤ ((a + b) / 2) ^ 2 := by nlinarith
-  have h := Real.sqrt_le_sqrt h_ab_le
-  rwa [Real.sqrt_sq h_half_nn] at h
+  have h := Real.geom_mean_le_arith_mean2_weighted
+    (by norm_num : (0:ℝ) ≤ 1/2) (by norm_num : (0:ℝ) ≤ 1/2) ha hb
+    (by norm_num : (1:ℝ)/2 + 1/2 = 1)
+  calc Real.sqrt (a * b) = (a * b) ^ ((1:ℝ)/2) := Real.sqrt_eq_rpow _
+    _ = a ^ ((1:ℝ)/2) * b ^ ((1:ℝ)/2) := Real.mul_rpow ha hb
+    _ ≤ 1/2 * a + 1/2 * b := h
+    _ = (a + b) / 2 := by ring
 
 /-- **Two-time-point geometric vs arithmetic Asian payoff**: for positive
 prices `S₁, S₂` and any strike `K`, the geometric-Asian-call payoff is

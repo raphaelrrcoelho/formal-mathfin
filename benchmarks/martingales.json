@@ -23,14 +23,14 @@
       "description": "Submartingale optional-sampling inequality: for stopping times tau <= sigma bounded by some n, E[stoppedValue f tau] <= E[stoppedValue f sigma] (Mathlib Submartingale.expected_stoppedValue_mono). This is the bounded-time submartingale inequality, NOT the uniformly-integrable-martingale equality E[M_tau] = E[M_0] (which needs the UI + unbounded-tau argument, not wrapped here).",
       "domain": "stopping_times",
       "code": {
-        "lean": "import Mathlib.Probability.Martingale.OptionalStopping\n\nopen MeasureTheory ProbabilityTheory\n\n-- Submartingale version of the optional stopping theorem (Mathlib's\n-- `Submartingale.expected_stoppedValue_mono`): for stopping times τ ≤ σ\n-- bounded by some n, E[stoppedValue f τ] ≤ E[stoppedValue f σ].\n-- For a martingale this gives equality both ways and hence E[M_τ] = E[M_0].\nexample {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    {𝒢 : Filtration ℕ m0} [SigmaFiniteFiltration μ 𝒢]\n    {f : ℕ → Ω → ℝ} (hf : Submartingale f 𝒢 μ)\n    {τ σ : Ω → ℕ∞} (hτ : MeasureTheory.IsStoppingTime 𝒢 τ)\n    (hσ : MeasureTheory.IsStoppingTime 𝒢 σ) (hle : τ ≤ σ)\n    {n : ℕ} (hn : ∀ ω, σ ω ≤ n) :\n    μ[MeasureTheory.stoppedValue f τ] ≤ μ[MeasureTheory.stoppedValue f σ] :=\n  hf.expected_stoppedValue_mono hτ hσ hle hn"
+        "lean": "import Mathlib\nimport MathFin.Foundations.OptionalSamplingInequality\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem submartingale_optional_sampling_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : MeasureTheory.Measure Ω}\n    {ℱ : MeasureTheory.Filtration ℕ m0} {f : ℕ → Ω → ℝ} {τ σ : Ω → ℕ∞} {n : ℕ}\n    [MeasureTheory.SigmaFiniteFiltration μ ℱ]\n    (hf : MeasureTheory.Submartingale f ℱ μ)\n    (hτ : MeasureTheory.IsStoppingTime ℱ τ) (hσ : MeasureTheory.IsStoppingTime ℱ σ)\n    (hσ_le_τ : σ ≤ τ) (hτ_le : ∀ ω, τ ω ≤ n)\n    [MeasureTheory.SigmaFinite (μ.trim hσ.measurableSpace_le)] :\n    MeasureTheory.stoppedValue f σ ≤ᵐ[μ]\n      μ[MeasureTheory.stoppedValue f τ | hσ.measurableSpace] :=\n  MathFin.submartingale_optional_sampling hf hτ hσ hσ_le_τ hτ_le\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.3.6",
         "difficulty": "advanced",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: faithfully wraps the bounded-time submartingale monotonicity; the optional stopping EQUALITY for UI martingales is not delivered."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the conditional-expectation-form optional sampling INEQUALITY for submartingales, stoppedValue f sigma <=ae mu[stoppedValue f tau | F_sigma] for bounded stopping times sigma <= tau <= n (Foundations/OptionalSamplingInequality.lean) — absent from Mathlib at the pin (which has the martingale EQUALITY, Martingale.stoppedValue_ae_eq_condExp_of_le, and only the expectation-form submartingale inequality). Derivation = Doob decomposition: the martingale part transports by Mathlib's optional sampling equality; the compensator predictablePart is a.s. nondecreasing (its increments are mu[f_{k+1} - f_k | F_k] >= 0, exactly the submartingale property), so its stopped values compare pathwise and condExp_mono transports the comparison. Replaces the former wrapper around the expectation-form Submartingale.expected_stoppedValue_mono. Axioms-clean."
       }
     },
     {

@@ -31,7 +31,12 @@ namespace MathFin
 /-- **Second-order Taylor remainder as an integral against `f''`.** For `f` twice
 differentiable on `[[κ, S]]` with continuous `f''`,
 `∫_κ^S (S − t) · f''(t) dt = f S − f κ − f' κ · (S − κ)`. One integration by parts
-(`u = S − ·`, `v = f'`) plus the fundamental theorem of calculus. -/
+(`u = S − ·`, `v = f'`) plus the fundamental theorem of calculus.
+
+This is the `n = 1` case of Mathlib's `taylor_integral_remainder` (stated there via
+`ContDiffOn` + `iteratedDerivWithin`); we keep this explicit-`HasDerivAt` form because the
+spanning proof consumes `f'`, `f''` as named functions and the `iteratedDerivWithin` bridge
+would be longer than the IBP proof itself. -/
 private theorem secondOrder_remainder_eq_integral {f f' f'' : ℝ → ℝ} {κ S : ℝ}
     (hf : ∀ t ∈ Set.uIcc κ S, HasDerivAt f (f' t) t)
     (hf' : ∀ t ∈ Set.uIcc κ S, HasDerivAt f' (f'' t) t)
@@ -156,11 +161,5 @@ theorem carrMadan_log_spanning {L U κ S : ℝ} (hL : 0 < L)
     hLκ hκU hS (fun t ht => Real.hasDerivAt_log (hpos t ht))
     (fun t ht => by simpa using hasDerivAt_inv (hpos t ht))
     (((continuousOn_id.pow 2).inv₀ (fun K hK => pow_ne_zero 2 (hpos K hK))).neg)
-
-/-- **Carr–Madan log-payoff algebra**: `log S − log F = log (S / F)`. (Benchmark-import
-alias for `Real.log_div`.) -/
-theorem carrMadan_log_payoff_algebra (S F : ℝ) (hS : 0 < S) (hF : 0 < F) :
-    Real.log S - Real.log F = Real.log (S / F) := by
-  rw [Real.log_div hS.ne' hF.ne']
 
 end MathFin

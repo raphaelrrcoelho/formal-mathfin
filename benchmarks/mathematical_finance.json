@@ -583,30 +583,30 @@
       "description": "For every n, S: g(S) ≤ americanPrice u d r g n S. The American option is always worth at least its immediate exercise value. Direct from the Bellman max.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.Binomial.American\n\nopen MathFin\n\ntheorem american_ge_intrinsic_thm (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    g S ≤ MathFin.americanPrice u d r g n S :=\n  MathFin.americanPrice_ge_intrinsic u d r g n S\n"
+        "lean": "import Mathlib\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_intrinsic_le_americanPrice_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) (N k : ℕ) (ω : ℕ → Bool) :\n    Real.exp (-r * k) * g (MathFin.spotPath S₀ u d k ω)\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_intrinsic_le_americanPrice u d r g S₀ N k ω\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "American option intrinsic bound (Shreve I 4.4)",
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: le_max_left on the definitional Bellman max (American price >= intrinsic g). Lives in MathFin/Binomial/American.lean. Axioms-clean."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the dominance clause of the Snell characterization at path level — the discounted intrinsic payoff e^{-rk}*g(S_k(omega)) is dominated by the discounted American value along every path, proved through the identification theorem snellAux_eq_discounted_americanPrice (an induction over the tree, Binomial/SnellEnvelope.lean), not by le_max on the Bellman definition. Honest scope: this clause is the elementary corner of the characterization; the depth lives in the sibling clauses (supermartingale property, adaptedness, minimality over arbitrary path-processes) proved in the same module — see mf-american-supermartingale. Axioms-clean."
       }
     },
     {
       "id": "mf-american-supermartingale",
-      "name": "American Price Dominates One-Step Continuation (Bellman max)",
+      "name": "American Value Process is a Supermartingale (Snell Envelope)",
       "description": "The one-period continuation value at V_{n+1} is bounded above by V_{n+1} = max(g, continuation), by le_max_right. This is the Bellman-max dominance; it is NOT the measure-theoretic supermartingale property (no conditional expectation / filtration statement is formalized).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.Binomial.American\n\nopen MathFin\n\ntheorem american_supermartingale_thm (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :\n    MathFin.binomialOptionPriceOnePeriod u d r\n        (MathFin.americanPrice u d r g n (S * u))\n        (MathFin.americanPrice u d r g n (S * d))\n      ≤ MathFin.americanPrice u d r g (n + 1) S :=\n  MathFin.americanPrice_supermartingale u d r g n S\n"
+        "lean": "import Mathlib\nimport MathFin.Binomial.SnellEnvelope\n\nopen MathFin\n\ntheorem discounted_americanPrice_supermartingale_thm\n    (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) {N k : ℕ} (hk : k < N) (ω : ℕ → Bool) :\n    MathFin.crrUpProb u d r * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k true)))\n      + (1 - MathFin.crrUpProb u d r) * (Real.exp (-r * (k + 1 : ℕ)) *\n        MathFin.americanPrice u d r g (N - (k + 1))\n          (MathFin.spotPath S₀ u d (k + 1) (Function.update ω k false)))\n      ≤ Real.exp (-r * k) * MathFin.americanPrice u d r g (N - k)\n          (MathFin.spotPath S₀ u d k ω) :=\n  MathFin.discounted_americanPrice_supermartingale u d r g S₀ hk ω\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "American supermartingale property (Shreve I 4.4, Hull 21.5)",
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: le_max_right on the definitional Bellman max. Lives in MathFin/Binomial/American.lean. Axioms-clean. The risk-neutral supermartingale property proper is not formalized."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine path-process supermartingale property of the discounted American value X_k(omega) = e^{-rk}*americanPrice(N-k, S_k(omega)) on coin-flip paths — q*X_{k+1}(up) + (1-q)*X_{k+1}(down) <= X_k, the explicit node-average form of E[X_{k+1}|F_k] (which on a finite tree IS the conditional expectation; same pathwise idiom as Binomial/MartingaleRepresentation.lean). Proved via the identification theorem snellAux_eq_discounted_americanPrice (the scalar Bellman recursion is the Markov instance of the path-space Snell envelope) in Binomial/SnellEnvelope.lean, where the FULL Snell characterization lives: payoff dominance, supermartingale, adaptedness (pathAdaptedAt clauses), and minimality over arbitrary path-processes (americanPrice_snell_minimal). Replaces the former le_max-on-the-Bellman-def shadow. Axioms-clean."
       }
     },
     {
@@ -1255,14 +1255,14 @@
       "description": "If the covariance kernel σ defines a non-negative quadratic form (∀ v, ∑∑ v_i v_j σ_ij ≥ 0), then portfolio variance is non-negative for any weights.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.Portfolio.MarkowitzNAsset\n\nopen MathFin\n\ntheorem markowitz_n_psd_thm\n    {ι : Type*} (s : Finset ι) (w : ι → ℝ) (σ : ι → ι → ℝ)\n    (h_psd : ∀ v : ι → ℝ, 0 ≤ ∑ i ∈ s, ∑ j ∈ s, v i * v j * σ i j) :\n    0 ≤ MathFin.portfolioVarN s w σ :=\n  MathFin.portfolioVarN_nonneg_of_psd s w σ h_psd\n"
+        "lean": "import Mathlib\nimport MathFin.Portfolio.CovariancePSD\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\ntheorem markowitz_covariance_psd_nonneg_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsFiniteMeasure μ] {ι : Type*} (s : Finset ι) (w : ι → ℝ)\n    (R : ι → Ω → ℝ) (hR : ∀ i ∈ s, MeasureTheory.MemLp (R i) 2 μ) :\n    0 ≤ MathFin.portfolioVarN s w (fun i j => cov[R i, R j; μ]) :=\n  MathFin.portfolioVarN_covariance_nonneg s w R hR\n"
       },
       "metadata": {
         "chapter": 11,
         "reference": "Positive-semidefinite covariance (Bodie-Kane-Marcus Ch 7; Markowitz 1952)",
         "difficulty": "beginner",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: conclusion-in-hypothesis. The PSD hypothesis (forall v, 0 <= sum sum v_i v_j sigma_ij) is instantiated at the specific weights w (h_psd w); there is no derivation that the covariance matrix IS PSD. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the PSD property is DERIVED, not assumed. portfolioVarN_covariance_nonneg (Portfolio/CovariancePSD.lean) proves the Markowitz quadratic form with the genuine covariance kernel cov(R_i, R_j) of L2 random returns equals Var[sum w_i R_i] >= 0 — the self-dot variance identity, via Mathlib's covariance bilinearity (covariance_sum_left'/right', covariance_smul_*, covariance_self). Replaces the former conclusion-in-hypothesis form (PSD assumed, instantiated at w). Axioms-clean."
       }
     },
     {
@@ -2595,18 +2595,18 @@
     },
     {
       "id": "mf-cvar-rockafellar-uryasev",
-      "name": "Gaussian CVaR additive (Rockafellar-Uryasev-form) identity",
+      "name": "Gaussian CVaR: Rockafellar-Uryasev Variational Characterization",
       "description": "Gaussian CVaR rewrites as CVaR_α = VaR_α + σ · (ϕ(z)/(1-α) - z), the additive form. This is the algebraic identity only; it is NOT the Rockafellar-Uryasev variational theorem CVaR = inf_c [c + (1/(1-α))·E[(L-c)⁺]] (no infimum / E[(L-c)⁺] is formalized), which it merely motivates.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem gaussianCVaR_rockafellarUryasev_thm (μ σ z α : ℝ) :\n    MathFin.gaussianCVaR μ σ z α =\n      MathFin.gaussianVaR μ σ z +\n        σ * (gaussianPDFReal 0 1 z / (1 - α) - z) :=\n  MathFin.gaussianCVaR_eq_VaR_plus_tail_term μ σ z α\n"
+        "lean": "import Mathlib\nimport MathFin.RiskMeasures.RockafellarUryasev\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem gaussian_cvar_rockafellar_uryasev_thm (μ σ z α : ℝ) (hσ : 0 < σ)\n    (hzα : MathFin.Phi z = α) (hα1 : α < 1) :\n    IsLeast (Set.range (MathFin.ruObjective μ σ α)) (MathFin.gaussianCVaR μ σ z α) :=\n  MathFin.gaussianCVaR_isLeast_ruObjective μ σ z α hσ hzα hα1\n"
       },
       "metadata": {
         "chapter": 13,
         "reference": "Rockafellar-Uryasev 2000 (CVaR optimization)",
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "Algebraic additive-form identity (ring rearrangement of the gaussian CVaR/VaR closed forms), re-exported. Axioms-clean. NOT the R-U variational/infimum theorem, which is not formalized — hence reduced_core, not full."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuine Rockafellar-Uryasev VARIATIONAL theorem for the Gaussian loss L = mu + sigma*Z — IsLeast: CVaR_alpha is the least value of g(c) = c + E[(L-c)+]/(1-alpha) over all thresholds c, attained at c = VaR_alpha (gaussianCVaR_isLeast_ruObjective, RiskMeasures/RockafellarUryasev.lean). Minimality by the pointwise certificate (L-c)+ >= (L-c)*1_{Z>z} integrated against the Gaussian density; the attained value via the expected-shortfall closed form E[(Z-z)+] = phi(z) - z(1-Phi(z)) built on the truncated-first-moment primitive. Quantile-parametrized (z with Phi(z) = alpha; no Phi-inverse API exists at the Mathlib pin). Replaces the former algebraic additive-identity shadow. Axioms-clean."
       }
     },
     {
@@ -2727,14 +2727,14 @@
       "description": "1 − kmvPD = Φ(d_2^KMV): the algebraic normal-CDF symmetry 1 − Φ(−x) = Φ(x). This is the algebraic identity only — NOT the probabilistic claim that 1 − kmvPD equals the survival probability Q({V_T > F}); that genuine probabilistic content is mf-kmv-merton-pd.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.FixedIncome.KMVMerton\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem kmv_survival_eq_Phi_d2_thm (V_0 F r σ_V T : ℝ) :\n    1 - MathFin.kmvPD V_0 F r σ_V T = Phi (MathFin.kmvDistanceToDefault V_0 F r σ_V T) :=\n  MathFin.kmv_survival_eq_Phi_d2 V_0 F r σ_V T\n"
+        "lean": "import Mathlib\nimport MathFin.FixedIncome.KMVMertonStructural\n\nopen MeasureTheory ProbabilityTheory Real\nopen MathFin\n\ntheorem kmv_survival_probability_eq_Phi_dd_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {Q : MeasureTheory.Measure Ω}\n    [MeasureTheory.IsProbabilityMeasure Q] {V_0 F r σ_V T : ℝ} {Z : Ω → ℝ}\n    (hV : 0 < V_0) (hF : 0 < F) (h : MathFin.BSCallHyp Q V_0 F r σ_V T Z) :\n    (Q {ω | MathFin.bsTerminal V_0 r σ_V T (Z ω) > F}).toReal =\n      Phi (MathFin.kmvDistanceToDefault V_0 F r σ_V T) :=\n  MathFin.survival_probability_eq_Phi_distanceToDefault hV hF h\n"
       },
       "metadata": {
         "chapter": 12,
         "reference": "Merton 1974 / KMV survival probability",
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: the normal-CDF symmetry 1 − Φ(−DD) = Φ(DD) (= 1 − kmvPD = Φ(DD)), an algebraic identity. The probabilistic survival statement is covered by mf-kmv-merton-pd (kmvPD_eq_one_sub_survival_probability). Axioms-clean."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): the genuinely probabilistic survival statement Q({V_T > F}).toReal = Phi(distance-to-default), via MathFin.survival_probability_eq_Phi_distanceToDefault, which routes the no-default event's measure through riskNeutralProb_S_T_gt_K (the lognormal tail computation) and kmvDistanceToDefault_eq_bsd2. Replaces the former algebraic CDF-symmetry shadow (1 - Phi(-DD) = Phi(DD)). Complements mf-kmv-merton-pd (the PD identification) on the survival side. Axioms-clean."
       }
     },
     {
@@ -2887,14 +2887,14 @@
       "description": "log(S) − log(F) = log(S/F): the algebraic identity used in the Carr-Madan static replication of the log payoff.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.Foundations.CarrMadan\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem carrMadan_log_payoff_algebra_thm (S F : ℝ) (hS : 0 < S) (hF : 0 < F) :\n    Real.log S - Real.log F = Real.log (S / F) :=\n  MathFin.carrMadan_log_payoff_algebra S F hS hF\n"
+        "lean": "import Mathlib\n\nopen Real\n\n/-- Carr–Madan log-payoff algebra: `log S − log F = log (S / F)`.\n    Direct invocation of Mathlib's `Real.log_div`. -/\ntheorem carrMadan_log_payoff_algebra_thm (S F : ℝ) (hS : 0 < S) (hF : 0 < F) :\n    Real.log S - Real.log F = Real.log (S / F) :=\n  (Real.log_div hS.ne' hF.ne').symm\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Carr-Madan static replication (Carr-Madan 2001)",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_status": "library_wrapper",
+        "formalization_scope": "Direct invocation of Mathlib's Real.log_div (statement-identical algebra step of the Carr-Madan log-contract chain). Relabeled full->library_wrapper in the 2026-06-03 audit; the former MathFin alias lemma was deleted. The genuine Carr-Madan content lives in mf-carr-madan-spanning and mf-carr-madan-log-contract (both full)."
       }
     },
     {
@@ -2979,18 +2979,18 @@
     },
     {
       "id": "mf-newton-raphson-fixed-at-root",
-      "name": "Newton-Raphson Iteration: Fixed Point at a Root",
+      "name": "Newton-Raphson Iteration: Local Quadratic Convergence",
       "description": "If f(σ) = 0, then the Newton iteration σ_{n+1} = σ_n - f(σ_n)/f'(σ_n) leaves σ unchanged.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.BlackScholes.NewtonRaphsonIV\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem newtonStep_fixed_at_root_thm (f f' : ℝ → ℝ) {σ : ℝ} (h_root : f σ = 0) :\n    MathFin.newtonStep f f' σ = σ :=\n  MathFin.newtonStep_fixed_at_root f f' h_root\n"
+        "lean": "import Mathlib\nimport MathFin.BlackScholes.NewtonConvergence\n\nopen Filter Topology MathFin\n\ntheorem newton_quadratic_error_and_tendsto_thm {f f' : ℝ → ℝ} {r δ m L x₀ : ℝ}\n    (hroot : f r = 0) (hm0 : 0 < m) (hL : 0 ≤ L)\n    (hd : ∀ y ∈ Set.Icc (r - δ) (r + δ), HasDerivAt f (f' y) y)\n    (hlip : ∀ y ∈ Set.Icc (r - δ) (r + δ), ∀ w ∈ Set.Icc (r - δ) (r + δ),\n      |f' y - f' w| ≤ L * |y - w|)\n    (hm : ∀ y ∈ Set.Icc (r - δ) (r + δ), m ≤ |f' y|)\n    (hx₀ : |x₀ - r| ≤ δ) (hbasin : L * δ ≤ m / 2) :\n    (∀ x ∈ Set.Icc (r - δ) (r + δ),\n        |MathFin.newtonStep f f' x - r| ≤ L / m * (x - r) ^ 2) ∧\n      Tendsto (MathFin.newtonSeq f f' x₀) atTop (𝓝 r) :=\n  ⟨fun _ hx => MathFin.newtonStep_quadratic_error hroot hm0 hL hd hlip hm hx,\n    MathFin.newtonSeq_tendsto_root hroot hm0 hL hd hlip hm hx₀ hbasin⟩\n"
       },
       "metadata": {
         "chapter": 14,
         "reference": "Newton-Raphson root-finding (classical numerical analysis)",
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "reduced_core: definitional unfold (f sigma = 0 implies sigma - f sigma / f' sigma = sigma). Honestly named (no Newton convergence/rate claimed). Lives in MathFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation (upgraded-properly 2026-06-04): genuine Newton-Raphson convergence theory replacing the definitional fixed-point unfold. (i) One-step quadratic error |newtonStep x - r| <= (L/m)(x-r)^2 under HasDerivAt + L-Lipschitz f' + |f'| >= m > 0 on [r-d, r+d] — proved via one mean-value bound applied to the linearization-subtracted auxiliary w ↦ f w - f'(x)w on the segment (no second derivative); (ii) basin convergence: |x0 - r| <= d with L*d <= m/2 gives the halving invariant and (1/2)^n geometric decay, hence newtonSeq → r (BlackScholes/NewtonConvergence.lean). In the implied-vol application f' = vega > 0 (bsV_vega_pos) discharges the simple-root hypothesis. The old fixed-point identity remains as the trivial lemma newtonStep_fixed_at_root in ImpliedVolatility.lean. Axioms-clean."
       }
     },
     {
