@@ -191,7 +191,14 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > continuous-time first FTAP). The stale `mf-crr-prob-half` scope sentence
 > claiming the distributional convergence "is upstream-gated on
 > triangular-array CLT" (false since 2026-05-30) was corrected to point at
-> the new entries.
+> the new entries. In the same pass, all 157 stale `lean/MathFin/<X>.lean`
+> prose path references (the pre-reorg flat layout) were remapped to the real
+> `MathFin/<Section>/<X>.lean` paths, using each entry's own compiled imports
+> as the authoritative mapping (the old combined files that were *split* in
+> the reorg — e.g. `StrikeConvexityAndRiskAdditivity.lean` — map to different
+> targets per entry, which a global rename table would have gotten wrong);
+> the ten entries whose snippet docstrings changed were re-verified
+> in-container.
 
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.

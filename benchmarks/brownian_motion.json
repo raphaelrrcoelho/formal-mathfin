@@ -35,7 +35,7 @@
           "from": "reduced_core",
           "to": "full",
           "recorded_on": "2026-05-09",
-          "note": "Real derivation lifted out of inline-snippet JSON (which OOM-ed Lean elaborator) into lean/MathFin/BrownianMartingale.lean as part of the LocalProject mode spike. Benchmark just re-exports the proven lemma."
+          "note": "Real derivation lifted out of inline-snippet JSON (which OOM-ed Lean elaborator) into MathFin/Foundations/BrownianMartingale.lean as part of the LocalProject mode spike. Benchmark just re-exports the proven lemma."
         }
       }
     },
@@ -122,14 +122,14 @@
       "description": "Remark 5.1.6: The process X_t = B_t² - t is a martingale w.r.t. the natural filtration of BM",
       "domain": "brownian_motion",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.Foundations.BrownianMartingale\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Theorem 5.1.6 (square version): for a filtered pre-Brownian motion B,\n    the process t ↦ B_t² − t is a martingale w.r.t. 𝓕. Re-export of\n    `ProbabilityTheory.IsFilteredPreBrownian.squareSubTime_isMartingale`\n    from `lean/MathFin/BrownianMartingale.lean` (proof: decompose\n    B_t² = B_s² + 2 B_s (B_t − B_s) + (B_t − B_s)²; apply condExp linearity,\n    pull-out, and independence; second-moment of the increment is the variance\n    of the Gaussian increment). -/\ntheorem brownian_square_minus_time_is_martingale\n    {P : Measure Ω} [IsFiniteMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian B 𝓕 P] :\n    Martingale (fun t ω => (B t ω) ^ 2 - (t : ℝ)) 𝓕 P :=\n  IsFilteredPreBrownian.squareSubTime_isMartingale\n"
+        "lean": "import Mathlib\nimport MathFin.Foundations.BrownianMartingale\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Theorem 5.1.6 (square version): for a filtered pre-Brownian motion B,\n    the process t ↦ B_t² − t is a martingale w.r.t. 𝓕. Re-export of\n    `ProbabilityTheory.IsFilteredPreBrownian.squareSubTime_isMartingale`\n    from `MathFin/Foundations/BrownianMartingale.lean` (proof: decompose\n    B_t² = B_s² + 2 B_s (B_t − B_s) + (B_t − B_s)²; apply condExp linearity,\n    pull-out, and independence; second-moment of the increment is the variance\n    of the Gaussian increment). -/\ntheorem brownian_square_minus_time_is_martingale\n    {P : Measure Ω} [IsFiniteMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian B 𝓕 P] :\n    Martingale (fun t ω => (B t ω) ^ 2 - (t : ℝ)) 𝓕 P :=\n  IsFilteredPreBrownian.squareSubTime_isMartingale\n"
       },
       "metadata": {
         "chapter": 5,
         "reference": "Remark 5.1.6",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Real Lean derivation of Theorem 5.1.6 (square version) in lean/MathFin/BrownianMartingale.lean. The structure BrownianMartingaleHyp encodes pre-Brownian + adaptedness + independence-of-past-from-future-increment hypotheses; square_minus_time_is_martingale derives the martingale property of B_t² − t via condExp_add (linearity), condExp_mul_of_stronglyMeasurable_left (pull-out of B_s), condExp_indep_eq (collapse of independent quantities to their integrals), and the second-moment computation ∫ x² ∂(gaussianReal 0 v) = v derived from variance_id_gaussianReal + variance_of_integral_eq_zero."
+        "formalization_scope": "Real Lean derivation of Theorem 5.1.6 (square version) in MathFin/Foundations/BrownianMartingale.lean. The structure BrownianMartingaleHyp encodes pre-Brownian + adaptedness + independence-of-past-from-future-increment hypotheses; square_minus_time_is_martingale derives the martingale property of B_t² − t via condExp_add (linearity), condExp_mul_of_stronglyMeasurable_left (pull-out of B_s), condExp_indep_eq (collapse of independent quantities to their integrals), and the second-moment computation ∫ x² ∂(gaussianReal 0 v) = v derived from variance_id_gaussianReal + variance_of_integral_eq_zero."
       }
     },
     {
@@ -138,14 +138,14 @@
       "description": "Remark 5.1.6: Y_t = exp(αB_t - α²t/2) is a martingale (the Wald/stochastic exponential of BM)",
       "domain": "brownian_motion",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.Foundations.BrownianMartingale\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Theorem 5.1.6 (Wald exponential): for a filtered pre-Brownian motion B\n    and any α : ℝ, the Wald exponential t ↦ exp(α B_t − α² t / 2) is a\n    martingale w.r.t. 𝓕. Re-export of\n    `ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale`\n    from `lean/MathFin/BrownianMartingale.lean` (proof: pointwise\n    factorization M_t = M_s · D_st where M_s is 𝓕_s-measurable and D_st is a\n    function of the increment, then condExp_mul_of_stronglyMeasurable_left\n    pull-out + condExp_indep_eq + Gaussian MGF gives E[D_st] = 1). -/\ntheorem brownian_wald_exponential_is_martingale\n    {P : Measure Ω} [IsFiniteMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian B 𝓕 P] (α : ℝ) :\n    Martingale (fun t ω => Real.exp (α * B t ω - α ^ 2 * (t : ℝ) / 2)) 𝓕 P :=\n  IsFilteredPreBrownian.waldExponential_isMartingale α\n"
+        "lean": "import Mathlib\nimport MathFin.Foundations.BrownianMartingale\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal ENNReal\n\nvariable {Ω : Type*} {mΩ : MeasurableSpace Ω}\n\n/-- Theorem 5.1.6 (Wald exponential): for a filtered pre-Brownian motion B\n    and any α : ℝ, the Wald exponential t ↦ exp(α B_t − α² t / 2) is a\n    martingale w.r.t. 𝓕. Re-export of\n    `ProbabilityTheory.IsFilteredPreBrownian.waldExponential_isMartingale`\n    from `MathFin/Foundations/BrownianMartingale.lean` (proof: pointwise\n    factorization M_t = M_s · D_st where M_s is 𝓕_s-measurable and D_st is a\n    function of the increment, then condExp_mul_of_stronglyMeasurable_left\n    pull-out + condExp_indep_eq + Gaussian MGF gives E[D_st] = 1). -/\ntheorem brownian_wald_exponential_is_martingale\n    {P : Measure Ω} [IsFiniteMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} {B : ℝ≥0 → Ω → ℝ}\n    [IsFilteredPreBrownian B 𝓕 P] (α : ℝ) :\n    Martingale (fun t ω => Real.exp (α * B t ω - α ^ 2 * (t : ℝ) / 2)) 𝓕 P :=\n  IsFilteredPreBrownian.waldExponential_isMartingale α\n"
       },
       "metadata": {
         "chapter": 5,
         "reference": "Remark 5.1.6",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Real Lean derivation of Theorem 5.1.6 (Wald exponential) in lean/MathFin/BrownianMartingale.lean. The conditional expectation step uses pointwise decomposition exp(α B_t − α²t/2) = exp(α B_s − α²s/2) · exp(α(B_t − B_s) − α²(t−s)/2), pull-out of the 𝓕_s-measurable factor via condExp_mul_of_stronglyMeasurable_left, and condExp_indep_eq + Gaussian MGF formula (mgf_id_gaussianReal) to show E[exp(α(B_t-B_s) − α²(t−s)/2)] = 1. Integrability via HasLaw + integrable_exp_mul_gaussianReal."
+        "formalization_scope": "Real Lean derivation of Theorem 5.1.6 (Wald exponential) in MathFin/Foundations/BrownianMartingale.lean. The conditional expectation step uses pointwise decomposition exp(α B_t − α²t/2) = exp(α B_s − α²s/2) · exp(α(B_t − B_s) − α²(t−s)/2), pull-out of the 𝓕_s-measurable factor via condExp_mul_of_stronglyMeasurable_left, and condExp_indep_eq + Gaussian MGF formula (mgf_id_gaussianReal) to show E[exp(α(B_t-B_s) − α²(t−s)/2)] = 1. Integrability via HasLaw + integrable_exp_mul_gaussianReal."
       }
     },
     {

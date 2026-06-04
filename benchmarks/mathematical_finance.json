@@ -14,7 +14,7 @@
         "reference": "Black-Scholes put formula (Hull 16.6, Shreve 4.5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in lean/MathFin/BlackScholesPut.lean (~230 lines). Derivation parallel to bs_call_formula: HasLaw transfer to standard normal, max(K - S_T, 0) as indicator on Iic(-d_2), then left-tail completing-the-square integral_exp_mul_gaussianPDFReal_Iic. Axioms-clean."
+        "formalization_scope": "Full formal proof. Lives in MathFin/BlackScholes/Put.lean (~230 lines). Derivation parallel to bs_call_formula: HasLaw transfer to standard normal, max(K - S_T, 0) as indicator on Iic(-d_2), then left-tail completing-the-square integral_exp_mul_gaussianPDFReal_Iic. Axioms-clean."
       }
     },
     {
@@ -30,7 +30,7 @@
         "reference": "Put-call parity (Hull 11.4, Shreve 4.5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct algebraic corollary of bs_call_formula + bs_put_formula + Phi_add_Phi_neg. Lives in lean/MathFin/BlackScholesPut.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Direct algebraic corollary of bs_call_formula + bs_put_formula + Phi_add_Phi_neg. Lives in MathFin/BlackScholes/Put.lean. Axioms-clean."
       }
     },
     {
@@ -46,7 +46,7 @@
         "reference": "Cash-or-nothing digital (Hull 26.1)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. HasLaw transfer + indicator identification on Ioi(-d_2) via bsTerminal_gt_K_iff + gaussianReal_Ioi_toReal. Lives in lean/MathFin/BlackScholesDigital.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. HasLaw transfer + indicator identification on Ioi(-d_2) via bsTerminal_gt_K_iff + gaussianReal_Ioi_toReal. Lives in MathFin/BlackScholes/Digital.lean. Axioms-clean."
       }
     },
     {
@@ -62,7 +62,7 @@
         "reference": "Asset-or-nothing digital (Hull 26.1)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. HasLaw transfer + indicator on Ioi(-d_2) + completing-the-square integral_exp_mul_gaussianPDFReal_Ioi. Together with cash-or-nothing, gives BS call decomposition. Lives in lean/MathFin/BlackScholesDigital.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. HasLaw transfer + indicator on Ioi(-d_2) + completing-the-square integral_exp_mul_gaussianPDFReal_Ioi. Together with cash-or-nothing, gives BS call decomposition. Lives in MathFin/BlackScholes/Digital.lean. Axioms-clean."
       }
     },
     {
@@ -78,7 +78,7 @@
         "reference": "Forward pricing under no-arbitrage (Hull 5.6)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Uses Gaussian MGF identity integral_exp_mul_gaussianPDFReal_univ + BS martingale algebra. Lives in lean/MathFin/BlackScholesForward.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Uses Gaussian MGF identity integral_exp_mul_gaussianPDFReal_univ + BS martingale algebra. Lives in MathFin/BlackScholes/Forward.lean. Axioms-clean."
       }
     },
     {
@@ -94,7 +94,7 @@
         "reference": "BS vega (Hull 19.3, Shreve 4.5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Chain rule + magic identity bs_identity collapse the d/dσ d_i terms, leaving S pdf(d_1) sqrt(τ). Lives in lean/MathFin/BlackScholesPDE.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Chain rule + magic identity bs_identity collapse the d/dσ d_i terms, leaving S pdf(d_1) sqrt(τ). Lives in MathFin/BlackScholes/PDE.lean. Axioms-clean."
       }
     },
     {
@@ -110,7 +110,7 @@
         "reference": "BS rho (Hull 19.5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Chain rule on d/dr d_i + d/dr exp(-rτ) + magic identity collapses pdf terms, leaving K*τ*exp(-rτ)*Phi(d_2). Lives in lean/MathFin/BlackScholesPDE.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Chain rule on d/dr d_i + d/dr exp(-rτ) + magic identity collapses pdf terms, leaving K*τ*exp(-rτ)*Phi(d_2). Lives in MathFin/BlackScholes/PDE.lean. Axioms-clean."
       }
     },
     {
@@ -126,7 +126,7 @@
         "reference": "Bachelier (1900) option pricing; modern: Brigo & Mercurio (2006), Black (1976)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Parallels bs_call_formula but for arithmetic BM. Key new primitive: truncated mean of N(0,1): integral_id_mul_gaussianPDFReal_Ioi a = pdf(0,1,a), proved via FTC integral_Ioi_of_hasDerivAt_of_tendsto using (-pdf)' = z*pdf. Plus integrable_id_mul_gaussianPDFReal_volume (transfer via withDensity). Lives in lean/MathFin/BachelierModel.lean (~330 lines). Axioms-clean."
+        "formalization_scope": "Full formal proof. Parallels bs_call_formula but for arithmetic BM. Key new primitive: truncated mean of N(0,1): integral_id_mul_gaussianPDFReal_Ioi a = pdf(0,1,a), proved via FTC integral_Ioi_of_hasDerivAt_of_tendsto using (-pdf)' = z*pdf. Plus integrable_id_mul_gaussianPDFReal_volume (transfer via withDensity). Lives in MathFin/BlackScholes/Bachelier.lean (~330 lines). Axioms-clean."
       }
     },
     {
@@ -142,7 +142,7 @@
         "reference": "Implied volatility uniqueness (Hull 19.10, Shreve 4.5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Vega-positivity (bsV_vega_pos) + strictMonoOn_of_deriv_pos + StrictMonoOn.injOn. Lives in lean/MathFin/ImpliedVolatility.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Vega-positivity (bsV_vega_pos) + strictMonoOn_of_deriv_pos + StrictMonoOn.injOn. Lives in MathFin/BlackScholes/ImpliedVolatility.lean. Axioms-clean."
       }
     },
     {
@@ -158,7 +158,7 @@
         "reference": "Black (1976) formula for futures options (Hull 18.7)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Specialization of bs_call_formula with BS-drift r=0 (futures are martingales) plus external discount rate. Lives in lean/MathFin/BlackFutures.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Specialization of bs_call_formula with BS-drift r=0 (futures are martingales) plus external discount rate. Lives in MathFin/Futures/Black76.lean. Axioms-clean."
       }
     },
     {
@@ -174,7 +174,7 @@
         "reference": "Single-period binomial replication (Cox-Ross-Rubinstein 1979; Shreve I 1.2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of all three statements: portfolio cost, up-state payoff, down-state payoff. Lives in lean/MathFin/BinomialModel.lean. Axioms-clean. Multi-period backward induction (binomialPrice) also defined and proved consistent; CRR convergence to BS is upstream."
+        "formalization_scope": "Full formal proof of all three statements: portfolio cost, up-state payoff, down-state payoff. Lives in MathFin/Binomial/Model.lean. Axioms-clean. Multi-period backward induction (binomialPrice) also defined and proved consistent; CRR convergence to BS is upstream."
       }
     },
     {
@@ -190,7 +190,7 @@
         "reference": "CRR parameterization, one-step martingale (Hull 21.1, Shreve I 1.2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Pure algebraic identity following from the definitions of crrUp, crrDown, crrPerStepRate, crrProb. Lives in lean/MathFin/BinomialCRRConvergence.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Pure algebraic identity following from the definitions of crrUp, crrDown, crrPerStepRate, crrProb. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean."
       }
     },
     {
@@ -206,7 +206,7 @@
         "reference": "CRR convergence (analytic step), Hull 21.1, Shreve I 3.2",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in lean/MathFin/BinomialCRRConvergence.lean. Axioms-clean. The full distributional convergence binomialPrice → bs_call_price is now proved: see mf-crr-gaussian-limit and mf-crr-bs-call-convergence."
+        "formalization_scope": "Full formal proof. Substantial: ~80 lines using difference-quotient limits (e^{cx}-1)/x → c via hasDerivAt_iff_tendsto_slope, plus quotient-of-limits arithmetic to show p(h) → 1/2 as h → 0, plus composition with h_n = √(T/n). Implies the variance limit. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean. The full distributional convergence binomialPrice → bs_call_price is now proved: see mf-crr-gaussian-limit and mf-crr-bs-call-convergence."
       }
     },
     {
@@ -222,7 +222,7 @@
         "reference": "CRR variance convergence (Hull 21.1, Shreve I 3.2)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in lean/MathFin/BinomialCRRConvergence.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Direct corollary of crrProb_tendsto_half via 4 p_n (1 - p_n) → 4 · (1/2) · (1/2) = 1, then const_mul to get σ² T. Lives in MathFin/Binomial/CRRConvergence.lean. Axioms-clean."
       }
     },
     {
@@ -270,7 +270,7 @@
         "reference": "BS put delta (Hull 19.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via put-call parity: bsP = bsV - S + K e^{-rτ}, so ∂P/∂S = ∂V/∂S - 1 = Φ(d₁) - 1. Lives in lean/MathFin/BlackScholesPutGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via put-call parity: bsP = bsV - S + K e^{-rτ}, so ∂P/∂S = ∂V/∂S - 1 = Φ(d₁) - 1. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -286,7 +286,7 @@
         "reference": "BS put gamma (Hull 19.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Same as call gamma (the linear correction in put-call parity has zero second derivative). Lives in lean/MathFin/BlackScholesPutGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Same as call gamma (the linear correction in put-call parity has zero second derivative). Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -302,7 +302,7 @@
         "reference": "BS put theta (Hull 19.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via put-call parity: ∂P/∂τ = ∂V/∂τ - r K e^{-rτ}, with Φ(d₂) → Φ(-d₂) via Phi_add_Phi_neg. Lives in lean/MathFin/BlackScholesPutGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via put-call parity: ∂P/∂τ = ∂V/∂τ - r K e^{-rτ}, with Φ(d₂) → Φ(-d₂) via Phi_add_Phi_neg. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -318,7 +318,7 @@
         "reference": "BS put vega (Hull 19.6)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Same as call vega via put-call parity. Lives in lean/MathFin/BlackScholesPutGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Same as call vega via put-call parity. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -334,7 +334,7 @@
         "reference": "BS put rho (Hull 19.7)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via put-call parity + Phi_add_Phi_neg. Lives in lean/MathFin/BlackScholesPutGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via put-call parity + Phi_add_Phi_neg. Lives in MathFin/BlackScholes/PutGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -350,7 +350,7 @@
         "reference": "BS vanna (Wystup 2002)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Product + chain rule on vega(S), with σ√τ - d₁ = -d₂ collapse. Lives in lean/MathFin/BlackScholesHigherGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Product + chain rule on vega(S), with σ√τ - d₁ = -d₂ collapse. Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -366,7 +366,7 @@
         "reference": "BS volga / vomma (Wystup 2002)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof using the clean derivative ∂_σ d₁ = -d₂/σ + chain rule on ϕ. Lives in lean/MathFin/BlackScholesHigherGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof using the clean derivative ∂_σ d₁ = -d₂/σ + chain rule on ϕ. Lives in MathFin/BlackScholes/HigherGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -382,7 +382,7 @@
         "reference": "Bachelier delta",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Product + chain rule, with (S-K)·∂d/∂S = d cancelling the σ√T·ϕ(d)·∂d/∂S contribution. Lives in lean/MathFin/BachelierGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Product + chain rule, with (S-K)·∂d/∂S = d cancelling the σ√T·ϕ(d)·∂d/∂S contribution. Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -398,7 +398,7 @@
         "reference": "Bachelier vega",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Quotient rule on d + chain rule on Φ, ϕ; algebraic cancellation. Lives in lean/MathFin/BachelierGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Quotient rule on d + chain rule on Φ, ϕ; algebraic cancellation. Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -414,7 +414,7 @@
         "reference": "Cash-or-nothing digital delta (Hull 26.1)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Chain rule on e^{-rτ} · Φ(d₂(S)). Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Chain rule on e^{-rτ} · Φ(d₂(S)). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -430,7 +430,7 @@
         "reference": "Asset-or-nothing digital delta (Hull 26.1)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Product rule on S · Φ(d₁(S)). Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Product rule on S · Φ(d₁(S)). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -446,7 +446,7 @@
         "reference": "BS-Merton with dividends (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Apply bs_call_formula with rate parameter r-q, then factor e^{-rT} = e^{-qT} · e^{-(r-q)T} on the LHS. Lives in lean/MathFin/BlackScholesDividends.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Apply bs_call_formula with rate parameter r-q, then factor e^{-rT} = e^{-qT} · e^{-(r-q)T} on the LHS. Lives in MathFin/BlackScholes/Dividends.lean. Axioms-clean."
       }
     },
     {
@@ -462,7 +462,7 @@
         "reference": "Garman-Kohlhagen FX (Hull 17.3)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct specialization of bs_dividends_call_formula with q := r_f. Lives in lean/MathFin/BlackScholesDividends.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Direct specialization of bs_dividends_call_formula with q := r_f. Lives in MathFin/BlackScholes/Dividends.lean. Axioms-clean."
       }
     },
     {
@@ -478,7 +478,7 @@
         "reference": "Black-76 delta (Hull 17.6)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. bsV delta at r=0 times outer discount factor e^{-rT}. Lives in lean/MathFin/BlackFuturesGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. bsV delta at r=0 times outer discount factor e^{-rT}. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
       }
     },
     {
@@ -494,7 +494,7 @@
         "reference": "Black-76 gamma (Hull 17.6)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. bsV gamma at r=0 times outer discount factor. Lives in lean/MathFin/BlackFuturesGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. bsV gamma at r=0 times outer discount factor. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
       }
     },
     {
@@ -510,7 +510,7 @@
         "reference": "Black-76 vega (Hull 17.6)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. bsV vega at r=0 times outer discount factor. Lives in lean/MathFin/BlackFuturesGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. bsV vega at r=0 times outer discount factor. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
       }
     },
     {
@@ -526,7 +526,7 @@
         "reference": "Bachelier gamma",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Chain rule on Φ(d(S)) with ∂_S d = 1/(σ√T). Lives in lean/MathFin/BachelierGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Chain rule on Φ(d(S)) with ∂_S d = 1/(σ√T). Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -542,7 +542,7 @@
         "reference": "Bachelier theta",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Quotient + chain rules on d(T) + algebraic cancellation. Lives in lean/MathFin/BachelierGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Quotient + chain rules on d(T) + algebraic cancellation. Lives in MathFin/BlackScholes/BachelierGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -558,7 +558,7 @@
         "reference": "Asset-or-nothing gamma (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Sum of Φ-chain-rule and pdf-chain-rule contributions, collapsed via the σ√τ − d₁ = -d₂ identity. Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Sum of Φ-chain-rule and pdf-chain-rule contributions, collapsed via the σ√τ − d₁ = -d₂ identity. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -574,7 +574,7 @@
         "reference": "BS-Merton dividends delta (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct const_mul of the BS call delta at effective drift r-q. Lives in lean/MathFin/BlackScholesDividendsGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Direct const_mul of the BS call delta at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -590,7 +590,7 @@
         "reference": "BS-Merton dividends gamma (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct const_mul of the BS call gamma at effective drift r-q. Lives in lean/MathFin/BlackScholesDividendsGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Direct const_mul of the BS call gamma at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -606,7 +606,7 @@
         "reference": "BS-Merton dividends vega (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Direct const_mul of the BS call vega at effective drift r-q. Lives in lean/MathFin/BlackScholesDividendsGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Direct const_mul of the BS call vega at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -654,7 +654,7 @@
         "reference": "American ≥ European (Hull 11.5, Shreve I 4.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof by induction on remaining steps, using supermartingale property + monotonicity of binomialOptionPriceOnePeriod. Lives in lean/MathFin/AmericanBinomial.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof by induction on remaining steps, using supermartingale property + monotonicity of binomialOptionPriceOnePeriod. Lives in MathFin/Binomial/American.lean. Axioms-clean."
       }
     },
     {
@@ -670,7 +670,7 @@
         "reference": "CRR drift convergence (Hull 21.1, Shreve I 3.2)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof of the h-form drift quotient limit. Building blocks: tendsto_exp_sym_sub_two_div_sq (via the algebraic identity e^{σh} + e^{-σh} - 2 = e^{-σh}(e^{σh} - 1)², reducing to existing tendsto_exp_sub_one_div); tendsto_crr_numerator_div_sq (combines with the existing tendsto_exp_sq_sub_one_div_sq); tendsto_sinh_div for the denominator. The n → ∞ form n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T is the obvious substitution h = √(T/n) scaled by σT, deferred as routine algebra (the Lean expression for the substitution is intricate, the analytic content is identical to the h-form proven here). Lives in lean/MathFin/BinomialDriftLimit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof of the h-form drift quotient limit. Building blocks: tendsto_exp_sym_sub_two_div_sq (via the algebraic identity e^{σh} + e^{-σh} - 2 = e^{-σh}(e^{σh} - 1)², reducing to existing tendsto_exp_sub_one_div); tendsto_crr_numerator_div_sq (combines with the existing tendsto_exp_sq_sub_one_div_sq); tendsto_sinh_div for the denominator. The n → ∞ form n · (2 p_n − 1) · σ√(T/n) → (r − σ²/2)T is the obvious substitution h = √(T/n) scaled by σT, deferred as routine algebra (the Lean expression for the substitution is intricate, the analytic content is identical to the h-form proven here). Lives in MathFin/Binomial/DriftLimit.lean. Axioms-clean."
       }
     },
     {
@@ -686,7 +686,7 @@
         "reference": "BS-Merton dividends rho (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via chain rule on r' ↦ r' - q applied to existing call rho, combining e^{-qT} · e^{-(r-q)T} = e^{-rT}. Lives in lean/MathFin/BlackScholesDividendsGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via chain rule on r' ↦ r' - q applied to existing call rho, combining e^{-qT} · e^{-(r-q)T} = e^{-rT}. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -702,7 +702,7 @@
         "reference": "BS-Merton dividends psi (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ). The first-term contribution -τ·V_q and the second-term -K·τ·e^{-rτ}·Φ(d₂') combine via the magic-identity-like cancellation S·e^{-qτ}·Φ(d₁') = K·e^{-rτ}·Φ(d₂') minus itself (the residual Φ(d₂') terms cancel). Lives in lean/MathFin/BlackScholesDividendsGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ). The first-term contribution -τ·V_q and the second-term -K·τ·e^{-rτ}·Φ(d₂') combine via the magic-identity-like cancellation S·e^{-qτ}·Φ(d₁') = K·e^{-rτ}·Φ(d₂') minus itself (the residual Φ(d₂') terms cancel). Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -718,7 +718,7 @@
         "reference": "BS-Merton dividends theta (Hull 17.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ) using existing hasDerivAt_bsV_tau at effective drift r-q. Lives in lean/MathFin/BlackScholesDividendsGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via product rule on V_q = e^{-qτ}·bsV(K, r-q, σ, S, τ) using existing hasDerivAt_bsV_tau at effective drift r-q. Lives in MathFin/BlackScholes/DividendsGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -734,7 +734,7 @@
         "reference": "Cash-or-nothing gamma (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ). Numerator f(s) = e^{-rτ}·ϕ(d₂(s)) with f'(S) = e^{-rτ}·(-d₂·ϕ(d₂))·(1/(Sσ√τ)); denominator g(s) = s·σ·√τ with g'(S) = σ·√τ. Quotient (f'·g − f·g')/g² collapses via d₂ + σ√τ = d₁. Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via quotient rule on δ_cash(s) = e^{-rτ}·ϕ(d₂(s))/(s·σ·√τ). Numerator f(s) = e^{-rτ}·ϕ(d₂(s)) with f'(S) = e^{-rτ}·(-d₂·ϕ(d₂))·(1/(Sσ√τ)); denominator g(s) = s·σ·√τ with g'(S) = σ·√τ. Quotient (f'·g − f·g')/g² collapses via d₂ + σ√τ = d₁. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -750,7 +750,7 @@
         "reference": "Asset-or-nothing rho (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. ∂_r d₁ = √τ/σ since d₁ − d₂ is r-independent. Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. ∂_r d₁ = √τ/σ since d₁ − d₂ is r-independent. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -766,7 +766,7 @@
         "reference": "Cash-or-nothing rho (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via product rule. ∂_r e^{-rτ} = -τ·e^{-rτ}, ∂_r Φ(d₂(r)) = ϕ(d₂)·√τ/σ. Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via product rule. ∂_r e^{-rτ} = -τ·e^{-rτ}, ∂_r Φ(d₂(r)) = ϕ(d₂)·√τ/σ. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -782,7 +782,7 @@
         "reference": "Asset-or-nothing vega (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. The Lean form (σ²τ/2 − log(S/K) − rτ)/(σ²√τ) for ∂_σ d₁ equals -d₂/σ via bsd2_eq + field_simp + ring. Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁. The Lean form (σ²τ/2 − log(S/K) − rτ)/(σ²√τ) for ∂_σ d₁ equals -d₂/σ via bsd2_eq + field_simp + ring. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -798,7 +798,7 @@
         "reference": "Cash-or-nothing vega (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₂. The Lean form ∂_σ d₂ = ∂_σ d₁ − √τ equals -d₁/σ via bsd2_eq + the identity bsd2 + σ√τ = bsd1. Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₂. The Lean form ∂_σ d₂ = ∂_σ d₁ − √τ equals -d₁/σ via bsd2_eq + the identity bsd2 + σ√τ = bsd1. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -814,7 +814,7 @@
         "reference": "Asset-or-nothing theta (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁ in τ. Lean's natural quotient-rule form for ∂_τ d₁ equals (r + σ²/2)/(σ√τ) − d₁/(2τ) by algebra (left to consumer). Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via chain rule on Φ ∘ d₁ in τ. Lean's natural quotient-rule form for ∂_τ d₁ equals (r + σ²/2)/(σ√τ) − d₁/(2τ) by algebra (left to consumer). Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -830,7 +830,7 @@
         "reference": "Cash-or-nothing theta (Hull 26.1)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via product rule on e^{-rτ}·Φ(d₂(τ)). ∂_τ e^{-rτ} = -r·e^{-rτ}; ∂_τ Φ(d₂(τ)) = ϕ(d₂)·∂_τ d₂ where ∂_τ d₂ is the Lean natural form. Lives in lean/MathFin/BlackScholesDigitalGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via product rule on e^{-rτ}·Φ(d₂(τ)). ∂_τ e^{-rτ} = -r·e^{-rτ}; ∂_τ Φ(d₂(τ)) = ϕ(d₂)·∂_τ d₂ where ∂_τ d₂ is the Lean natural form. Lives in MathFin/BlackScholes/DigitalGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -846,7 +846,7 @@
         "reference": "Black-76 rho (Hull 17.6)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The inner bsV(K, 0, σ, F, T) has zero drift so is r-independent. Only the discount factor e^{-rT} contributes, giving the clean -T·V_B form. Lives in lean/MathFin/BlackFuturesGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The inner bsV(K, 0, σ, F, T) has zero drift so is r-independent. Only the discount factor e^{-rT} contributes, giving the clean -T·V_B form. Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
       }
     },
     {
@@ -862,7 +862,7 @@
         "reference": "Black-76 theta (Hull 17.6)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via product rule on e^{-rT}·bsV(K, 0, σ, F, T). ∂_T e^{-rT} = -r·e^{-rT}; ∂_T bsV(·, 0, ·) reduces to σ·F·ϕ(d₁)/(2√T) (the rK·e^{-rT}·Φ(d₂) term vanishes at r=0). Lives in lean/MathFin/BlackFuturesGreeks.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via product rule on e^{-rT}·bsV(K, 0, σ, F, T). ∂_T e^{-rT} = -r·e^{-rT}; ∂_T bsV(·, 0, ·) reduces to σ·F·ϕ(d₁)/(2√T) (the rK·e^{-rT}·Φ(d₂) term vanishes at r=0). Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
       }
     },
     {
@@ -878,7 +878,7 @@
         "reference": "CRR drift correspondence to BS (Cox-Ross-Rubinstein 1979; Hull 13.4)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form crr_drift_limit_h, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in lean/MathFin/BinomialDriftLimit.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Substitutes h_n = √(T/n) into the h-form crr_drift_limit_h, scales by σT, and closes the algebraic residual via linear_combination over the identity n · (√(T/n))² = T. Lives in MathFin/Binomial/DriftLimit.lean. Axioms-clean."
       }
     },
     {
@@ -894,7 +894,7 @@
         "reference": "Continuous-compounding ZCB (Hull 4.2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in lean/MathFin/FixedIncome.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -910,7 +910,7 @@
         "reference": "Yield-to-maturity for ZCB (Hull 4.2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via log of exp + algebraic simplification. Lives in lean/MathFin/FixedIncome.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via log of exp + algebraic simplification. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -926,7 +926,7 @@
         "reference": "Macaulay/Modified Duration for ZCB (Hull 4.8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in lean/MathFin/FixedIncome.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -942,7 +942,7 @@
         "reference": "Bond convexity for ZCB (Hull 4.9)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Lives in lean/MathFin/FixedIncome.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. Lives in MathFin/FixedIncome/ZCB.lean. Axioms-clean."
       }
     },
     {
@@ -958,7 +958,7 @@
         "reference": "Markowitz mean-variance frontier, two-asset case (Bodie-Kane-Marcus Ch 7)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring on the polynomial identity. Lives in lean/MathFin/Markowitz.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring on the polynomial identity. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
       }
     },
     {
@@ -974,7 +974,7 @@
         "reference": "Markowitz minimum-variance closed form (Bodie-Kane-Marcus Ch 7)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof, immediate from the variance factorization at w = w*. Lives in lean/MathFin/Markowitz.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof, immediate from the variance factorization at w = w*. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
       }
     },
     {
@@ -990,7 +990,7 @@
         "reference": "Markowitz mean-variance frontier as a lower envelope (Bodie-Kane-Marcus Ch 7)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from the variance factorization plus sq_nonneg + linarith. Lives in lean/MathFin/Markowitz.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from the variance factorization plus sq_nonneg + linarith. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
       }
     },
     {
@@ -1006,7 +1006,7 @@
         "reference": "Markowitz perfect-hedge identity (Bodie-Kane-Marcus Ch 7)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The numerator (1 - ρ²) vanishes at ρ = -1. Lives in lean/MathFin/Markowitz.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The numerator (1 - ρ²) vanishes at ρ = -1. Lives in MathFin/Portfolio/Markowitz.lean. Axioms-clean."
       }
     },
     {
@@ -1022,7 +1022,7 @@
         "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from div_self. Lives in lean/MathFin/CAPM.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from div_self. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
       }
     },
     {
@@ -1038,7 +1038,7 @@
         "reference": "CAPM (Sharpe 1964; Bodie-Kane-Marcus Ch 9)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from zero_div. Lives in lean/MathFin/CAPM.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from zero_div. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
       }
     },
     {
@@ -1054,7 +1054,7 @@
         "reference": "CAPM beta linearity (Bodie-Kane-Marcus Ch 9.3)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via bilinearity of covariance, axiomatized as `(w₁·c₁ + w₂·c₂)/v = w₁·c₁/v + w₂·c₂/v`. Lives in lean/MathFin/CAPM.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via bilinearity of covariance, axiomatized as `(w₁·c₁ + w₂·c₂)/v = w₁·c₁/v + w₂·c₂/v`. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
       }
     },
     {
@@ -1070,7 +1070,7 @@
         "reference": "CAPM beta linearity for portfolios (Bodie-Kane-Marcus Ch 9.3)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_div + mul_div_assoc. Lives in lean/MathFin/CAPM.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_div + mul_div_assoc. Lives in MathFin/Portfolio/CAPM.lean. Axioms-clean."
       }
     },
     {
@@ -1086,7 +1086,7 @@
         "reference": "Value-at-Risk affine invariance (McNeil-Frey-Embrechts, Quantitative Risk Management, Ch 2)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on the definition VaR = μ + σ·z. Lives in lean/MathFin/GaussianRiskMeasures.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on the definition VaR = μ + σ·z. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -1102,7 +1102,7 @@
         "reference": "Conditional Value-at-Risk affine invariance (McNeil-Frey-Embrechts, QRM Ch 2)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on the definition CVaR = μ + σ·φ(z)/(1-α). Lives in lean/MathFin/GaussianRiskMeasures.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on the definition CVaR = μ + σ·φ(z)/(1-α). Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -1118,7 +1118,7 @@
         "reference": "Standard normal VaR (McNeil-Frey-Embrechts, QRM Ch 2)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from the definition 0 + 1·z = z. Lives in lean/MathFin/GaussianRiskMeasures.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from the definition 0 + 1·z = z. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -1134,7 +1134,7 @@
         "reference": "Standard normal CVaR closed form (McNeil-Frey-Embrechts, QRM Ch 2.2.4)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from the definition 0 + 1·ϕ(z)/(1-α). Lives in lean/MathFin/GaussianRiskMeasures.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from the definition 0 + 1·ϕ(z)/(1-α). Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -1150,7 +1150,7 @@
         "reference": "CVaR/VaR difference (McNeil-Frey-Embrechts, QRM Ch 2.2.4)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on the definitions. Lives in lean/MathFin/GaussianRiskMeasures.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on the definitions. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -1166,7 +1166,7 @@
         "reference": "VaR volatility scaling under iid aggregation (McNeil-Frey-Embrechts, QRM Ch 2.3)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring on VaR(T·μ, σ√T, z) = T·μ + σ√T·z. Lives in lean/MathFin/GaussianRiskMeasures.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring on VaR(T·μ, σ√T, z) = T·μ + σ√T·z. Lives in MathFin/RiskMeasures/Gaussian.lean. Axioms-clean."
       }
     },
     {
@@ -1182,7 +1182,7 @@
         "reference": "Bond portfolio duration (Fabozzi, Fixed Income Mathematics; Hull Ch 4)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from HasDerivAt.sum on the per-bond exponential derivative. Lives in lean/MathFin/BondImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from HasDerivAt.sum on the per-bond exponential derivative. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -1198,7 +1198,7 @@
         "reference": "Single ZCB duration as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in lean/MathFin/BondImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -1214,7 +1214,7 @@
         "reference": "Single ZCB price as a degenerate portfolio (Fabozzi, Fixed Income Mathematics)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in lean/MathFin/BondImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -1230,7 +1230,7 @@
         "reference": "Redington immunization (Redington 1952; Fabozzi, Fixed Income Mathematics Ch 5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from rate-sensitivity of A and L plus duration matching. Lives in lean/MathFin/BondImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from rate-sensitivity of A and L plus duration matching. Lives in MathFin/FixedIncome/Immunization.lean. Axioms-clean."
       }
     },
     {
@@ -1246,7 +1246,7 @@
         "reference": "Markowitz portfolio variance scaling (Bodie-Kane-Marcus Ch 7)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from Finset.mul_sum + ring on the double sum. Lives in lean/MathFin/MarkowitzNAsset.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from Finset.mul_sum + ring on the double sum. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
       }
     },
     {
@@ -1262,7 +1262,7 @@
         "reference": "Uncorrelated-asset portfolio variance (Bodie-Kane-Marcus Ch 7.2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via inner-sum collapse Finset.sum_ite_eq' on the diagonal. Lives in lean/MathFin/MarkowitzNAsset.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via inner-sum collapse Finset.sum_ite_eq' on the diagonal. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
       }
     },
     {
@@ -1278,7 +1278,7 @@
         "reference": "Diversification under iid assets (Bodie-Kane-Marcus Ch 7.4)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via diagonal collapse + Finset.sum_const + nsmul_eq_mul. Lives in lean/MathFin/MarkowitzNAsset.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via diagonal collapse + Finset.sum_const + nsmul_eq_mul. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
       }
     },
     {
@@ -1310,7 +1310,7 @@
         "reference": "Two-asset specialization of the n-asset Markowitz variance (Bodie-Kane-Marcus Ch 7.3)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.univ on Fin 2 expansion + ring. Lives in lean/MathFin/MarkowitzNAsset.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.univ on Fin 2 expansion + ring. Lives in MathFin/Portfolio/MarkowitzNAsset.lean. Axioms-clean."
       }
     },
     {
@@ -1326,7 +1326,7 @@
         "reference": "Sharpe ratio (Sharpe 1966; Bodie-Kane-Marcus Ch 10)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp on the definition. Lives in lean/MathFin/PerformanceRatios.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp on the definition. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
       }
     },
     {
@@ -1342,7 +1342,7 @@
         "reference": "Sharpe ratio time scaling (Bodie-Kane-Marcus Ch 5.5; Hull Ch 14 vol annualization)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via T = √T·√T rewrite + field_simp. Lives in lean/MathFin/PerformanceRatios.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via T = √T·√T rewrite + field_simp. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
       }
     },
     {
@@ -1358,7 +1358,7 @@
         "reference": "Kelly criterion (Kelly 1956; Thorp 2006)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via HasDerivAt.log composition + field_simp on the polynomial identity at f*. Lives in lean/MathFin/PerformanceRatios.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via HasDerivAt.log composition + field_simp on the polynomial identity at f*. Lives in MathFin/Performance/Ratios.lean. Axioms-clean."
       }
     },
     {
@@ -1374,7 +1374,7 @@
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999; McNeil-Frey-Embrechts Ch 2.3)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1390,7 +1390,7 @@
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999; McNeil-Frey-Embrechts Ch 2.3)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1406,7 +1406,7 @@
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1422,7 +1422,7 @@
         "reference": "Coherent risk measure axioms (Artzner-Delbaen-Eber-Heath 1999)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1438,7 +1438,7 @@
         "reference": "Coherent risk measure axioms — monotonicity (Artzner-Delbaen-Eber-Heath 1999)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via linarith on the definition. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via linarith on the definition. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1454,7 +1454,7 @@
         "reference": "Coherent risk measure axioms — monotonicity (Artzner-Delbaen-Eber-Heath 1999)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via linarith on the definition. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via linarith on the definition. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1470,7 +1470,7 @@
         "reference": "Joint-gaussian stdev triangle inequality (used for VaR/CVaR subadditivity)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via nlinarith on (σ₁+σ₂)² - (σ₁²+2ρσ₁σ₂+σ₂²) = 2(1-ρ)σ₁σ₂ ≥ 0, then Real.sqrt monotonicity. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via nlinarith on (σ₁+σ₂)² - (σ₁²+2ρσ₁σ₂+σ₂²) = 2(1-ρ)σ₁σ₂ ≥ 0, then Real.sqrt monotonicity. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1486,7 +1486,7 @@
         "reference": "Coherent risk measure axioms — gaussian VaR subadditivity (Artzner-Delbaen-Eber-Heath 1999)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + nlinarith. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + nlinarith. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1502,7 +1502,7 @@
         "reference": "Coherent risk measure axioms — gaussian CVaR subadditivity (Artzner-Delbaen-Eber-Heath 1999)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + PDF non-negativity + linarith. Lives in lean/MathFin/RiskMeasureAxioms.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via joint-stdev triangle inequality + PDF non-negativity + linarith. Lives in MathFin/RiskMeasures/CoherentAxioms.lean. Axioms-clean."
       }
     },
     {
@@ -1518,7 +1518,7 @@
         "reference": "Annuity formula (Fabozzi, Fixed Income Mathematics Ch 2; Hull Ch 4.5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via term rewriting exp(-r(i+1)Δt) = exp(-rΔt)·exp(-rΔt)^i, geom_sum_eq, and field_simp. Lives in lean/MathFin/CouponBondsAndAnnuities.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via term rewriting exp(-r(i+1)Δt) = exp(-rΔt)·exp(-rΔt)^i, geom_sum_eq, and field_simp. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
       }
     },
     {
@@ -1534,7 +1534,7 @@
         "reference": "Forward/spot rate consistency (Hull Ch 4.7; Fabozzi Ch 3)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: log(exp(-r(T-t))) = -r(T-t), so -log = r(T-t), with derivative r in T. Lives in lean/MathFin/CouponBondsAndAnnuities.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: log(exp(-r(T-t))) = -r(T-t), so -log = r(T-t), with derivative r in T. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
       }
     },
     {
@@ -1550,7 +1550,7 @@
         "reference": "YTM monotonicity → uniqueness (Fabozzi, Fixed Income Mathematics; Hull Ch 4)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_lt_sum_of_nonempty and Real.exp_lt_exp on each summand. Lives in lean/MathFin/CouponBondsAndAnnuities.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_lt_sum_of_nonempty and Real.exp_lt_exp on each summand. Lives in MathFin/FixedIncome/CouponBonds.lean. Axioms-clean."
       }
     },
     {
@@ -1566,7 +1566,7 @@
         "reference": "Standard normal CDF range",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Phi_add_Phi_neg + Phi_nonneg + linarith. Lives in lean/MathFin/StaticOptionBounds.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Phi_add_Phi_neg + Phi_nonneg + linarith. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
       }
     },
     {
@@ -1582,7 +1582,7 @@
         "reference": "Call price upper bound (Hull Ch 11.2; Merton 1973)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from S·Φ(d₁) ≤ S and K·e^{-rτ}·Φ(d₂) ≥ 0. Lives in lean/MathFin/StaticOptionBounds.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from S·Φ(d₁) ≤ S and K·e^{-rτ}·Φ(d₂) ≥ 0. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
       }
     },
     {
@@ -1598,7 +1598,7 @@
         "reference": "Put price upper bound (Hull Ch 11.2; Merton 1973)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from K·e^{-rτ}·Φ(-d₂) ≤ K·e^{-rτ} and S·Φ(-d₁) ≥ 0. Lives in lean/MathFin/StaticOptionBounds.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from K·e^{-rτ}·Φ(-d₂) ≤ K·e^{-rτ} and S·Φ(-d₁) ≥ 0. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
       }
     },
     {
@@ -1614,7 +1614,7 @@
         "reference": "Box spread pricing (Hull Ch 12.8; Cohen 1985)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via two applications of put-call parity + linarith. Lives in lean/MathFin/StaticOptionBounds.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via two applications of put-call parity + linarith. Lives in MathFin/BlackScholes/StaticBounds.lean. Axioms-clean."
       }
     },
     {
@@ -1630,7 +1630,7 @@
         "reference": "Capital Market Line (Tobin 1958; Bodie-Kane-Marcus Ch 9.2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring on the definitions. Lives in lean/MathFin/TwoFundSeparation.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring on the definitions. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
       }
     },
     {
@@ -1646,7 +1646,7 @@
         "reference": "Two-fund separation theorem (Tobin 1958; Bodie-Kane-Marcus Ch 9.2)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring. Lives in lean/MathFin/TwoFundSeparation.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
       }
     },
     {
@@ -1662,7 +1662,7 @@
         "reference": "Two-fund separation decomposition (Tobin 1958)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp. Lives in lean/MathFin/TwoFundSeparation.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
       }
     },
     {
@@ -1678,7 +1678,7 @@
         "reference": "Capital Market Line — return as function of risk (Bodie-Kane-Marcus Ch 9.2)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring. Lives in lean/MathFin/TwoFundSeparation.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/Portfolio/TwoFundSeparation.lean. Axioms-clean."
       }
     },
     {
@@ -1694,7 +1694,7 @@
         "reference": "Sortino ratio (Sortino-van der Meer 1991; Bodie-Kane-Marcus Ch 10)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp. Lives in lean/MathFin/PerformanceRatiosExtended.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
       }
     },
     {
@@ -1710,7 +1710,7 @@
         "reference": "Sortino ratio (Sortino-van der Meer 1991)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring_nf. Lives in lean/MathFin/PerformanceRatiosExtended.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring_nf. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
       }
     },
     {
@@ -1726,7 +1726,7 @@
         "reference": "Treynor ratio (Treynor 1965; Bodie-Kane-Marcus Ch 10)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp. Lives in lean/MathFin/PerformanceRatiosExtended.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
       }
     },
     {
@@ -1742,7 +1742,7 @@
         "reference": "Information ratio (Grinold-Kahn 1999, Active Portfolio Management)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp. Lives in lean/MathFin/PerformanceRatiosExtended.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
       }
     },
     {
@@ -1758,7 +1758,7 @@
         "reference": "Tracking error decomposition (Grinold-Kahn 1999)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via ring. Lives in lean/MathFin/PerformanceRatiosExtended.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via ring. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
       }
     },
     {
@@ -1774,7 +1774,7 @@
         "reference": "Tracking error bound from Cauchy-Schwarz (Grinold-Kahn 1999)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via nlinarith on the algebraic identity. Lives in lean/MathFin/PerformanceRatiosExtended.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via nlinarith on the algebraic identity. Lives in MathFin/Performance/RatiosExtended.lean. Axioms-clean."
       }
     },
     {
@@ -1790,7 +1790,7 @@
         "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via HasDerivAt.sum on the per-bond exponential second derivative. Lives in lean/MathFin/BondConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via HasDerivAt.sum on the per-bond exponential second derivative. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -1806,7 +1806,7 @@
         "reference": "Bond convexity (Fabozzi, Fixed Income Mathematics Ch 5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof by negating the duration derivative. Lives in lean/MathFin/BondConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof by negating the duration derivative. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -1822,7 +1822,7 @@
         "reference": "Single ZCB convexity as a degenerate portfolio (Fabozzi Ch 5)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in lean/MathFin/BondConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Finset.sum_singleton. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -1838,7 +1838,7 @@
         "reference": "Second-order Redington immunization (Fabozzi Ch 5; Hull Ch 4.11)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via second-derivative sensitivities of A and L plus convexity matching. Lives in lean/MathFin/BondConvexityImmunization.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via second-derivative sensitivities of A and L plus convexity matching. Lives in MathFin/FixedIncome/ConvexityImmunization.lean. Axioms-clean."
       }
     },
     {
@@ -1854,7 +1854,7 @@
         "reference": "AM-GM inequality (two-element case)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via nlinarith on (a-b)² ≥ 0 and Real.sqrt monotonicity. Lives in lean/MathFin/AsianOptionInequality.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via nlinarith on (a-b)² ≥ 0 and Real.sqrt monotonicity. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
       }
     },
     {
@@ -1870,7 +1870,7 @@
         "reference": "Asian options: geometric vs arithmetic (Kemna-Vorst 1990; Hull Ch 26.13)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via AM-GM + max monotonicity. Lives in lean/MathFin/AsianOptionInequality.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via AM-GM + max monotonicity. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
       }
     },
     {
@@ -1886,7 +1886,7 @@
         "reference": "AM-GM inequality (equal-weight n-element case)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: equal-weight specialization of Real.geom_mean_le_arith_mean_weighted plus multiplication by n. Lives in lean/MathFin/AsianOptionInequality.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: equal-weight specialization of Real.geom_mean_le_arith_mean_weighted plus multiplication by n. Lives in MathFin/BlackScholes/AsianInequality.lean. Axioms-clean."
       }
     },
     {
@@ -1902,7 +1902,7 @@
         "reference": "Reduced-form credit risk (Duffie-Singleton 1999; Lando 2004)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from exp(0) = 1. Lives in lean/MathFin/CreditSpread.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from exp(0) = 1. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -1918,7 +1918,7 @@
         "reference": "Reduced-form credit risk (Duffie-Singleton 1999)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof from Real.exp_pos. Lives in lean/MathFin/CreditSpread.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof from Real.exp_pos. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -1934,7 +1934,7 @@
         "reference": "Reduced-form credit pricing under constant hazard (Lando 2004 Ch 5)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Real.log_exp + field_simp. Lives in lean/MathFin/CreditSpread.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Real.log_exp + field_simp. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -1950,7 +1950,7 @@
         "reference": "Reduced-form credit risk: survival monotonicity (Lando 2004)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Real.exp_lt_exp on increasing argument. Lives in lean/MathFin/CreditSpread.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Real.exp_lt_exp on increasing argument. Lives in MathFin/FixedIncome/Credit.lean. Axioms-clean."
       }
     },
     {
@@ -1966,7 +1966,7 @@
         "reference": "Black-Scholes K-derivative of d_1 (Hull Ch 17)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via Real.log_div + HasDerivAt.congr_of_eventuallyEq on a (k ≠ 0)-neighborhood. Lives in lean/MathFin/OptionStrikeProperties.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via Real.log_div + HasDerivAt.congr_of_eventuallyEq on a (k ≠ 0)-neighborhood. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -1982,7 +1982,7 @@
         "reference": "Black-Scholes K-derivative of d_2 (Hull Ch 17)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: bsd2 = bsd1 - σ√τ, so K-derivative is same as bsd1's. Lives in lean/MathFin/OptionStrikeProperties.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: bsd2 = bsd1 - σ√τ, so K-derivative is same as bsd1's. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -1998,7 +1998,7 @@
         "reference": "Black-Scholes ∂_K Greek (Hull Ch 17; Black-Scholes 1973)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via product/chain rule + bs_identity magic identity collapse. Lives in lean/MathFin/OptionStrikeProperties.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via product/chain rule + bs_identity magic identity collapse. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -2014,7 +2014,7 @@
         "reference": "Black-Scholes put ∂_K Greek (Hull Ch 17)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via put-call parity bsP_eq_bsV + ∂_K bsV + Phi_neg. Lives in lean/MathFin/OptionStrikeProperties.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via put-call parity bsP_eq_bsV + ∂_K bsV + Phi_neg. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -2030,7 +2030,7 @@
         "reference": "Call price convexity in strike (butterfly spread non-negativity; Hull Ch 12.8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: derivative of -e^{-rτ}·Phi(d_2(K)) chains via Phi' = ϕ and ∂_K d_2. Lives in lean/MathFin/OptionStrikeProperties.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: derivative of -e^{-rτ}·Phi(d_2(K)) chains via Phi' = ϕ and ∂_K d_2. Lives in MathFin/BlackScholes/StrikeGreeks.lean. Axioms-clean."
       }
     },
     {
@@ -2046,7 +2046,7 @@
         "reference": "Multi-period Kelly aggregation (Kelly 1956; Thorp 2006)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof by definitional unfolding. Lives in lean/MathFin/MultiPeriodKelly.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof by definitional unfolding. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
       }
     },
     {
@@ -2062,7 +2062,7 @@
         "reference": "Multi-period Kelly myopia (Thorp 2006; MacLean-Thorp-Ziemba 2010)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via const_mul on single-period first-order condition. Lives in lean/MathFin/MultiPeriodKelly.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via const_mul on single-period first-order condition. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
       }
     },
     {
@@ -2078,7 +2078,7 @@
         "reference": "Kelly fraction bounds (Kelly 1956)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via div_lt_one + nlinarith. Lives in lean/MathFin/MultiPeriodKelly.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via div_lt_one + nlinarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
       }
     },
     {
@@ -2094,7 +2094,7 @@
         "reference": "Kelly fraction zero at break-even (Thorp 2006)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via div_eq_zero_iff + linarith. Lives in lean/MathFin/MultiPeriodKelly.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via div_eq_zero_iff + linarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
       }
     },
     {
@@ -2110,7 +2110,7 @@
         "reference": "Kelly fraction sign (Thorp 2006)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via lt_div_iff + linarith. Lives in lean/MathFin/MultiPeriodKelly.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via lt_div_iff + linarith. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
       }
     },
     {
@@ -2126,7 +2126,7 @@
         "reference": "Lognormal second moment (Hull Ch 14.7; risk-neutral measure under BS)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: (bsTerminal z)^2 = S_0^2·exp(2(r-σ²/2)T + 2σ√T·z), then HasLaw transfer + gaussian MGF at 2σ√T + BS algebra 2(r-σ²/2)T + (2σ√T)²/2 = 2rT + σ²T. Lives in lean/MathFin/LognormalSecondMoment.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: (bsTerminal z)^2 = S_0^2·exp(2(r-σ²/2)T + 2σ√T·z), then HasLaw transfer + gaussian MGF at 2σ√T + BS algebra 2(r-σ²/2)T + (2σ√T)²/2 = 2rT + σ²T. Lives in MathFin/BlackScholes/LognormalMoments.lean. Axioms-clean."
       }
     },
     {
@@ -2142,7 +2142,7 @@
         "reference": "Lognormal variance (Hull Ch 14.7; Bodie-Kane-Marcus Ch 21)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: secondMoment_terminal − (expected_terminal_eq_forward)² = S_0²·exp(2rT)·(exp(σ²T) - 1), via exp(rT)² = exp(2rT) and Real.exp_add. Lives in lean/MathFin/LognormalSecondMoment.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: secondMoment_terminal − (expected_terminal_eq_forward)² = S_0²·exp(2rT)·(exp(σ²T) - 1), via exp(rT)² = exp(2rT) and Real.exp_add. Lives in MathFin/BlackScholes/LognormalMoments.lean. Axioms-clean."
       }
     },
     {
@@ -2158,7 +2158,7 @@
         "reference": "Yield curve bootstrapping (Fabozzi, Fixed Income Mathematics Ch 9; Hull Ch 4.6)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + linarith on the pricing equation. Lives in lean/MathFin/YieldCurveBootstrap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + linarith on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -2174,7 +2174,7 @@
         "reference": "Yield curve bootstrapping base case (Fabozzi Ch 9)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp. Lives in lean/MathFin/YieldCurveBootstrap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -2190,7 +2190,7 @@
         "reference": "Two-bond bootstrap step (Fabozzi Ch 9)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring. Lives in lean/MathFin/YieldCurveBootstrap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -2206,7 +2206,7 @@
         "reference": "Bootstrap inversion identity (Fabozzi Ch 9)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in lean/MathFin/YieldCurveBootstrap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via field_simp + ring on the pricing equation. Lives in MathFin/FixedIncome/YieldCurve.lean. Axioms-clean."
       }
     },
     {
@@ -2222,7 +2222,7 @@
         "reference": "Demeterfi-Derman-Kamal log-replication setup (More Than You Ever Wanted to Know About Volatility Swaps 1999)",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via S_0 cancellation + Real.exp_sub + Real.log_exp + ring. Lives in lean/MathFin/VarianceSwap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via S_0 cancellation + Real.exp_sub + Real.log_exp + ring. Lives in MathFin/BlackScholes/VarianceSwap.lean. Axioms-clean."
       }
     },
     {
@@ -2238,7 +2238,7 @@
         "reference": "Log moment of risk-neutral discount factor (Demeterfi-Derman-Kamal 1999)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: rewrite via algebraic identity, then linearity of integral + integral_id_gaussianReal (mean = 0) + integral_const on a probability measure. Lives in lean/MathFin/VarianceSwap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: rewrite via algebraic identity, then linearity of integral + integral_id_gaussianReal (mean = 0) + integral_const on a probability measure. Lives in MathFin/BlackScholes/VarianceSwap.lean. Axioms-clean."
       }
     },
     {
@@ -2254,7 +2254,7 @@
         "reference": "Variance swap fair strike via log-replication (Demeterfi-Derman-Kamal 1999; Carr-Madan 1998)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: log-moment integral identity + (2/T)·(σ²T/2) = σ² via field_simp. Lives in lean/MathFin/VarianceSwap.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: log-moment integral identity + (2/T)·(σ²T/2) = σ² via field_simp. Lives in MathFin/BlackScholes/VarianceSwap.lean. Axioms-clean."
       }
     },
     {
@@ -2270,7 +2270,7 @@
         "reference": "Standard normal symmetry",
         "difficulty": "beginner",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via congr + ring on the PDF formula. Lives in lean/MathFin/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via congr + ring on the PDF formula. Lives in MathFin/BlackScholes/PutStrikeConvexity.lean. Axioms-clean."
       }
     },
     {
@@ -2286,7 +2286,7 @@
         "reference": "Put price convexity in strike (mirror of call convexity; Hull Ch 12.8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof via derivative of Phi(-d_2(K)) + PDF symmetry + field_simp. Lives in lean/MathFin/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof via derivative of Phi(-d_2(K)) + PDF symmetry + field_simp. Lives in MathFin/BlackScholes/PutStrikeConvexity.lean. Axioms-clean."
       }
     },
     {
@@ -2302,7 +2302,7 @@
         "reference": "Gaussian VaR at ρ=1 (McNeil-Frey-Embrechts, QRM Ch 8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in lean/MathFin/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in MathFin/RiskMeasures/Additivity.lean. Axioms-clean."
       }
     },
     {
@@ -2318,7 +2318,7 @@
         "reference": "Gaussian CVaR at ρ=1 (McNeil-Frey-Embrechts, QRM Ch 8)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in lean/MathFin/StrikeConvexityAndRiskAdditivity.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof: σ₁²+2σ₁σ₂+σ₂² = (σ₁+σ₂)² + Real.sqrt_sq + ring. Lives in MathFin/RiskMeasures/Additivity.lean. Axioms-clean."
       }
     },
     {
