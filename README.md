@@ -27,8 +27,8 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 |  | count |
 |---|---:|
 | total theorems | 258 |
-| **full derivations** | **212** |
-| library wrappers | 19 |
+| **full derivations** | **216** |
+| library wrappers | 15 |
 | reduced cores | 27 |
 | placeholders | **0** |
 

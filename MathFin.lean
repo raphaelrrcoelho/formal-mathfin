@@ -32,6 +32,10 @@
 
 -- Foundations
 import MathFin.Foundations.StandardNormal
+import MathFin.Foundations.DoobDecomposition
+import MathFin.Foundations.L2MartingaleConvergence
+import MathFin.Foundations.BrownianMarkov
+import MathFin.Foundations.ErlangSum
 import MathFin.Foundations.GaussianMoments
 import MathFin.Foundations.BivariateGaussian
 import MathFin.Foundations.GaussianCDFDeriv

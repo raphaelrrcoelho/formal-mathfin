@@ -3,18 +3,18 @@
   "theorems": [
     {
       "id": "mart-thm-2.2.12",
-      "name": "Doob Decomposition",
-      "description": "Theorem 2.2.12: Every adapted integrable process X admits a unique decomposition X = M + A where M is a martingale and A is predictable with A_0 = 0",
+      "name": "Doob Decomposition (Existence and Uniqueness)",
+      "description": "Every adapted integrable process f decomposes as f = M + A with M a martingale and A predictable null at 0, uniquely up to a.e. equality at every time. The existence-plus-uniqueness packaging is assembled in MathFin from Mathlib's martingalePart/predictablePart lemmas.",
       "domain": "martingales",
       "code": {
-        "lean": "import Mathlib.Probability.Martingale.Centering\n\nopen MeasureTheory ProbabilityTheory\n\n-- Mathlib's `martingalePart` and `predictablePart` give the Doob decomposition for\n-- ℕ-indexed processes. The defining identity is:\n--   martingalePart f ℱ μ + predictablePart f ℱ μ = f.\nexample {Ω E : Type*} {m0 : MeasurableSpace Ω}\n    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]\n    (μ : Measure Ω) (ℱ : Filtration ℕ m0) (f : ℕ → Ω → E) :\n    martingalePart f ℱ μ + predictablePart f ℱ μ = f :=\n  martingalePart_add_predictablePart ℱ μ f"
+        "lean": "import Mathlib\nimport MathFin.Foundations.DoobDecomposition\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem doob_decomposition_thm {Ω E : Type*} {m0 : MeasurableSpace Ω}\n    [NormedAddCommGroup E] [NormedSpace ℝ E] [CompleteSpace E]\n    {μ : Measure Ω} {ℱ : Filtration ℕ m0} [SigmaFiniteFiltration μ ℱ]\n    {f : ℕ → Ω → E} (hf : StronglyAdapted ℱ f) (hf_int : ∀ n, Integrable (f n) μ) :\n    ∃ M A : ℕ → Ω → E,\n      (Martingale M ℱ μ ∧ (StronglyAdapted ℱ fun n => A (n + 1)) ∧ A 0 = 0 ∧\n        M + A = f) ∧\n      ∀ M' A' : ℕ → Ω → E, Martingale M' ℱ μ →\n        (StronglyAdapted ℱ fun n => A' (n + 1)) → A' 0 = 0 →\n        (∀ n, Integrable (A' n) μ) → M' + A' = f →\n        ∀ n, M' n =ᵐ[μ] M n ∧ A' n =ᵐ[μ] A n :=\n  MathFin.doob_decomposition hf hf_int\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.2.12",
         "difficulty": "advanced",
-        "formalization_status": "library_wrapper",
-        "formalization_scope": "Direct Lean wrapper around an existing library theorem closely matching the benchmark statement."
+        "formalization_status": "full",
+        "formalization_scope": "Full textbook statement: existence AND a.e.-uniqueness of the decomposition. Mathlib provides all component lemmas (martingalePart/predictablePart, their martingale/predictability/zero facts, and the two essential-uniqueness lemmas martingalePart_add_ae_eq / predictablePart_add_ae_eq); this library's contribution (MathFin.Foundations.DoobDecomposition) is the single existence-plus-uniqueness packaging, which Mathlib never states. Previous entry stated only the near-definitional sum identity. Axioms-clean."
       }
     },
     {
@@ -51,18 +51,18 @@
     },
     {
       "id": "mart-thm-2.5.1",
-      "name": "Martingale a.s. Convergence (L1/L2-bounded)",
-      "description": "An L1-bounded (in particular L2-bounded) submartingale converges almost surely to limitProcess (Mathlib Submartingale.ae_tendsto_limitProcess). The in-L2 convergence is NOT wrapped here -- only the a.s. part (identical content to mart-thm-2.5.3).",
+      "name": "L²-bounded Martingale Convergence (a.s. and L²)",
+      "description": "A martingale bounded in L² converges to the limit process almost surely AND in L²-norm. The L² half is absent from Mathlib; it is proved in MathFin via the library's Doob L² maximal inequality (envelope dominator), Chebyshev, and Vitali's convergence theorem.",
       "domain": "martingales",
       "code": {
-        "lean": "import Mathlib.Probability.Martingale.Convergence\n\nopen MeasureTheory ProbabilityTheory Filter\n\n-- A submartingale bounded in L¹ (in particular bounded in L²) converges almost everywhere.\n-- Mathlib's `Submartingale.ae_tendsto_limitProcess` gives the a.s. convergence;\n-- L² convergence follows from `Submartingale.memLp_limitProcess` + uniform integrability.\nexample {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    [IsFiniteMeasure μ]\n    {ℱ : Filtration ℕ m0} {f : ℕ → Ω → ℝ} {R : NNReal}\n    (hf : Submartingale f ℱ μ)\n    (hbdd : ∀ n, eLpNorm (f n) 1 μ ≤ R) :\n    ∀ᵐ ω ∂μ, Tendsto (fun n => f n ω) atTop (nhds (ℱ.limitProcess f μ ω)) :=\n  hf.ae_tendsto_limitProcess hbdd"
+        "lean": "import Mathlib\nimport MathFin.Foundations.L2MartingaleConvergence\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\ntheorem martingale_L2_convergence_thm {Ω : Type*} {m0 : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsFiniteMeasure μ] {ℱ : Filtration ℕ m0}\n    {f : ℕ → Ω → ℝ} {R : ℝ≥0}\n    (hf : Martingale f ℱ μ) (hbdd : ∀ n, eLpNorm (f n) 2 μ ≤ R) :\n    (∀ᵐ ω ∂μ, Filter.Tendsto (fun n => f n ω) Filter.atTop\n      (nhds (ℱ.limitProcess f μ ω))) ∧\n    Filter.Tendsto (fun n => eLpNorm (f n - ℱ.limitProcess f μ) 2 μ)\n      Filter.atTop (nhds 0) :=\n  MathFin.martingale_ae_tendsto_and_eLpNorm_two_tendsto hf hbdd\n"
       },
       "metadata": {
         "chapter": 2,
         "reference": "Theorem 2.5.1",
         "difficulty": "advanced",
-        "formalization_status": "library_wrapper",
-        "formalization_scope": "library_wrapper of the a.s.-convergence theorem; faithful for the a.s. claim only. The L2-convergence conclusion is not formalized."
+        "formalization_status": "full",
+        "formalization_scope": "Full statement: a.e. convergence (Mathlib's upcrossing-based ae_tendsto_limitProcess) AND L²-norm convergence. The L² half is NOT in Mathlib; MathFin.Foundations.L2MartingaleConvergence derives it by manufacturing uniform integrability in L² from this library's Doob L² maximal inequality (DoobLpMaximalInequality.eLpNorm_norm_runMax_le: monotone-convergence envelope dominator + Chebyshev + MemLp.eLpNorm_indicator_le), closed by Vitali. Differentiates this entry from mart-thm-2.5.3 (the a.s.-only Mathlib wrapper). Axioms-clean."
       }
     },
     {

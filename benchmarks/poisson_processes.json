@@ -68,17 +68,17 @@
     {
       "id": "pp-thm-3.3.8",
       "name": "Sum of n Exponentials is Erlang(n, λ)",
-      "description": "Theorem 3.3.8: The waiting time for the n-th event T_n = X_1 + ... + X_n is Erlang(n, λ), with density λ^n t^{n-1} e^{-λt} / (n-1)!",
+      "description": "The n-th arrival time of a Poisson(rate) process — the sum of n iid Exp(rate) interarrival times — has the Erlang(n, rate) = Gamma(n, rate) distribution. Proved from the densities up via the Gamma convolution identity (absent from Mathlib).",
       "domain": "poisson_processes",
       "code": {
-        "lean": "import Mathlib\n\nopen ProbabilityTheory MeasureTheory\n\n/-- Specification of n iid Exp(rate) waiting times whose sum has the\n    Gamma(n, rate) (= Erlang(n, rate)) distribution. -/\nstructure ErlangSumSpec {Ω : Type*} [MeasurableSpace Ω]\n    (μ : Measure Ω) (n : ℕ) (rate : ℝ) where\n  rate_pos : 0 < rate\n  components : Fin n → Ω → ℝ\n  exp_law : ∀ i, Measure.map (components i) μ = expMeasure rate\n  joint_indep : iIndepFun components μ\n  /-- Theorem 3.3.8 conclusion: the sum X_1 + ⋯ + X_n is Gamma(n, rate). -/\n  sum_law : Measure.map (fun ω => ∑ i, components i ω) μ\n              = gammaMeasure (n : ℝ) rate\n\n/-- Theorem 3.3.8: the n-th arrival time of a Poisson(rate) process — equal\n    to the sum of n iid Exp(rate) interarrival times — has the Erlang(n, rate)\n    distribution, identified with `gammaMeasure n rate`. -/\ntheorem ErlangSumSpec.sum_is_erlang\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {n : ℕ} {rate : ℝ}\n    (S : ErlangSumSpec μ n rate) :\n    Measure.map (fun ω => ∑ i, S.components i ω) μ = gammaMeasure (n : ℝ) rate :=\n  S.sum_law\n"
+        "lean": "import Mathlib\nimport MathFin.Foundations.ErlangSum\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem sum_iid_exponentials_is_erlang {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r)\n    {n : ℕ} (hn : n ≠ 0) {X : Fin n → Ω → ℝ} (hmeas : ∀ i, Measurable (X i))\n    (hlaw : ∀ i, Measure.map (X i) μ = expMeasure r)\n    (hindep : iIndepFun X μ) :\n    Measure.map (fun ω => ∑ i, X i ω) μ = gammaMeasure n r :=\n  MathFin.ErlangSum.sum_iidExp_law_gammaMeasure hr hn hmeas hlaw hindep\n"
       },
       "metadata": {
         "chapter": 3,
         "reference": "Theorem 3.3.8",
         "difficulty": "intermediate",
-        "formalization_status": "library_wrapper",
-        "formalization_scope": "reduced_core: the active Lean code is a structural specification of the textbook Erlang density λⁿtⁿ⁻¹e^{−λt}/(n−1)! for the sum of n iid Exp(λ); the general theorem is gated (no Mathlib Erlang/Gamma-sum theorem yet)."
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation from primitives in MathFin.Foundations.ErlangSum: the Gamma-exponential convolution identity gammaMeasure_conv_expMeasure (gammaMeasure a r ∗ expMeasure r = gammaMeasure (a+1) r — no Gamma convolution exists in Mathlib; the exponential factors merge so the Beta integral degenerates to ∫x^(a−1) = z^a/a, normalised by Γ(a+1) = a·Γ(a)), then induction over the index finset via IndepFun.map_add_eq_map_conv_map. The previous entry carried the conclusion as a structure field (hypothesis-smuggled); nothing is assumed now. Axioms-clean."
       }
     }
   ]

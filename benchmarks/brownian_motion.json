@@ -96,18 +96,18 @@
     },
     {
       "id": "bm-thm-5.1.4",
-      "name": "Brownian Motion Markov Property",
-      "description": "Theorem 5.1.4: (B_{t+s} - B_s)_{t>=0} is independent of F_s — the Markov property of BM follows from independent increments",
+      "name": "Brownian Markov Property (σ-algebra form)",
+      "description": "After t0, Brownian motion restarts afresh independently of its entire past: the shifted increment process is a pre-Brownian motion AND is independent of the natural filtration σ(X_u : u ≤ t0) — the σ-algebra of the whole past, not merely finitely many evaluations.",
       "domain": "brownian_motion",
       "code": {
-        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Theorem 5.1.4 (Brownian Markov property — formal statement underlying the\n    textbook claim): if `B : ℝ → Ω → ℝ` has independent increments under\n    measure `P` and `B 0 = 0` almost surely, then for every `0 ≤ s ≤ t` the\n    value `B s` is independent of the future increment `B t − B s`. The\n    textbook conclusion that `(B_{t+s} − B_s)_{t ≥ 0}` is independent of the\n    past σ-algebra `F_s` is the joint upgrade of this pairwise statement,\n    obtained by iterating `HasIndepIncrements.nat`. -/\ntheorem brownian_indepFun_eval_sub\n    {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {B : ℝ → Ω → ℝ}\n    (hIncr : HasIndepIncrements B P)\n    (h0 : ∀ᵐ ω ∂P, B 0 ω = 0)\n    {s t : ℝ} (h0s : 0 ≤ s) (hst : s ≤ t) :\n    IndepFun (B s) (B t - B s) P :=\n  hIncr.indepFun_eval_sub h0s hst h0\n"
+        "lean": "import Mathlib\nimport MathFin.Foundations.BrownianMarkov\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\ntheorem brownian_markov_property_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {P : Measure Ω} {X : ℝ≥0 → Ω → ℝ} [IsPreBrownian X P]\n    (hX : ∀ t, Measurable (X t)) (t₀ : ℝ≥0) :\n    IsPreBrownian (fun t ω ↦ X (t₀ + t) ω - X t₀ ω) P ∧\n    Indep\n      (MeasurableSpace.comap (fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω) inferInstance)\n      (Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀) P :=\n  MathFin.brownian_markov_property hX t₀\n"
       },
       "metadata": {
         "chapter": 5,
         "reference": "Theorem 5.1.4",
         "difficulty": "intermediate",
-        "formalization_status": "library_wrapper",
-        "formalization_scope": "Lean library wrapper of Mathlib's `HasIndepIncrements.indepFun_eval_sub` (in `Mathlib.Probability.Independence.Process.HasIndepIncrements.Basic`, pinned commit f23306121184). The textbook Markov-property statement that `(B_{t+s} - B_s)_{t ≥ 0}` is independent of `F_s` is encoded here pairwise: under independent increments and `B 0 = 0` a.s., `B s` is independent of `B t - B s` for every `0 ≤ s ≤ t`. The joint version (independence of the entire future-increment process from a finite-dimensional past sigma-algebra) follows by iterating `HasIndepIncrements.nat` and is left out of the wrapper's scope.",
+        "formalization_status": "full",
+        "formalization_scope": "The textbook σ-algebra statement (shifted process is pre-Brownian AND independent of the natural filtration at t0), upgraded in MathFin.Foundations.BrownianMarkov from Degenne's function-valued indepFun_shift via Filtration.natural_eq_comap + IndepFun_iff_Indep. Previous entry stated only the pairwise increment independence its own docstring conceded was weaker. Axioms-clean.",
         "v430_recovery": {
           "from": "placeholder",
           "to": "library_wrapper",

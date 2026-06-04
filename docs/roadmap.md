@@ -44,7 +44,7 @@ round should pursue.
   `field_simp`. (Itô's formula and Margrabe have since been delivered —
   see the phase log below.)
 
-* **The slop ratio sharpens with more breadth.** Of the 212 "full"
+* **The slop ratio sharpens with more breadth.** Of the 216 "full"
   derivations, roughly 30 are genuinely non-trivial (the continuous-time
   L² Itô formula, Doob L^p,
   Wiener L² isometry, joint-stdev triangle, Kelly FOC, Sharpe √T,
