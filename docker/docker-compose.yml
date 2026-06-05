@@ -56,6 +56,9 @@ services:
       - ../benchmarks:/app/benchmarks:ro
       - ../tests:/app/tests:ro
       - ../mathfin.toml:/app/mathfin.toml:ro
+      # The verification ledger is read in-container only by tests/test_ledger.py;
+      # writes happen host-side via `python3 -m tools.verify.ledger`.
+      - ../verification_ledger.json:/app/verification_ledger.json:ro
       - lean_interact_cache:/usr/local/lib/python3.12/dist-packages/lean_interact/cache
       # SHARED olean cache with the `lean-repl` daemon (same named volume).
       # Without this, `verify` built oleans into its own ephemeral container

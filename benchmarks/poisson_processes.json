@@ -71,7 +71,7 @@
       "description": "The n-th arrival time of a Poisson(rate) process — the sum of n iid Exp(rate) interarrival times — has the Erlang(n, rate) = Gamma(n, rate) distribution. Proved from the densities up via the Gamma convolution identity (absent from Mathlib).",
       "domain": "poisson_processes",
       "code": {
-        "lean": "import Mathlib\nimport MathFin.Foundations.ErlangSum\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem sum_iid_exponentials_is_erlang {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r)\n    {n : ℕ} (hn : n ≠ 0) {X : Fin n → Ω → ℝ} (hmeas : ∀ i, Measurable (X i))\n    (hlaw : ∀ i, Measure.map (X i) μ = expMeasure r)\n    (hindep : iIndepFun X μ) :\n    Measure.map (fun ω => ∑ i, X i ω) μ = gammaMeasure n r :=\n  MathFin.ErlangSum.sum_iidExp_law_gammaMeasure hr hn hmeas hlaw hindep\n"
+        "lean": "import MathFin.Foundations.ErlangSum\n\nopen MeasureTheory ProbabilityTheory\n\ntheorem sum_iid_exponentials_is_erlang {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    {μ : Measure Ω} [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r)\n    {n : ℕ} (hn : n ≠ 0) {X : Fin n → Ω → ℝ} (hmeas : ∀ i, Measurable (X i))\n    (hlaw : ∀ i, Measure.map (X i) μ = expMeasure r)\n    (hindep : iIndepFun X μ) :\n    Measure.map (fun ω => ∑ i, X i ω) μ = gammaMeasure n r :=\n  MathFin.ErlangSum.sum_iidExp_law_gammaMeasure hr hn hmeas hlaw hindep\n"
       },
       "metadata": {
         "chapter": 3,

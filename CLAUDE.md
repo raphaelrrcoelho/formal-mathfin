@@ -72,7 +72,25 @@ dropped-backend residue), no `sorry`/`admit`, a declared
 formalization-faithfulness status for every benchmark theorem, and that every
 `module`-header Lean file carries `@[expose] public section` (without it the
 file's declarations are module-private — invisible to importers while the
-build stays green).
+build stays green). `tests/test_ledger.py` enforces that every entry has a
+verification-ledger row and that ids are globally unique.
+
+**Verification ledger** (`verification_ledger.json` + `tools/verify/ledger.py`):
+every benchmark entry's validity depends on exactly its snippet code, the
+transitive MathFin modules it imports, and the toolchain pins — the ledger
+records the input-hash each entry last verified under. After ANY `MathFin/`
+or benchmark edit:
+
+```bash
+python3 -m tools.verify.ledger status      # fresh/stale/missing (exit 1 if not all fresh)
+python3 -m tools.verify.ledger verify      # re-verify just the stale entries (daemon must be up)
+```
+
+Host-side, stdlib-only; the Lean work happens in the lean-repl daemon. This
+replaces blanket re-verification sweeps — only entries whose inputs changed
+ever re-run. Benchmark snippets that import a MathFin module do NOT
+`import Mathlib` (the module's `public import Mathlib` re-exports it);
+only pure-Mathlib wrapper snippets carry the blanket import.
 
 Delivery/status docs:
 - `docs/coverage.md`: per-theorem audit, safe claim wording, verification evidence, and remaining placeholders.

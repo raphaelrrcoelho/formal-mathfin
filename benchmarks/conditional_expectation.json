@@ -39,7 +39,7 @@
       "description": "Proposition 2.1.11(7): If Y is G-measurable and XY ∈ L¹, then E[XY | G] = Y · E[X | G]",
       "domain": "measure_theory",
       "code": {
-        "lean": "import Mathlib.MeasureTheory.Function.ConditionalExpectation.Real\n\nopen MeasureTheory\n\n-- Pulling out a known factor: μ[f * g | m] =ᵐ[μ] f * μ[g | m]\n-- when f is m-strongly-measurable. Uses Mathlib's `condExp_mul_of_stronglyMeasurable_left`.\ntheorem condexp_pull_out {α : Type*} {m m₀ : MeasurableSpace α} {μ : Measure α}\n    {f g : α → ℝ}\n    (hf : StronglyMeasurable[m] f) (hfg : Integrable (f * g) μ) (hg : Integrable g μ) :\n    μ[f * g | m] =ᵐ[μ] f * μ[g | m] :=\n  condExp_mul_of_stronglyMeasurable_left hf hfg hg"
+        "lean": "import Mathlib\n\nopen MeasureTheory\n\n-- Pulling out a known factor: μ[f * g | m] =ᵐ[μ] f * μ[g | m]\n-- when f is m-strongly-measurable. Uses Mathlib's `condExp_mul_of_stronglyMeasurable_left`.\ntheorem condexp_pull_out {α : Type*} {m m₀ : MeasurableSpace α} {μ : Measure α}\n    {f g : α → ℝ}\n    (hf : StronglyMeasurable[m] f) (hfg : Integrable (f * g) μ) (hg : Integrable g μ) :\n    μ[f * g | m] =ᵐ[μ] f * μ[g | m] :=\n  condExp_mul_of_stronglyMeasurable_left hf hfg hg"
       },
       "metadata": {
         "chapter": 2,

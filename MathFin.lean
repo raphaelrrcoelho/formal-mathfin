@@ -274,3 +274,11 @@ import MathFin.Actuarial.Insurance
 import MathFin.Actuarial.Mortality
 -- Phase 13 additions:
 import MathFin.Actuarial.CompoundPoisson
+
+-- Upstream (Degenne BrownianMotion) modules consumed ONLY by benchmark
+-- wrappers, imported here so `lake build` puts them in the build graph —
+-- nothing else in MathFin/ imports them, and a snippet import of an unbuilt
+-- module fails with a silently-empty environment (found 2026-06-05 via
+-- cm-thm-4.3.7; its sibling cm-thm-4.3.9 works only because
+-- Foundations/LpContinuousMartingaleConvergence imports Degenne's DoobLp).
+import BrownianMotion.StochasticIntegral.LocalMartingale

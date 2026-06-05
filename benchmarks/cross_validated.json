@@ -7,7 +7,7 @@
       "description": "A probability measure assigns measure 1 to the full space and 0 to the empty set",
       "domain": "measure_theory",
       "code": {
-        "lean": "import Mathlib.MeasureTheory.Measure.Typeclasses\n\nopen MeasureTheory\n\ntheorem prob_univ {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)\n    [IsProbabilityMeasure μ] : μ Set.univ = 1 :=\n  measure_univ\n\ntheorem prob_empty {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)\n    [IsProbabilityMeasure μ] : μ ∅ = 0 :=\n  measure_empty"
+        "lean": "import Mathlib\n\nopen MeasureTheory\n\ntheorem prob_univ {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)\n    [IsProbabilityMeasure μ] : μ Set.univ = 1 :=\n  measure_univ\n\ntheorem prob_empty {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)\n    [IsProbabilityMeasure μ] : μ ∅ = 0 :=\n  measure_empty"
       },
       "metadata": {
         "difficulty": "foundational",
@@ -21,7 +21,7 @@
       "description": "E[E[X | G] | H] = E[X | H] when H ⊆ G (tower/smoothing property)",
       "domain": "measure_theory",
       "code": {
-        "lean": "import Mathlib.MeasureTheory.Function.ConditionalExpectation.Basic\n\nopen MeasureTheory\nopen scoped MeasureTheory\n\n-- Tower property of conditional expectation: μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] when m₁ ≤ m₂.\n-- (Equality is almost-everywhere via Mathlib's `condexp_condexp_of_le`.)\ntheorem cond_exp_tower {α : Type*} {m₁ m₂ m₀ : MeasurableSpace α} {μ : Measure α}\n    (hm₁₂ : m₁ ≤ m₂) (hm₂ : m₂ ≤ m₀) [SigmaFinite (μ.trim hm₂)]\n    {f : α → ℝ} :\n    μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] :=\n  condexp_condexp_of_le hm₁₂ hm₂"
+        "lean": "import Mathlib\n\nopen MeasureTheory\nopen scoped MeasureTheory\n\n-- Tower property of conditional expectation: μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] when m₁ ≤ m₂.\n-- (Equality is almost-everywhere via Mathlib's `condExp_condExp_of_le`.)\ntheorem cond_exp_tower {α : Type*} {m₁ m₂ m₀ : MeasurableSpace α} {μ : Measure α}\n    (hm₁₂ : m₁ ≤ m₂) (hm₂ : m₂ ≤ m₀) [SigmaFinite (μ.trim hm₂)]\n    {f : α → ℝ} :\n    μ[μ[f|m₂]|m₁] =ᵐ[μ] μ[f|m₁] :=\n  condExp_condExp_of_le hm₁₂ hm₂"
       },
       "metadata": {
         "difficulty": "intermediate",
