@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.ImpliedVolatility
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.ImpliedVolatility
 
 /-!
 # Implied volatility: bisection bracket existence
@@ -27,6 +29,8 @@ The convergence-rate analysis of bisection (`|σ_n − σ*| ≤ 2^{-n} (σ_hi �
 follows from the standard halving lemma and is left as a calculus exercise on
 the abstract real-valued problem.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

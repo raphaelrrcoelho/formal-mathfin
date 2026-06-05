@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Doob decomposition: existence and uniqueness
@@ -34,6 +36,8 @@ process `n ↦ A (n + 1)` is `ℱ`-strongly-adapted, i.e. `A (n + 1)` is
   agrees a.e. with `(martingalePart f ℱ μ, predictablePart f ℱ μ)`.
 * `doob_decomposition` — the full existence-and-uniqueness statement.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

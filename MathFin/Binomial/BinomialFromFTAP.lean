@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.FTAPTwoState
-import MathFin.Binomial.Model
+module
+
+public import Mathlib
+public import MathFin.Foundations.FTAPTwoState
+public import MathFin.Binomial.Model
 
 /-!
 # Binomial price as iterated two-state FTAP (phase 43)
@@ -47,6 +49,8 @@ no-arbitrage principle, not a stand-alone definition.
 * `binomial_emm_exists`: under `BinomialNoArb`, an EMM exists for the
   excess-return market `(z_u, z_d)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.FixedIncome.Immunization
+module
+
+public import Mathlib
+public import MathFin.FixedIncome.Immunization
 
 /-!
 # Second-order bond portfolio immunization
@@ -32,6 +34,8 @@ Results:
 * `bondPortfolio_immunization_second_order`: matching convexity gives
   `∂² (A − L)/∂r² = 0`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

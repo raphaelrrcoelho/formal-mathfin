@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.FixedIncome.DurationSensitivity
+module
+
+public import Mathlib
+public import MathFin.FixedIncome.DurationSensitivity
 
 /-!
 # Convexity as the second derivative of bond price (first-principles)
@@ -42,6 +44,8 @@ second derivative of price, not a separately-defined moment.
 * `hasDerivAt_bondPriceDisc_secondDeriv`: `d²P/dy² = ConvNum(y)` (stated as
   the derivative of `P'(y) = −ModNum(y)`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

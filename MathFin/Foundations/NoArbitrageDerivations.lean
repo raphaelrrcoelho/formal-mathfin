@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Core quant-finance results derived from no-arbitrage (first principles)
@@ -52,6 +54,8 @@ The same template gives the forward price `F = S_0 / DF`.
 * `putCall_parity_from_no_arbitrage`: the parity derivation.
 * `forward_price_from_no_arbitrage`: the forward price characterisation.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

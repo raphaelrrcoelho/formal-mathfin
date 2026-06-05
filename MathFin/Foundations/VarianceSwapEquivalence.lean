@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.VarianceSwapLimit
-import MathFin.BlackScholes.VarianceSwap
+module
+
+public import Mathlib
+public import MathFin.Foundations.VarianceSwapLimit
+public import MathFin.BlackScholes.VarianceSwap
 
 /-!
 # Variance-swap form equivalence (phase 45)
@@ -52,6 +54,8 @@ The full equivalence at the *random-variable* level (showing both functionals
 coincide on the path of `S_t`, not just on their values) would require the
 continuous Itô-to-log identity, which is gated.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

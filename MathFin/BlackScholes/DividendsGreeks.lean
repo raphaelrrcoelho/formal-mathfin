@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.PDE
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.PDE
 
 /-!
 # Black-Scholes-Merton (continuous dividends) Greeks
@@ -20,6 +22,8 @@ and derive the Greeks via existing call Greeks at effective drift `r − q`.
 * `hasDerivAt_bsVDiv_SS` — γ_q = e^{-qT} · ϕ(d₁') / (S σ √τ).
 * `hasDerivAt_bsVDiv_sigma` — vega_q = e^{-qT} · S · ϕ(d₁') · √τ.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Performance.Ratios
+module
+
+public import Mathlib
+public import MathFin.Performance.Ratios
 
 /-!
 # Capital Market Line and two-fund separation (algebraic)
@@ -29,6 +31,8 @@ Results:
 * `cml_sharpeRatio_invariant`: Sharpe is preserved along the CML.
 * `cml_decomposition_unique`: the inverse map `(μ_p, σ_p) ↦ α` is `σ_p / σ_t`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

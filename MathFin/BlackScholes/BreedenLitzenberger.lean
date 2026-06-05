@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.StrikeGreeks
-import MathFin.BlackScholes.StrikeConvexity
-import MathFin.BlackScholes.Call
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.StrikeGreeks
+public import MathFin.BlackScholes.StrikeConvexity
+public import MathFin.BlackScholes.Call
 
 /-!
 # Breeden-Litzenberger: implied risk-neutral PDF from option prices
@@ -52,6 +54,8 @@ Results:
   infinitesimal face of payoff convexity (the discrete face is
   `butterfly_payoff_nonneg`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

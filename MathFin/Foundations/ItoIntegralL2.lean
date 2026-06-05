@@ -3,11 +3,13 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import BrownianMotion.Gaussian.BrownianMotion
-import BrownianMotion.StochasticIntegral.SimpleProcess
-import BrownianMotion.StochasticIntegral.L2M
-import MathFin.Foundations.ItoIsometryAdapted
+module
+
+public import Mathlib
+public import BrownianMotion.Gaussian.BrownianMotion
+public import BrownianMotion.StochasticIntegral.SimpleProcess
+public import BrownianMotion.StochasticIntegral.L2M
+public import MathFin.Foundations.ItoIsometryAdapted
 
 /-!
 # The L²-adapted Itô isometry, anchored on Degenne's `SimpleProcess`
@@ -46,6 +48,8 @@ simple processes into the predictable `L²`, density of those embeddings (via
 continuous-time Itô-*calculus* layer (Itô's lemma, SDEs). The full resume-plan is in
 `docs/ito-integral-clm-deferred.md`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 namespace ItoIntegralL2

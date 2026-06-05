@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.StandardNormal
+module
+
+public import Mathlib
+public import MathFin.Foundations.StandardNormal
 
 /-!
 # Black-Scholes European call pricing formula
@@ -70,6 +72,8 @@ risk-neutral lognormal hypothesis:
   - `bsd2_eq`, `bsTerminal_gt_K_iff`, `max_payoff_eq_indicator` helpers.
   - `bs_call_formula` main theorem.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

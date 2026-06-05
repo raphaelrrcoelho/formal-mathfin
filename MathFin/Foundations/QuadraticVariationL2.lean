@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import BrownianMotion.Gaussian.BrownianMotion
-import MathFin.Foundations.ItoIsometryAdapted
-import MathFin.Foundations.GaussianMoments
+module
+
+public import Mathlib
+public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Foundations.ItoIsometryAdapted
+public import MathFin.Foundations.GaussianMoments
 
 /-!
 # The L² quadratic variation of Brownian motion
@@ -34,6 +36,8 @@ the precise reason the quadratic variation is `t` and not, say, `0`. For the uni
 
 * `integral_increment_pow4` — `E[(B_{t₁} − B_{t₀})⁴] = 3(t₁ − t₀)²`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 namespace QuadraticVariationL2

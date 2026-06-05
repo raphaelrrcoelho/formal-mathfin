@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Lookback call lower bound
@@ -18,6 +20,8 @@ Result:
 
 * `lookback_payoff_ge_vanilla`: `max(S − K, 0) ≤ max(M − K, 0)` when `S ≤ M`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

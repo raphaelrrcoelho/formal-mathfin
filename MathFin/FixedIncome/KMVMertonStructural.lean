@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.FixedIncome.KMVMerton
-import MathFin.BlackScholes.RiskNeutralProbabilities
+module
+
+public import Mathlib
+public import MathFin.FixedIncome.KMVMerton
+public import MathFin.BlackScholes.RiskNeutralProbabilities
 
 /-!
 # KMV-Merton structural model: probabilistic content of `kmvPD`
@@ -37,6 +39,8 @@ with finance-specific variable renaming.
   expectation of `max(V_T − F, 0)` is the BS call closed form
   (`bs_call_formula` with `(S_0, K) ↦ (V_0, F)` and `σ ↦ σ_V`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

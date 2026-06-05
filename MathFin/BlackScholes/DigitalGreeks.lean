@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.PDE
-import MathFin.BlackScholes.Bachelier
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.Bachelier
 
 /-!
 # Black–Scholes digital option Greeks
@@ -25,6 +27,8 @@ We derive their deltas and the asset-side gamma:
 which collapses the `S · ϕ(d₁) · ∂_S d₁` chain-rule term, and uses the
 clean identity `σ√τ − d₁ = -d₂`.)
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # The exponential-discount / cumulative-rate principle
@@ -50,6 +52,8 @@ identity as `rate_eq_neg_log_deriv` below.
 * `discount_strictAnti`: `H₁ < H₂ ⇒ exp(-H₂) < exp(-H₁)` (discounting
   decreases in cumulative rate).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

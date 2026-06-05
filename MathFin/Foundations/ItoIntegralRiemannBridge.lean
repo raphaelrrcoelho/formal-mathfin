@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.ItoIntegralBrownian
+module
+
+public import MathFin.Foundations.ItoIntegralBrownian
 
 /-! # Riemann ↔ CLM bridge for bounded continuous integrands
 
@@ -19,6 +21,8 @@ needed both). `gφ` is obtained as the trim-`L²` limit of the step approximatio
 (`simpleAssembly_T (stepφ n)`), which sidesteps proving `φ∘B` predictable directly:
 predictability is inherited from the `TBoundedSP` approximants and `Lp` closedness.
 -/
+
+@[expose] public section
 
 namespace MathFin
 namespace ItoIntegralRiemannBridge

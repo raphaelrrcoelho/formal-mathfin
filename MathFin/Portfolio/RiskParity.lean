@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Risk parity portfolio (two-asset closed form)
@@ -25,6 +27,8 @@ Result:
 * `risk_parity_equal_contribution`: at the RP weights, the two assets'
   contributions to portfolio variance are equal.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

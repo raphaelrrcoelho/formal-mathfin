@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
+module
+
 -- `import Mathlib` and `BrownianMotion.*` come transitively through
 -- `QuadraticVariationL2`; this file's own surface needs only:
-import MathFin.Foundations.ItoSquaringIdentity
-import MathFin.Foundations.QuadraticVariationL2
+public import MathFin.Foundations.ItoSquaringIdentity
+public import MathFin.Foundations.QuadraticVariationL2
 
 /-! # Itô's lemma for `f(x) = x²` — the L² continuous-time form
 
@@ -45,6 +47,8 @@ The first form is what the proof produces directly (no division); the
 second is the canonical Itô-lemma statement. Both are derived; pick the
 shape that downstream proofs find more convenient.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

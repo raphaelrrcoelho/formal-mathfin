@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.DoobLpMaximalInequality
+module
+
+public import Mathlib
+public import MathFin.Foundations.DoobLpMaximalInequality
 
 /-!
 # L²-bounded discrete martingales converge in L²
@@ -39,6 +41,8 @@ input is manufactured from this library's own **Doob L² maximal inequality**
   with `eLpNorm (f n) 2 μ ≤ R` for all `n`: a.e. convergence to
   `ℱ.limitProcess f μ` **and** `eLpNorm (f n − ℱ.limitProcess f μ) 2 μ → 0`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

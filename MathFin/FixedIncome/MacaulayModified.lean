@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Macaulay vs modified duration under discrete compounding
@@ -26,6 +28,8 @@ Result:
 
 * `modifiedNumerator_eq_macaulayNumerator_div`: the algebraic identity.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

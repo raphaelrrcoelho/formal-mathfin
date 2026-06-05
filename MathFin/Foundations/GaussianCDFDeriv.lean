@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.StandardNormal
+module
+
+public import Mathlib
+public import MathFin.Foundations.StandardNormal
 
 /-!
 # Derivative of the standard normal CDF: `Φ'(x) = ϕ(x)`
@@ -20,6 +22,8 @@ into an interval integral plus a constant, then `intervalIntegral.integral_hasDe
 
 * `hasDerivAt_Phi` — `HasDerivAt Phi (gaussianPDFReal 0 1 x) x` for every `x : ℝ`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

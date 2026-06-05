@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Standard normal primitives: CDF, tail, and the Gaussian MGF
@@ -32,6 +34,8 @@ pricing-free base.
 * `integral_exp_mul_gaussianPDFReal_univ` — the standard-normal MGF
   `∫ exp(c·z)·pdf = exp(c²/2)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

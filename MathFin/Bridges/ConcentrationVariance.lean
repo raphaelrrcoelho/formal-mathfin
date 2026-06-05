@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.RiskMeasures.Concentration
-import MathFin.Portfolio.MarkowitzNAsset
+module
+
+public import MathFin.RiskMeasures.Concentration
+public import MathFin.Portfolio.MarkowitzNAsset
 
 /-!
 # Bridge: concentration is diversifiable variance
@@ -15,6 +17,8 @@ ties `RiskMeasures/Concentration.lean` to `Portfolio/MarkowitzNAsset.lean`: the
 diversifiable part of portfolio variance *is* the concentration metric. A
 certified unification of two known textbook facts — not new finance.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

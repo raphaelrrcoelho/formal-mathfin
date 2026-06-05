@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib.Probability.Martingale.Basic
-import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
+module
+
+public import Mathlib.Probability.Martingale.Basic
+public import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 
 /-!
 # Martingale transform (Theorem 2.2.9)
@@ -12,6 +14,8 @@ import Mathlib.MeasureTheory.Function.ConditionalExpectation.PullOut
 The martingale transform of a martingale by a bounded predictable process is
 itself a martingale (the discrete stochastic integral).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Triangle arbitrage no-arbitrage condition
@@ -24,6 +26,8 @@ risk-free gain; if `< 1`, the reverse trip is.
 * `triangleNoArb_solve_third`: given two rates (non-zero), the no-arb constraint
   uniquely determines the third: `S_CA = 1 / (S_AB · S_BC)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

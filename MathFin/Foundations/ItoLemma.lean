@@ -24,8 +24,10 @@ Mathematical content and original Lean code © Tamás Nagy 2026, used here
 under academic fair use for derivative work with attribution.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib
-import MathFin.Foundations.DiscreteIto
+module
+
+public import Mathlib
+public import MathFin.Foundations.DiscreteIto
 
 /-!
 # Itô's lemma structural drift formula (phase 39, after Nagy 2026)
@@ -61,6 +63,8 @@ The drift formula here is *all that is needed* for the downstream
 applications in this library (GBM drift derivation, BS PDE, log-payoff
 variance swap).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.PDE
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.PDE
 
 /-!
 # Implied volatility uniqueness
@@ -26,6 +28,8 @@ on an interval is strictly monotone there, hence injective.
 * `implied_volatility_unique`: as a corollary, the implied volatility is
   unique whenever it exists.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

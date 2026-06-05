@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.ItoSquaringIdentity
+module
+
+public import MathFin.Foundations.ItoSquaringIdentity
 
 /-! # Polynomial Itô remainders — item 3 of the Itô-lemma chain
 
@@ -41,6 +43,8 @@ application (recursion for `E[B_t^n]`, variance-of-variance, etc.).
 * `discrete_cubing_identity` — the pathwise `X_N³ − X_0³` decomposition
   along any partition: `2·∑ X_k²·ΔX_k`, `1·∑ X_k·(ΔX_k)²` and `∑ (ΔX_k)³`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

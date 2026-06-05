@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.Model
+module
+
+public import Mathlib
+public import MathFin.Binomial.Model
 
 /-!
 # Cox-Ross-Rubinstein convergence to Black-Scholes
@@ -42,6 +44,8 @@ What this file provides is the **classical analytic CRR↔BS correspondence**
 on the mean and variance of one log-return increment — the substantive
 textbook computations feeding that limit.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

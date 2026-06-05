@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.GarmanNormalForm
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.GarmanNormalForm
 
 /-!
 # KMV-Merton structural credit (as a Garman-form specialisation)
@@ -38,6 +40,8 @@ PD-as-probability bounds.
 * `kmvPD_nonneg`, `kmvPD_le_one`: probability bounds.
 * `kmv_survival_eq_Phi_d2`: `1 − PD = Φ(d_2)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

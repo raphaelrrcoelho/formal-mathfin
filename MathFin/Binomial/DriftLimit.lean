@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.CRRConvergence
+module
+
+public import Mathlib
+public import MathFin.Binomial.CRRConvergence
 
 /-!
 # CRR drift limit (Phase 3 closeout)
@@ -29,6 +31,8 @@ characteristic-function/Lévy route plus put-call parity.
   `tendsto_exp_sub_one_div`.
 * `crr_drift_limit`: the headline `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

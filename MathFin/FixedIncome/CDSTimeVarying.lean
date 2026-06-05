@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.FixedIncome.HazardCurve
+module
+
+public import Mathlib
+public import MathFin.FixedIncome.HazardCurve
 
 /-!
 # CDS fair spread under time-varying hazard (first-principles)
@@ -47,6 +49,8 @@ any deterministic hazard curve.
   i.e. `∏ exp(−h_i Δt_i) = exp(−∑ h_i Δt_i)` (a direct `Real.exp_sum`
   application stated in finance variables).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

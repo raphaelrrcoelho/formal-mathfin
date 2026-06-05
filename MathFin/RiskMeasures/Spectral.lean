@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Spectral risk measures: monotonicity and convex combinations
@@ -37,6 +39,8 @@ Results:
 * `spectralRisk_convex_combination`: a convex combination of two normalized
   weight vectors is itself a normalized weight vector.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

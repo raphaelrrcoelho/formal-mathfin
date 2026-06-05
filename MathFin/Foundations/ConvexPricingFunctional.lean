@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.StatePrices
-import MathFin.BlackScholes.StrikeConvexity
+module
+
+public import Mathlib
+public import MathFin.Foundations.StatePrices
+public import MathFin.BlackScholes.StrikeConvexity
 
 /-!
 # Convexity is preserved by the linear pricing functional
@@ -59,6 +61,8 @@ kind. This module is one example of the second kind.
   infinitesimal face of which is `∂²_K ≥ 0` and (passing to a continuous
   density) the implied-PDF positivity.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

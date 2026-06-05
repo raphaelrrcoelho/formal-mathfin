@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.VarianceSwapEquipartition
+module
+
+public import Mathlib
+public import MathFin.Foundations.VarianceSwapEquipartition
 
 /-!
 # Variance-swap QV limit theorem (phase 34)
@@ -32,6 +34,8 @@ Derman-Kamal log-payoff identity `(2/T) · E[log(F/S_T)] = σ²`. The two
 characterisations of `σ²` (realised-variance / QV here, log-payoff
 replication there) are different functionals of the same BS price process.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

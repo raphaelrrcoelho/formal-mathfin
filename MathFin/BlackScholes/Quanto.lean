@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.BlackScholes.Dividends
+module
+
+public import MathFin.BlackScholes.Dividends
 
 /-!
 # Quanto correction — re-export
@@ -16,3 +18,5 @@ variants of the same BS pricing formula.
 The namespace `MathFin` exposes `quantoForward` and
 `quanto_correction_factor` through the transitive import.
 -/
+
+@[expose] public section

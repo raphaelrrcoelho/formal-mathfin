@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Geometric vs arithmetic Asian options
@@ -33,6 +35,8 @@ Results:
 * `asian_payoff_geom_le_arith_two`: two-time-point geometric Asian payoff is
   bounded above by the arithmetic Asian payoff.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

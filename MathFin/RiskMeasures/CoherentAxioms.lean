@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.RiskMeasures.Gaussian
+module
+
+public import Mathlib
+public import MathFin.RiskMeasures.Gaussian
 
 /-!
 # Coherent risk measure axioms (gaussian case)
@@ -35,6 +37,8 @@ Results:
   `σ_i ≥ 0`. The substantive analytic content of gaussian subadditivity.
 * `gaussianVaR_subadditive`, `gaussianCVaR_subadditive`: subadditivity.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

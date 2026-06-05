@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Bachelier
-import MathFin.BlackScholes.PDE
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Bachelier
+public import MathFin.BlackScholes.PDE
 
 /-!
 # Bachelier model Greeks
@@ -22,6 +24,8 @@ These parallel the Black–Scholes Greeks but with much simpler algebra
 (no exponential, no log). All cancellation goes through the identity
 `(S − K)/(σ √T) = d`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

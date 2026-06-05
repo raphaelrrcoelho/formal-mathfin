@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
+module
+
 -- `import Mathlib` comes transitively through `ItoLemma`; this file's surface
 -- needs only the `Real.exp` chain rule + `Finset` sum lemmas it already pulls.
-import MathFin.Foundations.ItoLemma
+public import MathFin.Foundations.ItoLemma
 
 /-! # Itô's lemma for `f(t, x)` — time-dependent (2D), items 4 & 5
 
@@ -38,6 +40,8 @@ limit via the third-moment bound) is deferred; the discrete identity +
 the GBM partials are the algebraic and analytic content that the limit
 argument consumes.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

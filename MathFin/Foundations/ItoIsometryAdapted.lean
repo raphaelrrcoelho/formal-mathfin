@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import BrownianMotion.Gaussian.BrownianMotion
+module
+
+public import Mathlib
+public import BrownianMotion.Gaussian.BrownianMotion
 
 /-!
 # The adapted Itô isometry (the increment-independence cornerstone)
@@ -49,6 +51,8 @@ are the shared-start (`s = u`) and diagonal instances of
 `WienerIntegral*.lean`, and extracting the single shared increment-covariance
 lemma are deferred to the continuous-integral build that consumes both layers.
 -/
+
+@[expose] public section
 
 namespace MathFin
 namespace ItoIsometryAdapted

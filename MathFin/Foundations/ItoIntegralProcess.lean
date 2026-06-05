@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.ItoIntegralL2
+module
+
+public import MathFin.Foundations.ItoIntegralL2
 
 /-! # The Itô integral as a process `t ↦ (V ● B)_t`, with genuine `L²` content
 
@@ -36,6 +38,8 @@ What is still deferred (the *next* layer, which will consume this one):
 adaptedness of `t ↦ (V●B)_t` to `𝓕_t`, pathwise continuity, the martingale
 property, and the time-indexed Itô isometry. Those are genuine follow-ups built
 on `memLp_itoSimpleProcess` here. -/
+
+@[expose] public section
 
 namespace MathFin
 namespace ItoIntegralProcess

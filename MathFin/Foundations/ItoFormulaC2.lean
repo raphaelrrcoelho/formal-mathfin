@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.WeightedQuadraticVariation
-import MathFin.Foundations.ItoFormulaRemainder
+module
+
+public import MathFin.Foundations.WeightedQuadraticVariation
+public import MathFin.Foundations.ItoFormulaRemainder
 
 /-! # Bounded-derivative continuous-time Itô formula (L², named-limit form)
 
@@ -22,6 +24,8 @@ plus the second-order correction recovers `f(B_T) − f(B_0)`. The discrete iden
 The integral term is identified with the genuine `itoIntegralCLM_T` in
 `ItoIntegralRiemannBridge` (A3/A4).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

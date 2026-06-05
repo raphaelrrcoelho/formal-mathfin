@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.Forward
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.Forward
 
 /-!
 # Delta as stock-numeraire probability: `Φ(d_1) = Q^(S)(S_T > K)`
@@ -55,6 +57,8 @@ This closes the structural narrative on the BS formula:
 Each Φ is now identified with the exercise probability under one of the
 two natural numeraires (money market vs. stock).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

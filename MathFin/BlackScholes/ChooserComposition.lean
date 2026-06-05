@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Chooser
-import MathFin.BlackScholes.PDE
-import MathFin.BlackScholes.PutGreeks
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Chooser
+public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PutGreeks
 
 /-!
 # Chooser option as call-plus-put portfolio (first-principles composition)
@@ -40,6 +42,8 @@ proved in full.
   BS-style discounted strike.
 * `chooser_integral_decomp`: the linearity-of-expectation step.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

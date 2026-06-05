@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.ExponentialDiscount
+module
+
+public import Mathlib
+public import MathFin.Foundations.ExponentialDiscount
 
 /-!
 # Force of mortality and survival functions
@@ -38,6 +40,8 @@ Results:
 * `survivalFromForce_pos`: positivity.
 * `gompertz_cumulative_force`: closed form `(B/c)·(e^{c·t} − 1)` for Gompertz.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

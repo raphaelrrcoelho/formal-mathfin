@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.PDE
-import MathFin.BlackScholes.PutGreeks
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PutGreeks
 
 /-!
 # Black-Scholes price monotonicity and convexity in the strike `K`
@@ -30,6 +32,8 @@ Results:
 * `hasDerivAt_bsP_K`: `∂_K bsP = e^{-rτ} · Φ(-d₂)`.
 * `hasDerivAt_bsV_KK`: `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ)` (convexity in K).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

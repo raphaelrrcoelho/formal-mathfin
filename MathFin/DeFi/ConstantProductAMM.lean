@@ -32,7 +32,9 @@ the time of writing; this adaptation does not copy any Lean source from
 that repo and uses only the published paper content.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Constant-product AMM (phase 38, after Pusceddu-Bartoletti 2024)
@@ -79,6 +81,8 @@ liquidity provision.
 * `internalPrice`, `arbitragePresent`: internal price `y / x` and the
   oracle-divergence predicate (definitions).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

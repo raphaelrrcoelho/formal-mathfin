@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Markowitz two-asset portfolio theory
@@ -36,6 +38,8 @@ Results:
 * `minPortfolioVarTwo_eq_zero_iff_perfect_anticorr`: at `ρ = -1` with
   `σ_1, σ_2 > 0`, the minimum variance is exactly zero (perfect hedge).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Capital Asset Pricing Model (CAPM)
@@ -24,6 +26,8 @@ Results:
 * `beta_of_marketPortfolio`: the market's beta is `1`.
 * `beta_of_riskFree`: the risk-free asset's beta is `0` (zero covariance with the market).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Black-Litterman one-dimensional Bayesian update
@@ -33,6 +35,8 @@ Results:
 * `blackLitterman_var_eq_inv_sum_precision`: equivalence with the
   inverse-sum-of-precisions form.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

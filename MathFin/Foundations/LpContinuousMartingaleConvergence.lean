@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.DoobLpMaximalInequality
-import BrownianMotion.StochasticIntegral.UniformIntegrable
-import BrownianMotion.StochasticIntegral.DoobLp
+module
+
+public import Mathlib
+public import MathFin.Foundations.DoobLpMaximalInequality
+public import BrownianMotion.StochasticIntegral.UniformIntegrable
+public import BrownianMotion.StochasticIntegral.DoobLp
 
 /-!
 # Lp continuous-martingale convergence (Theorem 4.3.10, Saporito)
@@ -65,6 +67,8 @@ surely to an integrable `M_∞`; for `p > 1` it also converges in `L^p`.
   only right-continuity. The in-measure form is the canonical conclusion
   for right-continuous martingales.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

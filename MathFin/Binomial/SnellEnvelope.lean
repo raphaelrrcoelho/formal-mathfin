@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.American
-import MathFin.Binomial.MartingaleRepresentation
+module
+
+public import Mathlib
+public import MathFin.Binomial.American
+public import MathFin.Binomial.MartingaleRepresentation
 
 /-!
 # Snell envelope characterization of `americanPrice` — scalar and path-space
@@ -62,6 +64,8 @@ E^Q[e^{−rτ} g(S_τ)]` — is downstream work on top of this file's path layer
 * `discounted_americanPrice_supermartingale`, `discounted_intrinsic_le_americanPrice`,
   `americanPrice_snell_minimal`: the American-price corollaries on paths.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

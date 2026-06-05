@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.CRRCharFun
-import MathFin.BlackScholes.Put
+module
+
+public import Mathlib
+public import MathFin.Binomial.CRRCharFun
+public import MathFin.BlackScholes.Put
 
 /-!
 # CRR → Black–Scholes call price, in closed form
@@ -17,6 +19,8 @@ This file chains it to the literal Black–Scholes closed form
 instantiated on the terminal law `N((r−σ²/2)T, σ²T)` through the standardisation
 `Z = (· − (r−σ²/2)T)/(σ√T)`) and the CDF symmetry `Φ(−x) = 1 − Φ(x)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

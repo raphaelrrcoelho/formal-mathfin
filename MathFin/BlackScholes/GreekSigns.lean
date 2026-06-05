@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.PDE
-import MathFin.BlackScholes.PriceBounds
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PriceBounds
 
 /-!
 # Black-Scholes Greek sign constraints
@@ -41,6 +43,8 @@ increasing in rate, decreasing in dividends.
 * `bsV_partial_K_nonpos`: `∂_K V ≤ 0` (call decreasing in strike).
 * `bsV_partial_KK_nonneg`: `∂²_K V ≥ 0` (call convex in strike).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

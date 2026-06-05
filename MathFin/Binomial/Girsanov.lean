@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.Model
+module
+
+public import Mathlib
+public import MathFin.Binomial.Model
 
 /-!
 # Discrete Girsanov: measure change in the single-period binomial tree
@@ -42,6 +44,8 @@ is just two-state algebra. We make this discrete Girsanov-machinery explicit.
 * `binomial_riskNeutral_via_RN`: discrete pricing identity
   `E^Q[V_T] = E^P[Z · V_T] = p · Z_up · V_u + (1 − p) · Z_down · V_d`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

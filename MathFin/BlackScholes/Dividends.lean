@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.GarmanNormalForm
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.GarmanNormalForm
 
 /-!
 # Black-Scholes-Merton call price with continuous dividend yield
@@ -23,6 +25,8 @@ Derivation: apply `bs_call_formula` with rate parameter `r − q`, then
 multiply through by the additional discount `e^{-qT}` (since the discount on
 the LHS uses the actual rate `r`, not the drift `r − q`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

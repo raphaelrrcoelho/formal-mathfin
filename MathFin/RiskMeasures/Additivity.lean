@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.RiskMeasures.Gaussian
-import MathFin.RiskMeasures.CoherentAxioms
+module
+
+public import Mathlib
+public import MathFin.RiskMeasures.Gaussian
+public import MathFin.RiskMeasures.CoherentAxioms
 
 /-!
 # Gaussian VaR/CVaR additivity at perfect positive correlation
@@ -20,6 +22,8 @@ Results:
 * `gaussianVaR_additive_at_rho_one`: at `ρ = 1`, VaR is additive.
 * `gaussianCVaR_additive_at_rho_one`: at `ρ = 1`, CVaR is additive.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

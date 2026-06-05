@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.PDE
-import MathFin.BlackScholes.Put
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.Put
 
 /-!
 # Black–Scholes put Greeks
@@ -29,6 +31,8 @@ constant/identity derivatives + put-call symmetry `Φ(d) + Φ(-d) = 1`.
 * `hasDerivAt_bsP_sigma` — vega_P = S ϕ(d₁) √τ (same as call vega).
 * `hasDerivAt_bsP_r` — ρ_P = -K τ e^{-rτ} Φ(-d₂).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.FTAPTwoState
+module
+
+public import Mathlib
+public import MathFin.Foundations.FTAPTwoState
 
 /-!
 # Multi-state FTAP backward direction (phase 42, hypothesis-form)
@@ -53,6 +55,8 @@ two-state case from Phase 37**.
 * `noArbitrage_of_emm_multi`: forward FTAP for arbitrary finite state +
   finite assets.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

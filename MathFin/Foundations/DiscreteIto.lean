@@ -21,7 +21,9 @@ Mathematical content and original Lean code © Tamás Nagy 2026, used here
 under academic fair use for derivative work with attribution.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Discrete Itô formula (phase 35, after Nagy 2026)
@@ -57,6 +59,8 @@ provides the probabilistic content needed for the limit.
 * `discreteTaylorRemainder`: definition of the per-step remainder.
 * `discrete_ito_formula`: the main identity.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

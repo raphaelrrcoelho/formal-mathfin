@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.ItoIntegralL2
+module
+
+public import MathFin.Foundations.ItoIntegralL2
 
 /-!
 # Continuous Itô integral on `[0,T]` as a continuous linear isometry
@@ -64,6 +66,8 @@ The `ℝ≥0` (unbounded-horizon) Itô CLM requires σ-finite exhaustion of the
 predictable σ-algebra and is left gated (see `docs/blueprint.md`); it is not
 required by any downstream pricing module in this library.
 -/
+
+@[expose] public section
 
 open MeasureTheory Filter Topology NNReal ENNReal ProbabilityTheory
 open scoped MeasureTheory NNReal ENNReal InnerProductSpace

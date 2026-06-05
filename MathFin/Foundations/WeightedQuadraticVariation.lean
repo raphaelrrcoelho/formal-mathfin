@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.QuadraticVariationL2
-import MathFin.Foundations.ItoIntegralL2
+module
+
+public import MathFin.Foundations.QuadraticVariationL2
+public import MathFin.Foundations.ItoIntegralL2
 
 /-! # Weighted quadratic variation — `∑ g(B_{tₖ})(ΔBₖ)² → ∫₀ᵀ g(B_s) ds` in `L²`
 
@@ -22,6 +24,8 @@ constant to a continuous weight. The proof splits the difference into
   `∑ g(B_{tₖ})·Δtₖ − ∫₀ᵀ g(B_s) ds → 0`, pathwise by continuity of `s ↦ g(B_s)`, then
   in `L²` by dominated convergence (`|·| ≤ C·T`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

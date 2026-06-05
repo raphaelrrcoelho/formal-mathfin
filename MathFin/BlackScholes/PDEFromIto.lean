@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
+module
+
 -- `import Mathlib` comes transitively through `ItoLemma` / `BlackScholes.PDE`.
-import MathFin.Foundations.ItoLemma
-import MathFin.Foundations.ItoLemma2D
-import MathFin.BlackScholes.PDE
+public import MathFin.Foundations.ItoLemma
+public import MathFin.Foundations.ItoLemma2D
+public import MathFin.BlackScholes.PDE
 
 /-!
 # Black-Scholes PDE derived via the Itô-drift formula (phase 46)
@@ -86,6 +88,8 @@ The discount + drift algebra:
 ⟹ for `d(e^{−rt} V)` to be driftless: `drift_V = r V`.
 i.e., `∂_t V + r S ∂_S V + (1/2) σ² S² ∂_SS V = r V`,
 i.e., the BS PDE. -/
+
+@[expose] public section
 
 namespace MathFin
 

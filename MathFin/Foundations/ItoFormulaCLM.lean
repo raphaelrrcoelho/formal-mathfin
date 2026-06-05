@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.ItoFormulaC2
-import MathFin.Foundations.ItoIntegralRiemannBridge
+module
+
+public import MathFin.Foundations.ItoFormulaC2
+public import MathFin.Foundations.ItoIntegralRiemannBridge
 
 /-! # CLM-identified continuous-time Itô formula (L²)
 
@@ -20,6 +22,8 @@ sums `∑ f′(B_{tₖ})·ΔBₖ`, so by uniqueness of `L²` limits they coincid
 `I ∈ L²` (needed to take the `toLp` class) because `f` is Lipschitz (`f′` bounded), so
 `f(B_T)` is dominated by `|f 0| + C₁·|B_T|`, an `L²` function.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

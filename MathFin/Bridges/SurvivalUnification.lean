@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Actuarial.Mortality
-import MathFin.FixedIncome.HazardCurve
+module
+
+public import MathFin.Actuarial.Mortality
+public import MathFin.FixedIncome.HazardCurve
 
 /-!
 # Bridge: actuarial survival ≡ reduced-form credit survival
@@ -20,6 +22,8 @@ This is one of the library's two illustrative *certified cross-domain bridges*
 (the other being `Bridges/ConcentrationVariance.lean`): a machine-checked identity
 showing that two independently-developed modules denote the same mathematics.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

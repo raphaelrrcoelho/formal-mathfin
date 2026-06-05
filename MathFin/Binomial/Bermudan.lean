@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Bermudan sandwich: European ≤ Bermudan ≤ American
@@ -23,6 +25,8 @@ Results:
 * `bermudan_sandwich`: `Eur ⊆ Berm ⊆ Amer ⇒ sup_Eur ≤ sup_Berm ≤ sup_Amer`
   (both inequalities, via `Finset.sup'_mono`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

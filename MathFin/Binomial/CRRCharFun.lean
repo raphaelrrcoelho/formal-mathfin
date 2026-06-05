@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.DriftLimit
+module
+
+public import Mathlib
+public import MathFin.Binomial.DriftLimit
 
 /-!
 # CRR characteristic-function convergence (the CLT heart of CRR → Black–Scholes)
@@ -36,6 +38,8 @@ The crux is `crr_charFun_pow_tendsto`. The argument:
 Both real trig limits reduce to `sin u / u → 1` (the half-angle identity
 `1 − cos u = 2 sin²(u/2)` handles the cosine).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

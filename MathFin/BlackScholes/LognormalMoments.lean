@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.Forward
-import MathFin.BlackScholes.PowerOption
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.Forward
+public import MathFin.BlackScholes.PowerOption
 
 /-!
 # Second moment and variance of the terminal asset price
@@ -30,6 +32,8 @@ Results:
 * `secondMoment_terminal`: `E_Q[S_T²] = S_0² · exp(2rT + σ²T)`.
 * `variance_terminal`: `Var_Q[S_T] = S_0² · exp(2rT) · (exp(σ²T) − 1)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
 
 /-!
 # Black–Scholes digital option pricing formulas
@@ -24,6 +26,8 @@ as the vanilla call: HasLaw transfer to standard normal, `1_{S_T > K}` on
 The standard decomposition `Call = AssetDigital − K · CashDigital` is
 also proved as a corollary.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

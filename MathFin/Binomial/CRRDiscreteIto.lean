@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.DiscreteIto
-import MathFin.Binomial.CRRConvergence
-import MathFin.Binomial.DriftLimit
+module
+
+public import Mathlib
+public import MathFin.Foundations.DiscreteIto
+public import MathFin.Binomial.CRRConvergence
+public import MathFin.Binomial.DriftLimit
 
 /-!
 # CRR binomial scheme as a discrete-Itô process (phase 44a+b)
@@ -59,6 +61,8 @@ continuity + put-call parity (no triangular-array CLT needed).
 * `tendsto_sum_QV_atTop_BS_QV`: `n · per_step_QV → σ²·T` (composes
   `crr_variance_limit`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

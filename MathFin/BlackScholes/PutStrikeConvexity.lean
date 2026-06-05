@@ -3,11 +3,13 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.PDE
-import MathFin.BlackScholes.PutGreeks
-import MathFin.BlackScholes.StrikeGreeks
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.PutGreeks
+public import MathFin.BlackScholes.StrikeGreeks
 
 /-!
 # Put-price convexity in strike
@@ -24,6 +26,8 @@ Results:
 * `gaussianPDFReal_zero_one_neg`: `ϕ(−x) = ϕ(x)` for the standard normal PDF.
 * `hasDerivAt_bsP_KK`: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

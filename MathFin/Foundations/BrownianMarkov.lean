@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import BrownianMotion.Gaussian.BrownianMotion
+module
+
+public import Mathlib
+public import BrownianMotion.Gaussian.BrownianMotion
 
 /-!
 # Brownian Markov property at the σ-algebra level
@@ -34,6 +36,8 @@ which together with `IsPreBrownian.shift` is the full textbook package: after
 * `brownian_markov_property` — the textbook package: the shifted increment
   process is a pre-Brownian motion *and* independent of `𝓕ᵉ_{t₀}`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

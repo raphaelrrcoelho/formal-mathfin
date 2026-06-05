@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Futures.Black76
-import MathFin.BlackScholes.PDE
+module
+
+public import Mathlib
+public import MathFin.Futures.Black76
+public import MathFin.BlackScholes.PDE
 
 /-!
 # Black-76 Greeks
@@ -18,6 +20,8 @@ Greeks evaluated at `r = 0` and post-multiplied by the discount factor `e^{-rT}`
 * `hasDerivAt_blackV_FF` — γ = e^{-rT} · ϕ(d₁) / (F σ √T).
 * `hasDerivAt_blackV_sigma` — vega = e^{-rT} · F · ϕ(d₁) · √T.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

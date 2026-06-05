@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.DiscreteIto
+module
+
+public import MathFin.Foundations.DiscreteIto
 
 /-! # Itô's lemma for `f(x) = x²` — the discrete squaring identity
 
@@ -33,6 +35,8 @@ to deterministic `t`. That bridge is deferred to a follow-up: see the
 * `discrete_squaring_identity` — the pathwise identity
   `X_N² − X_0² = 2·∑ X_k·ΔX_k + ∑ (ΔX_k)²`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.StrikeConvexity
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.StrikeConvexity
 
 /-!
 # Static spread no-arbitrage relations (bull-call, butterfly)
@@ -26,6 +28,8 @@ The same convexity, applied infinitesimally rather than discretely, yields
 non-negativity of the second `K`-derivative of the European call price —
 i.e. the Breeden-Litzenberger implied PDF.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

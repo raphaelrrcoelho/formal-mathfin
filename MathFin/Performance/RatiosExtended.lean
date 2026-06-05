@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Performance.Ratios
+module
+
+public import Mathlib
+public import MathFin.Performance.Ratios
 
 /-!
 # Extended performance ratios: Sortino, Treynor, Information ratio
@@ -32,6 +34,8 @@ Results:
 * `informationRatio`, `informationRatio_scale_invariant`.
 * `trackingErrorSq`, `trackingErrorSq_self`, `trackingErrorSq_ge_diff_sq`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

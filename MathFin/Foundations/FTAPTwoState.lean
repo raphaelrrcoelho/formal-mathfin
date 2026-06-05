@@ -20,7 +20,9 @@ Mathematical content and original Lean code © Tamás Nagy 2026, used here
 under academic fair use for derivative work with attribution.
 Released under Apache 2.0 license as described in the file LICENSE.
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # FTAP both directions, two-state market (phase 37, after Nagy 2026)
@@ -52,6 +54,8 @@ negative and strictly positive in at least one state.
   trivial-market case `z = 0` (which trivially has EMM `(1/2, 1/2)` and
   no arbitrage).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

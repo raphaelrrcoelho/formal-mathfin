@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.Model
+module
+
+public import Mathlib
+public import MathFin.Binomial.Model
 
 /-!
 # Uniqueness of the binomial replicating portfolio
@@ -41,6 +43,8 @@ The proof is pure linear algebra: the coefficient matrix has determinant
 * `binomial_replicatingPortfolio_unique`: the replicating portfolio `(Δ, B)`
   is uniquely determined by the target payoffs `(V_u, V_d)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

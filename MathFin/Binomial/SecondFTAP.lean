@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Binomial.Model
+module
+
+public import Mathlib
+public import MathFin.Binomial.Model
 
 /-!
 # Second Fundamental Theorem of Asset Pricing (single-period binomial form)
@@ -31,6 +33,8 @@ So in the single-period binomial: **no-arbitrage ⟹ unique EMM ⟺ completeness
 * `second_FTAP_single_period`: under `BinomialNoArb u d r`, the risk-neutral
   up-probability `q` is uniquely determined.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

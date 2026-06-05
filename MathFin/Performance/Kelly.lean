@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Performance.Ratios
+module
+
+public import Mathlib
+public import MathFin.Performance.Ratios
 
 /-!
 # Multi-period Kelly criterion and Kelly fraction bounds
@@ -38,6 +40,8 @@ Results:
 * `kellyFraction_lt_one`, `kellyFraction_eq_zero_iff`, `kellyFraction_pos_iff`:
   bounds and sign analysis of the Kelly fraction.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Concentration risk: Herfindahl–Hirschman Index (HHI)
@@ -28,6 +30,8 @@ Results:
 * `herfindahl_le_one_of_sum_le_one_of_nonneg`: HHI ≤ 1 under unit budget.
 * `herfindahl_card_inv_le_of_sum_one`: HHI ≥ 1/n via Cauchy-Schwarz.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Portfolio.BlackLitterman
+module
+
+public import Mathlib
+public import MathFin.Portfolio.BlackLitterman
 
 /-!
 # N-dimensional Black-Litterman posterior (matrix form, first-principles)
@@ -67,6 +69,8 @@ Specialising `n = 1`, `m = 1`, `P = (1)`, `Sg_inv = (1/s0sq)`, `Om_inv =
 * `IsBLPosteriorMean_unique`: solution to the normal equation is unique
   (when posterior precision is invertible).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

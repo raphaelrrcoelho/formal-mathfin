@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Portfolio.TangentPortfolio
+module
+
+public import MathFin.Portfolio.TangentPortfolio
 
 /-!
 # N-asset tangent portfolio — re-export
@@ -15,3 +17,5 @@ closed form (of which it is the natural generalisation).
 The namespace `MathFin` exposes `IsTangentPortfolioN` and
 `isTangent_of_proportional` through the transitive import.
 -/
+
+@[expose] public section

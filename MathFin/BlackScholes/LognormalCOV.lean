@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.BlackScholes.BreedenLitzenberger
+module
+
+public import MathFin.BlackScholes.BreedenLitzenberger
 
 /-!
 # Lognormal-to-gaussian change of variables — re-export
@@ -15,3 +17,5 @@ next to the implied-PDF definition and positivity.
 The namespace `MathFin` exposes `lognormalTerminalPDF_change_of_variables`
 through the transitive import.
 -/
+
+@[expose] public section

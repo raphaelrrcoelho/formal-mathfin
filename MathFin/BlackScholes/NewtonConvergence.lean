@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.ImpliedVolatility
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.ImpliedVolatility
 
 /-!
 # Newton–Raphson: local quadratic convergence
@@ -53,6 +55,8 @@ bracketing interval and the simple-root hypothesis is automatic.
 * `newtonSeq_error_le_geometric`: geometric error decay in the basin.
 * `newtonSeq_tendsto_root`: convergence `xₙ → r`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

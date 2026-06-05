@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.BrownianQuadraticVariation
+module
+
+public import Mathlib
+public import MathFin.Foundations.BrownianQuadraticVariation
 
 /-!
 # Variance-swap log-price increment from Brownian quadratic variation (phase 32)
@@ -45,6 +47,8 @@ QV-style derivation of the variance-swap fair strike.
 * `expected_bsLogPrice_sq_increment`: the per-increment QV identity for
   BS log-price.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

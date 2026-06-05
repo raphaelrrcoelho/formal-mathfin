@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.GarmanNormalForm
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.GarmanNormalForm
 
 /-!
 # Margrabe's exchange option: a two-asset option that is a one-asset BS problem
@@ -50,6 +52,8 @@ the Margrabe-analog of leap-1 Girsanov), so the reduction is end-to-end.
 * `margrabe_price_via_call`: the exchange option is a `bs_call_formula` call
   on the ratio (price-level reduction).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

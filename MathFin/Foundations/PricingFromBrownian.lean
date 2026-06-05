@@ -3,15 +3,17 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.BSCallHypFromBrownian
-import MathFin.BlackScholes.Put
-import MathFin.BlackScholes.Forward
-import MathFin.BlackScholes.Digital
-import MathFin.BlackScholes.PowerCall
-import MathFin.BlackScholes.StockNumeraire
-import MathFin.BlackScholes.Dividends
-import MathFin.FixedIncome.KMVMertonStructural
+module
+
+public import Mathlib
+public import MathFin.Foundations.BSCallHypFromBrownian
+public import MathFin.BlackScholes.Put
+public import MathFin.BlackScholes.Forward
+public import MathFin.BlackScholes.Digital
+public import MathFin.BlackScholes.PowerCall
+public import MathFin.BlackScholes.StockNumeraire
+public import MathFin.BlackScholes.Dividends
+public import MathFin.FixedIncome.KMVMertonStructural
 
 /-!
 # Pricing entry points from a pre-Brownian motion (phase 31)
@@ -43,6 +45,8 @@ single foundational entry point: "supply a Brownian motion."
 * `bs_put_call_parity_via_brownian`: put-call parity from BM.
 * `bachelier_call_formula_via_brownian`: Bachelier call price formula from BM.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

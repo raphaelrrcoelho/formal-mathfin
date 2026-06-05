@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
 
 /-!
 # Forward and futures pricing under the BS lognormal hypothesis
@@ -35,6 +37,8 @@ condition is
 so `F = E_Q[S_T]`. Combined with `expected_terminal_eq_forward`, this gives
 `F = S_0 · e^{rT}`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

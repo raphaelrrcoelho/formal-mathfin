@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Almgren-Chriss optimal execution (deterministic closed form)
@@ -42,6 +44,8 @@ function-space machinery beyond Mathlib's current pin.
 * `hasDerivAt_almgrenChrissPath`: first derivative.
 * `almgrenChrissPath_satisfies_EL`: `X''(t) = κ² · X(t)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

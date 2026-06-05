@@ -3,10 +3,12 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import BrownianMotion.Gaussian.BrownianMotion
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.Bachelier
+module
+
+public import Mathlib
+public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.Bachelier
 
 /-!
 # Bridge: `BSCallHyp` / `BachelierHyp` from a Brownian motion
@@ -54,6 +56,8 @@ discharges the BS / Bachelier hypothesis automatically.
 * `BachelierHyp.of_isPreBrownian`: Bachelier hypothesis from a pre-Brownian
   motion (same scaled `Z`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

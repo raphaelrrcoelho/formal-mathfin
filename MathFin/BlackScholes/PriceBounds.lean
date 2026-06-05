@@ -3,11 +3,13 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
-import MathFin.BlackScholes.Put
-import MathFin.BlackScholes.PutGreeks
-import MathFin.BlackScholes.PDE
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
+public import MathFin.BlackScholes.Put
+public import MathFin.BlackScholes.PutGreeks
+public import MathFin.BlackScholes.PDE
 
 /-!
 # The no-arbitrage rectangle for European call/put prices
@@ -55,6 +57,8 @@ call costs less than the stock", bsP ≥ K · e^{−rT} − S says "a put costs 
 least the discounted strike minus spot", etc. — sits on the rectangle. Naming
 the rectangle makes the meaning explicit and the proofs trivial.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

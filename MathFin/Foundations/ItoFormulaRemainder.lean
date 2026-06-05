@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import MathFin.Foundations.GaussianMoments
-import MathFin.Foundations.QuadraticVariationL2
-import MathFin.Foundations.DiscreteIto
+module
+
+public import MathFin.Foundations.GaussianMoments
+public import MathFin.Foundations.QuadraticVariationL2
+public import MathFin.Foundations.DiscreteIto
 
 /-! # The Itô–Taylor remainder vanishes in `L²`
 
@@ -18,6 +20,8 @@ Each per-step remainder `Rₖ` is `O(|ΔBₖ|³)` (order-2 Taylor bound,
 sixth moment `integral_pow6_gaussianReal`). Cauchy–Schwarz on the sum gives
 `E[(∑ₖ Rₖ)²] ≤ n·∑ₖ E[Rₖ²] = O(n·n·(T/n)³) = O(n⁻¹) → 0`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

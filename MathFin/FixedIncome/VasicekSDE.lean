@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.FixedIncome.Vasicek
+module
+
+public import Mathlib
+public import MathFin.FixedIncome.Vasicek
 
 /-!
 # Vasicek SDE terminal-distribution form (stated, not derived) (phase 41)
@@ -58,6 +60,8 @@ explicitly so that downstream consumers can use it without re-deriving.
 * `vasicekSDE_variance_pos`: positivity of variance for `κ > 0`, `σ ≠ 0`.
 * `vasicekSDE_mean_at_zero`: `r_t = r_0` at `t = 0`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.FixedIncome.Credit
-import MathFin.Foundations.ExponentialDiscount
+module
+
+public import Mathlib
+public import MathFin.FixedIncome.Credit
+public import MathFin.Foundations.ExponentialDiscount
 
 /-!
 # Time-varying hazard credit curve
@@ -31,6 +33,8 @@ Results:
   constant `h`.
 * `creditSpread_eq_time_avg_hazard`: `c(T) = H(T) / T`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

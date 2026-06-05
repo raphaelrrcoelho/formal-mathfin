@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.Call
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.Call
 
 /-!
 # Bachelier model option pricing
@@ -27,6 +29,8 @@ Key new primitive: **truncated mean of `N(0, 1)`** —
 `∫ z in Ioi a, z · ϕ(z) dz = ϕ(a)`,
 proved via FTC since `(−ϕ)' = z · ϕ`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

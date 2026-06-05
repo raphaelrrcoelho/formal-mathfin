@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Capped call payoff decomposition
@@ -20,6 +22,8 @@ Result:
 
 * `cappedCall_eq_bull_spread`: case-by-case over `S` vs `K₁, K₂`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

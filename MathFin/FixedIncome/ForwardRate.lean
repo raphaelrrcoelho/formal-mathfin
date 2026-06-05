@@ -3,8 +3,10 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.Foundations.ExponentialDiscount
+module
+
+public import Mathlib
+public import MathFin.Foundations.ExponentialDiscount
 
 /-!
 # Forward rate from a non-flat spot-rate curve
@@ -33,6 +35,8 @@ Result:
   actual discount factor `P(T) = exp(−T · R(T))`, via the
   `ExponentialDiscount` principle.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

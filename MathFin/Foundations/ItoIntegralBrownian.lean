@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
+module
+
 -- `import Mathlib` + `BrownianMotion.*` come transitively through `ItoIntegralCLM`.
-import MathFin.Foundations.ItoIntegralCLM
-import MathFin.Foundations.ItoFormulaSquaredL2
+public import MathFin.Foundations.ItoIntegralCLM
+public import MathFin.Foundations.ItoFormulaSquaredL2
 
 /-!
 # The Itô integral of Brownian motion: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` via the CLM
@@ -44,6 +46,8 @@ device — it is exactly how the Itô integral is defined for unbounded integran
    `g_B` is the Itô-L² realisation of `s ↦ B_s`.
 8. `itoIntegralCLM_T g_B = ½·⟦B_T² − B₀² − T⟧` — the keystone.
 -/
+
+@[expose] public section
 
 open MeasureTheory ProbabilityTheory Filter Topology NNReal ENNReal MathFin.QuadraticVariationL2
 open scoped MeasureTheory NNReal ENNReal InnerProductSpace

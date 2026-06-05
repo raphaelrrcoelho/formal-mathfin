@@ -3,9 +3,11 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
-import MathFin.BlackScholes.PDE
-import MathFin.BlackScholes.Bachelier
+module
+
+public import Mathlib
+public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.Bachelier
 
 /-!
 # Higher-order Black–Scholes Greeks: vanna and volga
@@ -21,6 +23,8 @@ The key algebraic shortcut is `∂_σ d₁ = -d₂/σ` (from
 quotient-rule expression. Combined with `ϕ'(z) = -z · ϕ(z)`, both Greeks
 follow from one chain rule + one product/scalar rule.
 -/
+
+@[expose] public section
 
 namespace MathFin
 

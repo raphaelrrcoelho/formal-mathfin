@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Binomial-tree option pricing (Cox-Ross-Rubinstein style)
@@ -31,6 +33,8 @@ This file contains:
 The bridge to Black-Scholes (CRR convergence) is proved in
 `Binomial/CRRCharFun.lean` (`binomialPrice_call_tendsto_bs`).
 -/
+
+@[expose] public section
 
 namespace MathFin
 

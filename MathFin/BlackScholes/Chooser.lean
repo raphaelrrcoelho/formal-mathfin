@@ -3,7 +3,9 @@ Copyright (c) 2026 Raphael Coelho. All rights reserved.
 Released under Apache 2.0 license as described in the file LICENSE.
 Authors: Raphael Coelho
 -/
-import Mathlib
+module
+
+public import Mathlib
 
 /-!
 # Chooser option
@@ -25,6 +27,8 @@ Results:
 * `chooser_via_pcp`: under `C - P = S - K_disc`,
   `max C P = C + max 0 (K_disc - S)`.
 -/
+
+@[expose] public section
 
 namespace MathFin
 
