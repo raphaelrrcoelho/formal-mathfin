@@ -48,6 +48,8 @@ standard density / `LinearMap.extendOfNorm` construction.
   `∫ ω, (I f ω)² ∂μ = ∫ s in (0, T], (f s)² ∂volume`.
 -/
 
+@[expose] public section
+
 namespace MathFin
 namespace WienerIntegralL2
 

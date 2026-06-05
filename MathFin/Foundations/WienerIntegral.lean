@@ -27,6 +27,8 @@ This file contains the step-function kernel. The extension to
 `MathFin.Foundations.WienerIntegralL2`.
 -/
 
+@[expose] public section
+
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
