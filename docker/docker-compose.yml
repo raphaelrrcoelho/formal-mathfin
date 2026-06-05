@@ -36,7 +36,8 @@ services:
     #
     # `mem_limit` is the hard backstop: a runaway Lean process OOM-kills the
     # container (exit 137 — the backend respawns) instead of exhausting the
-    # WSL VM and freezing the Windows host.
+    # WSL VM and freezing the Windows host. Sized for `.wslconfig memory=8GB`
+    # (6g cap leaves the VM ~2 GB of headroom); keep the two in sync.
     #
     # `LEAN_NUM_THREADS=1` is the cold-build sweet spot on this host:
     # Lake's own worker parallelism (~nproc concurrent module builds) already
@@ -47,7 +48,7 @@ services:
     # would help, but our typical request elaborates ~100-LOC files, not
     # heavy enough to matter. Override only if you know what you're doing.
     cpuset: "${VERIFY_CPUSET:-0-3}"
-    mem_limit: 9g
+    mem_limit: 6g
     environment:
       - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
     volumes:
@@ -103,7 +104,7 @@ services:
       context: ..
       dockerfile: docker/Dockerfile.verify
     cpuset: "${VERIFY_CPUSET:-0-3}"
-    mem_limit: 9g
+    mem_limit: 6g
     environment:
       - LEAN_NUM_THREADS=${LEAN_NUM_THREADS:-1}
     volumes:

@@ -80,6 +80,31 @@ def _iter_theorems():
             yield path, theorem
 
 
+# Lean module-system exposure guard. A `module`-header file whose declarations
+# are not under a `public section` exports NOTHING: importers see no names while
+# `lake build` stays green (this silently broke sc-thm-6.2.5 via the Wiener
+# pair — the only two modules with zero in-library consumers — found 2026-06-04).
+# No deliberately-private modules exist; add any future one here with a comment.
+MODULE_PRIVATE_ALLOWLIST: set = set()
+
+MODULE_HEADER_RE = re.compile(r"^module\s*$", re.MULTILINE)
+
+
+def test_mathfin_module_files_expose_public_section() -> None:
+    for path in Path("MathFin").rglob("*.lean"):
+        if str(path) in MODULE_PRIVATE_ALLOWLIST:
+            continue
+        text = path.read_text()
+        if MODULE_HEADER_RE.search(text) and "public section" not in text:
+            raise AssertionError(
+                f"{path} uses the Lean module system but has no `public section` — "
+                "its declarations are module-private and invisible to importers "
+                "while the build stays green. Add `@[expose] public section` after "
+                "the module docstring (library-wide convention), or allowlist with "
+                "a justification."
+            )
+
+
 def test_default_routes_are_lean_only() -> None:
     router = Router()
 

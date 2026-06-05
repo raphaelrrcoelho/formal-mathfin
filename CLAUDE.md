@@ -68,8 +68,11 @@ docker compose -f docker/docker-compose.yml run --rm \
 ```
 
 `tests/test_router.py` enforces Lean-only routing, Lean-only `code` keys (no
-dropped-backend residue), no `sorry`/`admit`, and a declared
-formalization-faithfulness status for every benchmark theorem.
+dropped-backend residue), no `sorry`/`admit`, a declared
+formalization-faithfulness status for every benchmark theorem, and that every
+`module`-header Lean file carries `@[expose] public section` (without it the
+file's declarations are module-private — invisible to importers while the
+build stays green).
 
 Delivery/status docs:
 - `docs/coverage.md`: per-theorem audit, safe claim wording, verification evidence, and remaining placeholders.
@@ -87,7 +90,15 @@ Docker notes:
   (`MathFin/`, `MathFin.lean`, `lakefile.lean`,
   `lake-manifest.json`, `lean-toolchain`). The Lake bind mount is RW so
   authoring `MathFin/*.lean` on host (VS Code + Lean LSP) propagates
-  without a rebuild; `.lake/` lives on the host and survives between runs.
+  without a rebuild. The olean store lives in the `lake_build_cache`
+  named volume, shared by `verify` and `lean-repl` (one Lake writer at a
+  time — never run a build in one while the other is up); any host-side
+  `.lake/` directory is unused and should not exist.
+- Both Lean services default to `cpuset 0-3` (4 Lake workers) and
+  `mem_limit 6g`: this host gives WSL ~8 GB and uncapped Lean runs froze
+  the machine. A runaway elaboration OOM-kills the container (exit 137,
+  the backend respawns) instead of the host. Widen on bigger machines
+  via `VERIFY_CPUSET=0-7`.
 - `lean-interact`'s own cache is in the `lean_interact_cache` Docker volume.
 - If Docker build fails under Claude/Codex because it cannot write under
   `~/.docker`, rerun the same `docker compose ...` command with elevated
@@ -137,6 +148,13 @@ Lean LSP (`loogle`/`leansearch%`/`apply?` are transitively available
 via Mathlib's `LeanSearchClient`), `lake build` to validate, then update the
 benchmark JSON to import + reference.
 
+**Module-system rule**: `MathFin/` files use the Lean module system (`module`
+header + `public import`s) and **must** put `@[expose] public section` right
+after the module docstring. Without it every declaration is module-private:
+importers see nothing, `lake build` stays green, and only consumers (benchmark
+snippets) break. Enforced by
+`test_router.test_mathfin_module_files_expose_public_section`.
+
 **Fast authoring iteration via persistent REPL daemon (`docker compose
 service lean-repl`)**. The daemon (`tools/verify/lean_repl.py`) boots a
 `lean-interact` server pointing at the repo root once per session, paying
@@ -155,6 +173,9 @@ docker compose -f docker/docker-compose.yml logs -f lean-repl | grep -m1 READY
 # per iteration: edit a .lean file, then check it via the wrapper
 ./scripts/lean-check.sh MathFin/Foundations/BrownianMartingale.lean
 # Returns JSON: {"success": bool, "errors": [...], "warnings": [...], "sorry_count": N}
+
+# check a single benchmark snippet the same way (seconds, not a 5-min cold boot)
+./scripts/bench-check.sh benchmarks/martingales.json mart-thm-2.2.9
 
 # tear down at end of session
 docker compose -f docker/docker-compose.yml down lean-repl
