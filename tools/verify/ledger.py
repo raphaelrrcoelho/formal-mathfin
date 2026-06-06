@@ -42,6 +42,34 @@ LEDGER_PATH = REPO / "verification_ledger.json"
 BENCH_DIR = REPO / "benchmarks"
 PIN_FILES = ("lean-toolchain", "lake-manifest.json")
 
+# Tooling-only Lake packages, OUTSIDE every benchmark import closure: no
+# MathFin module reachable from a benchmark snippet imports them (enforced by
+# ``test_router.test_tooling_packages_not_imported_by_library``), and a
+# package on LEAN_PATH that an env never imports cannot affect elaboration
+# (Lean environments are import-closed). Their manifest entries are therefore
+# stripped before pin-hashing so adding/bumping them does not false-restale
+# the corpus. Substantive pins (mathlib, BrownianMotion, batteries, …) still
+# restale everything, as they must.
+# `Hammer`/`Duper`/`auto`/`premise-selection` are the LeanHammer cluster:
+# authoring-time scouts (CLAUDE.md values gate), imported only by pilot files
+# under tests/, never by MathFin modules or benchmark snippets.
+PIN_EXCLUDED_PACKAGES = frozenset({
+    "LeanArchitect", "Hammer", "Duper", "auto", "«premise-selection»",
+})
+
+
+def _pin_bytes(path: Path) -> bytes:
+    """Pin-relevant bytes of a pin file (manifest: tooling packages stripped)."""
+    data = path.read_bytes()
+    if path.name != "lake-manifest.json":
+        return data
+    manifest = json.loads(data)
+    manifest["packages"] = [
+        p for p in manifest.get("packages", [])
+        if p.get("name") not in PIN_EXCLUDED_PACKAGES
+    ]
+    return json.dumps(manifest, sort_keys=True).encode()
+
 MATHFIN_IMPORT_RE = re.compile(
     r"^\s*(?:public\s+)?import(?:\s+all)?\s+(MathFin(?:\.[A-Za-z0-9_]+)*)\s*$",
     re.MULTILINE,
@@ -64,11 +92,13 @@ def _sha(data: bytes) -> str:
 class InputHasher:
     """Computes per-entry input hashes with memoized file hashes/imports."""
 
-    def __init__(self) -> None:
+    def __init__(self, pins: str | None = None) -> None:
         self._file_sha: dict[Path, str] = {}
         self._file_imports: dict[Path, list[str]] = {}
-        self._pins = "".join(
-            _sha((REPO / p).read_bytes()) for p in PIN_FILES
+        # Pin segment: tooling-only packages stripped from the manifest before
+        # hashing (see PIN_EXCLUDED_PACKAGES). `pins` overrides for rebase.
+        self._pins = pins if pins is not None else "".join(
+            _sha(_pin_bytes(REPO / p)) for p in PIN_FILES
         )
 
     def _hash_file(self, path: Path) -> str:
@@ -290,10 +320,60 @@ def cmd_verify(args) -> int:
     return 1 if failures else 0
 
 
+def cmd_rebase_pins(args) -> int:
+    """Rewrite stored entry hashes from the OLD pin scheme to the current one
+    — WITHOUT re-verification, and only where that is provable.
+
+    Sound by construction: an entry is rewritten only if its stored hash
+    EQUALS the hash recomputed under the baseline rev's pin files (old
+    raw-bytes scheme) with the CURRENT snippet + module closure — i.e. its
+    code and every transitive MathFin module are byte-identical to the
+    verified state, and only the pin segment moved. Anything else is left
+    untouched (genuinely stale ⇒ still needs `verify`). Use when the pin
+    *scheme* changes or a PIN_EXCLUDED_PACKAGES dep is added — never as a
+    shortcut after substantive pin bumps (those won't match the proof gate
+    anyway, by design)."""
+    def git_show(rev: str, path: str) -> bytes:
+        return subprocess.run(
+            ["git", "show", f"{rev}:{path}"],
+            cwd=REPO, capture_output=True, check=True,
+        ).stdout
+
+    old_pins = "".join(_sha(git_show(args.baseline_rev, p)) for p in PIN_FILES)
+    old_hasher = InputHasher(pins=old_pins)
+    new_hasher = InputHasher()
+    ledger = load_ledger()
+    entries = ledger.get("entries", {})
+    rebased = skipped = 0
+    for _fname, theorem in iter_entries():
+        tid = theorem["id"]
+        code = theorem.get("code", {}).get("lean", "")
+        row = entries.get(tid)
+        if row is None:
+            continue
+        if row.get("input_hash") == old_hasher.entry_hash(code):
+            row["input_hash"] = new_hasher.entry_hash(code)
+            row["pin_rebased_from"] = args.baseline_rev
+            rebased += 1
+        else:
+            skipped += 1
+    save_ledger(ledger)
+    print(f"rebased: {rebased}  left-untouched: {skipped} "
+          f"(baseline {args.baseline_rev})")
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     sub = parser.add_subparsers(dest="command", required=True)
     sub.add_parser("status", help="fresh/stale/missing report (exit 1 if not all fresh)")
+    p_rebase = sub.add_parser(
+        "rebase-pins",
+        help="migrate stored hashes across a pin-SCHEME change (proof-gated, "
+             "no re-verification; see cmd_rebase_pins docstring)")
+    p_rebase.add_argument("--baseline-rev", default="HEAD",
+                          help="git rev whose pin files the ledger was "
+                               "last verified under (default HEAD)")
     p_verify = sub.add_parser("verify", help="verify entries via the lean-repl daemon")
     p_verify.add_argument("--all", action="store_true",
                           help="re-verify everything, not just stale/missing")
@@ -311,6 +391,8 @@ def main() -> int:
     args = parser.parse_args()
     if args.command == "status":
         return cmd_status(args)
+    if args.command == "rebase-pins":
+        return cmd_rebase_pins(args)
     return cmd_verify(args)
 
 
