@@ -55,6 +55,13 @@ EXPECTED_FULL_THEOREMS = {
     "mc-def-1.1.1",
     "mc-prop-1.2.3",
     "mc-prop-1.4.13",
+    # 2026-06-05 Poisson-cluster + Itô-QV upgrade round: conclusions are now
+    # DERIVED (PoissonSuperposition / PoissonThinning / PoissonCounting /
+    # ItoProcessQV in Foundations/), not structure-field projections.
+    "pp-thm-3.3.5",
+    "pp-thm-3.3.9",
+    "pp-thm-3.3.10",
+    "sc-thm-7.4.5",
 }
 
 # Deliberate 2026-06-03 audit demotions: THEOREM-named entries whose textbook
@@ -63,7 +70,10 @@ EXPECTED_FULL_THEOREMS = {
 # nor be re-promoted without a genuine derivation (the Poisson construction /
 # Ionescu-Tulcea path measure, respectively).
 EXPECTED_REDUCED_CORE_THEOREMS = {
-    "pp-thm-3.3.5",
+    # pp-prop-3.3.6 stays reduced_core HONESTLY: the first interarrival's
+    # exponential law + memorylessness are derived (PoissonInterarrival), but
+    # the textbook's whole-sequence iid claim needs the strong Markov property.
+    "pp-prop-3.3.6",
     "mc-thm-1.1.2",
 }
 

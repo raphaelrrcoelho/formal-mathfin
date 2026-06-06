@@ -1707,37 +1707,37 @@
     "pp-prop-3.3.6": {
       "benchmark_file": "poisson_processes.json",
       "date": "2026-06-05",
-      "elapsed_s": 0.1,
-      "input_hash": "d349cf7d56fa2ab320c7b19a79f836824bef82d5851989b0f8bca6d51d466f4f",
-      "verified_at_commit": "9078508"
+      "elapsed_s": 453.2,
+      "input_hash": "c1b117de646f84af78cffebe73a69f2b26811e460845d359eee388d37814c7e6",
+      "verified_at_commit": "4da98f4"
     },
     "pp-thm-3.3.10": {
       "benchmark_file": "poisson_processes.json",
-      "date": "2026-06-05",
-      "elapsed_s": 0.1,
-      "input_hash": "89b951be5f4aa10575e9b672ffdc56f98e1cf65ea8c487bc5d639a63ad6379c8",
-      "verified_at_commit": "9078508"
+      "date": "2026-06-06",
+      "elapsed_s": 305.0,
+      "input_hash": "d8c33d084a0d242fb25381d04c64a779a9e962df4e88ed3df5a4c8a168692ca8",
+      "verified_at_commit": "4da98f4"
     },
     "pp-thm-3.3.5": {
       "benchmark_file": "poisson_processes.json",
       "date": "2026-06-05",
-      "elapsed_s": 0.1,
-      "input_hash": "3e8363cef4f52d2185ff33e3a14d1f989df3ce76c4c57fd7037367e36786bf59",
-      "verified_at_commit": "9078508"
+      "elapsed_s": 394.0,
+      "input_hash": "a347cf923cdeddd7fa594896e229a6b94450b0e337180d7f9fc63a67be362c69",
+      "verified_at_commit": "4da98f4"
     },
     "pp-thm-3.3.8": {
       "benchmark_file": "poisson_processes.json",
       "date": "2026-06-05",
-      "elapsed_s": 32.2,
-      "input_hash": "4530ba1f3a7b7fda1f5a543ac90e4bcefeb5973877e3b585b5b52c4b77f8c9cc",
-      "verified_at_commit": "fa07391"
+      "elapsed_s": 128.7,
+      "input_hash": "2f7bfe6423c24649e15d90ba0768bbe6a5089588c6387600bf00bd11cf19463d",
+      "verified_at_commit": "4da98f4"
     },
     "pp-thm-3.3.9": {
       "benchmark_file": "poisson_processes.json",
-      "date": "2026-06-05",
-      "elapsed_s": 0.1,
-      "input_hash": "f15b0532cfd07ab9eecad56898b6431af8d310d307ca33a9c2653ed8e4204f52",
-      "verified_at_commit": "9078508"
+      "date": "2026-06-06",
+      "elapsed_s": 447.2,
+      "input_hash": "765f6e070dbf3f2f0affdd23a35524dbcbad3e3df242cbd3ce945ce1d0083054",
+      "verified_at_commit": "4da98f4"
     },
     "sc-bs-pde": {
       "benchmark_file": "stochastic_calculus.json",
@@ -1791,9 +1791,9 @@
     "sc-thm-7.4.5": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-05",
-      "elapsed_s": 0.1,
-      "input_hash": "70c46dcaad318182c0afa5f90d53bb514af0e7ea5d74e276b4c9581d1351d00b",
-      "verified_at_commit": "9078508"
+      "elapsed_s": 228.1,
+      "input_hash": "4509ea721d30f1e792155e886743e9c3af8bbdab4ac345a713b4d4d073bf3c41",
+      "verified_at_commit": "4da98f4"
     },
     "sc-thm-7.5.2": {
       "benchmark_file": "stochastic_calculus.json",

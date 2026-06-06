@@ -388,3 +388,61 @@ unblocked by the Itô integral; they need their own upstream Mathlib
 infrastructure. (CRR→BS distributional convergence is **done** — via
 characteristic functions + put-call parity, sidestepping the triangular-array
 CLT.)
+
+## phase: the 100%-full push — Poisson cluster + Itô QV (2026-06-05)
+
+The remaining gap to 100% full is 22 reduced cores in four clusters
+(Poisson 4, Markov 6, Itô/Girsanov tower 9, BM path machinery 3). This
+phase took the Poisson cluster and the bounded half of the Itô pair.
+
+**Poisson cluster (4 entries) — landed:**
+
+- `pp-thm-3.3.9` (superposition) → **full**. New
+  `Foundations/PoissonSuperposition.lean`: the Poisson convolution identity
+  `poissonMeasure a ∗ poissonMeasure b = poissonMeasure (a+b)` (absent from
+  Mathlib; singleton-ext + binomial collapse of the Cauchy product) + the
+  independent-sum bridge mirroring `gaussianReal_conv_gaussianReal`'s
+  pattern.
+- `pp-thm-3.3.10` (thinning) → **full**. New
+  `Foundations/PoissonThinning.lean`: the binomial-marking factorisation
+  `markedPoissonMeasure r p = Poisson(pr) ×ₘ Poisson((1−p)r)` — marginals
+  AND independence of the thinned streams derived from the marking
+  mechanism (`C(j+k,j)/(j+k)! = 1/(j!k!)` + `e^{−r} = e^{−pr}e^{−qr}`).
+- `pp-thm-3.3.5` (marginal law) → **full**, via the route coverage.md
+  recorded as re-earnable. New `Foundations/PoissonCounting.lean`: marginal
+  derived from the arrival construction — Erlang law of arrival times
+  (`ErlangSum`, generalized from `Fin n` to arbitrary index) composed with
+  the new **Gamma-CDF difference identity**
+  `∫₀ᵗ γ_k − ∫₀ᵗ γ_{k+1} = e^{−rt}(rt)ᵏ/k!` (FTC telescope on
+  `Φ_k(u) = (ru)ᵏe^{−ru}/k!`).
+- `pp-prop-3.3.6` (interarrivals iid Exp) → stays **reduced_core,
+  honestly**, but with a real derived core. New
+  `Foundations/PoissonInterarrival.lean`: the FIRST interarrival is PROVED
+  exponential from the counting axioms (survival law + CDF identification
+  against `cdf_expMeasure_eq`), and the memoryless survival factorisation
+  is PROVED from independent increments. The full-sequence iid claim needs
+  the strong Markov property — upstream-gated.
+
+**Itô bounded pair:**
+
+- `sc-thm-7.4.5` (QV of an Itô process) → **full** in the constant-σ /
+  Lipschitz-drift regime. New `Foundations/ItoProcessQV.lean`: equipartition
+  QV sums of `X = X₀ + A + σB` converge in L² to `σ²T` with explicit `1/n`
+  rates — the drift-immunity content derived (pathwise squeeze + Cauchy–
+  Schwarz cross-term + `QuadraticVariationL2`). General σ(s,ω) = Summit B.
+- `sc-thm-7.1.2` (time-dependent Itô) — **assessed, deferred**: NOT the
+  ~100-line extension a first survey suggested. It needs the Summit-A limit
+  arguments (weighted QV, remainder, Riemann↔CLM bridge) redone with
+  `(t,x)`-dependence — a Summit-A′-scale mini-campaign (~300–500 lines),
+  not a bounded patch. Next candidate when an Itô session opens.
+
+**Markov cluster note:** `Kernel.traj` (Ionescu–Tulcea) is now IN the
+Mathlib pin — re-cost the path-space entries (`mc-thm-1.1.2`,
+`mc-thm-1.4.32`) before assuming they are gated.
+
+**Follow-up (small): adopt `formalization.yaml`** — the mathlib-initiative
+formalization-provenance manifest (scope / sources / sorry count / axiom
+boundary / paper↔Lean alignment / production record). The repo already
+maintains every ingredient (formalization_status, coverage.md, AxiomAudit,
+verification ledger); a stdlib generator emitting one repo-level manifest
+from the benchmark JSONs would make it legible to the emerging standard.

@@ -419,4 +419,37 @@ namespace MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
   #print axioms MathFin.discounted_intrinsic_le_americanPrice
 
+-- Poisson-process theory + Itô-process QV (2026-06-05 full-push round)
+
+/-- info: 'MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.PoissonSuperposition.poissonMeasure_conv_poissonMeasure
+
+/-- info: 'MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.PoissonSuperposition.indepFun_map_add_poissonMeasure
+
+/-- info: 'MathFin.PoissonThinning.markedPoissonMeasure_eq_prod' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.PoissonThinning.markedPoissonMeasure_eq_prod
+
+/-- info: 'MathFin.PoissonThinning.thinned_streams' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.PoissonThinning.thinned_streams
+
+/-- info: 'MathFin.PoissonCounting.map_count_eq_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.PoissonCounting.map_count_eq_poissonMeasure
+
+/-- info: 'MathFin.PoissonInterarrival.map_firstArrival_eq_expMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.PoissonInterarrival.map_firstArrival_eq_expMeasure
+
+/-- info: 'MathFin.PoissonInterarrival.survival_factorizes' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.PoissonInterarrival.survival_factorizes
+
+/-- info: 'MathFin.ItoProcessQV.tendsto_qv_ito_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoProcessQV.tendsto_qv_ito_process
+
 end MathFin.AxiomAudit

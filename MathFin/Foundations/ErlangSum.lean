@@ -214,15 +214,16 @@ theorem gammaMeasure_conv_expMeasure (ha : 0 < a) (hr : 0 < r) :
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 /-- **Erlang from iid exponentials, finset form.** If the `X i` are iid
-`Exp(r)` and `s` is a nonempty finset, the law of `∑ i ∈ s, X i` is
-`gammaMeasure s.card r`. Induction on `s`: the base case is
-`expMeasure = gammaMeasure 1` (definitional), the step is
+`Exp(r)` and `s` is a nonempty finset (over any index type — `Fin n` for the
+textbook statement, `ℕ` for the arrival times of a Poisson process), the law
+of `∑ i ∈ s, X i` is `gammaMeasure s.card r`. Induction on `s`: the base case
+is `expMeasure = gammaMeasure 1` (definitional), the step is
 `gammaMeasure_conv_expMeasure` via `IndepFun.map_add_eq_map_conv_map`. -/
-theorem map_sum_iidExp [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r) {n : ℕ}
-    {X : Fin n → Ω → ℝ} (hmeas : ∀ i, Measurable (X i))
+theorem map_sum_iidExp [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r)
+    {ι : Type*} {X : ι → Ω → ℝ} (hmeas : ∀ i, Measurable (X i))
     (hlaw : ∀ i, Measure.map (X i) μ = expMeasure r)
     (hindep : iIndepFun X μ)
-    (s : Finset (Fin n)) (hs : s.Nonempty) :
+    (s : Finset ι) (hs : s.Nonempty) :
     Measure.map (∑ i ∈ s, X i) μ = gammaMeasure s.card r := by
   classical
   induction s using Finset.cons_induction with

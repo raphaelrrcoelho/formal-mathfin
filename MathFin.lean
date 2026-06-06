@@ -36,6 +36,14 @@ import MathFin.Foundations.DoobDecomposition
 import MathFin.Foundations.L2MartingaleConvergence
 import MathFin.Foundations.BrownianMarkov
 import MathFin.Foundations.ErlangSum
+-- Poisson-process theory: superposition, thinning, marginal-from-arrivals,
+-- first-interarrival law (Saporito 3.3.5/3.3.6/3.3.9/3.3.10)
+import MathFin.Foundations.PoissonSuperposition
+import MathFin.Foundations.PoissonThinning
+import MathFin.Foundations.PoissonCounting
+import MathFin.Foundations.PoissonInterarrival
+-- QV of an Itô process: drift contributes nothing (Saporito 7.4.5)
+import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments
 import MathFin.Foundations.BivariateGaussian
 import MathFin.Foundations.GaussianCDFDeriv
