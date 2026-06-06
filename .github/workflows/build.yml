@@ -55,6 +55,7 @@ jobs:
         # keeping within-batch import amortization; per-batch echo keeps the
         # log alive for eviction-vs-progress diagnosis.
         run: |
+          echo "== runner resources =="; free -h; df -h / /mnt 2>/dev/null || df -h /
           find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' > /tmp/modules.txt
           sed -i '1i MathFin' /tmp/modules.txt
           total=$(wc -l < /tmp/modules.txt)
@@ -63,6 +64,8 @@ jobs:
           while mapfile -t -n 8 chunk && ((${#chunk[@]})); do
             batch=$((batch+1))
             echo "::group::batch $batch (${chunk[0]} …)"
+            t0=$(date +%s)
             lake env leanchecker "${chunk[@]}"
+            echo "batch $batch ok in $(( $(date +%s) - t0 ))s; $(free -m | awk '/^Mem/{print $7 " MB avail"}')"
             echo "::endgroup::"
           done < /tmp/modules.txt
