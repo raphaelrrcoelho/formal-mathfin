@@ -60,16 +60,16 @@ jobs:
           # tick in the log still tells us whether memory was climbing
           ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 5; done ) &
           TICKER=$!
+          # The umbrella module `MathFin` is deliberately NOT in the list.
+          # Replaying it re-checks every re-exported public declaration —
+          # the ENTIRE library again — and its uncapped footprint is >13 GB
+          # in ~35 s (ticker data, run 27858a2), which OOM-evicts the
+          # runner. It declares nothing of its own: every real declaration
+          # is kernel-replayed via its declaring module below, so skipping
+          # it loses zero coverage and removes a redundant whole-library
+          # double-check.
           find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' > /tmp/modules.txt
           total=$(wc -l < /tmp/modules.txt)
-          # The umbrella module is replayed ALONE first: three evictions all
-          # died inside the batch containing it, while every local profile
-          # (umbrella alone: 405s, 1.6GB under a 6g cap) stays modest.
-          echo "::group::batch 0 (umbrella MathFin, isolated)"
-          t0=$(date +%s)
-          lake env leanchecker MathFin
-          echo "umbrella ok in $(( $(date +%s) - t0 ))s"
-          echo "::endgroup::"
           echo "checking $total modules in batches of 8"
           batch=0
           while mapfile -t -n 8 chunk && ((${#chunk[@]})); do
