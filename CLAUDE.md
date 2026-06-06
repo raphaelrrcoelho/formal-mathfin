@@ -29,9 +29,11 @@ docker compose -f docker/docker-compose.yml pull verify
 # Run a benchmark:
 docker compose -f docker/docker-compose.yml run --rm verify benchmarks/<file>.json -v --config mathfin.toml --timeout 120
 
-# Force a local rebuild (only when changing Dockerfile/Lean toolchain):
-docker compose -f docker/docker-compose.yml build verify
-# Then re-publish; see docker/docker-compose.yml header for the docker push commands.
+# Rebuild the image: NEVER locally (see "Memory doctrine" below) — push to
+# main (publish-image.yml paths cover MathFin/lakefile/manifest/toolchain/
+# Dockerfile/pyproject) or trigger the workflow manually:
+gh workflow run publish-image.yml && sleep 5 && gh run watch
+# then refresh: docker compose -f docker/docker-compose.yml pull verify
 ```
 
 The default compose command runs `benchmarks/cross_validated.json`:
@@ -133,6 +135,69 @@ Docker notes:
 - If Docker build fails under Claude/Codex because it cannot write under
   `~/.docker`, rerun the same `docker compose ...` command with elevated
   permissions.
+
+## Memory doctrine — this box is a 10 GB client, not a build server
+
+Measured 2026-06-06: 15.7 GB host RAM, WSL capped at 10 GB (`.wslconfig`
+`memory=10GB`, `swap=4GB`, `autoMemoryReclaim=gradual` — already tuned; no
+local headroom lever remains). A Mathlib-loaded Lean environment is ~4–5 GB,
+so **two simultaneous Lean processes overcommit the host** — every OOM /
+container kill / historical PC freeze has been exactly that event.
+
+1. **One Lean-loaded process locally, ever.** The lean-repl daemon is the
+   default slot occupant. `verify` runs, `leanchecker`, and lake builds take
+   the slot only with the daemon DOWN (`docker compose down lean-repl`).
+   Never exec a second env-loading command into a container already serving
+   one (2026-06-06: a `leanchecker` exec OOM-killed the daemon's container).
+2. **Never `docker compose build` locally.** Image builds escape compose's
+   mem caps AND silently redo the full Mathlib layer (the local layer cache
+   does not contain the pulled GHCR image's intermediates). CI
+   `publish-image.yml` rebuilds on push to main (paths include `pyproject.toml`
+   — pip layer inputs are baked, unlike bind-mounted `tools/`); locally only
+   ever `docker compose pull verify`.
+3. **Full-environment batch work runs on GitHub runners** (4-core/16 GB —
+   more memory than this box): the `kernel-replay` (leanchecker) CI job,
+   image publishing, and corpus-scale `ledger verify --exec` sweeps.
+4. **Remote daemon is one flag away** when parallel heavy work is wanted:
+   the whole authoring loop speaks TCP to `127.0.0.1:7878`, so
+   `ssh -L 7878:localhost:7878 <bigger-box>` makes a remote daemon
+   transparent to `lean-check.sh` / `bench-check.sh` / the ledger.
+
+## Automation toolkit — and its values gate
+
+In-loop automation (all CPU-local, pin-respecting):
+- **`grind`** (in core): first call on algebraic equalities — incl. field
+  identities with `≠ 0` side conditions and commuted denominators — ℕ/cast
+  arithmetic, and goals linear in nonlinear atoms. NOT nonlinear real
+  inequalities (0/7 on the corpus sample; FRO Year-3 work-in-progress —
+  re-test each toolchain bump). Boundary + trials: docs/patterns.md.
+- **`nlinarith [certificates]`** stays the tool for nonlinear inequalities;
+  grind accepts the same certificates but does not search hypothesis
+  products.
+- **loogle** (`scripts/loogle.sh 'Real.sqrt (_ * _)'`): scriptable Mathlib
+  search (public instance tracks a NEWER Mathlib than the pin — confirm hits
+  via the daemon before building on them).
+- **`hammer`** (LeanHammer, when present): premise selection + external ATP
+  with NATIVE Aesop/Duper/Grind reconstruction — kernel-checked, axiom-clean.
+  PRIVACY: never use the default cloud selector; every file sets
+  `set_library_suggestions` to a local selector (sineQuaNon / MePo) or a
+  self-hosted `premiseSelection.apiBaseUrl`.
+
+The gate (the repo contract applies unchanged to machine-found proofs):
+- Automation output is a **scout, not an author**. A goal closed by
+  `hammer`/`grind` is refactored to the *conceptually right* proof — the
+  certificate that shows why — before it merges. An opaque 20-premise
+  discharge is slop even when the kernel accepts it.
+- Search and premise tools exist to **find the idiomatic Mathlib/Degenne
+  lemma so we consume it** instead of reproving it (coherence-first,
+  anti-wrapper).
+- The blueprint (`MathFin/Blueprint.lean`, post-hoc `@[blueprint]` tags) is
+  the concept-clarity instrument: generated proof-term dependency graph +
+  honest prose. Regenerate via `lake exe blueprint_export` +
+  `tools/blueprint_render.py`; never hand-edit the generated block in
+  docs/blueprint.md.
+- `leanchecker` (CI kernel replay) + `AxiomAudit.lean` are the honesty
+  floor. No `sorry`, axiom-clean, kernel-replayed.
 
 ## Architecture
 

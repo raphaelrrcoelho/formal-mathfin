@@ -32,3 +32,6 @@ pr-description.md
 # Paper / strategy material — local-only, never pushed (design specs, plans, drafts).
 # Already-tracked historical docs here remain tracked; new files stay local.
 docs/superpowers/
+
+# agent-local state (mirrors .codex/)
+.claude/
