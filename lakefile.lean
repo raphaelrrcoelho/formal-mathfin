@@ -38,6 +38,17 @@ require LeanArchitect from git
   "https://github.com/hanwenzhu/LeanArchitect.git" @
   "v4.30.0-rc2"
 
+-- JOSHCLUNE/LeanHammer: the `hammer` tactic — PILOT ONLY, verdict in
+-- tests/hammer_pilot/REPORT.md: DO NOT ADOPT at this rev x toolchain
+-- (kernel-rejected reconstructions from the rc2<->v4.30.0-stable grind
+-- skew + ~31 min/goal latency). Privacy held: local sineQuaNon selection,
+-- no goal context to leanpremise.net. Re-pilot at the rc2->stable bump.
+-- Declared before mathlib so mathlib-last keeps batteries/Qq/aesop at
+-- Mathlib's revs (else Mathlib recompiles).
+require Hammer from git
+  "https://github.com/JOSHCLUNE/LeanHammer" @
+  "c997b8dc0eac7a05a7655bdec3ff95dd34d63b7c"
+
 -- RemyDegenne/brownian-motion: Brownian motion construction, multivariate
 -- Gaussian, Kolmogorov-Chentsov continuity, Doob's L^p inequality, stochastic
 -- integral approximation. Pinned to a specific commit so toolchain bumps stay
