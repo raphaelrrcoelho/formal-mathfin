@@ -56,9 +56,20 @@ jobs:
         # log alive for eviction-vs-progress diagnosis.
         run: |
           echo "== runner resources =="; free -h; df -h / /mnt 2>/dev/null || df -h /
+          # background ticker: if the agent is evicted mid-batch, the last
+          # tick in the log still tells us whether memory was climbing
+          ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 5; done ) &
+          TICKER=$!
           find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' > /tmp/modules.txt
-          sed -i '1i MathFin' /tmp/modules.txt
           total=$(wc -l < /tmp/modules.txt)
+          # The umbrella module is replayed ALONE first: three evictions all
+          # died inside the batch containing it, while every local profile
+          # (umbrella alone: 405s, 1.6GB under a 6g cap) stays modest.
+          echo "::group::batch 0 (umbrella MathFin, isolated)"
+          t0=$(date +%s)
+          lake env leanchecker MathFin
+          echo "umbrella ok in $(( $(date +%s) - t0 ))s"
+          echo "::endgroup::"
           echo "checking $total modules in batches of 8"
           batch=0
           while mapfile -t -n 8 chunk && ((${#chunk[@]})); do
@@ -66,6 +77,7 @@ jobs:
             echo "::group::batch $batch (${chunk[0]} …)"
             t0=$(date +%s)
             lake env leanchecker "${chunk[@]}"
-            echo "batch $batch ok in $(( $(date +%s) - t0 ))s; $(free -m | awk '/^Mem/{print $7 " MB avail"}')"
+            echo "batch $batch ok in $(( $(date +%s) - t0 ))s"
             echo "::endgroup::"
           done < /tmp/modules.txt
+          kill "$TICKER" 2>/dev/null || true
