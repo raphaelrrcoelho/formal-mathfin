@@ -56,6 +56,18 @@ jobs:
         # log alive for eviction-vs-progress diagnosis.
         run: |
           echo "== runner resources =="; free -h; df -h / /mnt 2>/dev/null || df -h /
+          # CONTAINMENT (the actual fix after 5 evictions): Lean's allocator
+          # scales to available headroom — the same module peaks 0.6 GB under
+          # a 6 GB cgroup, 6.6 GB under an 8.5 GB cgroup, and >14 GB uncapped
+          # on the 16 GB runner VM, which OOM-evicts the runner agent
+          # (ticker data, runs 27858a2/93fe22a/c3f28c9). Local runs only ever
+          # survived BECAUSE compose capped them. Recreate that here: move
+          # this step's shell into a cgroup-v2 sub-group; memory.high applies
+          # reclaim throttle well before the VM is in danger.
+          sudo mkdir -p /sys/fs/cgroup/leancheck
+          echo $$ | sudo tee /sys/fs/cgroup/leancheck/cgroup.procs > /dev/null
+          echo 9G  | sudo tee /sys/fs/cgroup/leancheck/memory.high  > /dev/null
+          echo 11G | sudo tee /sys/fs/cgroup/leancheck/memory.max   > /dev/null
           # background ticker: if the agent is evicted mid-batch, the last
           # tick in the log still tells us whether memory was climbing
           ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 5; done ) &
