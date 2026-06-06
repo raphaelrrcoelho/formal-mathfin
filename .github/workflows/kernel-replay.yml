@@ -1,0 +1,87 @@
+name: kernel-replay
+
+# Defense-in-depth BELOW the elaborator: replay every MathFin content
+# module's declarations through the Lean kernel via the toolchain-bundled
+# `leanchecker` (elaborator bugs / environment hacking cannot slip past it).
+#
+# SCHEDULED, not per-push — a deliberate disposition (2026-06-06, six
+# instrumented rounds): the job is correct but slow-and-flaky territory on
+# hosted runners (30-120 min: Mathlib cache fetches degrade to KB/s, and
+# leanchecker's allocator scales to available headroom — >14 GB uncapped —
+# which OOM-evicts the runner agent unless contained in a cgroup, see the
+# step comments). The PER-PUSH soundness floor is build.yml: a green
+# `lake build` + AxiomAudit's #guard_msgs-pinned axioms. This workflow adds
+# the kernel-replay layer nightly and on demand.
+#
+# Upstream-report candidate: leanchecker × module-system `public import`
+# closures × headroom-scaling allocation (ticker data in runs
+# 27858a2 / 93fe22a / c3f28c9 of the build workflow, 2026-06-06).
+#
+# Runs on the GitHub runner by doctrine — a full-environment batch load
+# must never share the 10 GB local box with the lean-repl daemon (CLAUDE.md
+# "Memory doctrine").
+
+on:
+  schedule:
+    - cron: '17 3 * * *'   # nightly, 03:17 UTC
+  workflow_dispatch:
+
+concurrency:
+  group: kernel-replay
+  cancel-in-progress: true
+
+jobs:
+  kernel-replay:
+    name: leanchecker kernel replay (MathFin)
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same cache key family as build.yml (manifest-keyed) — on a cache hit
+      # the inner `lake build` is an incremental no-op and leanchecker only
+      # pays import loads.
+      - name: Build / restore (elan + Mathlib cache + lake build)
+        uses: leanprover/lean-action@v1
+
+      - name: Replay every MathFin content module through the kernel
+        # CHUNKED + CONTAINED, deliberately:
+        # * One 180-module invocation OOM-evicted the runner (silent ~20 min,
+        #   agent shutdown + exit 143). Fresh process per batch of 8 releases
+        #   everything between batches, keeps within-batch import
+        #   amortization.
+        # * Lean's allocator scales to available headroom: the same module
+        #   peaks 0.6 GB under a 6 GB cgroup, 6.6 GB under 8.5 GB, >14 GB
+        #   uncapped on the 16 GB VM. The cgroup-v2 sub-group below recreates
+        #   the containment under which the workload demonstrably completes
+        #   (memory.high reclaim-throttles well before the VM is in danger).
+        # * Whole-library-closure modules (umbrella `MathFin`, `Examples`,
+        #   `AxiomAudit`, `Blueprint*`) are excluded: replaying them
+        #   re-checks every re-exported declaration — the entire library
+        #   again — for zero added coverage (they declare no proof content;
+        #   every theorem is replayed via its declaring module).
+        # * The free-ticker keeps climb-vs-flat truth in the log even if the
+        #   agent is evicted mid-batch.
+        run: |
+          echo "== runner resources =="; free -h; df -h /
+          sudo mkdir -p /sys/fs/cgroup/leancheck
+          echo $$ | sudo tee /sys/fs/cgroup/leancheck/cgroup.procs > /dev/null
+          echo 9G  | sudo tee /sys/fs/cgroup/leancheck/memory.high  > /dev/null
+          echo 11G | sudo tee /sys/fs/cgroup/leancheck/memory.max   > /dev/null
+          ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 5; done ) &
+          TICKER=$!
+          find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' \
+            | grep -v -E '^MathFin\.(Examples|AxiomAudit|Blueprint)' > /tmp/modules.txt
+          total=$(wc -l < /tmp/modules.txt)
+          echo "checking $total modules in batches of 8"
+          batch=0
+          while mapfile -t -n 8 chunk && ((${#chunk[@]})); do
+            batch=$((batch+1))
+            echo "::group::batch $batch (${chunk[0]} …)"
+            t0=$(date +%s)
+            lake env leanchecker "${chunk[@]}"
+            echo "batch $batch ok in $(( $(date +%s) - t0 ))s"
+            echo "::endgroup::"
+          done < /tmp/modules.txt
+          kill "$TICKER" 2>/dev/null || true
