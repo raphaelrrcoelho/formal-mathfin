@@ -60,15 +60,17 @@ jobs:
           # tick in the log still tells us whether memory was climbing
           ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 5; done ) &
           TICKER=$!
-          # The umbrella module `MathFin` is deliberately NOT in the list.
-          # Replaying it re-checks every re-exported public declaration —
-          # the ENTIRE library again — and its uncapped footprint is >13 GB
-          # in ~35 s (ticker data, run 27858a2), which OOM-evicts the
-          # runner. It declares nothing of its own: every real declaration
-          # is kernel-replayed via its declaring module below, so skipping
-          # it loses zero coverage and removes a redundant whole-library
-          # double-check.
-          find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' > /tmp/modules.txt
+          # Modules with WHOLE-LIBRARY import closures are excluded: the
+          # umbrella `MathFin`, and `Examples`/`AxiomAudit`/`Blueprint*`,
+          # which import it (or most of it). Replaying any of them allocates
+          # >13 GB in ~30 s and OOM-evicts the runner (ticker data, runs
+          # 27858a2 + 93fe22a — available RAM 14.7GB→0.3GB), and they
+          # declare no proof content of their own (a tour, #guard_msgs
+          # audits, blueprint attribute applications) — every theorem is
+          # kernel-replayed via its declaring module below, so the
+          # exclusion loses zero coverage.
+          find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' \
+            | grep -v -E '^MathFin\.(Examples|AxiomAudit|Blueprint)' > /tmp/modules.txt
           total=$(wc -l < /tmp/modules.txt)
           echo "checking $total modules in batches of 8"
           batch=0
