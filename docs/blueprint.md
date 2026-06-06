@@ -9,55 +9,85 @@ This is the spine — the load-bearing arc. The other ~200 results (the full Gre
 matrix, fixed income, portfolio theory, risk measures, …) are catalogued with
 their faithfulness status in [`coverage.md`](coverage.md).
 
-**Status legend.** ✅ machine-checked in Lean 4, and — for the headline nodes —
-`#print axioms`-clean ([`AxiomAudit.lean`](../MathFin/AxiomAudit.lean) build-pins
-them to `[propext, Classical.choice, Quot.sound]`). 🚧 *partially* formalized — a
-genuine machine-checked core with an explicitly deferred lifting step (the gap
-is named in the file, never papered over). ⏳ stated but not yet formalized — the
-Mathlib-gated frontier. No node is colored proved unless it is.
+**Status legend.** Green: machine-checked in Lean 4, and — for the headline
+nodes — `#print axioms`-clean ([`AxiomAudit.lean`](../MathFin/AxiomAudit.lean)
+build-pins them to `[propext, Classical.choice, Quot.sound]`). Blue: consumed
+from an upstream package (Degenne's `brownian-motion`) — coherence made
+visible. 🚧 *partially* formalized — a genuine machine-checked core with an
+explicitly deferred lifting step (the gap is named in the file, never papered
+over). ⏳ stated but not yet formalized — the Mathlib-gated frontier. No node
+is colored proved unless it is.
 
+**The graph below is generated, not drawn.** Nodes are `@[blueprint]`-tagged
+declarations ([`MathFin/Blueprint.lean`](../MathFin/Blueprint.lean)); edges are
+*inferred from the proof terms* (LeanArchitect's `collectUsed`, a transitive
+walk that passes through untagged helpers and stops at tagged constants —
+[`MathFin/Blueprint/Export.lean`](../MathFin/Blueprint/Export.lean) →
+[`tools/blueprint_render.py`](../tools/blueprint_render.py)). An edge here is
+a theorem actually *consuming* another — narrative lineage with no proof-term
+trace does not appear, and where this page's prose once disagreed with the
+graph, the graph won (see *Black–Scholes PDE* below). A node with no inbound
+edge is a genuine logical root.
+
+<!-- BEGIN GENERATED SPINE (tools/blueprint_render.py — do not hand-edit) -->
 ```mermaid
 graph TD
-  BM["Brownian motion"]:::proved
-  QV["Quadratic variation<br/>∑(ΔB)² → T"]:::proved
-  WI["Wiener isometry (L²)"]:::proved
-  II["Adapted Itô isometry"]:::proved
-  EI["Expectation-form Itô"]:::proved
-  GIR["Static Girsanov (Esscher tilt)<br/>EMM derived"]:::proved
-  BCH["BSCallHyp — a theorem"]:::proved
-  BSF["Black–Scholes call formula"]:::proved
-  BID["bs_identity (magic collapse)"]:::proved
-  GRK["Greeks: δ γ vega θ ρ"]:::proved
-  PDE["Black–Scholes PDE (forward)"]:::proved
-  IPDE["BS PDE from Itô + no-arbitrage"]:::proved
-  MAR["Margrabe exchange option"]:::proved
-  CONT["Continuous Itô integral (L², adapted) on [0,T]"]:::proved
-  PATH["Pathwise Itô · Lévy · SDEs"]:::gated
+  brownianMotion["Brownian motion (Degenne, upstream)"]:::upstream
+  binomialRepresentation["Binomial martingale representation (completeness)"]:::proved
+  bsCall["Black–Scholes call formula"]:::proved
+  bsIdentity["bs_identity: S·φ(d₁) = Ke^{−rτ}·φ(d₂)"]:::proved
+  bsPde["Black–Scholes PDE (from the closed form)"]:::proved
+  bsPdeNoArb["BS PDE ↔ Itô-drift balance (algebraic)"]:::proved
+  carrMadan["Carr–Madan static replication"]:::proved
+  crrBsConvergence["CRR → Black–Scholes convergence"]:::proved
+  discreteIto["Discrete Itô formula (pathwise)"]:::proved
+  esscherTilt["Esscher tilt is the Gaussian Girsanov"]:::proved
+  expectationIto["Expectation-form Itô / Feynman–Kac"]:::proved
+  gbmSde["GBM coefficient matching (algebraic)"]:::proved
+  itoIntegralClm["Continuous Itô integral (CLM on [0,T])"]:::proved
+  bsDelta["Greeks (δ shown; γ vega θ ρ alongside)"]:::proved
+  bscallhypBrownian["BSCallHyp from a Brownian model"]:::proved
+  continuousFtap["Continuous-time first FTAP (EMM)"]:::proved
+  girsanovCall["Call price from the physical measure"]:::proved
+  itoIsometryAdapted["Adapted Itô isometry"]:::proved
+  margrabe["Margrabe exchange option"]:::proved
+  quadraticVariation["Quadratic variation: ∑(ΔB)² → T in L²"]:::proved
+  wienerIsometry["Wiener isometry (deterministic L²)"]:::proved
+  itoFormulaL2["Itô formula, L² (C³ bounded — Summit A)"]:::proved
+  itoSquaredL2["Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)"]:::proved
+  itoIntegralBrownian["∫₀ᵀ B dB = ½(B_T² − B₀² − T)"]:::proved
+  pathwiseIto["Pathwise Itô · Lévy · SDEs"]:::gated
 
-  BM --> QV
-  BM --> WI
-  BM --> II
-  QV --> II
-  BM --> EI
-  BM --> GIR
-  GIR --> BCH
-  BM --> BCH
-  BCH --> BSF
-  BSF --> MAR
-  BSF --> GRK
-  BSF --> PDE
-  BID --> GRK
-  BID --> PDE
-  GRK --> PDE
-  EI --> IPDE
-  IPDE --> PDE
-  WI --> CONT
-  II --> CONT
-  CONT --> PATH
+  brownianMotion --> itoIntegralClm
+  bsIdentity --> bsDelta
+  brownianMotion --> bscallhypBrownian
+  brownianMotion --> continuousFtap
+  bsCall --> girsanovCall
+  esscherTilt --> girsanovCall
+  brownianMotion --> itoIsometryAdapted
+  bsCall --> margrabe
+  esscherTilt --> margrabe
+  brownianMotion --> quadraticVariation
+  brownianMotion --> wienerIsometry
+  brownianMotion --> itoFormulaL2
+  itoIntegralClm --> itoFormulaL2
+  discreteIto --> itoFormulaL2
+  brownianMotion --> itoSquaredL2
+  discreteIto --> itoSquaredL2
+  quadraticVariation --> itoSquaredL2
+  brownianMotion --> itoIntegralBrownian
+  itoIntegralClm --> itoIntegralBrownian
+  itoIsometryAdapted --> itoIntegralBrownian
+  itoSquaredL2 --> itoIntegralBrownian
+  itoIntegralClm --> pathwiseIto
+  itoFormulaL2 --> pathwiseIto
 
   classDef proved fill:#d4edda,stroke:#28a745,color:#111;
+  classDef upstream fill:#d9e8f6,stroke:#1f6fb2,color:#111;
+  classDef partial fill:#ffe5d0,stroke:#d9534f,color:#111;
   classDef gated fill:#fff3cd,stroke:#d39e00,color:#111;
 ```
+<!-- END GENERATED SPINE -->
 
 ---
 
@@ -233,8 +263,14 @@ graph above (nothing in the spine proves it); it feeds the Greeks and the PDE.
 [`BlackScholes/PDE.lean`](../MathFin/BlackScholes/PDE.lean)
 
 ### Black–Scholes PDE ✅
-`bsV` satisfies the Black–Scholes PDE (`bs_pde_holds`), verified from the closed
-form via the Greeks and `bs_identity`.
+`bsV` satisfies the Black–Scholes PDE (`bs_pde_holds`). *Correction recorded
+2026-06-06, forced by the generated graph:* this page used to say "verified via
+the Greeks and `bs_identity`" — the proof term shows otherwise. The PDE
+statement carries the Greeks' closed forms in its slots, and the verification
+is self-contained field algebra (`rw [bsV]; field_simp; ring`); it consumes
+neither the Greek theorems nor `bs_identity`. The conceptual route Greeks →
+PDE is real mathematics but a *different proof* than the one formalized; the
+graph shows `thm:bs-pde` as a root, and that is the truth.
 [`BlackScholes/PDE.lean`](../MathFin/BlackScholes/PDE.lean)
 
 ### BS PDE from no-arbitrage + Itô 🚧
@@ -249,6 +285,30 @@ not reach it: the genuine derivation needs the *time-dependent* Itô formula (th
 function, whose `Γ` is unbounded as `S → 0`. So this meets the closed-form route
 at the PDE *coefficient*, with the martingale step still to come.
 [`BlackScholes/PDEFromIto.lean`](../MathFin/BlackScholes/PDEFromIto.lean)
+
+### Itô formula in L² — Summit A ✅
+The continuous-time L² Itô formula
+`f(B_T) − f(B_0) = ∫₀ᵀ f′(B_s) dB_s + ½∫₀ᵀ f″(B_s) ds` for `C³` functions with
+**bounded** derivatives (`ito_formula_L2_bddDeriv`), proved from primitives:
+weighted quadratic variation, the Taylor-remainder limit, and the Riemann↔CLM
+bridge — three limit arguments on top of `discrete_ito_formula` and the
+continuous Itô integral. The boundedness restriction is the honestly-named
+boundary: GBM's exponential sits outside it (see *Geometric Brownian motion*
+above for why that lift is deferral, not absence).
+→ *Finance:* the engine that turns pathwise second-order algebra into
+distributional statements — the analytic heart of every drift argument.
+[`Foundations/ItoFormulaCLM.lean`](../MathFin/Foundations/ItoFormulaCLM.lean)
+
+### CRR → Black–Scholes convergence ✅
+The binomial (CRR) call price converges to the Black–Scholes call price as the
+tree refines (`binomialPrice_call_tendsto_bs`): characteristic functions →
+Lévy continuity → convergence in distribution, with **put–call parity lifting
+the bounded put's weak convergence to the call** (avoiding a uniform-
+integrability/Vitali argument). The discrete and continuous pricing theories
+meet where they should.
+→ *Finance:* the lattice methods used on every trading desk are not a separate
+model — they are the same price, in the limit.
+[`Binomial/CRRCharFun.lean`](../MathFin/Binomial/CRRCharFun.lean)
 
 ### Margrabe exchange option ✅
 The option to exchange one asset for another prices as a Black–Scholes call on
@@ -297,7 +357,11 @@ infrastructure. See [`roadmap.md`](roadmap.md).
 
 ---
 
-*This page is the lightweight blueprint: a GitHub-native dependency graph linking
-each statement to its Lean proof. For the per-theorem faithfulness audit see
-[`coverage.md`](coverage.md); for the storefront and build instructions see the
-[README](../README.md).*
+*This page is the lightweight blueprint: a GitHub-native dependency graph
+linking each statement to its Lean proof. The graph regenerates from the
+proof terms — inside the verify container:
+`lake build MathFin.Blueprint blueprint_export && lake exe blueprint_export
+MathFin.Blueprint > docs/blueprint_nodes.json`, then host-side
+`python3 tools/blueprint_render.py`. For the per-theorem faithfulness audit
+see [`coverage.md`](coverage.md); for the storefront and build instructions
+see the [README](../README.md).*
