@@ -104,7 +104,7 @@ class LeanBackend:
             return False
         return shutil.which("lake") is not None
 
-    def _ensure_server(self) -> None:
+    def _ensure_server(self, auto_build: bool = True) -> None:
         if self._server is not None:
             return
 
@@ -116,7 +116,7 @@ class LeanBackend:
 
         self._project = LocalProject(
             directory=self._local_project,
-            auto_build=True,
+            auto_build=auto_build,
         )
         self._config = LeanREPLConfig(
             project=self._project,

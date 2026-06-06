@@ -160,19 +160,34 @@ def main() -> int:
         backend._ensure_server()
     except Exception as exc:  # noqa: BLE001 — startup build/load is the failure point
         # lean-interact's LocalProject runs `lake build` on init; a Lean error
-        # anywhere in the working tree (classically: a file edited *while* the
-        # daemon was booting) makes that build fail and would otherwise surface
-        # as an opaque traceback + container exit. Make the failure mode legible
-        # and actionable instead.
+        # anywhere in the working tree (classically: a work-in-progress file
+        # mid-authoring) makes that build fail. That used to be FATAL, which
+        # turned every authoring iteration on a red tree into a full
+        # restart-the-daemon cycle (~10-15 min) instead of a 5-30 s
+        # `lean-check`. But serving needs only the *imports'* oleans (Mathlib
+        # + the modules that DID build — lake builds everything it can before
+        # reporting failure), so a broken leaf module must not block the
+        # server: retry without the build and serve, loudly.
         print(
-            "DAEMON STARTUP FAILED — the Lean project did not build. Almost always "
-            "this means the working tree has a Lean error (e.g. a file was edited "
-            "while the daemon was booting, or `lake build` was not green before "
-            "`up -d lean-repl`). Fix it so a plain `lake build` is green, then "
-            "restart the daemon. Underlying error:\n"
+            "STARTUP BUILD FAILED — the working tree has a Lean error. Serving "
+            "ANYWAY against the oleans that did build: `lean-check` of the broken "
+            "files works (it elaborates file content, needing only their imports' "
+            "oleans). Caveats: (1) checks of files that import a *broken* module "
+            "will fail with unknown-namespace cascades until that module builds; "
+            "(2) run a final green `lake build` before relying on cross-file "
+            "imports or the ledger. Underlying build error:\n"
             f"{exc}",
             file=sys.stderr, flush=True)
-        return 1
+        try:
+            backend._ensure_server(auto_build=False)
+        except Exception as exc2:  # noqa: BLE001 — genuine env-load failure
+            print(
+                "DAEMON STARTUP FAILED — could not initialize the Lean REPL even "
+                "without the project build (this is NOT the usual red-tree case; "
+                "check toolchain/olean-store health). Underlying error:\n"
+                f"{exc2}",
+                file=sys.stderr, flush=True)
+            return 1
     print(f"READY: listening on {HOST}:{PORT}", flush=True)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

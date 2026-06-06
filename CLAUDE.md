@@ -209,6 +209,12 @@ Caveats:
 - Daemon serializes requests through `LeanBackend._lock` (Lean isn't reentrant). Concurrent connections queue.
 - Daemon does not write `.olean`s for downstream imports; once a proof works in the daemon, run a final `lake build` (or restart the daemon) before relying on the oleans for cross-file imports.
 - If you bump Mathlib pin or the lakefile, restart the daemon to pick up new project state.
+- A red working tree does NOT block the daemon: if the startup `lake build`
+  fails, it logs the error loudly and serves anyway against the oleans that
+  did build (`lean-check` of the broken file works — it elaborates file
+  content, needing only its imports' oleans). Checking a file that *imports*
+  a broken module still fails (unknown-namespace cascades) until that module
+  builds; the canonical green gate stays the final `lake build`.
 
 For multi-iteration sessions, prefer keeping
 `Foundations/BrownianMartingale.lean`-class files small (one theorem + its

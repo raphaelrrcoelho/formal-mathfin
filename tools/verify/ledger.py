@@ -29,6 +29,7 @@ import argparse
 import datetime as _dt
 import hashlib
 import json
+import os
 import re
 import socket
 import subprocess
@@ -168,6 +169,45 @@ def daemon_check(code: str, timeout: float) -> dict:
     return json.loads(b"".join(chunks).decode("utf-8"))
 
 
+EXEC_CONTAINER = os.environ.get("LEDGER_EXEC_CONTAINER", "docker-lean-repl-1")
+# Compose bind-mounts specific subtrees (MathFin/, tools/, ...), NOT the repo
+# root — so the temp file must live inside one of them. MathFin/ is mounted RW
+# (same pattern as scripts/bench-check.sh); the dotfile name keeps it out of
+# the lake glob and git.
+EXEC_TMP = "MathFin/.ledger-exec-check.lean"
+
+
+def exec_check(code: str, timeout: float) -> dict:
+    """Stateless check: write the snippet to a repo-root temp file and run
+    ``lake env lean`` on it inside the (bind-mounted) Lean container.
+
+    No REPL, no env cache — a flat ~30–90 s per entry that is immune to the
+    daemon's cold-start pathology (a respawned REPL re-pays the full Mathlib
+    import on its first request). Best for small batches; the daemon path
+    still wins for long warm sweeps where repeat import-sets cost ~0.1 s.
+    Read-only on the olean store (``lake env`` does not build), so it is safe
+    to run next to an idle daemon."""
+    tmp_host = REPO / EXEC_TMP
+    tmp_host.write_text(code, encoding="utf-8")
+    try:
+        proc = subprocess.run(
+            ["docker", "exec", EXEC_CONTAINER, "lake", "env", "lean",
+             f"/app/{EXEC_TMP}"],
+            capture_output=True, text=True, timeout=timeout, cwd=REPO,
+        )
+    finally:
+        tmp_host.unlink(missing_ok=True)
+    out = (proc.stdout or "") + (proc.stderr or "")
+    errors = [ln for ln in out.splitlines() if "error" in ln.lower()]
+    sorry_count = out.count("declaration uses 'sorry'")
+    return {
+        "success": proc.returncode == 0 and not errors and sorry_count == 0,
+        "errors": errors[:20],
+        "warnings": [],
+        "sorry_count": sorry_count,
+    }
+
+
 def _git_head() -> str:
     try:
         return subprocess.run(
@@ -210,16 +250,20 @@ def cmd_verify(args) -> int:
         return 0
 
     head = _git_head()
-    print(f"verifying {len(targets)} entries against the lean-repl daemon "
-          f"(HEAD {head})", flush=True)
+    checker = exec_check if args.use_exec else daemon_check
+    via = ("`lake env lean` in container " + EXEC_CONTAINER) if args.use_exec \
+        else "the lean-repl daemon"
+    print(f"verifying {len(targets)} entries via {via} (HEAD {head})",
+          flush=True)
     failures = []
     for i, (fname, tid, code, digest) in enumerate(targets, 1):
         t0 = time.monotonic()
         try:
-            verdict = daemon_check(code, timeout=args.timeout)
-        except (ConnectionRefusedError, OSError) as exc:
-            print(f"\nABORT at {tid}: daemon unreachable ({exc}). "
-                  "Start it and resume with `verify --stale`.", flush=True)
+            verdict = checker(code, timeout=args.timeout)
+        except (ConnectionRefusedError, OSError,
+                subprocess.TimeoutExpired) as exc:
+            print(f"\nABORT at {tid}: checker unavailable ({exc}). "
+                  "Fix and resume with `verify --stale`.", flush=True)
             break
         elapsed = round(time.monotonic() - t0, 1)
         if verdict.get("success"):
@@ -257,6 +301,11 @@ def main() -> int:
                           help="(default) verify stale + missing entries only")
     p_verify.add_argument("--limit", type=int, default=0,
                           help="cap the number of entries this run")
+    p_verify.add_argument("--exec", dest="use_exec", action="store_true",
+                          help="check via `lake env lean` inside the container "
+                               "(stateless, no REPL env cache; flat ~30-90s "
+                               "per entry — best for small batches and cold "
+                               "daemons)")
     p_verify.add_argument("--timeout", type=float, default=1800.0,
                           help="per-entry daemon timeout in seconds")
     args = parser.parse_args()
