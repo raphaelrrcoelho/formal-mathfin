@@ -58,6 +58,30 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > strong Markov property (upstream-gated). Net: **225 full + 18 wrappers =
 > 243 / 261 delivery-ready, 18 reduced cores.**
 
+> **Finance layer over the Poisson/QV track (2026-06-06).** Six new `full`
+> entries make the freshly-derived foundations load-bearing in the pricing
+> layer: `mf-variance-swap-drift-immunity` (realized variance of GBM
+> log-returns → `σ²T` in **L²** for ANY drift — the variance-swap fair
+> strike is a QV functional, immune to the physical-vs-risk-neutral drift;
+> strengthens the phase-34 expectation-level limit;
+> `VarianceSwapDriftImmunity.lean`, first pricing consumer of
+> `ItoProcessQV`), `mf-first-to-default-spread` (FtD basket spread = Σ
+> single-name hazards under independence — `ExpMin.minimum_survival`
+> bridged into the `Credit.lean` vocabulary; `FirstToDefault.lean`),
+> `dist-poisson-pgf` (the Poisson pgf `E[x^N] = e^{r(x−1)}` for every real
+> `x`, absent from Mathlib; `PoissonPgf.lean`), and the Merton (1976)
+> jump-diffusion trio (`mf-merton-call-series`,
+> `mf-merton-spot-recombination`, `mf-merton-put-call-parity`): the price
+> is *defined* as the expectation over the Poisson jump count, so the
+> textbook series, the compensation identity `E[spot_N] = S₀` (the pgf at
+> `1+k`), and parity `C − P = S₀ − Ke^{−rT}` are theorems — and every
+> series term is separately proved equal to a discounted conditional
+> expected payoff (`bs_call_formula` on `(ℝ, gaussianReal 0 1)`).
+> Terminal-mixture-law scope, exactly parallel to `BSCallHyp`: the
+> compound-Poisson jump *SDE* is upstream-gated and not claimed
+> (`MertonJumpDiffusion.lean`). Net: **231 full + 18 wrappers = 249 / 267
+> delivery-ready, 18 reduced cores** (corpus 261 → 267).
+
 > **Duplication + status audit (2026-06-03).** A five-reviewer sweep of all 216
 > then-`full` entries asked two questions: does any MathFin module re-derive
 > content already in pinned Mathlib / Degenne's BrownianMotion package, and is

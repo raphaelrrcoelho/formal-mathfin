@@ -42,6 +42,9 @@ import MathFin.Foundations.PoissonSuperposition
 import MathFin.Foundations.PoissonThinning
 import MathFin.Foundations.PoissonCounting
 import MathFin.Foundations.PoissonInterarrival
+-- Poisson probability generating function E[x^N] = e^{r(x−1)} (absent from
+-- Mathlib); the engine behind Merton-mixture compensation identities
+import MathFin.Foundations.PoissonPgf
 -- QV of an Itô process: drift contributes nothing (Saporito 7.4.5)
 import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments
@@ -81,6 +84,9 @@ import MathFin.Foundations.VarianceSwapFromQV
 import MathFin.Foundations.VarianceSwapEquipartition
 -- Phase 34: Variance-swap QV limit theorem (realised-variance → σ²T as n → ∞)
 import MathFin.Foundations.VarianceSwapLimit
+-- Variance-swap drift immunity: realized variance → σ²T in L² for ANY drift
+-- (consumes ItoProcessQV; strengthens phase 34 from expectation-level to L²)
+import MathFin.Foundations.VarianceSwapDriftImmunity
 -- Phase 35: Discrete Itô formula (adapted from Nagy 2026, SSRN 6336503)
 import MathFin.Foundations.DiscreteIto
 -- The adapted Itô isometry (increment-independence cornerstone)
@@ -140,6 +146,9 @@ import MathFin.BlackScholes.AsianInequality
 import MathFin.BlackScholes.ImpliedVolatility
 import MathFin.BlackScholes.LognormalMoments
 import MathFin.BlackScholes.VarianceSwap
+-- Merton (1976) jump-diffusion: Poisson-mixture price, compensation
+-- identity, parity (consumes Foundations.PoissonPgf + Call/Put formulas)
+import MathFin.BlackScholes.MertonJumpDiffusion
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
@@ -218,6 +227,9 @@ import MathFin.FixedIncome.Immunization
 import MathFin.FixedIncome.ConvexityImmunization
 import MathFin.FixedIncome.YieldCurve
 import MathFin.FixedIncome.Credit
+-- First-to-default: basket intensity = Σ single-name intensities
+-- (bridges Foundations.ExpMin into the Credit vocabulary)
+import MathFin.FixedIncome.FirstToDefault
 import MathFin.FixedIncome.MacaulayModified
 import MathFin.FixedIncome.HazardCurve
 import MathFin.FixedIncome.ForwardRate

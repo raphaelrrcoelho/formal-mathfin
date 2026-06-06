@@ -452,4 +452,28 @@ namespace MathFin.AxiomAudit
 #guard_msgs (whitespace := lax) in
   #print axioms MathFin.ItoProcessQV.tendsto_qv_ito_process
 
+-- Finance layer over the Poisson/QV track (2026-06-06): variance-swap drift
+-- immunity, first-to-default additivity, Poisson pgf, Merton jump-diffusion
+
+/-- info: 'MathFin.tendsto_realizedVariance_gbm_L2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.tendsto_realizedVariance_gbm_L2
+
+/-- info: 'MathFin.firstToDefault_spread_eq_sum_hazards' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.firstToDefault_spread_eq_sum_hazards
+
+/-- info: 'MathFin.PoissonPgf.integral_pow_poissonMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.PoissonPgf.integral_pow_poissonMeasure
+
+/-- info: 'MathFin.mertonCallTerm_eq_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallTerm_eq_integral
+
+/-- info: 'MathFin.integral_mertonSpot' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.integral_mertonSpot
+
+/-- info: 'MathFin.merton_put_call_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.merton_put_call_parity
+
 end MathFin.AxiomAudit

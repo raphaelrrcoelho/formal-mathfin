@@ -10,11 +10,12 @@
 [![dataset](https://img.shields.io/badge/HF-dataset-ffcc4d)](https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 261 theorems across 11 areas — Black-Scholes
-with the full Greek matrix and the exotics, binomial trees with American /
-Bermudan / Snell envelope, fixed income with hazard credit and Vasicek SDE,
-portfolio theory from Markowitz to Black-Litterman, coherent risk measures,
-Kelly, mortality, and constant-product AMMs.
+and Degenne's BrownianMotion. 267 theorems across 11 areas — Black-Scholes
+with the full Greek matrix, the exotics, and Merton jump-diffusion, binomial
+trees with American / Bermudan / Snell envelope, fixed income with hazard
+credit, first-to-default baskets, and Vasicek SDE, portfolio theory from
+Markowitz to Black-Litterman, coherent risk measures, Kelly, mortality, and
+constant-product AMMs.
 
 The aim is a comprehensive, honest reference for formally-verified
 mathematical finance: broad coverage, and — for every result — an exact
@@ -26,13 +27,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 261 |
-| **full derivations** | **221** |
+| total theorems | 267 |
+| **full derivations** | **231** |
 | library wrappers | 18 |
-| reduced cores | 22 |
+| reduced cores | 18 |
 | placeholders | **0** |
 
-**239 of the 261 are delivery-ready** (`full` + `library_wrapper`); the 22
+**249 of the 267 are delivery-ready** (`full` + `library_wrapper`); the 18
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
@@ -40,7 +41,7 @@ done*).
 Every `full` derivation depends only on the three Mathlib standard axioms
 `[propext, Classical.choice, Quot.sound]` — there is no `sorry` and no
 project-local axiom anywhere in the library. For the load-bearing derivations
-(~90 declarations) this is `#print axioms`-pinned as a build invariant in
+(~115 declarations) this is `#print axioms`-pinned as a build invariant in
 `MathFin/AxiomAudit.lean`.
 
 ## At a glance
@@ -126,23 +127,26 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-22 of the 261 theorems are `reduced_core` — an honest special case or
+18 of the 267 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 
-- **Itô calculus** (`stochastic_calculus`, 6): time-dependent Itô, the
-  two-dimensional Itô formula, quadratic variation of an Itô process, Lévy's
-  martingale characterisation, SDE existence + uniqueness, and Girsanov. (The
-  one-dimensional path-wise Itô lemma itself is now `full` — see below.)
+- **Itô calculus** (`stochastic_calculus`, 5): time-dependent Itô, the
+  two-dimensional Itô formula, Lévy's martingale characterisation, SDE
+  existence + uniqueness, and Girsanov. (The one-dimensional path-wise Itô
+  lemma and the quadratic variation of an Itô process — constant σ,
+  Lipschitz drift, with explicit L² rates — are now `full`; see below.)
 - **Girsanov** (`girsanov_finance`, 3).
 - **Markov chains** (6): finite-state structural specifications, one of them a
   definitional identity pinned `reduced_core` by convention. No longer
   upstream-gated — Mathlib now ships the Ionescu–Tulcea trajectory-measure
   machinery (`Kernel.traj`).
-- **Continuous-time Poisson processes** (4): the marginal law (a
-  field-projection pinned `reduced_core` by convention), interarrival
-  exponential, superposition, thinning — Mathlib has only the discrete
-  `PoissonPMF`.
+- **Continuous-time Poisson processes** (1): the whole-sequence iid claim for
+  interarrival times needs the strong Markov property. Its analytic core is
+  derived (first interarrival proved exponential, memoryless factorisation
+  proved from independent increments), and the marginal law, superposition,
+  and thinning are now `full` — each from a new derived identity (Gamma-CDF
+  difference, Poisson convolution, binomial-marking factorisation).
 - **Fine Brownian path machinery** (3): path-wise reflection,
   nowhere-differentiability, law of iterated logarithm.
 

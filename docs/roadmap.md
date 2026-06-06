@@ -446,3 +446,54 @@ boundary / paper↔Lean alignment / production record). The repo already
 maintains every ingredient (formalization_status, coverage.md, AxiomAudit,
 verification ledger); a stdlib generator emitting one repo-level manifest
 from the benchmark JSONs would make it legible to the emerging standard.
+
+## phase: the finance layer over the Poisson/QV track (2026-06-06)
+
+The 2026-06-05 round derived the Poisson/QV foundations; this phase answers
+"what, in finance, did that free" by making them load-bearing in the
+pricing layer. Six new `full` entries (corpus 261 → 267, **231 full + 18
+wrappers = 249/267 delivery-ready**), four new modules, recon-first (two
+Explore agents + daemon name-probes before any Lean was written; three of
+four modules green on first daemon check, the fourth needed two mechanical
+fixes — a `Phi_nonneg` name collision and a needless `Summable.congr`).
+
+- **Variance-swap drift immunity** (`mf-variance-swap-drift-immunity`,
+  `Foundations/VarianceSwapDriftImmunity.lean`): realized variance of GBM
+  log-returns → `σ²T` in **L²** for ANY drift — the fair strike is a QV
+  functional; physical-vs-risk-neutral drift is irrelevant to what the
+  swap settles on. First pricing consumer of `ItoProcessQV`; strengthens
+  phase 34 (expectation-level, risk-neutral-drift-only) on both axes.
+- **First-to-default additivity** (`mf-first-to-default-spread`,
+  `FixedIncome/FirstToDefault.lean`): FtD basket spread = Σ single-name
+  hazards under independence. Pure de-orphaning bridge:
+  `ExpMin.minimum_survival` (previously consumed only by `dist-exp-min`)
+  rewritten in `Credit.lean` vocabulary; spread reading via the existing
+  `creditSpread_eq_hazard`. No new measure theory.
+- **Poisson pgf** (`dist-poisson-pgf`, `Foundations/PoissonPgf.lean`):
+  `E[x^N] = e^{r(x−1)}` for every real `x`, absent from Mathlib —
+  exponential series at `r·x` rescaled by `e^{−r}`, the same
+  `NormedSpace.expSeries_div_hasSum_exp` route Mathlib uses for the pmf
+  normalisation.
+- **Merton (1976) jump-diffusion** (`mf-merton-call-series` /
+  `mf-merton-spot-recombination` / `mf-merton-put-call-parity`,
+  `BlackScholes/MertonJumpDiffusion.lean`): the price is *defined* as
+  `∫ n, C_BS(spot_n, vol_n) ∂(poissonMeasure Λ)` — an honest expectation
+  over the jump count (the pin's `integral_poissonMeasure` makes the
+  textbook series a theorem, not a definition). Compensation identity
+  `E[spot_N] = S₀` via the pgf at `1+k`; parity through the mixture via
+  sandwich-bound integrability (`0 ≤ C_n ≤ spot_n`, `0 ≤ P_n ≤ Ke^{−rT}`)
+  + term-wise `Φ(x)+Φ(−x)=1` algebra. Every term separately grounded as a
+  discounted conditional expected payoff (`bs_call_formula` instantiated
+  on `(ℝ, gaussianReal 0 1)` with `HasLaw.id`). Honest scope: terminal
+  mixture law only, exactly parallel to `BSCallHyp`; the compound-Poisson
+  jump *SDE* stays upstream-gated.
+
+**Deliberately skipped:** Cramér–Lundberg ruin bound (needs
+compound-Poisson process machinery + optional stopping we don't have —
+only the algebraic MGF identity exists in `Actuarial/Mortality.lean`);
+jump-diffusion QV with compound-Poisson jumps (same gating).
+
+**Next candidates from here:** Merton Greeks / monotonicity-in-Λ
+(formula-level, cheap); re-pointing the λ′ = Λ(1+k) classic display as a
+series-rearrangement lemma; the Markov cluster re-cost (`Kernel.traj`);
+Summit B decision.

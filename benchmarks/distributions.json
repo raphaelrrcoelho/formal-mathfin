@@ -81,6 +81,21 @@
         "formalization_status": "full",
         "formalization_scope": "Survival-function identity for the minimum of jointly independent exponentials, derived from joint independence (iIndepFun.meas_iInter) and individual exponential laws (exp_law + expMeasure CDF formula). At the survival-function (CDF) level, matching the precedent of dist-exp-memoryless. The structure no longer axiomatizes the minimum's distribution as a field; the conclusion is derived."
       }
+    },
+    {
+      "id": "dist-poisson-pgf",
+      "name": "Poisson Probability Generating Function",
+      "description": "E[x^N] = e^{r(x-1)} for N ~ Poisson(r) and every real x — the Poisson pgf as an honest expectation against poissonMeasure, absent from Mathlib. The exponential series at r·x rescaled by e^{-r}, so absolute convergence holds for all x.",
+      "domain": "poisson_processes",
+      "code": {
+        "lean": "import MathFin.Foundations.PoissonPgf\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal\n\ntheorem poisson_pgf_thm (r : ℝ≥0) (x : ℝ) :\n    ∫ n, x ^ n ∂(poissonMeasure r) = Real.exp ((r : ℝ) * (x - 1)) :=\n  MathFin.PoissonPgf.integral_pow_poissonMeasure r x\n"
+      },
+      "metadata": {
+        "reference": "Poisson generating function E[x^N] = e^{r(x-1)} (standard; e.g. Saporito Ch 3 toolbox)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof for every real x: the weighted series ∑ e^{-r} rⁿ/n! xⁿ is the exponential series at r·x rescaled by e^{-r} (NormedSpace.expSeries_div_hasSum_exp, the same route Mathlib uses for the pmf normalisation), then integral_poissonMeasure converts the expectation to the series. Lives in MathFin/Foundations/PoissonPgf.lean. Axioms-clean."
+      }
     }
   ]
 }

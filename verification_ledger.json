@@ -171,6 +171,13 @@
       "input_hash": "78e7898a208dfd3092d854bc7ec947e03e9b8a7d59ef0ff433bb78753337ced6",
       "verified_at_commit": "fa07391"
     },
+    "dist-poisson-pgf": {
+      "benchmark_file": "distributions.json",
+      "date": "2026-06-06",
+      "elapsed_s": 30.0,
+      "input_hash": "a43e82dd389450629a60b17a661e0f2af1f7876734d9d916d72b1c8d21515f4a",
+      "verified_at_commit": "0d94f56"
+    },
     "dist-thm-B.1.2-affine": {
       "benchmark_file": "distributions.json",
       "date": "2026-06-05",
@@ -1074,6 +1081,13 @@
       "input_hash": "26e183165150ea993bb81bc9149d1f20253b8b7654a631afb33f0bc22681cc5c",
       "verified_at_commit": "fa07391"
     },
+    "mf-first-to-default-spread": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-06",
+      "elapsed_s": 27.8,
+      "input_hash": "cb006c0b6a2548c102df4fe04b3f57d62c84021fba3787d8b439388634c40c73",
+      "verified_at_commit": "0d94f56"
+    },
     "mf-forward-price": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-05",
@@ -1438,6 +1452,27 @@
       "input_hash": "8d698c8c155d6346be3f9dff7031050ebf8e7be5411aa633dbf918717e27d19a",
       "verified_at_commit": "fa07391"
     },
+    "mf-merton-call-series": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-06",
+      "elapsed_s": 27.0,
+      "input_hash": "6cf3bb965d48cf3ed91c9f4a94edc7ee11e4e5634331a6b22054c1a853ffc620",
+      "verified_at_commit": "0d94f56"
+    },
+    "mf-merton-put-call-parity": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-06",
+      "elapsed_s": 0.0,
+      "input_hash": "f0174588efea7df6b197fa34bdbea82a617dc1b1a351f2919b577c56fa0220a4",
+      "verified_at_commit": "0d94f56"
+    },
+    "mf-merton-spot-recombination": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-06",
+      "elapsed_s": 0.0,
+      "input_hash": "2bf3a7fa6f469052152bc71a33c5eb9a6c21653bfd19c0d185e0d71f3a7b26e5",
+      "verified_at_commit": "0d94f56"
+    },
     "mf-newton-raphson-fixed-at-root": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-05",
@@ -1640,6 +1675,13 @@
       "elapsed_s": 17.7,
       "input_hash": "f71565996075223d9a6aea375ac25311280ebf0355e38ed8d2a9eadc2ee0af86",
       "verified_at_commit": "fa07391"
+    },
+    "mf-variance-swap-drift-immunity": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-06",
+      "elapsed_s": 18.8,
+      "input_hash": "73b3df0c9ed9d08a62e6f88386d1d45fe0f9d2906477700a1e42376e0e09b086",
+      "verified_at_commit": "0d94f56"
     },
     "mf-variance-swap-log": {
       "benchmark_file": "mathematical_finance.json",

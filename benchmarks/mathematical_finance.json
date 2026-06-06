@@ -1938,6 +1938,22 @@
       }
     },
     {
+      "id": "mf-first-to-default-spread",
+      "name": "First-to-Default Spread Is the Sum of Single-Name Hazards",
+      "description": "For a basket of jointly independent exponential default times τ_i ~ Exp(rates i), the first-to-default credit spread — read off the measure of the basket survival event — equals Σ rates: basket intensity is the sum of single-name intensities, so FtD spreads are additive under independence (the extremal case; default correlation only lowers the spread).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.FirstToDefault\n\nopen MeasureTheory ProbabilityTheory MathFin\n\ntheorem first_to_default_spread_thm\n    {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}\n    {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}\n    (hrates_pos : ∀ i, 0 < rates i)\n    (hexp_law : ∀ i, Measure.map (τ i) μ = expMeasure (rates i))\n    (hindep : iIndepFun τ μ)\n    (hmeas : ∀ i, Measurable (τ i))\n    (hn : 0 < n) {t : ℝ} (ht : 0 < t) :\n    -Real.log ((μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩\n        (fun i : Fin n => τ i ω)}).toReal) / t\n      = ∑ i, rates i :=\n  MathFin.firstToDefault_spread_eq_sum_hazards hrates_pos hexp_law hindep hmeas hn ht\n"
+      },
+      "metadata": {
+        "chapter": 17,
+        "reference": "First-to-default baskets under independent reduced-form intensities (Lando 2004 Ch 5; Duffie-Singleton 2003)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: Foundations/ExpMin.minimum_survival (minimum of jointly independent exponentials survives at the summed rate) bridged into the Credit.lean vocabulary — the basket survival probability IS survivalProbability (Σ rates) 0 t (firstToDefault_survival), and the spread reading follows by creditSpread_eq_hazard. Lives in MathFin/FixedIncome/FirstToDefault.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-survival-strictAnti",
       "name": "Survival Strictly Decreasing Under Positive Hazard",
       "description": "Positive hazard ⇒ survival probability strictly decreasing in horizon T. Hazard induces default risk that accumulates over time.",
@@ -2255,6 +2271,70 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: log-moment integral identity + (2/T)·(σ²T/2) = σ² via field_simp. Lives in MathFin/BlackScholes/VarianceSwap.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-variance-swap-drift-immunity",
+      "name": "Variance Swap Fair Strike Is Drift-Immune (L² Realized Variance)",
+      "description": "Realized variance of GBM log-returns along the uniform partition converges in mean-square to σ²T for ANY drift parameter μd: the variance-swap fair strike is a quadratic-variation functional, immune to the physical-vs-risk-neutral drift.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.VarianceSwapDriftImmunity\n\nopen MeasureTheory ProbabilityTheory Filter MathFin.QuadraticVariationL2\nopen scoped NNReal\n\ntheorem variance_swap_drift_immunity_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)\n    {S : ℝ≥0 → Ω → ℝ} {S₀ μd σ : ℝ} (hS₀ : 0 < S₀)\n    (hS : ∀ t ω, S t ω = S₀ * Real.exp ((μd - σ ^ 2 / 2) * (t : ℝ) + σ * B t ω)) :\n    Tendsto (fun n : ℕ => ∫ ω, (∑ k ∈ Finset.range n,\n        (Real.log (S (unifPart T n (k + 1)) ω) - Real.log (S (unifPart T n k) ω)) ^ 2\n          - σ ^ 2 * (T : ℝ)) ^ 2 ∂μ)\n      atTop (nhds 0) :=\n  MathFin.tendsto_realizedVariance_gbm_L2 hBmeas T hS₀ hS\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Variance swap fair strike as realized variance (Demeterfi-Derman-Kamal 1999); drift-immunity of quadratic variation",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: the GBM log-price is an Itô process with constant-slope drift, so Foundations/ItoProcessQV (equipartition QV → σ²T in L² with explicit 1/n rates) applies with the drift parameter arbitrary and absent from the limit. Strengthens the phase-34 expectation-level limit (VarianceSwapLimit) to L² concentration for every drift. Lives in MathFin/Foundations/VarianceSwapDriftImmunity.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-call-series",
+      "name": "Merton (1976) Jump-Diffusion Call Price: Poisson-Weighted Series",
+      "description": "The Merton jump-diffusion call price — DEFINED as the expectation over the Poisson jump count of the conditional Black-Scholes value — expands to the textbook series Σ_n e^{-Λ}Λⁿ/n! · C_BS(spot_n, vol_n). The series is a theorem, not a definition.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonJumpDiffusion\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal Nat\n\ntheorem merton_call_series_thm (S_0 K r σ T k δ : ℝ) (Λ : ℝ≥0) :\n    MathFin.mertonCallPrice S_0 K r σ T k δ Λ\n      = ∑' n : ℕ, Real.exp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n !\n          * MathFin.mertonCallTerm S_0 K r σ T k δ Λ n :=\n  MathFin.mertonCallPrice_eq_tsum S_0 K r σ T k δ Λ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. mertonCallPrice is defined as ∫ n, mertonCallTerm n ∂(poissonMeasure Λ) — an honest expectation over the jump count — and the textbook Poisson-weighted series falls out of Mathlib's integral_poissonMeasure. Each term is separately proved equal to a discounted conditional expected payoff (mertonCallTerm_eq_integral, bs_call_formula on (ℝ, gaussianReal 0 1)). Terminal-mixture-law formalization; the compound-Poisson jump SDE dynamics are upstream-gated and not claimed. Lives in MathFin/BlackScholes/MertonJumpDiffusion.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-spot-recombination",
+      "name": "Merton Compensation Identity: Conditional Spots Recombine to the Spot",
+      "description": "E[mertonSpot(N)] = S₀ for N ~ Poisson(Λ): the jump compensator e^{-kΛ} exactly cancels the expected jump growth E[(1+k)^N] = e^{kΛ} (the Poisson pgf at 1+k) — Merton's risk-neutral consistency condition, exact for all k and Λ.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonJumpDiffusion\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped NNReal\n\ntheorem merton_spot_recombination_thm (S_0 k : ℝ) (Λ : ℝ≥0) :\n    ∫ n, MathFin.mertonSpot S_0 k Λ n ∂(poissonMeasure Λ) = S_0 :=\n  MathFin.integral_mertonSpot S_0 k Λ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976) risk-neutral drift compensation; Poisson probability generating function",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via the new Poisson pgf E[x^N] = e^{Λ(x-1)} (Foundations/PoissonPgf.lean, absent from Mathlib) at x = 1+k: the compensator e^{-kΛ} cancels e^{kΛ} exactly. No hypotheses — the identity is exact for all real k and all rates Λ. Lives in MathFin/BlackScholes/MertonJumpDiffusion.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-put-call-parity",
+      "name": "Merton Jump-Diffusion Put-Call Parity",
+      "description": "C − P = S₀ − Ke^{-rT} in the Merton jump-diffusion model: parity survives jump risk because term-wise BS parity leaves E[mertonSpot(N)] − Ke^{-rT}, and the compensation identity collapses the expectation to S₀.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonJumpDiffusion\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped NNReal\n\ntheorem merton_put_call_parity_thm {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)\n    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :\n    MathFin.mertonCallPrice S_0 K r σ T k δ Λ\n        - MathFin.mertonPutPrice S_0 K r σ T k δ Λ\n      = S_0 - K * Real.exp (-r * T) :=\n  MathFin.merton_put_call_parity δ Λ hS_0 hK hσ hT hk\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: integral_sub on the mixture (integrability from the sandwich bounds 0 ≤ C_n ≤ spot_n, 0 ≤ P_n ≤ Ke^{-rT} with the weighted spots a convergent exponential series), term-wise BS parity via Φ(x)+Φ(-x)=1, then the spot-recombination identity. Lives in MathFin/BlackScholes/MertonJumpDiffusion.lean. Axioms-clean."
       }
     },
     {

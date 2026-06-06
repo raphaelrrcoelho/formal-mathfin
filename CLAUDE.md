@@ -112,6 +112,18 @@ Docker notes:
   named volume, shared by `verify` and `lean-repl` (one Lake writer at a
   time — never run a build in one while the other is up); any host-side
   `.lake/` directory is unused and should not exist.
+- **Single-FILE bind mounts pin the inode** (`MathFin.lean`,
+  `lakefile.lean`, `lake-manifest.json`, `lean-toolchain`,
+  `mathfin.toml`): rename-based writes (Claude's Edit/Write tools, `sed
+  -i`, `mv`) replace the host inode, after which a RUNNING container
+  silently keeps the OLD content — while directory-mounted trees
+  (`MathFin/`, `benchmarks/`, …) stay fresh. Symptom (2026-06-06): new
+  modules built fine but the umbrella's import list was stale →
+  "unknown constant" in AxiomAudit for every new name. After editing
+  any single-file-mounted file, re-sync it into running containers
+  (`docker exec -i docker-lean-repl-1 sh -c 'cat > /app/MathFin.lean'
+  < MathFin.lean`) or restart the service. And never `| tail` a build
+  log you are diagnosing — the first error is the diagnostic one.
 - Both Lean services default to `cpuset 0-3` (4 Lake workers) and
   `mem_limit 6g`: this host gives WSL ~8 GB and uncapped Lean runs froze
   the machine. A runaway elaboration OOM-kills the container (exit 137,
