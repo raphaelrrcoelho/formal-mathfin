@@ -10,9 +10,9 @@ requires-python = ">=3.11"
 dependencies = []
 
 [project.optional-dependencies]
-lean = ["lean-interact>=0.11.0"]
+lean = ["lean-interact>=0.11.4"]
 all = [
-    "lean-interact>=0.11.0",
+    "lean-interact>=0.11.4",
 ]
 dev = [
     "pytest>=8.0",
@@ -28,16 +28,10 @@ include = ["tools*"]
 namespaces = true
 
 [tool.mathfin]
-[tool.mathfin.lean]
-version = "v4.30.0-rc1"
-mathlib = true
-
-# Mirror of mathfin.toml's extra_requires; kept here so coverage tooling
-# that reads pyproject as a fallback config sees the same dependency set.
-[[tool.mathfin.lean.extra_requires]]
-name = "BrownianMotion"
-git = "https://github.com/RemyDegenne/brownian-motion.git"
-rev = "51807683c5130238fd4013b2fbee314135e3d8d9"
+# Lean/Mathlib/BrownianMotion versions are authoritative in `lean-toolchain` +
+# `lakefile.lean` + `lake-manifest.json`; the verifier points at the repo root
+# via mathfin.toml `local_project = "."`. (A stale version-mirror block lived
+# here until 2026-06-06 — config.py never read it.)
 
 [tool.mathfin.orchestrator]
 default_timeout = 60.0

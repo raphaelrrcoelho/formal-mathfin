@@ -489,3 +489,55 @@ supermartingale/intrinsic statements about `americanPrice`, with the
 node-average conditional expectation made explicit. Same instrument as the
 "this IS already that" structural reduction, but for *recursions* rather than
 single formulas.
+
+## In-Lean automation: `grind` (2026-06-06 batch)
+
+Empirical trial of the core `grind` tactic (in toolchain since 4.22; we are
+on 4.30) against 17 goals extracted verbatim from MathFin proof sites. The
+boundary is sharp and worth internalizing.
+
+### Where grind wins — make it the first call
+
+8/10 in its lane, including goals our current proofs work harder for:
+
+* **Field identities with `≠ 0` side conditions** — the full risk-parity
+  contribution identity (`Portfolio/RiskParity.lean`) closes by bare `grind`,
+  *including the un-normalized form with commuted denominators*
+  (`σ₁ + σ₂` and `σ₂ + σ₁` mixed) that forces a manual
+  `rw [show σ₂ + σ₁ = σ₁ + σ₂ from by ring]` before `field_simp; ring`.
+  Congruence closure absorbs the commutation; the denominator non-vanishing
+  is consumed from the hypothesis.
+* **Division goals with ℕ-cast denominators** — the telescoping increment
+  `(k+1)·t/(n+1) − k·t/(n+1) = t/(n+1)` closes with *no* explicit
+  `(n:ℝ) + 1 ≠ 0` hypothesis: grind derives it from cast nonnegativity.
+* **Goals linear in nonlinear atoms** — `1 − cos u = 2·sin(u/2)²` from the
+  double-angle + Pythagorean hypotheses (atoms `cos u`, `sin(u/2)²`,
+  `cos(u/2)²` enter linearly). Our proof used `nlinarith [h2, h3]`; grind
+  needs no hints.
+* **ℕ arithmetic** (truncated subtraction, cast pushing) — subsumes `omega`
+  via cutsat.
+
+### Where grind loses — keep nlinarith
+
+0/7 on nonlinear *real inequalities* (power-mean `(e+f+g)² ≤ 3(e²+f²+g²)`,
+`w² ≤ w` on `[0,1]`, `t² ≤ 4s²` from `t/2 < s`, products of hypotheses like
+`a ≤ b → 0 ≤ z → az ≤ bz`). This is exactly the FRO's in-progress Year-3
+nonlinear-arithmetic workstream — re-test on future toolchain bumps.
+
+Passing the nlinarith certificates as grind parameters
+(`grind [sq_nonneg (e - f), …]`) recovers *some* of these (the power-mean
+closes), but fails where nlinarith multiplies hypotheses *together*
+(`w² ≤ w` needs `w·(1−w) ≥ 0`, a product of `h0` and `h1` — grind does not
+search hypothesis products). Hint-for-hint, nlinarith remains strictly
+stronger on this class.
+
+### Trap
+
+The `unusedVariables` linter false-positives on binders consumed only inside
+grind-generated proof terms (a `≠ 0` hypothesis the proof genuinely needs gets
+flagged unused). Kernel-checked soundness is unaffected; don't "fix" the
+warning by deleting the hypothesis — the proof breaks.
+
+Authoring order going forward: `grind` → (if nonlinear-inequality shaped)
+`nlinarith [certificates]` → `positivity`/`gcongr`/`bound` for the structured
+inequality families.
