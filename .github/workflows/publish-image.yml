@@ -21,6 +21,11 @@ on:
       - 'lake-manifest.json'
       - 'lean-toolchain'
       - 'docker/Dockerfile.verify'
+      # pip layer inputs: Python deps are BAKED into the image (unlike
+      # tools/, which compose bind-mounts at runtime) — a lean-interact
+      # version bump must republish or local pulls keep the old wheel.
+      - 'pyproject.toml'
+      - 'requirements.txt'
   workflow_dispatch:
 
 # One republish at a time; cancel any superseded in-flight build.

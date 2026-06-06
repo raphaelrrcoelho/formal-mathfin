@@ -13,6 +13,13 @@ on:
 # A green build is *also* the axiom-cleanliness proof: MathFin/AxiomAudit.lean
 # #guard_msgs-pins every headline theorem to [propext, Classical.choice,
 # Quot.sound], so `lake build` fails if any of them drifts.
+#
+# The `kernel-replay` job is the honesty floor BELOW the elaborator: it
+# replays every MathFin module's declarations through the Lean kernel via the
+# toolchain-bundled `leanchecker` (elaborator bugs / env hacking cannot slip
+# past it). It runs on the GitHub runner by doctrine — a full-environment
+# batch load (~4-5 GB) that must never share the 10 GB local box with the
+# lean-repl daemon (see CLAUDE.md "Memory doctrine").
 
 jobs:
   build:
@@ -24,3 +31,25 @@ jobs:
 
       - name: Build (elan + Mathlib cache + lake build)
         uses: leanprover/lean-action@v1
+
+  kernel-replay:
+    name: leanchecker kernel replay (MathFin)
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same cache key as the build job (manifest + commit) — restores the
+      # built oleans, so `lake build` inside the action is an incremental
+      # no-op and leanchecker only pays import loads.
+      - name: Restore build (elan + caches)
+        uses: leanprover/lean-action@v1
+
+      - name: Replay every MathFin module through the kernel
+        run: |
+          modules=$(find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||')
+          modules="MathFin $modules"
+          echo "checking $(echo "$modules" | wc -w) modules"
+          # one invocation amortizes import loading across modules
+          lake env leanchecker $modules
