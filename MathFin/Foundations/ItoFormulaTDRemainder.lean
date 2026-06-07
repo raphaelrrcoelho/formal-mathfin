@@ -329,7 +329,7 @@ theorem tendsto_ito_remainder_td
           rw [integral_add hi12 hi3, integral_add hi1 hi2,
             integral_const, probReal_univ, one_smul,
             integral_const_mul, integral_const_mul,
-            ItoIsometryAdapted.integral_increment_sq (B := B) hle hBmeas,
+            ItoIsometryAdapted.integral_increment_sq (B := B) hle,
             integral_increment_pow6 (B := B) hle]
       _ ≤ K * ((T : ℝ) / n) ^ 3 := by
           rw [hΔ k hk, hK_def]

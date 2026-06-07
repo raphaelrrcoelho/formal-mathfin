@@ -94,7 +94,7 @@ private lemma gammaMeasure_Iic {a : ℝ} (ha : 1 ≤ a) (hr : 0 < r) (ht : 0 ≤
 
 /-- The telescoping antiderivative: on `s ≥ 0`, `Φ_k(u) = (ru)ᵏ e^{−ru}/k!`
 has derivative `γ_k(s) − γ_{k+1}(s)` (Gamma densities of natural shapes). -/
-private lemma hasDerivAt_gamma_antideriv (hr : 0 < r) {k : ℕ} (hk : k ≠ 0)
+private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
     {s : ℝ} (hs : 0 ≤ s) :
     HasDerivAt (fun u : ℝ => (r * u) ^ k * rexp (-(r * u)) / k !)
       (gammaPDFReal k r s - gammaPDFReal (k + 1 : ℕ) r s) s := by
@@ -138,8 +138,9 @@ private lemma hasDerivAt_gamma_antideriv (hr : 0 < r) {k : ℕ} (hk : k ≠ 0)
 
 /-- **Gamma-CDF difference identity.** For `k ≥ 1`, `r > 0`, `t ≥ 0`:
 `∫₀ᵗ γ_k − ∫₀ᵗ γ_{k+1} = e^{−rt} (rt)ᵏ / k!` — the Poisson pmf appears as
-the telescoping gap between consecutive Erlang CDFs. -/
-private lemma integral_gammaPDFReal_sub_succ (hr : 0 < r) (ht : 0 ≤ t)
+the telescoping gap between consecutive Erlang CDFs (a formal calculus
+identity; no positivity of `r` is needed). -/
+private lemma integral_gammaPDFReal_sub_succ (ht : 0 ≤ t)
     {k : ℕ} (hk : k ≠ 0) :
     (∫ s in (0:ℝ)..t, gammaPDFReal k r s)
         - ∫ s in (0:ℝ)..t, gammaPDFReal (k + 1 : ℕ) r s
@@ -151,7 +152,7 @@ private lemma integral_gammaPDFReal_sub_succ (hr : 0 < r) (ht : 0 ≤ t)
   have hint2 := intervalIntegrable_gammaPDFReal (a := ((k + 1 : ℕ) : ℝ)) (r := r) hk1' ht
   rw [← intervalIntegral.integral_sub hint1 hint2,
     intervalIntegral.integral_eq_sub_of_hasDerivAt
-      (fun s hs => hasDerivAt_gamma_antideriv hr hk
+      (fun s hs => hasDerivAt_gamma_antideriv hk
         (by rw [Set.uIcc_of_le ht] at hs; exact hs.1))
       (hint1.sub hint2)]
   rw [mul_zero, zero_pow hk, zero_mul, zero_div, sub_zero]
@@ -159,7 +160,7 @@ private lemma integral_gammaPDFReal_sub_succ (hr : 0 < r) (ht : 0 ≤ t)
 
 /-- The base case against zero: `∫₀ᵗ γ_1 = 1 − e^{−rt}` (the exponential
 CDF). -/
-private lemma integral_gammaPDFReal_one (hr : 0 < r) (ht : 0 ≤ t) :
+private lemma integral_gammaPDFReal_one (ht : 0 ≤ t) :
     ∫ s in (0:ℝ)..t, gammaPDFReal 1 r s = 1 - rexp (-(r * t)) := by
   have hderiv : ∀ s ∈ Set.uIcc (0:ℝ) t,
       HasDerivAt (fun u : ℝ => -rexp (-(r * u))) (gammaPDFReal 1 r s) s := by
@@ -255,7 +256,7 @@ theorem map_count_eq_poissonMeasure [IsProbabilityMeasure μ]
       Real.exp_le_one_iff.mpr (neg_nonpos.mpr (mul_nonneg rate.coe_nonneg ht))
     rw [hT0, measure_univ, hF 1 one_ne_zero,
       show ((1 : ℕ) : ℝ) = (1 : ℝ) from Nat.cast_one,
-      integral_gammaPDFReal_one hr ht,
+      integral_gammaPDFReal_one ht,
       show (1 : ℝ≥0∞) = ENNReal.ofReal 1 from ENNReal.ofReal_one.symm,
       ← ENNReal.ofReal_sub 1 (by linarith)]
     norm_num [hco]
@@ -266,7 +267,7 @@ theorem map_count_eq_poissonMeasure [IsProbabilityMeasure μ]
         gammaPDFReal_nonneg (by positivity) hr s
     rw [hF k hk, hF (k + 1) (Nat.succ_ne_zero k),
       ← ENNReal.ofReal_sub _ hnn,
-      integral_gammaPDFReal_sub_succ hr ht hk, hco]
+      integral_gammaPDFReal_sub_succ ht hk, hco]
 
 end PoissonCounting
 

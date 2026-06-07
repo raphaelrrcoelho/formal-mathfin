@@ -111,22 +111,36 @@ the unbounded-coefficient gap is named everywhere it matters.
    in `kelly_n_periods_deriv_at_kelly` + its benchmark snippet.
 
 **Recorded actions**:
-1. *(minor, open)* consolidate the increment-second-moment fact:
-   `ItoIsometryAdapted.integral_increment_sq` is itself documented
-   re-derivation of `WienerIntegralL2.covariance_increment_aux` — fold into
-   the long-deferred "single shared increment-covariance lemma" cleanup on
-   the next structural pass of that layer.
-2. *(minor, open)* `WeightedQuadraticVariation` Term-II scaffolding (~19
-   lines of path/bound/measurability setup) is duplicated between
-   `tendsto_riemann_L2_process` and `tendsto_weighted_qv_process`; exporting
-   a per-`n` `Integrable` companion would complete the hoist — next touch of
-   the file.
-3. *(nit, accepted)* `abs_sub` deprecated-alias usage in both Riemann↔CLM
-   bridges (the TD bridge faithfully mirrors the committed 1D idiom) — sweep
-   at the next toolchain bump.
+1. *(minor, DONE same day — consolidation follow-up commit)*
+   increment-second-moment fact consolidated: `ItoIsometryAdapted` now
+   imports `WienerIntegralL2` (acyclic) and `integral_increment_sq` /
+   `integral_two_increment` are one-step instances of
+   `covariance_increment_aux` (diagonal and shared-start), `hBmeas` dropped
+   from both signatures as dead; module docstring's stale "(non-`module`)
+   file" re-derivation apology rewritten. The `SimpleProcess`/`L2Predictable`
+   unification remains the only deferred item of that paragraph.
+2. *(minor, DONE same day — same commit)* the Term-II scaffolding hoist
+   completed: private `measurable_pathIntegral` + `abs_pathIntegral_le` are
+   the single home of the path-integral measurability/bound, consumed by
+   `tendsto_riemann_L2_process`, the new per-`n` companion
+   `integrable_riemann_defect_sq`, and `memLp_pathIntegral_process`;
+   `tendsto_weighted_qv_process` lost its 19-line duplicate block.
+3. *(nit, RESOLVED — no action at this pin)* `abs_sub` is **not** deprecated
+   in the pinned Mathlib: it is the live `to_additive` companion of
+   `theorem mabs_div` (`Algebra/Order/Group/Abs.lean:81`), and the bridges
+   elaborate with zero deprecation warnings. The reviewer's claim was a
+   newer-Mathlib artifact — the documented public-loogle-vs-pin caveat.
+   Re-check at the next toolchain bump.
 4. *(nit, accepted)* `coverage.md`'s "pre-re-audit historical record" line is
    deliberately stale provenance; the panel flagged it, the file already
    frames it as such — no action.
+5. *(nit, DONE same day — same commit)* `PoissonCounting`'s two unused-`hr`
+   warnings (pre-existing, surfaced by the consolidation rebuild) pruned as
+   a dead-positivity cascade: three private Gamma-CDF calculus lemmas
+   (`hasDerivAt_gamma_antideriv`, `integral_gammaPDFReal_sub_succ`,
+   `integral_gammaPDFReal_one`) never needed `0 < r` — the telescoping
+   antiderivative identities are formal algebra; public signatures
+   untouched.
 
 ## 2026-06-06 — commit f1b0dcd — corpus 269
 

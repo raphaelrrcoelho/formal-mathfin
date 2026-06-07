@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Foundations.WienerIntegralL2
 
 /-!
 # The adapted Itô isometry (the increment-independence cornerstone)
@@ -43,13 +44,13 @@ simple-predictable-integrand objects (`SimpleProcess`, `ElementaryPredictableSet
 `L2Predictable`) — but proves **no** isometry; that is the gap this file fills.
 We re-encode adaptedness concretely as `AdaptedAt` (factoring through
 `pastProcess`) so that the weak-Markov independence `IsPreBrownian.indepFun_shift`
-applies directly. Likewise `integral_two_increment` / `integral_increment_sq`
-are the shared-start (`s = u`) and diagonal instances of
-`WienerIntegralL2.covariance_increment_aux`, re-derived here only because this
-(non-`module`) file does not yet import that layer. Unifying onto the package's
-`SimpleProcess`/`L2Predictable`, adopting the `module` convention of
-`WienerIntegral*.lean`, and extracting the single shared increment-covariance
-lemma are deferred to the continuous-integral build that consumes both layers.
+applies directly. The deterministic moments `integral_two_increment` /
+`integral_increment_sq` are *consumed* as the shared-start (`s = u`) and
+diagonal instances of `WienerIntegralL2.covariance_increment_aux` — the single
+shared increment-covariance lemma (consolidated 2026-06-07; they had been
+re-derived here while this file predated the `module` convention and did not
+import that layer). Unifying onto the package's `SimpleProcess`/`L2Predictable`
+remains deferred to a structural pass of the simple-process layer.
 -/
 
 @[expose] public section
@@ -160,20 +161,18 @@ theorem integral_adapted_mul_increment
     rwa [integral_id_gaussianReal] at h
   rw [hmean, mul_zero]
 
-/-- The forward increment has second moment `E[(B_{t₁} - B_{t₀})²] = t₁ - t₀`
-(mean zero, variance `t₁ - t₀`). -/
+/-- The forward increment has second moment `E[(B_{t₁} - B_{t₀})²] = t₁ - t₀`: the
+diagonal instance of the Wiener-layer increment covariance
+`WienerIntegralL2.covariance_increment_aux`. -/
 theorem integral_increment_sq
-    {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) (hBmeas : ∀ t, Measurable (B t)) :
+    {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 2 ∂μ = (t₁ : ℝ) - t₀ := by
-  have hΔm : Measurable (fun ω => B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
-  have hmean : ∫ ω, (B t₁ ω - B t₀ ω) ∂μ = 0 := by
-    have h := (hB.hasLaw_sub t₁ t₀).integral_eq
-    rwa [integral_id_gaussianReal] at h
-  have hmax : (max (t₁ - t₀) (t₀ - t₁) : ℝ≥0) = t₁ - t₀ :=
-    max_eq_left (by rw [tsub_eq_zero_of_le ht]; exact zero_le)
-  rw [← variance_of_integral_eq_zero hΔm.aemeasurable hmean]
-  show Var[B t₁ - B t₀; μ] = (t₁ : ℝ) - t₀
-  rw [(hB.hasLaw_sub t₁ t₀).variance_eq, variance_id_gaussianReal, hmax, NNReal.coe_sub ht]
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have h := WienerIntegralL2.covariance_increment_aux (B := B) (μ := μ) t₀ t₁ t₀ t₁ ht ht
+  simp only [min_self, max_self] at h
+  rw [max_eq_right (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))] at h
+  rw [← h]
+  exact integral_congr_ae (Filter.Eventually.of_forall fun ω => pow_two (B t₁ ω - B t₀ ω))
 
 /-- **General isometry kernel**: for `χ` adapted to `𝓕_{t₀}`,
 `E[χ · (B_{t₁} - B_{t₀})²] = E[χ] · (t₁ - t₀)`. The increment's square is
@@ -192,7 +191,7 @@ theorem integral_adapted_mul_increment_sq
   have key := hindep2.integral_fun_mul_eq_mul_integral
     hχm.aestronglyMeasurable (hΔm.pow_const 2).aestronglyMeasurable
   simp only [Function.comp_apply, id_eq] at key
-  rw [key, integral_increment_sq (μ := μ) ht hBmeas]
+  rw [key, integral_increment_sq (μ := μ) ht]
 
 /-- **Isometry kernel** (the diagonal term of the Itô isometry): for `φ`
 adapted to `𝓕_{t₀}`, `E[φ² · (B_{t₁} - B_{t₀})²] = E[φ²] · (t₁ - t₀)`. The
@@ -379,36 +378,18 @@ theorem adapted_indepFun_forward
   exact (hB.indepFun_shift hBmeas t₀).symm.comp hg hH
 
 /-- Two increments sharing a start: `E[(B_t − B_a)(B_{t'} − B_a)] = min t t' − a`
-for `a ≤ t`, `a ≤ t'`. Both increments are forward of `a`, so this is the
-deterministic covariance; the stochastic content lives in `rect_increment_pairing`. -/
+for `a ≤ t`, `a ≤ t'`: the shared-start instance of the Wiener-layer increment
+covariance `WienerIntegralL2.covariance_increment_aux` (`max a a = a`, and the
+overlap `min t t' − a` is nonnegative); the stochastic content lives in
+`rect_increment_pairing`. -/
 theorem integral_two_increment
-    (hBmeas : ∀ s, Measurable (B s)) {a t t' : ℝ≥0} (hat : a ≤ t) (hat' : a ≤ t') :
+    {a t t' : ℝ≥0} (hat : a ≤ t) (hat' : a ≤ t') :
     ∫ ω, (B t ω - B a ω) * (B t' ω - B a ω) ∂μ = ((min t t' : ℝ≥0) : ℝ) - a := by
-  have hincr : ∀ b c : ℝ≥0, MemLp (fun ω => B b ω - B c ω) 2 μ := fun b c =>
-    hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
-  rcases le_total t t' with htt' | htt'
-  · have e2 : ∫ ω, (B t ω - B a ω) * (B t' ω - B t ω) ∂μ = 0 :=
-      integral_adapted_mul_increment (μ := μ) hBmeas htt'
-        ((adaptedAt_eval le_rfl).sub (adaptedAt_eval hat))
-    have hi1 : Integrable (fun ω => (B t ω - B a ω) ^ 2) μ := (hincr t a).integrable_sq
-    have hi2 : Integrable (fun ω => (B t ω - B a ω) * (B t' ω - B t ω)) μ :=
-      (hincr t a).integrable_mul (hincr t' t)
-    have hsum : ∫ ω, (B t ω - B a ω) * (B t' ω - B a ω) ∂μ
-        = (∫ ω, (B t ω - B a ω) ^ 2 ∂μ) + ∫ ω, (B t ω - B a ω) * (B t' ω - B t ω) ∂μ := by
-      rw [← integral_add hi1 hi2]
-      exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
-    rw [hsum, e2, add_zero, integral_increment_sq (μ := μ) hat hBmeas, min_eq_left htt']
-  · have e2 : ∫ ω, (B t' ω - B a ω) * (B t ω - B t' ω) ∂μ = 0 :=
-      integral_adapted_mul_increment (μ := μ) hBmeas htt'
-        ((adaptedAt_eval le_rfl).sub (adaptedAt_eval hat'))
-    have hi1 : Integrable (fun ω => (B t' ω - B a ω) ^ 2) μ := (hincr t' a).integrable_sq
-    have hi2 : Integrable (fun ω => (B t' ω - B a ω) * (B t ω - B t' ω)) μ :=
-      (hincr t' a).integrable_mul (hincr t t')
-    have hsum : ∫ ω, (B t ω - B a ω) * (B t' ω - B a ω) ∂μ
-        = (∫ ω, (B t' ω - B a ω) ^ 2 ∂μ) + ∫ ω, (B t' ω - B a ω) * (B t ω - B t' ω) ∂μ := by
-      rw [← integral_add hi1 hi2]
-      exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
-    rw [hsum, e2, add_zero, integral_increment_sq (μ := μ) hat' hBmeas, min_eq_right htt']
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have h := WienerIntegralL2.covariance_increment_aux (B := B) (μ := μ) a t a t' hat hat'
+  simp only [max_self] at h
+  rw [h, NNReal.coe_min, max_eq_right]
+  exact sub_nonneg.mpr (le_min (NNReal.coe_le_coe.mpr hat) (NNReal.coe_le_coe.mpr hat'))
 
 /-- Integrability of `h · ΔB · ΔB'` for `h` bounded (the products that appear
 when splitting the rectangle pairing). -/
@@ -475,7 +456,7 @@ private lemma rect_increment_pairing_aux
         = (∫ ω, f ω * g ω ∂μ) * (((min t t' : ℝ≥0) : ℝ) - s') := by
       rw [hindep.integral_fun_mul_eq_mul_integral hfgm.aestronglyMeasurable
             hXm.aestronglyMeasurable,
-          integral_two_increment (μ := μ) hBmeas htle.le hst']
+          integral_two_increment (μ := μ) htle.le hst']
     have hsum : ∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ
         = (∫ ω, f ω * g ω * ((B s' ω - B s ω) * (B t' ω - B s' ω)) ∂μ)
           + ∫ ω, f ω * g ω * ((B t ω - B s' ω) * (B t' ω - B s' ω)) ∂μ := by

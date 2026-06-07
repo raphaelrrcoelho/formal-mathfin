@@ -128,7 +128,7 @@ private lemma qv_bound (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   have hΔB_int_sq : ∀ k : ℕ, ∫ ω,
       (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 ∂μ = (T : ℝ) / n := by
     intro k
-    rw [integral_increment_sq (μ := μ) (hle k) hBmeas, hgapeq k]
+    rw [integral_increment_sq (μ := μ) (hle k), hgapeq k]
   -- ===== bound for the pure-drift term =====
   have hE_nonneg : ∀ ω, 0 ≤ E ω := fun ω =>
     Finset.sum_nonneg fun k _ => sq_nonneg _
@@ -246,7 +246,7 @@ private lemma qv_bound (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
           (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2)) μ := by
       refine Integrable.const_mul ?_ _
       refine Integrable.const_mul ?_ _
-      exact integrable_finset_sum _ fun k _ => (hΔB2 k).integrable_sq
+      exact integrable_finsetSum _ fun k _ => (hΔB2 k).integrable_sq
     calc ∫ ω, (F ω) ^ 2 ∂μ
         ≤ ∫ ω, 4 * σ ^ 2 * (Ca * ((T : ℝ) / n)) ^ 2
             * ((n : ℝ) * ∑ k ∈ Finset.range n,
@@ -255,7 +255,7 @@ private lemma qv_bound (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
             hRHS_int (Eventually.of_forall hpt)
       _ = 4 * σ ^ 2 * (Ca * ((T : ℝ) / n)) ^ 2 * ((n : ℝ)
             * ∑ k ∈ Finset.range n, ((T : ℝ) / n)) := by
-          rw [integral_const_mul, integral_const_mul, integral_finset_sum _
+          rw [integral_const_mul, integral_const_mul, integral_finsetSum _
             (fun k _ => (hΔB2 k).integrable_sq)]
           congr 2
           exact Finset.sum_congr rfl fun k _ => hΔB_int_sq k
