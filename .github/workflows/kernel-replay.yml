@@ -4,14 +4,22 @@ name: kernel-replay
 # module's declarations through the Lean kernel via the toolchain-bundled
 # `leanchecker` (elaborator bugs / environment hacking cannot slip past it).
 #
-# SCHEDULED, not per-push — a deliberate disposition (2026-06-06, six
-# instrumented rounds): the job is correct but slow-and-flaky territory on
-# hosted runners (30-120 min: Mathlib cache fetches degrade to KB/s, and
-# leanchecker's allocator scales to available headroom — >14 GB uncapped —
-# which OOM-evicts the runner agent unless contained in a cgroup, see the
-# step comments). The PER-PUSH soundness floor is build.yml: a green
-# `lake build` + AxiomAudit's #guard_msgs-pinned axioms. This workflow adds
-# the kernel-replay layer nightly and on demand.
+# ON-DEMAND ONLY (workflow_dispatch) — the nightly cron was dropped
+# 2026-06-07 after the cap experiment below concluded negatively. leanchecker
+# loads every checked module's FULL `public import` closure (all of Mathlib +
+# BrownianMotion) into one kernel environment — ~14 GB — and its allocator
+# sizes to the VM's total RAM, not the cgroup cap. So on a 16 GB hosted runner
+# the replay OOM-kills (exit 137) inside the FIRST batch at any cap below
+# ~14 GB: measured 11G cap → killed at ~11.3 GB after 1h45m of reclaim crawl,
+# 13G cap → killed at ~13.2 GB in 20 min. No cap both contains the workload
+# AND leaves the runner agent room; making it green needs a >16 GB runner or
+# un-wholesaling the library's imports (a refactor against the module-system
+# design) — not worth it for a redundant layer.
+#
+# The ENFORCED soundness floor is build.yml (per-push): a green `lake build`
+# + AxiomAudit's #guard_msgs-pinned axioms (no `sorry`, axiom-clean). This
+# kernel-replay job is BEST-EFFORT defense-in-depth, kept for manual
+# on-demand use from a bigger box / self-hosted runner.
 #
 # Upstream-report candidate: leanchecker × module-system `public import`
 # closures × headroom-scaling allocation (ticker data in runs
@@ -22,9 +30,7 @@ name: kernel-replay
 # "Memory doctrine").
 
 on:
-  schedule:
-    - cron: '17 3 * * *'   # nightly, 03:17 UTC
-  workflow_dispatch:
+  workflow_dispatch:   # best-effort, on-demand only (nightly dropped — see header)
 
 concurrency:
   group: kernel-replay
@@ -34,7 +40,7 @@ jobs:
   kernel-replay:
     name: leanchecker kernel replay (MathFin)
     runs-on: ubuntu-latest
-    timeout-minutes: 150
+    timeout-minutes: 60   # OOMs in ~20 min at 13G on a 16 GB runner; bound the manual-run cost
     steps:
       - name: Checkout
         uses: actions/checkout@v4

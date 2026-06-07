@@ -219,8 +219,13 @@ The gate (the repo contract applies unchanged to machine-found proofs):
   honest prose. Regenerate via `lake exe blueprint_export` +
   `tools/blueprint_render.py`; never hand-edit the generated block in
   docs/blueprint.md.
-- `leanchecker` (CI kernel replay) + `AxiomAudit.lean` are the honesty
-  floor. No `sorry`, axiom-clean, kernel-replayed.
+- `AxiomAudit.lean` (`#guard_msgs`-pinned axioms, enforced per-push by
+  `build.yml`) is the ENFORCED honesty floor: no `sorry`, axiom-clean.
+  `leanchecker` (the `kernel-replay.yml` CI job) is BEST-EFFORT kernel
+  replay below the elaborator — it cannot complete on a 16 GB hosted runner
+  (every module's `public import` closure loads the ~14 GB full Mathlib
+  environment; OOM-kills inside batch 1 at any cgroup cap < ~14 GB, confirmed
+  2026-06-07), so it is `workflow_dispatch`-only and wants a >16 GB box.
 
 ## Architecture
 
