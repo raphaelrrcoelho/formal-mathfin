@@ -230,6 +230,8 @@ import MathFin.BlackScholes.MargrabeGrounding
 import MathFin.BlackScholes.ChooserComposition
 -- Phase 46: BS PDE derived from Itô drift + no-arbitrage
 import MathFin.BlackScholes.PDEFromIto
+-- Feynman–Kac → BS PDE keystone (step 2: the FK price representation)
+import MathFin.BlackScholes.PDEFromFeynmanKac
 -- Phase 40: Itô lemma L¹-expectation form applied to GBM log (mean + variance)
 import MathFin.BlackScholes.GBMLogMoments
 
