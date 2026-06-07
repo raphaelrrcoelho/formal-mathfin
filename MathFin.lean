@@ -117,6 +117,11 @@ import MathFin.Foundations.ItoFormulaRemainder
 import MathFin.Foundations.ItoFormulaC2
 import MathFin.Foundations.ItoIntegralRiemannBridge
 import MathFin.Foundations.ItoFormulaCLM
+-- Summit A′: time-dependent Itô formula in L² — TD Taylor remainder vanishes,
+-- TD Riemann↔CLM bridge, and the assembly f(T,B_T) = f(0,B₀) + ∫f_x dB + ∫(f_t+½f_xx)ds
+import MathFin.Foundations.ItoFormulaTDRemainder
+import MathFin.Foundations.ItoIntegralRiemannBridgeTD
+import MathFin.Foundations.ItoFormulaTD
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)

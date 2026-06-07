@@ -55,6 +55,7 @@ graph TD
   quadraticVariation["Quadratic variation: ∑(ΔB)² → T in L²"]:::proved
   wienerIsometry["Wiener isometry (deterministic L²)"]:::proved
   itoFormulaL2["Itô formula, L² (C³ bounded — Summit A)"]:::proved
+  itoFormulaTdL2["Time-dependent Itô formula, L² (Summit A′)"]:::proved
   itoSquaredL2["Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)"]:::proved
   mertonDominance["Merton dominance: jump risk is never free"]:::proved
   itoIntegralBrownian["∫₀ᵀ B dB = ½(B_T² − B₀² − T)"]:::proved
@@ -74,6 +75,8 @@ graph TD
   brownianMotion --> itoFormulaL2
   itoIntegralClm --> itoFormulaL2
   discreteIto --> itoFormulaL2
+  brownianMotion --> itoFormulaTdL2
+  itoIntegralClm --> itoFormulaTdL2
   brownianMotion --> itoSquaredL2
   discreteIto --> itoSquaredL2
   quadraticVariation --> itoSquaredL2
@@ -284,11 +287,11 @@ The PDE is shown *algebraically equal* to the Itô-drift balance: the iff
 `BS-PDE-LHS = itoDrift2D (rS) (σS) − rV` (`bs_pde_eq_itoDrift2D_minus_rV`) are
 both polynomial identities (`ring`). What is **deferred**: deriving "drift `= 0`"
 *from* a no-arbitrage `Q`-martingale (the dynamic-hedging derivation proper). The
-bounded-derivative, time-*independent* Summit A (`ito_formula_L2_bddDeriv`) does
-not reach it: the genuine derivation needs the *time-dependent* Itô formula (the
-`∂_t`/θ term — `sc-thm-7.1.2`, still `reduced_core`) applied to the BS value
-function, whose `Γ` is unbounded as `S → 0`. So this meets the closed-form route
-at the PDE *coefficient*, with the martingale step still to come.
+bounded-derivative Itô formulas do not reach it: the *time-dependent* formula
+now exists (`sc-thm-7.1.2`, `full` in the bounded regime — Summit A′ below),
+but the BS value function's `Γ` is unbounded as `S → 0`, so the bounded formula
+does not yet apply to it. So this meets the closed-form route at the PDE
+*coefficient*, with the martingale step still to come.
 [`BlackScholes/PDEFromIto.lean`](../MathFin/BlackScholes/PDEFromIto.lean)
 
 ### Itô formula in L² — Summit A ✅
@@ -303,6 +306,21 @@ above for why that lift is deferral, not absence).
 → *Finance:* the engine that turns pathwise second-order algebra into
 distributional statements — the analytic heart of every drift argument.
 [`Foundations/ItoFormulaCLM.lean`](../MathFin/Foundations/ItoFormulaCLM.lean)
+
+### Time-dependent Itô formula in L² — Summit A′ ✅
+The classical `df = f_x dB + (f_t + ½f_xx) dt` in integrated form:
+`f(T, B_T) − f(0, B_0) = ∫₀ᵀ f_x(s, B_s) dB_s + ∫₀ᵀ (f_t + ½f_xx)(s, B_s) ds`
+for `C^{1,2}` functions with bounded higher partials
+(`ito_formula_td_L2_bddDeriv`). The three Summit-A limit arguments redone with
+`(t,x)`-dependence: the weighted quadratic variation generalized to bounded
+**adapted weight processes** (the fluctuation engine never cared the weight was
+`g(B_s)`), the 2D Itô–Taylor remainder vanishing at `O(1/n)` under the Gaussian
+moments, and the time-dependent Riemann↔CLM bridge. The joint continuity of
+`f_t` is *derived* from its bounded partials (jointly Lipschitz), not assumed;
+the boundedness restriction stays the honestly-named boundary, as in Summit A.
+→ *Finance:* the form pricing actually uses — value functions depend on time,
+and the `f_t + ½f_xx` drift is the Black–Scholes operator itself.
+[`Foundations/ItoFormulaTD.lean`](../MathFin/Foundations/ItoFormulaTD.lean)
 
 ### CRR → Black–Scholes convergence ✅
 The binomial (CRR) call price converges to the Black–Scholes call price as the

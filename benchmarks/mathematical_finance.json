@@ -2052,17 +2052,17 @@
     {
       "id": "mf-kelly-n-periods-linearity",
       "name": "Multi-Period Kelly Log-Growth Linearity",
-      "description": "T·kellyGrowth(p, b, f) = T·(p·log(1 + f·b) + (1-p)·log(1 - f)). Linear aggregation of iid period log-growths.",
+      "description": "E[log(R_1...R_n)] = n*kellyGrowth(p, b, f) over n iid Kelly periods: expected total log-growth under the n-fold product of the two-point wealth-multiplier law equals n times the per-period expected log-growth. Linearity of expectation over the actual multi-period model.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_n_periods_linearity_thm (T : ℕ) (p b f : ℝ) :\n    (T : ℝ) * MathFin.kellyGrowth p b f =\n      (T : ℝ) * (p * Real.log (1 + f * b) + (1 - p) * Real.log (1 - f)) :=\n  MathFin.kellyGrowth_n_periods T p b f\n"
+        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin MeasureTheory\n\ntheorem kelly_n_periods_linearity_thm (n : ℕ) {p : ℝ}\n    (hp : 0 ≤ p) (hp1 : p ≤ 1) (b f : ℝ) :\n    ∫ R : Fin n → ℝ, ∑ i, Real.log (R i)\n        ∂(Measure.pi fun _ : Fin n => MathFin.kellyReturnMeasure p b f)\n      = (n : ℝ) * MathFin.kellyGrowth p b f :=\n  MathFin.kellyGrowth_n_periods n hp hp1 b f\n"
       },
       "metadata": {
         "chapter": 15,
         "reference": "Multi-period Kelly aggregation (Kelly 1956; Thorp 2006)",
         "difficulty": "beginner",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "Demoted full -> reduced_core 2026-06-06 (caught by the definitional-rfl tripwire, tests/test_values.py, on its first run): the cited lemma kellyGrowth_n_periods states T * kellyGrowth = T * (unfolded formula) and its proof is rfl — a definitional unfolding, not a derivation. The textbook content (log-growth over T iid periods equals T times the per-period expected log-growth, via linearity of expectation over an actual T-period model) is not modeled. Same demotion class as mf-newton-raphson (2026-05-29). Lives in MathFin/Performance/Kelly.lean."
+        "formalization_status": "full",
+        "formalization_scope": "Full formal derivation (reduced_core -> full, 2026-06-06, repairing the definitional-rfl demotion of the same morning): the n-period iid model is now actual measure theory — one period's wealth multiplier is the two-point law kellyReturnMeasure p b f (win 1+f*b w.p. p, lose to 1-f w.p. 1-p), n periods are its n-fold product Measure.pi, and E[sum_i log R_i] = n * kellyGrowth p b f is COMPUTED via linearity of expectation: integral_finsetSum + the measure-preserving coordinate evaluations of the product measure (measurePreserving_eval) + the one-period evaluation integral_log_kellyReturnMeasure. The compounded-wealth reading is log(prod R_i) = sum log R_i. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
       }
     },
     {
@@ -2071,7 +2071,7 @@
       "description": "The Kelly fraction f* is optimal for any horizon T (the optimal fraction doesn't depend on horizon — Kelly is myopic).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_n_periods_foc_thm (T : ℕ) {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => (T : ℝ) * MathFin.kellyGrowth p b f) 0\n      (MathFin.kellyFraction p b) :=\n  MathFin.kelly_n_periods_deriv_at_kelly T hp hp1 hb\n"
+        "lean": "import MathFin.Performance.Kelly\n\nopen MathFin\n\ntheorem kelly_n_periods_foc_thm (n : ℕ) {p b : ℝ}\n    (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    HasDerivAt (fun f => (n : ℝ) * MathFin.kellyGrowth p b f) 0\n      (MathFin.kellyFraction p b) :=\n  MathFin.kelly_n_periods_deriv_at_kelly n hp hp1 hb\n"
       },
       "metadata": {
         "chapter": 15,

@@ -13,6 +13,7 @@ import MathFin.Foundations.ItoIntegralBrownian
 import MathFin.Foundations.DiscreteIto
 import MathFin.Foundations.ItoFormulaSquaredL2
 import MathFin.Foundations.ItoFormulaCLM
+import MathFin.Foundations.ItoFormulaTD
 import MathFin.Foundations.ItoLemma2D
 import MathFin.Foundations.FeynmanKacHeatEquation
 import MathFin.Foundations.GaussianGirsanov
@@ -114,6 +115,15 @@ attribute [blueprint "thm:ito-formula-l2" (title := "Itô formula, L² (C³ boun
   Taylor remainder, Riemann↔CLM bridge). Unbounded coefficients (e.g. GBM's
   exponential) are honestly out of scope — the named gap. -/)]
   MathFin.ito_formula_L2_bddDeriv
+
+attribute [blueprint "thm:ito-formula-td-l2" (title := "Time-dependent Itô formula, L² (Summit A′)")
+  (statement := /-- The classical $df = f_x\,dB + (f_t + \tfrac12 f_{xx})\,dt$ in
+  integrated $L^2$ form: $f(T,B_T) - f(0,B_0) = \int_0^T f_x(s,B_s)\,dB_s
+  + \int_0^T (f_t + \tfrac12 f_{xx})(s,B_s)\,ds$ for $C^{1,2}$ functions with bounded
+  higher partials — the time-dependent extension of Summit A, with the drift Riemann
+  term as the third vanishing limit and the joint continuity of $f_t$ *derived* from
+  its bounded partials. Unbounded coefficients stay out of scope — the named gap. -/)]
+  MathFin.ito_formula_td_L2_bddDeriv
 
 attribute [blueprint "thm:expectation-ito" (title := "Expectation-form Itô / Feynman–Kac")
   (statement := /-- $E[f(B_t)] = f(0) + \tfrac12 \int_0^t E[f''(B_s)]\,ds$, proved

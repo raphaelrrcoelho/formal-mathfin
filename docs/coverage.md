@@ -133,6 +133,33 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > (including `bs_identity`), now pinned in the curated audit. Net: **233
 > full + 18 wrappers = 251 / 269 delivery-ready, 18 reduced cores.**
 
+> **Summit A′ round (2026-06-07).** Two reduced cores earned `full`, each by
+> replacing the named gap with the actual mathematics. (1)
+> `mf-kelly-n-periods-linearity` — repairing the previous round's
+> definitional-`rfl` demotion: the n-period iid model is now real measure
+> theory (`Performance/Kelly.lean`): one period's wealth multiplier is the
+> two-point law `kellyReturnMeasure p b f`, n periods are its n-fold
+> `Measure.pi`, and `E[∑ log Rᵢ] = n·kellyGrowth p b f` is *computed* via
+> linearity of expectation through the product measure's coordinate
+> evaluations. (2) `sc-thm-7.1.2` — the **time-dependent Itô formula**
+> (Summit A′): `f(T,B_T) − f(0,B₀) = ∫₀ᵀ f_x(s,B_s) dB_s +
+> ∫₀ᵀ (f_t + ½f_xx)(s,B_s) ds` a.e., the classical `df = f_x dB +
+> (f_t + ½f_xx) dt`, with the stochastic integral the genuine
+> `itoIntegralCLM_T`. The three Summit-A limit arguments redone with
+> `(t,x)`-dependence: `WeightedQuadraticVariation` generalized to bounded
+> **adapted weight processes** (the fluctuation engine never cared the
+> weight was `g(B_s)`; `tendsto_riemann_L2_process` exported standalone for
+> the drift term), the 2D Itô–Taylor remainder vanishing at `O(1/n)`
+> (`ItoFormulaTDRemainder.lean` — time/cross/space split bounded by
+> `C_tt Δt² + C_tx|ΔB|Δt + C_xxx|ΔB|³`), and the time-dependent Riemann↔CLM
+> bridge (`ItoIntegralRiemannBridgeTD.lean`). Assembly in
+> `Foundations/ItoFormulaTD.lean`; `f_t`'s joint continuity is *derived*
+> from its bounded partials (jointly Lipschitz), not assumed; unbounded
+> coefficients stay the named gap, as in 7.1.1. All four new headliners
+> axiom-pinned in the curated audit and the spine node
+> `thm:ito-formula-td-l2` added. Net: **235 full + 18 wrappers = 253 / 269
+> delivery-ready, 16 reduced cores.**
+
 > **Duplication + status audit (2026-06-03).** A five-reviewer sweep of all 216
 > then-`full` entries asked two questions: does any MathFin module re-derive
 > content already in pinned Mathlib / Degenne's BrownianMotion package, and is

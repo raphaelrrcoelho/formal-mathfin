@@ -154,6 +154,17 @@
   "label": "thm:markov-path-law",
   "file": "/app/MathFin/Foundations/MarkovPathMeasure.lean"},
  {"uses": [],
+  "title": "GBM coefficient matching (algebraic)",
+  "text":
+  "$S(t,B_t)$ with $S = S_0 e^{(\\mu-\\sigma^2/2)t+\\sigma x}$ matches\n  the Itô coefficients of $dS = \\mu S\\,dt + \\sigma S\\,dB$: genuine `HasDerivAt`\n  partials + the 2D Itô drift. Honestly *coefficient matching*, not a continuous\n  SDE-solution theorem — the $-\\sigma^2/2$ cancellation IS the Itô correction.",
+  "name": "MathFin.gbm_solves_sde",
+  "module": "MathFin.Foundations.ItoLemma2D",
+  "line": 176,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:gbm-sde",
+  "file": "/app/MathFin/Foundations/ItoLemma2D.lean"},
+ {"uses": [],
   "title": "Brownian motion (Degenne, upstream)",
   "text":
   "The driving noise: independent stationary Gaussian increments,\n  $B_t \\sim N(0,t)$ — `IsPreBrownian`, consumed from Rémy Degenne's\n  `brownian-motion` package, on which this library builds.",
@@ -165,17 +176,6 @@
   "label": "def:brownian-motion",
   "file":
   "/app/.lake/packages/BrownianMotion/BrownianMotion/Gaussian/BrownianMotion.lean"},
- {"uses": [],
-  "title": "GBM coefficient matching (algebraic)",
-  "text":
-  "$S(t,B_t)$ with $S = S_0 e^{(\\mu-\\sigma^2/2)t+\\sigma x}$ matches\n  the Itô coefficients of $dS = \\mu S\\,dt + \\sigma S\\,dB$: genuine `HasDerivAt`\n  partials + the 2D Itô drift. Honestly *coefficient matching*, not a continuous\n  SDE-solution theorem — the $-\\sigma^2/2$ cancellation IS the Itô correction.",
-  "name": "MathFin.gbm_solves_sde",
-  "module": "MathFin.Foundations.ItoLemma2D",
-  "line": 176,
-  "leanOk": true,
-  "latexEnv": "theorem",
-  "label": "thm:gbm-sde",
-  "file": "/app/MathFin/Foundations/ItoLemma2D.lean"},
  {"uses": ["thm:esscher-tilt", "thm:bs-call"],
   "title": "Call price from the physical measure",
   "text":
@@ -198,6 +198,17 @@
   "latexEnv": "theorem",
   "label": "thm:quadratic-variation",
   "file": "/app/MathFin/Foundations/QuadraticVariationL2.lean"},
+ {"uses": ["def:brownian-motion", "def:ito-integral-clm"],
+  "title": "Time-dependent Itô formula, L² (Summit A′)",
+  "text":
+  "The classical $df = f_x\\,dB + (f_t + \\tfrac12 f_{xx})\\,dt$ in\n  integrated $L^2$ form: $f(T,B_T) - f(0,B_0) = \\int_0^T f_x(s,B_s)\\,dB_s\n  + \\int_0^T (f_t + \\tfrac12 f_{xx})(s,B_s)\\,ds$ for $C^{1,2}$ functions with bounded\n  higher partials — the time-dependent extension of Summit A, with the drift Riemann\n  term as the third vanishing limit and the joint continuity of $f_t$ *derived* from\n  its bounded partials. Unbounded coefficients stay out of scope — the named gap.",
+  "name": "MathFin.ito_formula_td_L2_bddDeriv",
+  "module": "MathFin.Foundations.ItoFormulaTD",
+  "line": 251,
+  "leanOk": true,
+  "latexEnv": "theorem",
+  "label": "thm:ito-formula-td-l2",
+  "file": "/app/MathFin/Foundations/ItoFormulaTD.lean"},
  {"uses": ["def:brownian-motion"],
   "title": "Wiener isometry (deterministic L²)",
   "text":

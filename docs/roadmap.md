@@ -430,11 +430,19 @@ phase took the Poisson cluster and the bounded half of the Itô pair.
   QV sums of `X = X₀ + A + σB` converge in L² to `σ²T` with explicit `1/n`
   rates — the drift-immunity content derived (pathwise squeeze + Cauchy–
   Schwarz cross-term + `QuadraticVariationL2`). General σ(s,ω) = Summit B.
-- `sc-thm-7.1.2` (time-dependent Itô) — **assessed, deferred**: NOT the
-  ~100-line extension a first survey suggested. It needs the Summit-A limit
-  arguments (weighted QV, remainder, Riemann↔CLM bridge) redone with
-  `(t,x)`-dependence — a Summit-A′-scale mini-campaign (~300–500 lines),
-  not a bounded patch. Next candidate when an Itô session opens.
+- `sc-thm-7.1.2` (time-dependent Itô) → **full** (2026-06-07, Summit A′
+  DONE). The assessed mini-campaign executed as scoped: the three Summit-A
+  limit arguments redone with `(t,x)`-dependence. `tendsto_weighted_qv_process`
+  (WeightedQuadraticVariation generalized to bounded *adapted weight
+  processes* — the fluctuation engine never cared the weight was `g(B_s)`;
+  `tendsto_riemann_L2_process` exported standalone for the drift term),
+  `tendsto_ito_remainder_td` (2D Taylor remainder, `O(1/n)` under
+  `E[ΔB⁶] = 15Δt³`), `itoIntegralCLM_T_of_bdd_cont_td` (TD Riemann↔CLM
+  bridge), assembled in `Foundations/ItoFormulaTD.lean`:
+  `ito_formula_td_L2_bddDeriv` = the classical
+  `f(T,B_T) − f(0,B₀) = ∫f_x dB + ∫(f_t + ½f_xx) ds` a.e., with `f_t`'s
+  joint continuity *derived* from its bounded partials. Unbounded
+  coefficients stay the named gap (as in 7.1.1).
 
 **Markov cluster note:** `Kernel.traj` (Ionescu–Tulcea) is now IN the
 Mathlib pin — re-cost the path-space entries (`mc-thm-1.1.2`,
@@ -535,9 +543,18 @@ the "next candidates" above, executed, plus the markov re-cost verdict.
   strong Markov property needs stopping-time kernels (a design-level
   extension, not a gap-fill). a markov campaign is a 4–6 week
   renewal+spectral build, upstream-quality material — record, don't drift
-  into it.
+  into it. *re-confirmed 2026-06-06 (third round), with one new datum:
+  the pin now carries `Matrix.IsIrreducible` / `Matrix.IsPrimitive`
+  **definitions** (`LinearAlgebra/Matrix/Irreducible/Defs.lean`,
+  quiver-path formulation + `isIrreducible_iff_exists_pow_pos`) but no
+  Perron–Frobenius eigenvalue theorem, and `Dynamics/BirkhoffSum` is the
+  von-Neumann normed-space flavor, not the pointwise ergodic theorem. the
+  re-cost trigger for 1.4.25/1.4.40 is therefore concrete: when Mathlib
+  lands the PF theorem over these definitions, both become tractable
+  matrix-level builds.*
 
 **Next candidates from here:** Summit B decision (integral-as-process /
-general `σ(s,ω)`); hammer re-pilot at the rc2→stable toolchain bump;
-`sc-thm-7.1.2` time-dependent Itô (Summit-A′-scale, ~300–500 lines); the
+general `σ(s,ω)`); hammer re-pilot at the rc2→stable toolchain bump; the
 Markov renewal/spectral layers if that cluster is ever prioritized.
+(`sc-thm-7.1.2` time-dependent Itô: DONE 2026-06-07 — Summit A′ landed, see
+the Itô bounded pair above.)

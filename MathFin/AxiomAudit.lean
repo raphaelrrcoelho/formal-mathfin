@@ -371,6 +371,21 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ito_formula_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_L2_bddDeriv
 
+/-! ## Summit A′: time-dependent Itô formula in L² (CLM-identified) -/
+
+/-- info: 'MathFin.tendsto_weighted_qv_process' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_weighted_qv_process
+
+/-- info: 'MathFin.tendsto_ito_remainder_td' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.tendsto_ito_remainder_td
+
+/-- info: 'MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td
+
+/-- info: 'MathFin.ito_formula_td_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_L2_bddDeriv
+
 /-! ## Carr–Madan static replication / spanning formula -/
 
 /-- info: 'MathFin.carrMadan_spanning' depends on axioms: [propext, Classical.choice, Quot.sound] -/

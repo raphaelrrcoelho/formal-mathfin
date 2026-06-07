@@ -1492,43 +1492,38 @@
     },
     "mf-kelly-fraction-lt-one": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-05",
-      "elapsed_s": 17.8,
-      "input_hash": "ab6e949e15deb6b5377ad9ace915651534bcf6a0842d334c07995c0f776fd2ff",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "fa07391"
+      "date": "2026-06-07",
+      "elapsed_s": 64.8,
+      "input_hash": "c9c7c67645ab5099839d5f74b14cc5219a26a6aee6c43dc701c68cfb409d3571",
+      "verified_at_commit": "f424b30"
     },
     "mf-kelly-fraction-pos-iff": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-05",
-      "elapsed_s": 0.0,
-      "input_hash": "3ec2c22db97f4e007338be61ad7f0c0c0210d93a32843b79c060ed24ce477bba",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "fa07391"
+      "date": "2026-06-07",
+      "elapsed_s": 0.1,
+      "input_hash": "553ec18a93f5dc51a37843e7ff502c9300e4957b36f172770ee02ae8302b0378",
+      "verified_at_commit": "f424b30"
     },
     "mf-kelly-fraction-zero-iff": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-05",
+      "date": "2026-06-07",
       "elapsed_s": 0.0,
-      "input_hash": "aab54e6946716e86e447819a772db59a935c0e266bb41267cade73850516e66f",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "fa07391"
+      "input_hash": "0fe07fcab626c7928d9609fd4d64b722f32449c4b1b028b2333a6ac0df3a41a1",
+      "verified_at_commit": "f424b30"
     },
     "mf-kelly-n-periods-foc": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-05",
-      "elapsed_s": 0.0,
-      "input_hash": "aa43da94d4ab77a4bb3346cd5e4e11f3883ec6296201022806d719e197e5d4ca",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "fa07391"
+      "date": "2026-06-07",
+      "elapsed_s": 0.1,
+      "input_hash": "7062cdbf69dd6b6b6ca637bbcfb40dec4b6e42ff16d582ecd8be13034b3cfbc0",
+      "verified_at_commit": "f424b30"
     },
     "mf-kelly-n-periods-linearity": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-05",
-      "elapsed_s": 0.0,
-      "input_hash": "551180b77098a36da056956bb2601b9cf2b1473117dfea71fbeefe22fdb82cbf",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "fa07391"
+      "date": "2026-06-07",
+      "elapsed_s": 0.1,
+      "input_hash": "8c31bd5450e8f3f8676f411a7e0facacb652d8481e08b534423bb77eff413f44",
+      "verified_at_commit": "f424b30"
     },
     "mf-kmv-merton-pd": {
       "benchmark_file": "mathematical_finance.json",
@@ -2087,19 +2082,17 @@
     },
     "sc-thm-7.1.1": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-05",
-      "elapsed_s": 20.8,
-      "input_hash": "e7a730b6213d9ee55c2d3b57a6820052fc2338472ddcbab17f1f1fde3cd77a97",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "fa07391"
+      "date": "2026-06-07",
+      "elapsed_s": 34.4,
+      "input_hash": "31fc1120096b567adf8bf3e85bc1b2d2b1e11b9a1b2e3a84b412476528585e07",
+      "verified_at_commit": "f424b30"
     },
     "sc-thm-7.1.2": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-05",
-      "elapsed_s": 0.1,
-      "input_hash": "0f8b916d074d9b278b159f54e7c9a22a5aafe495d4f1fe2188837eaa783d2f91",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "9078508"
+      "date": "2026-06-07",
+      "elapsed_s": 145.5,
+      "input_hash": "8a7da6d7f8156f97b1cb0f7c52978645c1a7466e766825fed7d74328d351698f",
+      "verified_at_commit": "f424b30"
     },
     "sc-thm-7.4.5": {
       "benchmark_file": "stochastic_calculus.json",
