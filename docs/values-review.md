@@ -53,6 +53,68 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-07 — commit 321eb4f — corpus 269
+
+**Scope**: commit `321eb4f` — `bsV_eq_feynmanU` (the Feynman–Kac representation of
+the Black–Scholes call price) in the new bridge module
+`MathFin/BlackScholes/PDEFromFeynmanKac.lean`, plus its umbrella import. This is
+step 2 of the Feynman–Kac → BS PDE keystone (which makes the previously
+consumer-less `Foundations.FeynmanKacHeatEquation.feynmanU` load-bearing for
+pricing); steps 1 (kernel-side heat equation), 3 (change of variables) and 4
+(assembly) remain in progress.
+**Panel**: three Sonnet agents on the mechanical lenses — (coherence + idiomatic
+register), (zero slop + dead-code/forbidden-text), (architecture + first-principles
++ docstring fidelity) — and Opus on the judgment lenses (inspired math, first
+principles, concept clarity, beauty).
+
+| lens | verdict |
+|---|---|
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS-WITH-NOTES |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS (after the fix below) |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: one, fixed before this verdict. The theorem docstring's
+"Proof chain" described a *two-step* route (`feynmanU_eq_integral_of_map` with
+`B = id` over `gaussianReal 0 (σ²τ)`, then a **separate** `integral_map` rescale)
+that was never written: the actual proof is a *single* `feynmanU_eq_integral_of_map`
+with `B = (σ√τ · ·)` over the standard normal, the variance rescale discharged as
+its hypothesis `hmap`. The docstring — the concept-clarity instrument — was
+rewritten to describe the one-step proof that exists.
+
+**Checks that mattered**: all four hypotheses are consumed (`hS` via
+`Real.exp_log` and the `BSCallHyp` constructor; `hK`/`hσ` via `BSCallHyp`; `hτ`
+via `Real.sq_sqrt` and `BSCallHyp`) — no dead binders; forbidden-text scan clean
+(no `sorry`/`native_decide`/`?`-tactics/etc.); the statement is a genuine identity,
+not a disguised `rfl` (the closed-form `bsV` and the integral `feynmanU` are
+definitionally distinct) and not vacuous; it consumes the canonical upstream API
+(`gaussianReal_map_const_mul`, `feynmanU_eq_integral_of_map`, `bs_call_formula`,
+`HasLaw.id`) with no thin wrappers or re-derivations; the NNReal-coercion block and
+the two `neg_mul` reconciliations are load-bearing glue, not slop; correct
+file/layer (a `BlackScholes/` bridge over the Foundations FK layer) at the right
+generality (the concrete call payoff baked in, not over-abstracted).
+
+**Declined reviewer flags** (with reason):
+1. *(minor)* "redundant `public import MathFin.BlackScholes.Call`" — declined: this
+   file directly consumes `bs_call_formula`/`bsTerminal`/`BSCallHyp`, so the
+   explicit import is correct direct-dependency hygiene; the file's transitive-import
+   comment scopes only the Mathlib base, not directly-used modules.
+2. *(minor)* "`NNReal.coe_mk` is deprecated" — declined: the pinned-Mathlib build is
+   warning-clean, so this is the documented public-Mathlib-newer-than-pin artifact
+   (the same class as the `abs_sub` false positive in the `14ca008` review).
+3. *(nit)* "'until now consumed by nothing' is stale" — declined: "until now
+   consumed by nothing, becomes load-bearing" is self-consistent and correct.
+
+**Recorded actions**:
+1. *(minor, out of scope — future cleanup)* the exp-sign convention mismatch
+   between `Call.lean` (`Real.exp (-r * T)`) and `PDE.lean` (`Real.exp (-(r * τ))`)
+   forces two cosmetic `neg_mul` reconciliations in this file; unify the convention
+   in a pass over the lower BS modules.
+
 ## 2026-06-07 — commit 14ca008 — corpus 269
 
 **Scope**: commit `14ca008` — Summit A′ (the time-dependent Itô formula:

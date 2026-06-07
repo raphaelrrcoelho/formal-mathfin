@@ -63,13 +63,14 @@ The closed-form value `bsV K r σ S τ` equals the heat-kernel convolution
 
 This is the bridge that makes `Foundations.FeynmanKacHeatEquation.feynmanU`
 load-bearing for the pricing layer. Proof chain:
-* `feynmanU g (σ²τ) x = ∫ ω, g (x + ω) ∂(gaussianReal 0 (σ²τ))`
-  (`feynmanU_eq_integral_of_map` with `B = id`, `μ = gaussianReal 0 (σ²τ)`);
-* rescale `ω = σ√τ · z` to the standard normal
-  (`Measure.map (σ√τ · ·) (gaussianReal 0 1) = gaussianReal 0 (σ²τ)`,
-  `integral_map`);
-* `x + σ√τ·z = log (bsTerminal S r σ τ z)`, so
-  `g (x + σ√τ·z) = e^{−rτ}·(bsTerminal S r σ τ z − K)⁺`;
+* a single `feynmanU_eq_integral_of_map`, taken with `B = (σ√τ · ·)` over the
+  *standard* normal `μ = gaussianReal 0 1`, rewrites the convolution directly as
+  the expectation `∫ ω, g (x + σ√τ·ω) ∂(gaussianReal 0 1)`; the variance rescale
+  is discharged as that lemma's hypothesis
+  `hmap : Measure.map (σ√τ · ·) (gaussianReal 0 1) = gaussianReal 0 (σ²τ)`
+  (from `gaussianReal_map_const_mul`, using `(σ√τ)² = σ²τ`);
+* `x + σ√τ·ω = log (bsTerminal S r σ τ ω)`, so the integrand collapses to
+  `e^{−rτ}·(bsTerminal S r σ τ ω − K)⁺`;
 * `bs_call_formula` on `(ℝ, gaussianReal 0 1, Z = id)` evaluates the integral to
   the closed form `bsV`. -/
 theorem bsV_eq_feynmanU {K r σ S τ : ℝ}
