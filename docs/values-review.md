@@ -53,6 +53,81 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-07 — commit 14ca008 — corpus 269
+
+**Scope**: commit `14ca008` — Summit A′ (the time-dependent Itô formula:
+three new Foundations modules + the process-weight generalization of
+`WeightedQuadraticVariation`), the Kelly n-period iid model re-promotion,
+and the wiring (`sc-thm-7.1.2` + `mf-kelly-n-periods-linearity` → `full`,
+AxiomAudit Summit A′ section, blueprint spine node, docs).
+**Panel**: three agents — (coherence + idiomatic), (slop + first principles
++ architecture), (clarity + inspired math + beauty).
+
+| lens | verdict |
+|---|---|
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS-WITH-NOTES |
+| zero slop | PASS-WITH-NOTES |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS-WITH-NOTES |
+| concept clarity | PASS-WITH-NOTES |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: none.
+
+**Checks that mattered**: the boundary-cancellation algebra of the named-limit
+core was verified symbolically — the discrete 2D identity makes the unbounded
+`f(T,B_T) − f(0,B₀)` cancel, so "the L² estimate only ever sees three
+vanishing terms" is literally true, not prose; the Kelly repair is genuine
+first principles (`integral_log_kellyReturnMeasure` *computes* the two-point
+integral, `kellyGrowth_n_periods` is real linearity of expectation over
+`Measure.pi` — no step is `rfl`); a dead-hypothesis sweep over every new
+public theorem found every binder consumed (including both joint-continuity
+hypotheses of the CLM theorem); every `nlinarith` carries certificate hints
+(the `(u+v+w)² ≤ 3(u²+v²+w²)` step via the three cross-difference squares);
+no Mathlib lemma yields joint continuity from bounded one-variable partials,
+so the corner-split Lipschitz route of `continuous_uncurry_of_bdd_partials`
+is canonical, and `tendsto_riemann_L2_process` duplicates no Mathlib
+Riemann-DCT result (bespoke `NNReal` `timeMeasure`); the `sc-thm-7.1.2`
+snippet matches `ito_formula_td_L2_bddDeriv` hypothesis-for-hypothesis, and
+the unbounded-coefficient gap is named everywhere it matters.
+
+**Fixed before this verdict** (triaged minor, fixed in `14ca008`):
+1. `integral_increment_sq` duplication — the TDRemainder copy re-derived
+   `ItoIsometryAdapted.integral_increment_sq` at the bare `MathFin` namespace
+   (a latent ambiguity trap since `ItoFormulaTD` opens that namespace);
+   deleted, the call site consumes the existing lemma, the genuinely-new
+   `integrable_increment_sq` companion stays.
+2. Three dead nonneg `have`s in `tendsto_ito_remainder_td` left by the
+   memLp hoist (self-caught pre-panel, confirmed by the panel's sweep).
+3. `tendsto_riemann_continuous` had been widened to public with a docstring
+   claiming the Itô layers consume it — they consume the L² wrappers;
+   reverted to `private` with the honest description.
+4. `docs/blueprint.md` BS-PDE section still called `sc-thm-7.1.2` "still
+   `reduced_core`"; rewritten to the bounded-regime status (the deferral
+   argument stands: the BS value function's Γ is unbounded as `S → 0`).
+5. Kelly horizon-binder drift (`T : ℕ` vs the file's new `n : ℕ` register)
+   in `kelly_n_periods_deriv_at_kelly` + its benchmark snippet.
+
+**Recorded actions**:
+1. *(minor, open)* consolidate the increment-second-moment fact:
+   `ItoIsometryAdapted.integral_increment_sq` is itself documented
+   re-derivation of `WienerIntegralL2.covariance_increment_aux` — fold into
+   the long-deferred "single shared increment-covariance lemma" cleanup on
+   the next structural pass of that layer.
+2. *(minor, open)* `WeightedQuadraticVariation` Term-II scaffolding (~19
+   lines of path/bound/measurability setup) is duplicated between
+   `tendsto_riemann_L2_process` and `tendsto_weighted_qv_process`; exporting
+   a per-`n` `Integrable` companion would complete the hoist — next touch of
+   the file.
+3. *(nit, accepted)* `abs_sub` deprecated-alias usage in both Riemann↔CLM
+   bridges (the TD bridge faithfully mirrors the committed 1D idiom) — sweep
+   at the next toolchain bump.
+4. *(nit, accepted)* `coverage.md`'s "pre-re-audit historical record" line is
+   deliberately stale provenance; the panel flagged it, the file already
+   frames it as such — no action.
+
 ## 2026-06-06 — commit f1b0dcd — corpus 269
 
 **Scope**: commits `9db04f8` (Merton dominance + classic display + Markov
