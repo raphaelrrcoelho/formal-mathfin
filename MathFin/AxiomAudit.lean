@@ -476,4 +476,21 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.merton_put_call_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.merton_put_call_parity
 
+-- Merton dominance + classic display; Markov path law (2026-06-06): jump
+-- risk is never free (spot convexity + compensation identity), the
+-- Λ′ = Λ(1+k) textbook display (rate-shift identity), and Saporito 1.1.2
+-- derived from the pin's Ionescu–Tulcea trajectory kernels
+
+/-- info: 'MathFin.bsV_spot_convexOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_spot_convexOn
+
+/-- info: 'MathFin.bsV_le_mertonCallPrice' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bsV_le_mertonCallPrice
+
+/-- info: 'MathFin.mertonCallPrice_eq_classic_tsum' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.mertonCallPrice_eq_classic_tsum
+
+/-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder
+
 end MathFin.AxiomAudit

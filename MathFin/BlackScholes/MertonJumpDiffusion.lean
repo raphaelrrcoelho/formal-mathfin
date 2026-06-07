@@ -9,6 +9,7 @@ public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Put
 public import MathFin.Foundations.PoissonPgf
+public import MathFin.BlackScholes.PDE
 import MathFin.BlackScholes.PriceBounds
 
 /-!
@@ -127,6 +128,15 @@ noncomputable def mertonCallPrice (S_0 K r σ T k δ : ℝ) (Λ : ℝ≥0) : ℝ
 /-- **Merton (1976) jump-diffusion put price**. -/
 noncomputable def mertonPutPrice (S_0 K r σ T k δ : ℝ) (Λ : ℝ≥0) : ℝ :=
   ∫ n, mertonPutTerm S_0 K r σ T k δ Λ n ∂(poissonMeasure Λ)
+
+/-- Each conditional value *is* the Black–Scholes price function `bsV` at the
+jump-adjusted spot and volatility: the Merton mixture averages genuine BS
+prices. The bridge consumed by `MertonDominance` and `MertonClassicDisplay`. -/
+theorem mertonCallTerm_eq_bsV (S_0 K r σ T k δ : ℝ) (Λ : ℝ≥0) (n : ℕ) :
+    mertonCallTerm S_0 K r σ T k δ Λ n
+      = bsV K r (mertonVol σ δ T n) (mertonSpot S_0 k Λ n) T := by
+  unfold mertonCallTerm bsV
+  simp only [neg_mul]
 
 /-! ### Each term is an honest discounted expected payoff -/
 

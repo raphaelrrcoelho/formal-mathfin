@@ -10,7 +10,7 @@
 [![dataset](https://img.shields.io/badge/HF-dataset-ffcc4d)](https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 267 theorems across 11 areas — Black-Scholes
+and Degenne's BrownianMotion. 269 theorems across 11 areas — Black-Scholes
 with the full Greek matrix, the exotics, and Merton jump-diffusion, binomial
 trees with American / Bermudan / Snell envelope, fixed income with hazard
 credit, first-to-default baskets, and Vasicek SDE, portfolio theory from
@@ -27,13 +27,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 267 |
-| **full derivations** | **231** |
+| total theorems | 269 |
+| **full derivations** | **234** |
 | library wrappers | 18 |
-| reduced cores | 18 |
+| reduced cores | 17 |
 | placeholders | **0** |
 
-**249 of the 267 are delivery-ready** (`full` + `library_wrapper`); the 18
+**252 of the 269 are delivery-ready** (`full` + `library_wrapper`); the 17
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
@@ -127,7 +127,7 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-18 of the 267 theorems are `reduced_core` — an honest special case or
+17 of the 269 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 

@@ -82,6 +82,36 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > (`MertonJumpDiffusion.lean`). Net: **231 full + 18 wrappers = 249 / 267
 > delivery-ready, 18 reduced cores** (corpus 261 → 267).
 
+> **Merton dominance + classic display; Markov path law (2026-06-06, second
+> round).** Two new `full` entries deepen the Merton layer:
+> `mf-merton-dominance` — *jump risk is never free*,
+> `C_BS(S₀,σ) ≤ C_Merton(S₀,σ,k,δ,Λ)` for every `Λ`, `δ`, `k > −1`, proved
+> by pricing the two jump channels separately: per-term vol-monotonicity
+> (`bsV_strictMonoOn_sigma`, vega) lowers the jump vol to `δ = 0`, and there
+> a Jensen floor comes from the new spot-direction convexity
+> `bsV_spot_convexOn` (gamma ≥ 0 second-derivative test, the S-direction
+> dual of `bsV_strike_convexOn`; `SpotConvexity.lean`) whose supporting
+> tangent at `S₀` has its linear term integrate to zero by the compensation
+> identity `integral_mertonSpot` (`MertonDominance.lean`). And
+> `mf-merton-classic-display` — the textbook `Λ′ = Λ(1+k)` form, driven by
+> the rate-shift invariance
+> `bsV K r σ (S·e^{cτ}) τ = e^{cτ}·bsV K (r+c) σ S τ`
+> (`bsV_spot_exp_rate_shift`) at `c_n = r_n − r` plus Poisson-weight
+> absorption (`MertonClassicDisplay.lean`). One reduced core earned `full`:
+> `mc-thm-1.1.2` (path distribution of a Markov chain) — the chain's law is
+> now *constructed* via the pin's Ionescu–Tulcea trajectory kernels
+> (`Kernel.trajMeasure`) from kernels that read only the last history
+> coordinate, and `P(X₀=i₀,…,Xₙ=iₙ) = init(i₀)·∏ P(iₖ,iₖ₊₁)` is derived by
+> induction through the comp-product recursion of the marginals, replacing
+> the prior definitional `rfl` (`Foundations/MarkovPathMeasure.lean`; the
+> converse characterization is not claimed). The same `Kernel.traj` re-cost
+> found the other five Markov reduced cores still honestly gated: recurrence
+> needs renewal theory / fundamental-matrix algebra, convergence needs
+> Perron–Frobenius, the ergodic theorem needs both, stationarity-uniqueness
+> needs recurrence, and the strong Markov property needs stopping-time
+> kernels — none in the pin. Net: **234 full + 18 wrappers = 252 / 269
+> delivery-ready, 17 reduced cores** (corpus 267 → 269).
+
 > **Duplication + status audit (2026-06-03).** A five-reviewer sweep of all 216
 > then-`full` entries asked two questions: does any MathFin module re-derive
 > content already in pinned Mathlib / Degenne's BrownianMotion package, and is

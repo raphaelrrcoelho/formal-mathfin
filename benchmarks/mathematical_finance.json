@@ -2338,6 +2338,38 @@
       }
     },
     {
+      "id": "mf-merton-dominance",
+      "name": "Merton Jump-Diffusion Dominance: Jump Risk Is Never Free",
+      "description": "C_BS(S₀, σ) ≤ C_Merton(S₀, σ, k, δ, Λ) for every jump intensity Λ, mean jump size k > −1, and jump vol δ: the option value under jump risk dominates the Black-Scholes value at the diffusion vol. The two jump channels are separately priced: conditional vols exceed σ (vega), and the compensated conditional spots are a mean-preserving spread of S₀ (gamma convexity + Jensen via the compensation identity).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonDominance\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped NNReal\n\ntheorem merton_dominance_thm {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)\n    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :\n    MathFin.bsV K r σ S_0 T ≤ MathFin.mertonCallPrice S_0 K r σ T k δ Λ :=\n  MathFin.bsV_le_mertonCallPrice δ Λ hS_0 hK hσ hT hk\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), Option pricing when underlying stock returns are discontinuous, J. Financial Economics 3, 125-144",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in two reductions: (1) per-term vol-monotonicity (bsV_strictMonoOn_sigma, vega > 0) lowers the jump vol to δ = 0; (2) at δ = 0 the mixture dominates bsV by the supporting-tangent bound from the new spot-direction convexity bsV_spot_convexOn (gamma ≥ 0 second-derivative test, SpotConvexity.lean — the S-direction dual of bsV_strike_convexOn), and the tangent's linear term integrates to zero by the compensation identity integral_mertonSpot. Lives in MathFin/BlackScholes/MertonDominance.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-merton-classic-display",
+      "name": "Merton Series in Classic Form: Adjusted Intensity Λ′ = Λ(1+k)",
+      "description": "The Merton mixture regroups into the textbook display C_Merton = Σ_n e^{−Λ′}Λ′ⁿ/n! · C_BS(S₀, K, r_n, vol_n, T) with adjusted intensity Λ′ = Λ(1+k) and shifted rates r_n = r − kΛ/T + n·log(1+k)/T: the jump factor (1+k)ⁿ migrates from the conditional spot into the Poisson weight.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.MertonClassicDisplay\n\nopen MeasureTheory ProbabilityTheory Real MathFin\nopen scoped NNReal Nat\n\ntheorem merton_classic_display_thm {S_0 K k T : ℝ} (r σ δ : ℝ) (Λ : ℝ≥0)\n    (hS_0 : 0 < S_0) (hK : 0 < K) (hT : 0 < T) (hk : -1 < k) :\n    MathFin.mertonCallPrice S_0 K r σ T k δ Λ\n      = ∑' n : ℕ, Real.exp (-((Λ : ℝ) * (1 + k))) * ((Λ : ℝ) * (1 + k)) ^ n / n !\n          * MathFin.bsV K (MathFin.mertonRate r k T Λ n) (MathFin.mertonVol σ δ T n) S_0 T :=\n  MathFin.mertonCallPrice_eq_classic_tsum r σ δ Λ hS_0 hK hT hk\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Merton (1976), eq. (16) — the λ′ = λ(1+k) form of the jump-diffusion series",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof driven by one structural identity: the rate-shift invariance bsV K r σ (S·e^{cτ}) τ = e^{cτ}·bsV K (r+c) σ S τ (bsV_spot_exp_rate_shift, pure d₁/d₂ algebra) applied at c_n = r_n − r so that e^{c_n T} = e^{−kΛ}(1+k)ⁿ is exactly the compensated jump growth, plus the weight absorption e^{−Λ}Λⁿ/n!·e^{−kΛ}(1+k)ⁿ = e^{−Λ′}Λ′ⁿ/n!. No constraints on σ, δ, r. Lives in MathFin/BlackScholes/MertonClassicDisplay.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-gaussianPDF-symmetry",
       "name": "Standard Normal PDF Symmetry",
       "description": "ϕ(-z) = ϕ(z) for the standard normal density, since the gaussian is symmetric around 0.",

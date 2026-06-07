@@ -35,6 +35,9 @@ import MathFin.Foundations.StandardNormal
 import MathFin.Foundations.DoobDecomposition
 import MathFin.Foundations.L2MartingaleConvergence
 import MathFin.Foundations.BrownianMarkov
+-- Markov-chain path law derived from the pin's Ionescu–Tulcea trajectory
+-- kernels (Saporito 1.1.2)
+import MathFin.Foundations.MarkovPathMeasure
 import MathFin.Foundations.ErlangSum
 -- Poisson-process theory: superposition, thinning, marginal-from-arrivals,
 -- first-interarrival law (Saporito 3.3.5/3.3.6/3.3.9/3.3.10)
@@ -149,6 +152,10 @@ import MathFin.BlackScholes.VarianceSwap
 -- Merton (1976) jump-diffusion: Poisson-mixture price, compensation
 -- identity, parity (consumes Foundations.PoissonPgf + Call/Put formulas)
 import MathFin.BlackScholes.MertonJumpDiffusion
+-- Merton dominance (jump risk is never free: vega + gamma/Jensen channels)
+-- and the classic Λ′ = Λ(1+k) display (rate-shift identity)
+import MathFin.BlackScholes.MertonDominance
+import MathFin.BlackScholes.MertonClassicDisplay
 import MathFin.BlackScholes.Bachelier
 import MathFin.BlackScholes.BachelierGreeks
 import MathFin.BlackScholes.Chooser
@@ -160,6 +167,7 @@ import MathFin.BlackScholes.BreedenLitzenberger
 import MathFin.BlackScholes.BisectionIV
 -- Structural / principle modules:
 import MathFin.BlackScholes.StrikeConvexity
+import MathFin.BlackScholes.SpotConvexity
 import MathFin.BlackScholes.PriceBounds
 -- Phase 13 additions:
 import MathFin.BlackScholes.Quanto

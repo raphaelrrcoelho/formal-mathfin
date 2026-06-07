@@ -497,3 +497,47 @@ jump-diffusion QV with compound-Poisson jumps (same gating).
 (formula-level, cheap); re-pointing the λ′ = Λ(1+k) classic display as a
 series-rearrangement lemma; the Markov cluster re-cost (`Kernel.traj`);
 Summit B decision.
+
+## phase: merton dominance + classic display + markov path law (2026-06-06, second round)
+
+the "next candidates" above, executed, plus the markov re-cost verdict.
+
+- **merton dominance** (`mf-merton-dominance`,
+  `BlackScholes/MertonDominance.lean` + `BlackScholes/SpotConvexity.lean`):
+  `C_BS(S₀,σ) ≤ C_Merton(S₀,σ,k,δ,Λ)` for every `Λ`, `δ`, `k > −1` — the
+  "Merton Greeks" item reframed to its substantive content. a literal
+  delta-as-series theorem needs differentiation under the tsum, whose
+  global derivative bounds the junk region `s ≤ 0` cannot honestly supply
+  (`hasDerivAt_tsum` requires them) — skipped as ceremony. the dominance
+  bound prices the two jump channels separately: per-term vol-monotonicity
+  (vega, `bsV_strictMonoOn_sigma`) reduces to `δ = 0`; there the **new
+  spot-direction convexity** `bsV_spot_convexOn` (gamma ≥ 0
+  second-derivative test — the S-direction dual of `bsV_strike_convexOn`,
+  so convexity is now visible in both coordinates of the price surface)
+  gives the supporting tangent at `S₀`, whose linear term integrates to
+  zero by the compensation identity `integral_mertonSpot`.
+- **classic display** (`mf-merton-classic-display`,
+  `BlackScholes/MertonClassicDisplay.lean`): the textbook `Λ′ = Λ(1+k)`
+  series with shifted rates `r_n = r − kΛ/T + n·log(1+k)/T`, driven by one
+  structural identity — the rate-shift invariance
+  `bsV K r σ (S·e^{cτ}) τ = e^{cτ}·bsV K (r+c) σ S τ`
+  (`bsV_spot_exp_rate_shift`) — plus Poisson-weight absorption.
+- **markov re-cost verdict** (`Kernel.traj` now in the pin): only
+  `mc-thm-1.1.2` was genuinely unlocked, and it is now **full**
+  (`Foundations/MarkovPathMeasure.lean`): the chain's law is constructed
+  via `Kernel.trajMeasure` from kernels that read only the last history
+  coordinate, and the path factorization is derived by induction through
+  the comp-product recursion of the marginals. the other five Markov
+  reduced cores stay honestly gated — recurrence needs renewal theory /
+  fundamental-matrix algebra, convergence to stationarity needs
+  Perron–Frobenius, the ergodic theorem needs both plus aperiodicity,
+  stationary uniqueness needs recurrence + communicating classes, and the
+  strong Markov property needs stopping-time kernels (a design-level
+  extension, not a gap-fill). a markov campaign is a 4–6 week
+  renewal+spectral build, upstream-quality material — record, don't drift
+  into it.
+
+**Next candidates from here:** Summit B decision (integral-as-process /
+general `σ(s,ω)`); hammer re-pilot at the rc2→stable toolchain bump;
+`sc-thm-7.1.2` time-dependent Itô (Summit-A′-scale, ~300–500 lines); the
+Markov renewal/spectral layers if that cluster is ever prioritized.

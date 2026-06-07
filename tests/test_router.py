@@ -64,17 +64,16 @@ EXPECTED_FULL_THEOREMS = {
     "sc-thm-7.4.5",
 }
 
-# Deliberate 2026-06-03 audit demotions: THEOREM-named entries whose textbook
-# conclusion is a projected structure field / definitional `rfl`. Pinned as
-# exactly `reduced_core` so they can neither silently regress to placeholder
-# nor be re-promoted without a genuine derivation (the Poisson construction /
-# Ionescu-Tulcea path measure, respectively).
+# Deliberate audit pins: entries kept at exactly `reduced_core` so they can
+# neither silently regress to placeholder nor be re-promoted without a
+# genuine derivation. (mc-thm-1.1.2 left this list 2026-06-06: the
+# Ionescu-Tulcea path-measure derivation landed in
+# Foundations/MarkovPathMeasure.lean and the entry is `full` now.)
 EXPECTED_REDUCED_CORE_THEOREMS = {
     # pp-prop-3.3.6 stays reduced_core HONESTLY: the first interarrival's
     # exponential law + memorylessness are derived (PoissonInterarrival), but
     # the textbook's whole-sequence iid claim needs the strong Markov property.
     "pp-prop-3.3.6",
-    "mc-thm-1.1.2",
 }
 
 EXPECTED_NON_PLACEHOLDER_THEOREMS = {
