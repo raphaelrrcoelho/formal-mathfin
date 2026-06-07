@@ -76,6 +76,19 @@ formalization-faithfulness status for every benchmark theorem, and that every
 file's declarations are module-private — invisible to importers while the
 build stays green). `tests/test_ledger.py` enforces that every entry has a
 verification-ledger row and that ids are globally unique.
+`tests/test_values.py` enforces the values gates: no forbidden text in
+`MathFin/` sources (sorry/admit/native_decide/polyrith/`?`-suggestion
+tactics/hammer/loogle/leansearch — comments exempt, allowlist with
+justification), no `full` entry backed by a definitional-`rfl` proof (the
+reduced_core pattern in disguise; caught mf-kelly-n-periods-linearity on its
+first run), blueprint-spine ⊆ curated AxiomAudit, and byte-freshness of the
+GENERATED exhaustive audit `MathFin/AxiomAuditGen.lean` — after ANY
+benchmark edit regenerate it with
+`python3 -m tools.verify.axiom_audit_gen --write` (it pins every
+proof-position MathFin constant cited by the corpus; the curated
+`MathFin/AxiomAudit.lean` remains the storied headliner file). CI
+(`build.yml`) runs pytest + `ledger status` BEFORE the Lean build — pushes
+with failing gates or stale ledger claims go red.
 
 **Verification ledger** (`verification_ledger.json` + `tools/verify/ledger.py`):
 every benchmark entry's validity depends on exactly its snippet code, the

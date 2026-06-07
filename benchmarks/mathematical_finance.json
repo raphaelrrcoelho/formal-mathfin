@@ -2061,8 +2061,8 @@
         "chapter": 15,
         "reference": "Multi-period Kelly aggregation (Kelly 1956; Thorp 2006)",
         "difficulty": "beginner",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof by definitional unfolding. Lives in MathFin/Performance/Kelly.lean. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Demoted full -> reduced_core 2026-06-06 (caught by the definitional-rfl tripwire, tests/test_values.py, on its first run): the cited lemma kellyGrowth_n_periods states T * kellyGrowth = T * (unfolded formula) and its proof is rfl — a definitional unfolding, not a derivation. The textbook content (log-growth over T iid periods equals T times the per-period expected log-growth, via linearity of expectation over an actual T-period model) is not modeled. Same demotion class as mf-newton-raphson (2026-05-29). Lives in MathFin/Performance/Kelly.lean."
       }
     },
     {

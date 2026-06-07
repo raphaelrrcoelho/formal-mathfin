@@ -44,6 +44,7 @@ graph TD
   esscherTilt["Esscher tilt is the Gaussian Girsanov"]:::proved
   expectationIto["Expectation-form Itô / Feynman–Kac"]:::proved
   gbmSde["GBM coefficient matching (algebraic)"]:::proved
+  markovPathLaw["Markov path law (Ionescu–Tulcea)"]:::proved
   itoIntegralClm["Continuous Itô integral (CLM on [0,T])"]:::proved
   bsDelta["Greeks (δ shown; γ vega θ ρ alongside)"]:::proved
   bscallhypBrownian["BSCallHyp from a Brownian model"]:::proved
@@ -55,6 +56,7 @@ graph TD
   wienerIsometry["Wiener isometry (deterministic L²)"]:::proved
   itoFormulaL2["Itô formula, L² (C³ bounded — Summit A)"]:::proved
   itoSquaredL2["Itô for x² in L²: ∑B·ΔB → ½(B_T²−B₀²−T)"]:::proved
+  mertonDominance["Merton dominance: jump risk is never free"]:::proved
   itoIntegralBrownian["∫₀ᵀ B dB = ½(B_T² − B₀² − T)"]:::proved
   pathwiseIto["Pathwise Itô · Lévy · SDEs"]:::gated
 
@@ -75,6 +77,9 @@ graph TD
   brownianMotion --> itoSquaredL2
   discreteIto --> itoSquaredL2
   quadraticVariation --> itoSquaredL2
+  bsCall --> mertonDominance
+  bsDelta --> mertonDominance
+  bsIdentity --> mertonDominance
   brownianMotion --> itoIntegralBrownian
   itoIntegralClm --> itoIntegralBrownian
   itoIsometryAdapted --> itoIntegralBrownian

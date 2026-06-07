@@ -112,6 +112,27 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > kernels — none in the pin. Net: **234 full + 18 wrappers = 252 / 269
 > delivery-ready, 17 reduced cores** (corpus 267 → 269).
 
+> **Values-gates round (2026-06-06, evening).** The honesty conventions this
+> file documents became *mechanically enforced*: `tests/test_values.py` adds
+> (1) a forbidden-text scan over `MathFin/` sources (no
+> sorry/admit/native_decide/polyrith/`?`-suggestion tactics/hammer/loogle/
+> leansearch outside comments), (2) a **definitional-`rfl` tripwire** — no
+> `full` entry may cite a theorem whose proof is bare `rfl`/`unfold; rfl`
+> (the reduced_core pattern in disguise), (3) blueprint-spine ⊆ curated
+> audit, (4) byte-freshness of the new GENERATED exhaustive audit
+> `MathFin/AxiomAuditGen.lean`, which `#guard_msgs`-pins every
+> proof-position MathFin constant cited by the corpus (222 names vs the
+> curated file's headliners). CI (`build.yml`) now runs pytest + `ledger
+> status` before the Lean build, so these gates and ledger freshness are
+> push-enforced, not session discipline. First-run catches: the tripwire
+> demoted `mf-kelly-n-periods-linearity` `full`→`reduced_core` (its cited
+> lemma states `T·kellyGrowth = T·(unfolded formula)` by `rfl`; the genuine
+> multi-period iid model is not formalized — same class as the 2026-05-29
+> newton-raphson demotion, now pinned in `EXPECTED_REDUCED_CORE_THEOREMS`),
+> and the blueprint-coverage check found seven spine headliners unguarded
+> (including `bs_identity`), now pinned in the curated audit. Net: **233
+> full + 18 wrappers = 251 / 269 delivery-ready, 18 reduced cores.**
+
 > **Duplication + status audit (2026-06-03).** A five-reviewer sweep of all 216
 > then-`full` entries asked two questions: does any MathFin module re-derive
 > content already in pinned Mathlib / Degenne's BrownianMotion package, and is

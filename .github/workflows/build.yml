@@ -12,7 +12,9 @@ on:
 #
 # A green build is *also* the axiom-cleanliness proof: MathFin/AxiomAudit.lean
 # #guard_msgs-pins every headline theorem to [propext, Classical.choice,
-# Quot.sound], so `lake build` fails if any of them drifts.
+# Quot.sound] — and the GENERATED MathFin/AxiomAuditGen.lean extends the pin
+# to every proof-position MathFin constant cited by the benchmark corpus —
+# so `lake build` fails if any of them drifts.
 #
 # The kernel-replay layer (toolchain `leanchecker` over every content module)
 # lives in kernel-replay.yml — nightly + workflow_dispatch, deliberately not
@@ -22,11 +24,24 @@ on:
 
 jobs:
   build:
-    name: lake build + axiom audit
+    name: python gates + lake build + axiom audit
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      # Fail-fast values/honesty gates (stdlib + pytest, seconds): routing +
+      # status declarations + module exposure (test_router), ledger rows
+      # (test_ledger), forbidden text / definitional-rfl tripwire /
+      # blueprint⊆audit / generated-audit freshness (test_values), and
+      # verification-ledger freshness (`ledger status` exits 1 on any stale
+      # entry). Before this step landed (2026-06-06) these gates ran only as
+      # local session discipline — a push that skipped them came up green here.
+      - name: Python gates (tests + ledger freshness)
+        run: |
+          pip install --quiet pytest
+          python3 -m pytest tests/ -q
+          python3 -m tools.verify.ledger status
 
       - name: Build (elan + Mathlib cache + lake build)
         uses: leanprover/lean-action@v1

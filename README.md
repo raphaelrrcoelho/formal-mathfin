@@ -28,12 +28,12 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 |  | count |
 |---|---:|
 | total theorems | 269 |
-| **full derivations** | **234** |
+| **full derivations** | **233** |
 | library wrappers | 18 |
-| reduced cores | 17 |
+| reduced cores | 18 |
 | placeholders | **0** |
 
-**252 of the 269 are delivery-ready** (`full` + `library_wrapper`); the 17
+**251 of the 269 are delivery-ready** (`full` + `library_wrapper`); the 18
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
@@ -127,7 +127,7 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-17 of the 269 theorems are `reduced_core` — an honest special case or
+18 of the 269 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 

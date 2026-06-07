@@ -74,6 +74,11 @@ EXPECTED_REDUCED_CORE_THEOREMS = {
     # exponential law + memorylessness are derived (PoissonInterarrival), but
     # the textbook's whole-sequence iid claim needs the strong Markov property.
     "pp-prop-3.3.6",
+    # Demoted 2026-06-06 by the definitional-rfl tripwire (test_values.py):
+    # kellyGrowth_n_periods is `T * kellyGrowth = T * (unfolded formula)` by
+    # rfl. Re-promotion needs an actual T-period iid model + linearity of
+    # expectation, not a scalar multiple of the definition.
+    "mf-kelly-n-periods-linearity",
 }
 
 EXPECTED_NON_PLACEHOLDER_THEOREMS = {

@@ -493,4 +493,30 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.markovPathMeasure_cylinder' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.markovPathMeasure_cylinder
 
+-- Blueprint-spine closure (2026-06-06): every spine node is axiom-pinned.
+-- Gap found by tests/test_values.py::test_blueprint_spine_is_audited on its
+-- first run — seven tagged headliners (including bs_identity, the magic
+-- identity itself) had no guard.
+
+/-- info: 'MathFin.WienerIntegralL2.wiener_assembly_isometry' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.WienerIntegralL2.wiener_assembly_isometry
+
+/-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_T
+
+/-- info: 'MathFin.discrete_ito_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discrete_ito_formula
+
+/-- info: 'MathFin.hasLaw_esscher_tilt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasLaw_esscher_tilt
+
+/-- info: 'MathFin.BSCallHyp.of_isPreBrownian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.BSCallHyp.of_isPreBrownian
+
+/-- info: 'MathFin.bs_identity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bs_identity
+
+/-- info: 'MathFin.bs_pde_from_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bs_pde_from_no_arbitrage
+
 end MathFin.AxiomAudit

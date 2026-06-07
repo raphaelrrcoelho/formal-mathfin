@@ -25,6 +25,8 @@ import MathFin.BlackScholes.PDEFromIto
 import MathFin.BlackScholes.MargrabeGrounding
 import MathFin.Binomial.MartingaleRepresentation
 import MathFin.Binomial.CRRCharFun
+import MathFin.BlackScholes.MertonDominance
+import MathFin.Foundations.MarkovPathMeasure
 import Architect
 
 /-!
@@ -210,3 +212,21 @@ attribute [blueprint "thm:crr-bs-convergence" (title := "CRR → Black–Scholes
   price: charFun → Lévy continuity → weak convergence, with put–call parity
   lifting the (bounded) put's convergence to the call. -/)]
   MathFin.binomialPrice_call_tendsto_bs
+
+attribute [blueprint "thm:merton-dominance" (title := "Merton dominance: jump risk is never free")
+  (statement := /-- The Merton (1976) jump-diffusion call price dominates the
+  Black–Scholes price at the diffusion vol, for every intensity, mean jump
+  size $k > -1$, and jump vol: vega prices the jump-size channel (conditional
+  vols exceed $\sigma$), gamma prices the jump-count channel — spot convexity
+  gives a supporting tangent at $S_0$ whose linear term integrates to zero by
+  the compensation identity $E[\mathrm{spot}_N] = S_0$. -/)]
+  MathFin.bsV_le_mertonCallPrice
+
+attribute [blueprint "thm:markov-path-law" (title := "Markov path law (Ionescu–Tulcea)")
+  (statement := /-- The law of a countable-state Markov chain, constructed on
+  infinite trajectories by Mathlib's Ionescu–Tulcea trajectory kernels from
+  kernels reading only the last history coordinate; the finite-path
+  factorization $P(X_0{=}i_0,\dots,X_n{=}i_n) = \mathrm{init}(i_0)\prod_k
+  P(i_k,i_{k+1})$ is derived by induction through the comp-product recursion
+  of the marginals (Saporito 1.1.2). -/)]
+  MathFin.markovPathMeasure_cylinder
