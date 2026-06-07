@@ -23,12 +23,8 @@ LIBRARY sources and the generated audit artifacts (complementing
 import re
 from pathlib import Path
 
-from tools.verify.axiom_audit_gen import (
-    GEN_PATH,
-    PROOF_HEAD_RE,
-    generate,
-    iter_entries,
-)
+from tools.verify.axiom_audit_gen import GEN_PATH, PROOF_HEAD_RE, generate
+from tools.verify.corpus import iter_entries
 
 AUDIT_PATH = Path("MathFin/AxiomAudit.lean")
 BLUEPRINT_PATH = Path("MathFin/Blueprint.lean")
@@ -287,4 +283,37 @@ def test_axiom_audit_gen_is_fresh() -> None:
         f"{GEN_PATH} is stale relative to the benchmark corpus — run "
         "`python3 -m tools.verify.axiom_audit_gen --write` and commit the "
         "result (generated artifacts are never hand-edited)"
+    )
+
+
+# --------------------------------------------------------------------------
+# 5. the values review (the judgment lenses) actually happens
+# --------------------------------------------------------------------------
+
+# The eight judgment lenses (docs/values-review.md) cannot be checked by a
+# machine — but "nobody looked" can. A recorded multi-agent review must
+# cover the corpus to within one session's growth.
+VALUES_REVIEW_PATH = Path("docs/values-review.md")
+REVIEW_HEADER_RE = re.compile(
+    r"^## \d{4}-\d{2}-\d{2} — commit [0-9a-f]{7,} — corpus (\d+)",
+    re.MULTILINE,
+)
+REVIEW_SLACK_ENTRIES = 12
+
+
+def test_values_review_is_current() -> None:
+    text = VALUES_REVIEW_PATH.read_text()
+    reviewed_counts = [int(m.group(1)) for m in REVIEW_HEADER_RE.finditer(text)]
+    assert reviewed_counts, (
+        f"{VALUES_REVIEW_PATH} has no parseable verdict block — run the "
+        "values-review panel (see the protocol in that file) and record it"
+    )
+    corpus = sum(1 for _ in iter_entries())
+    newest = max(reviewed_counts)
+    assert corpus - newest <= REVIEW_SLACK_ENTRIES, (
+        f"the corpus has {corpus} entries but the latest recorded values "
+        f"review covered {newest} — more than {REVIEW_SLACK_ENTRIES} entries "
+        "of unreviewed growth. Run the multi-agent values review "
+        "(docs/values-review.md) and record the verdict before pushing more "
+        "proof content."
     )

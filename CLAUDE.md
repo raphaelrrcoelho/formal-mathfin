@@ -90,6 +90,16 @@ proof-position MathFin constant cited by the corpus; the curated
 (`build.yml`) runs pytest + `ledger status` BEFORE the Lean build — pushes
 with failing gates or stale ledger claims go red.
 
+**The final verification — values review** (`docs/values-review.md`): the
+eight judgment lenses (inspired math, Mathlib/Degenne coherence, zero slop,
+architectural ingenuity, first principles, idiomatic register, concept
+clarity, beautiful/elegant math) are verified by a multi-agent review panel
+at the close of any session that adds or changes proof content — blocking
+findings are fixed before the verdict is appended to that file's log. The
+judgment is human/agent; the CADENCE is machine-enforced:
+`test_values_review_is_current` fails once the corpus outgrows the last
+recorded verdict by more than 12 entries.
+
 **Verification ledger** (`verification_ledger.json` + `tools/verify/ledger.py`):
 every benchmark entry's validity depends on exactly its snippet code, the
 transitive MathFin modules it imports, and the toolchain pins — the ledger

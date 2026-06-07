@@ -31,10 +31,11 @@ and regeneration must be a no-op).
 
 from __future__ import annotations
 
-import json
 import re
 import sys
 from pathlib import Path
+
+from tools.verify.corpus import iter_entries
 
 GEN_PATH = Path("MathFin/AxiomAuditGen.lean")
 
@@ -50,15 +51,6 @@ STANDARD_AXIOMS = "[propext, Classical.choice, Quot.sound]"
 # strict subset of the standard three (pure-algebra theorems). Populated from
 # build output; the build is the oracle for these strings.
 EXPECTED_OVERRIDES: dict[str, str] = {}
-
-
-def iter_entries():
-    """Yield ``(path, theorem_dict)`` over every benchmark entry."""
-    for path in sorted(Path("benchmarks").glob("*.json")):
-        data = json.loads(path.read_text())
-        theorems = data.get("theorems", data)
-        for theorem in theorems:
-            yield path, theorem
 
 
 def collect_proof_position_names() -> list[str]:

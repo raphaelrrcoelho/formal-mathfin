@@ -30,29 +30,25 @@ import json
 from collections import Counter
 from pathlib import Path
 
+from tools.verify.corpus import iter_entries
+
 DATASET_FILE = "formal-mathfin-theorems.jsonl"
-
-
-def _load(path: Path):
-    data = json.loads(path.read_text(encoding="utf-8"))
-    return data["theorems"] if isinstance(data, dict) else data
 
 
 def build_rows() -> list[dict]:
     rows = []
-    for path in sorted(Path("benchmarks").glob("*.json")):
-        for t in _load(path):
-            code = t.get("code") or {}
-            rows.append({
-                "id": t.get("id"),
-                "name": t.get("name"),
-                "domain": t.get("domain"),
-                "formalization_status":
-                    (t.get("metadata") or {}).get("formalization_status"),
-                "description": t.get("description", ""),
-                "lean_code": code.get("lean") if isinstance(code, dict) else None,
-                "source_file": path.name,
-            })
+    for path, t in iter_entries():
+        code = t.get("code") or {}
+        rows.append({
+            "id": t.get("id"),
+            "name": t.get("name"),
+            "domain": t.get("domain"),
+            "formalization_status":
+                (t.get("metadata") or {}).get("formalization_status"),
+            "description": t.get("description", ""),
+            "lean_code": code.get("lean") if isinstance(code, dict) else None,
+            "source_file": path.name,
+        })
     return rows
 
 
