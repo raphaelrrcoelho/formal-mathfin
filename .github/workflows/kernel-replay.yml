@@ -53,9 +53,18 @@ jobs:
         #   amortization.
         # * Lean's allocator scales to available headroom: the same module
         #   peaks 0.6 GB under a 6 GB cgroup, 6.6 GB under 8.5 GB, >14 GB
-        #   uncapped on the 16 GB VM. The cgroup-v2 sub-group below recreates
-        #   the containment under which the workload demonstrably completes
-        #   (memory.high reclaim-throttles well before the VM is in danger).
+        #   uncapped on the 16 GB VM. The cgroup-v2 sub-group below caps it.
+        #   HONEST STATUS (2026-06-07): post-Summit-A′ the batch-1 import
+        #   closure no longer fits an 11G cap — runs 14ca008 / f424b30 were
+        #   OOM-killed (exit 137) INSIDE batch 1 after ~1h45m, cgroup floor
+        #   held at ~11.3 GB (so containment engaged; the workload simply
+        #   needs more). Chunking can't help — peak is set by one module's
+        #   public-import closure, not batch size. Trying memory.max 13G; a
+        #   long shot, since the uncapped peak (>14 GB) may not fit alongside
+        #   the runner agent on a 16 GB VM at all. The ENFORCED soundness
+        #   floor remains build.yml (green lake build + AxiomAudit
+        #   #guard_msgs-pinned axioms); this kernel layer is best-effort
+        #   redundancy below the elaborator.
         # * Whole-library-closure modules (umbrella `MathFin`, `Examples`,
         #   `AxiomAudit`, `Blueprint*`) are excluded: replaying them
         #   re-checks every re-exported declaration — the entire library
@@ -67,8 +76,8 @@ jobs:
           echo "== runner resources =="; free -h; df -h /
           sudo mkdir -p /sys/fs/cgroup/leancheck
           echo $$ | sudo tee /sys/fs/cgroup/leancheck/cgroup.procs > /dev/null
-          echo 9G  | sudo tee /sys/fs/cgroup/leancheck/memory.high  > /dev/null
-          echo 11G | sudo tee /sys/fs/cgroup/leancheck/memory.max   > /dev/null
+          echo 12G | sudo tee /sys/fs/cgroup/leancheck/memory.high  > /dev/null
+          echo 13G | sudo tee /sys/fs/cgroup/leancheck/memory.max   > /dev/null
           ( while true; do free -m | awk '/^Mem/{print strftime("%T"), "avail:", $7, "MB"}'; sleep 5; done ) &
           TICKER=$!
           find MathFin -name '*.lean' | sed 's|/|.|g; s|\.lean$||' \
