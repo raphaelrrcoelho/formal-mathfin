@@ -1,0 +1,62 @@
+name: hf-publish
+
+# Refresh the public Hugging Face dataset
+# (raphaelrrcoelho/formal-mathfin-theorems) whenever the benchmark corpus
+# changes on main. The dataset files — JSONL + the card with COMPUTED counts
+# — are built by tools/verify/hf_dataset.py from benchmarks/*.json; this
+# repo is the single source of truth (the originally-published card had
+# rotted to a stale 261-theorem snapshot precisely because it was
+# hand-maintained).
+#
+# Requires the repo secret HF_TOKEN (a Hugging Face WRITE token):
+#   gh secret set HF_TOKEN
+# huggingface_hub skips files whose content is unchanged, so re-runs are
+# cheap and no-op pushes create no noise.
+#
+# Deliberately push-to-main only (never pull_request): the job carries a
+# write secret and publishes externally.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'benchmarks/**'
+      - 'tools/verify/hf_dataset.py'
+      - '.github/workflows/hf-publish.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: hf-publish
+  cancel-in-progress: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build dataset files (JSONL + card with computed counts)
+        run: python3 -m tools.verify.hf_dataset --out dist/hf
+
+      - name: Upload to Hugging Face
+        env:
+          HF_TOKEN: ${{ secrets.HF_TOKEN }}
+        run: |
+          pip install --quiet huggingface_hub
+          python3 - <<'EOF'
+          import os
+          from huggingface_hub import HfApi
+
+          api = HfApi(token=os.environ["HF_TOKEN"])
+          api.upload_folder(
+              repo_id="raphaelrrcoelho/formal-mathfin-theorems",
+              repo_type="dataset",
+              folder_path="dist/hf",
+              commit_message="ci: refresh dataset from formal-mathfin main",
+          )
+          print("uploaded dist/hf -> raphaelrrcoelho/formal-mathfin-theorems")
+          EOF
