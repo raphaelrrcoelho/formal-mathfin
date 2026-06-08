@@ -44,7 +44,13 @@ load-bearing for pricing.
 4. **`bsV` solves the BS PDE, via Feynman–Kac**: assemble 1–3 — an independent,
    conceptually grounded derivation of `bs_pde_holds`.
 
-Steps 1, 3, 4 are in progress; this file currently establishes step 2.
+Step 1 is proved in `Foundations/FeynmanKacHeatEquation`. This file establishes step 2
+(`bsV_eq_feynmanU`), the discounted-heat-flow bridge (`bsV_eq_discount_feynmanU` — the result that
+makes `feynmanU` load-bearing for pricing), and Delta via Feynman–Kac (`hasDerivAt_bsV_S_fk`, the
+`S`-derivative as a kernel moment). The `τ`-derivative and the PDE assembly (closing step 4) are
+deferred: a direct differentiate-under-the-integral domination proved computationally unwieldy, and
+the elegant route is `C¹`-from-continuous-partials (`HasFDerivAt feynmanU` from continuity of
+`∂_t`/`∂_x`, then one chain rule), to be built next.
 -/
 
 @[expose] public section
@@ -137,116 +143,4 @@ private lemma hasDerivAt_bsV_S_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) 
   filter_upwards [isOpen_Ioi.mem_nhds hS] with S' hS'
   exact bsV_eq_discount_feynmanU hS' hK hσ hτ
 
-/-- **Total `τ`-derivative of the heat kernel along the Black–Scholes curve.** -/
-private lemma hasDerivAt_kernelCurve {r σ S z : ℝ} (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun τ' => heatKernel (σ ^ 2 * τ') (z - Real.log S - (r - σ ^ 2 / 2) * τ'))
-      (σ ^ 2 * (heatKernel (σ ^ 2 * τ) (z - Real.log S - (r - σ ^ 2 / 2) * τ)
-                * ((z - Real.log S - (r - σ ^ 2 / 2) * τ) ^ 2 - σ ^ 2 * τ) / (2 * (σ ^ 2 * τ) ^ 2))
-        + (r - σ ^ 2 / 2) * ((z - Real.log S - (r - σ ^ 2 / 2) * τ) / (σ ^ 2 * τ)
-                * heatKernel (σ ^ 2 * τ) (z - Real.log S - (r - σ ^ 2 / 2) * τ))) τ := by
-  have hipos : (0 : ℝ) < 2 * Real.pi * (σ ^ 2 * τ) := by positivity
-  have hsqne : Real.sqrt (2 * Real.pi * (σ ^ 2 * τ)) ≠ 0 := (Real.sqrt_pos.mpr hipos).ne'
-  have hss : Real.sqrt (2 * Real.pi * (σ ^ 2 * τ)) ^ 2 = 2 * Real.pi * (σ ^ 2 * τ) :=
-    Real.sq_sqrt hipos.le
-  have hi : HasDerivAt (fun τ' => 2 * Real.pi * (σ ^ 2 * τ')) (2 * Real.pi * σ ^ 2) τ := by
-    simpa using ((hasDerivAt_id τ).const_mul (σ ^ 2)).const_mul (2 * Real.pi)
-  have hb : HasDerivAt (fun τ' => z - Real.log S - (r - σ ^ 2 / 2) * τ') (-(r - σ ^ 2 / 2)) τ := by
-    have h1 : HasDerivAt (fun τ' => (r - σ ^ 2 / 2) * τ') (r - σ ^ 2 / 2) τ := by
-      simpa using (hasDerivAt_id τ).const_mul (r - σ ^ 2 / 2)
-    exact h1.const_sub (z - Real.log S)
-  have h2s : HasDerivAt (fun τ' => 2 * (σ ^ 2 * τ')) (2 * σ ^ 2) τ := by
-    simpa using ((hasDerivAt_id τ).const_mul (σ ^ 2)).const_mul 2
-  have hsqrt := (Real.hasDerivAt_sqrt hipos.ne').comp τ hi
-  have hP := hsqrt.inv hsqne
-  have hQ := ((hb.pow 2).neg.div h2s (by positivity : (2 : ℝ) * (σ ^ 2 * τ) ≠ 0)).exp
-  have hPQ := hP.mul hQ
-  unfold heatKernel
-  convert hPQ using 1
-  simp only [Function.comp_apply, Pi.inv_apply, Pi.div_apply, Pi.neg_apply, Pi.pow_apply]
-  rw [hss]
-  set E := Real.exp (-(z - Real.log S - (r - σ ^ 2 / 2) * τ) ^ 2 / (2 * (σ ^ 2 * τ))) with hEdef
-  set s0 := Real.sqrt (2 * Real.pi * (σ ^ 2 * τ)) with hs0def
-  field_simp
-  ring
-
-/-- **Combined time-and-space kernel bound along the Black–Scholes curve.** For `τ' ∈ (τ/2, 3τ/2)`,
-both the kernel's time `σ²τ'` and its centre `log S + (r−σ²/2)τ'` move with `τ'`; the kernel is
-nonetheless dominated by a single fixed *wider* kernel at `τ`. Spatial shift via the public
-`heatKernel_shift_le` (the centre moves by `≤ |r−σ²/2|·τ/2`), then a direct time-monotonicity step
-(`2σ²τ' ≤ 3σ²τ`). The `τ'`-uniform dominating kernel for differentiating `bsV` under the integral. -/
-private lemma heatKernel_curve_le {r σ S : ℝ} (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ)
-    {τ' : ℝ} (hlo : τ / 2 < τ') (hhi : τ' < 3 * τ / 2) (z : ℝ) :
-    heatKernel (σ ^ 2 * τ') (z - Real.log S - (r - σ ^ 2 / 2) * τ')
-      ≤ Real.sqrt 2 * Real.exp ((|r - σ ^ 2 / 2| * (τ / 2) + 1) ^ 2 / (σ ^ 2 * τ))
-          * (Real.sqrt 3 * heatKernel (3 * σ ^ 2 * τ) (z - Real.log S - (r - σ ^ 2 / 2) * τ)) := by
-  have hτ'pos : 0 < τ' := by linarith
-  have htt' : (0 : ℝ) < σ ^ 2 * τ' := by positivity
-  have hKt0 : 0 ≤ heatKernel (3 * σ ^ 2 * τ) (z - Real.log S - (r - σ ^ 2 / 2) * τ) :=
-    heatKernel_nonneg (by positivity) _
-  -- spatial shift: centre moves by < δ := |r−σ²/2|·τ/2 + 1
-  have hsub : z - Real.log S - (r - σ ^ 2 / 2) * τ'
-      = z - (Real.log S + (r - σ ^ 2 / 2) * τ') := by ring
-  have hsp : |(Real.log S + (r - σ ^ 2 / 2) * τ') - (Real.log S + (r - σ ^ 2 / 2) * τ)|
-      < |r - σ ^ 2 / 2| * (τ / 2) + 1 := by
-    rw [show (Real.log S + (r - σ ^ 2 / 2) * τ') - (Real.log S + (r - σ ^ 2 / 2) * τ)
-          = (r - σ ^ 2 / 2) * (τ' - τ) from by ring, abs_mul]
-    have h1 : |τ' - τ| ≤ τ / 2 := by rw [abs_le]; constructor <;> linarith
-    nlinarith [mul_le_mul_of_nonneg_left h1 (abs_nonneg (r - σ ^ 2 / 2)), abs_nonneg (r - σ ^ 2 / 2)]
-  have hspatial := heatKernel_shift_le htt' (x := Real.log S + (r - σ ^ 2 / 2) * τ')
-    (x₀ := Real.log S + (r - σ ^ 2 / 2) * τ) (δ := |r - σ ^ 2 / 2| * (τ / 2) + 1) hsp z
-  rw [hsub]
-  -- the spatial bound lands on heatKernel (2σ²τ'); now a time-monotonicity step to 3σ²τ
-  have htemporal : heatKernel (2 * (σ ^ 2 * τ')) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))
-      ≤ Real.sqrt 3 * heatKernel (3 * σ ^ 2 * τ) (z - Real.log S - (r - σ ^ 2 / 2) * τ) := by
-    rw [show z - (Real.log S + (r - σ ^ 2 / 2) * τ) = z - Real.log S - (r - σ ^ 2 / 2) * τ from by ring]
-    set y := z - Real.log S - (r - σ ^ 2 / 2) * τ with hy
-    rw [heatKernel, heatKernel]
-    have hpre : (Real.sqrt (2 * Real.pi * (2 * (σ ^ 2 * τ'))))⁻¹
-        ≤ Real.sqrt 3 * (Real.sqrt (2 * Real.pi * (3 * σ ^ 2 * τ)))⁻¹ := by
-      have h3ne : Real.sqrt 3 ≠ 0 := (Real.sqrt_pos.mpr (by norm_num : (0:ℝ) < 3)).ne'
-      have key : Real.sqrt 3 * (Real.sqrt (2 * Real.pi * (3 * σ ^ 2 * τ)))⁻¹
-          = (Real.sqrt (2 * Real.pi * (σ ^ 2 * τ)))⁻¹ := by
-        rw [show (2 * Real.pi * (3 * σ ^ 2 * τ)) = 3 * (2 * Real.pi * (σ ^ 2 * τ)) from by ring,
-            Real.sqrt_mul (by norm_num : (0:ℝ) ≤ 3), mul_inv, mul_inv_cancel_left₀ h3ne]
-      rw [key]
-      exact inv_anti₀ (by positivity) (Real.sqrt_le_sqrt (by
-        nlinarith [mul_pos (mul_pos Real.pi_pos (mul_pos hσ hσ))
-          (show (0:ℝ) < 2 * τ' - τ by linarith)]))
-    have hexp : Real.exp (-y ^ 2 / (2 * (2 * (σ ^ 2 * τ'))))
-        ≤ Real.exp (-y ^ 2 / (2 * (3 * σ ^ 2 * τ))) := by
-      apply Real.exp_le_exp.mpr
-      rw [neg_div, neg_div, neg_le_neg_iff, div_le_div_iff₀ (by positivity) (by positivity)]
-      nlinarith [mul_nonneg (sq_nonneg y) (mul_nonneg (sq_nonneg σ)
-        (show (0:ℝ) ≤ 3 * τ - 2 * τ' by linarith))]
-    calc (Real.sqrt (2 * Real.pi * (2 * (σ ^ 2 * τ'))))⁻¹ * Real.exp (-y ^ 2 / (2 * (2 * (σ ^ 2 * τ'))))
-        ≤ (Real.sqrt 3 * (Real.sqrt (2 * Real.pi * (3 * σ ^ 2 * τ)))⁻¹)
-            * Real.exp (-y ^ 2 / (2 * (3 * σ ^ 2 * τ))) :=
-          mul_le_mul hpre hexp (Real.exp_nonneg _) (by positivity)
-      _ = Real.sqrt 3 * ((Real.sqrt (2 * Real.pi * (3 * σ ^ 2 * τ)))⁻¹
-            * Real.exp (-y ^ 2 / (2 * (3 * σ ^ 2 * τ)))) := by ring
-  -- assemble: spatial ≤, then temporal ≤, then bound the τ'-dependent exp by a τ'-free one
-  have hexpc : Real.exp ((|r - σ ^ 2 / 2| * (τ / 2) + 1) ^ 2 / (2 * (σ ^ 2 * τ')))
-      ≤ Real.exp ((|r - σ ^ 2 / 2| * (τ / 2) + 1) ^ 2 / (σ ^ 2 * τ)) := by
-    apply Real.exp_le_exp.mpr
-    rw [div_le_div_iff₀ (by positivity) (by positivity)]
-    nlinarith [mul_nonneg (sq_nonneg (|r - σ ^ 2 / 2| * (τ / 2) + 1)) (mul_nonneg (sq_nonneg σ)
-      (show (0:ℝ) ≤ 2 * τ' - τ by linarith))]
-  calc heatKernel (σ ^ 2 * τ') (z - (Real.log S + (r - σ ^ 2 / 2) * τ'))
-      ≤ Real.sqrt 2 * Real.exp ((|r - σ ^ 2 / 2| * (τ / 2) + 1) ^ 2 / (2 * (σ ^ 2 * τ')))
-          * heatKernel (2 * (σ ^ 2 * τ')) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)) := hspatial
-    _ ≤ Real.sqrt 2 * Real.exp ((|r - σ ^ 2 / 2| * (τ / 2) + 1) ^ 2 / (σ ^ 2 * τ))
-          * (Real.sqrt 3 * heatKernel (3 * σ ^ 2 * τ) (z - Real.log S - (r - σ ^ 2 / 2) * τ)) :=
-        mul_le_mul (mul_le_mul_of_nonneg_left hexpc (Real.sqrt_nonneg 2)) htemporal
-          (heatKernel_nonneg (by positivity) _) (by positivity)
-
-/-- `eᶻ`-envelope integrability of `eᶻ · poly · K(3σ²τ, z−m)` — the dominating function for the
-`τ`-differentiation, a constant multiple of the step-1 envelope. -/
-private lemma integrable_tau_bound {r σ S : ℝ} (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (M d : ℝ) :
-    Integrable (fun z => M * (Real.exp z
-      * (((z - Real.log S - (r - σ ^ 2 / 2) * τ) ^ 2 + d)
-        * heatKernel (3 * σ ^ 2 * τ) (z - Real.log S - (r - σ ^ 2 / 2) * τ)))) volume := by
-  refine ((integrable_exp_mul_poly_heatKernel (show (0:ℝ) < 3 * σ ^ 2 * τ by positivity)
-    (Real.log S + (r - σ ^ 2 / 2) * τ) d).const_mul M).congr
-    (Filter.Eventually.of_forall fun z => ?_)
-  simp only [sub_sub]
 end MathFin

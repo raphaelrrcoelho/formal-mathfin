@@ -53,6 +53,64 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-08 — commit 3beb170 — corpus 269
+
+**Scope**: the Feynman–Kac → BS-PDE *keystone core* — step 1 (kernel-side heat equation
+`∂_t U = ½ ∂_xx U` for sub-Gaussian payoffs, in `Foundations/FeynmanKacHeatEquation`: the
+completing-the-square mean-shift, the sub-Gaussian envelope, the spatial kernel bound, three
+diff-under-integral derivatives, the `feynmanU_heat_equation` identity) + the bridge
+`bsV_eq_discount_feynmanU` (bsV = discounted heat flow, making `feynmanU` load-bearing for pricing)
+and Delta-via-FK `hasDerivAt_bsV_S_fk` (in `BlackScholes/PDEFromFeynmanKac`). The full `∂_τ`/PDE
+assembly is deferred (its brute-force domination is infeasible — see below).
+**Panel**: three Sonnet reviewers (coherence+idiomatic · zero-slop+architecture ·
+inspired-math+first-principles+clarity+beauty) reading the diff, + Opus synthesis and judgment.
+
+| lens | verdict |
+|---|---|
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS-WITH-NOTES |
+| zero slop | PASS-WITH-NOTES |
+| architectural ingenuity | PASS-WITH-NOTES |
+| first principles | PASS |
+| idiomatic register | PASS-WITH-NOTES |
+| concept clarity | PASS-WITH-NOTES |
+| beautiful, elegant math | PASS-WITH-NOTES |
+
+**Blocking finding (fixed in this commit's follow-up)**: `PDEFromFeynmanKac` carried ~112 lines of
+orphaned, never-consumed `∂_τ` domination scaffolding (`hasDerivAt_kernelCurve`, `heatKernel_curve_le`,
+`integrable_tau_bound`) — machinery for a brute-force differentiate-under-the-integral that
+heartbeat-times-out and is being abandoned for a leaner route. Removed (recoverable from `3beb170`);
+the file now holds only the FK representation, the bridge, and the FK-Delta, with an honest module
+docstring.
+
+**Recorded actions (deferred to the next FK round, batched to avoid re-staling the ledger)**:
+1. *(top priority — leaner + elegant + architecture; all three panels)* `hasDerivAt_phi`,
+   `hasDerivAt_feynmanU_t/_x/_xx` are the same dominated-convergence proof at different parameters;
+   unify into ONE parametric `hasDerivAt_feynmanU_param` (≈200 → ≈100 lines).
+2. failing 1, extract the verbatim-duplicated `heatKernel_temporal_le`, polynomial-bound, and
+   `hFt_int` blocks as shared private helpers (≈35 lines).
+3. *(concept clarity)* `exp_mul_heatKernel` docstring over-claims "Cameron–Martin mean shift" — it is
+   the completing-the-square identity (the *analytic core* of the shift, not the measure-change
+   theorem); retitle honestly.
+4. *(idiomatic)* `open Real` is declared but `Real.` is qualified ~200×; drop it.
+5. *(architecture)* `callPayoff_continuous`/`le_exp` are call-payoff facts → `BlackScholes/Call.lean`.
+6. *(zero slop)* `hasDerivAt_feynmanU_xx`'s closing `linarith [show … ring]` should mirror `_x`'s
+   clean `calc … ring`.
+
+**Declined (Sonnet suggestions overruled on the math)**:
+- "compose `hasDerivAt_kernelCurve` from the `∂_t` + `∂_y` partials" — wrong: the curve moves both
+  kernel arguments, so total = sum-of-partials ONLY under joint differentiability, which the
+  partial-`HasDerivAt`s do not provide; the from-scratch differentiation of the explicit kernel is
+  the correct route.
+- "`heatKernel_shift_le` without variance-widening (same-`t` bound)" — false: `K(t,z−x)/K(t,z−x₀)`
+  is unbounded in `z`; widening to `2t` is essential for the domination.
+
+**Verdict**: the keystone core is sound, honest, and largely elegant — the inspired ideas
+(kernel-side differentiation, the mean-shift, the heat-equation collapse) are present and correct.
+The first-try slop (the duplicated diff-under-integral template; the brute-force `∂_τ` scaffolding) is
+the natural debris of a large climb: the scaffolding is removed here, the duplication is scheduled for
+a parametric pass.
+
 ## 2026-06-07 — commit 321eb4f — corpus 269
 
 **Scope**: commit `321eb4f` — `bsV_eq_feynmanU` (the Feynman–Kac representation of
