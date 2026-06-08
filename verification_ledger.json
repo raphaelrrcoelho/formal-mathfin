@@ -2132,11 +2132,10 @@
     },
     "sc-thm-9.2.1": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-05",
-      "elapsed_s": 29.1,
-      "input_hash": "0c56d84e57e8c07eff2bd84a3e54086a2b04fedded13fde36924cc80c5751218",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "9078508"
+      "date": "2026-06-08",
+      "elapsed_s": 119.4,
+      "input_hash": "af38ad6ea7aa519f87d8f0ebdb3cd96eea0996e07d4a4b9904e2c67ad8df37f0",
+      "verified_at_commit": "30212a0"
     }
   }
 }
