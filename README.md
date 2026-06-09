@@ -10,7 +10,7 @@
 [![dataset](https://img.shields.io/badge/HF-dataset-ffcc4d)](https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 269 theorems across 11 areas — Black-Scholes
+and Degenne's BrownianMotion. 270 theorems across 11 areas — Black-Scholes
 with the full Greek matrix, the exotics, and Merton jump-diffusion, binomial
 trees with American / Bermudan / Snell envelope, fixed income with hazard
 credit, first-to-default baskets, and Vasicek SDE, portfolio theory from
@@ -27,13 +27,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 269 |
-| **full derivations** | **233** |
+| total theorems | 270 |
+| **full derivations** | **236** |
 | library wrappers | 18 |
-| reduced cores | 18 |
+| reduced cores | 16 |
 | placeholders | **0** |
 
-**251 of the 269 are delivery-ready** (`full` + `library_wrapper`); the 18
+**254 of the 270 are delivery-ready** (`full` + `library_wrapper`); the 16
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
@@ -92,7 +92,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
 
 | Area | Headline results |
 |---|---|
-| **Black-Scholes** | Call, put, digital (cash + asset) + parity; full Greek matrix (δ, γ, vega, θ, ρ, vanna, volga, ψ); BS-Merton with dividends; Garman-Kohlhagen FX; implied vol uniqueness + bisection bracket; PDE forward direction; strike Greeks (∂_K, ∂²_K); static price bounds; box-spread arbitrage; lognormal moments + n-th moment + power forward; variance swap fair strike (closed-form + QV-limit); Breeden-Litzenberger implied risk-neutral PDF. |
+| **Black-Scholes** | Call, put, digital (cash + asset) + parity; full Greek matrix (δ, γ, vega, θ, ρ, vanna, volga, ψ); BS-Merton with dividends; Garman-Kohlhagen FX; implied vol uniqueness + bisection bracket; PDE forward direction; strike Greeks (∂_K, ∂²_K); static price bounds; box-spread arbitrage; lognormal moments + n-th moment + power forward; variance swap fair strike (closed-form + QV-limit); Breeden-Litzenberger implied risk-neutral PDF; PDE re-derived from Feynman–Kac (heat-kernel route). |
 | **Exotics** | Chooser via PCP; capped call = bull spread; bull-spread + butterfly non-negativity; lookback ≥ vanilla; two-date geometric ≤ arithmetic Asian; **Margrabe exchange option** (multivariate — effective vol `√(σ₁²+σ₂²−2ρσ₁σ₂)`, parity, and the price as a `bs_call_formula` call on the ratio). |
 | **Bachelier** | Arithmetic-BM option pricing with the truncated-mean primitive; full first-order Greeks. |
 | **Black-76 (Futures)** | Black-76 formula via zero-drift specialisation + full Greek matrix; swaption. |
@@ -103,7 +103,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
 | **Risk measures** | Gaussian VaR / CVaR closed forms; coherent axioms (translation, homogeneity, monotonicity, subadditivity) **verified on the gaussian closed form** (acceptance-set convexity is separately derived from concave utility in `UtilityDerivation.lean`); joint-stdev triangle; VaR/CVaR additivity at ρ=1; **Rockafellar-Uryasev** algebraic form; spectral risk measures; **Herfindahl-Hirschman** with Cauchy-Schwarz lower bound. |
 | **Actuarial** | Annuity-due closed form; net premium principle; **Gompertz** cumulative force of mortality. |
 | **DeFi** | Constant-product AMM (Uniswap v2) invariants — adapted from Pusceddu-Bartoletti. |
-| **Foundations** | **Static Girsanov** — the risk-neutral measure *derived* from the physical measure via an Esscher density, making `BSCallHyp` a theorem and the discounted asset a proven `Q`-martingale ([`docs/leaps.md`](docs/leaps.md)); Brownian motion martingales (square-sub-time, Wald exponential); Wiener integral + L² version; **the adapted Itô isometry** — the genuinely-stochastic `E[(Σ φₖ·ΔBₖ)²]=Σ E[φₖ²]·Δtₖ` for *random adapted* integrands, cross-terms killed by the weak Markov property (`∫B dB` capstone) ([`docs/leaps.md`](docs/leaps.md)); quadratic variation; Doob L^p continuous-time convergence; conditional Jensen; **discrete Itô lemma** (after Nagy); simple Itô integral; FTAP (two-state explicit EMM + multi-state forward); pricing kernels; state prices; Itô structural drift (GBM log-drift, log return mean); BS PDE from Itô + no-arbitrage. |
+| **Foundations** | **Static Girsanov** — the risk-neutral measure *derived* from the physical measure via an Esscher density, making `BSCallHyp` a theorem and the discounted asset a proven `Q`-martingale ([`docs/leaps.md`](docs/leaps.md)); Brownian motion martingales (square-sub-time, Wald exponential); Wiener integral + L² version; **the adapted Itô isometry** — the genuinely-stochastic `E[(Σ φₖ·ΔBₖ)²]=Σ E[φₖ²]·Δtₖ` for *random adapted* integrands, cross-terms killed by the weak Markov property (`∫B dB` capstone) ([`docs/leaps.md`](docs/leaps.md)); quadratic variation; Doob L^p continuous-time convergence; conditional Jensen; **discrete Itô lemma** (after Nagy); simple Itô integral; FTAP (two-state explicit EMM + multi-state forward); pricing kernels; state prices; Itô structural drift (GBM log-drift, log return mean); BS PDE from Itô + no-arbitrage; **the Black–Scholes PDE re-derived from Feynman–Kac** — the heat kernel's joint Fréchet-differentiability makes the orphaned `feynmanU` heat-flow load-bearing for pricing (closing the two-tower gap). |
 
 The library leans on seven **structural-principle modules** where one named
 fact generates dozens of one-line corollaries (Garman normal form, price
@@ -127,17 +127,17 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-18 of the 269 theorems are `reduced_core` — an honest special case or
+16 of the 270 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 
-- **Itô calculus** (`stochastic_calculus`, 5): time-dependent Itô, the
-  two-dimensional Itô formula, Lévy's martingale characterisation, SDE
-  existence + uniqueness, and Girsanov. (The one-dimensional path-wise Itô
-  lemma and the quadratic variation of an Itô process — constant σ,
-  Lipschitz drift, with explicit L² rates — are now `full`; see below.)
+- **Itô calculus** (`stochastic_calculus`, 4): the two-dimensional Itô formula,
+  Lévy's martingale characterisation, SDE existence + uniqueness, and Girsanov.
+  (The one-dimensional path-wise Itô lemma, the quadratic variation of an Itô
+  process, *and* the time-dependent Itô formula — constant σ, Lipschitz drift,
+  explicit L² rates — are now `full`; see below.)
 - **Girsanov** (`girsanov_finance`, 3).
-- **Markov chains** (6): finite-state structural specifications, one of them a
+- **Markov chains** (5): finite-state structural specifications, one of them a
   definitional identity pinned `reduced_core` by convention. No longer
   upstream-gated — Mathlib now ships the Ionescu–Tulcea trajectory-measure
   machinery (`Kernel.traj`).

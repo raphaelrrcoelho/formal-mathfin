@@ -160,6 +160,21 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > `thm:ito-formula-td-l2` added. Net: **235 full + 18 wrappers = 253 / 269
 > delivery-ready, 16 reduced cores.**
 
+> **Feynman–Kac → Black–Scholes-PDE keystone round (2026-06-08).** The new
+> `full` entry `sc-bs-pde-feynman-kac` (`bsV_satisfies_bs_pde_via_feynmanKac`)
+> re-derives the Black–Scholes PDE `−∂_τV + ½σ²S²∂_SSV + rS∂_SV − rV = 0` from
+> the Feynman–Kac representation — through the heat kernel's joint
+> Fréchet-differentiability (`hasFDerivAt_heatKernel`) and a parametric
+> differentiate-under-the-integral skeleton, *not* from Itô — closing the
+> long-standing two-tower gap between the deep heat-kernel/Itô foundations and
+> the pricing layer (the orphaned `feynmanU` heat flow is now load-bearing for
+> pricing; `Foundations/FeynmanKacHeatEquation.lean` +
+> `BlackScholes/PDEFromFeynmanKac.lean`). In the same pass the Feynman–Kac scope
+> note on `sc-thm-9.2.1` was de-staled: its "~300–500 lines left as upstream
+> work" claim was false — that infrastructure is now built and consumed by the
+> keystone. Net: **236 full + 18 wrappers = 254 / 270 delivery-ready, 16 reduced
+> cores** (corpus 269 → 270).
+
 > **Duplication + status audit (2026-06-03).** A five-reviewer sweep of all 216
 > then-`full` entries asked two questions: does any MathFin module re-derive
 > content already in pinned Mathlib / Degenne's BrownianMotion package, and is

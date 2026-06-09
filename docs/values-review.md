@@ -53,6 +53,54 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-08 (round 5) — WHOLE-REPO values review — corpus 270
+
+**Scope**: at the user's request, a full-repo panel (not just the Feynman–Kac keystone) — **six**
+reviewers: two deep on the keystone tower, plus one each on `MathFin/Foundations/`, the pricing modules
+(`BlackScholes`/`Futures`/`Binomial`/`FixedIncome`/`Portfolio`/`Performance`/`RiskMeasures`/`Actuarial`/`DeFi`),
+the benchmark corpus (all 270 entries), and `docs/` + repo-meta.
+
+**Headline**: the library is in **excellent shape**. No forbidden tactics anywhere; no proof smuggling;
+no `rfl`/`trivial`-in-disguise `full` entry; every `library_wrapper` is a genuine Mathlib/Degenne
+re-export; the `full`/`wrapper`/`reduced` split (236/18/16) is **honest**; coherence with the pinned
+Mathlib/Degenne is real (no reproving of pinned lemmas); the Itô-formula ladder and the FK keystone are
+principled, not redundant; `RockafellarUryasev`, the BS "magic identity" Greeks, Merton dominance, and the
+dividend-Greek reparametrization are genuinely elegant. **The findings are honesty-of-claims drift (stale
+docs/docstrings after the keystone landed) + a few pre-existing orphans + minor faithfulness/nits — no
+blocking findings.**
+
+**Applied this round** (public-facing honesty, no rebuild): README counts → 270/236/254/16, "What's not
+done" corrected (dropped the now-`full` time-dependent Itô; Markov 6→5), the FK→BS-PDE keystone surfaced
+in "What's covered"; CITATION.cff 251→254; `sc-thm-9.2.1` scope note (metadata **and** in-snippet)
+de-staled — the "~300–500 lines left as upstream work" claim was false (that infra is built and consumed
+by `sc-bs-pde-feynman-kac`); coverage.md round record.
+
+**Deferred, prioritized** (catalogued so nothing is lost — a clean follow-up cleanup):
+- *[Lean, one rebuild] keystone-tower docstring drift*: `PDEFromFeynmanKac` "Only step 4 remains" /
+  "(until now consumed by nothing)" / inconsistent `Foundations.` qualifier / step-3 numbering;
+  `FeynmanKacHeatEquation` three stale "deferred heat-PDE direction" notes (the work is in the file), the
+  module "Main results" block omitting the new lemmas, and the `feynmanU_heat_equation` docstring implying
+  an unstated assembly. Plus `hasDerivAt_feynmanU_t` is now an unconsumed public export → add the
+  heat-equation endpoint (consumes `_t`) or mark `private`.
+- *[Lean] `PDEFromIto.lean`*: 3 orphan `unfold;ring` lemmas (`bsItoDrift_eq_itoDrift2D`,
+  `bsItoDrift_no_time_eq_itoDrift`, `bs_pde_lhs_eq_drift_minus_rV`) — zero references repo-wide → delete.
+- *[Lean, umbrella] Foundations orphan modules* (~700 lines, zero consumers): `VarianceSwapEquivalence`
+  (a literal re-export anti-wrapper), `StochasticInterval` (the abandoned upstream-PR body), `PricingKernel`,
+  `FTAPMultiState` → wire to a benchmark or delete. (`PricingFromBrownian` is intentional BM-grounding — keep.)
+- *[corpus] `sc-thm-8.2.5`* (reduced_core): the SDE structure encodes a Lebesgue `∫σ ds`, not Itô `∫σ dB`
+  (the `B` parameter is dead) → use an opaque adapted stochastic-integral field, mirroring `sc-thm-7.5.2`.
+  `sc-thm-9.2.1` name/description state the full PDE+uniqueness (disclosed in scope) → optionally narrow.
+- *[docs] roadmap.md / bridges.md / blueprint.md*: log the FK round, add the FK→BS-PDE bridge row, and
+  regenerate the blueprint spine (tag the keystone `@[blueprint]`); `feynman-kac-growth-deferred.md` add a
+  "superseded — a kernel-differentiation FK route landed" note.
+- *[style, declined/deferred]*: ~159 `Real.` qualifiers under `open Real` — **declined** (the file
+  consistently qualifies; low-value, high-churn, disambiguation-fragile); the `integrable_payoff_mul_d{t,x}K`
+  / `curve_*` boilerplate dedup; 8 dead `set … with h…_def` binding names; 9 honestly-labeled re-export
+  shim files; DeFi `internalPrice`/`arbitragePresent` + a `Performance/Ratios` docstring word.
+
+**Verdict**: PASS. No blocking findings; the proofs across the whole repo are sound, elegant, and honest.
+The remaining work is honesty-drift cleanup + pre-existing orphan housekeeping, fully catalogued above.
+
 ## 2026-06-08 (round 4) — the keystone complete: BS PDE from Feynman–Kac — corpus 269
 
 **Scope**: step 4 — `bsV_satisfies_bs_pde_via_feynmanKac`: the Black–Scholes PDE
