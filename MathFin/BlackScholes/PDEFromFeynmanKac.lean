@@ -183,4 +183,39 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   filter_upwards [isOpen_Ioi.mem_nhds hτ] with τ' hτ'
   exact bsV_eq_discount_feynmanU hS hK hσ hτ'
 
+/-- **Step 3 (Gamma) — the second `S`-derivative of `bsV`, via Feynman–Kac.** Differentiating the
+Delta `e^{−rτ}·U_x·S⁻¹` (from `hasDerivAt_bsV_S_fk`) in `S`: the first space-derivative integral `U_x`
+moves through `log S` (chain rule on `hasDerivAt_feynmanU_xx`, giving `U_xx·S⁻¹`) and the `S⁻¹` factor
+contributes `−U_x·S⁻²`, so `∂_SS V = e^{−rτ}·(U_xx − U_x)/S²`. The third in-place Greek-via-FK awaiting
+the step-4 PDE assembly. -/
+private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
+    {S : ℝ} (hS : 0 < S) :
+    HasDerivAt (fun S' => Real.exp (-(r * τ))
+        * ((∫ z, max (Real.exp z - K) 0
+              * ((z - (Real.log S' + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
+                * heatKernel (σ ^ 2 * τ) (z - (Real.log S' + (r - σ ^ 2 / 2) * τ)))) * S'⁻¹))
+      (Real.exp (-(r * τ))
+        * (((∫ z, max (Real.exp z - K) 0
+                * (heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))
+                    * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) ^ 2 - σ ^ 2 * τ) / (σ ^ 2 * τ) ^ 2))
+              - (∫ z, max (Real.exp z - K) 0
+                * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
+                  * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))))) / S ^ 2)) S := by
+  have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
+  have hg := (hasDerivAt_feynmanU_xx ht₀ (callPayoff_continuous K) (callPayoff_le_exp hK)
+      (Real.log S + (r - σ ^ 2 / 2) * τ)).comp S
+    ((Real.hasDerivAt_log hS.ne').add_const ((r - σ ^ 2 / 2) * τ))
+  have hprod := (hg.mul (hasDerivAt_inv hS.ne')).const_mul (Real.exp (-(r * τ)))
+  have hSne : S ≠ 0 := hS.ne'
+  convert hprod using 1
+  simp only [Function.comp_apply]
+  set Uxx := ∫ z, max (Real.exp z - K) 0
+      * (heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))
+          * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) ^ 2 - σ ^ 2 * τ) / (σ ^ 2 * τ) ^ 2)
+  set Ux := ∫ z, max (Real.exp z - K) 0
+      * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
+          * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)))
+  field_simp
+  ring
+
 end MathFin
