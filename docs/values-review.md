@@ -111,6 +111,28 @@ flipped a too-aggressive "delete"):
 **Verdict**: PASS. No blocking findings; the proofs across the whole repo are sound, elegant, and honest.
 The remaining work is honesty-drift cleanup + pre-existing orphan housekeeping, fully catalogued above.
 
+**Follow-up execution (2026-06-09)** — the catalogued deferred items above were executed (housekeeping of
+panel-vetted "wire or delete" items, no fresh mathematical content, so no new panel):
+- *docs*: the FK round logged in `roadmap.md` (new phase), `bridges.md` (the "FK" bridge row), and
+  `feynman-kac-growth-deferred.md` (SUPERSEDED banner — its "deferred, not needed ever" kernel-
+  differentiation route is exactly what shipped).
+- *corpus faithfulness*: `sc-thm-8.2.5` SDE diffusion `∫σ ds` (dead `B`) → opaque adapted Itô integral
+  `IσX`, mirroring `sc-thm-7.5.2`. Stays `reduced_core`, now faithful.
+- *orphans, reflected per [[feedback_orphan_future_use]]*: `FTAPMultiState` (Phase 42 forward),
+  `PricingKernel` (Phase 53 butterfly), and `VarianceSwapEquivalence` (Phase 45 equivalence) **wired** to
+  new `full` corpus entries (`mf-ftap-multi-state-forward` / `mf-pricing-kernel-butterfly` /
+  `mf-variance-swap-equivalence`); the literal anti-wrapper `varianceSwap_equivalence` removed (subsumed by
+  the genuine two-functional theorem). `StochasticInterval` **kept** — Degenne #440 upstream-PR body,
+  two-AxiomAudit-anchored, named `ElementaryPredictableSet` gap in the deferred Itô-CLM record.
+- *blueprint*: the keystone `bsV_satisfies_bs_pde_via_feynmanKac` + the kernel heat equation
+  `feynmanU_heat_equation` are now `@[blueprint]` spine nodes (curated AxiomAudit guards added; spine
+  regenerated — the FK tower links into the existing `bsCall` node).
+
+Net: corpus 270 → **273**, full 236 → **239**, delivery-ready **257**/273, 16 reduced. lake build 8708
+jobs axiom-clean; AxiomAuditGen 226 guards; ledger 273/273 fresh; 19 gate tests green. Still-open
+(unchanged): the fully-general continuous-`g` FK PDE + uniqueness; variable-coefficient FK (local-vol/
+Heston) on the general-Itô layer; the Markov renewal/spectral cluster; P1 the CRR→BS error-constant paper.
+
 ## 2026-06-08 (round 4) — the keystone complete: BS PDE from Feynman–Kac — corpus 269
 
 **Scope**: step 4 — `bsV_satisfies_bs_pde_via_feynmanKac`: the Black–Scholes PDE

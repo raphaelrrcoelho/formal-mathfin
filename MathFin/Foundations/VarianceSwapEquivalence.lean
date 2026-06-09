@@ -41,9 +41,6 @@ volatility.
 
 ## Results
 
-* `varianceSwap_equivalence`: the log-payoff functional `(2/T)·E[log(F/S_T)]`
-  equals `σ²` (a re-export of `varianceSwap_log_contribution`, the
-  static-replication half).
 * `varianceSwap_log_eq_QV_limit_value`: the **genuine two-functional
   agreement** — the log-payoff form equals `σ²` AND the realised-variance
   QV-limit `lim_n E_Q[Σ_k (Δlog S)²] → σ²·T` (the actual equipartition
@@ -60,21 +57,6 @@ continuous Itô-to-log identity, which is gated.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-
-/-- **Variance-swap log-payoff fair strike** `(2/T) · E[log(F/S_T)] = σ²` — the
-static-replication (Demeterfi-Derman-Kamal) half. A direct re-export of
-`varianceSwap_log_contribution` from `BlackScholes/VarianceSwap.lean`, kept here
-as the companion to the genuine two-functional agreement
-`varianceSwap_log_eq_QV_limit_value` below (which adds the realised-variance
-QV-limit side). This lemma alone is *only* the log-payoff equality, not the
-two-form agreement. -/
-theorem varianceSwap_equivalence {S_0 : ℝ} (hS : 0 < S_0)
-    (r σ T : ℝ) (hT_pos : T ≠ 0) :
-    -- Log-payoff form yields σ²:
-    (2 / T) * (∫ z, Real.log ((S_0 * Real.exp (r * T)) /
-        (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))) ∂(gaussianReal 0 1))
-      = σ ^ 2 :=
-  varianceSwap_log_contribution hS r σ T hT_pos
 
 /-- **The two variance-swap characterisations agree** — both genuinely
 recover the model variance. For Brownian dynamics `B` (a

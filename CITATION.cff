@@ -23,7 +23,7 @@ keywords:
   - stochastic calculus
 abstract: >-
   A Lean 4 library of machine-checked mathematical-finance theorems
-  (254 delivery-ready theorems across eleven areas), built on Mathlib and
+  (257 delivery-ready theorems across eleven areas), built on Mathlib and
   Rémy Degenne's BrownianMotion package. Every result is classified by
   how faithfully its Lean statement matches the mathematical claim, and
   a build-enforced axiom audit pins the axioms each proof depends on.

@@ -3198,6 +3198,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.NoArbitrageDerivations. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-pricing-kernel-butterfly",
+      "name": "Pricing Kernel: Butterfly No-Arbitrage from FTAP",
+      "description": "In a two-state market, the FTAP-derived discounted state prices make call-price butterfly spreads cost ≥ 0 — the canonical static no-arbitrage constraint, derived not assumed.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.PricingKernel\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **No-arbitrage ⟹ butterfly spreads cost ≥ 0** (Phase 53). For sign data\n    `z_up > 0 > z_down`, the discounted FTAP state prices are non-negative, so the\n    finite-state call-price functional `K ↦ Σᵢ qᵢ · max(Sᵢ − K, 0)` is convex in\n    the strike and the butterfly combination `C(K₁) − 2·C((K₁+K₃)/2) + C(K₃)` has\n    non-negative cost. The state prices come from the Phase 37 backward-FTAP EMM\n    construction, so this static no-arbitrage constraint is derived, not assumed.\n    Re-exports `MathFin.stateprice_call_butterfly_nonneg`. -/\ntheorem pricing_kernel_butterfly_nonneg\n    (z_up z_down rT : ℝ) (h_up : 0 < z_up) (h_down : z_down < 0)\n    (S : Fin 2 → ℝ) (K₁ K₃ : ℝ) :\n    0 ≤ (∑ i, MathFin.stateprices_two_state z_up z_down rT i * max (S i - K₁) 0)\n        - 2 * (∑ i, MathFin.stateprices_two_state z_up z_down rT i *\n              max (S i - (K₁ + K₃) / 2) 0)\n        + (∑ i, MathFin.stateprices_two_state z_up z_down rT i * max (S i - K₃) 0) :=\n  MathFin.stateprice_call_butterfly_nonneg z_up z_down rT h_up h_down S K₁ K₃\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Pricing kernel / state prices from FTAP (Phase 53; Nagy 2026 §7 backward FTAP)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation re-exported from MathFin/Foundations/PricingKernel.lean: discounted FTAP state prices are non-negative (stateprices_nonneg, from z_up>0>z_down), feeding ConvexPricingFunctional.callPrice_finiteState_butterfly_nonneg. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-53 bridge (bridges.md row 53) to the corpus."
+      }
+    },
+    {
+      "id": "mf-ftap-multi-state-forward",
+      "name": "Forward FTAP: Multi-State, Multi-Asset",
+      "description": "EMM existence ⟹ no arbitrage in an arbitrary finite-state, finite-asset one-period market (forward Fundamental Theorem of Asset Pricing).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPMultiState\n\n/-- **Forward FTAP, arbitrary finite state + finite assets** (Phase 42). If there\n    is a strictly-positive probability `q` with `Σ q = 1` whose `q`-weighted excess\n    return is zero for every asset (an equivalent martingale measure), then no\n    portfolio attains a payoff that is non-negative in every state and strictly\n    positive in at least one state — i.e. no arbitrage. Standard linearity /\n    `Finset.sum_comm` argument. Re-exports `MathFin.noArbitrage_of_emm_multi`. -/\ntheorem ftap_multi_state_forward {N M : ℕ} (z : Fin M → Fin N → ℝ)\n    (h_emm : MathFin.HasEMM_multi_state z) :\n    ¬ MathFin.HasArbitrage_multi_state z :=\n  MathFin.noArbitrage_of_emm_multi z h_emm\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Fundamental Theorem of Asset Pricing, multi-state forward (Phase 42; Nagy 2026 §7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation re-exported from MathFin/Foundations/FTAPMultiState.lean: EMM ⟹ no-arbitrage via the q-weighted-excess-return argument (Finset.sum_comm + Finset.sum_pos'). Forward direction in arbitrary finite state + finite assets, generalising the two-state Phase 37. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-42 bridge (bridges.md row 42) to the corpus."
+      }
+    },
+    {
+      "id": "mf-variance-swap-equivalence",
+      "name": "Variance Swap: Log-Payoff = Realised-Variance Limit",
+      "description": "The log-payoff static-replication strike (2/T)·E[log(F/S_T)] = σ² and the realised-variance equipartition functional E[Σ(Δlog S)²] → σ²·T — two distinct functionals of the BS log-price both recover the model variance.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.VarianceSwapEquivalence\n\nopen MeasureTheory ProbabilityTheory Real\n\n/-- **The two variance-swap characterisations agree** (Phase 45). For Brownian\n    dynamics `B` (a `BrownianQuadraticVariation`), the two distinct functionals of\n    the BS log-price both recover the model variance: the log-payoff\n    static-replication integral `(2/T)·E[log(F/S_T)]` equals `σ²`, AND the\n    realised-variance equipartition functional `E[Σₖ (Δlog S)²]` converges to\n    `σ²·T`. Both conjuncts are genuine functionals (the second is the honest\n    `Tendsto` of the squared-increment sum). Re-exports\n    `MathFin.varianceSwap_log_eq_QV_limit_value`. -/\ntheorem variance_swap_log_eq_qv_limit\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ → Ω → ℝ} (hB : MathFin.BrownianQuadraticVariation μ B)\n    {S_0 : ℝ} (hS : 0 < S_0) (r σ : ℝ) {T : ℝ} (hT_pos : T ≠ 0) (hT_nonneg : 0 ≤ T) :\n    (2 / T) * (∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n        (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))) ∂(gaussianReal 0 1))\n      = σ ^ 2 ∧\n    Filter.Tendsto\n      (fun n : ℕ => ∫ ω, ∑ k ∈ Finset.range (n + 1),\n        (MathFin.bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -\n         MathFin.bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ)\n      Filter.atTop (nhds (σ ^ 2 * T)) :=\n  MathFin.varianceSwap_log_eq_QV_limit_value hB hS r σ hT_pos hT_nonneg\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Variance swap form equivalence (Phase 45; Demeterfi-Derman-Kamal 1999)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation re-exported from MathFin/Foundations/VarianceSwapEquivalence.lean: the log-payoff static-replication strike equals σ² (varianceSwap_log_contribution) and the realised-variance equipartition sum tends to σ²·T (tendsto_expected_bsLogPrice_equipartition_sum, Phase 34). Both conjuncts are genuine functionals. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-45 bridge (bridges.md row 45) to the corpus."
+      }
     }
   ]
 }

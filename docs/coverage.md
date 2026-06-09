@@ -160,6 +160,29 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > `thm:ito-formula-td-l2` added. Net: **235 full + 18 wrappers = 253 / 269
 > delivery-ready, 16 reduced cores.**
 
+> **Deferred-cleanup round (2026-06-09).** Executed the round-5 values-review
+> follow-up catalogue. (1) **Corpus faithfulness** — `sc-thm-8.2.5` (SDE
+> existence/uniqueness) encoded its diffusion as a Lebesgue `∫σ ds`, leaving the
+> Brownian driver `B` dead (a random-IC ODE, not an SDE); fixed to an opaque
+> adapted stochastic-integral process `IσX` (= `∫₀ᵗ σ dB`), mirroring
+> `sc-thm-7.5.2`'s opaque Itô-integral fields. Stays `reduced_core`, now faithful.
+> (2) **Orphan wiring** — three documented-but-unwired Foundations bridges became
+> `full` corpus entries: `mf-ftap-multi-state-forward` (Phase 42 forward FTAP, EMM
+> ⟹ no-arbitrage in arbitrary finite state + assets), `mf-pricing-kernel-butterfly`
+> (Phase 53 FTAP state-price butterfly no-arbitrage), `mf-variance-swap-equivalence`
+> (Phase 45 log-payoff strike = realised-variance QV limit). The literal
+> anti-wrapper re-export `varianceSwap_equivalence` (subsumed by the genuine
+> two-functional theorem) was removed. `StochasticInterval` was reflected on and
+> **kept** — it is the Degenne #440 upstream-PR body, anchored by two AxiomAudit
+> entries and named as the `ElementaryPredictableSet` gap in the deferred
+> Itô-CLM coherence record. (3) **Blueprint** — the keystone
+> `bsV_satisfies_bs_pde_via_feynmanKac` and the kernel heat equation
+> `feynmanU_heat_equation` are now `@[blueprint]` spine nodes (with curated
+> AxiomAudit guards); the regenerated spine shows the FK tower linking into the
+> existing `bsCall` node. Net: **239 full + 18 wrappers = 257 / 273
+> delivery-ready, 16 reduced cores** (corpus 270 → 273). lake build 8708 jobs,
+> axiom-clean; ledger 273/273 fresh; gate tests green.
+
 > **Feynman–Kac → Black–Scholes-PDE keystone round (2026-06-08).** The new
 > `full` entry `sc-bs-pde-feynman-kac` (`bsV_satisfies_bs_pde_via_feynmanKac`)
 > re-derives the Black–Scholes PDE `−∂_τV + ½σ²S²∂_SSV + rS∂_SV − rV = 0` from

@@ -43,10 +43,12 @@ graph TD
   discreteIto["Discrete Itô formula (pathwise)"]:::proved
   esscherTilt["Esscher tilt is the Gaussian Girsanov"]:::proved
   expectationIto["Expectation-form Itô / Feynman–Kac"]:::proved
+  feynmanKacHeatEq["Heat equation for the kernel convolution"]:::proved
   gbmSde["GBM coefficient matching (algebraic)"]:::proved
   markovPathLaw["Markov path law (Ionescu–Tulcea)"]:::proved
   itoIntegralClm["Continuous Itô integral (CLM on [0,T])"]:::proved
   bsDelta["Greeks (δ shown; γ vega θ ρ alongside)"]:::proved
+  bsPdeFeynmanKac["Black–Scholes PDE (from Feynman–Kac)"]:::proved
   bscallhypBrownian["BSCallHyp from a Brownian model"]:::proved
   continuousFtap["Continuous-time first FTAP (EMM)"]:::proved
   girsanovCall["Call price from the physical measure"]:::proved
@@ -63,6 +65,8 @@ graph TD
 
   brownianMotion --> itoIntegralClm
   bsIdentity --> bsDelta
+  bsCall --> bsPdeFeynmanKac
+  feynmanKacHeatEq --> bsPdeFeynmanKac
   brownianMotion --> bscallhypBrownian
   brownianMotion --> continuousFtap
   bsCall --> girsanovCall

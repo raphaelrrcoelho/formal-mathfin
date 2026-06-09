@@ -1266,6 +1266,13 @@
       "pin_rebased_from": "HEAD",
       "verified_at_commit": "fa07391"
     },
+    "mf-ftap-multi-state-forward": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-09",
+      "elapsed_s": 16.8,
+      "input_hash": "a02186f4da37d9e42ca351ff3510e74533383a0dd233e390e7cbe9f40b34e199",
+      "verified_at_commit": "3a25518"
+    },
     "mf-garman-kohlhagen": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-05",
@@ -1736,6 +1743,13 @@
       "pin_rebased_from": "HEAD",
       "verified_at_commit": "fa07391"
     },
+    "mf-pricing-kernel-butterfly": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-09",
+      "elapsed_s": 101.9,
+      "input_hash": "df9867cadb0dcad58de6c8fe5fdb386765a2aa72c29f7aef6f2829401bee6ca3",
+      "verified_at_commit": "3a25518"
+    },
     "mf-put-call-parity": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-05",
@@ -1927,6 +1941,13 @@
       "input_hash": "2f54055fde430031f9547766122479ca7eecbaabc04eaa287dae8610545d3065",
       "verified_at_commit": "0997e8c"
     },
+    "mf-variance-swap-equivalence": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-09",
+      "elapsed_s": 53.0,
+      "input_hash": "4b195251606463add1d26840018031830f9fababa4e5d14d116820a8b01cc57c",
+      "verified_at_commit": "3a25518"
+    },
     "mf-variance-swap-log": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-05",
@@ -2115,11 +2136,10 @@
     },
     "sc-thm-8.2.5": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-05",
+      "date": "2026-06-09",
       "elapsed_s": 0.1,
-      "input_hash": "da3c3a55ce7dd6860fde07af783125d71a6e8eb5dc8e42262380132c0fc5e110",
-      "pin_rebased_from": "HEAD",
-      "verified_at_commit": "9078508"
+      "input_hash": "28c8bd1cfdb0f7590250b453892bee13baf83e394a16eb19876252423f498843",
+      "verified_at_commit": "d2cb7bd"
     },
     "sc-thm-9.1.1": {
       "benchmark_file": "stochastic_calculus.json",

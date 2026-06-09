@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (223 constants). Scope: proof-position MathFin names only —
+  corpus (226 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -551,6 +551,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.modifiedNumerator_eq_macaulayNumerator_div' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.modifiedNumerator_eq_macaulayNumerator_div
 
+/-- info: 'MathFin.noArbitrage_of_emm_multi' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.noArbitrage_of_emm_multi
+
 /-- info: 'MathFin.nthMoment_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.nthMoment_terminal
 
@@ -632,6 +635,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.statePricePricing_eq_riskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.statePricePricing_eq_riskNeutral
 
+/-- info: 'MathFin.stateprice_call_butterfly_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.stateprice_call_butterfly_nonneg
+
 /-- info: 'MathFin.submartingale_optional_sampling' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.submartingale_optional_sampling
 
@@ -667,6 +673,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.varianceSwap_log_contribution' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.varianceSwap_log_contribution
+
+/-- info: 'MathFin.varianceSwap_log_eq_QV_limit_value' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.varianceSwap_log_eq_QV_limit_value
 
 /-- info: 'MathFin.variance_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.variance_terminal

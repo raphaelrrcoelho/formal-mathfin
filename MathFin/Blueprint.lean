@@ -23,6 +23,7 @@ import MathFin.Foundations.CarrMadan
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.PDE
 import MathFin.BlackScholes.PDEFromIto
+import MathFin.BlackScholes.PDEFromFeynmanKac
 import MathFin.BlackScholes.MargrabeGrounding
 import MathFin.Binomial.MartingaleRepresentation
 import MathFin.Binomial.CRRCharFun
@@ -195,6 +196,23 @@ attribute [blueprint "thm:bs-pde-no-arb" (title := "BS PDE ↔ Itô-drift balanc
   name: deriving drift $=0$ *from* the no-arbitrage $Q$-martingale (needs the
   time-dependent Itô formula on the unbounded-Γ value function). -/)]
   MathFin.bs_pde_from_no_arbitrage
+
+attribute [blueprint "thm:feynman-kac-heat-eq" (title := "Heat equation for the kernel convolution")
+  (statement := /-- The convolution $u(t,x) = \int g(z)\,K(t,z-x)\,dz$ against the
+  Gaussian heat kernel solves $\partial_t u = \tfrac12\partial_{xx}u$, from the
+  kernel identity $\partial_t K = \tfrac12\partial_{yy}K$ and differentiation under
+  the integral — `g` need only be continuous and growth-controlled, so the call's
+  kink is never differentiated. -/)]
+  MathFin.FeynmanKacHeatEquation.feynmanU_heat_equation
+
+attribute [blueprint "thm:bs-pde-feynman-kac" (title := "Black–Scholes PDE (from Feynman–Kac)")
+  (statement := /-- The closed-form price's actual derivatives satisfy
+  $-\partial_\tau V + \tfrac12\sigma^2 S^2\partial_{SS}V + rS\partial_S V - rV = 0$,
+  derived *independently of Itô* from the heat-kernel representation: the kernel's
+  joint Fréchet-differentiability feeds the three Greeks, and the heat equation
+  $\partial_t u = \tfrac12\partial_{xx}u$ plus exact drift cancellation assembles
+  the PDE — the second, probabilistically-grounded tower closing the two-tower gap. -/)]
+  MathFin.bsV_satisfies_bs_pde_via_feynmanKac
 
 attribute [blueprint "thm:margrabe" (title := "Margrabe exchange option")
   (statement := /-- The option to exchange one asset for another prices as a BS

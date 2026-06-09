@@ -49,6 +49,14 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.expected_terminal_eq_forward' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs in #print axioms MathFin.expected_terminal_eq_forward
 
+/-! ## Feynman–Kac → Black–Scholes-PDE keystone -/
+
+/-- info: 'MathFin.FeynmanKacHeatEquation.feynmanU_heat_equation' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.FeynmanKacHeatEquation.feynmanU_heat_equation
+
+/-- info: 'MathFin.bsV_satisfies_bs_pde_via_feynmanKac' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs in #print axioms MathFin.bsV_satisfies_bs_pde_via_feynmanKac
+
 /-! ## Garman normal form + consumer-side corollaries -/
 
 /-- info: 'MathFin.bsV_eq_bsVGarman_standard' depends on axioms: [propext, Classical.choice, Quot.sound] -/
