@@ -178,6 +178,22 @@
       }
     },
     {
+      "id": "sc-bs-pde-feynman-kac",
+      "name": "Black-Scholes PDE via Feynman-Kac",
+      "description": "Chapter 9/10: The Black-Scholes PDE derived from the Feynman–Kac representation — the operator vanishes because the heat kernel does (independent of the closed-form route in sc-bs-pde).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PDEFromFeynmanKac\n\nopen MeasureTheory ProbabilityTheory Real\n\n/-- Theorem (Black–Scholes PDE via Feynman–Kac).\n    The European call value `bsV K r σ S τ` satisfies the Black–Scholes operator\n    `−∂_τ V + (1/2) σ² S² ∂²_S V + r S ∂_S V − r V = 0`, with all three derivatives\n    supplied by the Feynman–Kac Greeks — an independent re-derivation of `bs_pde_holds`\n    grounded in the heat kernel rather than the closed-form Φ.\n\n    Real derivation in `MathFin/BlackScholes/PDEFromFeynmanKac.lean` and\n    `MathFin/Foundations/FeynmanKacHeatEquation.lean`:\n    * `hasFDerivAt_heatKernel`: the heat kernel is jointly Fréchet-differentiable in (t, y).\n    * `hasDerivAt_feynmanU_comp`: the Feynman–Kac function differentiated along the curve\n      `τ ↦ (σ²τ, log S + (r−σ²/2)τ)`, both kernel arguments moving.\n    * `hasDerivAt_bsV_S_fk`, `hasDerivAt_bsV_SS_fk`, `hasDerivAt_bsV_tau_fk`: the FK Greeks\n      Δ, Γ, Θ as heat-kernel moments of the call payoff.\n    * `feynmanU_heat_equation`: the kernel heat equation `∂_t U = ½ ∂_xx U`.\n    * `bsV_satisfies_bs_pde_via_feynmanKac`: the operator vanishes because the heat kernel\n      does — the `U_x` drift terms cancel algebraically and `∂_t U = ½ ∂_xx U`.\n\n    Axioms: only `[propext, Classical.choice, Quot.sound]` (Mathlib defaults). -/\ntheorem bs_pde_via_feynman_kac {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    ∃ Vτ VS VSS : ℝ,\n      HasDerivAt (fun τ' => MathFin.bsV K r σ S τ') Vτ τ ∧\n      HasDerivAt (fun S' => MathFin.bsV K r σ S' τ) VS S ∧\n      HasDerivAt (fun S' => deriv (fun S'' => MathFin.bsV K r σ S'' τ) S') VSS S ∧\n      -Vτ + (1 / 2) * σ ^ 2 * S ^ 2 * VSS + r * S * VS - r * MathFin.bsV K r σ S τ = 0 :=\n  MathFin.bsV_satisfies_bs_pde_via_feynmanKac hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Black-Scholes PDE via Feynman-Kac",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Independent, probabilistically-grounded re-derivation of the BS PDE (cf. sc-bs-pde, the closed-form route). The call value V = e^{-rτ}·feynmanU(call payoff) is a discounted Gaussian heat flow; the three derivatives are the Feynman–Kac Greeks (hasDerivAt_bsV_{S,SS,tau}_fk), each a heat-kernel integral built on the heat kernel's joint Fréchet differentiability (hasFDerivAt_heatKernel) → curve derivative (hasDerivAt_feynmanU_comp, via the parametric diff-under-integral skeleton + a sum-of-two-Gaussian-moment-envelopes domination). The operator vanishes because ∂_t U = ½ ∂_xx U (feynmanU_heat_equation, the kernel heat equation) and the U_x drift terms cancel exactly. Closes the two-tower gap: feynmanU is now load-bearing for pricing. Axioms: only [propext, Classical.choice, Quot.sound]."
+      }
+    },
+    {
       "id": "sc-discrete-cubing-identity",
       "name": "Discrete Ito Identity for Cubing",
       "description": "Pathwise X_N^3 - X_0^3 decomposition into the third-power discrete Ito integral (3 sum X^2 dX), the QV-weighted cross sum (3 sum X (dX)^2), and the cubic remainder. Specialisation of the discrete Ito formula to f(x)=x^3.",

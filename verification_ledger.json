@@ -2046,6 +2046,13 @@
       "pin_rebased_from": "HEAD",
       "verified_at_commit": "fa07391"
     },
+    "sc-bs-pde-feynman-kac": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-08",
+      "elapsed_s": 60.6,
+      "input_hash": "35a3ce547704e7f74af91d347d1124c3019347a580308e03166f2a53c0dea218",
+      "verified_at_commit": "9af309f"
+    },
     "sc-discrete-cubing-identity": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-05",
