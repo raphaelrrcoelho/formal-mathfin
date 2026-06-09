@@ -190,6 +190,60 @@ private lemma hasDerivAt_heatKernel_x_x {t : ℝ} (ht : 0 < t) (z x : ℝ) :
   convert h using 1
   ring
 
+/-- **Joint differentiability of the heat kernel** in `(t, y)` (for `t > 0`). The Fréchet derivative
+at `(t₀, y₀)` is the row functional `(a, b) ↦ ∂_t K · a + ∂_y K · b` (`∂_t K = K·(y²−t)/(2t²)`,
+`∂_y K = −(y/t)·K`). Built from the elementary calculus of `(√(2πt))⁻¹·exp(−y²/(2t))`; the two
+columns read off against the basis. This upgrades the two separately-proved partials to a *total*
+derivative — the one genuinely-2D ingredient that lets the price, differentiated along a curve
+`τ ↦ (v τ, w τ)` with both kernel arguments moving, collapse to a single chain rule. -/
+lemma hasFDerivAt_heatKernel {t₀ : ℝ} (ht₀ : 0 < t₀) (y₀ : ℝ) :
+    HasFDerivAt (fun p : ℝ × ℝ => heatKernel p.1 p.2)
+      ((heatKernel t₀ y₀ * (y₀ ^ 2 - t₀) / (2 * t₀ ^ 2)) • ContinuousLinearMap.fst ℝ ℝ ℝ
+        + (-(y₀ / t₀) * heatKernel t₀ y₀) • ContinuousLinearMap.snd ℝ ℝ ℝ) (t₀, y₀) := by
+  have h2pit : (0:ℝ) < 2 * Real.pi * t₀ := by positivity
+  have hsqrt_ne : Real.sqrt (2 * Real.pi * t₀) ≠ 0 := (Real.sqrt_pos.mpr h2pit).ne'
+  have h2t0_ne : (2 * t₀) ≠ 0 := by positivity
+  have hlin1 : HasFDerivAt (fun p : ℝ × ℝ => 2 * Real.pi * p.1)
+      ((2 * Real.pi) • ContinuousLinearMap.fst ℝ ℝ ℝ) (t₀, y₀) := by
+    simpa using ((2 * Real.pi) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
+  have hlin2 : HasFDerivAt (fun p : ℝ × ℝ => 2 * p.1)
+      ((2 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ) (t₀, y₀) := by
+    simpa using ((2 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
+  have hsnd : HasFDerivAt (fun p : ℝ × ℝ => p.2) (ContinuousLinearMap.snd ℝ ℝ ℝ) (t₀, y₀) := by
+    simpa using (ContinuousLinearMap.snd ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
+  have hA := (hasDerivAt_inv hsqrt_ne).comp_hasFDerivAt (t₀, y₀)
+      ((Real.hasDerivAt_sqrt h2pit.ne').comp_hasFDerivAt (t₀, y₀) hlin1)
+  have hnum := (hsnd.pow 2).neg
+  have hden := (hasDerivAt_inv h2t0_ne).comp_hasFDerivAt (t₀, y₀) hlin2
+  have hB := (hnum.mul hden).exp
+  convert hA.mul hB using 1
+  refine ContinuousLinearMap.ext fun v => ?_
+  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.neg_apply, ContinuousLinearMap.coe_fst',
+    ContinuousLinearMap.coe_snd', smul_eq_mul,
+    Pi.mul_apply, Pi.neg_apply, Function.comp_apply, heatKernel]
+  rw [show -(y₀ ^ 2) / (2 * t₀) = -(y₀ ^ 2) * (2 * t₀)⁻¹ from div_eq_mul_inv _ _,
+      show Real.sqrt (2 * Real.pi * t₀) ^ 2 = 2 * Real.pi * t₀ from Real.sq_sqrt h2pit.le]
+  field_simp
+  ring
+
+/-- **Derivative of the heat kernel along a curve** `s ↦ K(v s, z − w s)`. With both the variance
+`v s` and the centre `w s` moving, the chain rule on `hasFDerivAt_heatKernel` collapses to
+`v′·∂_t K + w′·∂_x K`. The kernel-level engine for the Black–Scholes `τ`-derivative, where
+`v τ = σ²τ` and `w τ = log S + (r − σ²/2)τ` move together. -/
+lemma hasDerivAt_heatKernel_comp {v w : ℝ → ℝ} {τ₀ vd wd : ℝ}
+    (hv : HasDerivAt v vd τ₀) (hw : HasDerivAt w wd τ₀) (hvpos : 0 < v τ₀) (z : ℝ) :
+    HasDerivAt (fun s => heatKernel (v s) (z - w s))
+      (vd * (heatKernel (v τ₀) (z - w τ₀) * ((z - w τ₀) ^ 2 - v τ₀) / (2 * (v τ₀) ^ 2))
+        + wd * ((z - w τ₀) / (v τ₀) * heatKernel (v τ₀) (z - w τ₀))) τ₀ := by
+  have hcurve : HasDerivAt (fun s => (v s, z - w s)) (vd, -wd) τ₀ :=
+    hv.prodMk (hw.const_sub z)
+  have hcomp := (hasFDerivAt_heatKernel hvpos (z - w τ₀)).comp_hasDerivAt τ₀ hcurve
+  convert hcomp using 1
+  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+    ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd', smul_eq_mul]
+  ring
+
 /-- **Heat-kernel PDE on `heatKernel`**: `∂_t K = (1/2) ∂²_y K`. As an algebraic
 identity on the derivative values from `hasDerivAt_heatKernel_t` and
 `hasDerivAt_heatKernel_y_y`.
@@ -472,6 +526,61 @@ private lemma sq_sub_div_le {t s : ℝ} (ht : 0 < t) (hs_lo : t / 2 < s) (hs_hi 
   rw [div_le_div_iff₀ (by positivity) (by positivity)]
   nlinarith [mul_le_mul_of_nonneg_right habs (sq_nonneg t),
     mul_le_mul_of_nonneg_left ht4s (show (0:ℝ) ≤ w ^ 2 + 3 * t / 2 by positivity)]
+
+/-- **Local domination of the heat kernel under a joint variance + centre perturbation.** When the
+variance `v` stays in `(v₀/2, 3v₀/2)` and the centre `x` within `δ` of `x₀`,
+`K(v, z−x) ≤ √3·√2·e^{δ²/(3v₀)}·K(3v₀, z−x₀)`. The composition of `heatKernel_temporal_le` (variance)
+with `heatKernel_shift_le` (centre); the domination engine for differentiating the price along the
+curve `τ ↦ (σ²τ, log S + (r−σ²/2)τ)`, where both kernel arguments move with `τ`. -/
+lemma heatKernel_loc_le {v₀ v x x₀ δ : ℝ} (hv₀ : 0 < v₀)
+    (hv_lo : v₀ / 2 < v) (hv_hi : v < 3 * v₀ / 2) (hx : |x - x₀| < δ) (z : ℝ) :
+    heatKernel v (z - x)
+      ≤ Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (3 * v₀))) * heatKernel (3 * v₀) (z - x₀) := by
+  have h32 : (0 : ℝ) < 3 * v₀ / 2 := by positivity
+  calc heatKernel v (z - x)
+      ≤ Real.sqrt 3 * heatKernel (3 * v₀ / 2) (z - x) :=
+        heatKernel_temporal_le hv₀ hv_lo hv_hi (z - x)
+    _ ≤ Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (2 * (3 * v₀ / 2)))
+          * heatKernel (2 * (3 * v₀ / 2)) (z - x₀)) :=
+        mul_le_mul_of_nonneg_left (heatKernel_shift_le h32 hx z) (Real.sqrt_nonneg 3)
+    _ = Real.sqrt 3 * (Real.sqrt 2 * Real.exp (δ ^ 2 / (3 * v₀))) * heatKernel (3 * v₀) (z - x₀) := by
+        rw [show 2 * (3 * v₀ / 2) = 3 * v₀ from by ring]; ring
+
+/-- **Curve quadratic-ratio bound** (the `∂_t`-kernel polynomial factor of the curve domination).
+On `v ∈ (v₀/2, 3v₀/2)` with the centre shifted by `≤ d` (`|W − W₀| ≤ d`), the moving denominator is
+absorbed into the fixed `v₀`: `|W²−v|/(2v²) ≤ 2(2W₀²+2d²+3v₀/2)/v₀²`. Isolated as its own lemma so the
+`nlinarith` elaborates without the heartbeat blow-up that defeats it inline. -/
+private lemma curve_sq_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo : v₀ / 2 < v)
+    (hvhi : v < 3 * v₀ / 2) (hW : |W - W₀| ≤ d) (hd : 0 ≤ d) :
+    |W ^ 2 - v| / (2 * v ^ 2) ≤ 2 * (2 * W₀ ^ 2 + 2 * d ^ 2 + 3 * v₀ / 2) / v₀ ^ 2 := by
+  have hvpos : 0 < v := by linarith
+  have hWsq : W ^ 2 ≤ 2 * W₀ ^ 2 + 2 * d ^ 2 := by
+    have hd2 : (W - W₀) ^ 2 ≤ d ^ 2 := by
+      nlinarith [sq_abs (W - W₀), mul_le_mul hW hW (abs_nonneg (W - W₀)) hd]
+    nlinarith [hd2, sq_nonneg (W - 2 * W₀)]
+  have habs : |W ^ 2 - v| ≤ W ^ 2 + v := by rw [abs_le]; constructor <;> nlinarith [sq_nonneg W]
+  have hfac : (0:ℝ) ≤ 4 * v ^ 2 - v₀ ^ 2 := by nlinarith [hvlo, hvpos, hv₀]
+  have hpoly_nn : (0:ℝ) ≤ 2 * W₀ ^ 2 + 2 * d ^ 2 + 3 * v₀ / 2 := by positivity
+  rw [div_le_div_iff₀ (by positivity) (by positivity)]
+  nlinarith [habs, hWsq, hvhi, hvpos, mul_nonneg hpoly_nn hfac, sq_nonneg W₀]
+
+/-- **Curve linear-ratio bound** (the `∂_x`-kernel polynomial factor). Companion to
+`curve_sq_ratio_le`: `|W|/v ≤ 2(W₀²+1+d)/v₀` on `v > v₀/2` with `|W − W₀| ≤ d`. -/
+private lemma curve_abs_ratio_le {v₀ v W W₀ d : ℝ} (hv₀ : 0 < v₀) (hvlo : v₀ / 2 < v)
+    (hW : |W - W₀| ≤ d) (hd : 0 ≤ d) :
+    |W| / v ≤ 2 * (W₀ ^ 2 + 1 + d) / v₀ := by
+  have hvpos : 0 < v := by linarith
+  have hWabs : |W| ≤ W₀ ^ 2 + 1 + d := by
+    have h1 : |W| ≤ |W₀| + d := by
+      have htri : |W| ≤ |W₀| + |W - W₀| := by
+        calc |W| = |W₀ + (W - W₀)| := by ring_nf
+          _ ≤ |W₀| + |W - W₀| := abs_add_le _ _
+      linarith [htri, hW]
+    have h2 : |W₀| ≤ W₀ ^ 2 + 1 := by nlinarith [sq_nonneg (|W₀| - 1), sq_abs W₀, abs_nonneg W₀]
+    linarith
+  rw [div_le_div_iff₀ hvpos (by positivity)]
+  nlinarith [hWabs, hvlo, hvpos, hv₀, abs_nonneg W,
+    mul_nonneg (show (0:ℝ) ≤ W₀ ^ 2 + 1 + d by positivity) (show (0:ℝ) ≤ 2 * v - v₀ by linarith)]
 
 /-- **Parametric differentiation under the integral, for an `h`-weighted kernel family.** The single
 skeleton behind every derivative of a heat-flow integral `p ↦ ∫ z, h z · φ(p, z) dz`: given the
@@ -1070,6 +1179,120 @@ theorem hasDerivAt_feynmanU_xx {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : C
           mul_le_mul_of_nonneg_left hstep (by positivity)
       _ = (3 * Real.sqrt 2 * Real.exp (1 / (2 * t)) / t ^ 2)
             * (Real.exp z * (((z - x) ^ 2 + (3 + t)) * heatKernel (2 * t) (z - x))) := by ring
+
+/-- **Derivative of the Feynman–Kac function along an affine curve** `s ↦ (α s, x₀ + β s)`
+(kernel-side, sub-Gaussian payoff). For `h` continuous with `|h z| ≤ eᶻ`, `α > 0`, `τ > 0`, the price
+`s ↦ feynmanU h (α s) (x₀ + β s)` — with both kernel arguments moving — is differentiable at `τ` with
+`d/ds = ∫ z, h z · (α·∂_t K + β·∂_x K)`. This is the Black–Scholes `τ`-derivative engine (`α = σ²`,
+`β = r − σ²/2`, `x₀ = log S`) and the consumer that makes the heat kernel's joint differentiability
+`hasFDerivAt_heatKernel` load-bearing for pricing. Pointwise derivative: `hasDerivAt_heatKernel_comp`.
+The uniform domination on `s ∈ (τ/2, 3τ/2)` bounds the two terms *separately* by Gaussian-moment
+envelopes (`integrable_exp_mul_poly_heatKernel`) via `heatKernel_loc_le` + `curve_sq_ratio_le` /
+`curve_abs_ratio_le` — no single mega-constant — fed to `hasDerivAt_integral_mul_kernelFamily`. -/
+theorem hasDerivAt_feynmanU_comp {h : ℝ → ℝ} (hhc : Continuous h) (hh : ∀ z, |h z| ≤ Real.exp z)
+    {α β x₀ τ : ℝ} (hα : 0 < α) (hτ : 0 < τ) :
+    HasDerivAt (fun s => feynmanU h (α * s) (x₀ + β * s))
+      (∫ z, h z * (α * (heatKernel (α * τ) (z - (x₀ + β * τ))
+              * ((z - (x₀ + β * τ)) ^ 2 - α * τ) / (2 * (α * τ) ^ 2))
+          + β * ((z - (x₀ + β * τ)) / (α * τ)
+              * heatKernel (α * τ) (z - (x₀ + β * τ)))) ∂volume) τ := by
+  show HasDerivAt (fun s => ∫ z, h z * heatKernel (α * s) (z - (x₀ + β * s)) ∂volume) _ τ
+  have hατ : (0 : ℝ) < α * τ := by positivity
+  have h3ατ : (0 : ℝ) < 3 * (α * τ) := by positivity
+  have hd_nn : (0 : ℝ) ≤ |β| * (τ / 2) := by positivity
+  set Cexp : ℝ :=
+    Real.sqrt 3 * (Real.sqrt 2 * Real.exp ((|β| * (τ / 2) + 1) ^ 2 / (3 * (α * τ)))) with hCexp
+  have hCexp_nn : 0 ≤ Cexp := by rw [hCexp]; positivity
+  refine hasDerivAt_integral_mul_kernelFamily
+    (φ := fun s z => heatKernel (α * s) (z - (x₀ + β * s)))
+    (φ' := fun s z => α * (heatKernel (α * s) (z - (x₀ + β * s))
+          * ((z - (x₀ + β * s)) ^ 2 - α * s) / (2 * (α * s) ^ 2))
+        + β * ((z - (x₀ + β * s)) / (α * s) * heatKernel (α * s) (z - (x₀ + β * s))))
+    (p₀ := τ) (r := τ / 2) hhc (by positivity)
+    (fun s => (continuous_heatKernel (α * s)).comp (continuous_id.sub continuous_const))
+    ((((((continuous_heatKernel (α * τ)).comp (continuous_id.sub continuous_const)).mul
+          (((continuous_id.sub continuous_const).pow 2).sub continuous_const)).div_const
+          _).const_mul α).add
+      ((((continuous_id.sub continuous_const).div_const _).mul
+          ((continuous_heatKernel (α * τ)).comp (continuous_id.sub continuous_const))).const_mul β))
+    (integrable_payoff_mul_heatKernel hατ hhc hh (x₀ + β * τ))
+    (((integrable_exp_mul_poly_heatKernel h3ατ (x₀ + β * τ)
+          ((|β| * (τ / 2)) ^ 2 + 3 * (α * τ) / 4)).const_mul (4 * α * Cexp / (α * τ) ^ 2)).add
+      ((integrable_exp_mul_poly_heatKernel h3ατ (x₀ + β * τ)
+          (1 + |β| * (τ / 2))).const_mul (2 * |β| * Cexp / (α * τ))))
+    ?_ ?_
+  · -- uniform domination: bound the two terms separately by Gaussian-moment envelopes
+    refine ae_of_all _ fun z s hs => ?_
+    rw [Metric.mem_ball, Real.dist_eq, abs_lt] at hs
+    have hs_pos : 0 < s := by linarith [hs.1]
+    have hvpos : 0 < α * s := by positivity
+    have hvlo : α * τ / 2 < α * s := by nlinarith [mul_pos hα (show (0:ℝ) < s - τ / 2 by linarith)]
+    have hvhi : α * s < 3 * (α * τ) / 2 := by
+      nlinarith [mul_pos hα (show (0:ℝ) < 3 * τ / 2 - s by linarith)]
+    set W : ℝ := z - (x₀ + β * s) with hW
+    set W₀ : ℝ := z - (x₀ + β * τ) with hW₀
+    have hKnn : 0 ≤ heatKernel (α * s) W := heatKernel_nonneg hvpos _
+    have hK0nn : 0 ≤ heatKernel (3 * (α * τ)) W₀ := heatKernel_nonneg h3ατ _
+    have hWd : |W - W₀| ≤ |β| * (τ / 2) := by
+      rw [hW, hW₀, show z - (x₀ + β * s) - (z - (x₀ + β * τ)) = β * (τ - s) from by ring, abs_mul]
+      have : |τ - s| ≤ τ / 2 := by rw [abs_le]; constructor <;> linarith
+      exact mul_le_mul_of_nonneg_left this (abs_nonneg β)
+    have hcenter : |(x₀ + β * s) - (x₀ + β * τ)| < |β| * (τ / 2) + 1 := by
+      rw [show x₀ + β * s - (x₀ + β * τ) = β * (s - τ) from by ring, abs_mul]
+      have : |s - τ| < τ / 2 := by rw [abs_lt]; constructor <;> linarith
+      nlinarith [mul_le_mul_of_nonneg_left this.le (abs_nonneg β), abs_nonneg β]
+    have hk : heatKernel (α * s) W ≤ Cexp * heatKernel (3 * (α * τ)) W₀ := by
+      have := heatKernel_loc_le (v₀ := α * τ) (v := α * s) (x := x₀ + β * s) (x₀ := x₀ + β * τ)
+        (δ := |β| * (τ / 2) + 1) hατ hvlo hvhi hcenter z
+      rwa [← hW, ← hW₀, ← hCexp] at this
+    have hrt := curve_sq_ratio_le (v₀ := α * τ) (v := α * s) (W := W) (W₀ := W₀)
+      (d := |β| * (τ / 2)) hατ hvlo hvhi hWd hd_nn
+    have hrx := curve_abs_ratio_le (v₀ := α * τ) (v := α * s) (W := W) (W₀ := W₀)
+      (d := |β| * (τ / 2)) hατ hvlo hWd hd_nn
+    -- |φ'| ≤ the two nonneg envelope-ready terms
+    have e1 : |α * (heatKernel (α * s) W * (W ^ 2 - α * s) / (2 * (α * s) ^ 2))|
+        = α * (heatKernel (α * s) W * (|W ^ 2 - α * s| / (2 * (α * s) ^ 2))) := by
+      rw [abs_mul, abs_of_nonneg hα.le, abs_div, abs_mul, abs_of_nonneg hKnn,
+        abs_of_nonneg (by positivity : (0:ℝ) ≤ 2 * (α * s) ^ 2), mul_div_assoc]
+    have e2 : |β * (W / (α * s) * heatKernel (α * s) W)|
+        = |β| * (|W| / (α * s) * heatKernel (α * s) W) := by
+      rw [abs_mul, abs_mul, abs_div, abs_of_nonneg hvpos.le, abs_of_nonneg hKnn]
+    rw [Real.norm_eq_abs, abs_mul]
+    refine (mul_le_mul (hh z) ((abs_add_le _ _).trans_eq (by rw [e1, e2]))
+      (abs_nonneg _) (Real.exp_nonneg z)).trans ?_
+    rw [mul_add]
+    simp only [Pi.add_apply, ← hW₀]
+    have hr_t_nn : (0:ℝ) ≤ |W ^ 2 - α * s| / (2 * (α * s) ^ 2) := by positivity
+    refine add_le_add ?_ ?_
+    · -- α-term ≤ first envelope
+      calc Real.exp z * (α * (heatKernel (α * s) W * (|W ^ 2 - α * s| / (2 * (α * s) ^ 2))))
+          ≤ Real.exp z * (α * ((Cexp * heatKernel (3 * (α * τ)) W₀)
+              * (2 * (2 * W₀ ^ 2 + 2 * (|β| * (τ / 2)) ^ 2 + 3 * (α * τ) / 2) / (α * τ) ^ 2))) :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left
+                (mul_le_mul hk hrt hr_t_nn (mul_nonneg hCexp_nn hK0nn)) hα.le)
+              (Real.exp_nonneg z)
+        _ = 4 * α * Cexp / (α * τ) ^ 2
+              * (Real.exp z * ((W₀ ^ 2 + ((|β| * (τ / 2)) ^ 2 + 3 * (α * τ) / 4))
+                * heatKernel (3 * (α * τ)) W₀)) := by ring
+    · -- β-term ≤ second envelope
+      calc Real.exp z * (|β| * (|W| / (α * s) * heatKernel (α * s) W))
+          ≤ Real.exp z * (|β| * (2 * (W₀ ^ 2 + 1 + |β| * (τ / 2)) / (α * τ)
+              * (Cexp * heatKernel (3 * (α * τ)) W₀))) :=
+            mul_le_mul_of_nonneg_left
+              (mul_le_mul_of_nonneg_left
+                (mul_le_mul hrx hk hKnn (by positivity)) (abs_nonneg β))
+              (Real.exp_nonneg z)
+        _ = 2 * |β| * Cexp / (α * τ)
+              * (Real.exp z * ((W₀ ^ 2 + (1 + |β| * (τ / 2)))
+                * heatKernel (3 * (α * τ)) W₀)) := by ring
+  · -- pointwise curve derivative
+    refine fun z s hs => ?_
+    rw [Metric.mem_ball, Real.dist_eq, abs_lt] at hs
+    have hs_pos : 0 < s := by linarith [hs.1]
+    exact hasDerivAt_heatKernel_comp (v := fun s => α * s) (w := fun s => x₀ + β * s)
+      (by simpa using (hasDerivAt_id s).const_mul α)
+      (by simpa using ((hasDerivAt_id s).const_mul β).const_add x₀) (by positivity) z
 
 /-- **The Feynman–Kac function solves the heat equation** `∂_t u = ½ ∂_xx u` (the derivative
 *values*). Pointwise on the kernel: `K·((z−x)²−t)/(2t²) = ½·K·((z−x)²−t)/t²`. Combined with

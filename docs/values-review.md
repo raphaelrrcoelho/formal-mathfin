@@ -53,6 +53,37 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-08 (round 3) — ∂_τ landed (Theta via Feynman–Kac) — corpus 269
+
+**Scope**: the Black–Scholes `τ`-derivative via Feynman–Kac — the result that defeated several prior
+attempts (the uniform domination kept hitting Lean's 200k-heartbeat `nlinarith`/`whnf` wall). The
+four-step tower (all green): `hasFDerivAt_heatKernel` (heat kernel jointly Fréchet-differentiable) →
+`hasDerivAt_heatKernel_comp` (curve chain rule) → `hasDerivAt_feynmanU_comp` (∂_τ of the FK function) →
+`hasDerivAt_bsV_tau_fk` (the price's Theta). The breakthrough: **(1)** isolate the polynomial bracket
+bounds (`curve_sq_ratio_le` / `curve_abs_ratio_le`) as standalone lemmas with the moving denominator
+replaced by the constant `v₀` — in isolation `nlinarith` elaborates (the inline failure was the
+`whnf`/`isDefEq` blow-up on a single mega-constant, not the math); **(2)** dominate by a **sum of two
+Gaussian-moment envelopes** (one per kernel-derivative term), never a single mega-constant.
+
+**Panel**: one adversarial reviewer (try-to-refute "net improvement"), synthesised with Opus judgment.
+
+**Findings applied** (2): (a) **[blocking]** the `PDEFromFeynmanKac` module docstring still declared the
+`τ`-derivative "deferred … the same nlinarith/heartbeat wall" — now false (`hasDerivAt_bsV_tau_fk` is
+proved); rewritten to the honest status (Theta landed, only the step-4 PDE assembly remains); (b)
+[minor slop] an unreduced beta-redex `(fun ξ => …) z` in `bsV_tau_fk`'s stated value → `max (e^z−K) 0`.
+
+**Findings accepted / declined**: `hasDerivAt_bsV_tau_fk` is private with no consumer yet — accepted as
+an in-progress Greek awaiting the step-4 PDE assembly, exactly as the already-committed
+`hasDerivAt_bsV_S_fk` (Delta) was; the `sc-thm-9.2.1` benchmark scope-note overclaim ("~300–500 lines
+upstream") is now mildly stale but left untouched (editing a benchmark re-stales the ledger + forces an
+axiom-audit regen for a narrative note; flagged for a future benchmark pass). All other lenses PASS
+(inspired math, idiomatic register, Mathlib coherence, elegance, concept clarity, architectural
+ingenuity — the one genuinely-2D ingredient `hasFDerivAt_heatKernel` makes a single chain rule available).
+
+**Verdict**: PASS. `feynmanU` is now load-bearing for the Black–Scholes time-derivative; the C¹ tower is
+fully consumed. Lean: `lake build` green (no MathFin errors), 19 pytest, ledger 269/269 fresh,
+axiom-clean. Remaining for the full keystone: `∂_SS` via FK + the PDE-operator assembly (step 4).
+
 ## 2026-06-08 (round 2) — parametric unification — corpus 269
 
 **Scope**: the parametric unification of the heat-kernel differentiate-under-the-integral lemmas in

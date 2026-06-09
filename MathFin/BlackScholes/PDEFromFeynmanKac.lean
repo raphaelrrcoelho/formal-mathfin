@@ -47,15 +47,17 @@ load-bearing for pricing.
 Step 1 is proved in `Foundations/FeynmanKacHeatEquation`. This file establishes step 2
 (`bsV_eq_feynmanU`), the discounted-heat-flow bridge (`bsV_eq_discount_feynmanU` — the result that
 makes `feynmanU` load-bearing for pricing), and Delta via Feynman–Kac (`hasDerivAt_bsV_S_fk`, the
-`S`-derivative as a kernel moment). The `τ`-derivative and the PDE assembly (closing step 4) are
-deferred. The conceptual route is settled: the heat kernel is jointly Fréchet-differentiable, so the
-`τ`-derivative is one chain rule along the curve `τ ↦ (σ²τ, log S + (r−σ²/2)τ)` (both kernel arguments
-moving). The remaining obstacle is purely computational — the *uniform domination* needed to
-differentiate that curve under the integral (variance and centre moving together) is the same
-`nlinarith`/heartbeat wall that the earlier brute-force attempt hit; landing it wants a cleaner
-constant-free bound (or an upstream parametric-integral-along-a-curve lemma). The kernel-side heat
-equation `∂_t u = ½ ∂_xx u` (`feynmanU_heat_equation`) and the diff-under-integral skeleton
-(`hasDerivAt_integral_mul_kernelFamily`) that this last step would consume are in place.
+`S`-derivative as a kernel moment) and the `τ`-derivative `hasDerivAt_bsV_tau_fk` (Theta — the product
+rule on the discount `e^{−rτ'}` times the discounted heat flow, with *both* kernel arguments `σ²τ'` and
+`log S + (r−σ²/2)τ'` moving with `τ'`). The Theta consumes `hasDerivAt_feynmanU_comp` and through it the
+heat kernel's joint Fréchet differentiability `hasFDerivAt_heatKernel`, so `feynmanU` is now
+load-bearing for the Black–Scholes time-derivative — the curve domination is handled by bounding the two
+kernel-derivative terms separately (`Foundations.curve_sq_ratio_le` / `curve_abs_ratio_le` +
+`heatKernel_loc_le`), avoiding the single-mega-constant blow-up that defeated the brute force.
+
+Only step 4 — the PDE assembly `−V_τ + ½σ²S²V_SS + rSV_S − rV = e^{−rτ}σ²(½U_xx − U_t) = 0` via
+`feynmanU_heat_equation` — remains: it needs `∂_SS` via Feynman–Kac plus the operator cancellation, on
+top of the in-place Greeks `hasDerivAt_bsV_S_fk` / `hasDerivAt_bsV_tau_fk`.
 -/
 
 @[expose] public section
@@ -147,5 +149,38 @@ private lemma hasDerivAt_bsV_S_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) 
   refine (hchain.const_mul (Real.exp (-(r * τ)))).congr_of_eventuallyEq ?_
   filter_upwards [isOpen_Ioi.mem_nhds hS] with S' hS'
   exact bsV_eq_discount_feynmanU hS' hK hσ hτ
+
+/-- **Step 3 (Theta) — the `τ`-derivative of `bsV`, via Feynman–Kac.** The price's time-decay, derived
+from the heat kernel's curve derivative (`hasDerivAt_feynmanU_comp`): product rule on the discount
+`e^{−rτ'}` and the discounted heat flow (both kernel arguments `σ²τ'` and `log S + (r−σ²/2)τ'` move
+with `τ'`), with the bridge `bsV_eq_discount_feynmanU` for the `τ' > 0` domain. This is the consumer
+that makes `hasDerivAt_feynmanU_comp` — and through it the heat kernel's *joint* differentiability
+`hasFDerivAt_heatKernel` — load-bearing for the Black–Scholes time-derivative. -/
+private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S : ℝ} (hS : 0 < S) {τ : ℝ} (hτ : 0 < τ) :
+    HasDerivAt (fun τ' => bsV K r σ S τ')
+      (-r * Real.exp (-(r * τ))
+          * feynmanU (fun ξ => max (Real.exp ξ - K) 0) (σ ^ 2 * τ)
+              (Real.log S + (r - σ ^ 2 / 2) * τ)
+        + Real.exp (-(r * τ))
+          * (∫ z, max (Real.exp z - K) 0
+              * (σ ^ 2 * (heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))
+                    * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) ^ 2 - σ ^ 2 * τ)
+                    / (2 * (σ ^ 2 * τ) ^ 2))
+                + (r - σ ^ 2 / 2) * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
+                    * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)))) ∂volume)) τ := by
+  have hσ2 : (0 : ℝ) < σ ^ 2 := by positivity
+  have hexp : HasDerivAt (fun τ' => Real.exp (-(r * τ'))) (-r * Real.exp (-(r * τ))) τ := by
+    have h1 : HasDerivAt (fun τ' : ℝ => -(r * τ')) (-r) τ := by
+      simpa using ((hasDerivAt_id τ).const_mul r).neg
+    have h2 := h1.exp
+    convert h2 using 1
+    ring
+  have hfk := hasDerivAt_feynmanU_comp (h := fun ξ => max (Real.exp ξ - K) 0)
+    (callPayoff_continuous K) (callPayoff_le_exp hK) (α := σ ^ 2) (β := r - σ ^ 2 / 2)
+    (x₀ := Real.log S) hσ2 hτ
+  refine (hexp.mul hfk).congr_of_eventuallyEq ?_
+  filter_upwards [isOpen_Ioi.mem_nhds hτ] with τ' hτ'
+  exact bsV_eq_discount_feynmanU hS hK hσ hτ'
 
 end MathFin
