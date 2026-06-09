@@ -24,8 +24,8 @@ not a derivation.
 This file closes that gap from the **probabilistic** side. The Black–Scholes
 value is a Gaussian convolution of the payoff — a Feynman–Kac representation —
 and it satisfies the PDE *because* the heat kernel does. The deep machinery of
-`Foundations/FeynmanKacHeatEquation.lean` (until now consumed by nothing) becomes
-load-bearing for pricing.
+`Foundations/FeynmanKacHeatEquation.lean` — previously an orphan, consumed by no
+pricing result — is now load-bearing for pricing.
 
 ## The program (four steps)
 
@@ -44,20 +44,21 @@ load-bearing for pricing.
 4. **`bsV` solves the BS PDE, via Feynman–Kac**: assemble 1–3 — an independent,
    conceptually grounded derivation of `bs_pde_holds`.
 
-Step 1 is proved in `Foundations/FeynmanKacHeatEquation`. This file establishes step 2
-(`bsV_eq_feynmanU`), the discounted-heat-flow bridge (`bsV_eq_discount_feynmanU` — the result that
-makes `feynmanU` load-bearing for pricing), and Delta via Feynman–Kac (`hasDerivAt_bsV_S_fk`, the
-`S`-derivative as a kernel moment) and the `τ`-derivative `hasDerivAt_bsV_tau_fk` (Theta — the product
-rule on the discount `e^{−rτ'}` times the discounted heat flow, with *both* kernel arguments `σ²τ'` and
-`log S + (r−σ²/2)τ'` moving with `τ'`). The Theta consumes `hasDerivAt_feynmanU_comp` and through it the
-heat kernel's joint Fréchet differentiability `hasFDerivAt_heatKernel`, so `feynmanU` is now
-load-bearing for the Black–Scholes time-derivative — the curve domination is handled by bounding the two
-kernel-derivative terms separately (`Foundations.curve_sq_ratio_le` / `curve_abs_ratio_le` +
-`heatKernel_loc_le`), avoiding the single-mega-constant blow-up that defeated the brute force.
+Step 1 is proved in `Foundations/FeynmanKacHeatEquation`. This file establishes steps 2–4. Step 2 is
+`bsV_eq_feynmanU` with the discounted-heat-flow bridge `bsV_eq_discount_feynmanU` (the result that
+makes `feynmanU` load-bearing for pricing). Step 3 is the three Greeks via Feynman–Kac:
+`hasDerivAt_bsV_S_fk` (Delta — the `S`-derivative as a kernel moment), `hasDerivAt_bsV_tau_fk`
+(Theta — the product rule on the discount `e^{−rτ'}` times the discounted heat flow, with *both*
+kernel arguments `σ²τ'` and `log S + (r−σ²/2)τ'` moving with `τ'`), and `hasDerivAt_bsV_SS_fk`
+(Gamma). The Theta consumes `hasDerivAt_feynmanU_comp` and through it the heat kernel's joint Fréchet
+differentiability `hasFDerivAt_heatKernel`; the curve domination bounds the two kernel-derivative terms
+separately (`curve_sq_ratio_le` / `curve_abs_ratio_le` + `heatKernel_loc_le`), avoiding the
+single-mega-constant blow-up that defeated the brute force.
 
-Only step 4 — the PDE assembly `−V_τ + ½σ²S²V_SS + rSV_S − rV = e^{−rτ}σ²(½U_xx − U_t) = 0` via
-`feynmanU_heat_equation` — remains: it needs `∂_SS` via Feynman–Kac plus the operator cancellation, on
-top of the in-place Greeks `hasDerivAt_bsV_S_fk` / `hasDerivAt_bsV_tau_fk`.
+Step 4 is the capstone `bsV_satisfies_bs_pde_via_feynmanKac`: the PDE assembly
+`−V_τ + ½σ²S²V_SS + rSV_S − rV = e^{−rτ}σ²(½U_xx − U_t) = 0` via `feynmanU_heat_equation` and the
+operator cancellation `−(r−σ²/2) − ½σ² + r = 0`, on top of the in-place Greeks above. The benchmark
+`sc-bs-pde-feynman-kac` re-exports it.
 -/
 
 @[expose] public section

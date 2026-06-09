@@ -73,17 +73,27 @@ blocking findings.**
 done" corrected (dropped the now-`full` time-dependent Itô; Markov 6→5), the FK→BS-PDE keystone surfaced
 in "What's covered"; CITATION.cff 251→254; `sc-thm-9.2.1` scope note (metadata **and** in-snippet)
 de-staled — the "~300–500 lines left as upstream work" claim was false (that infra is built and consumed
-by `sc-bs-pde-feynman-kac`); coverage.md round record.
+by `sc-bs-pde-feynman-kac`); coverage.md round record. **PASS 2** (Lean rebuild) then fixed the
+keystone-tower docstring drift: `PDEFromFeynmanKac` ("Only step 4 remains" → step 4 is the capstone;
+"(until now consumed by nothing)" → load-bearing; wrong `Foundations.` qualifier on opened lemmas; step
+numbering) and `FeynmanKacHeatEquation` (three stale "deferred heat-PDE direction" notes — the work is in
+the file; the "Main results" block now lists `hasFDerivAt_heatKernel` + the `feynmanU` derivatives/heat
+equation; the `heatKernel_t_eq_half_y_y` docstring, which wrongly said "not consumed" when
+`feynmanU_heat_equation` consumes it) — all now honest that the keystone is complete and the heat flow
+load-bearing.
+
+**Orphans — REFLECTED, kept** (per the user's "always reflect if orphans will be used later", which
+flipped a too-aggressive "delete"):
+- `hasDerivAt_feynmanU_t` has zero *code* consumers (only docstring mentions) but is **kept public**: it
+  is the `∂_t` building block the still-open fully-general-`g` PDE + uniqueness will consume, and it
+  completes the natural `∂_t / ∂_x / ∂_xx` heat-flow API triple. Privating it would be wrong.
+- The 3 `unfold;ring` lemmas in `PDEFromIto.lean` (`bsItoDrift_eq_itoDrift2D`,
+  `bsItoDrift_no_time_eq_itoDrift`, `bs_pde_lhs_eq_drift_minus_rV`) are **kept**: they are the named
+  coherence bridges that file exists to state (the bespoke BS drift *is* the general 1D/2D Itô drift
+  specialised; the PDE LHS = drift − rV), carrying real conceptual content, and the file's own deferred
+  martingale-route continuation (discounted price is a `Q`-martingale ⟹ driftless) consumes them. Not slop.
 
 **Deferred, prioritized** (catalogued so nothing is lost — a clean follow-up cleanup):
-- *[Lean, one rebuild] keystone-tower docstring drift*: `PDEFromFeynmanKac` "Only step 4 remains" /
-  "(until now consumed by nothing)" / inconsistent `Foundations.` qualifier / step-3 numbering;
-  `FeynmanKacHeatEquation` three stale "deferred heat-PDE direction" notes (the work is in the file), the
-  module "Main results" block omitting the new lemmas, and the `feynmanU_heat_equation` docstring implying
-  an unstated assembly. Plus `hasDerivAt_feynmanU_t` is now an unconsumed public export → add the
-  heat-equation endpoint (consumes `_t`) or mark `private`.
-- *[Lean] `PDEFromIto.lean`*: 3 orphan `unfold;ring` lemmas (`bsItoDrift_eq_itoDrift2D`,
-  `bsItoDrift_no_time_eq_itoDrift`, `bs_pde_lhs_eq_drift_minus_rV`) — zero references repo-wide → delete.
 - *[Lean, umbrella] Foundations orphan modules* (~700 lines, zero consumers): `VarianceSwapEquivalence`
   (a literal re-export anti-wrapper), `StochasticInterval` (the abandoned upstream-PR body), `PricingKernel`,
   `FTAPMultiState` → wire to a benchmark or delete. (`PricingFromBrownian` is intentional BM-grounding — keep.)

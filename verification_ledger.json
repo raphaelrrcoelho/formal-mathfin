@@ -2048,10 +2048,10 @@
     },
     "sc-bs-pde-feynman-kac": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-08",
-      "elapsed_s": 60.6,
-      "input_hash": "35a3ce547704e7f74af91d347d1124c3019347a580308e03166f2a53c0dea218",
-      "verified_at_commit": "9af309f"
+      "date": "2026-06-09",
+      "elapsed_s": 45.9,
+      "input_hash": "bad860ac578bc4ff603442718bc3cd35df7f19e10c27d13be37b9eb4e7297f01",
+      "verified_at_commit": "7bf8139"
     },
     "sc-discrete-cubing-identity": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2139,10 +2139,10 @@
     },
     "sc-thm-9.2.1": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-08",
-      "elapsed_s": 0.1,
-      "input_hash": "66d3569d15b8df50bb2f538ba259beceb23081ec4cbc53bfb2b49954f2949d4d",
-      "verified_at_commit": "81022cc"
+      "date": "2026-06-09",
+      "elapsed_s": 210.7,
+      "input_hash": "44da5d5442845a8d5c31636830c387426a6f2e89111fac79e022694c26faf269",
+      "verified_at_commit": "7bf8139"
     }
   }
 }
