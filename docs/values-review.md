@@ -53,6 +53,41 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-08 (round 2) — parametric unification — corpus 269
+
+**Scope**: the parametric unification of the heat-kernel differentiate-under-the-integral lemmas in
+`Foundations/FeynmanKacHeatEquation` — new skeleton `hasDerivAt_integral_mul_kernelFamily` + extracted
+`heatKernel_temporal_le` / `sq_sub_div_le` / `integrable_payoff_mul_heatKernel`, with `hasDerivAt_phi`
+and `hasDerivAt_feynmanU_{t,x,xx}` refactored to route through it (net ≈ −55 lines); the
+`exp_mul_heatKernel` docstring made honest. The timed-out ∂_τ tower (the heat kernel's joint Fréchet
+derivative + its curve derivative + `feynmanU_comp`) was *validated* but **removed**: its uniform
+domination hits the 200k-heartbeat wall — the same obstacle as the earlier brute force — so it was kept
+zero-orphan rather than shipped behind a `maxHeartbeats` discharge (which would itself be slop).
+
+**Panel**: three reviewers — (1) zero-slop / idiomatic register / Mathlib coherence; (2) elegance /
+concept clarity / architecture; (3) adversarial abstraction audit (try to refute "net improvement").
+**No blocking findings — all three judged it a net improvement.**
+
+**Findings applied** (3): (a) stale cross-ref in `heatKernel_shift_le` (`hasDerivAt_phi` →
+`heatKernel_temporal_le`); (b) `integrable_payoff_mul_heatKernel` docstring overclaim ("every
+diff-under-integral lemma" → the `_t`/`_x` lemmas, since `_phi` uses the Gaussian-integrability route
+and `_xx` a first-derivative integrand); (c) **[adversarial, deepest]** the temporal polynomial-ratio
+bound `|w²−s|/(2s²) ≤ 2(w²+3t/2)/t²` was still duplicated verbatim (modulo `y` vs `z−x`) between
+`hasDerivAt_phi` and `_t` — extracted as the private `sq_sub_div_le`, so the shared estimate is now
+named and the per-lemma dominations are genuinely distinct (making the skeleton docstring's claim true).
+
+**Findings declined** (with reason): "remove the named `hs_pos`" — load-bearing via `positivity`'s
+context search, removing it breaks the build; param-lemma arg reorder + skeleton rename — subjective
+idiom not worth touching four green call sites; restore "Cameron–Martin" to the `exp_mul_heatKernel`
+title — honesty wins (it is the completing-the-square real-analysis identity, *not* the measure change;
+the Cameron–Martin/Girsanov connection stays in the body); `_xx`'s interleaved `?_` argument
+ergonomics — an honest, accepted cost (its base point is a first-derivative integrand, not a raw
+kernel product, so it cannot use `integrable_payoff_mul_heatKernel`).
+
+**Verdict**: PASS. The unification is elegant, fully consumed (4 callers + shared helpers), and reduces
+duplication without hiding the genuinely-distinct dominations. Lean: `lake build` green (no MathFin
+errors), 19 pytest pass, ledger 269/269 fresh, axiom-clean.
+
 ## 2026-06-08 — commit 3beb170 — corpus 269
 
 **Scope**: the Feynman–Kac → BS-PDE *keystone core* — step 1 (kernel-side heat equation

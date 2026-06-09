@@ -48,9 +48,14 @@ Step 1 is proved in `Foundations/FeynmanKacHeatEquation`. This file establishes 
 (`bsV_eq_feynmanU`), the discounted-heat-flow bridge (`bsV_eq_discount_feynmanU` — the result that
 makes `feynmanU` load-bearing for pricing), and Delta via Feynman–Kac (`hasDerivAt_bsV_S_fk`, the
 `S`-derivative as a kernel moment). The `τ`-derivative and the PDE assembly (closing step 4) are
-deferred: a direct differentiate-under-the-integral domination proved computationally unwieldy, and
-the elegant route is `C¹`-from-continuous-partials (`HasFDerivAt feynmanU` from continuity of
-`∂_t`/`∂_x`, then one chain rule), to be built next.
+deferred. The conceptual route is settled: the heat kernel is jointly Fréchet-differentiable, so the
+`τ`-derivative is one chain rule along the curve `τ ↦ (σ²τ, log S + (r−σ²/2)τ)` (both kernel arguments
+moving). The remaining obstacle is purely computational — the *uniform domination* needed to
+differentiate that curve under the integral (variance and centre moving together) is the same
+`nlinarith`/heartbeat wall that the earlier brute-force attempt hit; landing it wants a cleaner
+constant-free bound (or an upstream parametric-integral-along-a-curve lemma). The kernel-side heat
+equation `∂_t u = ½ ∂_xx u` (`feynmanU_heat_equation`) and the diff-under-integral skeleton
+(`hasDerivAt_integral_mul_kernelFamily`) that this last step would consume are in place.
 -/
 
 @[expose] public section
