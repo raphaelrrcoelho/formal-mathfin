@@ -53,6 +53,34 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-08 (round 4) — the keystone complete: BS PDE from Feynman–Kac — corpus 269
+
+**Scope**: step 4 — `bsV_satisfies_bs_pde_via_feynmanKac`: the Black–Scholes PDE
+`−∂_τV + ½σ²S²∂_SSV + rS∂_SV − rV = 0` derived *independently* from the Feynman–Kac representation,
+closing the two-tower gap. Plus `hasDerivAt_bsV_SS_fk` (Gamma via FK) and the two integrability helpers
+(`integrable_payoff_mul_d{t,x}K`). The whole chain — `hasFDerivAt_heatKernel → hasDerivAt_heatKernel_comp
+→ hasDerivAt_feynmanU_comp → {Δ,Γ,Θ Greeks} → the PDE` — is now consumed end-to-end; `feynmanU` is
+load-bearing for the PDE.
+
+**Panel**: one adversarial reviewer (try-to-refute + no-smuggling audit), synthesised with Opus judgment.
+**No blocking findings.** Verified the proof is honest: it genuinely rests on `feynmanU_heat_equation`
+(the kernel identity `∂_t K = ½ ∂_xx K`) + the exact drift cancellation (`U_x` coeff
+`−(r−σ²/2)−½σ²+r = 0`, `U_xx` coeff `−½σ²+½σ²=0`), with the DCT/uniform-domination content living in the
+already-proved `hasDerivAt_feynmanU_comp` — no smuggling.
+
+**Findings applied** (2): dropped an unused `with hc₀`; docstring clarified that the hard
+differentiability work is in `feynmanU_comp` and `feynmanU_heat_equation` is only the algebraic kernel
+identity. **Declined**: (a) the reviewer's "`hSne` is dead" — false, it is used by the final `field_simp`
+to clear the `S`-powers (kept); (b) the reviewer's idiom suggestion `simp only []`→`dsimp only` —
+*tried and reverted*: `dsimp only` does **not** beta-reduce the `feynmanU_heat_equation` `h z`-redex here
+(it broke the build), so `simp only []` is the correct tactic. **Deferred**: the ~10-line copy-paste
+between `integrable_payoff_mul_d{t,x}K` (a future unified skeleton); and **benchmark wiring** — the public
+keystone theorem is not yet cited by a corpus entry (the only substantive open item; adding one triggers
+an axiom-audit regen + ledger, deferred at this budget) — flagged as the immediate follow-up.
+
+**Verdict**: PASS — the four-step keystone (kernel heat equation → FK price representation → discounted
+heat flow → PDE) is complete, sound, axiom-clean. lake build green, 19 pytest, ledger 269/269 fresh.
+
 ## 2026-06-08 (round 3) — ∂_τ landed (Theta via Feynman–Kac) — corpus 269
 
 **Scope**: the Black–Scholes `τ`-derivative via Feynman–Kac — the result that defeated several prior
