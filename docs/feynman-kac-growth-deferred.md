@@ -1,9 +1,26 @@
-# Feynman–Kac (growth-controlled heat equation) — explored, then deferred
+# Feynman–Kac (growth-controlled heat equation) — explored, deferred, then SUPERSEDED
+
+> **SUPERSEDED 2026-06-08 — the kernel-differentiation FK route landed.** The chain
+> sketched in *What this was* (`∂ₓ/∂ₓₓ/∂ₜ feynmanU` under the integral + the kernel PDE
+> `∂ₜ K = ½ ∂_yy K` ⟹ the BS PDE) is now **built and load-bearing**, not deferred.
+> `MathFin/Foundations/FeynmanKacHeatEquation.lean` proves
+> `hasDerivAt_feynmanU_{t,x,xx}` (routed through the parametric skeleton
+> `hasDerivAt_integral_mul_kernelFamily`) and `feynmanU_heat_equation`;
+> `MathFin/BlackScholes/PDEFromFeynmanKac.lean` composes them into the keystone
+> `bsV_satisfies_bs_pde_via_feynmanKac` (the BS PDE derived *independently* of Itô, via the
+> heat kernel's joint Fréchet-differentiability `hasFDerivAt_heatKernel`), wired to the
+> corpus as `sc-bs-pde-feynman-kac`. So `feynmanU` is no longer an orphan — it is the heat
+> flow the Black–Scholes Theta/Delta/Gamma and the PDE all consume. What the
+> *Why deferred* section below got right is the **boundary**: this is the
+> constant-coefficient (closed-form) case; the genuinely-open work is the
+> **variable-coefficient** FK on the general-Itô/SDE layer (local vol, Heston), plus the
+> fully-general continuous-`g` PDE + uniqueness. The text below is kept as the historical
+> record of the deferral and as the design notes whose plan was ultimately executed.
 
 **Status:** built + verified, then **reverted on 2026-05-29** (commit `9b016b1`; the
-lemmas lived in-tree at `eaa5c59`). **Not needed for mathematical finance as the library
-currently stands** — see *Why deferred*. The three verified foundation lemmas are
-preserved verbatim below for posterity / revival.
+lemmas lived in-tree at `eaa5c59`), then **revived and completed 2026-06-08** as the
+Feynman–Kac → BS-PDE keystone (see the superseded banner above). The three verified
+foundation lemmas are preserved verbatim below for posterity / revival.
 
 This follows the same convention as [`ito-integral-clm-deferred.md`](ito-integral-clm-deferred.md):
 a design + working-code record for a direction that is sound but not currently

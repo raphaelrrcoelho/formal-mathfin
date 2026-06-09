@@ -558,3 +558,48 @@ general `σ(s,ω)`); hammer re-pilot at the rc2→stable toolchain bump; the
 Markov renewal/spectral layers if that cluster is ever prioritized.
 (`sc-thm-7.1.2` time-dependent Itô: DONE 2026-06-07 — Summit A′ landed, see
 the Itô bounded pair above.)
+
+## phase: Feynman–Kac → Black–Scholes PDE keystone (2026-06-08)
+
+the second, **Itô-independent** derivation that the discounted risk-neutral
+price solves the Black–Scholes PDE — closing the "two-tower" gap (the deep
+Itô tower had no pricing consumer; the heat-flow `feynmanU` was an orphan).
+this is the direction recorded as "deferred — not needed ever" in
+`docs/feynman-kac-growth-deferred.md`, now **revived and completed** (that
+note carries a superseded banner).
+
+- **the heat-flow engine** (`Foundations/FeynmanKacHeatEquation.lean`): the
+  heat kernel `K(t,y) = (√(2πt))⁻¹ e^{−y²/2t}` is **jointly Fréchet-
+  differentiable** (`hasFDerivAt_heatKernel`) — the one genuinely-2D
+  ingredient, so a single curve chain rule serves all three partials.
+  `hasDerivAt_feynmanU_{t,x,xx}` differentiate `feynmanU g t x = ∫ z, g z ·
+  K(t, z−x) dz` under the integral (dominated convergence, routed through the
+  parametric skeleton `hasDerivAt_integral_mul_kernelFamily`; `g` need only be
+  continuous + growth-controlled, so the call's kink is sidestepped). the
+  kernel identity `feynmanU_heat_equation` is `∂_t K = ½ ∂_xx K`.
+- **the keystone** (`BlackScholes/PDEFromFeynmanKac.lean`,
+  `bsV_satisfies_bs_pde_via_feynmanKac`): the BS Greeks
+  `hasDerivAt_bsV_{tau,S,SS}_fk` follow from the heat flow by the log-
+  transform `S = eˣ` + discount `e^{−r(T−t)}`; the BS PDE assembles by exact
+  drift cancellation (`U_x` coeff `−(r−σ²/2)−½σ²+r = 0`, `U_xx` coeff
+  `−½σ²+½σ²=0`). the ∂_τ wall (the uniform-domination `nlinarith`/200k-
+  heartbeat blow-up that defeated several earlier attempts) fell by isolating
+  the polynomial bracket bounds as standalone lemmas with the moving
+  denominator replaced by the constant `v₀`, and dominating by a **sum of two
+  Gaussian-moment envelopes** (one per kernel-derivative term) rather than a
+  single mega-constant.
+- **wired**: corpus entry `sc-bs-pde-feynman-kac` (`full`); the
+  `sc-thm-9.2.1` scope note de-staled (its "~300–500 lines upstream" claim
+  was false — the infra is built and consumed). bridge row "FK" in
+  `bridges.md`. counts: corpus 269→**270**, full 235→**236**, delivery-ready
+  **254**/270.
+
+**scope honesty:** this is the **constant-coefficient** (closed-form) case.
+the genuinely-open FK work is **variable-coefficient** (`σ(S,t)` local vol,
+Heston) on the general-Itô/SDE layer — a different, much harder theorem — plus
+the fully-general continuous-`g` PDE + uniqueness.
+
+**Next candidates from here:** the deferred cleanup catalogued in
+`docs/values-review.md` round 5 (Foundations orphan-module wire-or-delete;
+`sc-thm-8.2.5` SDE-faithfulness; blueprint spine regen tagging the keystone
+`@[blueprint]`); P1 the explicit CRR→BS error-constant paper.
