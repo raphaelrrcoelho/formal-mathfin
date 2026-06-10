@@ -102,6 +102,8 @@ import MathFin.Foundations.ItoIntegralL2
 import MathFin.Foundations.ItoIntegralCLM
 -- The elementary Itô integral as a process `t ↦ (V●B)_t`, with genuine `L²` content
 import MathFin.Foundations.ItoIntegralProcess
+-- The Itô integral process is an adapted L² martingale (Summit B / B1a)
+import MathFin.Foundations.ItoIntegralProcessMartingale
 -- Pathwise discrete Itô identity for `f(x) = x²` (the squaring keystone)
 import MathFin.Foundations.ItoSquaringIdentity
 -- Polynomial Itô remainders (x³, x⁴) + the pathwise discrete cubing identity

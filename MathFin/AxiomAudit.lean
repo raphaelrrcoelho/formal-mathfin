@@ -549,4 +549,19 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.reflectionPrincipleEquiv_below' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.reflectionPrincipleEquiv_below
 
+-- Summit B / B1a (2026-06-10): the elementary Itô integral, viewed as a process
+-- `t ↦ (V●B)_t`, is an adapted L² martingale
+-- (Foundations/ItoIntegralProcessMartingale.lean). Infrastructure for the
+-- gated Girsanov/Lévy/martingale-representation/SDE cluster; no corpus entry
+-- yet (the `full` entry lands with B1b, the general integrand).
+
+/-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcess_adaptedAt' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcess.itoSimpleProcess_adaptedAt
+
+/-- info: 'MathFin.ItoIntegralProcess.condExp_adapted_mul_increment' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcess.condExp_adapted_mul_increment
+
+/-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcess_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcess.itoSimpleProcess_isMartingale
+
 end MathFin.AxiomAudit
