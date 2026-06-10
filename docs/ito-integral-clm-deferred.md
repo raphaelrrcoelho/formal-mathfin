@@ -136,3 +136,28 @@ with `ν = timeMeasure`, `μ` the probability measure, `𝓕 = natFiltration`.
 - The genuine density gap with **no** high-level shortcut: *elementary*-predictable-set
   indicators (SimpleProcess) dense in the *predictable* σ-algebra's L² — `Lp.simpleFunc.dense`
   gives general-simple, leaving the π-system step. This is why the CLM is genuinely ~160 lines.
+
+## 2026-06-10 — `SimpleProcess`/`L2Predictable` unification: verdict = already coherent, no action
+
+The round-6 values review left "the `SimpleProcess`/`L2Predictable` unification" as a
+deferred consolidation item. Scoped 2026-06-10 (as the warm-up to the Summit B / B1a
+integral-as-process work) against the two embedding chains:
+
+- **Infinite-horizon** (`ItoIntegralL2.lean`): `simpleProcessL2` (into
+  `(timeMeasure.prod μ).trim`), `itoAssembly`, `simpleAssembly`, `assembly_isometry`.
+- **Finite `[0,T]`** (`ItoIntegralCLM.lean`): `simpleProcessL2_T` (into `trimMeasure_T`),
+  `itoAssembly_T`, `simpleAssembly_T`, `assembly_isometry_T`.
+
+The `_T` layer **already consumes** the infinite-horizon layer at every substantive point:
+`memLp_uncurry_trim_T = (memLp_uncurry_trim …).restrict` (CLM:281–282);
+`itoAssembly_T = ItoIntegralL2.itoAssembly.comp (TBoundedSP …).subtype` (CLM:419–421);
+`assembly_isometry_T` closes by `exact ItoIntegralL2.assembly_isometry` (CLM:431);
+`simpleProcessL2_T_norm_eq` unfolds to `ItoIntegralL2.simpleProcessL2` (CLM:395). The only
+standalone defs (`simpleProcessL2_T`, `simpleAssembly_T`) are genuine **distinct objects over
+the T-restricted measure `trimMeasure_T`** — the entire reason the fixed-`T` CLM exists —
+related to their infinite-horizon counterparts by the restrict/norm bridges already present.
+They cannot be collapsed to one definition (different measures), and forcing it would add
+coupling for cosmetic dedup.
+
+**Verdict: no action.** The unification is already realized as *consumption*; the residual is
+deliberate type-level distinctness. This closes the round-6 deferred item.
