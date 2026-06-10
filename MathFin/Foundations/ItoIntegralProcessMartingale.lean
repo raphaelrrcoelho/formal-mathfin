@@ -57,5 +57,48 @@ theorem itoSimpleProcess_adaptedAt (hBmeas : ∀ t, Measurable (B t))
     simp only [h1, h2, sub_self, mul_zero]
     exact measurable_const
 
+variable [hB : IsPreBrownian B μ]
+
+/-- **Conditional martingale-difference.** For `φ` adapted at `t₀ ≤ t₁` and
+bounded, `μ[φ·(B_{t₁}−B_{t₀}) | 𝓕_{t₀}] = 0` — the `condExp` lift of the
+unconditional `ItoIsometryAdapted.integral_adapted_mul_increment`, via the
+set-integral characterisation of conditional expectation (the candidate `0`
+agrees with `φ·ΔB` on every `𝓕_{t₀}`-set, since `(s.indicator φ)·ΔB` is the
+unconditional martingale-difference). -/
+theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
+    {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) {φ : Ω → ℝ}
+    (hφ : ItoIsometryAdapted.AdaptedAt B t₀ φ) {C : ℝ} (hC : ∀ ω, |φ ω| ≤ C) :
+    μ[fun ω => φ ω * (B t₁ ω - B t₀ ω) | ItoIntegralL2.natFiltration hBmeas t₀]
+      =ᵐ[μ] 0 := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  have hm : ItoIntegralL2.natFiltration hBmeas t₀ ≤ mΩ :=
+    (ItoIntegralL2.natFiltration hBmeas).le t₀
+  have hφm : Measurable φ := hφ.measurable hBmeas
+  have hφ_L2 : MemLp φ 2 μ :=
+    MemLp.of_bound hφm.aestronglyMeasurable C
+      (ae_of_all _ fun ω => (Real.norm_eq_abs _).trans_le (hC ω))
+  have hg_int : Integrable (fun ω => φ ω * (B t₁ ω - B t₀ ω)) μ :=
+    (ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas ht hφ hφ_L2).integrable
+      (by norm_num)
+  symm
+  refine ae_eq_condExp_of_forall_setIntegral_eq hm hg_int
+    (fun s _ _ => (integrable_zero Ω ℝ μ).integrableOn) (fun s hs _ => ?_) ?_
+  · -- `∫_s 0 = ∫_s φ·ΔB`, and `∫_s φ·ΔB = ∫ (s.indicator φ)·ΔB = 0`.
+    have hind_adapt : ItoIsometryAdapted.AdaptedAt B t₀ (s.indicator φ) := by
+      have h1 : ItoIsometryAdapted.AdaptedAt B t₀ (s.indicator (1 : Ω → ℝ)) :=
+        ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas
+          ((measurable_const :
+            Measurable[ItoIntegralL2.natFiltration hBmeas t₀] (1 : Ω → ℝ)).indicator hs)
+      have heq : (fun ω => s.indicator (1 : Ω → ℝ) ω * φ ω) = s.indicator φ := by
+        funext ω; by_cases h : ω ∈ s <;> simp [h]
+      exact heq ▸ h1.mul hφ
+    have heq2 : Set.indicator s (fun ω => φ ω * (B t₁ ω - B t₀ ω))
+        = fun ω => s.indicator φ ω * (B t₁ ω - B t₀ ω) := by
+      funext ω; by_cases h : ω ∈ s <;> simp [h]
+    simp only [Pi.zero_apply, integral_zero]
+    rw [← integral_indicator (hm s hs), heq2]
+    exact (ItoIsometryAdapted.integral_adapted_mul_increment hBmeas ht hind_adapt).symm
+  · exact stronglyMeasurable_const.aestronglyMeasurable
+
 end ItoIntegralProcess
 end MathFin
