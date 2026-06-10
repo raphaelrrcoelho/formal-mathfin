@@ -16,6 +16,7 @@ lean/build/
 .agents/
 .codex/
 .claude/settings.local.json
+.playwright-mcp/
 
 # OS / IDE
 .DS_Store
