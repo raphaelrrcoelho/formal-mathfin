@@ -224,6 +224,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcess (memLp_itoSimpleProcess). Built on Degenne's SimpleProcess. Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-simple-process-martingale",
+      "name": "Elementary Ito Integral is an L2 Martingale",
+      "description": "For a pre-Brownian motion B and a simple adapted process V, the process-level Ito integral t -> (V dot B)_t is a martingale in the natural Brownian filtration. The defining property of the Ito integral, and the foundation the gated Girsanov / Levy / martingale-representation / SDE results rest on.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessMartingale\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcess\nopen scoped NNReal ENNReal\n\ntheorem itoSimpleProcess_isMartingale_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ t, Measurable (B t))\n    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :\n    Martingale (fun t ω => itoSimpleProcess hBmeas V t ω)\n      (ItoIntegralL2.natFiltration hBmeas) μ :=\n  itoSimpleProcess_isMartingale hBmeas V\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Martingale property of the elementary Ito integral (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessMartingale (itoSimpleProcess_isMartingale). The elementary Ito integral t -> (V dot B)_t is an L2 martingale in the natural Brownian filtration; the crux is the conditional martingale-difference E[phi * (B_t1 - B_t0) | F_t0] = 0, lifted from the unconditional integral_adapted_mul_increment via the set-integral characterization of conditional expectation (ae_eq_condExp_of_forall_setIntegral_eq). Built on Degenne's SimpleProcess + the weak Markov property. Axioms-clean."
+      }
+    },
+    {
+      "id": "sc-ito-simple-process-isometry",
+      "name": "Time-Indexed Ito Isometry on Simple Processes",
+      "description": "The time-indexed Ito isometry: for a simple adapted process V, E[(V dot B)_t^2] equals the predictable-rectangle double sum with every interval endpoint truncated at t. The process form of the terminal Ito isometry that the continuous L2 Ito-integral construction rests on.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessMartingale\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcess\nopen scoped NNReal ENNReal\n\ntheorem itoSimpleProcess_isometry_time_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ t, Measurable (B t))\n    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) (t : ℝ≥0) :\n    ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ\n      = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,\n          (∫ ω, V.value p ω * V.value q ω ∂μ)\n            * max 0 ((min ((min p.2 t : ℝ≥0) : ℝ) ((min q.2 t : ℝ≥0) : ℝ))\n                - (max ((min p.1 t : ℝ≥0) : ℝ) ((min q.1 t : ℝ≥0) : ℝ))) :=\n  itoSimpleProcess_isometry_time hBmeas V t\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Time-indexed Ito isometry on simple processes (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessMartingale (itoSimpleProcess_isometry_time). E[(V dot B)_t^2] = sum over predictable rectangles (p,q) of E[V(p)*V(q)] * vol of the overlap of the t-truncated intervals; the terminal itoSimple_sq_integral is the t-past-all-endpoints case. Cross terms vanish by the weak Markov property, diagonal terms give the deterministic overlap (rect_increment_pairing), rectangles whose left endpoint is past t collapse to zero. Axioms-clean."
+      }
+    },
+    {
+      "id": "sc-ito-simple-process-l2-continuity",
+      "name": "Elementary Ito Integral is L2-Continuous in Time",
+      "description": "The elementary Ito integral is continuous as an L2(mu)-valued process: t -> (V dot B)_t is a continuous map into Lp 2. The path-regularity that completes 'continuous L2 martingale'.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessMartingale\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcess\nopen scoped NNReal ENNReal\n\ntheorem itoSimpleProcessLp_l2_continuous_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ t, Measurable (B t))\n    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :\n    Continuous (fun t : ℝ≥0 => (itoSimpleProcessLp hBmeas V t : Lp ℝ 2 μ)) :=\n  itoSimpleProcessLp_l2_continuous hBmeas V\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "L2-continuity of the elementary Ito integral (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessMartingale (itoSimpleProcessLp_l2_continuous). The map t -> (V dot B)_t into Lp 2 mu is continuous: the increment norm-squared ||(V dot B)_t - (V dot B)_s||_2^2 <= (|support| * sum_p E[V(p)^2]) * |t - s| (a sqrt-Holder modulus) via Cauchy-Schwarz over the finite support and the single-increment isometry integral_adapted_sq_mul_increment_sq (no cross terms). Axioms-clean."
+      }
     }
   ]
 }
