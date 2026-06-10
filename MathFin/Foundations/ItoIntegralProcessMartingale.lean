@@ -269,5 +269,136 @@ theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
           rw [integral_congr_ae (Filter.Eventually.of_forall hz), integral_zero, hp1, hp2,
             max_eq_left (sub_nonpos.mpr ((min_le_left _ _).trans (le_max_left _ _))), mul_zero]
 
+/-- **`L²`-continuity.** `t ↦ (V●B)_t` is continuous into `Lp ℝ 2 μ`. For `s ≤ t`
+the increment `(V●B)_t − (V●B)_s = ∑_p V(p)·(B_{a_p∨(p.2∧t)} − B_{a_p})`
+(`a_p = p.1∨s`) is a finite sum of adapted Brownian increments over sub-intervals of
+`(s, t]` (`clamped_increment_eq`). Cauchy–Schwarz over the finite support plus the
+single-increment isometry `integral_adapted_sq_mul_increment_sq` give the `√`-Hölder
+modulus `‖(V●B)_t − (V●B)_s‖² ≤ (|support|·∑_p E[V(p)²])·|t − s|`, whence continuity. -/
+theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
+    Continuous (fun t : ℝ≥0 => (itoSimpleProcessLp hBmeas V t : Lp ℝ 2 μ)) := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  set C : ℝ := (V.value.support.card : ℝ)
+    * ∑ p ∈ V.value.support, ∫ ω, (V.value p ω) ^ 2 ∂μ with hC
+  have hVsq_nonneg : ∀ p, 0 ≤ ∫ ω, (V.value p ω) ^ 2 ∂μ :=
+    fun p => integral_nonneg fun ω => sq_nonneg _
+  have hC0 : 0 ≤ C :=
+    mul_nonneg (Nat.cast_nonneg _) (Finset.sum_nonneg fun p _ => hVsq_nonneg p)
+  -- `L²`-modulus on an ordered pair: `∫ ((V●B)_t − (V●B)_s)² ≤ C·(t − s)` for `s ≤ t`.
+  have hmod : ∀ {s t : ℝ≥0}, s ≤ t →
+      ∫ ω, (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2 ∂μ
+        ≤ C * ((t : ℝ) - s) := by
+    intro s t hst
+    have hadapt : ∀ p, ItoIsometryAdapted.AdaptedAt B (max p.1 s) (V.value p) := fun p =>
+      (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)).mono
+        (le_max_left _ _)
+    have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p =>
+      MemLp.of_bound ((V.measurable_value p).mono
+          ((ItoIntegralL2.natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
+        V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+    have hXL2 : ∀ p, MemLp (fun ω => V.value p ω
+        * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) 2 μ := fun p =>
+      ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (le_max_left _ _) (hadapt p) (hVL2 p)
+    have hintXsq : ∀ p, Integrable (fun ω => (V.value p ω
+        * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2) μ :=
+      fun p => (hXL2 p).integrable_sq
+    have hgdiff : ∀ ω, itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω
+        = ∑ p ∈ V.value.support, V.value p ω
+            * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω) := by
+      intro ω
+      rw [itoSimpleProcess_apply, itoSimpleProcess_apply, Finsupp.sum, Finsupp.sum,
+        ← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl fun p hp => ?_
+      have hcl := clamped_increment_eq (B := B) (V.le_of_mem_support_value p hp) hst ω
+      rw [← mul_sub, hcl]
+    have hsq_int : Integrable (fun ω => (∑ p ∈ V.value.support, V.value p ω
+        * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2) μ :=
+      (memLp_finsetSum _ fun p _ => hXL2 p).integrable_sq
+    have hcard_int : Integrable (fun ω => (V.value.support.card : ℝ)
+        * ∑ p ∈ V.value.support, (V.value p ω
+          * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2) μ :=
+      (integrable_finsetSum _ fun p _ => hintXsq p).const_mul _
+    calc ∫ ω, (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2 ∂μ
+        = ∫ ω, (∑ p ∈ V.value.support, V.value p ω
+            * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2 ∂μ := by
+          refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+          simp only [hgdiff]
+      _ ≤ ∫ ω, (V.value.support.card : ℝ) * ∑ p ∈ V.value.support, (V.value p ω
+            * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2 ∂μ := by
+          refine integral_mono hsq_int hcard_int fun ω => ?_
+          have h := Finset.sum_mul_sq_le_sq_mul_sq V.value.support (fun _ => (1 : ℝ))
+            (fun p => V.value p ω * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω))
+          simpa only [one_mul, one_pow, Finset.sum_const, nsmul_eq_mul, mul_one] using h
+      _ = (V.value.support.card : ℝ) * ∑ p ∈ V.value.support, ∫ ω, (V.value p ω
+            * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2 ∂μ := by
+          rw [integral_const_mul, integral_finsetSum _ fun p _ => hintXsq p]
+      _ ≤ C * ((t : ℝ) - s) := by
+          rw [hC, mul_assoc]
+          refine mul_le_mul_of_nonneg_left ?_ (Nat.cast_nonneg _)
+          rw [Finset.sum_mul]
+          refine Finset.sum_le_sum fun p hp => ?_
+          have hXsq_eq : ∫ ω, (V.value p ω
+              * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2 ∂μ
+              = (∫ ω, (V.value p ω) ^ 2 ∂μ)
+                * (((max (max p.1 s) (min p.2 t) : ℝ≥0) : ℝ) - ((max p.1 s : ℝ≥0) : ℝ)) := by
+            rw [← ItoIsometryAdapted.integral_adapted_sq_mul_increment_sq hBmeas
+              (le_max_left _ _) (hadapt p)]
+            exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
+          rw [hXsq_eq]
+          refine mul_le_mul_of_nonneg_left ?_ (hVsq_nonneg p)
+          have e1 : ((min p.2 t : ℝ≥0) : ℝ) ≤ (t : ℝ) := by exact_mod_cast min_le_right p.2 t
+          have e2 : (s : ℝ) ≤ ((max p.1 s : ℝ≥0) : ℝ) := by exact_mod_cast le_max_right p.1 s
+          have e3 : (s : ℝ) ≤ (t : ℝ) := by exact_mod_cast hst
+          rw [NNReal.coe_max]
+          rcases le_total ((min p.2 t : ℝ≥0) : ℝ) ((max p.1 s : ℝ≥0) : ℝ) with h | h
+          · rw [max_eq_left h]; linarith
+          · rw [max_eq_right h]; linarith
+  -- symmetric modulus in `dist`, then the `√`-Hölder bound and continuity.
+  have hmod_sym : ∀ t s : ℝ≥0,
+      ∫ ω, (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2 ∂μ
+        ≤ C * dist t s := by
+    intro t s
+    rw [NNReal.dist_eq]
+    rcases le_total s t with h | h
+    · rw [abs_of_nonneg (by exact_mod_cast sub_nonneg.mpr (NNReal.coe_le_coe.mpr h))]
+      exact hmod h
+    · rw [abs_of_nonpos (by exact_mod_cast sub_nonpos.mpr (NNReal.coe_le_coe.mpr h)), neg_sub,
+        show (fun ω => (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2)
+          = (fun ω => (itoSimpleProcess hBmeas V s ω - itoSimpleProcess hBmeas V t ω) ^ 2)
+          from funext fun ω => by ring]
+      exact hmod h
+  set F : ℝ≥0 → Lp ℝ 2 μ := fun t => itoSimpleProcessLp hBmeas V t with hF
+  rw [continuous_iff_continuousAt]
+  intro s
+  have hbound : ∀ t : ℝ≥0, ‖F t - F s‖ ≤ Real.sqrt C * Real.sqrt (dist t s) := by
+    intro t
+    have hnorm_sq : ‖F t - F s‖ ^ 2
+        = ∫ ω, (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2 ∂μ := by
+      have hsub : F t - F s
+          = ((memLp_itoSimpleProcess hBmeas V t).sub
+              (memLp_itoSimpleProcess hBmeas V s)).toLp _ := by
+        simp only [hF, itoSimpleProcessLp]
+        rw [← MemLp.toLp_sub]
+      rw [hsub, ← real_inner_self_eq_norm_sq, L2.inner_def]
+      refine integral_congr_ae ?_
+      filter_upwards [MemLp.coeFn_toLp ((memLp_itoSimpleProcess (μ := μ) hBmeas V t).sub
+        (memLp_itoSimpleProcess (μ := μ) hBmeas V s))] with ω hω
+      rw [hω]; simp only [Pi.sub_apply]
+      show (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω)
+          * (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω)
+          = (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2
+      ring
+    rw [← Real.sqrt_mul hC0, ← Real.sqrt_sq (norm_nonneg (F t - F s))]
+    refine Real.sqrt_le_sqrt ?_
+    rw [hnorm_sq]; exact hmod_sym t s
+  have htendsto : Filter.Tendsto
+      (fun t : ℝ≥0 => Real.sqrt C * Real.sqrt (dist t s)) (nhds s) (nhds 0) := by
+    have hcont : Continuous (fun t : ℝ≥0 => Real.sqrt C * Real.sqrt (dist t s)) :=
+      continuous_const.mul ((continuous_id.dist continuous_const).sqrt)
+    simpa [dist_self] using hcont.tendsto s
+  exact (tendsto_iff_norm_sub_tendsto_zero).mpr
+    (squeeze_zero (fun t => norm_nonneg _) hbound htendsto)
+
 end ItoIntegralProcess
 end MathFin
