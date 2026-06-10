@@ -10,7 +10,7 @@
 | [`patterns.md`](patterns.md) | Distilled Lean / Mathlib proof patterns + technical idioms + workflow notes + anti-patterns. | Before writing a non-trivial proof, especially if it touches gaussian / martingale / convexity / Lp machinery. |
 | [`roadmap.md`](roadmap.md) | Strategic depth-vs-breadth framing + tactical phase log of completed milestones. | When picking the next theorem to formalise, or to understand the historical trajectory. |
 | [`upstreaming.md`](upstreaming.md) | Log + playbook for contributing MathFin results upstream to brownian-motion / Mathlib (live: issue #440 → PR #446). | When submitting a `Foundations/` result upstream, or checking a contribution's status. |
-| [`superpowers/specs/`](superpowers/specs/) | Design specs for major changes (e.g. the 2026-05-23 reorganization). | Historical context for why the repo is structured this way. |
+| [`values-review.md`](values-review.md) | The eight judgment lenses and the per-round verdict log — the review panel that closes every proof-content session. | To see the quality bar and what each round found, fixed, and deferred. |
 
 ## Cross-references
 
@@ -23,6 +23,4 @@
 The four core docs (`coverage.md`, `bridges.md`, `patterns.md`,
 `roadmap.md`) were promoted from root-level `FORMALIZATION_STATUS.md`,
 `BRIDGE_AUDIT.md`, `LEARNINGS.md`, and a merge of `MATH_DEPTH_ROADMAP.md` +
-`QUANTFIN_ROADMAP.md` during the 2026-05-23 reorganization. See
-[`superpowers/specs/2026-05-23-repo-reorganization-design.md`](superpowers/specs/2026-05-23-repo-reorganization-design.md)
-for the structural rationale.
+`QUANTFIN_ROADMAP.md` during the 2026-05-23 reorganization.

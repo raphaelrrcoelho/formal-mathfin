@@ -599,7 +599,9 @@ the genuinely-open FK work is **variable-coefficient** (`σ(S,t)` local vol,
 Heston) on the general-Itô/SDE layer — a different, much harder theorem — plus
 the fully-general continuous-`g` PDE + uniqueness.
 
-**Next candidates from here:** the deferred cleanup catalogued in
-`docs/values-review.md` round 5 (Foundations orphan-module wire-or-delete;
-`sc-thm-8.2.5` SDE-faithfulness; blueprint spine regen tagging the keystone
-`@[blueprint]`); P1 the explicit CRR→BS error-constant paper.
+**Next candidates from here:** ✅ the round-5 deferred cleanup was executed
+same-day (orphan wiring + blueprint spine + the `sc-thm-8.2.5` rewrite,
+`3a25518`/`bde8f24`; values round 6 then found that rewrite's uniqueness
+clause uninhabitable and repaired it with an opaque integral-*operator*
+encoding + an in-snippet inhabitant guard). Remaining: P1 the explicit
+CRR→BS error-constant paper.

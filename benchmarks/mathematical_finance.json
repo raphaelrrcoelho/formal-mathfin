@@ -1652,10 +1652,10 @@
     {
       "id": "mf-cml-decomposition-unique",
       "name": "CML Decomposition Uniqueness",
-      "description": "Given a target portfolio standard deviation σ_p, the tangent-fund weight on the CML is uniquely α = σ_p/σ_t.",
+      "description": "Given a target portfolio standard deviation σ_p, the tangent-fund weight on the CML is uniquely α = σ_p/σ_t: that weight attains σ_p (recovery), and any weight attaining σ_p equals it (uniqueness).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Portfolio.TwoFundSeparation\n\nopen MathFin\n\ntheorem cml_decomposition_thm (σ_t σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    MathFin.cmlStdev σ_t (σ_p / σ_t) = σ_p :=\n  MathFin.cml_decomposition_unique σ_t σ_p hσ_t\n"
+        "lean": "import MathFin.Portfolio.TwoFundSeparation\n\nopen MathFin\n\n/-- **CML decomposition with unique weight** (two-fund separation): the\n    tangent-fund weight `α = σ_p / σ_t` attains the target standard deviation,\n    AND any weight attaining it equals `σ_p / σ_t` — existence and uniqueness\n    of the decomposition weight. Re-exports\n    `MathFin.cml_weight_recovers_stdev` + `MathFin.cml_weight_unique`. -/\ntheorem cml_decomposition_unique_weight (σ_t σ_p : ℝ) (hσ_t : σ_t ≠ 0) :\n    MathFin.cmlStdev σ_t (σ_p / σ_t) = σ_p ∧\n    ∀ α, MathFin.cmlStdev σ_t α = σ_p → α = σ_p / σ_t :=\n  ⟨MathFin.cml_weight_recovers_stdev σ_t σ_p hσ_t,\n   fun α h => MathFin.cml_weight_unique σ_t α σ_p hσ_t h⟩"
       },
       "metadata": {
         "chapter": 12,
@@ -2599,14 +2599,14 @@
       "description": "Under time-varying hazard h(u), the credit spread c(T) = -log(S(T))/T = H(T)/T where H is the cumulative hazard. The spread is the time-averaged hazard.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem creditSpread_eq_time_avg_hazard_thm {h : ℝ → ℝ} {T : ℝ} (hT : 0 < T) :\n    -Real.log (MathFin.hazardSurvival h T) / T = MathFin.cumHazard h T / T :=\n  MathFin.creditSpread_eq_time_avg_hazard hT\n"
+        "lean": "import MathFin.FixedIncome.HazardCurve\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Credit spread = time-averaged hazard** — definitional given\n    `S := exp(−H)` (`Real.log_exp`); paired below with the substantive FTC\n    recovery that grounds the model. -/\ntheorem creditSpread_eq_time_avg_hazard_thm {h : ℝ → ℝ} {T : ℝ} (hT : 0 < T) :\n    -Real.log (MathFin.hazardSurvival h T) / T = MathFin.cumHazard h T / T :=\n  MathFin.creditSpread_eq_time_avg_hazard hT\n\n/-- **Hazard recovered from the survival curve** (the substantive direction):\n    `h(t) = −d/dt log S(t)` for continuous `h`, by the FTC through the\n    `ExponentialDiscount` principle. -/\ntheorem hazard_recovers_from_survival_thm {h : ℝ → ℝ} (t : ℝ)\n    (hh : Continuous h) :\n    HasDerivAt (fun s => -(Real.log (MathFin.hazardSurvival h s))) (h t) t :=\n  MathFin.hazard_eq_neg_log_deriv_survival t hh"
       },
       "metadata": {
         "chapter": 12,
         "reference": "Hazard curve and credit spread (Lando, Credit Risk Modeling)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof. The snippet exports both directions honestly split: the spread identity −log S(T)/T = H(T)/T is definitional given S := exp(−H) (Real.log_exp), and the substantive content is the FTC recovery hazard_eq_neg_log_deriv_survival (h(t) = −d/dt log S(t) for continuous h), also exported. Axioms-clean."
       }
     },
     {
@@ -2791,7 +2791,7 @@
       "description": "Σ_{k=0}^{n-1} v^k = (1 - v^n)/(1 - v) for v ≠ 1. The annuity-due present value formula, mirror of the immediate-annuity case.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Actuarial.Insurance\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem annuityDueValue_thm (v : ℝ) (n : ℕ) (hv : v ≠ 1) :\n    ∑ k ∈ Finset.range n, v ^ k = (1 - v ^ n) / (1 - v) :=\n  MathFin.annuityDueValue v n hv\n"
+        "lean": "import MathFin.Actuarial.Insurance\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem annuityDue_closed_form_thm (v : ℝ) (n : ℕ) (hv : v ≠ 1) :\n    ∑ k ∈ Finset.range n, v ^ k = (1 - v ^ n) / (1 - v) :=\n  MathFin.annuityDue_closed_form v n hv\n"
       },
       "metadata": {
         "chapter": 11,
@@ -2974,7 +2974,7 @@
         "reference": "CDS pricing under constant hazard with recovery (Jarrow-Turnbull)",
         "difficulty": "intermediate",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_scope": "Full formal proof of the iff-characterisation c·factor = (1−R)·h·factor ⟺ c = (1−R)·h. `factor` is an abstract common annuity factor (both legs proportional to the same factor); the closed-form annuity computation (1−e^{−(r+h)T})/(r+h) is module prose, not Lean. Re-export from MathFin. Axioms-clean."
       }
     },
     {
@@ -3021,8 +3021,8 @@
         "chapter": 11,
         "reference": "Compound Poisson MGF (Cramér-Lundberg actuarial theory)",
         "difficulty": "intermediate",
-        "formalization_status": "full",
-        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Reduced core: the formalized statement is the exponential-algebra core e^{-λ}·e^{λM} = e^{λ(M-1)} of the compound-Poisson MGF identity E[e^{tS}] = exp(λ(M_X(t) − 1)), for arbitrary real λ, M — no random variables, expectation, or conditioning are encoded. The genuine identity needs the compound-sum conditioning step (tower property over N) on top of the library's poisson_pgf; future work."
       }
     },
     {
@@ -3205,7 +3205,7 @@
       "description": "In a two-state market, the FTAP-derived discounted state prices make call-price butterfly spreads cost ≥ 0 — the canonical static no-arbitrage constraint, derived not assumed.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.PricingKernel\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **No-arbitrage ⟹ butterfly spreads cost ≥ 0** (Phase 53). For sign data\n    `z_up > 0 > z_down`, the discounted FTAP state prices are non-negative, so the\n    finite-state call-price functional `K ↦ Σᵢ qᵢ · max(Sᵢ − K, 0)` is convex in\n    the strike and the butterfly combination `C(K₁) − 2·C((K₁+K₃)/2) + C(K₃)` has\n    non-negative cost. The state prices come from the Phase 37 backward-FTAP EMM\n    construction, so this static no-arbitrage constraint is derived, not assumed.\n    Re-exports `MathFin.stateprice_call_butterfly_nonneg`. -/\ntheorem pricing_kernel_butterfly_nonneg\n    (z_up z_down rT : ℝ) (h_up : 0 < z_up) (h_down : z_down < 0)\n    (S : Fin 2 → ℝ) (K₁ K₃ : ℝ) :\n    0 ≤ (∑ i, MathFin.stateprices_two_state z_up z_down rT i * max (S i - K₁) 0)\n        - 2 * (∑ i, MathFin.stateprices_two_state z_up z_down rT i *\n              max (S i - (K₁ + K₃) / 2) 0)\n        + (∑ i, MathFin.stateprices_two_state z_up z_down rT i * max (S i - K₃) 0) :=\n  MathFin.stateprice_call_butterfly_nonneg z_up z_down rT h_up h_down S K₁ K₃\n"
+        "lean": "import MathFin.Foundations.PricingKernel\n\nopen MeasureTheory ProbabilityTheory\n\n/-- **No-arbitrage ⟹ butterfly spreads cost ≥ 0** (Phase 53). For sign data\n    `z_up > 0 > z_down`, the discounted FTAP state prices are non-negative, so the\n    finite-state call-price functional `K ↦ Σᵢ qᵢ · max(Sᵢ − K, 0)` is convex in\n    the strike and the butterfly combination `C(K₁) − 2·C((K₁+K₃)/2) + C(K₃)` has\n    non-negative cost. The state prices come from the Phase 37 backward-FTAP EMM\n    construction, so this static no-arbitrage constraint is derived, not assumed.\n    Re-exports `MathFin.stateprice_call_butterfly_nonneg`. -/\ntheorem pricing_kernel_butterfly_nonneg\n    (z_up z_down rT : ℝ) (h_up : 0 < z_up) (h_down : z_down < 0)\n    (S : Fin 2 → ℝ) (K₁ K₃ : ℝ) :\n    0 ≤ (∑ i, MathFin.statePrices_two_state z_up z_down rT i * max (S i - K₁) 0)\n        - 2 * (∑ i, MathFin.statePrices_two_state z_up z_down rT i *\n              max (S i - (K₁ + K₃) / 2) 0)\n        + (∑ i, MathFin.statePrices_two_state z_up z_down rT i * max (S i - K₃) 0) :=\n  MathFin.stateprice_call_butterfly_nonneg z_up z_down rT h_up h_down S K₁ K₃\n"
       },
       "metadata": {
         "chapter": 14,
@@ -3237,7 +3237,7 @@
       "description": "The log-payoff static-replication strike (2/T)·E[log(F/S_T)] = σ² and the realised-variance equipartition functional E[Σ(Δlog S)²] → σ²·T — two distinct functionals of the BS log-price both recover the model variance.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Foundations.VarianceSwapEquivalence\n\nopen MeasureTheory ProbabilityTheory Real\n\n/-- **The two variance-swap characterisations agree** (Phase 45). For Brownian\n    dynamics `B` (a `BrownianQuadraticVariation`), the two distinct functionals of\n    the BS log-price both recover the model variance: the log-payoff\n    static-replication integral `(2/T)·E[log(F/S_T)]` equals `σ²`, AND the\n    realised-variance equipartition functional `E[Σₖ (Δlog S)²]` converges to\n    `σ²·T`. Both conjuncts are genuine functionals (the second is the honest\n    `Tendsto` of the squared-increment sum). Re-exports\n    `MathFin.varianceSwap_log_eq_QV_limit_value`. -/\ntheorem variance_swap_log_eq_qv_limit\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ → Ω → ℝ} (hB : MathFin.BrownianQuadraticVariation μ B)\n    {S_0 : ℝ} (hS : 0 < S_0) (r σ : ℝ) {T : ℝ} (hT_pos : T ≠ 0) (hT_nonneg : 0 ≤ T) :\n    (2 / T) * (∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n        (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))) ∂(gaussianReal 0 1))\n      = σ ^ 2 ∧\n    Filter.Tendsto\n      (fun n : ℕ => ∫ ω, ∑ k ∈ Finset.range (n + 1),\n        (MathFin.bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -\n         MathFin.bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ)\n      Filter.atTop (nhds (σ ^ 2 * T)) :=\n  MathFin.varianceSwap_log_eq_QV_limit_value hB hS r σ hT_pos hT_nonneg\n"
+        "lean": "import MathFin.Foundations.VarianceSwapEquivalence\n\nopen MeasureTheory ProbabilityTheory Real\n\n/-- **The two variance-swap characterisations agree** (Phase 45). For Brownian\n    dynamics `B` (a `BrownianQuadraticVariation`), the two distinct functionals of\n    the BS log-price both recover the model variance: the log-payoff\n    static-replication integral `(2/T)·E[log(F/S_T)]` equals `σ²`, AND the\n    realised-variance equipartition functional `E[Σₖ (Δlog S)²]` converges to\n    `σ²·T`. Both conjuncts are genuine functionals (the second is the honest\n    `Tendsto` of the squared-increment sum). Re-exports\n    `MathFin.varianceSwap_log_eq_QV_limit_value`. -/\ntheorem variance_swap_log_eq_qv_limit\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ → Ω → ℝ} (hB : MathFin.BrownianQuadraticVariation μ B)\n    {S_0 : ℝ} (hS : 0 < S_0) (r σ : ℝ) {T : ℝ} (hT : 0 < T) :\n    (2 / T) * (∫ z, Real.log ((S_0 * Real.exp (r * T)) /\n        (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))) ∂(gaussianReal 0 1))\n      = σ ^ 2 ∧\n    Filter.Tendsto\n      (fun n : ℕ => ∫ ω, ∑ k ∈ Finset.range (n + 1),\n        (MathFin.bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -\n         MathFin.bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ)\n      Filter.atTop (nhds (σ ^ 2 * T)) :=\n  MathFin.varianceSwap_log_eq_QV_limit_value hB hS r σ hT\n"
       },
       "metadata": {
         "chapter": 14,
@@ -3245,6 +3245,22 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full derivation re-exported from MathFin/Foundations/VarianceSwapEquivalence.lean: the log-payoff static-replication strike equals σ² (varianceSwap_log_contribution) and the realised-variance equipartition sum tends to σ²·T (tendsto_expected_bsLogPrice_equipartition_sum, Phase 34). Both conjuncts are genuine functionals. No axioms beyond Mathlib defaults. Wires the previously-orphan Phase-45 bridge (bridges.md row 45) to the corpus."
+      }
+    },
+    {
+      "id": "mf-reflection-principle-counting",
+      "name": "Reflection Principle (Andre, counting form)",
+      "description": "Andre's reflection principle for ±1 random-walk paths: the number of length-n paths that touch a barrier a > 0 and end at b ≤ a equals the number of all paths ending at the reflected endpoint 2a − b. The combinatorial backbone of barrier-option counting in the binomial tree; the hitting condition on the reflected side is discharged by a discrete intermediate-value theorem.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Binomial.PathReflection\n\n/-- **Andre's reflection principle, counting form** (1887). For ±1 walks of\n    length `n` (paths `Fin n → Bool`), a barrier `a > 0`, and an endpoint\n    `b ≤ a`: the number of paths that touch the barrier and end at `b` equals\n    the number of ALL paths ending at the reflected endpoint `2a − b` — the\n    hitting condition on the reflected side is automatic by the discrete IVT,\n    since `2a − b ≥ a`. This is the counting backbone of barrier-option\n    pricing in the binomial tree. Re-exports\n    `MathFin.reflectionPrincipleEquiv_below` through `Nat.card_congr`. -/\ntheorem reflection_principle_count {n : ℕ} (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // MathFin.HitsLevel a ω ∧ MathFin.walkPos ω n = b} =\n    Nat.card {ω : Fin n → Bool // MathFin.walkPos ω n = 2 * a - b} :=\n  Nat.card_congr (MathFin.reflectionPrincipleEquiv_below a b ha hb)"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Andre (1887) reflection principle; barrier-option path counting in the binomial tree",
+        "difficulty": "medium",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Binomial/PathReflection.lean: the reflectAtFirstHit involution, the reflected-endpoint identity, the discrete IVT (HitsLevel_of_walkPos_endpoint_ge), and the bijection reflectionPrincipleEquiv_below; the snippet re-exports the counting identity via Nat.card_congr."
       }
     }
   ]

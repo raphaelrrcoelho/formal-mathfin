@@ -28,8 +28,9 @@ Two algebraic results:
 
 Results:
 
-* `annuityDueValue`: `Σ_{k=0}^{n-1} v^k = (1 − v^n)/(1 − v)` (geometric).
-* `net_premium_principle`: equivalent algebraic statement.
+* `annuityDue_closed_form`: `Σ_{k=0}^{n-1} v^k = (1 − v^n)/(1 − v)` (geometric).
+* `net_premium_principle`: equivalent algebraic statement (Mathlib's
+  `eq_div_iff`, cited).
 -/
 
 @[expose] public section
@@ -40,7 +41,7 @@ open Finset
 
 /-- **Annuity-due geometric closed form**: `Σ_{k=0}^{n-1} v^k = (1 − v^n)/(1 − v)`
 for `v ≠ 1`. -/
-theorem annuityDueValue (v : ℝ) (n : ℕ) (hv : v ≠ 1) :
+theorem annuityDue_closed_form (v : ℝ) (n : ℕ) (hv : v ≠ 1) :
     ∑ k ∈ Finset.range n, v ^ k = (1 - v ^ n) / (1 - v) := by
   have h_one_sub_ne : (1 : ℝ) - v ≠ 0 := sub_ne_zero.mpr (Ne.symm hv)
   have h_v_sub_ne : v - 1 ≠ 0 := sub_ne_zero.mpr hv
@@ -48,13 +49,11 @@ theorem annuityDueValue (v : ℝ) (n : ℕ) (hv : v ≠ 1) :
   rw [div_eq_div_iff h_v_sub_ne h_one_sub_ne]
   ring
 
-/-- **Net premium principle**: if both `P · A = B` and `A ≠ 0`, then
-`P = B / A`. Restated as a strict equivalence for use in delivery
-benchmarks. -/
+/-- **Net premium principle**: `P · A = B ⟺ P = B / A` for `A ≠ 0` — the
+defining algebra of the net premium. This is Mathlib's `eq_div_iff`
+(symmetrised), cited rather than re-proved. -/
 theorem net_premium_principle (P A B : ℝ) (hA : A ≠ 0) :
-    P * A = B ↔ P = B / A := by
-  constructor
-  · intro h; rw [← h]; field_simp
-  · intro h; rw [h]; field_simp
+    P * A = B ↔ P = B / A :=
+  (eq_div_iff hA).symm
 
 end MathFin

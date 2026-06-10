@@ -66,8 +66,8 @@ Specialising `n = 1`, `m = 1`, `P = (1)`, `Sg_inv = (1/s0sq)`, `Om_inv =
 * `blPosteriorMean`: explicit form using `(posterior_precision)⁻¹`.
 * `blPosteriorMean_satisfies_normal_eq`: explicit form satisfies the
   normal equation.
-* `IsBLPosteriorMean_unique`: solution to the normal equation is unique
-  (when posterior precision is invertible).
+* `IsBLPosteriorMean.unique`: solution to the normal equation is unique
+  (when posterior precision is invertible); dot-notation `h.unique`.
 -/
 
 @[expose] public section
@@ -142,7 +142,7 @@ theorem blPosteriorMean_satisfies_normal_eq {n m : ℕ}
 
 /-- **Uniqueness of the BL posterior mean** (when posterior precision is
 invertible): any solution to the normal equation equals the explicit form. -/
-theorem IsBLPosteriorMean_unique {n m : ℕ}
+theorem IsBLPosteriorMean.unique {n m : ℕ}
     {μ_post π : Fin n → ℝ} {Q : Fin m → ℝ}
     {Sg_inv : Matrix (Fin n) (Fin n) ℝ}
     {P : Matrix (Fin m) (Fin n) ℝ}

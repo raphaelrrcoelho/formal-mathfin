@@ -45,14 +45,17 @@ negative and strictly positive in at least one state.
 * `HasEMM_two_state`: definition of EMM existence.
 * `HasArbitrage_two_state`: definition of arbitrage.
 * `noArbitrage_of_emm` (Nagy 7.1, forward): EMM exists ⟹ no arbitrage.
-* `signs_of_noArbitrage` (Nagy 7.2): no arbitrage and `z ≠ 0` ⟹ `z_up`
-  and `z_down` have opposite strict signs.
+* `emmWeightUp` / `emmWeightDown`: the named canonical backward-FTAP
+  weights `−z_down / (z_up − z_down)`, `z_up / (z_up − z_down)`.
 * `emm_of_signs` (Nagy 7.3, backward construction): if `z_up > 0` and
-  `z_down < 0`, an explicit EMM is `q_up = −z_down / (z_up − z_down)`,
-  `q_down = z_up / (z_up − z_down)`.
-* `ftap_two_state` (main): no arbitrage iff EMM exists, modulo the
-  trivial-market case `z = 0` (which trivially has EMM `(1/2, 1/2)` and
-  no arbitrage).
+  `z_down < 0`, the named weights form an EMM.
+* `emm_of_signs_swapped` / `emm_of_trivial_market`: the mirrored sign
+  regime, and the trivial market `z = 0` (EMM `(1/2, 1/2)`).
+
+*Not formalized here*: Nagy 7.2 (no arbitrage and `z ≠ 0` ⟹ opposite
+strict signs) and the packaged two-state iff. The backward *construction*
+is the load-bearing half: `Foundations/PricingKernel` builds the
+discounted state prices directly from the named weights.
 -/
 
 @[expose] public section
@@ -99,21 +102,35 @@ theorem noArbitrage_of_emm (z_up z_down : ℝ)
   · have h_down_term_pos : 0 < q_down * (θ * z_down) := mul_pos hq_down_pos h_down_pos
     linarith
 
+/-- **The canonical backward-FTAP up-state weight** (Nagy 2026, Theorem 7.3):
+`q_up = −z_down / (z_up − z_down)`. Named — rather than left as an
+existential witness inside `emm_of_signs` — so downstream constructions
+(the discounted state prices of `Foundations/PricingKernel`) can consume
+the weights themselves, making their FTAP lineage definitional. -/
+noncomputable def emmWeightUp (z_up z_down : ℝ) : ℝ :=
+  -z_down / (z_up - z_down)
+
+/-- **The canonical backward-FTAP down-state weight**:
+`q_down = z_up / (z_up − z_down)`. See `emmWeightUp`. -/
+noncomputable def emmWeightDown (z_up z_down : ℝ) : ℝ :=
+  z_up / (z_up - z_down)
+
 /-- **Backward FTAP — EMM construction** (Nagy 2026, Theorem 7.3): if
-`z_up > 0` and `z_down < 0`, the explicit weights
-
-  `q_up := −z_down / (z_up − z_down)`,    `q_down := z_up / (z_up − z_down)`
-
-form an EMM. -/
+`z_up > 0` and `z_down < 0`, the named weights
+`emmWeightUp = −z_down / (z_up − z_down)`, `emmWeightDown = z_up / (z_up −
+z_down)` form an EMM. -/
 theorem emm_of_signs (z_up z_down : ℝ)
     (h_up_pos : 0 < z_up) (h_down_neg : z_down < 0) :
     HasEMM_two_state z_up z_down := by
   have h_diff_pos : 0 < z_up - z_down := by linarith
-  refine ⟨-z_down / (z_up - z_down), z_up / (z_up - z_down), ?_, ?_, ?_, ?_⟩
+  refine ⟨emmWeightUp z_up z_down, emmWeightDown z_up z_down, ?_, ?_, ?_, ?_⟩ <;>
+      simp only [emmWeightUp, emmWeightDown]
   · exact div_pos (neg_pos.mpr h_down_neg) h_diff_pos
   · exact div_pos h_up_pos h_diff_pos
-  · field_simp; ring
-  · field_simp; ring
+  · field_simp
+    ring
+  · field_simp
+    ring
 
 /-- **Companion variant** of `emm_of_signs`: with `z_up < 0` and `z_down >
 0`, the same construction (with roles reversed) yields an EMM. -/

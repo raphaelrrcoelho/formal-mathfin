@@ -52,7 +52,7 @@
         "reference": "Theorem 5.1.7",
         "difficulty": "intermediate",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
       }
     },
     {
@@ -91,7 +91,7 @@
         "reference": "Corollary 5.3.4",
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
       }
     },
     {
@@ -184,7 +184,7 @@
         "reference": "Theorem 5.3.5",
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
       }
     }
   ]

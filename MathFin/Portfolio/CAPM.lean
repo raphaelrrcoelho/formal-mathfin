@@ -18,12 +18,13 @@ Results:
 
 * `beta`: defines `β_i = Cov(R_i, R_M) / Var(R_M)`.
 * `securityMarketLine`: the equilibrium expected return `R_f + β_i (E[R_M] − R_f)`.
-* `expectedReturn_eq_SML_iff_pricing_holds`: the CAPM identity
-  `E[R_i] = R_f + β_i (E[R_M] − R_f)` is equivalent to the equation
-  `α_i = E[R_i] − (R_f + β_i (E[R_M] − R_f)) = 0` (Jensen's alpha vanishes).
-* `beta_linearity`: a portfolio's beta is the weighted sum of its components' betas,
-  `β_p = ∑ w_i β_i`, by bilinearity of covariance (axiomatized at the algebraic level).
-* `beta_of_marketPortfolio`: the market's beta is `1`.
+* `jensenAlpha` / `jensenAlpha_eq_zero_iff`: Jensen's alpha
+  `α_i = E[R_i] − (R_f + β_i (E[R_M] − R_f))`, and the CAPM pricing identity
+  `E[R_i] = SML` ⟺ `α_i = 0` (Mathlib's `sub_eq_zero`).
+* `beta_linearity_two` / `beta_linearity_finset`: a portfolio's beta is the
+  weighted sum of its components' betas, `β_p = ∑ w_i β_i`, by bilinearity of
+  covariance (axiomatized at the algebraic level).
+* `beta_market`: the market's beta is `1`.
 * `beta_of_riskFree`: the risk-free asset's beta is `0` (zero covariance with the market).
 -/
 
@@ -37,14 +38,18 @@ noncomputable def beta (covRRm varRm : ℝ) : ℝ := covRRm / varRm
 /-- Security Market Line: the CAPM equilibrium expected return as a function of beta. -/
 noncomputable def securityMarketLine (rf β eRm : ℝ) : ℝ := rf + β * (eRm - rf)
 
-/-- The CAPM pricing identity `E[R] = R_f + β (E[R_M] − R_f)` is equivalent to
-zero Jensen's alpha. -/
-lemma expectedReturn_eq_SML_iff_alpha_zero
-    (eR rf β eRm : ℝ) :
-    eR = securityMarketLine rf β eRm ↔ eR - securityMarketLine rf β eRm = 0 := by
-  constructor
-  · intro h; linarith
-  · intro h; linarith
+/-- **Jensen's alpha**: the excess of the expected return over the SML
+prediction, `α = E[R] − (R_f + β (E[R_M] − R_f))`. The CAPM pricing
+identity is precisely `α = 0`. -/
+noncomputable def jensenAlpha (eR rf β eRm : ℝ) : ℝ :=
+  eR - securityMarketLine rf β eRm
+
+/-- The CAPM pricing identity `E[R] = R_f + β (E[R_M] − R_f)` holds iff
+Jensen's alpha vanishes — Mathlib's `sub_eq_zero` through the `jensenAlpha`
+definition. -/
+lemma jensenAlpha_eq_zero_iff (eR rf β eRm : ℝ) :
+    jensenAlpha eR rf β eRm = 0 ↔ eR = securityMarketLine rf β eRm :=
+  sub_eq_zero
 
 /-- A risk-free asset (zero covariance with the market) has beta zero. -/
 lemma beta_of_riskFree (varRm : ℝ) :

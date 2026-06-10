@@ -10,7 +10,7 @@
 [![dataset](https://img.shields.io/badge/HF-dataset-ffcc4d)](https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 273 theorems across 11 areas — Black-Scholes
+and Degenne's BrownianMotion. 274 theorems across 11 areas — Black-Scholes
 with the full Greek matrix, the exotics, and Merton jump-diffusion, binomial
 trees with American / Bermudan / Snell envelope, fixed income with hazard
 credit, first-to-default baskets, and Vasicek SDE, portfolio theory from
@@ -27,13 +27,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 273 |
+| total theorems | 274 |
 | **full derivations** | **239** |
 | library wrappers | 18 |
-| reduced cores | 16 |
+| reduced cores | 17 |
 | placeholders | **0** |
 
-**257 of the 273 are delivery-ready** (`full` + `library_wrapper`); the 16
+**257 of the 274 are delivery-ready** (`full` + `library_wrapper`); the 17
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
@@ -43,6 +43,17 @@ Every `full` derivation depends only on the three Mathlib standard axioms
 project-local axiom anywhere in the library. For the load-bearing derivations
 (~115 declarations) this is `#print axioms`-pinned as a build invariant in
 `MathFin/AxiomAudit.lean`.
+
+## Landmark results
+
+| | statement | where |
+|---|---|---|
+| **BS PDE from Feynman–Kac** | the Black–Scholes PDE derived from the risk-neutral expectation via heat-kernel differentiation — independent of the closed-form check and of Itô | [`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean) |
+| **CRR → Black–Scholes** | the n-step binomial call price converges to `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` (characteristic functions + Lévy continuity + put-call parity) | [`binomialPrice_call_tendsto_bs_closed`](MathFin/Binomial/CRRClosedForm.lean) |
+| **Continuous-time L² Itô formula** | `f(B_T) − f(B_0) = ∫₀ᵀ f′(B_s) dB_s + ½ ∫₀ᵀ f″(B_s) ds` on a from-scratch L² Itô integral (time-dependent variant included) | [`ito_formula_L2_bddDeriv`](MathFin/Foundations/ItoFormulaCLM.lean) |
+| **The EMM is a theorem** | static Girsanov via an Esscher tilt *constructs* the risk-neutral measure from the physical one; the discounted asset is a proven `Q`-martingale | [`BSCallHyp.exists_of_physical`](MathFin/Foundations/GaussianGirsanov.lean) · [`discountedGBM_isMartingale`](MathFin/Foundations/ContinuousFTAP.lean) |
+| **Jump risk is never free** | the Merton (1976) jump-diffusion price dominates Black–Scholes, with the classic `Λ′ = Λ(1+k)` weights display | [`bsV_le_mertonCallPrice`](MathFin/BlackScholes/MertonDominance.lean) |
+| **André's reflection principle** | the hitting-path bijection, with a discrete IVT discharging the reflected-side hitting condition — the counting backbone of barrier pricing | [`reflectionPrincipleEquiv_below`](MathFin/Binomial/PathReflection.lean) |
 
 ## At a glance
 
@@ -88,6 +99,30 @@ docker compose -f docker/docker-compose.yml up -d lean-repl
 
 See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
 
+## How verification works
+
+- **The build is the proof.** `lake build` from the repo root re-elaborates
+  every theorem against the pinned toolchain; a clean exit is the canonical
+  verification.
+- **Axiom audit.** [`MathFin/AxiomAudit.lean`](MathFin/AxiomAudit.lean)
+  (curated headliners) and [`MathFin/AxiomAuditGen.lean`](MathFin/AxiomAuditGen.lean)
+  (generated over the whole corpus) pin `#print axioms` output as
+  `#guard_msgs` build invariants — no `sorry`, no project-local axioms, only
+  the three Mathlib standard axioms.
+- **Verification ledger.** [`verification_ledger.json`](verification_ledger.json)
+  records the input-hash (snippet code + transitive imports + toolchain pins)
+  each of the 274 benchmark entries last verified under; only entries whose
+  inputs changed ever re-run.
+- **CI gates.** Every push runs the Python gates (status taxonomy, forbidden
+  tactics, a definitional-`rfl` tripwire, blueprint ⊆ audit, ledger
+  freshness) *before* the Lean build.
+- **Values review.** Sessions that add or change proof content close with a
+  multi-agent review panel over eight judgment lenses (inspired math,
+  upstream coherence, zero slop, architecture, first principles, idiomatic
+  register, concept clarity, elegance); verdicts are logged in
+  [`docs/values-review.md`](docs/values-review.md), and a CI cadence test
+  fails if the corpus outgrows the last verdict.
+
 ## What's covered
 
 | Area | Headline results |
@@ -122,12 +157,13 @@ gaussian MGF, exponential discount, Snell envelope). See
 | [`docs/bridges.md`](docs/bridges.md) | Catalogue of bridges from `Foundations/` to pricing modules. |
 | [`docs/patterns.md`](docs/patterns.md) | Distilled Lean / Mathlib proof patterns and anti-patterns from prior phases. |
 | [`docs/roadmap.md`](docs/roadmap.md) | Strategic depth-vs-breadth framing and the tactical phase log. |
+| [`docs/values-review.md`](docs/values-review.md) | The judgment layer: the eight review lenses and the per-round verdict log (cadence machine-enforced in CI). |
 | [`upstream/`](upstream/) | Drafts of contributions to Mathlib, BrownianMotion, and Lean Zulip. |
 | [`references/`](references/) | Source PDFs (Saporito notes, cited papers). |
 
 ## What's not done (yet)
 
-16 of the 273 theorems are `reduced_core` — an honest special case or
+17 of the 274 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 
@@ -149,6 +185,10 @@ formalized here. By area:
   difference, Poisson convolution, binomial-marking factorisation).
 - **Fine Brownian path machinery** (3): path-wise reflection,
   nowhere-differentiability, law of iterated logarithm.
+- **Actuarial algebra** (`mathematical_finance`, 1): the compound-Poisson MGF
+  identity is pinned at its exponential-algebra core (demoted from `full` in
+  values round 6); the genuine `E[e^{tS}] = exp(λ(M_X(t)−1))` needs the
+  compound-sum conditioning step on top of `poisson_pgf`.
 
 The continuous-time L²-adapted **Itô integral itself is built** — the bounded
 linear map `itoIntegralCLM_T` on `[0,T]` (`Foundations/ItoIntegralCLM.lean`,
@@ -174,9 +214,9 @@ Drafted as part of this project (source under [`upstream/`](upstream/)):
 
 The verify Docker image pins:
 
-- Lean toolchain `4.30.0-rc1`
-- Mathlib at commit `f23306121184`
-- Remy Degenne's `brownian-motion` library at commit `16d15eb42c`
+- Lean toolchain `4.30.0-rc2`
+- Mathlib at commit `c87cc9752221`
+- Remy Degenne's `brownian-motion` library at commit `fa590b1a198c`
 
 These are frozen in [`lakefile.lean`](lakefile.lean) + [`lake-manifest.json`](lake-manifest.json) + [`lean-toolchain`](lean-toolchain) at the repo root.
 

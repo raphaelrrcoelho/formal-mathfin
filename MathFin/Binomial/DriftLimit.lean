@@ -29,7 +29,9 @@ characteristic-function/Lévy route plus put-call parity.
   as `h → 0`. Uses the algebraic identity
   `e^{σh} + e^{-σh} − 2 = e^{−σh} · (e^{σh} − 1)²` to reduce to existing
   `tendsto_exp_sub_one_div`.
-* `crr_drift_limit`: the headline `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T`.
+* `crr_drift_limit_h` / `crr_drift_limit_n`: the headline
+  `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T`, in `h`-parametrised and
+  `n`-indexed form.
 -/
 
 @[expose] public section

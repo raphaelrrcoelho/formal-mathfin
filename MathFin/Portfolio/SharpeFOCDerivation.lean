@@ -41,7 +41,7 @@ loop between the optimization-theoretic and algebraic perspectives.
 * `varianceTwo_eq_w_dot_Sigma_w`: `V = w · (Σw)₁ + (1 − w) · (Σw)₂` (the
   self-dot identity).
 * `hasDerivAt_varianceTwo`: `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`.
-* `hasDerivAt_sharpeSqTwo_numerator_factored`: the derivative numerator
+* `sharpeSqTwo_deriv_numerator_factored`: the derivative numerator
   factors through `r₁ (Σw)₂ − r₂ (Σw)₁`.
 * `sharpeSqTwo_critical_iff_crossProduct_FOC`: critical-point
   characterisation (`E ≠ 0, V > 0` regime).

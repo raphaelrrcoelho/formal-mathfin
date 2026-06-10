@@ -29,7 +29,10 @@ Results:
 * `cmlMean`, `cmlStdev`: the (mean, std) of a CML portfolio at weight `α`.
 * `cml_equation`: `μ_combined = r_f + Sharpe_t · σ_combined` on the CML.
 * `cml_sharpeRatio_invariant`: Sharpe is preserved along the CML.
-* `cml_decomposition_unique`: the inverse map `(μ_p, σ_p) ↦ α` is `σ_p / σ_t`.
+* `cml_weight_recovers_stdev` / `cml_weight_unique`: the weight
+  `α = σ_p / σ_t` reproduces `σ_p`, and any weight attaining `σ_p` equals
+  it — existence and uniqueness of the decomposition weight.
+* `cml_mean_at_stdev`: mean recovery `μ_p = r_f + σ_p · Sharpe_t` at that weight.
 -/
 
 @[expose] public section
@@ -63,13 +66,23 @@ lemma cml_sharpeRatio_invariant (μ_t σ_t r_f α : ℝ)
   field_simp
   ring
 
-/-- **CML decomposition (uniqueness of weight)**: given a portfolio standard
-deviation `σ_p` on the CML, the tangent-fund weight is uniquely determined by
-`α = σ_p / σ_t`. -/
-lemma cml_decomposition_unique (σ_t σ_p : ℝ) (hσ_t : σ_t ≠ 0) :
+/-- **CML decomposition — weight recovery**: the tangent-fund weight
+`α = σ_p / σ_t` reproduces the target standard deviation,
+`cmlStdev σ_t (σ_p/σ_t) = σ_p`. This is the decomposition step of two-fund
+separation: the weight is read off the target stdev (the statement is the
+recovery identity; it does not itself assert uniqueness). -/
+lemma cml_weight_recovers_stdev (σ_t σ_p : ℝ) (hσ_t : σ_t ≠ 0) :
     cmlStdev σ_t (σ_p / σ_t) = σ_p := by
   unfold cmlStdev
   field_simp
+
+/-- **CML decomposition — weight uniqueness**: any weight attaining the
+target stdev is the canonical one, `cmlStdev σ_t α = σ_p ⟹ α = σ_p / σ_t`
+(Mathlib's `eq_div_iff`). Together with `cml_weight_recovers_stdev` this is
+the full unique-weight statement of the decomposition. -/
+lemma cml_weight_unique (σ_t α σ_p : ℝ) (hσ_t : σ_t ≠ 0)
+    (h : cmlStdev σ_t α = σ_p) : α = σ_p / σ_t :=
+  (eq_div_iff hσ_t).mpr h
 
 /-- **Mean recovery on the CML**: a portfolio with std deviation `σ_p` on the
 CML through `r_f` with tangent slope `Sharpe_t` has expected return

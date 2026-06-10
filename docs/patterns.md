@@ -541,3 +541,13 @@ warning by deleting the hypothesis — the proof breaks.
 Authoring order going forward: `grind` → (if nonlinear-inequality shaped)
 `nlinarith [certificates]` → `positivity`/`gcongr`/`bound` for the structured
 inequality families.
+
+## Canonical forms (2026-06-09, values round 6)
+
+**Discount-factor exponent**: in NEW files write `Real.exp (-(r * τ))` —
+the parenthesised product under one negation, the repo's 2:1 majority form.
+`Call.lean`-era `Real.exp (-r * T)` is grandfathered: the realized cost of
+the split is exactly three `neg_mul` reconciliations at the bridges
+(`PDEFromFeynmanKac` ×2, `MertonJumpDiffusion` ×1), accepted permanently in
+round 6 — a unifying sweep would re-stale a large ledger slice for zero
+mathematical content.

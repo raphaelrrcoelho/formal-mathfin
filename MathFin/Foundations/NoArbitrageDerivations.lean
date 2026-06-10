@@ -64,16 +64,11 @@ open Finset
 /-- **Payoff identity**: `max(x, 0) - max(-x, 0) = x`.
 
 This is the pointwise algebraic fact that turns into put-call parity when
-passed through a linear pricing functional. -/
-lemma max_sub_max_neg (x : ℝ) : max x 0 - max (-x) 0 = x := by
-  by_cases hx : 0 ≤ x
-  · rw [max_eq_left hx]
-    rw [max_eq_right (by linarith : -x ≤ 0)]
-    ring
-  · have hx' : x < 0 := not_le.mp hx
-    rw [max_eq_right hx'.le]
-    rw [max_eq_left (by linarith : 0 ≤ -x)]
-    ring
+passed through a linear pricing functional. It is Mathlib's
+`max_zero_sub_max_neg_zero_eq_self`, cited rather than re-proved; kept
+under its finance name as the named conceptual pivot of this file. -/
+lemma max_sub_max_neg (x : ℝ) : max x 0 - max (-x) 0 = x :=
+  max_zero_sub_max_neg_zero_eq_self x
 
 /-- **Put-call parity from no-arbitrage** (first-principles derivation).
 

@@ -72,22 +72,12 @@ lemma herfindahl_card_inv_le_of_sum_one (s : Finset ι) (w : ι → ℝ)
     (hs : s.Nonempty) (h_sum : ∑ i ∈ s, w i = 1) :
     (s.card : ℝ)⁻¹ ≤ herfindahl s w := by
   unfold herfindahl
-  have h_cs : (∑ i ∈ s, (1 : ℝ) * w i) ^ 2 ≤
-      (∑ i ∈ s, (1 : ℝ)^2) * ∑ i ∈ s, (w i)^2 :=
-    Finset.sum_mul_sq_le_sq_mul_sq s _ _
-  -- Simplify (1 * wᵢ) → wᵢ
-  have h_one_mul : ∀ i ∈ s, (1 : ℝ) * w i = w i := fun _ _ => one_mul _
-  rw [Finset.sum_congr rfl h_one_mul] at h_cs
-  -- Σ 1² over s = s.card · 1 = s.card
-  have h_one_sq_sum : ∑ i ∈ s, (1 : ℝ)^2 = (s.card : ℝ) := by
-    have : ∀ i ∈ s, (1 : ℝ)^2 = 1 := fun _ _ => one_pow 2
-    rw [Finset.sum_congr rfl this, Finset.sum_const]
-    rw [nsmul_eq_mul, mul_one]
-  rw [h_one_sq_sum, h_sum, one_pow] at h_cs
+  -- Mathlib's Cauchy–Schwarz card form, exactly this statement.
+  have h_cs : (∑ i ∈ s, w i) ^ 2 ≤ (s.card : ℝ) * ∑ i ∈ s, (w i) ^ 2 :=
+    sq_sum_le_card_mul_sum_sq
+  rw [h_sum, one_pow] at h_cs
   -- h_cs : 1 ≤ s.card * ∑ wᵢ²
   have h_card_pos : 0 < (s.card : ℝ) := by exact_mod_cast hs.card_pos
-  have h_card_ne : (s.card : ℝ) ≠ 0 := h_card_pos.ne'
-  -- (s.card)⁻¹ ≤ Σ wᵢ²  ⟺ 1 ≤ s.card · Σ wᵢ²
   rw [inv_le_iff_one_le_mul₀ h_card_pos]
   linarith
 

@@ -53,6 +53,163 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-09 (round 6) — WHOLE-REPO values review — corpus 274
+
+**Scope**: at the user's request, a second full-repo panel two days after round 5 — **eight
+reviewers, one per lens**, with the round-5-unreviewed delta (`c3a3498`/`d2cb7bd`/`3a25518`/`bde8f24`)
+reviewed in full and the whole-repo budget pointed at the **long tail** (Actuarial / DeFi /
+Performance / Portfolio / FixedIncome / Futures / Binomial / RiskMeasures + older Foundations),
+since the FK/Itô/Merton headliners had four recent reviews. Machine gates green before the panel
+(19 pytest, ledger 273/273).
+
+| lens | panel verdict | after fixes |
+|---|---|---|
+| inspired math quality | BLOCKING (2) | PASS |
+| Mathlib/BrownianMotion coherence | PASS-WITH-NOTES | PASS |
+| zero slop | PASS-WITH-NOTES | PASS |
+| architectural ingenuity | PASS-WITH-NOTES | PASS |
+| first principles | BLOCKING (1) | PASS |
+| idiomatic register | PASS-WITH-NOTES | PASS |
+| concept clarity | BLOCKING (1, same as first-principles') | PASS |
+| beautiful, elegant math | PASS-WITH-NOTES | PASS |
+
+**Blocking findings (3, all fixed this round):**
+
+1. **`sc-thm-8.2.5` was uninhabitable** (first principles + concept clarity, found *independently*
+   by two reviewers; then machine-confirmed by a daemon-checked refutation
+   `SDEExistenceUniqueness → False`). The round-5 follow-up rewrite (`3a25518`) quantified the
+   uniqueness candidate's diffusion integral `IσY` freely, so every process discharges the solution
+   premise by taking its own residual as the "integral" — the field collapses to "every process
+   started at `η` equals `X`", refuted inside any inhabitant by `Y := X + t`. The spec encoded a
+   contradiction; `unique_strong_solution` was a theorem about an empty type. **Fix**: an opaque
+   integral-**operator** encoding `Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ`, consumed as `Iσ X` (solution)
+   and `Iσ Y` (uniqueness premise) — candidates genuinely pinned to the same equation; the
+   uniqueness conclusion scoped to `0 ≤ t` (the synthesizer found the unscoped `∀ t` conclusion
+   left candidates free at negative times — a second uninhabitability the panel itself missed);
+   a `: Prop` ascription (register corroboration); and an **in-snippet inhabitant `example`**, so
+   non-vacuity is machine-guarded permanently. Corollary corrections in `coverage.md`.
+2. **`FixedIncome/Vasicek.lean` claimed an unproved limit theorem** ("limiting value `r(∞) = θ`" —
+   no `Tendsto` existed in FixedIncome). **Fixed in the strong direction**:
+   `vasicekDeterministic_tendsto_mean` added (exponential mean reversion, consuming `hκ` exactly
+   as the docstring advertised), making the claim true rather than deleting it.
+3. **`Performance/RatiosExtended.lean` claimed an unproved `Var(R_p − R_b)` expansion** for
+   `trackingErrorSq`. **Fix**: de-claimed — the def is the model definition, the variance-level
+   identity honestly out of scope; `trackingErrorSq_self`'s "decomposition" header retitled.
+
+**Fixed minors (the round's main wave):**
+
+- *PricingKernel recomposed* (3 lenses converged): `statePrices_two_state` is now **defined** as
+  `e^{−rT} · emmWeight{Up,Down}` — the Phase-37 weights, newly **named** in `FTAPTwoState` and
+  consumed by `emm_of_signs` — and `pricingKernel_two_state` is defined as the two-state
+  `statePricePricing` instance, so `_linear`/`_bond`/`_nonneg` genuinely consume `StatePrices`
+  and the "via state-price linearity" docstring describes the actual proof (the round-5-era
+  "via Greeks" fiction class, eliminated structurally). Phantom Results name fixed; `⟨0, by omega⟩`
+  statement literals → vector literals. `FTAPTwoState`'s own Results list had two more phantom
+  names (`signs_of_noArbitrage`, `ftap_two_state`) — rewritten with an honest not-formalized note.
+- *FTAPMultiState*: misleading "backward direction" title fixed (the file proves the **forward**
+  direction); the zero-consumer constructor-adapter `hasEMM_multi_of_candidate` (bold-titled
+  "Backward FTAP" over an anonymous-constructor application) deleted; closing `linarith` → the
+  pointed `h_sum_pos.ne' h_zero`.
+- *VarianceSwapEquivalence*: split `(T ≠ 0) + (0 ≤ T)` merged to the memorable `(hT : 0 < T)`
+  (+ snippet); intro-docstring normalization inconsistency fixed.
+- *André's reflection principle wired* (the round's inverted-weight repair): `PathReflection.lean`'s
+  stale "the hitting-time bijection is downstream work" de-staled (the bijection was *in the file*),
+  Results list completed, and the counting form wired as **`mf-reflection-principle-counting`**
+  (`Nat.card_congr` over `reflectionPrincipleEquiv_below`) with a curated AxiomAudit pin — the
+  library's best long-tail mathematics now has corpus existence.
+- *Coherence cites*: `herfindahl_card_inv_le_of_sum_one` now consumes Mathlib's
+  `sq_sum_le_card_mul_sum_sq` (was hand-reconstructed; a pre-existing dead `have` went with it);
+  `net_premium_principle := (eq_div_iff hA).symm`; `max_sub_max_neg :=
+  max_zero_sub_max_neg_zero_eq_self` (kept under its finance name as the file's conceptual pivot,
+  with the upstream cite documented).
+- *Register*: `annuityDueValue` → `annuityDue_closed_form` (+ snippet); `IsBLPosteriorMean_unique`
+  → dot-notation `IsBLPosteriorMean.unique`; CAPM's `a = b ↔ a − b = 0` anti-shape replaced by a
+  real `jensenAlpha` def + `jensenAlpha_eq_zero_iff := sub_eq_zero`; DeFi `swap_output_lt_y`
+  strengthened from `lt ∨ y = 0` to the honest `0 < y ⟹ lt` (named product certificate);
+  `cml_decomposition_unique`'s misnomer resolved by **adding the uniqueness direction**
+  (`cml_weight_unique := (eq_div_iff hσ_t).mpr`) so the entry's name became true — the snippet now
+  exports recovery ∧ uniqueness.
+- *Spectral*: the title promised monotonicity that did not exist — the real `spectralRisk_mono`
+  added (the file's first contentful inequality); Results list fixed.
+- *Stale-docstring batch*: 8 phantom identifiers fixed across DriftLimit / ForwardRate / CAPM(3) /
+  Markowitz / MarkowitzLagrangian / SharpeFOCDerivation (+ American's loose `BinomialModel` ref,
+  CAPMEquilibrium cross-ref; the Markowitz bullet also claimed positivity hypotheses the lemma
+  does not take).
+- *Corpus honesty*: `mf-compound-poisson-mgf` demoted `full` → `reduced_core` (the exp-algebra core
+  of the named MGF identity — the taxonomy's own definition; the Kelly-demotion pattern one notch
+  above `rfl`, exactly what the judgment layer exists to catch); `mf-credit-spread-time-avg-hazard`
+  upgraded honestly (the definitional spread identity now *paired with* the substantive FTC
+  recovery `hazard_eq_neg_log_deriv_survival`, both exported, the scope note splitting
+  definitional-vs-derived); `gir-thm-9.1.7`'s scope note now states exactly what the L¹-bound
+  field does and does not encode (no `θ`, no `B`, not Novikov's condition) + Doléans–Dade spelling;
+  10 scope notes' stale "toolchain v4.18.0" → pin-stable wording; `mart-thm-2.6.7`'s pre-strip
+  "inlined helper" provenance fixed; `mf-cds-fair-spread` abstract-annuity-factor disclosure.
+- *Docs*: `bridges.md` `||`-merged rows 42/40 split (the Phase-40 row had been invisible in
+  rendered markdown since 2026-05-30); row 42's wrong "discrete-Lagrangian" gloss and its mention
+  of the deleted adapter fixed; the CondExpJensen audit row annotated **DELETED** (it said "NOT
+  duplicate" about a file deleted as a duplicate); `ConvexPricingFunctional` got its missing
+  catalogue row (53a, recording its layering exception); `blueprint.md`'s prose walk caught up to
+  the generated spine (4 sections: FK heat flow, Markov path law, **BS PDE from Feynman–Kac**,
+  Merton dominance, + cross-link from the Itô 🚧 section); `roadmap.md`'s same-day-stale "next
+  candidates" fixed; `patterns.md` now declares the canonical `exp (-(r * τ))` form for new files;
+  `coverage.md` live-status pointer + the 8.2.5 round-6 correction note; **README's Reproducibility
+  pins were ALL stale** (toolchain rc1→rc2, Mathlib `f23306…`→`c87cc97…`, BM `16d15e…`→`fa590b1…`)
+  — a panel miss caught in the follow-up sweep, fixed.
+- *Repo hygiene*: the tracked-but-gitignored `docs/superpowers/specs/…` design spec untracked
+  (`git rm --cached`; the dir is deliberately private); `docs/README.md`'s links into that dir
+  removed and a `values-review.md` row added.
+
+**Declined / corrected reviewer claims**: lens 3's "tracked stale HF snapshot jsonl" was wrong on
+git status — the jsonl is untracked (local-only, no public exposure); the genuinely tracked-but-
+ignored file was the reorg spec (fixed above). Elegance refactors of sound, heavily-reviewed proofs
+were deferred with sketches recorded rather than churned (below), per the panel's own
+keep-deferred recommendations.
+
+**Recorded actions (deferred, owner = next session touching those files):**
+1. *(elegance, sketched in the panel reports)* `NewtonConvergence` mirrored case duplication
+   (~30 lines) → one `abs_integral_le_sq` helper; `SharpeFOCDerivation`'s 4× spelled-out derivative
+   numerator → rewrite-through-factorization (~50→15 lines); `UtilityDerivation` have-pyramid →
+   `calc` (+ canonical `ConcaveOn` hypothesis).
+2. *(slop, catalogued)* dedup pairs: `ItoIntegralRiemannBridge`/`TD` (accepted-debt class, fold
+   with the SimpleProcess/L2Predictable unification); `Immunization`/`ConvexityImmunization`
+   shared weighted-exponential-sum `HasDerivAt` skeleton; `integrable_payoff_mul_d{t,x}K` stays
+   deferred (fold when the general-`g` FK PDE lands); `MertonClassicDisplay`'s twice-proved
+   rate-shift identity → private lemma.
+3. *(elegance, assessed and closed)* the exp-sign convention split is **accepted permanently**;
+   the canonical form for new files is now in `patterns.md`.
+4. *(slop, Lean-gated)* dead `set … with` bindings: the two reviewers' static lists disagree
+   (8 vs 7, overlap 4) — itself proof the item needs per-case Lean confirmation; batch into
+   sessions already touching those files.
+5. *(register, recorded)* `HasEMM_*_state` hybrid casing kept (coherent in-repo family);
+   finance-acronym name parts (`_FOC`, `_SML`, `_QV_`) kept; ASCII-vs-unicode subscript census
+   recorded; `swap_output_*` family naming; `VasicekSDE`/`MertonAmericanCallTree` `exp_zero`-show
+   one-liners; `Phi_neg`'s `Iio_ae_eq_Iic` polish.
+6. *(infrastructure, noted)* `AxiomAuditGen` pins only head-position constants of snippet proofs —
+   compound proofs (`Nat.card_congr (…)`, anonymous constructors) contribute nothing; the
+   reflection keystone is pinned in the **curated** audit instead. Consider a generator extension.
+7. *(corpus, judgment note)* the long-tail trivia cluster (`mf-tracking-error-self`,
+   `mf-triangle-arbitrage-unique`, `mf-log-forward-bsTerminal`, `mf-sortino-translation`) stays
+   honest-but-thin `full`; upgrade toward the real theorems when those files are next touched.
+
+**Positive exemplars recorded by the panel**: `Portfolio/CovariancePSD` (the docstring's story IS
+the certificate), `Futures/Black76Greeks` (structural reduction made visible),
+`RiskMeasures/RockafellarUryasev` (certificate-first elegance), `RiskMeasures/UtilityDerivation`
+(the coherent axioms given content from a primitive), `Foundations/CarrMadan` (the model
+upstream-coherence note), `FixedIncome/KMVMerton` (structural-identity honesty),
+`pp-prop-3.3.6`'s scope note (the model reduced_core disclosure), and the snippet corpus's
+mechanically perfect import discipline (0 blanket-Mathlib violations in 235 MathFin-importing
+snippets).
+
+**Verdict**: **PASS after fixes** — all three blockers repaired and machine-verified (the 8.2.5
+refutation AND the repaired spec's inhabitant were both daemon-checked; the inhabitant ships
+inside the snippet as a permanent non-vacuity guard). Net: corpus 273 → **274**
+(+`mf-reflection-principle-counting`), **full 239** (−1 compound-poisson demotion, +1 reflection
+wire), wrappers 18, reduced 17, delivery-ready **257**/274. lake build **8708 jobs green**,
+MathFin sorry-free, axiom-clean (generated audit regenerated + a new curated pin); ledger
+**274/274 fresh**; **19 pytest gates green**. Shipped alongside: the repo-presentation upgrade
+(README landmark-results table + how-verification-works section + the stale Reproducibility pins
+fixed; GitHub description/topics; docs index repaired).
+
 ## 2026-06-08 (round 5) — WHOLE-REPO values review — corpus 270
 
 **Scope**: at the user's request, a full-repo panel (not just the Feynman–Kac keystone) — **six**

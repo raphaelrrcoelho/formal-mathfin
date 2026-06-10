@@ -35,8 +35,8 @@ Results:
 * `portfolioVarTwo_eq_quad`: the factorization above.
 * `portfolioVarTwo_at_minVarWeight`: `Var(w*) = V_min`.
 * `portfolioVarTwo_ge_min`: `Var(w) ≥ V_min` for every `w`, given `D > 0`.
-* `minPortfolioVarTwo_eq_zero_iff_perfect_anticorr`: at `ρ = -1` with
-  `σ_1, σ_2 > 0`, the minimum variance is exactly zero (perfect hedge).
+* `minPortfolioVarTwo_perfect_anticorr`: at `ρ = -1`, the minimum variance
+  is exactly zero (perfect hedge).
 -/
 
 @[expose] public section

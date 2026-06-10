@@ -125,20 +125,16 @@ theorem swap_output_pos
   exact div_pos (mul_pos hy hΔx) h_sum_pos
 
 /-- **Swap output bounded by reserve**: `Δy < y` — the AMM cannot be
-drained by any single (finite) trade. -/
+drained by any single (finite) trade. The deficit is exactly the positive
+remainder `y·x / (x + Δx)`. -/
 theorem swap_output_lt_y
-    (x y Δx : ℝ) (hx : 0 < x) (hΔx : 0 < Δx) (hy : 0 ≤ y) :
-    swapOutput x y Δx < y ∨ y = 0 := by
-  rcases eq_or_lt_of_le hy with hy_eq | hy_pos
-  · right; exact hy_eq.symm
-  · left
-    unfold swapOutput
-    have h_sum_pos : 0 < x + Δx := by linarith
-    rw [div_lt_iff₀ h_sum_pos]
-    -- y · Δx < y · (x + Δx)  ⟺  Δx < x + Δx  (since y > 0)
-    have h_factor : y * (x + Δx) = y * x + y * Δx := by ring
-    rw [h_factor]
-    nlinarith
+    (x y Δx : ℝ) (hx : 0 < x) (hΔx : 0 < Δx) (hy : 0 < y) :
+    swapOutput x y Δx < y := by
+  unfold swapOutput
+  have h_sum_pos : 0 < x + Δx := by linarith
+  rw [div_lt_iff₀ h_sum_pos]
+  -- y · Δx < y · x + y · Δx, the gap being the positive y · x
+  nlinarith [mul_pos hy hx]
 
 /-- **Marginal price identity**: at infinitesimal input, the exchange
 rate `Δy / Δx` equals `y / (x + Δx)`, which tends to `y / x` as

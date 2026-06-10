@@ -30,7 +30,7 @@ This file defines `americanPrice` and proves:
   price with the same terminal payoff. The American has weakly more optionality
   (early-exercise) — this is the formal expression of that intuition.
 
-No new infrastructure beyond `BinomialModel` is needed.
+No new infrastructure beyond `Binomial/Model.lean` is needed.
 -/
 
 @[expose] public section

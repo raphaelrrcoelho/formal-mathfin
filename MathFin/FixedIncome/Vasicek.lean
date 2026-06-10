@@ -42,6 +42,7 @@ Results:
 * `vasicekDeterministic`: definition `θ + (r₀ − θ) e^{−κt}`.
 * `vasicekDeterministic_at_zero`: `r(0) = r₀`.
 * `vasicekDeterministic_solves_ODE`: `dr/dt = κ(θ − r(t))`.
+* `vasicekDeterministic_tendsto_mean`: `r(t) → θ` as `t → ∞` (for `κ > 0`).
 * `meanReversionHalfLife`: `log 2 / κ`.
 * `vasicekDeterministic_at_halfLife`: at `t = log 2 / κ`, the gap is half
   the initial gap.
@@ -82,6 +83,17 @@ theorem vasicekDeterministic_solves_ODE (r₀ θ κ t : ℝ) :
   have h := h_mul.const_add θ
   convert h using 1
   ring
+
+/-- **Long-run mean reversion**: `r(t) → θ` as `t → ∞`, for `κ > 0`. The gap
+`(r₀ − θ) e^{−κt}` decays exponentially: `κt → ∞`, so `e^{−κt} → 0`. -/
+theorem vasicekDeterministic_tendsto_mean (r₀ θ κ : ℝ) (hκ : 0 < κ) :
+    Filter.Tendsto (vasicekDeterministic r₀ θ κ) Filter.atTop (nhds θ) := by
+  have h1 : Filter.Tendsto (fun t : ℝ => κ * t) Filter.atTop Filter.atTop :=
+    Filter.Tendsto.const_mul_atTop hκ Filter.tendsto_id
+  have h2 : Filter.Tendsto (fun t : ℝ => Real.exp (-(κ * t)))
+      Filter.atTop (nhds 0) :=
+    Real.tendsto_exp_neg_atTop_nhds_zero.comp h1
+  simpa using (h2.const_mul (r₀ - θ)).const_add θ
 
 /-! ## Half-life (folded from `MeanReversionHalfLife.lean`) -/
 

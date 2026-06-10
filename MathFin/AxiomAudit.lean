@@ -542,4 +542,11 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.bs_pde_from_no_arbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bs_pde_from_no_arbitrage
 
+-- Values round 6 (2026-06-09): Andre's reflection-principle counting
+-- bijection (Binomial/PathReflection.lean), wired to the corpus as
+-- `mf-reflection-principle-counting`.
+
+/-- info: 'MathFin.reflectionPrincipleEquiv_below' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.reflectionPrincipleEquiv_below
+
 end MathFin.AxiomAudit

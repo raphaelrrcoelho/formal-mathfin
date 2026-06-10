@@ -53,7 +53,7 @@ excess return.
 ## Why this is "first principles"
 
 Existing CAPM library content stated the SML and proved consistency
-relations (`expectedReturn_eq_SML_iff_alpha_zero`, beta linearity). It did
+relations (`jensenAlpha_eq_zero_iff`, beta linearity). It did
 not derive the SML from a market-equilibrium argument. This file does:
 given the equilibrium hypothesis (`h_FOC`, which itself follows from
 optimal portfolio choice via `Portfolio.TangentPortfolio`), the CAPM

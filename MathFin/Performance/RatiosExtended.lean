@@ -19,7 +19,9 @@ Standard quant performance metrics beyond the basic Sharpe ratio:
   systematic risk. The market-model analogue of Sharpe.
 * **Information ratio** `IR = (μ_p - μ_b) / σ_active`, with `σ_active` the
   tracking error (std-dev of `R_p − R_b`). Measures active management skill.
-* **Tracking-error decomposition**: `σ_active² = σ_p² − 2·Cov + σ_b²`.
+* **Tracking error squared** `trackingErrorSq := σ_p² − 2·cov + σ_b²` — the
+  `Var(R_p − R_b)` expansion taken as the *definition* (no random variables
+  enter this file; the variance-level identity is not formalized here).
 
 Sortino, Treynor, and IR are all instances of `(a − b)/d`. Their
 *scale-invariance* lemmas are one-line consequences of the algebraic master
@@ -87,13 +89,14 @@ lemma informationRatio_scale_invariant {c : ℝ} (hc : c ≠ 0)
   unfold informationRatio
   exact diff_div_scale_invariant hc μ_p μ_b σ_active
 
-/-- **Tracking error squared**: `σ_active² = σ_p² − 2·Cov(R_p, R_b) + σ_b²`.
-We define `trackingError² := σ_p² - 2 · cov + σ_b²` and prove this matches the
-expansion of `Var(R_p − R_b)`. -/
+/-- **Tracking error squared**, defined as `σ_p² − 2·cov + σ_b²` — the
+familiar expansion of `Var(R_p − R_b)` in terms of the input moments, taken
+here as the model definition. The variance-level identity itself is not
+formalized in this file (its inputs are bare reals, not random variables). -/
 noncomputable def trackingErrorSq (σ_p σ_b cov : ℝ) : ℝ :=
   σ_p ^ 2 - 2 * cov + σ_b ^ 2
 
-/-- **Tracking-error decomposition**: when the benchmark equals the portfolio
+/-- **Self-benchmark vanishing**: when the benchmark equals the portfolio
 (`σ_p = σ_b` and `cov = σ_p²`), the tracking error vanishes. -/
 lemma trackingErrorSq_self (σ_p : ℝ) :
     trackingErrorSq σ_p σ_p (σ_p ^ 2) = 0 := by

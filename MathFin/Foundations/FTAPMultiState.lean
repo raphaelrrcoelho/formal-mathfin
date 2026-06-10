@@ -9,14 +9,15 @@ public import Mathlib
 public import MathFin.Foundations.FTAPTwoState
 
 /-!
-# Multi-state FTAP backward direction (phase 42, hypothesis-form)
+# Multi-state FTAP: forward direction (phase 42)
 
 The pre-existing `Foundations/FTAPTwoState.lean` (phase 37) gives the
-**both-directions** Fundamental Theorem of Asset Pricing in the
-**one-period, one-asset, two-state** market. This file extends the
-**forward direction** (EMM ⟹ no arbitrage) to **arbitrary finite-state
-markets with multiple assets**, and parameterises the **backward
-direction** by a separating-functional hypothesis.
+Fundamental Theorem of Asset Pricing in the **one-period, one-asset,
+two-state** market. This file extends the **forward direction** (EMM ⟹
+no arbitrage) to **arbitrary finite-state markets with multiple assets**.
+The **backward direction** — constructing the EMM from no-arbitrage,
+which needs finite-dimensional separation (Farkas) — is not attempted
+here; see the scope note below.
 
 ## Setup
 
@@ -37,16 +38,16 @@ under EMM, every portfolio's `q`-weighted excess return is zero, but
 non-negative components with one strictly positive ⟹ strictly positive
 weighted sum, contradiction.
 
-## Backward FTAP (hypothesis-form)
+## Backward FTAP (not formalized — Phase 42c)
 
-Requires Hahn-Banach separation in finite-dim (or Farkas' lemma). Stated
-here parameterised by the existence of a separating positive
-functional. Mathlib has `Mathlib.Analysis.NormedSpace.HahnBanach.Separation`
-for normed spaces; specialising to finite-dim ℝ^N to produce an EMM
-without the separation hypothesis is the open work item (call it
-"Phase 42c"). For our scope: **the forward direction is fully proved
-in arbitrary finite-state, and the backward direction is the
-two-state case from Phase 37**.
+The backward direction requires Hahn-Banach separation in finite
+dimensions (or Farkas' lemma). Mathlib has
+`Mathlib.Analysis.NormedSpace.HahnBanach.Separation` for normed spaces;
+specialising to finite-dim ℝ^N to produce an EMM from the no-arbitrage
+condition is the open work item ("Phase 42c"). For our scope: **the
+forward direction is fully proved in arbitrary finite-state, and the
+backward direction exists only as the two-state construction from
+Phase 37** (`FTAPTwoState.emm_of_signs`).
 
 ## Results
 
@@ -112,21 +113,6 @@ theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
     mul_pos (hq_pos i₀) h_pos
   have h_sum_pos : 0 < ∑ i, q i * (∑ k, θ k * z k i) :=
     Finset.sum_pos' h_term_nn ⟨i₀, Finset.mem_univ _, h_term_pos⟩
-  linarith
-
-/-- **Backward FTAP, multi-state** — hypothesis-form. If an EMM-like
-candidate exists (a positive probability `q` satisfying the EMM
-identities), it produces the EMM. The **construction of `q` from the
-no-arbitrage condition** requires Hahn-Banach separation in finite-dim
-(Farkas' lemma) and is left as the open Phase 42c. This adapter shows
-the trivial direction: a candidate satisfying the EMM identities IS the
-EMM, so the FTAP backward direction collapses to "find such a `q`". -/
-theorem hasEMM_multi_of_candidate {N M : ℕ} (z : Fin M → Fin N → ℝ)
-    (q : Fin N → ℝ)
-    (hq_pos : ∀ i, 0 < q i)
-    (hq_sum : (∑ i, q i) = 1)
-    (hq_z : ∀ k, (∑ i, q i * z k i) = 0) :
-    HasEMM_multi_state z :=
-  ⟨q, hq_pos, hq_sum, hq_z⟩
+  exact h_sum_pos.ne' h_zero
 
 end MathFin

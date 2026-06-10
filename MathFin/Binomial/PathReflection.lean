@@ -29,8 +29,12 @@ when `ω` reaches level `a`), this identity yields the bijection between
 `2a − b`*. That bijection is the counting backbone of barrier-option
 pricing in the binomial tree.
 
-This file formalises the algebraic core (the path-position identity and
-involution); the hitting-time bijection is downstream work.
+This file formalises **both halves**: the algebraic core (the
+path-position identity and involution) *and* the hitting-time bijection
+itself (`reflectionPrincipleEquiv`, `reflectionPrincipleEquiv_below`), with
+the discrete IVT (`HitsLevel_of_walkPos_endpoint_ge`) discharging the
+redundant hitting condition on the reflected side. The counting form is
+wired to the corpus as `mf-reflection-principle-counting`.
 
 ## Why this is more than algebra
 
@@ -52,6 +56,17 @@ to both sides, and the suffix-sign-flip is what produces the
   `walkPos ω τ`.
 * `walkPos_reflectAfter_endpoint`: endpoint statement: if the original
   hits `a` at `τ` and ends at `b`, the reflected ends at `2a − b`.
+* `HitsLevel` / `firstHit` (+ `firstHit?`): the barrier-hit predicate and
+  the first hitting time.
+* `reflectAtFirstHit` (+ involutivity): reflection at the first hit.
+* `HitsLevel_of_walkPos_endpoint_ge`: discrete IVT — a walk ending at or
+  above a level `a ≥ 0` has hit `a`.
+* `reflectionPrincipleEquiv`: paths hitting `a` ending at `b` ≃ paths
+  hitting `a` ending at `2a − b` (André's bijection, an involution).
+* `reflectionPrincipleEquiv_below`: for `0 < a`, `b ≤ a` — paths hitting
+  `a` ending at `b` ≃ *all* paths ending at `2a − b` (hitting condition on
+  the right discharged by the IVT): the counting form used in barrier
+  pricing.
 -/
 
 @[expose] public section

@@ -148,7 +148,7 @@
         "reference": "Theorem 2.6.7",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Real derivation of FTAP (⇒ direction): embeds the martingale-transform theorem (mart-thm-2.2.9 inlined as helper since each benchmark is verified in isolation), applies it to the discounted price `S` under the EMM `Q`, then uses `Q ≪ P`, `integral_eq_zero_iff_of_nonneg_ae`, and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero."
+        "formalization_scope": "Real derivation of FTAP (⇒ direction): applies the martingale-transform theorem (shared with mart-thm-2.2.9 via `import MathFin.Foundations.MartingaleTransform`, not duplicated inline), applies it to the discounted price `S` under the EMM `Q`, then uses `Q ≪ P`, `integral_eq_zero_iff_of_nonneg_ae`, and `P ≪ Q` to derive that arbitrage sets have `P`-measure zero."
       }
     }
   ]

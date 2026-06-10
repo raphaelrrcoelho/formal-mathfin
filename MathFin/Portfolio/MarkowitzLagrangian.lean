@@ -52,10 +52,10 @@ normals, i.e., `1^T δw = 0` and `μ^T δw = 0`),
   1 + lam_2 · μ` componentwise, then `w` is a constrained-variance critical
   point. *Proof*: direct algebra — substitute the FOC, use the
   perturbation's orthogonality to the constraint normals.
-* `lagrangian_critical_directional_deriv`: explicit computation of the
-  directional derivative of `(1/2) w^T Σ w` at `w` in direction `δw` for
-  symmetric `Σ`, equals `(Σw) · δw`. The mathematical content underlying
-  the FOC.
+* `variance_objective_eq_self_dot` / `quadratic_form_perturb_linear_coeff`:
+  the variance objective as a self-dot, and the explicit linear coefficient
+  `(Σw) · δw` of a perturbation of `(1/2) wᵀΣw` for symmetric `Σ` — the
+  directional-derivative content underlying the FOC.
 
 ## What is *not* in this file (deferred)
 

@@ -7,14 +7,14 @@
       "description": "Theorem 9.1.7: If E[exp((1/2) ∫₀ᵀ θ_s² ds)] < ∞, then the Doleans-Dade exponential Z_t = exp(∫₀ᵗ θ_s dB_s - (1/2) ∫₀ᵗ θ_s² ds) is a true martingale on [0,T]",
       "domain": "stochastic_calculus",
       "code": {
-        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Novikov-condition specification: a progressively measurable integrand θ\n    on `[0, T]` with `E[exp((1/2) ∫₀ᵀ θ_s² ds)] < ∞` and a witness that the\n    Doléans–Dade exponential `Z_t = exp(∫₀ᵗ θ_s dB_s − (1/2) ∫₀ᵗ θ_s² ds)`\n    is a true martingale on `[0, T]` (Theorem 9.1.7). -/\nstructure NovikovCondition {Ω : Type*} [m0 : MeasurableSpace Ω]\n    (μ : Measure Ω) [IsProbabilityMeasure μ] (𝓕 : Filtration ℝ m0)\n    (T : ℝ) (Z : ℝ → Ω → ℝ) : Prop where\n  T_pos : 0 < T\n  /-- Novikov hypothesis: the exponential of the half-quadratic-variation is\n      integrable (assumed via a finite L¹ bound on `Z` for the textbook setting). -/\n  novikov_finite : ∃ R : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,\n    eLpNorm (Z t) 1 μ ≤ ENNReal.ofReal R\n  /-- Theorem 9.1.7: `Z` is a martingale on `[0, T]`. -/\n  is_martingale : Martingale Z 𝓕 μ\n\n/-- Theorem 9.1.7 (Novikov's condition): under the Novikov integrability\n    condition, the Doléans–Dade exponential `Z` is a true martingale on `[0, T]`. -/\ntheorem NovikovCondition.dolansDade_is_martingale\n    {Ω : Type*} [m0 : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {𝓕 : Filtration ℝ m0} {T : ℝ} {Z : ℝ → Ω → ℝ}\n    (h : NovikovCondition μ 𝓕 T Z) :\n    Martingale Z 𝓕 μ :=\n  h.is_martingale\n"
+        "lean": "import Mathlib\n\nopen MeasureTheory ProbabilityTheory\n\n/-- Novikov-condition specification: a progressively measurable integrand θ\n    on `[0, T]` with `E[exp((1/2) ∫₀ᵀ θ_s² ds)] < ∞` and a witness that the\n    Doléans–Dade exponential `Z_t = exp(∫₀ᵗ θ_s dB_s − (1/2) ∫₀ᵗ θ_s² ds)`\n    is a true martingale on `[0, T]` (Theorem 9.1.7). -/\nstructure NovikovCondition {Ω : Type*} [m0 : MeasurableSpace Ω]\n    (μ : Measure Ω) [IsProbabilityMeasure μ] (𝓕 : Filtration ℝ m0)\n    (T : ℝ) (Z : ℝ → Ω → ℝ) : Prop where\n  T_pos : 0 < T\n  /-- Stand-in for the Novikov hypothesis: a uniform L¹ bound on `Z`. The\n      genuine condition `E[exp(½∫₀ᵀ θ² ds)] < ∞` needs the stochastic integral\n      `∫ θ dB` (no `θ` or `B` appears in this structure) and is not encoded. -/\n  novikov_finite : ∃ R : ℝ, ∀ t ∈ Set.Icc (0 : ℝ) T,\n    eLpNorm (Z t) 1 μ ≤ ENNReal.ofReal R\n  /-- Theorem 9.1.7: `Z` is a martingale on `[0, T]`. -/\n  is_martingale : Martingale Z 𝓕 μ\n\n/-- Theorem 9.1.7 (Novikov's condition): under the Novikov integrability\n    condition, the Doléans–Dade exponential `Z` is a true martingale on `[0, T]`. -/\ntheorem NovikovCondition.doleansDade_is_martingale\n    {Ω : Type*} [m0 : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {𝓕 : Filtration ℝ m0} {T : ℝ} {Z : ℝ → Ω → ℝ}\n    (h : NovikovCondition μ 𝓕 T Z) :\n    Martingale Z 𝓕 μ :=\n  h.is_martingale\n"
       },
       "metadata": {
         "chapter": 9,
         "reference": "Theorem 9.1.7",
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+        "formalization_scope": "Lean specification (structure spec): the structure carries `T_pos`, a uniform L¹ bound on `Z` standing in for the Novikov integrability hypothesis — the genuine condition E[exp(½∫₀ᵀ θ² ds)] < ∞ requires the stochastic integral ∫θ dB, and no θ or B appears in the structure — and the conclusion `Martingale Z 𝓕 μ` as a field; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation. Marked `reduced_core` to remain honest: a real proof requires the Itô-integral / Doléans–Dade machinery currently outside Mathlib at the pinned toolchain."
       }
     },
     {
@@ -30,7 +30,7 @@
         "reference": "Theorem 9.1.8",
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
       }
     },
     {
@@ -78,7 +78,7 @@
         "reference": "Corollary 9.3.4",
         "difficulty": "advanced",
         "formalization_status": "reduced_core",
-        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at toolchain v4.18.0."
+        "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
       }
     }
   ]

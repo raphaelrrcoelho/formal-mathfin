@@ -17,8 +17,8 @@ zero-coupon bond price is `P(T) = exp(−T · R(T))`, so
   `forwardRate(T) := −d/dT log P(T) = d/dT [T · R(T)] = R(T) + T · R'(T)`.
 
 This generalizes the flat-curve case (`R(T) ≡ R₀ ⇒ forward = R₀`) covered by
-`forwardRate_eq_spot_flat` in `ZCB.lean`. The non-flat case is purely the
-product-rule chain rule applied to `T · R(T)`.
+`hasDerivAt_neg_log_zcb_T` in `CouponBonds.lean`. The non-flat case is purely
+the product-rule chain rule applied to `T · R(T)`.
 
 This is an instance of the `Foundations/ExponentialDiscount` principle at
 `H(T) = T · R(T)`: the forward rate is the negative log-derivative of the

@@ -26,6 +26,11 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+> **Live status (2026-06-09, values round 6):** corpus **274**, **239 full +
+> 18 wrappers = 257/274 delivery-ready**, 17 reduced cores — see the latest
+> round record at the end of this section. The figures immediately below are
+> the historical 2026-05-20 audit record, kept as provenance.
+
 Refresh with:
 
 ```bash
@@ -166,6 +171,12 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > Brownian driver `B` dead (a random-IC ODE, not an SDE); fixed to an opaque
 > adapted stochastic-integral process `IσX` (= `∫₀ᵗ σ dB`), mirroring
 > `sc-thm-7.5.2`'s opaque Itô-integral fields. Stays `reduced_core`, now faithful.
+> *(Round-6 correction, 2026-06-09: that rewrite's uniqueness clause quantified a free
+> per-candidate integral `IσY`, which made the spec **uninhabitable** — any process
+> discharges the solution premise by taking its own residual as "integral". Repaired
+> with an opaque integral-operator encoding `Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ` consumed
+> as `Iσ X` / `Iσ Y`, the uniqueness conclusion scoped to `0 ≤ t`, a `: Prop`
+> ascription, and an in-snippet inhabitant `example` guarding non-vacuity.)*
 > (2) **Orphan wiring** — three documented-but-unwired Foundations bridges became
 > `full` corpus entries: `mf-ftap-multi-state-forward` (Phase 42 forward FTAP, EMM
 > ⟹ no-arbitrage in arbitrary finite state + assets), `mf-pricing-kernel-butterfly`
@@ -182,6 +193,19 @@ Coverage as of 2026-05-20 (extended mathematical-finance pass: put greeks, highe
 > existing `bsCall` node. Net: **239 full + 18 wrappers = 257 / 273
 > delivery-ready, 16 reduced cores** (corpus 270 → 273). lake build 8708 jobs,
 > axiom-clean; ledger 273/273 fresh; gate tests green.
+
+> **2026-06-09 — values round 6 (whole-repo, 8-lens panel).** Three blockers found and fixed:
+> `sc-thm-8.2.5`'s round-5 rewrite was **uninhabitable** (free per-candidate `IσY`; repaired with
+> the opaque integral-operator encoding + conclusion scoped to `0 ≤ t` + an in-snippet inhabitant
+> guard — refutation and inhabitant both daemon-checked); Vasicek's claimed-but-absent limit
+> theorem (added for real: `vasicekDeterministic_tendsto_mean`); RatiosExtended's claimed-but-
+> absent variance expansion (de-claimed). Corpus honesty: `mf-compound-poisson-mgf` demoted to
+> `reduced_core` (exp-algebra core only); `mf-credit-spread-time-avg-hazard` now exports the
+> definitional identity *and* the substantive FTC recovery; André's reflection principle wired as
+> the new `full` entry `mf-reflection-principle-counting`. PricingKernel recomposed so its FTAP
+> lineage and `statePricePricing` consumption are definitional. Net: corpus 273 → **274**,
+> **239 full + 18 wrappers = 257 / 274 delivery-ready**, 17 reduced. lake build 8708 jobs green,
+> ledger 274/274 fresh, 19 gate tests green. Full findings ledger: `docs/values-review.md`.
 
 > **Feynman–Kac → Black–Scholes-PDE keystone round (2026-06-08).** The new
 > `full` entry `sc-bs-pde-feynman-kac` (`bsV_satisfies_bs_pde_via_feynmanKac`)

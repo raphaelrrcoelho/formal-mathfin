@@ -20,7 +20,7 @@ fair strike `σ²`:
    `(2/T) · E_Q[log(F/S_T)] = σ²`.
 
 2. **Realised-variance QV limit** (Phase 34 `tendsto_expected_bsLogPrice_equipartition_sum`):
-   `lim_n (1/T) · E_Q[Σ_k (log S_{(k+1)T/(n+1)} − log S_{kT/(n+1)})²] = σ²`.
+   `lim_n E_Q[Σ_k (log S_{(k+1)T/(n+1)} − log S_{kT/(n+1)})²] = σ²·T`.
 
 The two forms compute the same `σ²` from different *integrals* of the same
 underlying BS dynamics. This file proves their *agreement* — both equal
@@ -71,14 +71,15 @@ log-price both yield `σ²`:
 
 Unlike a tautological `σ² = σ²` restatement, **both conjuncts here are the
 genuine functionals**: the second is the honest `Tendsto` of the squared-
-increment sum, not a placeholder. `hB` and `hT_nonneg` are load-bearing (they
-feed the QV-limit theorem). This is the real model-level equivalence of the
-static-replication and realised-variance characterisations of the fair
+increment sum, not a placeholder. `hB` is load-bearing (it feeds the QV-limit
+theorem), and `hT : 0 < T` feeds both conjuncts — its `≠ 0` half the log
+form, its `≤` half the QV limit. This is the real model-level equivalence of
+the static-replication and realised-variance characterisations of the fair
 strike. -/
 theorem varianceSwap_log_eq_QV_limit_value
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     {B : ℝ → Ω → ℝ} (hB : BrownianQuadraticVariation μ B)
-    {S_0 : ℝ} (hS : 0 < S_0) (r σ : ℝ) {T : ℝ} (hT_pos : T ≠ 0) (hT_nonneg : 0 ≤ T) :
+    {S_0 : ℝ} (hS : 0 < S_0) (r σ : ℝ) {T : ℝ} (hT : 0 < T) :
     -- Log-payoff (static-replication) form = σ²
     (2 / T) * (∫ z, Real.log ((S_0 * Real.exp (r * T)) /
         (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))) ∂(gaussianReal 0 1))
@@ -89,7 +90,7 @@ theorem varianceSwap_log_eq_QV_limit_value
         (bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -
          bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ)
       Filter.atTop (nhds (σ ^ 2 * T)) :=
-  ⟨varianceSwap_log_contribution hS r σ T hT_pos,
-   tendsto_expected_bsLogPrice_equipartition_sum hB S_0 r σ hT_nonneg⟩
+  ⟨varianceSwap_log_contribution hS r σ T hT.ne',
+   tendsto_expected_bsLogPrice_equipartition_sum hB S_0 r σ hT.le⟩
 
 end MathFin

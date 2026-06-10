@@ -218,6 +218,26 @@ genuine GBM derivatives in hand, the SDE-solution limit still to come.
 `½σ²` second-order term that drives the Black–Scholes PDE.
 [`Foundations/FeynmanKacHeatEquation.lean`](../MathFin/Foundations/FeynmanKacHeatEquation.lean)
 
+### Feynman–Kac heat flow — kernel-side derivatives ✅
+The kernel convolution `feynmanU g t x = ∫ z, g z · K(t, z − x) dz`, with the
+heat kernel **jointly Fréchet-differentiable** (`hasFDerivAt_heatKernel` — the
+one genuinely-2D ingredient), giving `∂_t/∂_x/∂_xx` of `feynmanU` by dominated
+differentiation under the integral, and the heat equation `∂_t U = ½ ∂_xx U`
+(`feynmanU_heat_equation`) for sub-Gaussian payoffs.
+→ *Finance:* the heat flow whose discounted log-transform *is* the
+Black–Scholes price surface — the analytic engine of the FK keystone (Pricing
+section below).
+[`Foundations/FeynmanKacHeatEquation.lean`](../MathFin/Foundations/FeynmanKacHeatEquation.lean)
+
+### Markov path law (Ionescu–Tulcea) ✅
+The law of a countable-state Markov chain constructed on path space via
+`Kernel.trajMeasure`, with the finite-cylinder factorization through the
+transition kernels (`markovPathMeasure_cylinder`) — proved by comp-product
+marginal induction, not assumed.
+→ *Finance:* the path-space measure underlying lattice/tree models — every
+discrete pricing tree is a Markov path law.
+[`Foundations/MarkovPathMeasure.lean`](../MathFin/Foundations/MarkovPathMeasure.lean)
+
 ## Change of measure — the centerpiece
 
 ### Static Girsanov via an Esscher tilt ✅
@@ -295,8 +315,23 @@ bounded-derivative Itô formulas do not reach it: the *time-dependent* formula
 now exists (`sc-thm-7.1.2`, `full` in the bounded regime — Summit A′ below),
 but the BS value function's `Γ` is unbounded as `S → 0`, so the bounded formula
 does not yet apply to it. So this meets the closed-form route at the PDE
-*coefficient*, with the martingale step still to come.
+*coefficient*, with the martingale step still to come. An *independent*
+probabilistic derivation of the PDE — via Feynman–Kac rather than Itô — is
+complete: next section.
 [`BlackScholes/PDEFromIto.lean`](../MathFin/BlackScholes/PDEFromIto.lean)
+
+### BS PDE from Feynman–Kac ✅
+The keystone `bsV_satisfies_bs_pde_via_feynmanKac`: the Black–Scholes PDE
+`−∂_τV + ½σ²S²∂_SSV + rS∂_SV − rV = 0` derived **independently of Itô** from
+the representation `bsV = e^{−rτ} · feynmanU` (the discounted heat flow,
+`bsV_eq_discount_feynmanU`), the FK Greeks `hasDerivAt_bsV_{tau,S,SS}_fk`, and
+the kernel heat equation — the exact drift cancellation (`U_x` coefficient
+`−(r−σ²/2)−½σ²+r = 0`, `U_xx` coefficient `−½σ²+½σ²=0`) assembles the
+operator. A *second, independent* derivation of the PDE (the closed-form check
+above is the first); the Itô/martingale route remains open.
+→ *Finance:* the PDE obtained from the risk-neutral expectation representation
+— Feynman–Kac as practitioners actually use it.
+[`BlackScholes/PDEFromFeynmanKac.lean`](../MathFin/BlackScholes/PDEFromFeynmanKac.lean)
 
 ### Itô formula in L² — Summit A ✅
 The continuous-time L² Itô formula
@@ -370,6 +405,17 @@ one-step identity. The discrete companion of the abstract martingale-transform c
 replicable by a self-financing strategy, so the risk-neutral price is the *unique* arbitrage-free
 price.
 [`Binomial/MartingaleRepresentation.lean`](../MathFin/Binomial/MartingaleRepresentation.lean)
+
+### Merton jump-diffusion dominance ✅
+Jump risk is never free: the Black–Scholes price is dominated by the Merton
+(1976) jump-diffusion price, `bsV ≤ mertonCallPrice`
+(`bsV_le_mertonCallPrice`), through two channels — vega (per-term vol
+widening) and gamma/Jensen (the mixture over jump counts, with the tangent's
+linear term killed by `integral_mertonSpot`); the classic `Λ′ = Λ(1+k)`
+weights display is `MertonClassicDisplay`.
+→ *Finance:* ignoring jumps *underprices* options — the model-risk inequality,
+as a theorem.
+[`BlackScholes/MertonDominance.lean`](../MathFin/BlackScholes/MertonDominance.lean)
 
 ## The frontier ⏳
 
