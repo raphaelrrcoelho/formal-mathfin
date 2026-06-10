@@ -100,5 +100,86 @@ theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
     exact (ItoIsometryAdapted.integral_adapted_mul_increment hBmeas ht hind_adapt).symm
   · exact stronglyMeasurable_const.aestronglyMeasurable
 
+/-- **Clamped-increment identity.** For `u ≤ v` and `i ≤ j`, the increment between
+times `i` and `j` of the single-interval contribution `t ↦ B_{v∧t} − B_{u∧t}` is
+the Brownian increment over `[u∨i, (u∨i)∨(v∧j)]` — so it is a martingale
+difference past `𝓕_i`. (`B` is an arbitrary path here; pure `min`/`max` algebra.) -/
+private lemma clamped_increment_eq {u v i j : ℝ≥0} (huv : u ≤ v) (hij : i ≤ j)
+    (ω : Ω) :
+    (B (min v j) ω - B (min u j) ω) - (B (min v i) ω - B (min u i) ω)
+      = B (max (max u i) (min v j)) ω - B (max u i) ω := by
+  rcases le_total i u with h1 | h1 <;> rcases le_total j u with h2 | h2 <;>
+    rcases le_total i v with h3 | h3 <;> rcases le_total j v with h4 | h4 <;>
+      simp_all <;> grind
+
+/-- **The Itô integral process is an `L²` martingale.** `t ↦ (V●B)_t` is adapted
+(`itoSimpleProcess_adaptedAt`), `L¹` (`memLp_itoSimpleProcess`, `L²⟹L¹` on a
+probability space), and for `i ≤ j`, `μ[(V●B)_j | 𝓕_i] = (V●B)_i`: the increment
+`(V●B)_i − (V●B)_j` is, per interval, `V(p)·(B(mₚ) − B(Mₚ))` with
+`mₚ = p.1∨i ≤ Mₚ = (p.1∨i)∨(p.2∧j)` (`clamped_increment_eq`), whose `𝓕_i`-set
+integral vanishes by the unconditional martingale-difference
+`integral_adapted_mul_increment` applied to `s.indicator (V(p))` (adapted at `mₚ`). -/
+theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
+    Martingale (fun t ω => itoSimpleProcess hBmeas V t ω)
+      (ItoIntegralL2.natFiltration hBmeas) μ := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  refine ⟨fun t => (itoSimpleProcess_adaptedAt hBmeas V t).stronglyMeasurable, ?_⟩
+  intro i j hij
+  have hint : ∀ t : ℝ≥0, Integrable (fun ω => itoSimpleProcess hBmeas V t ω) μ :=
+    fun t => (memLp_itoSimpleProcess hBmeas V t).integrable (by norm_num)
+  have hadapt : ∀ p ∈ V.value.support,
+      ItoIsometryAdapted.AdaptedAt B (max p.1 i) (V.value p) := fun p _ =>
+    (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas
+      (V.measurable_value p)).mono (le_max_left _ _)
+  have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p =>
+    MemLp.of_bound ((V.measurable_value p).mono
+        ((ItoIntegralL2.natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
+      V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+  have hle_mM : ∀ p : ℝ≥0 × ℝ≥0,
+      max p.1 i ≤ max (max p.1 i) (min p.2 j) := fun _ => le_max_left _ _
+  symm
+  refine ae_eq_condExp_of_forall_setIntegral_eq ((ItoIntegralL2.natFiltration hBmeas).le i)
+    (hint j) (fun s _ _ => (hint i).integrableOn) (fun s hs _ => ?_)
+    (itoSimpleProcess_adaptedAt hBmeas V i).stronglyMeasurable.aestronglyMeasurable
+  have hmle : ItoIntegralL2.natFiltration hBmeas i ≤ mΩ :=
+    (ItoIntegralL2.natFiltration hBmeas).le i
+  -- the `i`-minus-`j` increment is `-∑ₚ V(p)·(B(Mₚ) − B(mₚ))`
+  have hpt : (fun ω => itoSimpleProcess hBmeas V i ω - itoSimpleProcess hBmeas V j ω)
+      = fun ω => -∑ p ∈ V.value.support,
+          V.value p ω * (B (max (max p.1 i) (min p.2 j)) ω - B (max p.1 i) ω) := by
+    funext ω
+    rw [itoSimpleProcess_apply, itoSimpleProcess_apply, Finsupp.sum, Finsupp.sum,
+        ← Finset.sum_sub_distrib, ← Finset.sum_neg_distrib]
+    refine Finset.sum_congr rfl fun p hp => ?_
+    have hcl := clamped_increment_eq (B := B) (V.le_of_mem_support_value p hp) hij ω
+    rw [← mul_sub, ← mul_neg]
+    congr 1
+    linarith [hcl]
+  have hterm_int : ∀ p ∈ V.value.support,
+      Integrable (fun ω => V.value p ω
+        * (B (max (max p.1 i) (min p.2 j)) ω - B (max p.1 i) ω)) (μ.restrict s) :=
+    fun p hp => ((ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (hle_mM p)
+      (hadapt p hp) (hVL2 p)).integrable (by norm_num)).integrableOn
+  rw [← sub_eq_zero, ← integral_sub (hint i).integrableOn (hint j).integrableOn, hpt,
+      integral_neg, neg_eq_zero, integral_finsetSum _ hterm_int]
+  refine Finset.sum_eq_zero fun p hp => ?_
+  have hAadapt : ItoIsometryAdapted.AdaptedAt B (max p.1 i) (s.indicator (V.value p)) := by
+    have h1 : ItoIsometryAdapted.AdaptedAt B (max p.1 i) (s.indicator (1 : Ω → ℝ)) :=
+      (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas
+        ((measurable_const :
+          Measurable[ItoIntegralL2.natFiltration hBmeas i] (1 : Ω → ℝ)).indicator hs)).mono
+        (le_max_right _ _)
+    have heq : (fun ω => s.indicator (1 : Ω → ℝ) ω * V.value p ω) = s.indicator (V.value p) := by
+      funext ω; by_cases h : ω ∈ s <;> simp [h]
+    exact heq ▸ h1.mul (hadapt p hp)
+  rw [← integral_indicator (hmle s hs),
+      show (s.indicator fun ω => V.value p ω
+            * (B (max (max p.1 i) (min p.2 j)) ω - B (max p.1 i) ω))
+          = fun ω => s.indicator (V.value p) ω
+            * (B (max (max p.1 i) (min p.2 j)) ω - B (max p.1 i) ω) from by
+        funext ω; by_cases h : ω ∈ s <;> simp [h]]
+  exact ItoIsometryAdapted.integral_adapted_mul_increment hBmeas (hle_mM p) hAadapt
+
 end ItoIntegralProcess
 end MathFin
