@@ -181,5 +181,93 @@ theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
         funext ω; by_cases h : ω ∈ s <;> simp [h]]
   exact ItoIsometryAdapted.integral_adapted_mul_increment hBmeas (hle_mM p) hAadapt
 
+/-- Each truncated summand `V(p)·(B_{p.2∧t} − B_{p.1∧t})` is in `L²` — the per-term
+content of `memLp_itoSimpleProcess`: for `p.1 ≤ t` an adapted coefficient times the
+increment over `[p.1, p.2∧t]`; past `t` the zero function. -/
+private lemma memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
+    (t : ℝ≥0) {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.value.support) :
+    MemLp (fun ω => V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)) 2 μ := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  by_cases ht : p.1 ≤ t
+  · rw [min_eq_left ht]
+    refine ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas
+      (le_min (V.le_of_mem_support_value p hp) ht)
+      (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
+    exact MemLp.of_bound
+      ((V.measurable_value p).mono ((ItoIntegralL2.natFiltration hBmeas).le p.1)
+        le_rfl).aestronglyMeasurable
+      V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+  · push Not at ht
+    have h1 : min p.1 t = t := min_eq_right ht.le
+    have h2 : min p.2 t = t := min_eq_right (ht.le.trans (V.le_of_mem_support_value p hp))
+    simp only [h1, h2, sub_self, mul_zero]
+    exact memLp_const 0
+
+/-- **Time-indexed Itô isometry.** `E[(V●B)_t²]` equals the predictable-rectangle
+double sum of `ItoIntegralL2.itoSimple_sq_integral` with every endpoint truncated at
+`t`: `∑_{p,q} E[V(p)·V(q)]·vol((p.1∧t, p.2∧t] ∩ (q.1∧t, q.2∧t])`. The square of the
+truncated increment sum expands into a double sum; active rectangles collapse by
+`rect_increment_pairing`, while a rectangle whose left endpoint is past `t` has a
+collapsed (zero-length) increment — matching the zero overlap on the right. The
+terminal `itoSimple_sq_integral` is the case `t` past every right endpoint. -/
+theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) (t : ℝ≥0) :
+    ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ
+      = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
+          (∫ ω, V.value p ω * V.value q ω ∂μ)
+            * max 0 ((min ((min p.2 t : ℝ≥0) : ℝ) ((min q.2 t : ℝ≥0) : ℝ))
+                - (max ((min p.1 t : ℝ≥0) : ℝ) ((min q.1 t : ℝ≥0) : ℝ))) := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
+  classical
+  set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ :=
+    fun p ω => V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω) with ha_def
+  have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ :=
+    fun p hp => memLp_truncated_term hBmeas V t hp
+  have hint : ∀ p ∈ V.value.support, ∀ q ∈ V.value.support,
+      Integrable (fun ω => a p ω * a q ω) μ :=
+    fun p hp q hq => (ha_L2 p hp).integrable_mul (ha_L2 q hq)
+  calc ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ
+      = ∫ ω, ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω ∂μ := by
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        show itoSimpleProcess hBmeas V t ω ^ 2
+          = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω
+        rw [show itoSimpleProcess hBmeas V t ω = ∑ p ∈ V.value.support, a p ω from by
+              rw [itoSimpleProcess_apply]; rfl, sq, Finset.sum_mul_sum]
+    _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, ∫ ω, a p ω * a q ω ∂μ := by
+        rw [integral_finsetSum _ (fun p hp => integrable_finsetSum _ fun q hq => hint p hp q hq)]
+        exact Finset.sum_congr rfl fun p hp =>
+          integral_finsetSum _ (fun q hq => hint p hp q hq)
+    _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
+          (∫ ω, V.value p ω * V.value q ω ∂μ)
+            * max 0 ((min ((min p.2 t : ℝ≥0) : ℝ) ((min q.2 t : ℝ≥0) : ℝ))
+                - (max ((min p.1 t : ℝ≥0) : ℝ) ((min q.1 t : ℝ≥0) : ℝ))) := by
+        refine Finset.sum_congr rfl fun p hp => Finset.sum_congr rfl fun q hq => ?_
+        by_cases htp : p.1 ≤ t
+        · by_cases htq : q.1 ≤ t
+          · -- both rectangles active: collapse via the rectangle pairing
+            simp only [ha_def, min_eq_left htp, min_eq_left htq]
+            exact ItoIsometryAdapted.rect_increment_pairing hBmeas
+              (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
+              (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value q))
+              (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
+              (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
+              (le_min (V.le_of_mem_support_value p hp) htp)
+              (le_min (V.le_of_mem_support_value q hq) htq)
+          · -- `q` past `t`: its increment collapses, overlap is zero
+            have hq1 : min q.1 t = t := min_eq_right (not_le.mp htq).le
+            have hq2 : min q.2 t = t :=
+              min_eq_right ((not_le.mp htq).le.trans (V.le_of_mem_support_value q hq))
+            have hz : ∀ ω, a p ω * a q ω = 0 := fun ω => by simp [ha_def, hq1, hq2]
+            rw [integral_congr_ae (Filter.Eventually.of_forall hz), integral_zero, hq1, hq2,
+              max_eq_left (sub_nonpos.mpr ((min_le_right _ _).trans (le_max_right _ _))), mul_zero]
+        · -- `p` past `t`: symmetric
+          have hp1 : min p.1 t = t := min_eq_right (not_le.mp htp).le
+          have hp2 : min p.2 t = t :=
+            min_eq_right ((not_le.mp htp).le.trans (V.le_of_mem_support_value p hp))
+          have hz : ∀ ω, a p ω * a q ω = 0 := fun ω => by simp [ha_def, hp1, hp2]
+          rw [integral_congr_ae (Filter.Eventually.of_forall hz), integral_zero, hp1, hp2,
+            max_eq_left (sub_nonpos.mpr ((min_le_left _ _).trans (le_max_left _ _))), mul_zero]
+
 end ItoIntegralProcess
 end MathFin
