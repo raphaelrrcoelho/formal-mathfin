@@ -11,9 +11,13 @@ public import MathFin.Foundations.ItoIntegralProcess
 
 The simple-integrand Itô integral `t ↦ (V●B)_t` (`ItoIntegralProcess`), as a
 process, is adapted, a martingale, satisfies the time-indexed isometry, and is
-L²-continuous. The crux is lifting the *unconditional* martingale-difference
-`ItoIsometryAdapted.integral_adapted_mul_increment` to its `condExp` form.
-Pathwise continuity and general (non-simple) integrands are later milestones. -/
+L²-continuous. The conditional martingale-difference `condExp_adapted_mul_increment`
+— the conditional sibling of the unconditional
+`ItoIsometryAdapted.integral_adapted_mul_increment` — packages
+`μ[φ·ΔB | 𝓕_{t₀}] = 0` as a reusable lemma; the martingale property itself is
+established directly, applying that same set-integral characterisation per
+`𝓕_s`-set. Pathwise continuity and general (non-simple) integrands are later
+milestones. -/
 
 @[expose] public section
 
@@ -59,12 +63,15 @@ theorem itoSimpleProcess_adaptedAt (hBmeas : ∀ t, Measurable (B t))
 
 variable [hB : IsPreBrownian B μ]
 
-/-- **Conditional martingale-difference.** For `φ` adapted at `t₀ ≤ t₁` and
-bounded, `μ[φ·(B_{t₁}−B_{t₀}) | 𝓕_{t₀}] = 0` — the `condExp` lift of the
-unconditional `ItoIsometryAdapted.integral_adapted_mul_increment`, via the
-set-integral characterisation of conditional expectation (the candidate `0`
-agrees with `φ·ΔB` on every `𝓕_{t₀}`-set, since `(s.indicator φ)·ΔB` is the
-unconditional martingale-difference). -/
+/-- **Conditional martingale-difference** — the conditional sibling of the
+unconditional `ItoIsometryAdapted.integral_adapted_mul_increment`, packaged for
+reuse. For `φ` adapted at `t₀ ≤ t₁` and bounded,
+`μ[φ·(B_{t₁}−B_{t₀}) | 𝓕_{t₀}] = 0`, via the set-integral characterisation of
+conditional expectation: the candidate `0` agrees with `φ·ΔB` on every
+`𝓕_{t₀}`-set, since `(s.indicator φ)·ΔB` is the unconditional
+martingale-difference. (`itoSimpleProcess_isMartingale` applies this same
+characterisation directly per-set rather than calling this lemma; it stands here
+as the reusable single-increment statement.) -/
 theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
     {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) {φ : Ω → ℝ}
     (hφ : ItoIsometryAdapted.AdaptedAt B t₀ φ) {C : ℝ} (hC : ∀ ω, |φ ω| ≤ C) :
@@ -205,12 +212,15 @@ private lemma memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
     exact memLp_const 0
 
 /-- **Time-indexed Itô isometry.** `E[(V●B)_t²]` equals the predictable-rectangle
-double sum of `ItoIntegralL2.itoSimple_sq_integral` with every endpoint truncated at
-`t`: `∑_{p,q} E[V(p)·V(q)]·vol((p.1∧t, p.2∧t] ∩ (q.1∧t, q.2∧t])`. The square of the
-truncated increment sum expands into a double sum; active rectangles collapse by
+double sum with every interval endpoint truncated at `t`:
+`∑_{p,q} E[V(p)·V(q)]·vol((p.1∧t, p.2∧t] ∩ (q.1∧t, q.2∧t])`. The proof mirrors the
+terminal `ItoIntegralL2.itoSimple_sq_integral`: the square of the truncated
+increment sum expands into a double sum; active rectangles collapse by
 `rect_increment_pairing`, while a rectangle whose left endpoint is past `t` has a
-collapsed (zero-length) increment — matching the zero overlap on the right. The
-terminal `itoSimple_sq_integral` is the case `t` past every right endpoint. -/
+collapsed (zero-length) increment matching the zero overlap on the right.
+Mathematically, `itoSimple_sq_integral` is recovered when `t` is past every right
+endpoint. (RHS endpoints are cast after `min` — `↑(p.2∧t)` — to match
+`rect_increment_pairing`'s output.) -/
 theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) (t : ℝ≥0) :
     ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ

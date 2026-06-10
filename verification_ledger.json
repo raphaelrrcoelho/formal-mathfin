@@ -2056,23 +2056,23 @@
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-10",
-      "elapsed_s": 0.0,
-      "input_hash": "9694a05bc0892698581347a0f2dd8b9242c8409205d8c124aa3ae0d3fc0a7655",
-      "verified_at_commit": "1ed7678"
+      "elapsed_s": 0.2,
+      "input_hash": "4886be020d1f75544f6d7f5552d593b27c0d7d20f8cb595ee3aa7584e72d6ab0",
+      "verified_at_commit": "c288861"
     },
     "sc-ito-simple-process-l2-continuity": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-10",
       "elapsed_s": 0.0,
-      "input_hash": "2eb6bd335d0ca4721c986838377f0a528d8b7f94313bab9fab863e47042e7e5a",
-      "verified_at_commit": "1ed7678"
+      "input_hash": "6a8651fdf4c18b5ed294661d11cd4a19e8a2da2064b30cf1aad8500311135794",
+      "verified_at_commit": "c288861"
     },
     "sc-ito-simple-process-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-10",
       "elapsed_s": 0.0,
-      "input_hash": "0e577ed8823aff983a2e45c4aa4c6aab8638aa4a302b30fcba9041f56c79ff58",
-      "verified_at_commit": "1ed7678"
+      "input_hash": "7fdf0c1a7a0cfed3ead6593228311ff8fef56d393f2f48c31bb68f52fdd784ed",
+      "verified_at_commit": "c288861"
     },
     "sc-memlp-ito-simple-process": {
       "benchmark_file": "stochastic_calculus.json",
