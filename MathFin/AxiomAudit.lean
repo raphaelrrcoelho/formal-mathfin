@@ -212,14 +212,6 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIsometryAdapted.rect_increment_pairing' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIsometryAdapted.rect_increment_pairing
 
-/-! ## Stochastic intervals + elementary-predictable-set lemma (Degenne issue #440) -/
-
-/-- info: 'MathFin.stochasticIoc.predictable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.stochasticIoc.predictable
-
-/-- info: 'MathFin.stochasticIoc.elementaryPredictableSet' depends on axioms: [propext, Classical.choice, Quot.sound] -/
-#guard_msgs (whitespace := lax) in #print axioms MathFin.stochasticIoc.elementaryPredictableSet
-
 /-! ## Continuous Itô integral — foundational bridge (AdaptedAt ↔ natural filtration) -/
 
 /-- info: 'MathFin.ItoIntegralL2.adaptedAt_of_measurable_natural' depends on axioms: [propext, Classical.choice, Quot.sound] -/

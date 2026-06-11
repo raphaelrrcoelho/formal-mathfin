@@ -94,8 +94,6 @@ import MathFin.Foundations.VarianceSwapDriftImmunity
 import MathFin.Foundations.DiscreteIto
 -- The adapted Itô isometry (increment-independence cornerstone)
 import MathFin.Foundations.ItoIsometryAdapted
--- Stochastic intervals + elementary-predictable-set lemma (Degenne issue #440)
-import MathFin.Foundations.StochasticInterval
 -- Continuous L²-adapted Itô integral (construction, anchored on Degenne SimpleProcess)
 import MathFin.Foundations.ItoIntegralL2
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`

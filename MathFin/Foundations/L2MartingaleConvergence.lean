@@ -99,13 +99,13 @@ private lemma H_eq_enorm_runMax (n : ℕ) (ω : Ω) :
   show ((Finset.range (n + 1)).sup fun k => ‖f k ω‖ₑ)
     = ‖(Finset.range (n + 1)).sup' Finset.nonempty_range_add_one (fun k => ‖f k ω‖)‖ₑ
   refine le_antisymm (Finset.sup_le fun k hk => ?_) ?_
-  · rw [← ofReal_norm_eq_enorm, ← ofReal_norm_eq_enorm]
+  · rw [← ofReal_norm, ← ofReal_norm]
     exact ENNReal.ofReal_le_ofReal
       ((Finset.le_sup' (fun m => ‖f m ω‖) hk).trans (Real.le_norm_self _))
   · obtain ⟨k₀, hk₀, heq⟩ := Finset.exists_mem_eq_sup'
       Finset.nonempty_range_add_one (fun k => ‖f k ω‖)
     rw [heq, show ‖(‖f k₀ ω‖)‖ₑ = ‖f k₀ ω‖ₑ from by
-      rw [← ofReal_norm_eq_enorm, norm_norm, ofReal_norm_eq_enorm]]
+      rw [← ofReal_norm, norm_norm, ofReal_norm]]
     exact Finset.le_sup (f := fun k => ‖f k ω‖ₑ) hk₀
 
 /-- Squared partial maxima have uniformly bounded lintegral: this is the
@@ -169,7 +169,7 @@ private lemma exists_dominator [IsFiniteMeasure μ]
     have h_eq : ∫⁻ ω, ‖(G f ω).toReal‖ₑ ^ (2 : ℕ) ∂μ = ∫⁻ ω, G f ω ^ (2 : ℕ) ∂μ := by
       refine lintegral_congr_ae ?_
       filter_upwards [h_ne] with ω hω
-      rw [← ofReal_norm_eq_enorm, Real.norm_of_nonneg ENNReal.toReal_nonneg,
+      rw [← ofReal_norm, Real.norm_of_nonneg ENNReal.toReal_nonneg,
         ENNReal.ofReal_toReal hω]
     have h_lt : eLpNorm (fun ω => (G f ω).toReal) 2 μ ^ (2 : ℕ) < ∞ := by
       rw [← lintegral_enorm_sq, h_eq]
@@ -181,7 +181,7 @@ private lemma exists_dominator [IsFiniteMeasure μ]
   · intro n
     filter_upwards [h_ne] with ω hω
     have h2 := ENNReal.toReal_mono hω (le_iSup (fun m => ‖f m ω‖ₑ) n)
-    rwa [← ofReal_norm_eq_enorm, ENNReal.toReal_ofReal (norm_nonneg _)] at h2
+    rwa [← ofReal_norm, ENNReal.toReal_ofReal (norm_nonneg _)] at h2
 
 /-- A single L² dominator makes the family uniformly integrable in L²:
 Chebyshev shrinks the tail sets uniformly, absolute continuity of the
@@ -222,7 +222,7 @@ private lemma unifIntegrable_of_dominator [IsFiniteMeasure μ]
     filter_upwards [hdom i] with x hx hxA
     have h1 : (C : ℝ≥0∞) ≤ ‖f i x‖ₑ := ENNReal.coe_le_coe.mpr hxA
     have h2 : ‖f i x‖ₑ ≤ ‖g x‖ₑ := by
-      rw [← ofReal_norm_eq_enorm, ← ofReal_norm_eq_enorm]
+      rw [← ofReal_norm, ← ofReal_norm]
       exact ENNReal.ofReal_le_ofReal (hx.trans (Real.le_norm_self _))
     exact pow_le_pow_left' (h1.trans h2) 2
   -- Chebyshev for the tail set of `g`
