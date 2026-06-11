@@ -139,10 +139,7 @@ theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
       ItoIsometryAdapted.AdaptedAt B (max p.1 i) (V.value p) := fun p _ =>
     (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas
       (V.measurable_value p)).mono (le_max_left _ _)
-  have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p =>
-    MemLp.of_bound ((V.measurable_value p).mono
-        ((ItoIntegralL2.natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
-      V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+  have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p => memLp_value hBmeas V p
   have hle_mM : ∀ p : ℝ≥0 × ℝ≥0,
       max p.1 i ≤ max (max p.1 i) (min p.2 j) := fun _ => le_max_left _ _
   symm
@@ -187,29 +184,6 @@ theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
             * (B (max (max p.1 i) (min p.2 j)) ω - B (max p.1 i) ω) from by
         funext ω; by_cases h : ω ∈ s <;> simp [h]]
   exact ItoIsometryAdapted.integral_adapted_mul_increment hBmeas (hle_mM p) hAadapt
-
-/-- Each truncated summand `V(p)·(B_{p.2∧t} − B_{p.1∧t})` is in `L²` — the per-term
-content of `memLp_itoSimpleProcess`: for `p.1 ≤ t` an adapted coefficient times the
-increment over `[p.1, p.2∧t]`; past `t` the zero function. -/
-private lemma memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
-    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
-    (t : ℝ≥0) {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.value.support) :
-    MemLp (fun ω => V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  by_cases ht : p.1 ≤ t
-  · rw [min_eq_left ht]
-    refine ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas
-      (le_min (V.le_of_mem_support_value p hp) ht)
-      (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
-    exact MemLp.of_bound
-      ((V.measurable_value p).mono ((ItoIntegralL2.natFiltration hBmeas).le p.1)
-        le_rfl).aestronglyMeasurable
-      V.valueBound (ae_of_all _ (V.value_le_valueBound p))
-  · push Not at ht
-    have h1 : min p.1 t = t := min_eq_right ht.le
-    have h2 : min p.2 t = t := min_eq_right (ht.le.trans (V.le_of_mem_support_value p hp))
-    simp only [h1, h2, sub_self, mul_zero]
-    exact memLp_const 0
 
 /-- **Time-indexed Itô isometry.** `E[(V●B)_t²]` equals the predictable-rectangle
 double sum with every interval endpoint truncated at `t`:
@@ -303,10 +277,7 @@ theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
     have hadapt : ∀ p, ItoIsometryAdapted.AdaptedAt B (max p.1 s) (V.value p) := fun p =>
       (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)).mono
         (le_max_left _ _)
-    have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p =>
-      MemLp.of_bound ((V.measurable_value p).mono
-          ((ItoIntegralL2.natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
-        V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+    have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p => memLp_value hBmeas V p
     have hXL2 : ∀ p, MemLp (fun ω => V.value p ω
         * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) 2 μ := fun p =>
       ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (le_max_left _ _) (hadapt p) (hVL2 p)

@@ -128,33 +128,51 @@ lemma itoSimpleProcess_eq_itoSimple (hBmeas : ∀ t, Measurable (B t))
 
 variable [hB : IsPreBrownian B μ]
 
-/-- **`L²` membership at every time `t`** — the genuine analytic content. After
-truncation each summand is `0` (interval past `t`) or an adapted coefficient
-times a Brownian increment (`p.1 ≤ t`); the finite sum is `L²(μ)`. -/
-theorem memLp_itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
+/-- A simple process's value `V(p)` is in `L²(μ)`: it is `𝓕_{p.1}`-measurable and
+bounded by `V.valueBound`, hence `L²` on the probability space. -/
+theorem memLp_value (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
-    (t : ℝ≥0) :
-    MemLp (itoSimpleProcess hBmeas V t) 2 μ := by
+    (p : ℝ≥0 × ℝ≥0) : MemLp (V.value p) 2 μ := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  rw [show itoSimpleProcess hBmeas V t
-        = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)
-      from funext fun ω => by rw [itoSimpleProcess_apply]; rfl]
-  refine memLp_finsetSum _ fun p hp => ?_
+  exact MemLp.of_bound
+    ((V.measurable_value p).mono ((ItoIntegralL2.natFiltration hBmeas).le p.1)
+      le_rfl).aestronglyMeasurable
+    V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+
+/-- Each truncated summand `V(p)·(B_{p.2∧t} − B_{p.1∧t})` is in `L²`: for `p.1 ≤ t`
+an adapted coefficient times the increment over `[p.1, p.2∧t]`; past `t` the zero
+function. The per-term content of `memLp_itoSimpleProcess`. -/
+theorem memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
+    (t : ℝ≥0) {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.value.support) :
+    MemLp (fun ω => V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)) 2 μ := by
+  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   by_cases ht : p.1 ≤ t
   · -- active interval: adapted coefficient × increment over `[p.1, p.2 ∧ t]`
     rw [min_eq_left ht]
-    refine ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas
+    exact ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas
       (le_min (V.le_of_mem_support_value p hp) ht)
-      (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
-    exact MemLp.of_bound
-      ((V.measurable_value p).mono ((ItoIntegralL2.natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
-      V.valueBound (ae_of_all _ (V.value_le_valueBound p))
+      (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
+      (memLp_value hBmeas V p)
   · -- interval entirely past `t`: both endpoints truncate to `t`, term is `0`
     push Not at ht
     have h1 : min p.1 t = t := min_eq_right ht.le
     have h2 : min p.2 t = t := min_eq_right (ht.le.trans (V.le_of_mem_support_value p hp))
     simp only [h1, h2, sub_self, mul_zero]
     exact memLp_const 0
+
+/-- **`L²` membership at every time `t`** — the genuine analytic content. After
+truncation each summand is `0` (interval past `t`) or an adapted coefficient times
+a Brownian increment (`p.1 ≤ t`), so the finite sum is `L²(μ)`
+(`memLp_truncated_term`). -/
+theorem memLp_itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
+    (t : ℝ≥0) :
+    MemLp (itoSimpleProcess hBmeas V t) 2 μ := by
+  rw [show itoSimpleProcess hBmeas V t
+        = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)
+      from funext fun ω => by rw [itoSimpleProcess_apply]; rfl]
+  exact memLp_finsetSum _ fun p hp => memLp_truncated_term hBmeas V t hp
 
 /-- The process Itô integral at time `t` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def itoSimpleProcessLp (hBmeas : ∀ t, Measurable (B t))
