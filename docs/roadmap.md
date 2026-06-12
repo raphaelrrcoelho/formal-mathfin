@@ -605,3 +605,43 @@ same-day (orphan wiring + blueprint spine + the `sc-thm-8.2.5` rewrite,
 clause uninhabitable and repaired it with an opaque integral-*operator*
 encoding + an in-snippet inhabitant guard). Remaining: P1 the explicit
 CRR→BS error-constant paper.
+
+## phase: Summit B / B1b — the general-integrand Itô integral (2026-06-12)
+
+B1a built the elementary (simple-integrand) Itô integral as a process; B1b
+extends it to a **general** predictable integrand `φ ∈ L2Predictable[0,T]` (=
+Degenne's predictable-L² on `[0,T]`), delivering the general Itô integral
+`(φ●B)_t = ∫₀ᵗ φ dB` as a **continuous L² martingale on `[0,T]`**
+(`Foundations/ItoIntegralProcessGeneral.lean`).
+
+- **Architecture (direct extension).** `itoProcessCLM := itoProcessLM.extendOfNorm
+  simpleAssembly_T` — extend B1a's t-process linear map along the *same* dense
+  embedding that builds the terminal CLM `itoIntegralCLM_T`. The bridge to B1a is
+  then **definitional** (`extendOfNorm_eq`); the one new analytic input is the
+  contraction bound `‖(V●B)_t‖ ≤ ‖V‖`, from B1a's martingale + the condExp L²
+  contraction.
+- **The key identity** `itoProcessCLM_eq_condExpL2`: `(φ●B)_t = condExpL2 𝓕_t
+  (∫₀ᵀ φ dB)` (the integral is the conditional-expectation projection of its
+  terminal value). From it: the **martingale property** (condExp tower
+  `condExp_condExp_of_le`), **a.e.-adaptedness** (`condExpL2` lands in `lpMeas`),
+  the **contraction** `‖(φ●B)_t‖ ≤ ‖φ‖`, and the **terminal isometry**
+  `‖(φ●B)_T‖ = ‖φ‖` (`itoProcessCLM T T = itoIntegralCLM_T T`). **L²-continuity**
+  is uniform approximation: the t-free contraction makes the simple-process
+  processes converge uniformly in `t`, so the limit is continuous
+  (`TendstoUniformly.continuous`).
+- **Coherence (the bump's payoff).** Pure consumption of upstream (Degenne's
+  `L2Predictable`/`SimpleProcess`, Mathlib's `condExpL2`/`extendOfNorm`/condExp
+  tower) + the repo's B1a + `itoIntegralCLM_T`. Nothing reproved.
+- **Wired:** 3 new `full` entries (`sc-ito-general-martingale` /
+  `-terminal-isometry` / `-l2-continuity`); corpus 277 → **280**, 242 → **245
+  full**; lake build 8723 jobs green, axioms-clean; values panel PASS (one
+  docstring-honesty blocker fixed).
+
+**Honest scope:** finite-horizon `[0,T]`, L² sense. The explicit **time-indexed
+isometry** `E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds` is **deferred** — it needs the
+band-over-trimmed-measure computation (a `restrict`∘`trim`∘`prod` rectTerm
+integral mirroring `simpleProcessL2_norm_sq`); the file proves the L²-energy law
+as the one-sided contraction off the horizon, exact at the terminal. Next: B1b's
+deferred per-t isometry, then **B2** (infinite-horizon `[0,∞)` via σ-finite
+predictable exhaustion) and **B3** (localization → consume upstream
+`LocalizingSequence`/`Locally`, sorry-free).

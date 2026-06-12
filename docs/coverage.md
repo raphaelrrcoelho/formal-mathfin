@@ -26,10 +26,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-09, values round 6):** corpus **274**, **239 full +
-> 18 wrappers = 257/274 delivery-ready**, 17 reduced cores — see the latest
-> round record at the end of this section. The figures immediately below are
-> the historical 2026-05-20 audit record, kept as provenance.
+> **Live status (2026-06-12, Summit B / B1b):** corpus **280**, **245 full +
+> 18 wrappers = 263/280 delivery-ready**, 17 reduced cores — see the B1b round
+> record immediately below. The figures further below are the historical
+> 2026-05-20 audit record, kept as provenance.
+>
+> **Summit B / B1b round (2026-06-12).** The **general-integrand** Itô integral
+> `(φ●B)_t = ∫₀ᵗ φ dB` for a general predictable `φ ∈ L2Predictable[0,T]`, as a
+> continuous L² martingale on `[0,T]` (`Foundations/ItoIntegralProcessGeneral.lean`).
+> It extends B1a (simple integrands) by density along the *same* `simpleAssembly_T`
+> embedding that builds the terminal CLM `itoIntegralCLM_T`, so the bridge to B1a
+> is definitional (`extendOfNorm_eq`). The key identity
+> `(φ●B)_t = E[∫₀ᵀ φ dB | 𝓕_t]` (the `condExpL2` projection of the terminal
+> integral) yields the L² martingale property (condExp tower), a.e.-adaptedness,
+> the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖`, the terminal isometry `‖(φ●B)_T‖ = ‖φ‖`,
+> and L²-continuity (uniform approximation via the t-free contraction). 3 new
+> `full` entries: `sc-ito-general-martingale` / `-terminal-isometry` /
+> `-l2-continuity`. **Honest scope:** finite-horizon `[0,T]`, L² sense; the
+> explicit per-t isometry `E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds` (the band-over-trimmed-
+> measure computation) is deferred to B2. Net: corpus 277 → **280**, **242 → 245
+> full**; lake build 8723 jobs green, axioms-clean.
 
 Refresh with:
 

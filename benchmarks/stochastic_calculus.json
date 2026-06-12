@@ -272,6 +272,54 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessMartingale (itoSimpleProcessLp_l2_continuous). The map t -> (V dot B)_t into Lp 2 mu is continuous: the increment norm-squared ||(V dot B)_t - (V dot B)_s||_2^2 <= (|support| * sum_p E[V(p)^2]) * |t - s| (a sqrt-Holder modulus) via Cauchy-Schwarz over the finite support and the single-increment isometry integral_adapted_sq_mul_increment_sq (no cross terms). Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-general-martingale",
+      "name": "General Ito Integral is an L2 Martingale",
+      "description": "For a pre-Brownian motion B and a GENERAL predictable L2 integrand phi (in L2Predictable on [0,T]), the Ito integral process t -> (phi dot B)_t = int_0^t phi dB is an L2 martingale: E[(phi dot B)_t | F_s] = (phi dot B)_s. The general-integrand extension of the simple-process martingale, and the object the gated Girsanov / Levy / SDE results consume.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessGeneral\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcessGeneral\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\ntheorem itoIntegralProcessGen_isMartingale_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ u, Measurable (B u)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {i j : ℝ≥0} (hij : i ≤ j) :\n    μ[(itoProcessCLM (μ := μ) T j hBmeas φ : Ω → ℝ) | natFiltration hBmeas i]\n      =ᵐ[μ] (itoProcessCLM (μ := μ) T i hBmeas φ : Ω → ℝ) :=\n  itoIntegralProcessGen_isMartingale T hBmeas φ hij\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Martingale property of the L2 Ito integral, general integrand (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessGeneral (itoIntegralProcessGen_isMartingale). The general Ito integral CLM is built by extending B1a's t-process linear map V -> (V dot B)_t along the dense embedding simpleAssembly_T (the same one that builds itoIntegralCLM_T) via LinearMap.extendOfNorm, with the contraction bound from B1a's martingale + the conditional-expectation L2 contraction. The key identity (phi dot B)_t = E[int_0^T phi dB | F_t] (condExpL2 projection of the terminal integral) gives the martingale property via the conditional-expectation tower. Finite-horizon [0,T], L2 sense. Axioms-clean. The explicit time-indexed isometry E[(phi dot B)_t^2] = int_0^t E[phi^2] ds is deferred (the trimmed-measure band computation)."
+      }
+    },
+    {
+      "id": "sc-ito-general-terminal-isometry",
+      "name": "General Ito Integral: Terminal Ito Isometry",
+      "description": "At the horizon, the general Ito integral process equals the terminal integral (itoProcessCLM T T = itoIntegralCLM_T T), so the Ito isometry ||(phi dot B)_T|| = ||phi|| holds exactly. The energy identity at the endpoint of the L2 Ito-integral martingale.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessGeneral\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcessGeneral\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\ntheorem itoProcessCLM_norm_terminal_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ u, Measurable (B u)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :\n    ‖itoProcessCLM (μ := μ) T T hBmeas φ‖ = ‖φ‖ :=\n  itoProcessCLM_norm_terminal T hBmeas φ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Terminal Ito isometry, general integrand (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessGeneral (itoProcessCLM_norm_terminal). At t = T the process CLM agrees with the existing terminal Ito-integral CLM itoIntegralCLM_T (both extend the same simple-process map along simpleAssembly_T, and agree on the dense simple processes since (V dot B)_T = itoSimple V), so the terminal Ito isometry ||(phi dot B)_T|| = ||phi|| is inherited from itoIntegralCLM_T_norm. The general per-t isometry E[(phi dot B)_t^2] = int_0^t E[phi^2] ds is deferred; the contraction ||(phi dot B)_t|| <= ||phi|| (itoProcessCLM_norm_le) holds for all t. Axioms-clean."
+      }
+    },
+    {
+      "id": "sc-ito-general-l2-continuity",
+      "name": "General Ito Integral is L2-Continuous in Time",
+      "description": "The general Ito integral is continuous as an L2(mu)-valued process: t -> (phi dot B)_t is a continuous map into Lp 2. The path-regularity that completes 'continuous L2 martingale' for general predictable integrands.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessGeneral\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcessGeneral\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\ntheorem itoIntegralProcessGen_l2_continuous_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ u, Measurable (B u)) (T : ℝ≥0)\n    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :\n    Continuous (fun t : ℝ≥0 => itoProcessCLM (μ := μ) T t hBmeas φ) :=\n  itoIntegralProcessGen_l2_continuous T hBmeas φ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "L2-continuity of the general Ito integral (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessGeneral (itoIntegralProcessGen_l2_continuous). The simple-process integrals t -> (V_n dot B)_t (continuous by B1a's itoSimpleProcessLp_l2_continuous) approximate t -> (phi dot B)_t uniformly in t -- the contraction ||(phi dot B)_t - (V_n dot B)_t|| <= ||phi - V_n|| is t-free -- so the limit is continuous (TendstoUniformly.continuous), using the density of simple processes in L2Predictable. Finite-horizon [0,T], L2 sense. Axioms-clean."
+      }
     }
   ]
 }

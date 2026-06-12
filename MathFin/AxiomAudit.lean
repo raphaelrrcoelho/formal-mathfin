@@ -562,4 +562,29 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcessLp_l2_continuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcess.itoSimpleProcessLp_l2_continuous
 
+-- Summit B / B1b (2026-06-12): the GENERAL-integrand Itô integral
+-- `(φ●B)_t = ∫₀ᵗ φ dB` for `φ ∈ L2Predictable[0,T]`, built by extending B1a's
+-- t-process along the dense `simpleAssembly_T` (`Foundations/ItoIntegralProcessGeneral.lean`).
+-- The key identity `(φ●B)_t = E[∫₀ᵀ φ dB | 𝓕_t]` gives the L² martingale property,
+-- a.e.-adaptedness, the contraction and terminal Itô isometry, and L²-continuity.
+-- The explicit time-indexed isometry E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds is deferred.
+
+/-- info: 'MathFin.ItoIntegralProcessGeneral.itoProcessCLM_eq_condExpL2' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoProcessCLM_eq_condExpL2
+
+/-- info: 'MathFin.ItoIntegralProcessGeneral.itoIntegralProcessGen_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoIntegralProcessGen_isMartingale
+
+/-- info: 'MathFin.ItoIntegralProcessGeneral.itoProcessCLM_aeStronglyMeasurable' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoProcessCLM_aeStronglyMeasurable
+
+/-- info: 'MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_le' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_le
+
+/-- info: 'MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_terminal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_terminal
+
+/-- info: 'MathFin.ItoIntegralProcessGeneral.itoIntegralProcessGen_l2_continuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoIntegralProcessGen_l2_continuous
+
 end MathFin.AxiomAudit

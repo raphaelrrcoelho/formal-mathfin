@@ -1844,6 +1844,27 @@
       "input_hash": "bcad100a054efa1cabd2107d7ae7d6c00547af37356c67d442b5f8bc82bc477e",
       "verified_at_commit": "cd4dfa6"
     },
+    "sc-ito-general-l2-continuity": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-12",
+      "elapsed_s": 277.7,
+      "input_hash": "2649bd6e7319bd16a8611781cf97898cacca2888f05e576bd36b7050fa6c2e42",
+      "verified_at_commit": "886c0d5"
+    },
+    "sc-ito-general-martingale": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-12",
+      "elapsed_s": 0.2,
+      "input_hash": "841a71bddb35abe687e7552d6f9d5e1a7390f55d0cf64fb63fc22bb8b28f229f",
+      "verified_at_commit": "886c0d5"
+    },
+    "sc-ito-general-terminal-isometry": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-12",
+      "elapsed_s": 0.0,
+      "input_hash": "3e6c1e079737b1d8ca9407dfeccd06654cb73ef88b4fe9a83cde513bfee6b9e7",
+      "verified_at_commit": "886c0d5"
+    },
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-11",
