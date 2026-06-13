@@ -587,4 +587,10 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralProcessGeneral.itoIntegralProcessGen_l2_continuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoIntegralProcessGen_l2_continuous
 
+-- The deferred per-`t` Itô isometry `E[(φ●B)_t²] = ∫_{(0,t]×Ω} φ²`
+-- (`Foundations/ItoIntegralProcessIsometry.lean`), proved by density-transferring the
+-- band-restricted simple-process isometry against the band-truncation CLM.
+/-- info: 'MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq
+
 end MathFin.AxiomAudit

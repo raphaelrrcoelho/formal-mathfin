@@ -320,6 +320,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessGeneral (itoIntegralProcessGen_l2_continuous). The simple-process integrals t -> (V_n dot B)_t (continuous by B1a's itoSimpleProcessLp_l2_continuous) approximate t -> (phi dot B)_t uniformly in t -- the contraction ||(phi dot B)_t - (V_n dot B)_t|| <= ||phi - V_n|| is t-free -- so the limit is continuous (TendstoUniformly.continuous), using the density of simple processes in L2Predictable. Finite-horizon [0,T], L2 sense. Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-general-time-isometry",
+      "name": "General Ito Integral: Time-Indexed Ito Isometry",
+      "domain": "stochastic_calculus",
+      "description": "The deferred per-t Ito isometry (L2-energy law) for the general-integrand Ito integral: E[(phi dot B)_t^2] = int_{(0,t] x Omega} phi^2 d(predictable measure) = int_0^t E[phi_s^2] ds, for every predictable phi in L2([0,T]) and t <= T. The per-time refinement of the terminal Ito isometry, completing B1b's L2 theory.",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessIsometry\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcessGeneral\nopen MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal ENNReal\n\ntheorem itoProcessCLM_norm_sq_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ u, Measurable (B u)) {t T : ℝ≥0} (htT : t ≤ T)\n    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :\n    ‖itoProcessCLM (μ := μ) T t hBmeas φ‖ ^ 2\n      = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2\n          ∂(trimMeasure_T (μ := μ) T hBmeas) :=\n  itoProcessCLM_norm_sq htT hBmeas φ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Time-indexed Ito isometry, general integrand (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessIsometry (itoProcessCLM_norm_sq). The map phi |-> ||(phi dot B)_t||^2 (a CLM norm) and phi |-> int_{(0,t]xOmega} phi^2 (= ||truncCLM T t phi||^2, the band-truncation CLM) are both continuous and agree on the dense simple processes, where the identity is the band-restricted simple-process isometry: the LHS is B1a's per-endpoint-truncated predictable-rectangle double sum (itoSimpleProcess_isometry_time) and the RHS is the joint-overlap-cap-(0,t] double sum (band Fubini), equal by a pure-R interval-overlap identity. DenseRange.equalizer then lifts to all phi. This is the deferred energy law of the L2 Ito-integral martingale; the terminal case t = T recovers itoProcessCLM_norm_terminal. Axioms-clean."
+      }
     }
   ]
 }

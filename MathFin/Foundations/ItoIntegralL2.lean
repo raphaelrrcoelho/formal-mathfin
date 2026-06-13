@@ -176,8 +176,9 @@ theorem itoSimple_sq_integral (hBmeas : ∀ t, Measurable (B t))
           (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
           (V.le_of_mem_support_value p hp) (V.le_of_mem_support_value q hq)
 
-/-- For `g : Lp ℝ 2 ν`, `‖g‖² = ∫ (g a)² ∂ν` (the real `L²` norm-square as an integral). -/
-private lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {ν : Measure α}
+/-- For `g : Lp ℝ 2 ν`, `‖g‖² = ∫ (g a)² ∂ν` (the real `L²` norm-square as an integral).
+Public: the time-indexed Itô-isometry layer (`ItoIntegralProcessIsometry`) reuses it. -/
+lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {ν : Measure α}
     (g : Lp ℝ 2 ν) : ‖g‖ ^ 2 = ∫ a, (g a) ^ 2 ∂ν := by
   have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
   rw [L2.inner_def] at h

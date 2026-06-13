@@ -42,10 +42,19 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖`, the terminal isometry `‖(φ●B)_T‖ = ‖φ‖`,
 > and L²-continuity (uniform approximation via the t-free contraction). 3 new
 > `full` entries: `sc-ito-general-martingale` / `-terminal-isometry` /
-> `-l2-continuity`. **Honest scope:** finite-horizon `[0,T]`, L² sense; the
-> explicit per-t isometry `E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds` (the band-over-trimmed-
-> measure computation) is deferred to B2. Net: corpus 277 → **280**, **242 → 245
-> full**; lake build 8723 jobs green, axioms-clean.
+> `-l2-continuity`. **Honest scope:** finite-horizon `[0,T]`, L² sense.
+>
+> **Isometry round (2026-06-12).** The explicit per-t isometry
+> `E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds` — deferred at B1b — is now **proved**
+> (`itoProcessCLM_norm_sq`, `Foundations/ItoIntegralProcessIsometry.lean`, entry
+> `sc-ito-general-time-isometry`): the band-restricted simple-process isometry
+> (B1a's per-endpoint-`∧t`-truncated rectangle double sum = the joint-overlap-`∩(0,t]`
+> double sum, equal by a pure-ℝ interval-length identity) transfers to all predictable
+> `φ` by `DenseRange.equalizer` — both `‖(φ●B)_t‖²` and `∫_{(0,t]}φ²` (`= ‖truncCLM φ‖²`,
+> the band-truncation CLM) are continuous and agree on the dense simple processes. The
+> generic `lp_two_norm_sq` was de-privatised in `ItoIntegralL2` and reused (no
+> duplication). Net: corpus 280 → **281**, 245 → **246 full**; lake build 8724 jobs
+> green, axioms-clean. (B2 = the infinite-horizon `[0,∞)` σ-finite extension remains.)
 
 Refresh with:
 

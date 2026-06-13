@@ -16,8 +16,9 @@ martingale. This file extends it to a **general** predictable integrand
 density: the process `t ↦ (φ●B)_t := ∫₀ᵗ φ dB` is a continuous L² martingale, with
 the Itô contraction `‖(φ●B)_t‖ ≤ ‖φ‖` and the terminal Itô isometry
 `‖(φ●B)_T‖ = ‖φ‖`. The explicit time-indexed isometry
-`E[(φ●B)_t²] = ∫₀ᵗ E[φ_s²] ds` is the deferred refinement (the band-over-
-trimmed-measure computation), not proved here — see B2.
+`E[(φ●B)_t²] = ∫₀ᵗ E[φ_s²] ds` is proved in the companion module
+`ItoIntegralProcessIsometry` (`itoProcessCLM_norm_sq`), by density-transferring the
+band-restricted simple-process isometry against a band-truncation CLM.
 
 The construction mirrors `ItoIntegralCLM.itoIntegralCLM_T`: extend the linear map
 `V ↦ itoSimpleProcessLp V t` (B1a's t-process) along the *same* dense embedding

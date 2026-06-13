@@ -104,6 +104,8 @@ import MathFin.Foundations.ItoIntegralProcess
 import MathFin.Foundations.ItoIntegralProcessMartingale
 -- The general-integrand Itô integral as an L² martingale on [0,T] (Summit B / B1b)
 import MathFin.Foundations.ItoIntegralProcessGeneral
+-- The deferred time-indexed Itô isometry E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds (B1b refinement)
+import MathFin.Foundations.ItoIntegralProcessIsometry
 -- Pathwise discrete Itô identity for `f(x) = x²` (the squaring keystone)
 import MathFin.Foundations.ItoSquaringIdentity
 -- Polynomial Itô remainders (x³, x⁴) + the pathwise discrete cubing identity

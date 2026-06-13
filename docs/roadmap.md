@@ -637,11 +637,21 @@ Degenne's predictable-L² on `[0,T]`), delivering the general Itô integral
   full**; lake build 8723 jobs green, axioms-clean; values panel PASS (one
   docstring-honesty blocker fixed).
 
-**Honest scope:** finite-horizon `[0,T]`, L² sense. The explicit **time-indexed
-isometry** `E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds` is **deferred** — it needs the
-band-over-trimmed-measure computation (a `restrict`∘`trim`∘`prod` rectTerm
-integral mirroring `simpleProcessL2_norm_sq`); the file proves the L²-energy law
-as the one-sided contraction off the horizon, exact at the terminal. Next: B1b's
-deferred per-t isometry, then **B2** (infinite-horizon `[0,∞)` via σ-finite
-predictable exhaustion) and **B3** (localization → consume upstream
+**Honest scope:** finite-horizon `[0,T]`, L² sense.
+
+**Isometry round (2026-06-12) — DONE.** The explicit **time-indexed isometry**
+`E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds` (B1b's deferred refinement) is now **proved**
+(`itoProcessCLM_norm_sq`, `Foundations/ItoIntegralProcessIsometry.lean`, entry
+`sc-ito-general-time-isometry`). The band-over-trimmed-measure computation
+(`restrict`∘`trim`∘`prod` rectTerm integral mirroring `simpleProcessL2_norm_sq`)
+gives the band-restricted **simple-process** isometry; the per-endpoint-`∧t`-truncated
+double sum (B1a's `itoSimpleProcess_isometry_time`) equals the joint-overlap-`∩(0,t]`
+double sum by a pure-ℝ interval-length identity (`band_overlap_real`). It transfers to
+all predictable `φ` by `DenseRange.equalizer`: both `‖(φ●B)_t‖²` and
+`∫_{(0,t]}φ² = ‖truncCLM φ‖²` (the band-truncation CLM, hand-built — Mathlib has only
+the *constant*-indicator `indicatorConstLp`, not variable-`φ` multiplication) are
+continuous and agree on the dense simple processes. The generic `lp_two_norm_sq` was
+de-privatised in `ItoIntegralL2` and reused. corpus 280 → **281**, 245 → **246 full**;
+lake build 8724 jobs green, axioms-clean. Next: **B2** (infinite-horizon `[0,∞)` via
+σ-finite predictable exhaustion) and **B3** (localization → consume upstream
 `LocalizingSequence`/`Locally`, sorry-free).
