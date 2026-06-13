@@ -54,7 +54,9 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > the band-truncation CLM) are continuous and agree on the dense simple processes. The
 > generic `lp_two_norm_sq` was de-privatised in `ItoIntegralL2` and reused (no
 > duplication). Net: corpus 280 → **281**, 245 → **246 full**; lake build 8724 jobs
-> green, axioms-clean. (B2 = the infinite-horizon `[0,∞)` σ-finite extension remains.)
+> green, axioms-clean. (B2 — the infinite-horizon `[0,∞)` σ-finite extension —
+landed 2026-06-13: `itoIntegralL2` / `itoIntegralL2_norm` in
+`Foundations/ItoIntegralL2Dense.lean`, corpus entry `sc-ito-infinite-horizon-isometry`.)
 
 Refresh with:
 

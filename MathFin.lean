@@ -98,6 +98,8 @@ import MathFin.Foundations.ItoIsometryAdapted
 import MathFin.Foundations.ItoIntegralL2
 -- The Itô integral as a continuous linear isometry `Lp 2 trim_T → Lp 2 μ` on `[0,T]`
 import MathFin.Foundations.ItoIntegralCLM
+-- The unbounded-horizon `[0,∞)` Itô integral CLM `Lp 2 trim_full → Lp 2 μ` (Summit B / B2)
+import MathFin.Foundations.ItoIntegralL2Dense
 -- The elementary Itô integral as a process `t ↦ (V●B)_t`, with genuine `L²` content
 import MathFin.Foundations.ItoIntegralProcess
 -- The Itô integral process is an adapted L² martingale (Summit B / B1a)

@@ -336,6 +336,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessIsometry (itoProcessCLM_norm_sq). The map phi |-> ||(phi dot B)_t||^2 (a CLM norm) and phi |-> int_{(0,t]xOmega} phi^2 (= ||truncCLM T t phi||^2, the band-truncation CLM) are both continuous and agree on the dense simple processes, where the identity is the band-restricted simple-process isometry: the LHS is B1a's per-endpoint-truncated predictable-rectangle double sum (itoSimpleProcess_isometry_time) and the RHS is the joint-overlap-cap-(0,t] double sum (band Fubini), equal by a pure-R interval-overlap identity. DenseRange.equalizer then lifts to all phi. This is the deferred energy law of the L2 Ito-integral martingale; the terminal case t = T recovers itoProcessCLM_norm_terminal. Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-infinite-horizon-isometry",
+      "name": "Infinite-Horizon Ito Integral: Ito Isometry",
+      "domain": "stochastic_calculus",
+      "description": "The unbounded-horizon [0,infinity) Ito integral as a continuous linear isometry itoIntegralL2 : L2Predictable(timeMeasure, mu) -> L2(mu), with the Ito isometry ||itoIntegralL2 f|| = ||f|| for every predictable f. Removes the finite-horizon T bound from itoIntegralCLM_T: timeMeasure (Lebesgue on R>=0) is only sigma-finite, so the density step is obtained by a sigma-finite exhaustion of the time axis rather than the finite-measure complement shortcut.",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralL2Dense\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralL2\nopen scoped NNReal ENNReal\n\ntheorem itoIntegralL2_norm_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ u, Measurable (B u))\n    (f : Lp ℝ 2 ((timeMeasure.prod μ).trim\n      (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)) :\n    ‖itoIntegralL2 (μ := μ) hBmeas f‖ = ‖f‖ :=\n  itoIntegralL2_norm hBmeas f\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Ito integral on [0,infinity), L2 isometry (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralL2Dense (itoIntegralL2_norm). The embedding and the simple-process Ito isometry are already built (ItoIntegralL2.simpleAssembly / assembly_isometry); the one new step is density of the simple-process embedding in the predictable L2. It is obtained from the finite-horizon density machinery by a sigma-finite exhaustion: on each finite frame Ioc 0 (n+1) x univ the trim measure restricts to the finite trimMeasure_T (n+1) (trimMeasure_T_eq_restrict), where the finite-horizon pi-lambda-induction lemma setIntegral_eq_zero_of_orthogonal_pred forces g =a.e. 0; the frames cover Ioi 0 x univ, whose complement {0} x univ is trim-null (timeMeasure {0} = 0). LinearMap.extendOfNorm then yields the CLM and the isometry. Pure consumption of the finite-horizon layer (predictableRect pi-system reused verbatim) plus Degenne SimpleProcess; nothing of the pi-system or isometry is reproved. Closes the unbounded-horizon gap in docs/ito-integral-clm-deferred.md. Axioms-clean."
+      }
     }
   ]
 }

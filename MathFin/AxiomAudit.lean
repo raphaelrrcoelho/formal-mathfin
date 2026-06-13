@@ -168,6 +168,9 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.QuadraticVariationL2.tendstoInMeasure_qv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.QuadraticVariationL2.tendstoInMeasure_qv
 
+/-- info: 'MathFin.BrownianQuadraticVariation.qv_equals_t' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.BrownianQuadraticVariation.qv_equals_t
+
 /-! ## Expectation-form Itô / Feynman–Kac (the QV → ½f″ correction, from first principles) -/
 
 /-- info: 'MathFin.FeynmanKacHeatEquation.heatConvolution_eq_add_integral_deriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
@@ -234,6 +237,12 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in
   #print axioms MathFin.ItoIntegralCLM.itoIntegralCLM_T_norm
+
+/-! ## Unbounded-horizon `[0,∞)` Itô integral CLM (Summit B / B2) -/
+
+/-- info: 'MathFin.ItoIntegralL2.itoIntegralL2_norm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in
+  #print axioms MathFin.ItoIntegralL2.itoIntegralL2_norm
 
 /-! ## Process-level elementary Itô integral `t ↦ (V●B)_t` — genuine `L²` content -/
 

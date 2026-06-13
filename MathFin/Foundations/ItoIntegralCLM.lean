@@ -62,9 +62,11 @@ Adds (the genuinely new content of this file):
 * Predictable rectangles use `Ioc` (left-open, right-closed), matching
   `stochasticIoc` in `BrownianMotion` and the Wiener case.
 
-The `ℝ≥0` (unbounded-horizon) Itô CLM requires σ-finite exhaustion of the
-predictable σ-algebra and is left gated (see `docs/blueprint.md`); it is not
-required by any downstream pricing module in this library.
+The `ℝ≥0` (unbounded-horizon) Itô CLM is built on top of this file in
+`MathFin/Foundations/ItoIntegralL2Dense.lean` (`itoIntegralL2`), by σ-finite
+exhaustion of the time axis: each finite frame restricts to a `trimMeasure_T`,
+so `setIntegral_eq_zero_of_orthogonal_pred` (de-privatised for that reuse) and
+the `predictableRect` π-system are the bridges it consumes.
 -/
 
 @[expose] public section
@@ -448,7 +450,12 @@ instance (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
   infer_instance
 
 omit hB in
-private lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
+/-- The heart of the density argument, reused by the unbounded-horizon CLM
+(`ItoIntegralL2Dense`): a function `g ∈ L²(trim_T)` whose set-integral over every
+basic predictable rectangle vanishes has vanishing set-integral over every
+predictable-measurable set. Dynkin's π-λ theorem over `predictableRect`; the
+total-integral step uses finiteness of `trimMeasure_T`. -/
+lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
     (g : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,

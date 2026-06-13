@@ -1,5 +1,18 @@
 # Continuous Itô integral (CLM extension) — progress + remaining density gap
 
+> **CLOSED 2026-06-13 (Summit B / B2).** The infinite-horizon (`ℝ≥0`,
+> σ-finite) Itô integral CLM is now **built**: `itoIntegralL2` /
+> `itoIntegralL2_norm` in `MathFin/Foundations/ItoIntegralL2Dense.lean`
+> (corpus entry `sc-ito-infinite-horizon-isometry`). The density step below
+> was obtained **without** the upstream elementary-set π-system: the
+> finite-horizon `predictableRect` π-system is T-independent and reused
+> verbatim, and the σ-finite exhaustion reduces each finite frame
+> `Ioc 0 (n+1) ×ˢ univ` to the finite `trimMeasure_T (n+1)` (via
+> `trimMeasure_T_eq_restrict`), where the finite-horizon
+> `setIntegral_eq_zero_of_orthogonal_pred` applies; the `{0}×univ` complement
+> is `timeMeasure`-null. The rest of this document is kept as the historical
+> design record.
+
 > **Note (2026-05-30): the finite-horizon `[0,T]` Itô integral CLM is DONE.**
 > `itoIntegralCLM_T` in `Foundations/ItoIntegralCLM.lean` is built, axioms-clean,
 > AxiomAudit-pinned, with `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` (`ItoIntegralBrownian.lean`)

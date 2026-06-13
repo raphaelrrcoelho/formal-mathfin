@@ -425,7 +425,8 @@ infrastructure. See [`roadmap.md`](roadmap.md).
 - **Pathwise Itô's lemma, Lévy's characterization, SDE existence/uniqueness,
   dynamic Girsanov** — downstream of the (built) `[0,T]` continuous Itô integral;
   this is the next gate. The infinite-horizon `L2Predictable` variant of the
-  integral itself also remains open — see
+  integral itself is now **delivered** (`itoIntegralL2` in
+  `Foundations/ItoIntegralL2Dense.lean`, B2, 2026-06-13) — see
   [`ito-integral-clm-deferred.md`](ito-integral-clm-deferred.md).
 
 ---

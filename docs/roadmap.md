@@ -328,8 +328,9 @@ proven in Degenne's package. Building directly on it:
   over adapted processes (density of adapted simple integrands in the adapted
   L²) is **built**: `itoIntegralCLM_T` (`ItoIntegralCLM.lean`), with
   `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` as its first consumer. what remains is the
-  downstream pathwise Itô / Lévy / SDE layer (and the infinite-horizon
-  `L2Predictable` variant — see `ito-integral-clm-deferred.md`).
+  downstream pathwise Itô / Lévy / SDE layer (the infinite-horizon
+  `L2Predictable` variant is now done — `itoIntegralL2`,
+  `ito-integral-clm-deferred.md`).
 - **Margrabe `BSCallHyp`-grounding — done.** `MargrabeGrounding.lean`: the
   ratio's risk-neutral lognormality is *derived* from a joint two-GBM gaussian
   model (`normalizedSpread_hasLaw_std` + `margrabe_bsCallHyp_of_gaussian`),
@@ -349,8 +350,8 @@ the continuous linear isometry on `[0,T]`, axioms-clean and AxiomAudit-pinned,
 with `∫₀ᵀ B dB = ½(B_T²−B₀²−T)` (`ItoIntegralBrownian.lean`) as its first
 consumer. The construction sketch below is kept as a reference record of how it
 was built; the still-open downstream layer is the pathwise Itô / Lévy / SDE
-results (and the infinite-horizon `L2Predictable` variant,
-`ito-integral-clm-deferred.md`).
+results (the infinite-horizon `L2Predictable` variant is now done —
+`itoIntegralL2`, `ito-integral-clm-deferred.md`).
 
 **Goal.** A continuous linear isometry
 `itoIntegralL2 : {adapted L²(Ω×[0,T])} →L[ℝ] Lp ℝ 2 μ` extending the discrete
@@ -652,6 +653,12 @@ all predictable `φ` by `DenseRange.equalizer`: both `‖(φ●B)_t‖²` and
 the *constant*-indicator `indicatorConstLp`, not variable-`φ` multiplication) are
 continuous and agree on the dense simple processes. The generic `lp_two_norm_sq` was
 de-privatised in `ItoIntegralL2` and reused. corpus 280 → **281**, 245 → **246 full**;
-lake build 8724 jobs green, axioms-clean. Next: **B2** (infinite-horizon `[0,∞)` via
-σ-finite predictable exhaustion) and **B3** (localization → consume upstream
-`LocalizingSequence`/`Locally`, sorry-free).
+lake build 8724 jobs green, axioms-clean. **B2 (infinite-horizon `[0,∞)` via
+σ-finite predictable exhaustion) DONE 2026-06-13** — `itoIntegralL2` /
+`itoIntegralL2_norm` in `Foundations/ItoIntegralL2Dense.lean`, corpus entry
+`sc-ito-infinite-horizon-isometry`, by reducing each finite frame to the
+finite-horizon `setIntegral_eq_zero_of_orthogonal_pred` via
+`trimMeasure_T_eq_restrict` and patching over the `{0}×univ`-null complement;
+build 8725 jobs green, axioms-clean, corpus 281 → **282**, 246 → **247 full**.
+Next: **B3** (localization → consume upstream `LocalizingSequence`/`Locally`,
+sorry-free).
