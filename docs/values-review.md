@@ -53,6 +53,67 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-12 — commit 867d265 — corpus 281
+
+**Scope**: the deferred per-`t` Itô isometry, now closed —
+`MathFin/Foundations/ItoIntegralProcessIsometry.lean` (`itoProcessCLM_norm_sq`:
+`‖(φ●B)_t‖² = ∫_{(0,t]×Ω} φ² d(trimMeasure_T T)` `= ∫₀ᵗ E[φ_s²] ds`, for every
+predictable `φ ∈ L²([0,T])` and `t ≤ T`) — plus the de-privatisation of the generic
+`lp_two_norm_sq` in `ItoIntegralL2` (reused, not copied) and 1 new `full` corpus entry
+`sc-ito-general-time-isometry`. This is the refinement B1b openly deferred (the
+band-over-trimmed-measure computation).
+
+**Panel**: 3 independent agents — two splitting the eight lenses
+(coherence/slop/idiomatic/first-principles; inspired/architecture/clarity/beauty), one
+completeness/faithfulness critic (snippet ⊨ theorem, no circularity, AxiomAudit honesty,
+de-dup). Read-only, no Lean.
+
+**Per-lens verdicts — all PASS**:
+1. *Inspired math* — the L²-energy law that makes the Itô integral an isometric
+   embedding at every `t`, not only the terminal; the load-bearing fact behind
+   quadratic-variation / hedging-error analysis in continuous time.
+2. *Mathlib/Degenne coherence* — consumes B1a's `itoSimpleProcess_isometry_time`, the
+   repo's `integral_rectTerm_mul` / `trimMeasure_T_eq_restrict` / `simpleAssembly_T`, and
+   Mathlib's `DenseRange.equalizer` / `integral_trim` / `eLpNorm_indicator_le`. The one
+   hand-built object `truncCLM` is justified: Mathlib has only the *constant*-indicator
+   `indicatorConstLp` and no `Lp→Lp` restriction CLM (confirmed by loogle search).
+3. *Zero slop* — every helper load-bearing; stepping-stones `private`; the generic
+   `lp_two_norm_sq` de-duplicated rather than copied (the very concern that triggered
+   this round). [fix applied: `integral_rectTerm_mul_band` made `private`.]
+4. *Architectural ingenuity* — reduce the per-`t` isometry to a band-restricted *simple*
+   isometry, then transfer by density through `truncCLM`; reuses the SAME
+   `simpleAssembly_T` dense embedding, so the bridge to B1a is definitional.
+5. *First principles* — no circularity (`truncCLM_norm_sq` assumes no isometry; the
+   simple case is B1a + Fubini + the pure-ℝ overlap identity), and the statement is the
+   genuine isometry — RHS a real integral against the predictable Lebesgue⊗μ measure, not
+   `‖x‖²=‖x‖²` in disguise.
+6. *Idiomatic register* — `mkContinuous` CLM, `DenseRange.equalizer` + `congrFun`,
+   `filter_upwards … rw [show …]`, `omit … in` placement — all match the adjacent
+   `ItoIntegralProcessGeneral` / CLM files.
+7. *Concept clarity* — docstrings name the key identity and state honest scope. [fixes
+   applied: the `truncCLM` docstring no longer flatly calls itself "the orthogonal
+   projection" (only norm-`≤1` is formalised) and now states the *squared*-norm isometry;
+   the `ItoIntegralProcessGeneral` module docstring updated from "deferred" to "proved in
+   the companion module".]
+8. *Beautiful, elegant math* — the reconciliation `band_overlap_real` (B1a's
+   per-endpoint-`∧t` overlap form = the joint-overlap-`∩(0,t]` form, both measuring
+   `(p.1,p.2]∩(q.1,q.2]∩(0,t]`) gets its own named lemma with the "why" in prose.
+
+**Blocking findings**: none (3-agent consensus).
+
+**Recorded actions**:
+1. *(done this round)* de-privatised `ItoIntegralL2.lp_two_norm_sq` and deleted the
+   temporary in-file copy — the generic `‖g‖² = ∫ g²` now has a single home and three
+   consumers across two files.
+2. *(done this round)* `integral_rectTerm_mul_band` → `private`; `truncCLM` docstring
+   sharpened (orthogonal-projection qualification + squared-norm statement).
+3. *(open, non-blocking)* `∫₀ᵗ E[φ_s²] ds` as an *explicit* Lean term (the Fubini split
+   of the product integral) is described in prose but not formalised as a standalone
+   corollary — a cheap future add if a consumer needs it.
+
+Cold `lake build` 8724 jobs green, axioms-clean; ledger 281/281 fresh; router/values
+pytest green.
+
 ## 2026-06-12 — commit 5f41a11 — corpus 280
 
 **Scope**: this session's Summit B / B1b deliverable —
