@@ -104,6 +104,8 @@ import MathFin.Foundations.ItoIntegralL2Dense
 import MathFin.Foundations.ItoIntegralProcess
 -- The Itô integral process is an adapted L² martingale (Summit B / B1a)
 import MathFin.Foundations.ItoIntegralProcessMartingale
+-- The elementary Itô integral as a continuous local martingale (Summit B / B3)
+import MathFin.Foundations.ItoIntegralProcessLocalMartingale
 -- The general-integrand Itô integral as an L² martingale on [0,T] (Summit B / B1b)
 import MathFin.Foundations.ItoIntegralProcessGeneral
 -- The deferred time-indexed Itô isometry E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds (B1b refinement)

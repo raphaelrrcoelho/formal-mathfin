@@ -352,6 +352,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralL2Dense (itoIntegralL2_norm). The embedding and the simple-process Ito isometry are already built (ItoIntegralL2.simpleAssembly / assembly_isometry); the one new step is density of the simple-process embedding in the predictable L2. It is obtained from the finite-horizon density machinery by a sigma-finite exhaustion: on each finite frame Ioc 0 (n+1) x univ the trim measure restricts to the finite trimMeasure_T (n+1) (trimMeasure_T_eq_restrict), where the finite-horizon pi-lambda-induction lemma setIntegral_eq_zero_of_orthogonal_pred forces g =a.e. 0; the frames cover Ioi 0 x univ, whose complement {0} x univ is trim-null (timeMeasure {0} = 0). LinearMap.extendOfNorm then yields the CLM and the isometry. Pure consumption of the finite-horizon layer (predictableRect pi-system reused verbatim) plus Degenne SimpleProcess; nothing of the pi-system or isometry is reproved. Closes the unbounded-horizon gap in docs/ito-integral-clm-deferred.md. Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-simple-process-local-martingale",
+      "name": "Elementary Ito Integral is a Continuous Local Martingale",
+      "domain": "stochastic_calculus",
+      "description": "For a continuous (pre-)Brownian motion B and a simple adapted process V, the elementary Ito integral t -> (V dot B)_t is a continuous local martingale (Degenne's IsLocalMartingale): it has continuous sample paths and, being already an L2 martingale, lands in the upstream local-martingale class. The localization entry point of the Ito tower and the first pathwise (sample-path) regularity result; the gateway object for the localized stochastic calculus (SDEs, Levy characterization, dynamic Girsanov).",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralProcessLocalMartingale\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralProcess\nopen scoped NNReal ENNReal\n\ntheorem itoSimpleProcess_isLocalMartingale_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)\n    (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :\n    IsLocalMartingale (fun t ω => itoSimpleProcess hBmeas V t ω)\n      (ItoIntegralL2.natFiltration hBmeas) μ :=\n  itoSimpleProcess_isLocalMartingale hBmeas hBcont V\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Continuous local martingale property of the elementary Ito integral (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessLocalMartingale (itoSimpleProcess_isLocalMartingale). Two ingredients: (1) pathwise continuity itoSimpleProcess_pathContinuous -- for each omega, t -> (V dot B)_t omega = sum_p V(p)omega*(B_{p.2 cap t}omega - B_{p.1 cap t}omega) (itoSimpleProcess_apply) is a finite sum of the continuous Brownian path B(.)omega composed with the continuous clamp t -> min p.i t, hence continuous; (2) the martingale property (itoSimpleProcess_isMartingale, B1a). Continuity gives cadlag paths, so Degenne's Martingale.IsLocalMartingale (Locally.of_prop along the constant localizing sequence, sorry-free) places the integral in the local-martingale class. The continuity of B is taken as a hypothesis -- the standard pathwise setting; IsPreBrownian fixes only the finite-dimensional laws and a continuous version exists by Kolmogorov-Chentsov. Honest scope: elementary (simple) integrands, for which the integral is in fact a true martingale, so the local-martingale statement is the canonical framing connecting to the localized theory; the genuinely new content is the pathwise continuity. Axioms-clean."
+      }
     }
   ]
 }

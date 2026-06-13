@@ -571,6 +571,17 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcessLp_l2_continuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcess.itoSimpleProcessLp_l2_continuous
 
+-- Summit B / B3 (2026-06-13): the elementary Itô integral as a continuous LOCAL
+-- MARTINGALE — pathwise continuity (given continuous Brownian paths) + Degenne's
+-- `Martingale.IsLocalMartingale` (`Foundations/ItoIntegralProcessLocalMartingale.lean`).
+-- The localization entry point; consumes the upstream local-martingale class.
+
+/-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcess_pathContinuous' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcess.itoSimpleProcess_pathContinuous
+
+/-- info: 'MathFin.ItoIntegralProcess.itoSimpleProcess_isLocalMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcess.itoSimpleProcess_isLocalMartingale
+
 -- Summit B / B1b (2026-06-12): the GENERAL-integrand Itô integral
 -- `(φ●B)_t = ∫₀ᵗ φ dB` for `φ ∈ L2Predictable[0,T]`, built by extending B1a's
 -- t-process along the dense `simpleAssembly_T` (`Foundations/ItoIntegralProcessGeneral.lean`).

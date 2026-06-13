@@ -1893,6 +1893,13 @@
       "input_hash": "4f87b5d7a6297c64d63512e0a86692eb4f0fc3745f4531fbd244c52e6d035b4c",
       "verified_at_commit": "c8f07fe"
     },
+    "sc-ito-simple-process-local-martingale": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-13",
+      "elapsed_s": 0.2,
+      "input_hash": "660fd3d30ad2747e306ee22bb7e9ff7e54543357b056db4c5656645b6b36be6c",
+      "verified_at_commit": "9122ff6"
+    },
     "sc-ito-simple-process-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-12",

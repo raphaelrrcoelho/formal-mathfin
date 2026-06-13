@@ -427,7 +427,13 @@ infrastructure. See [`roadmap.md`](roadmap.md).
   this is the next gate. The infinite-horizon `L2Predictable` variant of the
   integral itself is now **delivered** (`itoIntegralL2` in
   `Foundations/ItoIntegralL2Dense.lean`, B2, 2026-06-13) — see
-  [`ito-integral-clm-deferred.md`](ito-integral-clm-deferred.md).
+  [`ito-integral-clm-deferred.md`](ito-integral-clm-deferred.md). The
+  **localization entry point** is delivered too (B3, 2026-06-13): the elementary
+  Itô integral is a continuous **local martingale** in Degenne's
+  `IsLocalMartingale` class given continuous Brownian paths
+  (`itoSimpleProcess_isLocalMartingale`,
+  `Foundations/ItoIntegralProcessLocalMartingale.lean`) — the first sample-path
+  regularity result; the general-integrand pathwise modification remains the gate.
 
 ---
 

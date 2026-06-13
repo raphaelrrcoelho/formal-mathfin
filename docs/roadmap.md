@@ -660,5 +660,19 @@ lake build 8724 jobs green, axioms-clean. **B2 (infinite-horizon `[0,∞)` via
 finite-horizon `setIntegral_eq_zero_of_orthogonal_pred` via
 `trimMeasure_T_eq_restrict` and patching over the `{0}×univ`-null complement;
 build 8725 jobs green, axioms-clean, corpus 281 → **282**, 246 → **247 full**.
-Next: **B3** (localization → consume upstream `LocalizingSequence`/`Locally`,
-sorry-free).
+
+**B3 (localization) DONE 2026-06-13** — the elementary Itô integral as a
+**continuous local martingale** (`itoSimpleProcess_isLocalMartingale` +
+`itoSimpleProcess_pathContinuous`, `Foundations/ItoIntegralProcessLocalMartingale.lean`,
+entry `sc-ito-simple-process-local-martingale`). The first sample-path
+regularity result in the tower: given continuous Brownian paths, `t ↦ (V●B)_t ω`
+is continuous (finite sum of continuous clamped increments via
+`itoSimpleProcess_apply`), hence càdlàg, so B1a's true `L²` martingale lands in
+Degenne's sorry-free `IsLocalMartingale` class (`Martingale.IsLocalMartingale`).
+Pure consumption; the genuinely new content is the pathwise continuity. Honest
+scope: simple integrands, continuity assumed (the standard pathwise setting;
+`IsPreBrownian` fixes only finite-dim laws, a continuous version exists by
+Kolmogorov–Chentsov). build 8726 jobs green, axioms-clean, corpus 282 →
+**283**, 247 → **248 full**. Next: the general-integrand pathwise modification
+(continuous version of the `L²` limit) → the localized integral for locally-`L²`
+integrands → pathwise Itô / SDE layer.

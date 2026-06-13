@@ -26,10 +26,15 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-12, Summit B / B1b):** corpus **280**, **245 full +
-> 18 wrappers = 263/280 delivery-ready**, 17 reduced cores — see the B1b round
-> record immediately below. The figures further below are the historical
-> 2026-05-20 audit record, kept as provenance.
+> **Live status (2026-06-13, Summit B / B3):** corpus **283**, **248 full +
+> 18 wrappers = 266/283 delivery-ready**, 17 reduced cores. Since the B1b round
+> below: **B2** (unbounded-horizon `[0,∞)` σ-finite Itô integral CLM
+> `itoIntegralL2`, `Foundations/ItoIntegralL2Dense.lean`, entry
+> `sc-ito-infinite-horizon-isometry`) and **B3** (the elementary Itô integral as
+> a continuous **local martingale** — pathwise continuity + Degenne's
+> `Martingale.IsLocalMartingale`, `Foundations/ItoIntegralProcessLocalMartingale.lean`,
+> entry `sc-ito-simple-process-local-martingale`). The figures further below are
+> the historical 2026-05-20 audit record, kept as provenance.
 >
 > **Summit B / B1b round (2026-06-12).** The **general-integrand** Itô integral
 > `(φ●B)_t = ∫₀ᵗ φ dB` for a general predictable `φ ∈ L2Predictable[0,T]`, as a
