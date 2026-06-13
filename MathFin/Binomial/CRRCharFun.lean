@@ -37,6 +37,21 @@ The crux is `crr_charFun_pow_tendsto`. The argument:
 
 Both real trig limits reduce to `sin u / u → 1` (the half-angle identity
 `1 − cos u = 2 sin²(u/2)` handles the cosine).
+
+## Relationship to Mathlib's `Probability/CentralLimitTheorem.lean`
+
+Mathlib's CLT (`ProbabilityTheory.tendstoInDistribution_inv_sqrt_mul_sum_sub`) is the
+*classic fixed-i.i.d.* one-dimensional theorem: for a single fixed law shared by every
+`Xₖ` (`iIndepFun` + `IdentDistrib (X i) (X 0)`), `(√n)⁻¹·∑ₖ(Xₖ − μ) ⇒ N(0, v)`. CRR is a
+**triangular array** — the step law `crrStepMeasure r σ T n` *depends on `n`* (support
+`±σ√(T/n)`, probability `pₙ` carrying the risk-neutral drift), so it is not the sum of a
+fixed i.i.d. sequence and the upstream CLT does not apply. Mathlib (pin `c5ea003`) has no
+triangular-array / Lindeberg CLT and no measure-convolution power, so this CRR limit is a
+genuinely distinct result, not a re-proof. It *does* consume the shared characteristic-
+function layer the upstream CLT is itself built on: `charFun`, `charFun_conv`,
+`charFun_dirac`, `charFun_gaussianReal`, Lévy continuity
+(`ProbabilityMeasure.tendsto_of_tendsto_charFun`), and `tendsto_one_add_pow_exp_of_tendsto`
+(the same `(1+aₙ)ⁿ → exp` lemma Mathlib's own `Poisson/PoissonLimitThm` uses).
 -/
 
 @[expose] public section
@@ -48,15 +63,16 @@ open scoped Topology
 
 /-! ### Real second-order trig limits at `0` -/
 
-/-- `sin u / u → 1` as `u → 0` (`u ≠ 0`): the slope of `sin` at `0`,
-where `sin' 0 = cos 0 = 1`. -/
+/-- `sin u / u → 1` as `u → 0` (`u ≠ 0`): the value at `0` of Mathlib's continuous
+`Real.sinc` (`sinc u = sin u / u` off `0`, `sinc 0 = 1`). -/
 lemma tendsto_sin_div_one :
     Tendsto (fun u : ℝ => Real.sin u / u) (𝓝[≠] 0) (𝓝 1) := by
-  have h_deriv : HasDerivAt Real.sin 1 0 := by simpa using Real.hasDerivAt_sin 0
-  have h_slope := h_deriv.tendsto_slope
-  refine h_slope.congr' (Eventually.of_forall fun u => ?_)
-  rw [slope_def_field]
-  simp [Real.sin_zero]
+  have h : Tendsto Real.sinc (𝓝[≠] (0 : ℝ)) (𝓝 (Real.sinc 0)) :=
+    (Real.continuous_sinc.tendsto 0).mono_left nhdsWithin_le_nhds
+  rw [Real.sinc_zero] at h
+  refine h.congr' ?_
+  filter_upwards [self_mem_nhdsWithin] with u hu
+  exact Real.sinc_of_ne_zero hu
 
 /-- `(1 − cos u)/u² → 1/2` as `u → 0` (`u ≠ 0`), via the half-angle identity
 `1 − cos u = 2 sin²(u/2)` and `sin v / v → 1`. -/

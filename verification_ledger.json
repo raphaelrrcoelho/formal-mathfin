@@ -1027,10 +1027,10 @@
     },
     "mf-crr-bs-call-convergence": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-11",
-      "elapsed_s": 84.7,
-      "input_hash": "15afcee9c607f2e8404515a7f1a604006c5d8ccb568a2149cb2bb07c2ab611ee",
-      "verified_at_commit": "cd4dfa6"
+      "date": "2026-06-13",
+      "elapsed_s": 72.5,
+      "input_hash": "4dd9b122f985e020a756f8ce20200eb99bc7330297693917593b2c7369849e2f",
+      "verified_at_commit": "001d27b"
     },
     "mf-crr-drift-limit": {
       "benchmark_file": "mathematical_finance.json",
@@ -1048,10 +1048,10 @@
     },
     "mf-crr-gaussian-limit": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-11",
-      "elapsed_s": 168.4,
-      "input_hash": "aee4d59137844a67d7f08efe777cda708e3ae21f53c2aa9acea33d813ecd7034",
-      "verified_at_commit": "cd4dfa6"
+      "date": "2026-06-13",
+      "elapsed_s": 16.4,
+      "input_hash": "39c78703407d268f374512f9596cd03da55eb3182246eaf37b14464144a9862e",
+      "verified_at_commit": "001d27b"
     },
     "mf-crr-one-step-martingale": {
       "benchmark_file": "mathematical_finance.json",
