@@ -53,6 +53,51 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-13 — commit 6bd9477 — corpus 282
+
+**Scope**: Summit B / B2 — the unbounded-horizon `[0,∞)` Itô integral as a
+continuous linear isometry. `MathFin/Foundations/ItoIntegralL2Dense.lean`
+(`itoIntegralL2`, `itoIntegralL2_norm`), corpus entry
+`sc-ito-infinite-horizon-isometry`, plus de-privatising
+`ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred` for reuse. Closes the
+σ-finite density gap recorded in `docs/ito-integral-clm-deferred.md`.
+
+**Panel**: three agents over the eight lenses (slop / idiom / clarity;
+coherence / first-principles / architecture; inspired / elegant / honesty).
+
+**Findings & resolution** (all fixed before this verdict):
+- **BLOCKER (clarity/honesty)** — `ItoIntegralCLM.lean`'s module docstring still
+  declared the unbounded-horizon CLM "left gated … not required by any
+  downstream pricing module." Now false on both counts (it is built, and this
+  file de-privatises a CLM lemma to serve it). Rewritten to point at
+  `ItoIntegralL2Dense` and name the consumed bridges.
+- **MINOR (slop/idiom)** — five implementation-detail helpers (`iocSP`,
+  `uncurry_iocSP_eq`, `inner_simpleAssembly_iocSP`, `itoOrthRect`,
+  `aezeroOfOrth`) leaked into the public namespace, against the repo convention
+  (only the density theorem + CLM + isometry are public, as in
+  `ItoIntegralCLM`/`WienerIntegralL2`). Marked `private`.
+- **MINOR (clarity)** — module doc said B2 "removes the horizon bound from
+  `itoIntegralCLM_T`"; it is a sibling CLM reusing that file's density
+  machinery, not a direct extension. Reworded.
+- **MINOR (honesty, stale docs)** — `docs/coverage.md`, `docs/blueprint.md`,
+  `docs/roadmap.md`, and the deferred-doc header still listed the
+  infinite-horizon variant as open/future. All updated to record B2 as
+  delivered; the deferred doc carries a `CLOSED 2026-06-13` stamp.
+
+**Coherence / first principles / architecture** — PASS, unanimous. Pure
+consumption of the finite-horizon layer (the `predictableRect` π-system reused
+verbatim, T-independent) + Degenne `SimpleProcess` + Mathlib `extendOfNorm` /
+`Lp.ae_eq_zero_of_forall_setIntegral_eq_zero`; nothing of the π-system or the
+isometry is reproved. The σ-finite-exhaustion argument (per-frame `g =ᵐ 0` via
+the finite-horizon lemma, then a null-cover patch over `{0}×univ`) is sound and
+formally tight, and is the right architecture — reduce the σ-finite case to the
+already-proven finite case rather than rebuild density from scratch (and it
+sidesteps the upstream elementary-set π-system gap the deferred doc anticipated
+needing). `full` status justified: a genuine theorem, axioms-clean, AxiomAudit-pinned.
+
+**Verdict: PASS** (one blocker + minors, all fixed). Build 8725 jobs green,
+axioms-clean; ledger 282/282 fresh; pytest 19.
+
 ## 2026-06-12 — commit 867d265 — corpus 281
 
 **Scope**: the deferred per-`t` Itô isometry, now closed —
