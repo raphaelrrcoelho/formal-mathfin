@@ -3,11 +3,23 @@
 This is a Lean 4 library of formally verified mathematical-finance theorems. The
 canonical verification is `lake build` from the repo root.
 
+Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
+
+**New here?** [`docs/onboarding.md`](docs/onboarding.md) is the step-by-step
+first-contribution walkthrough. [`docs/troubleshooting.md`](docs/troubleshooting.md)
+covers common setup failures. Issues tagged
+[`good first issue`](https://github.com/raphaelrrcoelho/formal-mathfin/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
+are the recommended entry points.
+
 ## Getting set up
 
 The fastest path is Docker (pinned Lean toolchain + Mathlib + BrownianMotion):
 
 ```bash
+# Log in to GHCR (one-time per machine — needs gh with read:packages scope):
+TOKEN=$(grep -E '^[[:space:]]+oauth_token:' ~/.config/gh/hosts.yml | head -1 | awk '{print $2}')
+echo "$TOKEN" | docker login ghcr.io -u raphaelrrcoelho --password-stdin
+
 # Pull the prebuilt image (~3 min vs ~15 min local build)
 docker compose -f docker/docker-compose.yml pull verify
 
@@ -18,6 +30,12 @@ docker compose -f docker/docker-compose.yml run --rm --entrypoint bash verify -l
 For host authoring, install elan + the pinned Lean toolchain, then VS Code with
 the Lean extension. The Lake project at repo root is what VS Code's LSP sees;
 no extra config needed.
+
+## PR checklist
+
+Before opening a PR use the PR template (`.github/PULL_REQUEST_TEMPLATE.md`).
+The CI pipeline runs `pytest tests/ -q` → `python3 -m tools.verify.ledger status` →
+`lake build` in that order. A red gate at any step blocks merge.
 
 ## Adding a theorem
 
@@ -61,8 +79,16 @@ no extra config needed.
 7. **Run the regression tests:**
    ```bash
    docker compose -f docker/docker-compose.yml run --rm \
-       --entrypoint python3 verify -m pytest tests/test_router.py -q
+       --entrypoint python3 verify -m pytest tests/ -q
    ```
+
+   All three suites must pass:
+   - `tests/test_router.py` — Lean-only routing, no `sorry`, `@[expose]` rule,
+     `formalization_status` declared on every entry.
+   - `tests/test_ledger.py` — ledger freshness and globally unique ids.
+   - `tests/test_values.py` — no forbidden tactics, no `rfl`-backed `full`
+     entries, blueprint-spine ⊆ curated `AxiomAudit`, byte-fresh
+     `AxiomAuditGen.lean`.
 
 ## Style
 
