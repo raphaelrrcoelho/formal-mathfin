@@ -8,6 +8,8 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20477782.svg)](https://doi.org/10.5281/zenodo.20477782)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.01356-b31b1b)](https://arxiv.org/abs/2606.01356)
 [![dataset](https://img.shields.io/badge/HF-dataset-ffcc4d)](https://huggingface.co/datasets/raphaelrrcoelho/formal-mathfin-theorems)
+[![PRs welcome](https://img.shields.io/badge/PRs-welcome-brightgreen)](CONTRIBUTING.md)
+[![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa)](CODE_OF_CONDUCT.md)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
 and Degenne's BrownianMotion. 274 theorems across 11 areas — Black-Scholes
@@ -249,6 +251,21 @@ Treynor (1965), Sortino-van der Meer (1991), Grinold-Kahn (1999),
 Rockafellar-Uryasev (2000). Black-Scholes (1973), Merton (1973), Black
 (1976), Bachelier (1900), Cox-Ross-Rubinstein (1979). Roncalli-Maillard
 on risk parity, Black-Litterman (1992).
+
+## Contributing
+
+Contributions are welcome — from documentation fixes to new theorem
+formalisations to upstream Mathlib PRs.
+
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — full development workflow.
+- [`docs/onboarding.md`](docs/onboarding.md) — step-by-step first-contribution
+  walkthrough (environment setup, fast iteration loop, PR checklist).
+- [`docs/troubleshooting.md`](docs/troubleshooting.md) — common setup failures
+  and fixes.
+- [Good first issues](https://github.com/raphaelrrcoelho/formal-mathfin/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
+  — labelled tasks with explicit scope, acceptance criteria, and file pointers.
+
+Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 
 ## License
 
