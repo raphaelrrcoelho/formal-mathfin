@@ -499,6 +499,21 @@ lemma hasDerivAt_bsV_r {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ
   rw [h_bs]
   ring
 
+/-! ### Charm: ∂Δ/∂τ = ∂Φ(d₁)/∂τ -/
+
+/-- **Charm**: `∂Δ/∂τ = ∂Φ(d₁)/∂τ = ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ)`.
+
+The product/chain rules give `ϕ(d₁) · ∂_τ d₁`. The magic identity is not
+needed here — `∂_τ d₁` already has a clean closed form. -/
+lemma hasDerivAt_bsV_charm {K r σ : ℝ} (hσ : 0 < σ)
+    {S τ : ℝ} (hτ : 0 < τ) :
+    HasDerivAt (fun t => Phi (bsd1 S K r σ t))
+      (gaussianPDFReal 0 1 (bsd1 S K r σ τ)
+        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ := by
+  have h_d1_τ := hasDerivAt_bsd1_tau S K r σ hσ hτ
+  have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp τ h_d1_τ
+  simpa using h_Phi_d1
+
 /-- **Black–Scholes PDE** (forward direction): the European call price
 `V(S, t) = S · Φ(d₁) − K · e^{-r(T−t)} · Φ(d₂)` satisfies
 `∂_t V + (1/2) σ² S² ∂²_S V + r S ∂_S V − r V = 0` for `0 < S, t < T, 0 < K, 0 < σ`. -/

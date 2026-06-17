@@ -675,6 +675,13 @@
       "input_hash": "c7c0ea2ee31c3eeb310731acf82c3a2ed1a2598f8f28530eb1c9a10d18d86230",
       "verified_at_commit": "cd4dfa6"
     },
+    "mf-bs-charm": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-17",
+      "elapsed_s": 0.0,
+      "input_hash": "cbe45fa0e085a6e6dfb252cf56ec2231acbb1ac274e72fa79452ee60d88e7f9d",
+      "verified_at_commit": "ab336b7"
+    },
     "mf-bs-dividends-call": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-11",
