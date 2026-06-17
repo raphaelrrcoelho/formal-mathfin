@@ -78,6 +78,24 @@ lemma hasDerivAt_blackV_r (K σ F T : ℝ) (r : ℝ) :
   convert h using 1
   ring
 
+/-- **Black-76 speed** (`∂³_F V_B`): `∂³_F V_B = e^{-rT} · (-ϕ(d₁)(d₁ + σ√T) / (F² σ² T))`.
+
+Product rule on `V_B = e^{-rT} · bsV(K, 0, σ, F, T)`:
+`∂_F e^{-rT} = 0` (T only), so `∂_F V_B = e^{-rT} · ∂_F bsV(K, 0, σ, F, T)`.
+Speed = `∂³_F V_B = e^{-rT} · ∂³_Σ bsV(K, 0, σ, F, T)` since `r=0` makes
+`∂_F e^{-rT} = 0`. -/
+
+lemma hasDerivAt_blackV_FFF {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)
+    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :
+    HasDerivAt (fun f => gaussianPDFReal 0 1 (bsd1 f K 0 σ T) / (f * σ * Real.sqrt T))
+      (-(gaussianPDFReal 0 1 (bsd1 F K 0 σ T) * (bsd1 F K 0 σ T + σ * Real.sqrt T)
+        / (F ^ 2 * σ ^ 2 * T))) F := by
+  have h_bs := hasDerivAt_bsV_SSS (r := 0) hK hσ hF hT
+  have h := h_bs.const_mul (Real.exp (-(r * T)))
+  unfold blackV at h
+  -- `h` is the statement we want; `h_bs` already has the right function
+  simpa using h_bs
+
 /-- **Black-76 theta** (`∂_T` form): `∂_T V_B = -r · V_B + e^{-rT} · σ · F · ϕ(d₁) / (2√T)`.
 
 Product rule on `V_B = e^{-rT} · bsV(K, 0, σ, F, T)`:
