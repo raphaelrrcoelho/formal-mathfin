@@ -370,6 +370,22 @@
       }
     },
     {
+      "id": "mf-bs-speed",
+      "name": "BS Speed (∂³V/∂S³)",
+      "description": "BS speed: ∂³V/∂S³ = ∂Γ/∂S = -ϕ(d₁)·(d₁ + σ√τ)/(S² σ² τ). Product rule on the gamma numerator ϕ(d₁)/(S σ √τ) with chain rule ϕ'(d₁) = -d₁·ϕ(d₁); σ² τ denominator (not σ√τ) is the key algebraic feature.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.PDE\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_speed_thm {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)\n    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :\n    HasDerivAt (fun s => gaussianPDFReal 0 1 (MathFin.bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 S K r σ τ) * (MathFin.bsd1 S K r σ τ + σ * Real.sqrt τ)\n        / (S ^ 2 * σ ^ 2 * τ))) S :=\n  MathFin.hasDerivAt_bsV_SSS hK hσ hS hτ\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "BS speed (Wystup 2002; Hull 19.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on ϕ(d₁), s⁻¹, (σ√τ)⁻¹. Chain rule: ϕ'(d₁) = -d₁·ϕ(d₁). The σ² τ denominator emerges naturally (not σ√τ). Lives in MathFin/BlackScholes/PDE.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-bachelier-delta",
       "name": "Bachelier Delta",
       "description": "Bachelier delta: ∂V/∂S = Φ(d) where d = (S-K)/(σ√T). Chain-rule contributions through d cancel via the identity (S-K)/(σ√T) = d.",
@@ -863,6 +879,22 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof via product rule on e^{-rT}·bsV(K, 0, σ, F, T). ∂_T e^{-rT} = -r·e^{-rT}; ∂_T bsV(·, 0, ·) reduces to σ·F·ϕ(d₁)/(2√T) (the rK·e^{-rT}·Φ(d₂) term vanishes at r=0). Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-black76-speed",
+      "name": "Black-76 Speed",
+      "description": "Black-76 speed: ∂Γ_B/∂F = -ϕ(d₁)·(d₁ + σ√T)/(F² σ² T). Third derivative of Black-76 futures option value w.r.t. futures price. Re-exports BS speed via product rule on e^{-rT}·bsV(K, 0, σ, F, T).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76Greeks\n\nopen MathFin ProbabilityTheory\n\ntheorem black76_speed_thm {K σ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (r : ℝ)\n    {F T : ℝ} (hF : 0 < F) (hT : 0 < T) :\n    HasDerivAt (fun f => gaussianPDFReal 0 1 (MathFin.bsd1 f K 0 σ T) / (f * σ * Real.sqrt T))\n      (-(gaussianPDFReal 0 1 (MathFin.bsd1 F K 0 σ T) * (MathFin.bsd1 F K 0 σ T + σ * Real.sqrt T)\n        / (F ^ 2 * σ ^ 2 * T))) F :=\n  MathFin.hasDerivAt_blackV_FFF hK hσ hF hT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Black-76 speed (Hull 17.6)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via product rule on e^{-rT}·bsV(K, 0, σ, F, T). ∂_F e^{-rT} = 0; ∂_F bsV(·, 0, ·) reduces to -ϕ(d₁)(d₁+σ√T)/(F²σ²T). Lives in MathFin/Futures/Black76Greeks.lean. Axioms-clean."
       }
     },
     {

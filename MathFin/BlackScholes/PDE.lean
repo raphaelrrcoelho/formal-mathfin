@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.Foundations.GaussianCDFDeriv
+public import MathFin.BlackScholes.Bachelier
 
 /-!
 # Black–Scholes PDE — forward direction
@@ -348,6 +349,55 @@ lemma hasDerivAt_bsV_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
   convert h_Phi_d1 using 1
   field_simp
+
+/-! ### Speed: `∂³_S V = ∂Γ/∂S` -/
+
+/-- Algebraic shortcut: `d/dS [ϕ(d₁(S))] = -d₁ · ϕ(d₁) / (S σ √τ)`. Useful for
+speed (the third spot derivative of the BS call). -/
+private lemma hasDerivAt_gaussianPDFReal_bsd1_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    (hτ : 0 < τ) {S : ℝ} (hS : 0 < S) :
+    HasDerivAt (fun s => gaussianPDFReal 0 1 (bsd1 s K r σ τ))
+      (-(bsd1 S K r σ τ * gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ))) S := by
+  have h_d1_S := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
+  have h := (hasDerivAt_gaussianPDFReal_zero_one (bsd1 S K r σ τ)).comp S h_d1_S
+  convert h using 1
+  field_simp
+
+/-- **Speed**: `∂³_S V = ∂Γ/∂S = -ϕ(d₁) · (d₁ + σ√τ) / (S² σ² τ)`.
+
+Differentiates the gamma expression `ϕ(d₁)/(S σ √τ)` with respect to S
+using the product rule on the three factors `ϕ(d₁)`, `1/s`, `1/(σ√τ)` and the
+chain rule `ϕ'(d₁) = -d₁·ϕ(d₁)`. The result simplifies algebraically to
+`-ϕ(d₁)(d₁ + σ√τ)/(S² σ² τ)` — note the `σ² τ` denominator (not `σ √τ`). -/
+lemma hasDerivAt_bsV_SSS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
+    {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
+    HasDerivAt (fun s => gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (s * σ * Real.sqrt τ))
+      (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (bsd1 S K r σ τ + σ * Real.sqrt τ)
+        / (S ^ 2 * σ ^ 2 * τ))) S := by
+  have h_sqrt_τ_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
+  have h_sqrt_τ_ne : Real.sqrt τ ≠ 0 := h_sqrt_τ_pos.ne'
+  have hσ_ne : σ ≠ 0 := hσ.ne'
+  have hS_ne : S ≠ 0 := hS.ne'
+  have hτ_ne : τ ≠ 0 := hτ.ne'
+  have hS_sq_ne : S ^ 2 ≠ 0 := pow_ne_zero 2 hS_ne
+  -- Three factors: f₁(s) = ϕ(d₁(s)), f₂(s) = 1/s, f₃ = 1/(σ√τ)
+  have h_f1 := hasDerivAt_gaussianPDFReal_bsd1_S (r := r) hK hσ hτ hS
+  have h_f2 : HasDerivAt (fun s : ℝ => s⁻¹) (-(S ^ 2)⁻¹) S :=
+    hasDerivAt_inv hS_ne
+  have h_f3 : HasDerivAt (fun _ : ℝ => (σ * Real.sqrt τ)⁻¹) 0 S := hasDerivAt_const S _
+  have h_prod12 := h_f1.mul h_f2
+  have h_prod123 := h_prod12.mul_const ((σ * Real.sqrt τ)⁻¹)
+  have h_prod12' : HasDerivAt (fun s : ℝ => gaussianPDFReal 0 1 (bsd1 s K r σ τ) * s⁻¹)
+      (-(bsd1 S K r σ τ * gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) * S⁻¹
+        + gaussianPDFReal 0 1 (bsd1 S K r σ τ) * -(S ^ 2)⁻¹) S := by
+    simpa [mul_comm, mul_left_comm, mul_assoc] using h_prod12
+  have h_prod123' := h_prod12'.mul_const ((σ * Real.sqrt τ)⁻¹)
+  convert h_prod123' using 1
+  · funext s
+    simp [div_eq_mul_inv, mul_comm, mul_left_comm, mul_assoc]
+  · field_simp [hS_ne, hσ_ne, h_sqrt_τ_ne, hτ_ne, hS_sq_ne]
+    simp [Real.sq_sqrt hτ.le]
+    ring
 
 /-- **Theta (without τ → t sign flip)**: `∂_τ V = σ S ϕ(d₁) / (2 √τ) + r K e^{-rτ} Φ(d₂)`.
 The combination of product/chain rules + the magic identity (`K e^{-rτ} ϕ(d₂) = S ϕ(d₁)`)
