@@ -3010,6 +3010,54 @@
       }
     },
     {
+      "id": "mf-caplet-price",
+      "name": "Black-76 Caplet Price",
+      "description": "V^caplet = α · [F · Φ(d₁) − K · Φ(d₂)] with d_i = bsd_i(F, K, 0, σ, T) — the Black-76 futures call scaled by the accrual factor.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76\n\nopen MathFin\n\ntheorem blackCaplet_price_thm (F K σ T α : ℝ) :\n    MathFin.blackCaplet F K σ T α = α * (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T)) :=\n  rfl\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Black model for caplets and floorlets (Black 1976 specialisation)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal definition. Direct specialization of black_futures_formula to the caplet payoff α·max(F_T−K,0), with zero drift (futures are martingales) and the forward numéraire absorbing the discount. Lives in MathFin/Futures/Black76.lean next to the swaptions parity. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-floorlet-price",
+      "name": "Black-76 Floorlet Price",
+      "description": "V^floorlet = α · [K · Φ(−d₂) − F · Φ(−d₁)] — the Black-76 futures put scaled by the accrual factor, mirroring the caplet definition.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76\n\nopen MathFin\n\ntheorem blackFloorlet_price_thm (F K σ T α : ℝ) :\n    MathFin.blackFloorlet F K σ T α = α * (K * Phi (-(bsd2 F K 0 σ T)) - F * Phi (-(bsd1 F K 0 σ T))) :=\n  rfl\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Black model for caplets and floorlets (Black 1976 specialisation)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal definition. Put counterpart of the caplet: the Black-76 futures put scaled by the accrual factor α, mirroring blackPayerSwaption's structure. Lives in MathFin/Futures/Black76.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-caplet-floorlet-parity",
+      "name": "Black-76 Caplet-Floorlet Parity",
+      "description": "V^caplet − V^floorlet = α · (F − K) — the forward-rate analog of put-call parity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Black76\n\nopen MathFin\n\ntheorem caplet_floorlet_parity_thm (F K σ T α : ℝ) :\n    MathFin.blackCaplet F K σ T α - MathFin.blackFloorlet F K σ T α = α * (F - K) :=\n  MathFin.caplet_floorlet_parity F K σ T α\n"
+      },
+      "metadata": {
+        "chapter": 15,
+        "reference": "Black model for caplets and floorlets (Black 1976 specialisation)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. One-line via Phi_add_Phi_neg: factor α, then each of (Phi d1 + Phi(-d1)) and (Phi d2 + Phi(-d2)) collapse to 1. Lives in MathFin/Futures/Black76.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-compound-poisson-mgf",
       "name": "Compound Poisson MGF Algebraic Core",
       "description": "e^{-λ} · e^{λM} = e^{λ(M − 1)}: the algebraic core of the compound-Poisson MGF identity E[e^{tS}] = exp(λ(M_X(t) − 1)).",

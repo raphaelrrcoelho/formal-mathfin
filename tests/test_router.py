@@ -62,6 +62,12 @@ EXPECTED_FULL_THEOREMS = {
     "pp-thm-3.3.9",
     "pp-thm-3.3.10",
     "sc-thm-7.4.5",
+    # 2026-06-17 Caplet/floorlet round: Black-76 specialisation for the
+    # interest-rate caplet/floorlet + parity theorem, mirroring the
+    # swaption parity already on the spine.
+    "mf-caplet-price",
+    "mf-floorlet-price",
+    "mf-caplet-floorlet-parity",
 }
 
 # Deliberate audit pins: entries kept at exactly `reduced_core` so they can

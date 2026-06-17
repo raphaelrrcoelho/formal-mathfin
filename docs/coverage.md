@@ -26,8 +26,28 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-13, Summit B / B3):** corpus **283**, **248 full +
-> 18 wrappers = 266/283 delivery-ready**, 17 reduced cores. Since the B1b round
+> **Caplet/floorlet round (2026-06-17).** Three new `full` entries extend
+> the Black-76 spine into the interest-rate caplet/floorlet layer:
+> `mf-caplet-price` / `mf-floorlet-price` / `mf-caplet-floorlet-parity` in
+> `MathFin/Futures/Black76.lean`. The caplet is `α · [F · Φ(d₁) − K · Φ(d₂)]`
+> (accrual-scaled Black-76 futures call, zero-drift specialisation); the
+> floorlet mirrors it as `α · [K · Φ(−d₂) − F · Φ(−d₁)]`. Parity `V^caplet −
+> V^floorlet = α · (F − K)` follows from `Phi_add_Phi_neg` in one
+> line. Convention follows the swaption module: no separate discount factor
+> (the forward numéraire absorbs the drift), so `d_i = bsd_i(F, K, 0, σ, T)`
+> reuses the zero-drift hypothesis. Net: corpus 283 → **286**, **251 full +
+> 18 wrappers = 269/286 delivery-ready**, 17 reduced cores** (17 unchanged;
+> `mf-caplet-price` and `mf-floorlet-price` are definitional `rfl` entries
+> backed by genuine `blackCaplet`/`blackFloorlet` definitions whose
+> `library_wrapper` credit would be the reduced_core pattern in disguise —
+> the benchmark records them as `full` because the *definitions* are the
+> load-bearing spine, per the documented definitional-`full` convention).
+>
+> Values-review cadence: corpus 286, latest recorded review covered 283,
+> so +3 entries of unreviewed growth — within the 12-entry slack.
+
+> **Live status (2026-06-17, Caplet/floorlet round):** corpus **286**, **251 full +
+> 18 wrappers = 269/286 delivery-ready**, 17 reduced cores. Since the B1b round
 > below: **B2** (unbounded-horizon `[0,∞)` σ-finite Itô integral CLM
 > `itoIntegralL2`, `Foundations/ItoIntegralL2Dense.lean`, entry
 > `sc-ito-infinite-horizon-isometry`) and **B3** (the elementary Itô integral as
