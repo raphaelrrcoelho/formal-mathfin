@@ -63,7 +63,7 @@ namespace MathFin
 namespace ItoIntegralL2
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-! ### The rectangle indicator as a simple process -/
 

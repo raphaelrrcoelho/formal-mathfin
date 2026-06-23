@@ -101,7 +101,7 @@ lemma itoSimple_apply (hBmeas : ∀ t, Measurable (B t))
       = V.value.sum fun p v => v ω * (B p.2 ω - B p.1 ω) := by
   simp only [itoSimple, SimpleProcess.integral_top, ContinuousLinearMap.mul_apply']
 
-variable [hB : IsPreBrownian B μ]
+variable [hB : IsPreBrownianReal B μ]
 
 /-- **Step 1 — `L²` membership.** The terminal Itô integral of a simple process is in
 `L²(μ)`: it is the finite sum `∑ₚ V(p)·(B_{p.2}−B_{p.1})`, and each summand is in `L²`

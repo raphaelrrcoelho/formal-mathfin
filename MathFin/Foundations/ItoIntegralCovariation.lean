@@ -39,7 +39,7 @@ open MeasureTheory Filter Topology NNReal ENNReal ProbabilityTheory
 open scoped MeasureTheory NNReal ENNReal InnerProductSpace
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- The `[0,T]` Itô integral bundled as a **linear isometry**
 `Lp ℝ 2 trim_T →ₗᵢ[ℝ] Lp ℝ 2 μ`: the CLM `itoIntegralCLM_T` together with the

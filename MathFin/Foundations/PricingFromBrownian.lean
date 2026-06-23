@@ -20,7 +20,7 @@ public import MathFin.FixedIncome.KMVMertonStructural
 
 This file demonstrates that the full BS pricing pipeline (call, put,
 put-call parity, Bachelier call) is derivable from a *single* primitive:
-the existence of a pre-Brownian motion `W : ℝ≥0 → Ω → ℝ` (`IsPreBrownian W
+the existence of a pre-Brownian motion `W : ℝ≥0 → Ω → ℝ` (`IsPreBrownianReal W
 Q` from the `BrownianMotion` package).
 
 Each composite corollary is a *one-line composition*:
@@ -62,7 +62,7 @@ holds for `S_T := bsTerminal S_0 r σ T (W T.toNNReal · / √T)`. -/
 theorem bs_call_formula_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
@@ -75,7 +75,7 @@ theorem bs_call_formula_via_brownian
 theorem bs_put_formula_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
@@ -88,7 +88,7 @@ theorem bs_put_formula_via_brownian
 theorem bs_put_call_parity_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     (∫ ω, Real.exp (-r * T) *
@@ -102,7 +102,7 @@ theorem bs_put_call_parity_via_brownian
 theorem bachelier_call_formula_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K σ T : ℝ}
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, max (bachelierTerminal S_0 σ T
@@ -116,7 +116,7 @@ theorem bachelier_call_formula_via_brownian
 theorem bs_cash_or_nothing_formula_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
@@ -129,7 +129,7 @@ theorem bs_cash_or_nothing_formula_via_brownian
 theorem bs_asset_or_nothing_formula_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
@@ -142,7 +142,7 @@ theorem bs_asset_or_nothing_formula_via_brownian
 theorem bs_power_call_formula_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ} (a : ℕ) (ha : 0 < a)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
@@ -159,7 +159,7 @@ in the marginal hypothesis is `r − q`. -/
 theorem bs_dividends_call_formula_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r q σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
@@ -174,7 +174,7 @@ theorem bs_dividends_call_formula_via_brownian
 theorem stockNumeraire_exercise_probability_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     (∫ ω, (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
@@ -188,7 +188,7 @@ theorem stockNumeraire_exercise_probability_via_brownian
 theorem kmvPD_eq_one_sub_survival_probability_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {V_0 F r σ_V T : ℝ}
     (hV : 0 < V_0) (hF : 0 < F) (hσ : 0 < σ_V) (hT : 0 < T) :
     kmvPD V_0 F r σ_V T =
@@ -201,7 +201,7 @@ theorem kmvPD_eq_one_sub_survival_probability_via_brownian
 theorem merton_equity_eq_bs_call_via_brownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {V_0 F r σ_V T : ℝ}
     (hV : 0 < V_0) (hF : 0 < F) (hσ : 0 < σ_V) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *

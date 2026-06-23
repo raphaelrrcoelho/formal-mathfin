@@ -18,10 +18,10 @@ covariance `E[(B_t-B_s)(B_v-B_u)] = vol((s,t]∩(u,v])`. That is *not* the
 Itô integral. The Itô integral allows a **random, adapted** integrand
 `φ`, and the cross-terms vanish for a different, deeper reason: the next
 increment `B_{t₁} - B_{t₀}` is *independent of the past* `𝓕_{t₀}` (the weak
-Markov property `IsPreBrownian.indepFun_shift`), and has mean zero.
+Markov property `IsPreBrownianReal.indepFun_shift`), and has mean zero.
 
 This file builds that genuinely-stochastic core, grounded directly on
-Degenne's `IsPreBrownian.indepFun_shift` and `hasLaw_sub`. Adaptedness is
+Degenne's `IsPreBrownianReal.indepFun_shift` and `hasLaw_sub`. Adaptedness is
 encoded faithfully as factoring through the *past process*
 `fun (t : Set.Iic t₀) ↦ B t ω` — the natural Brownian filtration, which is
 exactly what `indepFun_shift` is stated against.
@@ -43,7 +43,7 @@ Degenne's `BrownianMotion/StochasticIntegral/` already abstracts the
 simple-predictable-integrand objects (`SimpleProcess`, `ElementaryPredictableSet`,
 `L2Predictable`) — but proves **no** isometry; that is the gap this file fills.
 We re-encode adaptedness concretely as `AdaptedAt` (factoring through
-`pastProcess`) so that the weak-Markov independence `IsPreBrownian.indepFun_shift`
+`pastProcess`) so that the weak-Markov independence `IsPreBrownianReal.indepFun_shift`
 applies directly. The deterministic moments `integral_two_increment` /
 `integral_increment_sq` are *consumed* as the shared-start (`s = u`) and
 diagonal instances of `WienerIntegralL2.covariance_increment_aux` — the single
@@ -62,7 +62,7 @@ open MeasureTheory ProbabilityTheory
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- The past process up to time `t₀`: `ω ↦ (fun t : Iic t₀ ↦ B t ω)`.
 This is the random variable generating the natural filtration `𝓕_{t₀}`. -/
@@ -125,7 +125,7 @@ theorem AdaptedAt.sub {t₀ : ℝ≥0} {φ ψ : Ω → ℝ}
 
 /-- An adapted integrand is independent of the forward increment. The deep
 content: `B_{t₁} - B_{t₀}` is independent of `𝓕_{t₀}` (weak Markov,
-`IsPreBrownian.indepFun_shift`), and `φ` is `𝓕_{t₀}`-measurable. -/
+`IsPreBrownianReal.indepFun_shift`), and `φ` is `𝓕_{t₀}`-measurable. -/
 theorem adapted_indepFun_increment
     (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) :
@@ -367,7 +367,7 @@ covariance `integral_two_increment`. -/
 
 /-- An adapted integrand is independent of *any* measurable functional of the
 forward increment process `u ↦ B_{t₀+u} − B_{t₀}` (weak Markov,
-`IsPreBrownian.indepFun_shift`). Generalises `adapted_indepFun_increment` from a
+`IsPreBrownianReal.indepFun_shift`). Generalises `adapted_indepFun_increment` from a
 single forward evaluation to functionals of several future increments. -/
 theorem adapted_indepFun_forward
     (hBmeas : ∀ t, Measurable (B t)) {t₀ : ℝ≥0}

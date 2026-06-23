@@ -14,7 +14,7 @@ public import BrownianMotion.StochasticIntegral.LocalMartingale
 The genuinely new result here is **pathwise (sample-path) regularity** — the
 first such result in the Itô tower, which so far is an `L²`/in-measure theory.
 For a **continuous** Brownian motion `B` (the standard pathwise setting —
-`IsPreBrownian` fixes only the finite-dimensional laws, and Degenne's
+`IsPreBrownianReal` fixes only the finite-dimensional laws, and Degenne's
 Kolmogorov–Chentsov machinery produces a continuous version):
 
 * `itoSimpleProcess_pathContinuous` — for each `ω`, the path `t ↦ (V ● B)_t ω` is
@@ -61,7 +61,7 @@ namespace MathFin
 namespace ItoIntegralProcess
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- A continuous function is càdlàg: right-continuity is `ContinuousWithinAt` on
 each `Ioi`, and the left limit at `x` is `f x` (continuity gives the

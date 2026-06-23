@@ -41,7 +41,7 @@ open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- **The contraction bound** — the one new analytic input. For a `T`-bounded
 simple process, the L² norm of the t-process `(V●B)_t` is at most that of its

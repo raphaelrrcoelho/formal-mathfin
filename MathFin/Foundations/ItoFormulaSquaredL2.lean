@@ -56,7 +56,7 @@ open MeasureTheory ProbabilityTheory Filter MathFin.QuadraticVariationL2
 open scoped NNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownian B μ]
+  [hB : IsPreBrownianReal B μ]
 
 /-- **L² Itô formula for the squaring function — quantitative form.** Along
 the uniform partition of `[0, T]` into `n` pieces, the integrated squared

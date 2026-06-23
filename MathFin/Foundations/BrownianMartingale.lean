@@ -14,7 +14,7 @@ public import MathFin.Foundations.GaussianMoments
 
 For a filtered pre-Brownian motion `X`, the following are martingales w.r.t. the filtration `𝓕`:
 
-* `X` itself (already provided as `IsPreBrownian.isMartingale` in `Gaussian/BrownianMotion.lean`)
+* `X` itself (already provided as `IsPreBrownianReal.isMartingale` in `Gaussian/BrownianMotion.lean`)
 * `t ↦ (X t)² − t`
 * `t ↦ exp(α X_t − α² t / 2)` (Wald exponential), for any `α : ℝ`
 
@@ -108,7 +108,7 @@ theorem squareSubTime_isMartingale :
   have h_meas_s : Measurable (X s) := ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
   have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
-  -- HasLaws from `IsPreBrownian`.
+  -- HasLaws from `IsPreBrownianReal`.
   have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P :=
     hX.hasLaw_sub t s
   have hL_s : HasLaw (X s) (gaussianReal 0 s) P := hX.hasLaw_eval s

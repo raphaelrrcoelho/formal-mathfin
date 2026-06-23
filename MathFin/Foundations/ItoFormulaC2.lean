@@ -33,7 +33,7 @@ open MeasureTheory ProbabilityTheory Filter QuadraticVariationL2
 open scoped NNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownian B μ]
+  [hB : IsPreBrownianReal B μ]
 
 /-- **Bounded-derivative Itô formula in `L²` (named-limit form).** For `f ∈ C³` with
 `|f″| ≤ C₂` and `|f‴| ≤ C₃`, the uniform-partition Riemann–Itô sums `∑ f′(B_{tₖ})·ΔBₖ`

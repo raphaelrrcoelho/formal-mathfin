@@ -30,7 +30,7 @@ open MeasureTheory ProbabilityTheory ItoIntegralL2 ItoIntegralCLM ItoIntegralPro
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 omit [IsProbabilityMeasure μ] in
 /-- **Band-restricted rectangle cross-integral.** The `ItoIntegralL2.integral_rectTerm_mul`

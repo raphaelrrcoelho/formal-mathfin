@@ -126,7 +126,7 @@ lemma itoSimpleProcess_eq_itoSimple (hBmeas : ∀ t, Measurable (B t))
   have h1 : min p.1 t = p.1 := min_eq_left ((V.le_of_mem_support_value p hp).trans (ht p hp))
   rw [h1, h2]
 
-variable [hB : IsPreBrownian B μ]
+variable [hB : IsPreBrownianReal B μ]
 
 /-- A simple process's value `V(p)` is in `L²(μ)`: it is `𝓕_{p.1}`-measurable and
 bounded by `V.valueBound`, hence `L²` on the probability space. -/

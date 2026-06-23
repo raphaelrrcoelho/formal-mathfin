@@ -58,7 +58,7 @@ open scoped NNReal ENNReal Topology InnerProductSpace
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-! ### Step-interval index -/
 
@@ -120,7 +120,7 @@ lemma memLp_increment_two {T : ℝ≥0} (i : StepIndex T) :
 
 /-- The Wiener increment `B(hi) - B(lo)` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def wienerIncrementLp (B : ℝ≥0 → Ω → ℝ)
-    [IsPreBrownian B μ] {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
+    [IsPreBrownianReal B μ] {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
   (memLp_increment_two (B := B) (μ := μ) i).toLp _
 
 variable [IsProbabilityMeasure μ]
@@ -134,7 +134,7 @@ noncomputable def stepAssembly (T : ℝ≥0) :
 
 /-- Linear map from finitely supported coefficients to Wiener increments. -/
 noncomputable def wienerAssembly (B : ℝ≥0 → Ω → ℝ)
-    [IsPreBrownian B μ] (T : ℝ≥0) :
+    [IsPreBrownianReal B μ] (T : ℝ≥0) :
     (StepIndex T →₀ ℝ) →ₗ[ℝ] Lp ℝ 2 μ :=
   Finsupp.linearCombination ℝ (wienerIncrementLp (μ := μ) B (T := T))
 
@@ -146,7 +146,7 @@ For `s ≤ t, u ≤ v ∈ ℝ≥0`,
 The right hand side is written as `max 0 (min t v - max s u)`. -/
 
 /-- `∫ ω, B s ω * B t ω ∂μ = min s t` for pre-Brownian motion `B` with zero start,
-using `IsPreBrownian.covariance_eval` and `covariance_eq_sub` (the means are zero). -/
+using `IsPreBrownianReal.covariance_eval` and `covariance_eq_sub` (the means are zero). -/
 lemma integral_mul_eval (s t : ℝ≥0) :
     ∫ ω, B s ω * B t ω ∂μ = ((min s t : ℝ≥0) : ℝ) := by
   have hBs : MemLp (B s) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval s).memLp_two
@@ -404,7 +404,7 @@ theorem stepAssembly_denseRange (T : ℝ≥0) :
 /-- The Wiener integral as a continuous linear isometry
 `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T)) →L[ℝ] Lp ℝ 2 μ`. -/
 noncomputable def wienerIntegralLp (B : ℝ≥0 → Ω → ℝ)
-    [IsPreBrownian B μ] (T : ℝ≥0) :
+    [IsPreBrownianReal B μ] (T : ℝ≥0) :
     Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) →L[ℝ] Lp ℝ 2 μ :=
   (wienerAssembly (μ := μ) B T).extendOfNorm (stepAssembly T)
 

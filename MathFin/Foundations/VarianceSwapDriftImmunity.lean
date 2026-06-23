@@ -58,7 +58,7 @@ open MeasureTheory ProbabilityTheory MathFin.QuadraticVariationL2 Filter
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- **Variance-swap drift immunity.** For a GBM price
 `S_t = S₀ · exp((μd − σ²/2)t + σ B_t)` with arbitrary drift `μd`, the

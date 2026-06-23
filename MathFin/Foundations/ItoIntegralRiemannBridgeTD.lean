@@ -34,7 +34,7 @@ open scoped MeasureTheory NNReal ENNReal InnerProductSpace
 open ItoIntegralL2 ItoIntegralCLM ItoIsometryAdapted ItoIntegralBrownian ItoIntegralRiemannBridge
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- The uniform-partition Riemann–Itô sum for the time-dependent integrand
 `(s, ω) ↦ φ(s, B_s ω)`: `∑_{k<n} φ(tₖ, B_{tₖ})·(B_{t_{k+1}} − B_{tₖ})`. -/

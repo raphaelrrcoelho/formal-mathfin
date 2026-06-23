@@ -58,9 +58,9 @@ the mathematics says, with deferrals named, never papered over.
 
 attribute [blueprint "def:brownian-motion" (title := "Brownian motion (Degenne, upstream)")
   (statement := /-- The driving noise: independent stationary Gaussian increments,
-  $B_t \sim N(0,t)$ — `IsPreBrownian`, consumed from Rémy Degenne's
+  $B_t \sim N(0,t)$ — `IsPreBrownianReal`, consumed from Rémy Degenne's
   `brownian-motion` package, on which this library builds. -/)]
-  ProbabilityTheory.IsPreBrownian
+  ProbabilityTheory.IsPreBrownianReal
 
 -- ===== foundations =====
 

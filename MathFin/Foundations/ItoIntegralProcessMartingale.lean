@@ -61,7 +61,7 @@ theorem itoSimpleProcess_adaptedAt (hBmeas : ∀ t, Measurable (B t))
     simp only [h1, h2, sub_self, mul_zero]
     exact measurable_const
 
-variable [hB : IsPreBrownian B μ]
+variable [hB : IsPreBrownianReal B μ]
 
 /-- **Conditional martingale-difference** — the conditional sibling of the
 unconditional `ItoIsometryAdapted.integral_adapted_mul_increment`, packaged for

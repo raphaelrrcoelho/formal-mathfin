@@ -17,7 +17,7 @@ The existing `BSCallHyp` and `BachelierHyp` hypotheses are stated at the
 **marginal level**: `Z ~ N(0, 1)` under `Q` with `S_T = bsTerminal …(Z ω)`
 (BS) or `S_T = S_0 + σ √T · Z(ω)` (Bachelier). This file shows that both
 hypotheses are *consequences* of having a pre-Brownian motion `W : ℝ≥0 → Ω →
-ℝ` (`IsPreBrownian W Q` from the `BrownianMotion` package), by setting
+ℝ` (`IsPreBrownianReal W Q` from the `BrownianMotion` package), by setting
 
   `Z := W T.toNNReal / √T`,
 
@@ -30,9 +30,9 @@ continue to consume the marginal hypothesis directly.
 
 The substantive new fact is `scaled_isPreBrownian_eval_law`:
 
-  `IsPreBrownian W Q  ⟹  HasLaw (fun ω => W T.toNNReal ω / √T) (gaussianReal 0 1) Q`.
+  `IsPreBrownianReal W Q  ⟹  HasLaw (fun ω => W T.toNNReal ω / √T) (gaussianReal 0 1) Q`.
 
-It combines `IsPreBrownian.hasLaw_eval` (Brownian marginal `W_T ~ N(0, T)`)
+It combines `IsPreBrownianReal.hasLaw_eval` (Brownian marginal `W_T ~ N(0, T)`)
 with `Mathlib`'s `gaussianReal_div_const` (Gaussian scaling under `· / c`).
 The variance arithmetic `T.toNNReal / NNReal.mk((√T)², _) = 1` collapses via
 `Real.sq_sqrt` and `NNReal.div_self`.
@@ -45,7 +45,7 @@ The `Foundations/` BM machinery (`BrownianMotion.Gaussian.BrownianMotion`,
 `MathFin.Foundations.BrownianMartingale`, etc.) was previously
 **structurally disconnected** from the pricing modules: pricing took
 `Z ~ N(0,1)` as axiom and never invoked the BM construction. This file
-makes the connection explicit — any BM construction (via `IsPreBrownian`)
+makes the connection explicit — any BM construction (via `IsPreBrownianReal`)
 discharges the BS / Bachelier hypothesis automatically.
 
 ## Results
@@ -68,18 +68,18 @@ open scoped NNReal ENNReal
 then for any positive `T : ℝ`, the rescaled time-`T` value
 `W T.toNNReal / √T` has `gaussianReal 0 1` law.
 
-Combines `IsPreBrownian.hasLaw_eval` (BM marginal `W_T ~ N(0, T.toNNReal)`)
+Combines `IsPreBrownianReal.hasLaw_eval` (BM marginal `W_T ~ N(0, T.toNNReal)`)
 with `gaussianReal_div_const` (Gaussian scaling under `· / c`). The
 variance computation `T.toNNReal / NNReal.mk((√T)², _) = 1` reduces to
 `Real.sq_sqrt` + `NNReal.div_self`. -/
 lemma scaled_isPreBrownian_eval_law
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {T : ℝ} (hT : 0 < T) :
     HasLaw (fun ω => W T.toNNReal ω / Real.sqrt T) (gaussianReal 0 1) Q := by
   have h_eval : HasLaw (W T.toNNReal) (gaussianReal 0 T.toNNReal) Q :=
-    IsPreBrownian.hasLaw_eval T.toNNReal
+    IsPreBrownianReal.hasLaw_eval T.toNNReal
   have h_div := gaussianReal_div_const h_eval (Real.sqrt T)
   convert h_div using 2
   · rw [zero_div]
@@ -100,7 +100,7 @@ hypothesis. -/
 theorem BSCallHyp.of_isPreBrownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     BSCallHyp Q S_0 K r σ T (fun ω => W T.toNNReal ω / Real.sqrt T) :=
@@ -113,7 +113,7 @@ exponential), since both hypotheses share `Z_law : HasLaw Z (gaussianReal
 theorem BachelierHyp.of_isPreBrownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownian W Q]
+    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
     {S_0 K σ T : ℝ}
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     BachelierHyp Q S_0 K σ T (fun ω => W T.toNNReal ω / Real.sqrt T) :=

@@ -94,7 +94,7 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
   exact h.trans_eq (by ring)
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownian B μ]
+  [hB : IsPreBrownianReal B μ]
 
 /-- **Sixth moment of a Brownian increment**: `E[(B_{t₁} − B_{t₀})⁶] = 15(t₁ − t₀)³`
 for `t₀ ≤ t₁` (law-transfer of the Gaussian identity `integral_pow6_gaussianReal`). -/

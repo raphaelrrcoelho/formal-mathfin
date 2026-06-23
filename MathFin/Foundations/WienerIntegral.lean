@@ -12,7 +12,7 @@ public import BrownianMotion.Gaussian.BrownianMotion
 # Wiener integral — Itô isometry kernel
 
 Itô isometry for step-function integrands against a pre-Brownian motion
-`B : ℝ≥0 → Ω → ℝ` (Degenne's `IsPreBrownian` from
+`B : ℝ≥0 → Ω → ℝ` (Degenne's `IsPreBrownianReal` from
 `BrownianMotion.Gaussian.BrownianMotion`):
 
 * `wiener_step_isometry`: for a single step `c · 𝟙_{(s, t]}`,
@@ -36,15 +36,15 @@ open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 
-section IsPreBrownian
+section IsPreBrownianReal
 
 variable {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- For `s ≤ t : ℝ≥0`, the increment `B t − B s` has law `gaussianReal 0 (t − s)`. -/
 private lemma hasLaw_increment {s t : ℝ≥0} (hst : s ≤ t) :
     HasLaw (B t - B s) (gaussianReal 0 (t - s)) μ := by
-  have hL := IsPreBrownian.hasLaw_sub (X := B) (P := μ) t s
+  have hL := IsPreBrownianReal.hasLaw_sub (X := B) (P := μ) t s
   have hmax : max (t - s) (s - t) = t - s := by
     rw [tsub_eq_zero_iff_le.mpr hst, max_eq_left zero_le]
   rwa [hmax] at hL
@@ -106,7 +106,7 @@ theorem wiener_finset_isometry
   have h_pair :
       Set.Pairwise (↑(Finset.univ : Finset (Fin n))) (fun i j => X i ⟂ᵢ[μ] X j) := by
     intro i _ j _ hij
-    exact ((IsPreBrownian.hasIndepIncrements (X := B) (P := μ) n p hp).comp
+    exact ((IsPreBrownianReal.hasIndepIncrements (X := B) (P := μ) n p hp).comp
       (fun k x => c k * x) (fun _ => measurable_const.mul measurable_id)).indepFun hij
   have h_mean_sum : ∫ ω, (∑ k : Fin n, X k) ω ∂μ = 0 := by
     simp_rw [Finset.sum_apply, integral_finsetSum _
@@ -124,6 +124,6 @@ theorem wiener_finset_isometry
         Finset.sum_congr rfl fun k _ => by
           simp [hX, variance_const_mul, variance_increment (B := B) (μ := μ) (hpk k)]
 
-end IsPreBrownian
+end IsPreBrownianReal
 
 end MathFin

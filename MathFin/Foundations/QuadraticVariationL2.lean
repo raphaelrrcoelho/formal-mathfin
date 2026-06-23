@@ -46,7 +46,7 @@ open MeasureTheory ProbabilityTheory ItoIsometryAdapted Filter
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- **Fourth moment of a Brownian increment**: `E[(B_{t₁} − B_{t₀})⁴] = 3(t₁ − t₀)²`
 for `t₀ ≤ t₁`. The increment has law `N(0, t₁ − t₀)`; push the fourth moment through that

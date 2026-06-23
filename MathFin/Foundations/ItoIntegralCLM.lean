@@ -273,7 +273,7 @@ lemma trimMeasure_T_eq_restrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       ← MeasureTheory.restrict_trim 𝓕.predictable_le_prod _
         (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ)]
 
-variable [hB : IsPreBrownian B μ]
+variable [hB : IsPreBrownianReal B μ]
 
 /-- `uncurry V ∈ L²` in the T-restricted trim. Mirrors
 `ItoIntegralL2.memLp_uncurry_trim` via the bridge + `MemLp.restrict`. -/
@@ -332,7 +332,7 @@ omit hB in
 in the full trim. Both integrate `|uncurry V|²` over the same effective support:
 trim_T integrates over `[0,T] × Ω`, and `uncurry V` vanishes off it (the bot
 fibre `{0} × Ω` has measure zero in `timeMeasure.prod μ`). Pure
-measure-theoretic equality — `[IsPreBrownian B μ]` is omitted. -/
+measure-theoretic equality — `[IsPreBrownianReal B μ]` is omitted. -/
 private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : TBoundedSP T hBmeas) :
     eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure_T (μ := μ) T hBmeas)

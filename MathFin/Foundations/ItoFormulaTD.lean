@@ -76,7 +76,7 @@ theorem continuous_uncurry_of_bdd_partials {g g_t g_x : ℝ → ℝ → ℝ}
   nlinarith [h3, e1, e2]
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- **Time-dependent Itô formula in `L²` (named-limit form).** For `f(t, x)` with the
 `C^{1,2}`-with-bounds package (`f_t, f_tt, f_tx` and `f_x, f_xx, f_xxx`, with `f_t, f_xx,

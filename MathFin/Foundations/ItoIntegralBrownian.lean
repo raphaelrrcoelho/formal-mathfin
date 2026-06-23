@@ -182,7 +182,7 @@ lemma itoSimple_truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m 
 
 /-! ### `L²` truncation primitives -/
 
-variable [hB : IsPreBrownian B μ]
+variable [hB : IsPreBrownianReal B μ]
 
 omit [IsProbabilityMeasure μ] in
 /-- `B s` is in `L²(μ)` (a centered Gaussian). -/

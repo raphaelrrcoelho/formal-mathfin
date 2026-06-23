@@ -32,7 +32,7 @@ open MeasureTheory ProbabilityTheory Filter QuadraticVariationL2 ItoIntegralCLM
 open scoped NNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- **CLM-identified bounded-derivative Itô formula in `L²`.** For `f ∈ C³` with `|f′| ≤ C₁`,
 `|f″| ≤ C₂`, `|f‴| ≤ C₃`, there is an Itô-`L²` integrand `gf'` (the realization of
@@ -91,22 +91,22 @@ theorem ito_formula_L2_bddDeriv
   linarith [hω]
 
 /-- **Continuity discharged.** The bounded-derivative Itô formula for the continuous
-modification `IsPreBrownian.mk X` of any pre-Brownian `X`: the path-continuity hypothesis is
-supplied for free by the Kolmogorov–Chentsov modification (`IsPreBrownian.continuous_mk`), so
+modification `IsPreBrownianReal.mk X` of any pre-Brownian `X`: the path-continuity hypothesis is
+supplied for free by the Kolmogorov–Chentsov modification (`IsPreBrownianReal.continuous_mk`), so
 no separate continuity assumption on the process is needed. -/
-theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} [hX : IsPreBrownian X μ] (T : ℝ≥0)
+theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} [hX : IsPreBrownianReal X μ] (T : ℝ≥0)
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
     {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
-    ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t => IsPreBrownian.measurable_mk (h := hX) t)),
-      (fun ω => f (IsPreBrownian.mk (h := hX) X T ω) - f (IsPreBrownian.mk (h := hX) X 0 ω)) =ᵐ[μ]
-        (fun ω => (itoIntegralCLM_T (μ := μ) T (fun t => IsPreBrownian.measurable_mk (h := hX) t) gf') ω
+    ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t => IsPreBrownianReal.measurable_mk (h := hX) t)),
+      (fun ω => f (IsPreBrownianReal.mk (h := hX) X T ω) - f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
+        (fun ω => (itoIntegralCLM_T (μ := μ) T (fun t => IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T,
-              f'' (IsPreBrownian.mk (h := hX) X s ω) ∂ItoIntegralL2.timeMeasure) :=
-  ito_formula_L2_bddDeriv (B := IsPreBrownian.mk (h := hX) X)
-    (fun t => IsPreBrownian.measurable_mk (h := hX) t)
-    (fun ω => IsPreBrownian.continuous_mk (h := hX) ω) T hf hf' hf'' hf1 hf2 hf3
+              f'' (IsPreBrownianReal.mk (h := hX) X s ω) ∂ItoIntegralL2.timeMeasure) :=
+  ito_formula_L2_bddDeriv (B := IsPreBrownianReal.mk (h := hX) X)
+    (fun t => IsPreBrownianReal.measurable_mk (h := hX) t)
+    (fun ω => IsPreBrownianReal.continuous_mk (h := hX) ω) T hf hf' hf'' hf1 hf2 hf3
 
 end MathFin

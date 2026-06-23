@@ -40,7 +40,7 @@ open MeasureTheory ProbabilityTheory Filter ItoIsometryAdapted QuadraticVariatio
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownian B μ]
+  [hB : IsPreBrownianReal B μ]
 
 /-- For `χ` adapted to `𝓕_{t₀}` and in `L²`, the centered squared increment integrates
 against `χ` to zero: `E[χ·((ΔB)² − (t₁−t₀))] = 0`. The `χ ≡ 1` case is

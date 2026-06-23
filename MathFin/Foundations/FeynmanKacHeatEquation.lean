@@ -851,7 +851,7 @@ variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
 /-- **Core transfer.** If `B_t` has law `N(0, t)` (`Measure.map (B t) μ = gaussianReal 0 t.toNNReal`),
 the heat-kernel form `feynmanU g t x` equals the expectation `E[g(x + B_t)]`. Factored out of
 `feynmanU_eq_expectation` so the same transfer serves both the increment-hypothesis bundle and the
-`IsPreBrownian` marginal law. -/
+`IsPreBrownianReal` marginal law. -/
 theorem feynmanU_eq_integral_of_map
     {B : ℝ → Ω → ℝ} {g : ℝ → ℝ} {t : ℝ}
     (h_aem : AEMeasurable (B t) μ)
@@ -959,12 +959,12 @@ theorem expectation_ito
   show (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume = (1 / 2) * ∫ ω, f'' (B s ω) ∂μ
   rw [hbridge f'' hf''c hs.1]
 
-/-- **Itô's formula in expectation for a pre-Brownian motion** — the repo-standard `IsPreBrownian`
+/-- **Itô's formula in expectation for a pre-Brownian motion** — the repo-standard `IsPreBrownianReal`
 (Degenne) reading of `expectation_ito`. For `f ∈ C²_b` and `t > 0`,
 `E[f(X_t)] = f(0) + ½·∫₀ᵗ E[f″(X_s)] ds`. The increment-law hypotheses are discharged from the
-marginal law `IsPreBrownian.hasLaw_eval` through the shared transfer `feynmanU_eq_integral_of_map`.
+marginal law `IsPreBrownianReal.hasLaw_eval` through the shared transfer `feynmanU_eq_integral_of_map`.
 (`X` is `ℝ≥0`-indexed; the `∫₀ᵗ` runs over real `s`, so `X` is read at `·.toNNReal`.) -/
-theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} [IsPreBrownian X μ]
+theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} [IsPreBrownianReal X μ]
     {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
@@ -978,8 +978,8 @@ theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} [IsPreBrownia
     have h1 := integral_shift_eq_feynmanU g r 0
     simp only [zero_add] at h1
     rw [h1, feynmanU_eq_integral_of_map (B := fun s => X s.toNNReal) (t := r)
-      (IsPreBrownian.aemeasurable (P := μ) r.toNNReal)
-      (IsPreBrownian.hasLaw_eval (P := μ) r.toNNReal).map_eq hgc hr 0]
+      (IsPreBrownianReal.aemeasurable (P := μ) r.toNNReal)
+      (IsPreBrownianReal.hasLaw_eval (P := μ) r.toNNReal).map_eq hgc hr 0]
     simp only [zero_add]
   rw [← hbridge f hfc ht, heatConvolution_eq_add_integral_deriv ht hf hf' hf''c hCf hCf' hCf'']
   congr 1

@@ -176,7 +176,7 @@ theorem sq_discreteTaylorRemainder2D_le
         rw [h4, h6, sq_abs, sq_abs]; ring
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownian B μ]
+  [hB : IsPreBrownianReal B μ]
 
 /-- A squared Brownian increment is integrable: `(ΔB)² = ((ΔB)² − Δt) + Δt`, the centered
 part being `L²` (`memLp_increment_sq_centered_two`) over a probability space. -/

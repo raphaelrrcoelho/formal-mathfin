@@ -51,7 +51,7 @@ open MeasureTheory ProbabilityTheory ItoIsometryAdapted MathFin.QuadraticVariati
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownian B μ]
+  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
 
 /-- Per-`n` mean-square bound: the squared-increment sum of the Itô process
 misses `σ²T` by at most `C/n`. -/
