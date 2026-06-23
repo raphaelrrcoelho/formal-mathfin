@@ -677,10 +677,10 @@
     },
     "mf-bs-charm": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-17",
+      "date": "2026-06-22",
       "elapsed_s": 0.0,
-      "input_hash": "cbe45fa0e085a6e6dfb252cf56ec2231acbb1ac274e72fa79452ee60d88e7f9d",
-      "verified_at_commit": "ab336b7"
+      "input_hash": "ecd6a19e184002e519c0046b357340742ecbb6f142074e8299e94b8b96ae9cb0",
+      "verified_at_commit": "c67bce7"
     },
     "mf-bs-dividends-call": {
       "benchmark_file": "mathematical_finance.json",
@@ -775,17 +775,17 @@
     },
     "mf-bs-vanna": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-11",
-      "elapsed_s": 87.7,
-      "input_hash": "8234a9432ec97bcc334b490869ecf2b00daf67e604f9fe909df12d404d778d4f",
-      "verified_at_commit": "cd4dfa6"
+      "date": "2026-06-22",
+      "elapsed_s": 0.1,
+      "input_hash": "85c58f5fc13ef8df7ead06502aa7974e8bcf978ff2f3477167308c7a3fa01542",
+      "verified_at_commit": "c67bce7"
     },
     "mf-bs-volga": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-11",
+      "date": "2026-06-22",
       "elapsed_s": 0.1,
-      "input_hash": "c4d905fa0089e815cd3cbcd511244e90bf4770cd3d9621559abc5708a421af13",
-      "verified_at_commit": "cd4dfa6"
+      "input_hash": "b7c4ad61a326683ef7a7ee4ddd6fd310d3d723c866202f18ef8154653127772d",
+      "verified_at_commit": "c67bce7"
     },
     "mf-bsP-K-deriv": {
       "benchmark_file": "mathematical_finance.json",

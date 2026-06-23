@@ -375,7 +375,7 @@
       "description": "Charm: ∂Δ/∂τ = ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ). Higher-order Greek: the decay of delta with respect to time to maturity.",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.BlackScholes.PDE\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_charm_thm {K r σ : ℝ} (hσ : 0 < σ)\n    {S τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => Phi (bsd1 S K r σ t))\n      (gaussianPDFReal 0 1 (bsd1 S K r σ τ)\n        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_bsV_charm hσ hτ\n"
+        "lean": "import MathFin.BlackScholes.HigherGreeks\n\nopen MathFin ProbabilityTheory\n\ntheorem bs_charm_thm {K r σ : ℝ} (hσ : 0 < σ)\n    {S τ : ℝ} (hτ : 0 < τ) :\n    HasDerivAt (fun t => Phi (bsd1 S K r σ t))\n      (gaussianPDFReal 0 1 (bsd1 S K r σ τ)\n        * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ :=\n  MathFin.hasDerivAt_bsV_charm hσ hτ\n"
       },
       "metadata": {
         "chapter": 9,
