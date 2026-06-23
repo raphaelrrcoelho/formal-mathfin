@@ -51,25 +51,25 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω}
 the shifted increment map `ω ↦ (X (t₀ + t) ω − X t₀ ω)_t` is independent of
 the natural filtration `σ(X_u : u ≤ t₀)`. Upgrade of Degenne's
 `IsPreBrownianReal.indepFun_shift` via `Filtration.natural_eq_comap`. -/
-theorem shift_indep_natural [h : IsPreBrownianReal X P]
+theorem shift_indep_natural (h : IsPreBrownianReal X P)
     (hX : ∀ t, Measurable (X t)) (t₀ : ℝ≥0) :
     Indep
       (MeasurableSpace.comap (fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω) inferInstance)
       (Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀) P := by
   rw [Filtration.natural_eq_comap]
-  exact (IndepFun_iff_Indep _ _ _).1 (h.indepFun_shift hX t₀)
+  exact (IndepFun_iff_Indep _ _ _).1 (h.indepFun_shift t₀)
 
 /-- **Theorem 5.1.4 (Brownian Markov property).** For a pre-Brownian motion
 `X` and any `t₀ ≥ 0`, the post-`t₀` increment process
 `t ↦ X (t₀ + t) − X t₀` is itself a pre-Brownian motion, and it is
 independent of the natural filtration `𝓕ᵉ_{t₀} = σ(X_u : u ≤ t₀)` — the
 σ-algebra of the *entire* past, not merely finitely many past evaluations. -/
-theorem brownian_markov_property [h : IsPreBrownianReal X P]
+theorem brownian_markov_property (h : IsPreBrownianReal X P)
     (hX : ∀ t, Measurable (X t)) (t₀ : ℝ≥0) :
     IsPreBrownianReal (fun t ω ↦ X (t₀ + t) ω - X t₀ ω) P ∧
     Indep
       (MeasurableSpace.comap (fun ω (t : ℝ≥0) ↦ X (t₀ + t) ω - X t₀ ω) inferInstance)
       (Filtration.natural X (fun t ↦ (hX t).stronglyMeasurable) t₀) P :=
-  ⟨h.shift t₀, shift_indep_natural hX t₀⟩
+  ⟨h.shift t₀, shift_indep_natural h hX t₀⟩
 
 end MathFin

@@ -39,26 +39,30 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 section IsPreBrownianReal
 
 variable {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- For `s ≤ t : ℝ≥0`, the increment `B t − B s` has law `gaussianReal 0 (t − s)`. -/
 private lemma hasLaw_increment {s t : ℝ≥0} (hst : s ≤ t) :
     HasLaw (B t - B s) (gaussianReal 0 (t - s)) μ := by
-  have hL := IsPreBrownianReal.hasLaw_sub (X := B) (P := μ) t s
-  have hmax : max (t - s) (s - t) = t - s := by
-    rw [tsub_eq_zero_iff_le.mpr hst, max_eq_left zero_le]
-  rwa [hmax] at hL
+  have hL := hB.hasLaw_sub t s
+  have hv : nndist (t : ℝ) (s : ℝ) = (t - s : ℝ≥0) := by
+    apply NNReal.coe_injective
+    rw [coe_nndist, Real.dist_eq, NNReal.coe_sub hst,
+      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
+  rwa [hv] at hL
 
 /-- The increment `B t − B s` has mean zero. -/
 private lemma integral_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ∂μ = 0 := by
-  have h := (hasLaw_increment (B := B) (μ := μ) hst).integral_eq
+  have h := (hasLaw_increment hB hst).integral_eq
   simpa using h.trans integral_id_gaussianReal
 
 /-- The increment `B t − B s` has variance `t − s`. -/
 private lemma variance_increment {s t : ℝ≥0} (hst : s ≤ t) :
     Var[fun ω => B t ω - B s ω; μ] = ((t - s : ℝ≥0) : ℝ) := by
-  have h := (hasLaw_increment (B := B) (μ := μ) hst).variance_eq
+  have h := (hasLaw_increment hB hst).variance_eq
   simpa using h.trans variance_id_gaussianReal
 
 /-- The increment `B t − B s` is in `L²`. -/
@@ -79,9 +83,9 @@ theorem wiener_step_isometry (c : ℝ) {s t : ℝ≥0} (hst : s ≤ t) :
   rw [integral_const_mul]
   congr 1
   rw [show (fun ω => (B t ω - B s ω) ^ 2) = fun ω => (B t - B s) ω ^ 2 from rfl,
-      ← variance_of_integral_eq_zero (hasLaw_increment (B := B) hst).aemeasurable
-        (by simpa using integral_increment_eq_zero (B := B) hst)]
-  simpa using variance_increment (B := B) (μ := μ) hst
+      ← variance_of_integral_eq_zero (hasLaw_increment hB hst).aemeasurable
+        (by simpa using integral_increment_eq_zero hB hst)]
+  simpa using variance_increment hB hst
 
 variable [IsProbabilityMeasure μ]
 
@@ -102,17 +106,17 @@ theorem wiener_finset_isometry
   have hpk : ∀ k : Fin n, p k.castSucc ≤ p k.succ :=
     fun k => hp (Fin.castSucc_le_succ k)
   have h_memLp : ∀ k, MemLp (X k) 2 μ := fun k =>
-    (memLp_increment_two (B := B) (μ := μ) (p k.castSucc) (p k.succ)).const_mul (c k)
+    (memLp_increment_two hB (p k.castSucc) (p k.succ)).const_mul (c k)
   have h_pair :
       Set.Pairwise (↑(Finset.univ : Finset (Fin n))) (fun i j => X i ⟂ᵢ[μ] X j) := by
     intro i _ j _ hij
-    exact ((IsPreBrownianReal.hasIndepIncrements (X := B) (P := μ) n p hp).comp
+    exact ((hB.hasIndepIncrements n p hp).comp
       (fun k x => c k * x) (fun _ => measurable_const.mul measurable_id)).indepFun hij
   have h_mean_sum : ∫ ω, (∑ k : Fin n, X k) ω ∂μ = 0 := by
     simp_rw [Finset.sum_apply, integral_finsetSum _
       (fun k _ => (h_memLp k).integrable one_le_two)]
     exact Finset.sum_eq_zero fun k _ => by
-      simp [hX, integral_const_mul, integral_increment_eq_zero (B := B) (hpk k)]
+      simp [hX, integral_const_mul, integral_increment_eq_zero hB (hpk k)]
   calc ∫ ω, (∑ k : Fin n, X k ω) ^ 2 ∂μ
       = ∫ ω, ((∑ k : Fin n, X k) ω) ^ 2 ∂μ := by simp_rw [Finset.sum_apply]
     _ = Var[∑ k : Fin n, X k; μ] :=
@@ -122,7 +126,7 @@ theorem wiener_finset_isometry
         IndepFun.variance_sum (fun k _ => h_memLp k) h_pair
     _ = ∑ k : Fin n, c k ^ 2 * ((p k.succ - p k.castSucc : ℝ≥0) : ℝ) :=
         Finset.sum_congr rfl fun k _ => by
-          simp [hX, variance_const_mul, variance_increment (B := B) (μ := μ) (hpk k)]
+          simp [hX, variance_const_mul, variance_increment hB (hpk k)]
 
 end IsPreBrownianReal
 
