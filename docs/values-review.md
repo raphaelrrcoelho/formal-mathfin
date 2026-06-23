@@ -53,6 +53,65 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-23 — commit 2e23025 — corpus 285
+
+**Scope**: D1 — covariation of Itô integrals (the bilinear Itô isometry).
+`Foundations/ItoIntegralCovariation.lean` + umbrella import, 4 AxiomAudit pins,
+benchmark `sc-ito-covariation-bilinear-isometry` (full), roadmap/coverage notes.
+The `[0,T]` Itô CLM is bundled as a `LinearIsometry` (`itoIsometry_T`);
+polarization (`LinearIsometry.inner_map_map`) gives `⟪∫φ dB, ∫ψ dB⟫ = ⟪φ, ψ⟫`
+(`inner_itoIntegralCLM_T`); `L2.inner_def` unfolds the μ-side to the expectation
+form `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` (`covariation_itoIntegralCLM_T`); the diagonal
+`φ = ψ` recovers the isometry (`variance_itoIntegralCLM_T`).
+
+**Panel**: three agents — (Mathlib/Degenne coherence + idiomatic register + zero
+slop), (concept clarity + first principles + honest scope), (inspired/beautiful
+math + architectural ingenuity + AxiomAudit honesty floor).
+
+| lens | verdict |
+|---|---|
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: none.
+
+**Checks that mattered**: the Mathlib lemmas (`LinearIsometry.inner_map_map`,
+`L2.inner_def`, `RCLike.inner_apply`, `conj_trivial`, `real_inner_self_eq_norm_sq`,
+`ContinuousLinearMap.coe_coe`) were each cross-checked against ledger-verified
+sibling files that use them identically; nothing of B1's isometry is reproved
+(the bilinear law is pure polarization of `itoIntegralCLM_T_norm`); the bundled
+`LinearIsometry` is novel in the repo (no other `→ₗᵢ[` for the Itô integral) and
+is the genuine reusable artifact, not a wrapper-to-inline; `mul_comm` in the
+`simpa` is load-bearing, not masking a mismatch (sibling `ItoIntegralL2Dense`
+confirms `⟪x,y⟫_ℝ` reduces second-argument-first under this pin); `[IsProbabilityMeasure μ]`
+is genuinely required (the CLM needs it; `IsPreBrownian` does not imply it);
+`full` status is correct (multi-step composition over a bundled definition, not a
+one-line wrapper, not a definitional `rfl`); the RHS is honestly the inner product
+`⟪φ, ψ⟫` (the `= ∫ φψ d(trim) = 𝔼∫₀ᵀ φψ ds` chain is a true explanatory gloss, not
+a literal Lean claim); the `[0,∞)` analog is honestly deferred; the 4 AxiomAudit
+pins are correct and complete at `[propext, Classical.choice, Quot.sound]` (no
+`sorry`/`sorryAx`).
+
+**Recorded actions**:
+1. *(done in this commit)* docstring polish from panel nits — the predictable
+   `trim` measure is described as a `.trim` (not `Measure.restrict`), and the
+   `variance_` name is justified in-docstring (the Itô integral is centered, so
+   its second moment is its variance).
+2. *(open, next session)* **D2** — the general-integrand local martingale — is
+   gated on a pathwise continuous-modification of the B1b integral (Doob
+   L²-maximal inequality → a.s.-uniform limit of the simple approximants), a
+   multi-session build; it is the load-bearing prerequisite for localizing the
+   Itô formula (`ito_formula_td_L2_bddDeriv`, presently bounded-derivative only)
+   to unbounded/GBM coefficients — the analytic-tower → pricing-tower bridge.
+3. *(open)* the `[0,∞)` bilinear analog lands cheaply once a named
+   full-trim-measure def is exposed in `ItoIntegralL2Dense.lean`.
+
 ## 2026-06-13 — commit 839dd06 — corpus 283
 
 **Scope**: Summit B / B3 — the elementary Itô integral as a continuous local
