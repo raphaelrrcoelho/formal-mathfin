@@ -45,7 +45,7 @@ require LeanArchitect from git
 -- lean-toolchain are authoritative (mathfin.toml just sets local_project = ".").
 require BrownianMotion from git
   "https://github.com/RemyDegenne/brownian-motion.git" @
-  "eaa439138fd9b5a0fed88ce9e35a2491c87b0ce5"
+  "d6f23daf48f9e2a8de5c88ece8ed3a6c313c16d6"
 
 -- Pinned to Degenne brownian-motion's lake-manifest commit (so all transitive
 -- versions resolve consistently). Bump together with the BrownianMotion pin.
@@ -53,4 +53,4 @@ require BrownianMotion from git
 -- requires, so mathlib-last pins batteries/Cli/etc. at Mathlib's revs.
 require mathlib from git
   "https://github.com/leanprover-community/mathlib4" @
-  "c5ea00351c28e24afc9f0f84379aa41082b1188f"
+  "fabf563a7c95a166b8d7b6efca11c8b4dc9d911f"
