@@ -26,9 +26,14 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-13, Summit B / B3):** corpus **283**, **248 full +
-> 18 wrappers = 266/283 delivery-ready**, 17 reduced cores. Since the B1b round
-> below: **B2** (unbounded-horizon `[0,∞)` σ-finite Itô integral CLM
+> **Live status (2026-06-23, D1 covariation):** corpus **285**, **250 full +
+> 18 wrappers = 268/285 delivery-ready**, 17 reduced cores, 0 placeholders.
+> Since B3: **D1** (the **bilinear Itô isometry** — the `[0,T]` Itô CLM bundled as
+> a `LinearIsometry`, so it preserves the L²-inner product by polarization:
+> `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫`, the diagonal recovering the isometry;
+> `Foundations/ItoIntegralCovariation.lean`, entry
+> `sc-ito-covariation-bilinear-isometry`). Earlier on the Itô tower: **B2**
+> (unbounded-horizon `[0,∞)` σ-finite Itô integral CLM
 > `itoIntegralL2`, `Foundations/ItoIntegralL2Dense.lean`, entry
 > `sc-ito-infinite-horizon-isometry`) and **B3** (the elementary Itô integral as
 > a continuous **local martingale** — pathwise continuity + Degenne's

@@ -368,6 +368,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralProcessLocalMartingale (itoSimpleProcess_isLocalMartingale). Two ingredients: (1) pathwise continuity itoSimpleProcess_pathContinuous -- for each omega, t -> (V dot B)_t omega = sum_p V(p)omega*(B_{p.2 cap t}omega - B_{p.1 cap t}omega) (itoSimpleProcess_apply) is a finite sum of the continuous Brownian path B(.)omega composed with the continuous clamp t -> min p.i t, hence continuous; (2) the martingale property (itoSimpleProcess_isMartingale, B1a). Continuity gives cadlag paths, so Degenne's Martingale.IsLocalMartingale (Locally.of_prop along the constant localizing sequence, sorry-free) places the integral in the local-martingale class. The continuity of B is taken as a hypothesis -- the standard pathwise setting; IsPreBrownian fixes only the finite-dimensional laws and a continuous version exists by Kolmogorov-Chentsov. Honest scope: elementary (simple) integrands, for which the integral is in fact a true martingale, so the local-martingale statement is the canonical framing connecting to the localized theory; the genuinely new content is the pathwise continuity. Axioms-clean."
       }
+    },
+    {
+      "id": "sc-ito-covariation-bilinear-isometry",
+      "name": "Covariation of Ito Integrals: the Bilinear Ito Isometry",
+      "domain": "stochastic_calculus",
+      "description": "The expectation of the product of two Ito integrals equals the L2(trim) inner product of their integrands: E_mu[(int phi dB)(int psi dB)] = <phi, psi> = int phi*psi d(trim) = E_mu int_0^T phi_s psi_s ds. This is the bilinear (polarized) companion of the Ito isometry: the Ito integral CLM, bundled as a LinearIsometry, preserves the L2 inner product (LinearIsometry.inner_map_map), not just the norm. The diagonal phi = psi recovers the Ito isometry E[(int phi dB)^2] = ||phi||^2. The covariance backbone for multi-factor / covariance-swap pricing.",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoIntegralCovariation\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralCovariation\nopen scoped NNReal ENNReal InnerProductSpace\n\ntheorem covariation_itoIntegralCLM_T_thm\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} [IsPreBrownian B μ]\n    (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))\n    (φ ψ : Lp ℝ 2 (ItoIntegralCLM.trimMeasure_T (μ := μ) T hBmeas)) :\n    ∫ ω, (ItoIntegralCLM.itoIntegralCLM_T (μ := μ) T hBmeas φ : Ω → ℝ) ω\n        * (ItoIntegralCLM.itoIntegralCLM_T (μ := μ) T hBmeas ψ : Ω → ℝ) ω ∂μ\n      = ⟪φ, ψ⟫_ℝ :=\n  covariation_itoIntegralCLM_T T hBmeas φ ψ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Bilinear Ito isometry / covariation of stochastic integrals (Saporito Ch 7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ItoIntegralCovariation (covariation_itoIntegralCLM_T). The finite-horizon Ito integral itoIntegralCLM_T is bundled as a LinearIsometry itoIsometry_T from the existing norm isometry itoIntegralCLM_T_norm (the norm_map' field, rewriting the ContinuousLinearMap->LinearMap coercion rather than forcing a defeq through the extendOfNorm term). LinearIsometry.inner_map_map (a real linear norm-isometry preserves the inner product by the polarization identity -- pure Mathlib) then gives <int phi dB, int psi dB> = <phi, psi>; L2.inner_def and the real inner product = multiplication (RCLike.inner_apply, conj_trivial) unfold the mu-side to the expectation E[(int phi dB)(int psi dB)]. Nothing of the isometry is reproved: the bilinear law is the polarization of the B1 norm isometry. The diagonal corollary variance_itoIntegralCLM_T recovers the Ito isometry via real_inner_self_eq_norm_sq. Axioms-clean."
+      }
     }
   ]
 }

@@ -613,4 +613,23 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessGeneral.itoProcessCLM_norm_sq
 
+-- Covariation of Itô integrals (2026-06-23): the BILINEAR Itô isometry. The Itô
+-- integral, bundled as a `LinearIsometry` (`itoIsometry_T`), preserves the
+-- L²-inner product (`LinearIsometry.inner_map_map`, polarization of the norm
+-- isometry), giving `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` and, on the diagonal, the Itô
+-- isometry itself (`Foundations/ItoIntegralCovariation.lean`). The bilinear
+-- completion of B1 and the covariance backbone for covariance-swap pricing.
+
+/-- info: 'MathFin.ItoIntegralCovariation.itoIsometry_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralCovariation.itoIsometry_T
+
+/-- info: 'MathFin.ItoIntegralCovariation.inner_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralCovariation.inner_itoIntegralCLM_T
+
+/-- info: 'MathFin.ItoIntegralCovariation.covariation_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralCovariation.covariation_itoIntegralCLM_T
+
+/-- info: 'MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T
+
 end MathFin.AxiomAudit

@@ -100,6 +100,8 @@ import MathFin.Foundations.ItoIntegralL2
 import MathFin.Foundations.ItoIntegralCLM
 -- The unbounded-horizon `[0,∞)` Itô integral CLM `Lp 2 trim_full → Lp 2 μ` (Summit B / B2)
 import MathFin.Foundations.ItoIntegralL2Dense
+-- Covariation of Itô integrals: the bilinear Itô isometry ⟪∫φdB,∫ψdB⟫=⟪φ,ψ⟫ (D1)
+import MathFin.Foundations.ItoIntegralCovariation
 -- The elementary Itô integral as a process `t ↦ (V●B)_t`, with genuine `L²` content
 import MathFin.Foundations.ItoIntegralProcess
 -- The Itô integral process is an adapted L² martingale (Summit B / B1a)

@@ -1851,6 +1851,13 @@
       "input_hash": "bcad100a054efa1cabd2107d7ae7d6c00547af37356c67d442b5f8bc82bc477e",
       "verified_at_commit": "cd4dfa6"
     },
+    "sc-ito-covariation-bilinear-isometry": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-23",
+      "elapsed_s": 0.1,
+      "input_hash": "040a7c602ce9530a833934f5055e461a7fc9cd6421ca604f3c615bc8fddd6876",
+      "verified_at_commit": "5765a39"
+    },
     "sc-ito-general-l2-continuity": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-13",

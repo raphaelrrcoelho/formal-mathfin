@@ -673,6 +673,32 @@ Pure consumption; the genuinely new content is the pathwise continuity. Honest
 scope: simple integrands, continuity assumed (the standard pathwise setting;
 `IsPreBrownian` fixes only finite-dim laws, a continuous version exists by
 Kolmogorov–Chentsov). build 8726 jobs green, axioms-clean, corpus 282 →
-**283**, 247 → **248 full**. Next: the general-integrand pathwise modification
-(continuous version of the `L²` limit) → the localized integral for locally-`L²`
-integrands → pathwise Itô / SDE layer.
+**283**, 247 → **248 full**.
+
+**D1 (covariation / bilinear Itô isometry) DONE 2026-06-23** — the polarized
+companion of the Itô isometry. `Foundations/ItoIntegralCovariation.lean`, entry
+`sc-ito-covariation-bilinear-isometry`. The `[0,T]` Itô CLM is bundled as a
+`LinearIsometry` (`itoIsometry_T`, from the norm isometry `itoIntegralCLM_T_norm`);
+a real linear norm-isometry preserves the inner product (polarization), so
+`LinearIsometry.inner_map_map` gives `⟪∫φ dB, ∫ψ dB⟫ = ⟪φ, ψ⟫`
+(`inner_itoIntegralCLM_T`), and `L2.inner_def` unfolds the μ-side to the
+expectation `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫` (`covariation_itoIntegralCLM_T`); the
+diagonal `φ = ψ` recovers the isometry (`variance_itoIntegralCLM_T`). Pure
+polarization of B1's norm isometry — the covariance backbone for
+covariance/correlation-swap pricing. build 8727 jobs green, axioms-clean, corpus
+→ **285**, **250 full** + 18 = 268/285 delivery-ready, 17 reduced.
+
+**Next — D2 (general-integrand local martingale), scoped multi-session.** Recon
+this round showed the natural "extend B3 to general integrands" step is GATED:
+B1b's general integral exists only as `Lp`/L²-objects (martingale = conditional-
+expectation equalities, continuity = L²-continuity into `Lp 2 μ`), with no
+pathwise-continuous representative — but Degenne's `IsLocalMartingale` needs
+pathwise càdlàg paths (exactly why B3 worked only for the *simple* process and its
+explicit continuous clamped-sum). So D2 first needs a **continuous modification**
+of the general integral (Doob L²-maximal inequality → a.s.-uniform limit of the
+simple approximants → pathwise-continuous process), after which the local-
+martingale property is B3's one-liner. That continuous modification is the load-
+bearing prerequisite for localizing the Itô formula
+(`ItoFormulaTD.ito_formula_td_L2_bddDeriv`, presently bounded-derivative only) to
+unbounded/GBM coefficients — the bridge from the analytic Itô tower to the
+drift-algebra pricing tower (`ItoLemma2D`, `PDEFromIto`, `VasicekSDE`).
