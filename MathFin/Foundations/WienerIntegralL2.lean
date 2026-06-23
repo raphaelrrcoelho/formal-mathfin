@@ -58,7 +58,7 @@ open scoped NNReal ENNReal Topology InnerProductSpace
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
   {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ}
 
 /-! ### Step-interval index -/
 
@@ -114,14 +114,14 @@ noncomputable def stepIndicatorLp (T : ℝ≥0) (i : StepIndex T) :
   indicatorConstLp 2 i.measurableSet_interval i.restrict_interval_ne_top (1 : ℝ)
 
 /-- The Wiener increment `B(hi) - B(lo)` is in `L²(μ)`. -/
-lemma memLp_increment_two {T : ℝ≥0} (i : StepIndex T) :
+lemma memLp_increment_two (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (i : StepIndex T) :
     MemLp (fun ω => B i.1.2 ω - B i.1.1 ω) 2 μ :=
   hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 
 /-- The Wiener increment `B(hi) - B(lo)` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def wienerIncrementLp (B : ℝ≥0 → Ω → ℝ)
-    [IsPreBrownianReal B μ] {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
-  (memLp_increment_two (B := B) (μ := μ) i).toLp _
+    (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (i : StepIndex T) : Lp ℝ 2 μ :=
+  (memLp_increment_two hB i).toLp _
 
 variable [IsProbabilityMeasure μ]
 
@@ -134,9 +134,9 @@ noncomputable def stepAssembly (T : ℝ≥0) :
 
 /-- Linear map from finitely supported coefficients to Wiener increments. -/
 noncomputable def wienerAssembly (B : ℝ≥0 → Ω → ℝ)
-    [IsPreBrownianReal B μ] (T : ℝ≥0) :
+    (hB : IsPreBrownianReal B μ) (T : ℝ≥0) :
     (StepIndex T →₀ ℝ) →ₗ[ℝ] Lp ℝ 2 μ :=
-  Finsupp.linearCombination ℝ (wienerIncrementLp (μ := μ) B (T := T))
+  Finsupp.linearCombination ℝ (wienerIncrementLp B hB (T := T))
 
 /-! ### Covariance identity for BM increments
 
@@ -147,7 +147,7 @@ The right hand side is written as `max 0 (min t v - max s u)`. -/
 
 /-- `∫ ω, B s ω * B t ω ∂μ = min s t` for pre-Brownian motion `B` with zero start,
 using `IsPreBrownianReal.covariance_eval` and `covariance_eq_sub` (the means are zero). -/
-lemma integral_mul_eval (s t : ℝ≥0) :
+lemma integral_mul_eval (hB : IsPreBrownianReal B μ) (s t : ℝ≥0) :
     ∫ ω, B s ω * B t ω ∂μ = ((min s t : ℝ≥0) : ℝ) := by
   have hBs : MemLp (B s) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval s).memLp_two
   have hBt : MemLp (B t) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval t).memLp_two
@@ -177,7 +177,8 @@ private lemma covariance_increment_arithmetic
 /-- Covariance identity for BM increments:
 `E[(B_t - B_s)(B_v - B_u)] = vol((s, t] ∩ (u, v])`,
 expressed via `max 0 (min t v - max s u)`. -/
-lemma covariance_increment_aux (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ v) :
+lemma covariance_increment_aux (hB : IsPreBrownianReal B μ)
+    (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ v) :
     ∫ ω, (B t ω - B s ω) * (B v ω - B u ω) ∂μ =
       max 0 ((min (t : ℝ) v) - (max (s : ℝ) u)) := by
   have hBs : MemLp (B s) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval s).memLp_two
@@ -214,8 +215,8 @@ lemma covariance_increment_aux (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ 
         (∫ ω, B s ω * B v ω ∂μ) + (∫ ω, B s ω * B u ω ∂μ) := by
     rw [h_eq_fun]
     linarith [e1, e2, e3]
-  rw [h_lhs, integral_mul_eval (μ := μ) t v, integral_mul_eval (μ := μ) t u,
-      integral_mul_eval (μ := μ) s v, integral_mul_eval (μ := μ) s u]
+  rw [h_lhs, integral_mul_eval hB t v, integral_mul_eval hB t u,
+      integral_mul_eval hB s v, integral_mul_eval hB s u]
   exact covariance_increment_arithmetic s t u v hst huv
 
 /-! ### The key isometry on finitely supported coefficients -/
@@ -223,27 +224,28 @@ lemma covariance_increment_aux (s t u v : ℝ≥0) (hst : s ≤ t) (huv : u ≤ 
 /-- The core pairing identity: for two step indices `i j ∈ StepIndex T`,
 the inner product of the Wiener increments equals the inner product of the
 step indicators in `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T))`. -/
-private lemma inner_wienerIncrementLp_eq {T : ℝ≥0} (i j : StepIndex T) :
-    ⟪wienerIncrementLp (μ := μ) B i, wienerIncrementLp (μ := μ) B j⟫_ℝ =
+private lemma inner_wienerIncrementLp_eq (hB : IsPreBrownianReal B μ)
+    {T : ℝ≥0} (i j : StepIndex T) :
+    ⟪wienerIncrementLp B hB i, wienerIncrementLp B hB j⟫_ℝ =
       ⟪stepIndicatorLp T i, stepIndicatorLp T j⟫_ℝ := by
   -- LHS: L2.inner_def reduces ⟪·, ·⟫ to ∫ ⟪f, g⟫_ℝ ∂μ; for real values
   -- ⟪x, y⟫_ℝ = y * x (Mathlib star-product convention), so we commute via ring.
-  have hLHS : ⟪wienerIncrementLp (μ := μ) B i, wienerIncrementLp (μ := μ) B j⟫_ℝ =
+  have hLHS : ⟪wienerIncrementLp B hB i, wienerIncrementLp B hB j⟫_ℝ =
               max 0 ((min (i.hi : ℝ) j.hi) - (max (i.lo : ℝ) j.lo)) := by
     rw [L2.inner_def]
     have h_eq : ∀ᵐ ω ∂μ,
-        (⟪(wienerIncrementLp (μ := μ) B i : Ω → ℝ) ω,
-          (wienerIncrementLp (μ := μ) B j : Ω → ℝ) ω⟫_ℝ : ℝ) =
+        (⟪(wienerIncrementLp B hB i : Ω → ℝ) ω,
+          (wienerIncrementLp B hB j : Ω → ℝ) ω⟫_ℝ : ℝ) =
         (B i.1.2 ω - B i.1.1 ω) * (B j.1.2 ω - B j.1.1 ω) := by
-      filter_upwards [MemLp.coeFn_toLp (memLp_increment_two (B := B) (μ := μ) i),
-                       MemLp.coeFn_toLp (memLp_increment_two (B := B) (μ := μ) j)]
+      filter_upwards [MemLp.coeFn_toLp (memLp_increment_two hB i),
+                       MemLp.coeFn_toLp (memLp_increment_two hB j)]
         with ω hωI hωJ
-      rw [show (wienerIncrementLp (μ := μ) B i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from hωI,
-          show (wienerIncrementLp (μ := μ) B j : Ω → ℝ) ω = B j.1.2 ω - B j.1.1 ω from hωJ]
+      rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from hωI,
+          show (wienerIncrementLp B hB j : Ω → ℝ) ω = B j.1.2 ω - B j.1.1 ω from hωJ]
       show (B j.1.2 ω - B j.1.1 ω) * (B i.1.2 ω - B i.1.1 ω) = _
       ring
     rw [integral_congr_ae h_eq]
-    exact covariance_increment_aux (B := B) (μ := μ) i.1.1 i.1.2 j.1.1 j.1.2 i.2.1 j.2.1
+    exact covariance_increment_aux hB i.1.1 i.1.2 j.1.1 j.1.2 i.2.1 j.2.1
   -- RHS: indicator inner product = volume of intersection = max 0 (min hi - max lo).
   have hRHS : ⟪stepIndicatorLp T i, stepIndicatorLp T j⟫_ℝ =
               max 0 ((min (i.hi : ℝ) j.hi) - (max (i.lo : ℝ) j.lo)) := by
@@ -264,12 +266,12 @@ private lemma inner_wienerIncrementLp_eq {T : ℝ≥0} (i j : StepIndex T) :
         ENNReal.toReal_ofReal', max_comm]
   rw [hLHS, hRHS]
 
-theorem wiener_assembly_isometry (T : ℝ≥0)
+theorem wiener_assembly_isometry (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : StepIndex T →₀ ℝ) :
-    ‖wienerAssembly (μ := μ) B T f‖ = ‖stepAssembly T f‖ := by
+    ‖wienerAssembly B hB T f‖ = ‖stepAssembly T f‖ := by
   -- Squares of both norms equal a common double-sum over `f.support × f.support`.
-  have h_sq : ‖wienerAssembly (μ := μ) B T f‖ ^ 2 = ‖stepAssembly T f‖ ^ 2 := by
-    rw [← @real_inner_self_eq_norm_sq _ _ _ (wienerAssembly (μ := μ) B T f),
+  have h_sq : ‖wienerAssembly B hB T f‖ ^ 2 = ‖stepAssembly T f‖ ^ 2 := by
+    rw [← @real_inner_self_eq_norm_sq _ _ _ (wienerAssembly B hB T f),
         ← @real_inner_self_eq_norm_sq _ _ _ (stepAssembly T f)]
     simp only [wienerAssembly, stepAssembly, Finsupp.linearCombination_apply]
     rw [Finsupp.sum_inner, Finsupp.sum_inner]
@@ -278,7 +280,7 @@ theorem wiener_assembly_isometry (T : ℝ≥0)
     refine Finsupp.sum_congr (fun j _ => ?_)
     rw [real_inner_smul_left, real_inner_smul_right,
         real_inner_smul_left, real_inner_smul_right,
-        inner_wienerIncrementLp_eq i j]
+        inner_wienerIncrementLp_eq hB i j]
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp h_sq
 
 /-! ### Density of step indicators in `Lp ℝ 2 (volume.restrict (Ioc 0 T))`
@@ -404,25 +406,25 @@ theorem stepAssembly_denseRange (T : ℝ≥0) :
 /-- The Wiener integral as a continuous linear isometry
 `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T)) →L[ℝ] Lp ℝ 2 μ`. -/
 noncomputable def wienerIntegralLp (B : ℝ≥0 → Ω → ℝ)
-    [IsPreBrownianReal B μ] (T : ℝ≥0) :
+    (hB : IsPreBrownianReal B μ) (T : ℝ≥0) :
     Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) →L[ℝ] Lp ℝ 2 μ :=
-  (wienerAssembly (μ := μ) B T).extendOfNorm (stepAssembly T)
+  (wienerAssembly B hB T).extendOfNorm (stepAssembly T)
 
 /-- Itô isometry, norm form. For every `f ∈ L²([0, T])`,
 `‖wienerIntegralLp f‖ = ‖f‖`. -/
-theorem wienerIntegralLp_norm (T : ℝ≥0)
+theorem wienerIntegralLp_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :
-    ‖wienerIntegralLp (μ := μ) B T f‖ = ‖f‖ := by
-  set W := wienerIntegralLp (μ := μ) B T with hW
+    ‖wienerIntegralLp B hB T f‖ = ‖f‖ := by
+  set W := wienerIntegralLp B hB T with hW
   have h_dense := stepAssembly_denseRange T
   have h_norm : ∀ x : StepIndex T →₀ ℝ,
-      ‖wienerAssembly (μ := μ) B T x‖ ≤ 1 * ‖stepAssembly T x‖ := fun x => by
+      ‖wienerAssembly B hB T x‖ ≤ 1 * ‖stepAssembly T x‖ := fun x => by
     rw [one_mul]
-    exact (wiener_assembly_isometry (μ := μ) (B := B) T x).le
+    exact (wiener_assembly_isometry hB T x).le
   -- Equality holds on `range stepAssembly` by `extendOfNorm_eq` + assembly isometry.
   have h_on_range : ∀ x, ‖W (stepAssembly T x)‖ = ‖stepAssembly T x‖ := fun x => by
     rw [hW, wienerIntegralLp, LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩,
-        wiener_assembly_isometry]
+        wiener_assembly_isometry hB]
   -- Both sides continuous in `f`; agree on a dense set ⇒ agree everywhere.
   exact h_dense.induction_on (p := fun y => ‖W y‖ = ‖y‖) f
     (isClosed_eq (continuous_norm.comp W.continuous) continuous_norm) h_on_range
@@ -440,12 +442,12 @@ private lemma Lp_real_two_norm_sq {α : Type*} {mα : MeasurableSpace α} (ν : 
 
 /-- Itô isometry, integral form. For every `f ∈ L²([0, T])`,
 `∫ ω, (wienerIntegralLp f ω)² ∂μ = ∫ s in (0, T], (f s)² ∂volume`. -/
-theorem wienerIntegralLp_integral_sq (T : ℝ≥0)
+theorem wienerIntegralLp_integral_sq (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :
-    ∫ ω, (wienerIntegralLp (μ := μ) B T f ω) ^ 2 ∂μ =
+    ∫ ω, (wienerIntegralLp B hB T f ω) ^ 2 ∂μ =
       ∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (f s) ^ 2 ∂volume := by
-  rw [← Lp_real_two_norm_sq μ (wienerIntegralLp (μ := μ) B T f),
-      wienerIntegralLp_norm (μ := μ) (B := B) T f,
+  rw [← Lp_real_two_norm_sq μ (wienerIntegralLp B hB T f),
+      wienerIntegralLp_norm hB T f,
       Lp_real_two_norm_sq (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) f]
 
 end WienerIntegralL2
