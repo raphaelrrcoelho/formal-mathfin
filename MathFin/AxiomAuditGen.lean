@@ -182,6 +182,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.butterfly_payoff_nonneg' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.butterfly_payoff_nonneg
 
+/-- info: 'MathFin.caplet_floorlet_parity' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.caplet_floorlet_parity
+
 /-- info: 'MathFin.cappedCall_eq_bull_spread' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.cappedCall_eq_bull_spread
 

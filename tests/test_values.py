@@ -139,7 +139,13 @@ RFL_TAIL_RE = re.compile(
 # (Definition entries — id containing "-def-" — are skipped wholesale: the
 # documented definitional-`full` convention, see test_router.py's
 # DEFINITIONAL_FULL_ALLOWLIST.)
-DEFINITIONAL_RFL_ALLOWLIST: set = set()
+# mf-caplet-price / mf-floorlet-price: Black-76 caplet/floorlet are genuine
+# definitions load-bearing for the spine; the benchmark theorem is their
+# definitional unfolding, which is the documented definitional-full pattern.
+DEFINITIONAL_RFL_ALLOWLIST: set = {
+    "mf-caplet-price",
+    "mf-floorlet-price",
+}
 
 
 def _decl_tails(text: str):

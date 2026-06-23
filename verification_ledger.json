@@ -1990,6 +1990,27 @@
       "elapsed_s": 40.1,
       "input_hash": "e68ab0e025d90dba3d3a8209e570bdadb45a4ac87d90888f6839edc584381831",
       "verified_at_commit": "cd4dfa6"
+    },
+    "mf-caplet-price": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-17",
+      "elapsed_s": 0.0,
+      "input_hash": "cc6b64b3531cbebcc0c5970cb231befecfa1fe1183ea9215c3d5cfdb2e5f7d5a",
+      "verified_at_commit": "ab336b7"
+    },
+    "mf-floorlet-price": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-17",
+      "elapsed_s": 0.0,
+      "input_hash": "f4798c2ac5f64e924590860ca0548cffee6111c67005d1a833f45b08cb12789d",
+      "verified_at_commit": "ab336b7"
+    },
+    "mf-caplet-floorlet-parity": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-17",
+      "elapsed_s": 0.0,
+      "input_hash": "917863ecc38078cc7e0da7d835fd09304eb5822c8736b9ed6dd3c8cb845e5fb8",
+      "verified_at_commit": "ab336b7"
     }
   }
 }

@@ -107,4 +107,70 @@ theorem swaption_payer_receiver_parity (A F K σ T : ℝ) :
   have h_d2 := Phi_add_Phi_neg (bsd2 F K 0 σ T)
   linear_combination A * F * h_d1 - A * K * h_d2
 
+/-! ## Black-76 caplet and floorlet (re-exports of the Black-76 formula)
+
+A **caplet** is a European call on a forward rate, discounted over the accrual
+period `α`. Its price is the accrual-scaled Black-76 futures call: the Black-76
+formula `black_futures_formula` (specialised to `r = 0` intra-formula + an
+external discount `e^{-rT}`) multiplied by the accrual factor `α`.
+
+A **floorlet** is the put counterpart: accrual-scaled Black-76 futures put.
+
+The parity theorem `caplet_floorlet_parity` is the textbook
+`V^caplet − V^floorlet = α · (F − K)`, the forward-rate analog of put-call
+parity — one-line via `Phi_add_Phi_neg`.
+-/
+
+/-- **Black-76 caplet price**: accrual-scaled Black-76 futures call on the forward
+rate.
+
+Given forward rate `F`, strike `K`, volatility `σ`, time to maturity `T`, and
+accrual factor `α`, the caplet price is
+
+    α · [F · Φ(d₁) − K · Φ(d₂)],
+
+where `d_i = bsd_i F K 0 σ T` (zero drift, the Black-76 specialisation).
+
+This is the textbook "call on a forward rate, discounted over the accrual
+period" — one line via the `black_futures_formula` specialisation. The
+convention follows `blackPayerSwaption` (no separate discount factor; the
+forward numéraire absorbs the drift). -/
+noncomputable def blackCaplet (F K σ T α : ℝ) : ℝ :=
+  α * (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T))
+
+/-- **Black-76 floorlet price**: accrual-scaled Black-76 futures put on the forward
+rate.
+
+Given forward rate `F`, strike `K`, volatility `σ`, time to maturity `T`, and
+accrual factor `α`, the floorlet price is
+
+    α · [K · Φ(−d₂) − F · Φ(−d₁)],
+
+where `d_i = bsd_i F K 0 σ T`. -/
+noncomputable def blackFloorlet (F K σ T α : ℝ) : ℝ :=
+  α * (K * Phi (-(bsd2 F K 0 σ T)) - F * Phi (-(bsd1 F K 0 σ T)))
+
+/-- **Caplet-floorlet parity**: `V^caplet − V^floorlet = α · (F − K)`, the
+forward-rate analog of put-call parity.
+
+Proof: factor out `α`, then apply `Phi_add_Phi_neg` to each of `d₁` and `d₂`,
+and `ring`. -/
+theorem caplet_floorlet_parity (F K σ T α : ℝ) :
+    blackCaplet F K σ T α - blackFloorlet F K σ T α = α * (F - K) := by
+  unfold blackCaplet blackFloorlet
+  have h_d1 := Phi_add_Phi_neg (bsd1 F K 0 σ T)
+  have h_d2 := Phi_add_Phi_neg (bsd2 F K 0 σ T)
+  have h_d1F : F * Phi (bsd1 F K 0 σ T) + F * Phi (-(bsd1 F K 0 σ T)) = F := by
+    linear_combination F * h_d1
+  have h_d2K : K * Phi (bsd2 F K 0 σ T) + K * Phi (-(bsd2 F K 0 σ T)) = K := by
+    linear_combination K * h_d2
+  calc
+    α * (F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T))
+      - α * (K * Phi (-(bsd2 F K 0 σ T)) - F * Phi (-(bsd1 F K 0 σ T)))
+        = α * ((F * Phi (bsd1 F K 0 σ T) - K * Phi (bsd2 F K 0 σ T))
+            - (K * Phi (-(bsd2 F K 0 σ T)) - F * Phi (-(bsd1 F K 0 σ T)))) := by ring
+    _ = α * ((F * Phi (bsd1 F K 0 σ T) + F * Phi (-(bsd1 F K 0 σ T)))
+        - (K * Phi (bsd2 F K 0 σ T) + K * Phi (-(bsd2 F K 0 σ T)))) := by ring
+    _ = α * (F - K) := by rw [h_d1F, h_d2K]
+
 end MathFin
