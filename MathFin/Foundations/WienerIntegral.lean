@@ -45,13 +45,13 @@ include hB
 
 /-- For `s ≤ t : ℝ≥0`, the increment `B t − B s` has law `gaussianReal 0 (t − s)`. -/
 private lemma hasLaw_increment {s t : ℝ≥0} (hst : s ≤ t) :
-    HasLaw (B t - B s) (gaussianReal 0 (t - s)) μ := by
+    HasLaw (fun ω => B t ω - B s ω) (gaussianReal 0 (t - s)) μ := by
   have hL := hB.hasLaw_sub t s
   have hv : nndist (t : ℝ) (s : ℝ) = (t - s : ℝ≥0) := by
     apply NNReal.coe_injective
     rw [coe_nndist, Real.dist_eq, NNReal.coe_sub hst,
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
-  rwa [hv] at hL
+  rw [← hv]; exact hL
 
 /-- The increment `B t − B s` has mean zero. -/
 private lemma integral_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
@@ -82,8 +82,7 @@ theorem wiener_step_isometry (c : ℝ) {s t : ℝ≥0} (hst : s ≤ t) :
   simp_rw [mul_pow]
   rw [integral_const_mul]
   congr 1
-  rw [show (fun ω => (B t ω - B s ω) ^ 2) = fun ω => (B t - B s) ω ^ 2 from rfl,
-      ← variance_of_integral_eq_zero (hasLaw_increment hB hst).aemeasurable
+  rw [← variance_of_integral_eq_zero (hasLaw_increment hB hst).aemeasurable
         (by simpa using integral_increment_eq_zero hB hst)]
   simpa using variance_increment hB hst
 
