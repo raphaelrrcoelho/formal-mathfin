@@ -119,7 +119,7 @@ lemma hasDerivAt_bsd1_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 <
   -- s ↦ log(s/K): HasDerivAt _ (1/S) S (chain rule)
   have h_log : HasDerivAt (fun s : ℝ => Real.log (s / K)) (1 / S) S := by
     have := (Real.hasDerivAt_log h_sK_pos.ne').comp S h_div
-    convert this using 1
+    convert this using 1 <;> try rfl
     field_simp
   -- s ↦ log(s/K) + (r + σ²/2)τ: same derivative
   have h_num : HasDerivAt (fun s : ℝ => Real.log (s / K) + (r + σ ^ 2 / 2) * τ) (1 / S) S := by
@@ -174,7 +174,7 @@ lemma hasDerivAt_bsd1_tau (S K r σ : ℝ) (hσ : 0 < σ)
     have h_sqrt_deriv : HasDerivAt Real.sqrt (1 / (2 * Real.sqrt τ)) τ :=
       Real.hasDerivAt_sqrt hτ.ne'
     have := h_sqrt_deriv.const_mul σ
-    convert this using 1
+    convert this using 1 <;> try rfl
     field_simp
   -- Quotient rule
   have h_quot := h_f.div h_g h_στ_ne
@@ -182,7 +182,7 @@ lemma hasDerivAt_bsd1_tau (S K r σ : ℝ) (hσ : 0 < σ)
         = (fun t : ℝ => bsd1 S K r σ t) := by
     funext t; rfl
   rw [← h_fun_eq]
-  convert h_quot using 1
+  convert h_quot using 1 <;> try rfl
   -- Value: ((r+σ²/2)τ - log(S/K))/(2 σ τ √τ) = ((r+σ²/2)(σ√τ) - (log + (r+σ²/2)τ)(σ/(2√τ))) / (σ√τ)²
   field_simp
   rw [h_sqrt_sq]
@@ -203,7 +203,7 @@ lemma hasDerivAt_bsd2_tau (S K r σ : ℝ) (hσ : 0 < σ)
         = (fun t : ℝ => bsd2 S K r σ t) := by
     funext t; rw [bsd2]
   rw [← h_fun_eq]
-  convert h_diff using 1
+  convert h_diff using 1 <;> try rfl
   field_simp
 
 /-! ### Partial derivatives of `bsd1`, `bsd2` w.r.t. `σ` -/
@@ -238,7 +238,7 @@ lemma hasDerivAt_bsd1_sigma (S K r : ℝ) {σ : ℝ} (hσ : 0 < σ)
   have h_fun_eq : (fun s : ℝ => (Real.log (S / K) + (r + s ^ 2 / 2) * τ) / (s * Real.sqrt τ))
         = (fun s : ℝ => bsd1 S K r s τ) := by funext s; rfl
   rw [← h_fun_eq]
-  convert h_quot using 1
+  convert h_quot using 1 <;> try rfl
   field_simp
   ring
 
@@ -282,7 +282,7 @@ lemma hasDerivAt_bsd1_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
   have h_fun_eq : (fun r' : ℝ => (Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
         = (fun r' : ℝ => bsd1 S K r' σ τ) := by funext r'; rfl
   rw [← h_fun_eq]
-  convert h_div using 1
+  convert h_div using 1 <;> try rfl
   -- τ/(σ√τ) = √τ/σ
   have h_τ_eq : Real.sqrt τ * Real.sqrt τ = τ := Real.mul_self_sqrt hτ.le
   field_simp
@@ -331,7 +331,7 @@ lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
         = (fun s : ℝ => bsV K r σ s τ) := by
     funext s; rfl
   rw [← h_fun_eq]
-  convert h_V using 1
+  convert h_V using 1 <;> try rfl
   -- Value simplification: cancel via magic identity
   have h_bs := bs_identity (r := r) hS hK hσ hτ
   simp only [Function.comp]
@@ -346,7 +346,7 @@ lemma hasDerivAt_bsV_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
       (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S := by
   have h_d1_S := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
-  convert h_Phi_d1 using 1
+  convert h_Phi_d1 using 1 <;> try rfl
   field_simp
 
 /-- **Theta (without τ → t sign flip)**: `∂_τ V = σ S ϕ(d₁) / (2 √τ) + r K e^{-rτ} Φ(d₂)`.
@@ -390,7 +390,7 @@ lemma hasDerivAt_bsV_tau {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
         = (fun t : ℝ => bsV K r σ S t) := by
     funext t; rfl
   rw [← h_fun_eq]
-  convert h_V using 1
+  convert h_V using 1 <;> try rfl
   -- Value match using magic identity (field_simp already absorbs √τ² = τ).
   have h_bs := bs_identity (r := r) hS hK hσ hτ
   simp only [Function.comp]
@@ -410,7 +410,7 @@ lemma hasDerivAt_bsV_t {K T r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     simpa using this
   have h_V_τ := hasDerivAt_bsV_tau (r := r) hK hσ hS hτ
   have h_comp := h_V_τ.comp t h_τ_deriv
-  convert h_comp using 1
+  convert h_comp using 1 <;> try rfl
   ring
 
 /-! ### Vega and Rho -/
@@ -444,7 +444,7 @@ lemma hasDerivAt_bsV_sigma {K r : ℝ} (hK : 0 < K)
         K * Real.exp (-(r * τ)) * (Phi ∘ fun s' => bsd2 S K r s' τ) s)
         = (fun s : ℝ => bsV K r s S τ) := by funext s; rfl
   rw [← h_fun_eq]
-  convert h_V using 1
+  convert h_V using 1 <;> try rfl
   have h_bs := bs_identity (r := r) hS hK hσ hτ
   have h_sq_sqrt : Real.sqrt τ ^ 2 = τ := Real.sq_sqrt hτ.le
   field_simp
@@ -491,7 +491,7 @@ lemma hasDerivAt_bsV_r {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ
         (fun r'' => K * Real.exp (-(r'' * τ)) * (Phi ∘ fun r''' => bsd2 S K r''' σ τ) r'') r')
         = (fun r' : ℝ => bsV K r' σ S τ) := by funext r'; rfl
   rw [← h_fun_eq]
-  convert h_V using 1
+  convert h_V using 1 <;> try rfl
   have h_bs := bs_identity (r := r) hS hK hσ hτ
   simp only [Function.comp_apply]
   field_simp

@@ -122,7 +122,7 @@ theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
       rw [← ha, ← hb] at h
       exact WithTop.coe_le_coe.1 h
     rw [← ha, ← hb]
-    simpa using hab
+    simpa only [WithTop.untopA_eq_untop WithTop.coe_ne_top, WithTop.untop_coe] using hab
   have hA_le : stoppedValue (predictablePart f ℱ μ) σ
       ≤ᵐ[μ] stoppedValue (predictablePart f ℱ μ) τ := by
     filter_upwards [hf.monotone_predictablePart] with ω hω
