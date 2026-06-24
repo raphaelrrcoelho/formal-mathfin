@@ -44,7 +44,7 @@ private lemma hasDerivAt_bachelierD_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)
   have h_sqrt_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
   have h_στ_pos : 0 < σ * Real.sqrt T := mul_pos hσ h_sqrt_pos
   have h_num : HasDerivAt (fun s : ℝ => s - K) 1 S := by
-    simpa using (hasDerivAt_id S).sub_const K
+    convert (hasDerivAt_id S).sub_const K using 1 <;> first | rfl | ring
   exact h_num.div_const (σ * Real.sqrt T)
 
 /-- **Bachelier delta**: `∂V/∂S = Φ(d)`. -/
@@ -60,14 +60,14 @@ lemma hasDerivAt_bachelierV_S {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : �
   have h_pdf_chain := (hasDerivAt_gaussianPDFReal_zero_one (bachelierD S K σ T)).comp S h_d_S
   -- ∂_S [(S - K)] = 1
   have h_S_sub : HasDerivAt (fun s : ℝ => s - K) 1 S := by
-    simpa using (hasDerivAt_id S).sub_const K
+    convert (hasDerivAt_id S).sub_const K using 1 <;> first | rfl | ring
   -- ∂_S [(S-K) · Φ(d(S))] = Φ(d) + (S-K) · ϕ(d) · ∂_S d
   have h_term1 := h_S_sub.mul h_Phi_chain
   -- ∂_S [σ √T · ϕ(d(S))] = σ √T · (-d ϕ(d)) · ∂_S d
   have h_term2 := h_pdf_chain.const_mul (σ * Real.sqrt T)
   have h_full := h_term1.add h_term2
   unfold bachelierV
-  convert h_full using 1
+  convert h_full using 1 <;> try rfl
   -- Value match: (S - K) ϕ(d) · 1/(σ√T) - σ√T · d · ϕ(d) · 1/(σ√T)
   --            = ϕ(d) · [(S-K)/(σ√T) - d] = ϕ(d) · [d - d] = 0
   -- so Φ(d) = Φ(d) + 0. trivially.
@@ -94,9 +94,9 @@ lemma hasDerivAt_bachelierV_sigma {K T : ℝ} (hT : 0 < T)
         ((0 * (σ * Real.sqrt T) - (S - K) * (1 * Real.sqrt T)) / (σ * Real.sqrt T)^2) σ := by
       have h_const : HasDerivAt (fun _ : ℝ => (S - K)) 0 σ := hasDerivAt_const _ _
       have h_denom : HasDerivAt (fun s : ℝ => s * Real.sqrt T) (1 * Real.sqrt T) σ := by
-        simpa using (hasDerivAt_id σ).mul_const (Real.sqrt T)
+        convert (hasDerivAt_id σ).mul_const (Real.sqrt T) using 1 <;> first | rfl | ring
       exact h_const.div h_denom (mul_pos hσ h_sqrt_pos).ne'
-    convert h_quot using 1
+    convert h_quot using 1 <;> try rfl
     field_simp
     ring
   -- Chain rules
@@ -106,12 +106,12 @@ lemma hasDerivAt_bachelierV_sigma {K T : ℝ} (hT : 0 < T)
   have h_term1 := h_Phi_chain.const_mul (S - K)
   -- ∂_σ [σ √T] = √T
   have h_σ_sqrt : HasDerivAt (fun s : ℝ => s * Real.sqrt T) (Real.sqrt T) σ := by
-    simpa using (hasDerivAt_id σ).mul_const (Real.sqrt T)
+    convert (hasDerivAt_id σ).mul_const (Real.sqrt T) using 1 <;> first | rfl | ring
   -- ∂_σ [σ √T · ϕ(d(σ))] = √T · ϕ(d) + σ √T · (-d ϕ(d)) · ∂_σ d
   have h_term2 := h_σ_sqrt.mul h_pdf_chain
   have h_full := h_term1.add h_term2
   unfold bachelierV
-  convert h_full using 1
+  convert h_full using 1 <;> try rfl
   simp only [Function.comp]
   rw [bachelierD]
   field_simp
@@ -123,7 +123,7 @@ lemma hasDerivAt_bachelierV_SS {K σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (S : �
       (gaussianPDFReal 0 1 (bachelierD S K σ T) / (σ * Real.sqrt T)) S := by
   have h_d_S := hasDerivAt_bachelierD_S (K := K) hσ hT S
   have h := (hasDerivAt_Phi (bachelierD S K σ T)).comp S h_d_S
-  convert h using 1
+  convert h using 1 <;> try rfl
   field_simp
 
 /-- **Bachelier theta**: `∂V/∂T = σ · ϕ(d) / (2 √T)`.
@@ -144,11 +144,12 @@ lemma hasDerivAt_bachelierV_T {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < 
     have h_sqrt : HasDerivAt Real.sqrt (1 / (2 * Real.sqrt T)) T := Real.hasDerivAt_sqrt hT.ne'
     have h_σsqrt : HasDerivAt (fun t : ℝ => σ * Real.sqrt t) (σ / (2 * Real.sqrt T)) T := by
       have := h_sqrt.const_mul σ
-      convert this using 1; field_simp
+      convert this using 1 <;> try rfl
+      field_simp
     have h_quot : HasDerivAt (fun t : ℝ => (S - K) / (σ * Real.sqrt t))
         ((0 * (σ * Real.sqrt T) - (S - K) * (σ / (2 * Real.sqrt T))) / (σ * Real.sqrt T)^2) T := by
       exact h_const.div h_σsqrt (mul_pos hσ h_sqrt_pos).ne'
-    convert h_quot using 1
+    convert h_quot using 1 <;> try rfl
     field_simp
     rw [show Real.sqrt T ^ 2 = T from h_sqrt_sq]
     ring
@@ -160,12 +161,13 @@ lemma hasDerivAt_bachelierV_T {K σ : ℝ} (hσ : 0 < σ) {S T : ℝ} (hT : 0 < 
   -- ∂_T [σ √T] = σ / (2√T)
   have h_σsqrt' : HasDerivAt (fun t : ℝ => σ * Real.sqrt t) (σ / (2 * Real.sqrt T)) T := by
     have h := (Real.hasDerivAt_sqrt hT.ne').const_mul σ
-    convert h using 1; field_simp
+    convert h using 1 <;> try rfl
+    field_simp
   -- ∂_T [σ √T · ϕ(d(T))] = (σ/(2√T)) · ϕ(d) + σ √T · (-d ϕ(d)) · ∂_T d
   have h_term2 := h_σsqrt'.mul h_pdf
   have h_full := h_term1.add h_term2
   unfold bachelierV
-  convert h_full using 1
+  convert h_full using 1 <;> try rfl
   simp only [Function.comp]
   rw [bachelierD]
   field_simp

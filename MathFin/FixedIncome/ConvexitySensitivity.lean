@@ -89,7 +89,7 @@ theorem hasDerivAt_modifiedNumerator
       (fun y' : ℝ => (t i : ℝ) * c i / (1 + y') ^ (t i + 1)) := by
     funext y'; ring
   rw [h_func] at h_pulled
-  convert h_pulled using 1
+  convert h_pulled using 1 <;> try rfl
   push_cast
   have : t i + 1 + 1 = t i + 2 := by omega
   rw [this]
@@ -107,7 +107,7 @@ theorem hasDerivAt_bondPriceDisc_secondDeriv
     HasDerivAt (fun y' => -modifiedNumerator s t c y')
                (convexityNumerator s t c y) y := by
   have h := (hasDerivAt_modifiedNumerator s t c hy).neg
-  convert h using 1
+  convert h using 1 <;> try rfl
   ring
 
 /-- **Convexity-sensitivity identity**: `P''(y)/P(y) = C(y) = ConvNum/P`. The

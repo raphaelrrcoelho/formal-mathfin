@@ -60,10 +60,10 @@ lemma hasDerivAt_bondPortfolioDur_r
     intro i _
     have h_lin : HasDerivAt (fun r' : ℝ => -(r' * (T i - t))) (-(T i - t)) r := by
       have h := (hasDerivAt_id r).mul_const (T i - t)
-      simpa using h.neg
+      convert h.neg using 1 <;> first | rfl | ring
     have h_exp := h_lin.exp
     have h_prod := h_exp.const_mul (w i * (T i - t))
-    convert h_prod using 1
+    convert h_prod using 1 <;> try rfl
     ring
   have h_raw := HasDerivAt.sum h_each
   have h_fn_eq :
@@ -84,7 +84,7 @@ lemma hasDerivAt_neg_bondPortfolioDur_r
     HasDerivAt (fun r' => -bondPortfolioDur s w T t r')
       (bondPortfolioConv s w T t r) r := by
   have h := (hasDerivAt_bondPortfolioDur_r s w T t r).neg
-  simpa using h
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Single-bond convexity**: a single-bond portfolio's convexity-times-value
 equals `w · (T − t)² · exp(−r(T − t))`. -/
@@ -114,7 +114,7 @@ lemma bondPortfolio_immunization_second_order
   have hA := hasDerivAt_neg_bondPortfolioDur_r sA wA TA t r
   have hL := hasDerivAt_neg_bondPortfolioDur_r sL wL TL t r
   have h := hA.sub hL
-  convert h using 1
+  convert h using 1 <;> try rfl
   rw [h_match_conv]
   ring
 

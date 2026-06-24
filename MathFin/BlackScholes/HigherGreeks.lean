@@ -37,7 +37,7 @@ private lemma hasDerivAt_bsd1_sigma_clean (S K r : ℝ) {σ τ : ℝ}
     (hσ : 0 < σ) (hτ : 0 < τ) :
     HasDerivAt (fun s => bsd1 S K r s τ) (-(bsd2 S K r σ τ) / σ) σ := by
   have h := hasDerivAt_bsd1_sigma S K r hσ hτ
-  convert h using 1
+  convert h using 1 <;> try rfl
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'
@@ -66,7 +66,7 @@ lemma hasDerivAt_bsV_vanna {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
   have h_prod := h_id.mul h_pdf_d1
   have h_full := h_prod.mul_const (Real.sqrt τ)
-  convert h_full using 1
+  convert h_full using 1 <;> try rfl
   simp only [Function.comp]
   rw [show bsd2 S K r σ τ = bsd1 S K r σ τ - σ * Real.sqrt τ from by rw [bsd2]]
   field_simp
@@ -88,7 +88,7 @@ lemma hasDerivAt_bsV_volga {K r : ℝ} (_hK : 0 < K)
   have h_pdf_d1 := (hasDerivAt_gaussianPDFReal_zero_one (bsd1 S K r σ τ)).comp σ h_d1_σ
   have h_S := h_pdf_d1.const_mul S
   have h_full := h_S.mul_const (Real.sqrt τ)
-  convert h_full using 1
+  convert h_full using 1 <;> try rfl
   field_simp
 
 /-- **Charm**: `∂Δ/∂τ = ∂Φ(d₁)/∂τ = ϕ(d₁) · ((r + σ²/2)τ − log(S/K)) / (2στ√τ)`.
@@ -102,6 +102,6 @@ lemma hasDerivAt_bsV_charm {K r σ : ℝ} (hσ : 0 < σ)
         * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ := by
   have h_d1_τ := hasDerivAt_bsd1_tau S K r σ hσ hτ
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp τ h_d1_τ
-  simpa using h_Phi_d1
+  convert h_Phi_d1 using 1 <;> first | rfl | ring
 
 end MathFin

@@ -54,7 +54,7 @@ lemma hasDerivAt_bsCashDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_Phi_d2 := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp S h_d2_S
   have h := h_Phi_d2.const_mul (Real.exp (-(r * τ)))
   unfold bsCashDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   ring
 
 /-- **Asset-or-nothing delta**: `∂_S V_asset = Φ(d₁) + ϕ(d₁) / (σ √τ)`.
@@ -74,7 +74,7 @@ lemma hasDerivAt_bsAssetDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
   have h := h_id.mul h_Phi_d1
   unfold bsAssetDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   simp only [Function.comp_apply]
   field_simp
 
@@ -103,7 +103,7 @@ lemma hasDerivAt_bsAssetDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   -- ∂_S [ϕ(d₁) / (σ √τ)] = (∂_S ϕ(d₁)) / (σ √τ)
   have h_pdf_div := h_pdf.div_const (σ * Real.sqrt τ)
   have h_full := h_Phi.add h_pdf_div
-  convert h_full using 1
+  convert h_full using 1 <;> try rfl
   rw [show bsd2 S K r σ τ = bsd1 S K r σ τ - σ * Real.sqrt τ from by rw [bsd2]]
   field_simp
   rw [show Real.sqrt τ ^ 2 = τ from h_sqrt_sq]
@@ -122,7 +122,7 @@ lemma hasDerivAt_bsAssetDigital_tau (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (
   have h_Phi := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp τ h_d1_τ
   have h := h_Phi.const_mul S
   unfold bsAssetDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   ring
 
 /-- **Cash-or-nothing theta**: `∂_τ V_cash = -r · e^{-rτ} · Φ(d₂) + e^{-rτ} · ϕ(d₂) · ∂_τ d₂`.
@@ -140,12 +140,12 @@ lemma hasDerivAt_bsCashDigital_tau (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (h
   have h_Phi := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp τ h_d2_τ
   have h_neg : HasDerivAt (fun t : ℝ => -(r * t)) (-r) τ := by
     have h := (hasDerivAt_id τ).const_mul r
-    simpa using h.neg
+    convert h.neg using 1 <;> first | rfl | ring
   have h_exp : HasDerivAt (fun t : ℝ => Real.exp (-(r * t)))
       (Real.exp (-(r * τ)) * (-r)) τ := h_neg.exp
   have h := h_exp.mul h_Phi
   unfold bsCashDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   simp only [Function.comp_apply]
   ring
 
@@ -164,7 +164,7 @@ lemma hasDerivAt_bsAssetDigital_sigma (S K r : ℝ) {σ τ : ℝ} (hσ : 0 < σ)
   have h_Phi := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp σ h_d1_σ
   have h := h_Phi.const_mul S
   unfold bsAssetDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   rw [bsd2_eq hσ hτ]
   field_simp
   ring
@@ -185,7 +185,7 @@ lemma hasDerivAt_bsCashDigital_sigma (S K : ℝ) {r σ τ : ℝ} (hσ : 0 < σ) 
   have h_Phi := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp σ h_d2_σ
   have h := h_Phi.const_mul (Real.exp (-(r * τ)))
   unfold bsCashDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   rw [show bsd1 S K r σ τ = bsd2 S K r σ τ + σ * Real.sqrt τ from by
     rw [bsd2]; ring]
   rw [bsd2_eq hσ hτ]
@@ -202,7 +202,7 @@ lemma hasDerivAt_bsAssetDigital_r (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ 
   have h_Phi := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp r h_d1_r
   have h := h_Phi.const_mul S
   unfold bsAssetDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   ring
 
 /-- **Cash-or-nothing rho**: `∂_r V_cash = e^{-rτ} · (ϕ(d₂) · √τ/σ − τ · Φ(d₂))`.
@@ -219,12 +219,12 @@ lemma hasDerivAt_bsCashDigital_r (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ :
   have h_Phi := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp r h_d2_r
   have h_neg_r : HasDerivAt (fun r' : ℝ => -(r' * τ)) (-τ) r := by
     have h := (hasDerivAt_id r).mul_const τ
-    simpa using h.neg
+    convert h.neg using 1 <;> first | rfl | ring
   have h_exp : HasDerivAt (fun r' : ℝ => Real.exp (-(r' * τ)))
       (Real.exp (-(r * τ)) * (-τ)) r := h_neg_r.exp
   have h := h_exp.mul h_Phi
   unfold bsCashDigital
-  convert h using 1
+  convert h using 1 <;> try rfl
   simp only [Function.comp_apply]
   ring
 
@@ -258,9 +258,10 @@ lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
   have h_denom : HasDerivAt (fun s : ℝ => s * σ * Real.sqrt τ) (σ * Real.sqrt τ) S := by
     have h := (h_id.mul_const σ).mul_const (Real.sqrt τ)
-    simpa using h
+    convert h using 1 <;> first | rfl | ring
   have h_div := h_num.div h_denom h_denom_ne
   convert h_div using 1
+  all_goals try rfl
   have h_bsd1 : bsd1 S K r σ τ = bsd2 S K r σ τ + σ * Real.sqrt τ := by
     rw [bsd2]; ring
   rw [h_bsd1]
