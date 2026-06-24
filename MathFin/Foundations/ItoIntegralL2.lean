@@ -101,30 +101,29 @@ lemma itoSimple_apply (hBmeas : ∀ t, Measurable (B t))
       = V.value.sum fun p v => v ω * (B p.2 ω - B p.1 ω) := by
   simp only [itoSimple, SimpleProcess.integral_top, ContinuousLinearMap.mul_apply']
 
-variable [hB : IsPreBrownianReal B μ]
+variable [IsProbabilityMeasure μ]
 
 /-- **Step 1 — `L²` membership.** The terminal Itô integral of a simple process is in
 `L²(μ)`: it is the finite sum `∑ₚ V(p)·(B_{p.2}−B_{p.1})`, and each summand is in `L²`
 by `memLp_adapted_mul_increment` — the coefficient `V(p)` is `𝓕_{p.1}`-measurable (hence
 `AdaptedAt` by the bridge) and bounded (hence `L²` on the probability space). -/
-theorem memLp_itoSimple (hBmeas : ∀ t, Measurable (B t))
+theorem memLp_itoSimple (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     MemLp (itoSimple hBmeas V) 2 μ := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   rw [show itoSimple hBmeas V
         = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
       from funext fun ω => by rw [itoSimple_apply]; rfl]
   refine memLp_finsetSum V.value.support (fun p hp => ?_)
-  refine ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (V.le_of_mem_support_value p hp)
+  refine ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (V.le_of_mem_support_value p hp)
     (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
   exact MemLp.of_bound
     ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
     V.valueBound (ae_of_all _ (V.value_le_valueBound p))
 
 /-- The terminal Itô integral of a simple process as an element of `Lp ℝ 2 μ`. -/
-noncomputable def itoSimpleLp (hBmeas : ∀ t, Measurable (B t))
+noncomputable def itoSimpleLp (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) : Lp ℝ 2 μ :=
-  (memLp_itoSimple hBmeas V).toLp _
+  (memLp_itoSimple hB hBmeas V).toLp _
 
 /-- **Step 2 — the Itô isometry on simple processes** (the predictable-rectangle double
 sum). For a simple process `V`,
@@ -136,17 +135,16 @@ increment sum expands into a double sum whose every term collapses by
 `rect_increment_pairing` — the genuinely-stochastic content (cross terms vanish by the
 weak Markov property, diagonal terms give the deterministic overlap). The right-hand side
 is exactly `‖V‖²` in the predictable `L²` space, so this is the Itô isometry. -/
-theorem itoSimple_sq_integral (hBmeas : ∀ t, Measurable (B t))
+theorem itoSimple_sq_integral (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     ∫ ω, (itoSimple hBmeas V ω) ^ 2 ∂μ
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   classical
   set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω => V.value p ω * (B p.2 ω - B p.1 ω) with ha_def
   have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp =>
-    ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (V.le_of_mem_support_value p hp)
+    ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (V.le_of_mem_support_value p hp)
       (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
       (MemLp.of_bound
         ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
@@ -169,7 +167,7 @@ theorem itoSimple_sq_integral (hBmeas : ∀ t, Measurable (B t))
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
         refine Finset.sum_congr rfl fun p hp => Finset.sum_congr rfl fun q hq => ?_
-        exact ItoIsometryAdapted.rect_increment_pairing hBmeas
+        exact ItoIsometryAdapted.rect_increment_pairing hB hBmeas
           (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
           (adaptedAt_of_measurable_natural hBmeas (V.measurable_value q))
           (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
@@ -191,16 +189,16 @@ lemma lp_two_norm_sq {α : Type*} {mα : MeasurableSpace α} {ν : Measure α}
 /-- **The Itô isometry in `Lp`-norm form.** `‖itoSimpleLp V‖²` equals the predictable-
 rectangle double sum — i.e. `‖V‖²` in the predictable `L²` space. This is the norm
 identity that `extendOfNorm` consumes to build the continuous Itô integral. -/
-theorem itoSimpleLp_norm_sq (hBmeas : ∀ t, Measurable (B t))
+theorem itoSimpleLp_norm_sq (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
-    ‖(itoSimpleLp hBmeas V : Lp ℝ 2 μ)‖ ^ 2
+    ‖(itoSimpleLp hB hBmeas V : Lp ℝ 2 μ)‖ ^ 2
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  rw [lp_two_norm_sq, ← itoSimple_sq_integral hBmeas V]
+  rw [lp_two_norm_sq, ← itoSimple_sq_integral hB hBmeas V]
   refine integral_congr_ae ?_
-  filter_upwards [(memLp_itoSimple hBmeas V).coeFn_toLp] with ω hω
-  rw [show (itoSimpleLp hBmeas V : Ω → ℝ) ω = itoSimple hBmeas V ω from hω]
+  filter_upwards [(memLp_itoSimple hB hBmeas V).coeFn_toLp] with ω hω
+  rw [show (itoSimpleLp hB hBmeas V : Ω → ℝ) ω = itoSimple hBmeas V ω from hω]
 
 /-! ### The time measure `ν` — Lebesgue on `ℝ≥0`
 
@@ -280,7 +278,6 @@ finite-measure interval `(p.1,p.2]` and `V(p)` is bounded. -/
 lemma memLp_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
     MemLp (rectTerm hBmeas V p) 2 (timeMeasure.prod μ) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc p.1 p.2)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, timeMeasure_Ioc];
         exact ENNReal.ofReal_lt_top⟩
@@ -298,7 +295,6 @@ lemma uncurry_ae_eq_sum_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     Function.uncurry ⇑V
       =ᵐ[timeMeasure.prod μ] fun z => ∑ p ∈ V.value.support, rectTerm hBmeas V p z := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hmem : {z : ℝ≥0 × Ω | z.1 ≠ ⊥} ∈ MeasureTheory.ae (timeMeasure.prod μ) := by
     rw [mem_ae_iff,
         show {z : ℝ≥0 × Ω | z.1 ≠ ⊥}ᶜ = {(⊥ : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp,
@@ -346,7 +342,6 @@ lemma integral_rectTerm_mul (hBmeas : ∀ t, Measurable (B t))
     ∫ z, rectTerm hBmeas V p z * rectTerm hBmeas V q z ∂(timeMeasure.prod μ)
       = (∫ ω, V.value p ω * V.value q ω ∂μ)
           * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hfun : (fun z : ℝ≥0 × Ω => rectTerm hBmeas V p z * rectTerm hBmeas V q z)
       = fun z => ((Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) z.1
                     * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) z.1)
@@ -422,17 +417,17 @@ lemma itoSimple_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
   funext ω; simp only [itoSimple, SimpleProcess.integral_smul_left, Pi.smul_apply]
 
 /-- **The elementary Itô integral as a linear map** `SimpleProcess →ₗ[ℝ] Lp ℝ 2 μ`. -/
-noncomputable def itoAssembly (hBmeas : ∀ t, Measurable (B t)) :
+noncomputable def itoAssembly (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) :
     SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas) →ₗ[ℝ] Lp ℝ 2 μ where
-  toFun V := itoSimpleLp hBmeas V
+  toFun V := itoSimpleLp hB hBmeas V
   map_add' V W := by
     rw [itoSimpleLp, itoSimpleLp, itoSimpleLp,
-        ← MemLp.toLp_add (memLp_itoSimple hBmeas V) (memLp_itoSimple hBmeas W)]
+        ← MemLp.toLp_add (memLp_itoSimple hB hBmeas V) (memLp_itoSimple hB hBmeas W)]
     congr 1
     exact itoSimple_add hBmeas V W
   map_smul' c V := by
     rw [itoSimpleLp, itoSimpleLp, RingHom.id_apply,
-        ← MemLp.toLp_const_smul c (memLp_itoSimple hBmeas V)]
+        ← MemLp.toLp_const_smul c (memLp_itoSimple hB hBmeas V)]
     congr 1
     exact itoSimple_smul hBmeas c V
 
@@ -468,12 +463,12 @@ noncomputable def simpleAssembly (hBmeas : ∀ t, Measurable (B t)) :
 /-- **The Itô isometry on simple processes.** `‖itoAssembly V‖ = ‖simpleAssembly V‖`: both
 squared norms equal the predictable-rectangle double sum (`itoSimpleLp_norm_sq`,
 `simpleProcessL2_norm_sq`). This is the bound `extendOfNorm` consumes. -/
-theorem assembly_isometry (hBmeas : ∀ t, Measurable (B t))
+theorem assembly_isometry (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
-    ‖itoAssembly (μ := μ) hBmeas V‖ = ‖simpleAssembly (μ := μ) hBmeas V‖ := by
-  have hsq : ‖itoAssembly (μ := μ) hBmeas V‖ ^ 2 = ‖simpleAssembly (μ := μ) hBmeas V‖ ^ 2 := by
-    show ‖(itoSimpleLp hBmeas V : Lp ℝ 2 μ)‖ ^ 2 = ‖simpleProcessL2 (μ := μ) hBmeas V‖ ^ 2
-    rw [itoSimpleLp_norm_sq hBmeas V, simpleProcessL2_norm_sq hBmeas V]
+    ‖itoAssembly (μ := μ) hB hBmeas V‖ = ‖simpleAssembly (μ := μ) hBmeas V‖ := by
+  have hsq : ‖itoAssembly (μ := μ) hB hBmeas V‖ ^ 2 = ‖simpleAssembly (μ := μ) hBmeas V‖ ^ 2 := by
+    show ‖(itoSimpleLp hB hBmeas V : Lp ℝ 2 μ)‖ ^ 2 = ‖simpleProcessL2 (μ := μ) hBmeas V‖ ^ 2
+    rw [itoSimpleLp_norm_sq hB hBmeas V, simpleProcessL2_norm_sq hBmeas V]
   exact (sq_eq_sq₀ (norm_nonneg _) (norm_nonneg _)).mp hsq
 
 end ItoIntegralL2
