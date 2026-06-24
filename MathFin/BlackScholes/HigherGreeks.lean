@@ -37,7 +37,8 @@ private lemma hasDerivAt_bsd1_sigma_clean (S K r : ℝ) {σ τ : ℝ}
     (hσ : 0 < σ) (hτ : 0 < τ) :
     HasDerivAt (fun s => bsd1 S K r s τ) (-(bsd2 S K r σ τ) / σ) σ := by
   have h := hasDerivAt_bsd1_sigma S K r hσ hτ
-  convert h using 1 <;> try rfl
+  convert h using 1
+  try rfl
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'
@@ -102,6 +103,6 @@ lemma hasDerivAt_bsV_charm {K r σ : ℝ} (hσ : 0 < σ)
         * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ := by
   have h_d1_τ := hasDerivAt_bsd1_tau S K r σ hσ hτ
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp τ h_d1_τ
-  convert h_Phi_d1 using 1 <;> first | rfl | ring
+  convert h_Phi_d1 using 1 <;> rfl
 
 end MathFin

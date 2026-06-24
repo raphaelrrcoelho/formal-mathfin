@@ -73,7 +73,7 @@ theorem normalizedSpread_hasLaw_std
       (σeff⁻¹ • (σ₁ • ContinuousLinearMap.fst ℝ ℝ ℝ - σ₂ • ContinuousLinearMap.snd ℝ ℝ ℝ))
     have hcomp : W = L ∘ (fun ω => (W₁ ω, W₂ ω)) := by
       funext ω
-      simp only [hW_def, L, ContinuousLinearMap.coe_smul', ContinuousLinearMap.coe_sub',
+      simp only [hW_def, L, FunLike.coe_smul, FunLike.coe_sub,
         ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd', Function.comp_apply,
         Pi.smul_apply, Pi.sub_apply, smul_eq_mul]
       rw [div_eq_inv_mul]

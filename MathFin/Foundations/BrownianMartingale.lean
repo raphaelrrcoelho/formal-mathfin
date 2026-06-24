@@ -347,7 +347,6 @@ theorem waldExponential_isMartingale (α : ℝ) :
     have h_eq : (fun ω ↦ Real.exp (α * X t ω - α ^ 2 * (t : ℝ) / 2))
               = (fun ω ↦ Real.exp (-(α ^ 2 * (t : ℝ) / 2)) * Real.exp (α * X t ω)) := by
       funext ω
-      change Real.exp _ = _ * Real.exp _
       rw [← Real.exp_add]; congr 1; ring
     rw [h_eq]
     exact (integrable_exp_mul_of_hasLaw h_meas_t (hX.hasLaw_eval t) α).const_mul _

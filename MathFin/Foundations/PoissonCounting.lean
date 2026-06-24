@@ -103,7 +103,7 @@ private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
   have h1 : HasDerivAt (fun u : ℝ => (r * u) ^ (m + 1))
       (((m + 1 : ℕ) : ℝ) * (r * s) ^ m * r) s := by
     have := (hasDerivAt_pow (m + 1) (r * s)).comp s ((hasDerivAt_id s).const_mul r)
-    convert this using 1 <;> first | rfl | (push_cast; ring) | ring
+    convert this using 1 <;> first | rfl | (push_cast; ring)
   have h2 : HasDerivAt (fun u : ℝ => rexp (-(r * u)))
       (rexp (-(r * s)) * (-r)) s := by
     have := (((hasDerivAt_id s).const_mul r).neg).exp
@@ -241,7 +241,7 @@ theorem map_count_eq_poissonMeasure [IsProbabilityMeasure μ]
   have hdiff : ∀ k : ℕ, μ ((N t) ⁻¹' {k})
       = μ {ω | T k ω ≤ t} - μ {ω | T (k + 1) ω ≤ t} := by
     intro k
-    rw [hpre k, measure_diff (hsub k) (hTset_meas (k + 1)).nullMeasurableSet
+    rw [hpre k, measure_sdiff (hsub k) (hTset_meas (k + 1)).nullMeasurableSet
       (measure_ne_top μ _)]
   -- assemble per singleton
   refine Measure.ext_of_singleton fun k => ?_

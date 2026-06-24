@@ -129,7 +129,7 @@ include hB
 content: `B_{t₁} - B_{t₀}` is independent of `𝓕_{t₀}` (weak Markov,
 `IsPreBrownianReal.indepFun_shift`), and `φ` is `𝓕_{t₀}`-measurable. -/
 theorem adapted_indepFun_increment
-    (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
+    (_hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) :
     IndepFun φ (fun ω => B t₁ ω - B t₀ ω) μ := by
   obtain ⟨g, hg, rfl⟩ := hφ
@@ -372,7 +372,7 @@ forward increment process `u ↦ B_{t₀+u} − B_{t₀}` (weak Markov,
 `IsPreBrownianReal.indepFun_shift`). Generalises `adapted_indepFun_increment` from a
 single forward evaluation to functionals of several future increments. -/
 theorem adapted_indepFun_forward
-    (hBmeas : ∀ t, Measurable (B t)) {t₀ : ℝ≥0}
+    (_hBmeas : ∀ t, Measurable (B t)) {t₀ : ℝ≥0}
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ)
     {H : (ℝ≥0 → ℝ) → ℝ} (hH : Measurable H) :
     IndepFun φ (fun ω => H (fun u => B (t₀ + u) ω - B t₀ ω)) μ := by

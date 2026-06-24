@@ -282,7 +282,8 @@ lemma hasDerivAt_bsd1_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
   have h_fun_eq : (fun r' : ℝ => (Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
         = (fun r' : ℝ => bsd1 S K r' σ τ) := by funext r'; rfl
   rw [← h_fun_eq]
-  convert h_div using 1 <;> try rfl
+  convert h_div using 1
+  try rfl
   -- τ/(σ√τ) = √τ/σ
   have h_τ_eq : Real.sqrt τ * Real.sqrt τ = τ := Real.mul_self_sqrt hτ.le
   field_simp

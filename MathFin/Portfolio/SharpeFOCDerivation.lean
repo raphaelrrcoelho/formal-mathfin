@@ -90,7 +90,7 @@ lemma hasDerivAt_expectedReturnTwo (w r₁ r₂ : ℝ) :
     have := h_sub.mul_const r₂
     simpa using this
   have h := h1.add h2
-  convert h using 1 <;> first | rfl | ring
+  convert h using 1 <;> rfl
 
 /-- **Derivative of `V(w) = w² σ₁² + (1−w)² σ₂² + 2 w (1−w) ρ σ₁ σ₂`** is
 `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`. Proof: polynomial rewrite of `V` in the form

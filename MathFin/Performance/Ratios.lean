@@ -175,6 +175,6 @@ lemma kellyGrowth_deriv_at_kelly {p b : ℝ}
   -- Combine
   have h := (h1.const_mul p).add (h2.const_mul (1 - p))
   have h_bp_ne : b + 1 ≠ 0 := h_b1_pos.ne'
-  convert h using 1 <;> first | rfl | (rw [h_1_add, h_1_sub]; field_simp <;> ring)
+  convert h using 1 <;> first | rfl | (rw [h_1_add, h_1_sub]; field_simp; ring)
 
 end MathFin

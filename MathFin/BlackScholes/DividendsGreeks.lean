@@ -109,7 +109,8 @@ lemma hasDerivAt_bsVDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
       have := (hasDerivAt_id q).mul_const τ
       convert this.neg using 1 <;> first | rfl | ring
     have h := h_neg.exp
-    convert h using 1 <;> try rfl
+    convert h using 1
+    try rfl
     ring
   -- ∂_q' [bsV(K, r-q', σ, S, τ)] via chain rule on (r - q').
   have h_sub : HasDerivAt (fun q' : ℝ => r - q') (-1) q := by
@@ -142,7 +143,8 @@ lemma hasDerivAt_bsVDiv_tau {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
       have := (hasDerivAt_id τ).const_mul q
       convert this.neg using 1 <;> first | rfl | ring
     have h := h_neg.exp
-    convert h using 1 <;> try rfl
+    convert h using 1
+    try rfl
     ring
   -- g(t) = bsV K (r-q) σ S t, derivative from hasDerivAt_bsV_tau
   have h_g := hasDerivAt_bsV_tau (r := r - q) hK hσ hS hτ

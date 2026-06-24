@@ -64,7 +64,7 @@ theorem integral_increment_pow4 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     rw [← hv]; exact hB.hasLaw_sub t₁ t₀
   have hcomp := hlaw.integral_comp (f := fun x : ℝ => x ^ 4)
     (measurable_id.pow_const 4).aestronglyMeasurable
-  simp only [Function.comp_def, Pi.sub_apply] at hcomp
+  simp only [Function.comp_def] at hcomp
   rw [hcomp, integral_pow4_gaussianReal, NNReal.coe_sub ht]
 
 /-- **Mean-square fluctuation of a squared Brownian increment**:
@@ -81,7 +81,7 @@ theorem integral_increment_sq_centered {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁
     rw [← hv]; exact hB.hasLaw_sub t₁ t₀
   have hcomp := hlaw.integral_comp
     (f := fun y : ℝ => (y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) ^ 2) (by fun_prop)
-  simp only [Function.comp_def, Pi.sub_apply] at hcomp
+  simp only [Function.comp_def] at hcomp
   rw [integral_sq_sub_var_sq_gaussianReal] at hcomp
   rw [NNReal.coe_sub ht] at hcomp
   exact hcomp
@@ -110,7 +110,7 @@ theorem integral_increment_centered_mean {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t�
     rw [← hv]; exact hB.hasLaw_sub t₁ t₀
   have hcomp := hlaw.integral_comp
     (f := fun y : ℝ => y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) (by fun_prop)
-  simp only [Function.comp_def, Pi.sub_apply] at hcomp
+  simp only [Function.comp_def] at hcomp
   rw [integral_sq_sub_var_gaussianReal] at hcomp
   rw [NNReal.coe_sub ht] at hcomp
   exact hcomp

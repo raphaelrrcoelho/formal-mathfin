@@ -81,7 +81,7 @@ theorem vasicekDeterministic_solves_ODE (r₀ θ κ t : ℝ) :
                 ((r₀ - θ) * (Real.exp (-(κ * t)) * (-κ))) t :=
     h_exp.const_mul (r₀ - θ)
   have h := h_mul.const_add θ
-  convert h using 1 <;> first | rfl | ring | field_simp
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Long-run mean reversion**: `r(t) → θ` as `t → ∞`, for `κ > 0`. The gap
 `(r₀ − θ) e^{−κt}` decays exponentially: `κt → ∞`, so `e^{−κt} → 0`. -/

@@ -73,7 +73,7 @@ private lemma heatKernel_eq_gaussianPDFReal {t : ℝ} (ht : 0 < t) (y : ℝ) :
 private lemma hasDerivAt_heatKernel_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
     HasDerivAt (fun z => heatKernel t z) (-(y / t) * heatKernel t y) y := by
   have h_neg_y_sq : HasDerivAt (fun z : ℝ => -(z ^ 2)) (-(2 * y)) y := by
-    convert (hasDerivAt_pow 2 y).neg using 1 <;> first | rfl | (push_cast; ring) | ring
+    convert (hasDerivAt_pow 2 y).neg using 1 <;> first | rfl | (push_cast; ring)
   have h_inner : HasDerivAt (fun z : ℝ => -(z ^ 2) / (2 * t)) (-(y / t)) y := by
     have := h_neg_y_sq.div_const (2 * t)
     have ht_ne : (2 * t) ≠ 0 := by positivity
@@ -222,8 +222,8 @@ lemma hasFDerivAt_heatKernel {t₀ : ℝ} (ht₀ : 0 < t₀) (y₀ : ℝ) :
   have hB := (hnum.mul hden).exp
   convert hA.mul hB using 1 <;> try rfl
   refine ContinuousLinearMap.ext fun v => ?_
-  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
-    ContinuousLinearMap.neg_apply, ContinuousLinearMap.coe_fst',
+  simp only [add_apply, smul_apply,
+    neg_apply, ContinuousLinearMap.coe_fst',
     ContinuousLinearMap.coe_snd', smul_eq_mul,
     Pi.mul_apply, Pi.neg_apply, Function.comp_apply, heatKernel]
   rw [show -(y₀ ^ 2) / (2 * t₀) = -(y₀ ^ 2) * (2 * t₀)⁻¹ from div_eq_mul_inv _ _,
@@ -244,7 +244,7 @@ lemma hasDerivAt_heatKernel_comp {v w : ℝ → ℝ} {τ₀ vd wd : ℝ}
     hv.prodMk (hw.const_sub z)
   have hcomp := (hasFDerivAt_heatKernel hvpos (z - w τ₀)).comp_hasDerivAt τ₀ hcurve
   convert hcomp using 1 <;> try rfl
-  simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
+  simp only [add_apply, smul_apply,
     ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd', smul_eq_mul]
   ring
 

@@ -207,7 +207,7 @@ private lemma iSup_rpow_atTop_nat {f : ℕ → ℝ≥0∞} (hf : Monotone f) {p 
 
 private lemma ofReal_finset_sup' {ι : Type*} {s : Finset ι} (hs : s.Nonempty) (f : ι → ℝ) :
     ENNReal.ofReal (s.sup' hs f) = s.sup' hs (fun i => ENNReal.ofReal (f i)) :=
-  Finset.comp_sup'_eq_sup'_comp hs ENNReal.ofReal ENNReal.ofReal_max
+  Finset.apply_sup'_eq_sup'_comp hs ENNReal.ofReal ENNReal.ofReal_max
 
 private lemma ofReal_norm_eq_enorm (x : ℝ) : ENNReal.ofReal ‖x‖ = ‖x‖ₑ := by
   rw [Real.norm_eq_abs, ← Real.enorm_eq_ofReal_abs]

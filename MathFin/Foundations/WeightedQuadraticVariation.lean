@@ -212,7 +212,7 @@ private theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Contin
     simp only [unifPart, div_self hne, one_mul]
   have hle_T : ∀ n k, k ≤ n → unifPart T n k ≤ T := fun n k hk => by
     rcases Nat.eq_zero_or_pos n with hn0 | hn
-    · subst hn0; rw [Nat.le_zero.mp hk, hzero]; exact zero_le'
+    · subst hn0; rw [Nat.le_zero.mp hk, hzero]; exact zero_le
     · exact (hmono n hk).trans_eq (hlast n hn)
   have hgap : ∀ n, 0 < n → ∀ k, (unifPart T n (k + 1) : ℝ) - unifPart T n k = (T : ℝ) / n :=
     fun n hn k => by
@@ -299,7 +299,7 @@ private theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Contin
     rw [setIntegral_indicator measurableSet_Ioc, setIntegral_const, smul_eq_mul,
       show Set.Ioc (0 : ℝ≥0) T ∩ Set.Ioc (unifPart T n k) (unifPart T n (k + 1))
           = Set.Ioc (unifPart T n k) (unifPart T n (k + 1)) by
-        rw [Set.Ioc_inter_Ioc, max_eq_right zero_le', min_eq_right (hle_T n (k + 1) hkn)],
+        rw [Set.Ioc_inter_Ioc, max_eq_right zero_le, min_eq_right (hle_T n (k + 1) hkn)],
       measureReal_def, hν, ItoIntegralL2.timeMeasure_Ioc, ENNReal.toReal_ofReal
         (sub_nonneg.mpr (by exact_mod_cast hmono n (Nat.le_succ k)))]
     ring

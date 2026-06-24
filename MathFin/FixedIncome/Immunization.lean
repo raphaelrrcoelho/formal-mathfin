@@ -71,7 +71,7 @@ lemma hasDerivAt_bondPortfolioValue_r
       exact h.neg
     have h_exp := h_lin.exp
     have h_prod := h_exp.const_mul (w i)
-    convert h_prod using 1 <;> first | rfl | ring | field_simp
+    convert h_prod using 1 <;> first | rfl | ring
   have h_raw := HasDerivAt.sum h_each
   -- `HasDerivAt.sum` yields a Pi-typed sum; convert back to a function of a sum.
   have h_fn_eq :
