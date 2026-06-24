@@ -73,12 +73,11 @@ private lemma heatKernel_eq_gaussianPDFReal {t : ℝ} (ht : 0 < t) (y : ℝ) :
 private lemma hasDerivAt_heatKernel_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
     HasDerivAt (fun z => heatKernel t z) (-(y / t) * heatKernel t y) y := by
   have h_neg_y_sq : HasDerivAt (fun z : ℝ => -(z ^ 2)) (-(2 * y)) y := by
-    simpa using (hasDerivAt_pow 2 y).neg
+    convert (hasDerivAt_pow 2 y).neg using 1 <;> first | rfl | (push_cast; ring) | ring
   have h_inner : HasDerivAt (fun z : ℝ => -(z ^ 2) / (2 * t)) (-(y / t)) y := by
     have := h_neg_y_sq.div_const (2 * t)
     have ht_ne : (2 * t) ≠ 0 := by positivity
-    convert this using 1
-    field_simp
+    convert this using 1 <;> first | rfl | field_simp
   have h_exp : HasDerivAt (fun z : ℝ => Real.exp (-(z ^ 2) / (2 * t)))
       (Real.exp (-(y ^ 2) / (2 * t)) * -(y / t)) y := h_inner.exp
   have h_mul := h_exp.const_mul ((Real.sqrt (2 * Real.pi * t))⁻¹)
@@ -179,8 +178,7 @@ private lemma hasDerivAt_heatKernel_x {t : ℝ} (ht : 0 < t) (z x : ℝ) :
     HasDerivAt (fun x' => heatKernel t (z - x'))
       ((z - x) / t * heatKernel t (z - x)) x := by
   have h := (hasDerivAt_heatKernel_y ht (z - x)).comp x ((hasDerivAt_id x).const_sub z)
-  convert h using 1
-  ring
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Second kernel `x`-derivative**:
 `∂_xx K(t, z − x) = ∂_x [((z − x)/t)·K(t, z − x)] = K(t, z − x)·((z − x)² − t)/t²`.
@@ -194,8 +192,7 @@ private lemma hasDerivAt_heatKernel_x_x {t : ℝ} (ht : 0 < t) (z x : ℝ) :
   rw [hfun]
   have h := ((hasDerivAt_heatKernel_y_y ht (z - x)).comp x
     ((hasDerivAt_id x).const_sub z)).neg
-  convert h using 1
-  ring
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Joint differentiability of the heat kernel** in `(t, y)` (for `t > 0`). The Fréchet derivative
 at `(t₀, y₀)` is the row functional `(a, b) ↦ ∂_t K · a + ∂_y K · b` (`∂_t K = K·(y²−t)/(2t²)`,
@@ -212,18 +209,18 @@ lemma hasFDerivAt_heatKernel {t₀ : ℝ} (ht₀ : 0 < t₀) (y₀ : ℝ) :
   have h2t0_ne : (2 * t₀) ≠ 0 := by positivity
   have hlin1 : HasFDerivAt (fun p : ℝ × ℝ => 2 * Real.pi * p.1)
       ((2 * Real.pi) • ContinuousLinearMap.fst ℝ ℝ ℝ) (t₀, y₀) := by
-    simpa using ((2 * Real.pi) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
+    exact ((2 * Real.pi) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
   have hlin2 : HasFDerivAt (fun p : ℝ × ℝ => 2 * p.1)
       ((2 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ) (t₀, y₀) := by
-    simpa using ((2 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
+    exact ((2 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
   have hsnd : HasFDerivAt (fun p : ℝ × ℝ => p.2) (ContinuousLinearMap.snd ℝ ℝ ℝ) (t₀, y₀) := by
-    simpa using (ContinuousLinearMap.snd ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
+    exact (ContinuousLinearMap.snd ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
   have hA := (hasDerivAt_inv hsqrt_ne).comp_hasFDerivAt (t₀, y₀)
       ((Real.hasDerivAt_sqrt h2pit.ne').comp_hasFDerivAt (t₀, y₀) hlin1)
   have hnum := (hsnd.pow 2).neg
   have hden := (hasDerivAt_inv h2t0_ne).comp_hasFDerivAt (t₀, y₀) hlin2
   have hB := (hnum.mul hden).exp
-  convert hA.mul hB using 1
+  convert hA.mul hB using 1 <;> try rfl
   refine ContinuousLinearMap.ext fun v => ?_
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.neg_apply, ContinuousLinearMap.coe_fst',
@@ -246,7 +243,7 @@ lemma hasDerivAt_heatKernel_comp {v w : ℝ → ℝ} {τ₀ vd wd : ℝ}
   have hcurve : HasDerivAt (fun s => (v s, z - w s)) (vd, -wd) τ₀ :=
     hv.prodMk (hw.const_sub z)
   have hcomp := (hasFDerivAt_heatKernel hvpos (z - w τ₀)).comp_hasDerivAt τ₀ hcurve
-  convert hcomp using 1
+  convert hcomp using 1 <;> try rfl
   simp only [ContinuousLinearMap.add_apply, ContinuousLinearMap.smul_apply,
     ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd', smul_eq_mul]
   ring
@@ -964,7 +961,7 @@ theorem expectation_ito
 `E[f(X_t)] = f(0) + ½·∫₀ᵗ E[f″(X_s)] ds`. The increment-law hypotheses are discharged from the
 marginal law `IsPreBrownianReal.hasLaw_eval` through the shared transfer `feynmanU_eq_integral_of_map`.
 (`X` is `ℝ≥0`-indexed; the `∫₀ᵗ` runs over real `s`, so `X` is read at `·.toNNReal`.) -/
-theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} [IsPreBrownianReal X μ]
+theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBrownianReal X μ)
     {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
@@ -978,8 +975,8 @@ theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} [IsPreBrownia
     have h1 := integral_shift_eq_feynmanU g r 0
     simp only [zero_add] at h1
     rw [h1, feynmanU_eq_integral_of_map (B := fun s => X s.toNNReal) (t := r)
-      (IsPreBrownianReal.aemeasurable (P := μ) r.toNNReal)
-      (IsPreBrownianReal.hasLaw_eval (P := μ) r.toNNReal).map_eq hgc hr 0]
+      (hX.aemeasurable r.toNNReal)
+      (hX.hasLaw_eval r.toNNReal).map_eq hgc hr 0]
     simp only [zero_add]
   rw [← hbridge f hfc ht, heatConvolution_eq_add_integral_deriv ht hf hf' hf''c hCf hCf' hCf'']
   congr 1
@@ -1310,7 +1307,6 @@ theorem feynmanU_heat_equation {t : ℝ} (ht : 0 < t) (h : ℝ → ℝ) (x : ℝ
   rw [← integral_const_mul]
   congr 1
   ext z
-  dsimp only
   rw [heatKernel_t_eq_half_y_y ht (z - x)]
   ring
 
