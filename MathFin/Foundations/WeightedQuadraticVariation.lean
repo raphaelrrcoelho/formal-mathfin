@@ -40,7 +40,9 @@ open MeasureTheory ProbabilityTheory Filter ItoIsometryAdapted QuadraticVariatio
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownianReal B μ]
+  (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- For `χ` adapted to `𝓕_{t₀}` and in `L²`, the centered squared increment integrates
 against `χ` to zero: `E[χ·((ΔB)² − (t₁−t₀))] = 0`. The `χ ≡ 1` case is
@@ -55,11 +57,11 @@ private theorem integral_adapted_mul_centered_sq
   have hχm : Measurable χ := hχ.measurable hBmeas
   have hYm : Measurable (fun ω => (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) := by fun_prop
   have hindep : IndepFun χ (fun ω => (B t₁ ω - B t₀ ω) ^ 2 - ((t₁ : ℝ) - t₀)) μ := by
-    have h := (adapted_indepFun_increment (μ := μ) hBmeas ht hχ).comp
-      (φ := (id : ℝ → ℝ)) (ψ := fun x => x ^ 2 - ((t₁ : ℝ) - t₀)) measurable_id (by fun_prop)
+    have h := (adapted_indepFun_increment hB hBmeas ht hχ).comp
+      measurable_id (by fun_prop : Measurable (fun x : ℝ => x ^ 2 - ((t₁ : ℝ) - t₀)))
     simpa [Function.comp_def] using h
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
-      integral_increment_centered_mean ht, mul_zero]
+      integral_increment_centered_mean hB ht, mul_zero]
 
 /-- **Term I, per-`n` bound.** The `L²` norm² of the weighted fluctuation
 `∑ₖ w_{tₖ}·((ΔBₖ)² − Δtₖ)` is at most `∑ₖ C²·2(Δtₖ)²` for any adapted weight process `w`
@@ -85,7 +87,7 @@ private theorem weighted_fluctuation_integral_le
     with hY_def
   set a : ℕ → Ω → ℝ := fun k ω => w (t k) ω * Y k ω with ha_def
   have hw_meas : ∀ s, Measurable (w s) := fun s => (hw_adapt s).measurable hBmeas
-  have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k => memLp_increment_sq_centered_two (t k) (t (k + 1)) _
+  have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k => memLp_increment_sq_centered_two hB (t k) (t (k + 1)) _
   have ha_aesm : ∀ k, AEStronglyMeasurable (a k) μ := fun k =>
     (hw_meas (t k)).aestronglyMeasurable.mul (hYL2 k).aestronglyMeasurable
   have haL2 : ∀ k, MemLp (a k) 2 μ := fun k =>
@@ -105,7 +107,7 @@ private theorem weighted_fluctuation_integral_le
     rcases lt_or_gt_of_ne hlk with hlt | hgt
     · have hχ : AdaptedAt B (t k) (fun ω => a l ω * w (t k) ω) :=
         ((ha_adapt l).mono (hmono (Nat.succ_le_of_lt hlt))).mul (hw_adapt (t k))
-      have h := integral_adapted_mul_centered_sq (μ := μ) hBmeas (hmono (Nat.le_succ k)) hχ
+      have h := integral_adapted_mul_centered_sq hB hBmeas (hmono (Nat.le_succ k)) hχ
       rw [show (fun ω => a k ω * a l ω)
             = (fun ω => (a l ω * w (t k) ω)
                 * ((B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)))
@@ -113,7 +115,7 @@ private theorem weighted_fluctuation_integral_le
       exact h
     · have hχ : AdaptedAt B (t l) (fun ω => a k ω * w (t l) ω) :=
         ((ha_adapt k).mono (hmono (Nat.succ_le_of_lt hgt))).mul (hw_adapt (t l))
-      have h := integral_adapted_mul_centered_sq (μ := μ) hBmeas (hmono (Nat.le_succ l)) hχ
+      have h := integral_adapted_mul_centered_sq hB hBmeas (hmono (Nat.le_succ l)) hχ
       rw [show (fun ω => a k ω * a l ω)
             = (fun ω => (a k ω * w (t l) ω)
                 * ((B (t (l + 1)) ω - B (t l) ω) ^ 2 - ((t (l + 1) : ℝ) - t l)))
@@ -135,7 +137,7 @@ private theorem weighted_fluctuation_integral_le
           rw [show (fun ω => Y k ω * Y k ω)
                 = (fun ω => ((B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)) ^ 2)
               from funext fun ω => by simp only [hY_def]; ring,
-              integral_increment_sq_centered (hmono (Nat.le_succ k))]
+              integral_increment_sq_centered hB (hmono (Nat.le_succ k))]
   calc ∫ ω, (∑ k ∈ Finset.range n, a k ω) ^ 2 ∂μ
       = ∫ ω, ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, a k ω * a l ω ∂μ := by
         refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
@@ -168,7 +170,7 @@ private theorem tendsto_weighted_fluctuation
     (Eventually.of_forall fun n => integral_nonneg fun ω => sq_nonneg _) ?_
     (by simpa using tendsto_const_div_atTop_nhds_zero_nat (2 * C ^ 2 * (T : ℝ) ^ 2))
   filter_upwards [eventually_gt_atTop 0] with n hn
-  refine (weighted_fluctuation_integral_le hBmeas hw_adapt hC hw_bdd T n).trans (le_of_eq ?_)
+  refine (weighted_fluctuation_integral_le hB hBmeas hw_adapt hC hw_bdd T n).trans (le_of_eq ?_)
   have hΔ : ∀ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n :=
     fun k _ => by simp only [unifPart]; push_cast; field_simp; ring
   have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
@@ -178,6 +180,7 @@ private theorem tendsto_weighted_fluctuation
       Finset.sum_const, Finset.card_range, nsmul_eq_mul]
   field_simp
 
+omit hB in
 /-- **Riemann sums of a continuous, bounded path converge to its integral.** For
 `h : ℝ≥0 → ℝ` continuous and bounded by `C`, the left-endpoint Riemann sums along the
 uniform partition of `[0,T]` converge to `∫₀ᵀ h ∂timeMeasure`. Mathlib has no Riemann-sum
@@ -311,6 +314,7 @@ private theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Contin
     (ae_restrict_of_forall_mem measurableSet_Ioc hptwise)
   exact (tendsto_congr hstep_integ).mp hconv
 
+omit hB in
 /-- The uniform-partition mesh telescopes: `∑_{k<n} (t_{k+1} − t_k) = T` for `n > 0`. -/
 private lemma unifPart_mesh_sum (T : ℝ≥0) {n : ℕ} (hn : 0 < n) :
     ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) := by
@@ -321,6 +325,7 @@ private lemma unifPart_mesh_sum (T : ℝ≥0) {n : ℕ} (hn : 0 < n) :
   have h0 : unifPart T n 0 = 0 := by simp [unifPart]
   rw [h1, h0]; simp
 
+omit hB in
 /-- A left-endpoint Riemann weight-sum of a bounded process is bounded by `C·T`:
 `|∑_{k<n} w_{t_k}(ω)·(t_{k+1} − t_k)| ≤ C·T`. Shared left-endpoint bound for the
 weighted-QV Riemann term, `memLp_pathIntegral_process`, and the time-dependent Itô
@@ -350,6 +355,7 @@ lemma abs_riemann_weight_sum_le {w : ℝ≥0 → Ω → ℝ} {C : ℝ} (hC0 : 0 
           rw [Finset.mul_sum]
       _ = C * T := by rw [unifPart_mesh_sum T hn]
 
+omit hB in
 /-- The pathwise integral `ω ↦ ∫₀ᵀ w_s(ω) ds` of a bounded measurable process with
 continuous paths is measurable: the pointwise limit of the (measurable) left-endpoint
 Riemann sums. The shared measurability core of the `L²` Riemann lemmas below and of
@@ -364,6 +370,7 @@ private theorem measurable_pathIntegral
     (tendsto_pi_nhds.mpr fun ω =>
       tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) (fun s => hw_bdd s ω) T)
 
+omit hB in
 /-- The pathwise integral inherits the Riemann sums' uniform bound `C·T`
 (`abs_riemann_weight_sum_le` carried to the limit). The shared bound core of the `L²`
 Riemann lemmas below and of `memLp_pathIntegral_process`. -/
@@ -376,6 +383,7 @@ private theorem abs_pathIntegral_le
       (tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) (fun s => hw_bdd s ω) T))
     (Eventually.of_forall fun n => abs_riemann_weight_sum_le hC0 hw_bdd T n ω)
 
+omit hB in
 /-- **Left-endpoint Riemann sums of a bounded continuous-path process converge in `L²` to
 its path integral**: `∑ₖ w_{tₖ}·Δtₖ → ∫₀ᵀ w_s ds` in `L²(μ)`. Pathwise this is
 `tendsto_riemann_continuous`; dominated convergence (uniform bound `C·T` on both sides)
@@ -416,6 +424,7 @@ theorem tendsto_riemann_L2_process [IsFiniteMeasure μ]
   simpa using tendsto_integral_of_dominated_convergence
     (fun _ => (2 * C * (T : ℝ)) ^ 2) hRI_meas (integrable_const _) hRI_nbd hlim
 
+omit hB in
 /-- **Per-`n` integrability of the squared Riemann defect**: both the weight-sum and the
 path integral are uniformly bounded by `C·T`, so the squared defect is dominated by
 `(2CT)²`. The integrability companion of `tendsto_riemann_L2_process`, supplying the
@@ -468,7 +477,7 @@ theorem tendsto_weighted_qv_process
   -- **Term I**: the fluctuation `Ssum − Rsum → 0` in `L²` (= `tendsto_weighted_fluctuation`)
   have hTermI : Tendsto (fun n => ∫ ω, (Ssum n ω - Rsum n ω) ^ 2 ∂μ) atTop (𝓝 0) := by
     refine (tendsto_congr fun n => ?_).mp
-      (tendsto_weighted_fluctuation (μ := μ) hBmeas hw_adapt hC0 hw_bdd T)
+      (tendsto_weighted_fluctuation hB hBmeas hw_adapt hC0 hw_bdd T)
     refine integral_congr_ae (Eventually.of_forall fun ω => ?_)
     show (∑ k ∈ Finset.range n, w (unifPart T n k) ω
           * ((B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
@@ -482,7 +491,7 @@ theorem tendsto_weighted_qv_process
     rw [hbase]
   -- **Term II**: the Riemann remainder `Rsum − Ipath → 0` in `L²` (the standalone lemma)
   have hTermII : Tendsto (fun n => ∫ ω, (Rsum n ω - Ipath ω) ^ 2 ∂μ) atTop (𝓝 0) :=
-    tendsto_riemann_L2_process (μ := μ) hw_meas hw_cont hC0 hw_bdd T
+    tendsto_riemann_L2_process hw_meas hw_cont hC0 hw_bdd T
   -- integrability of the two squared pieces (upper bounds for the squeeze)
   have hInt_I : ∀ n, Integrable (fun ω => (Ssum n ω - Rsum n ω) ^ 2) μ := by
     intro n
@@ -497,7 +506,7 @@ theorem tendsto_weighted_qv_process
       refine memLp_finsetSum _ fun k _ => ?_
       have hZ : MemLp (fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
           - ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) 2 μ :=
-        memLp_increment_sq_centered_two (unifPart T n k) (unifPart T n (k + 1)) _
+        memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) _
       have haesm : AEStronglyMeasurable (fun ω => w (unifPart T n k) ω
           * ((B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
             - ((unifPart T n (k + 1) : ℝ) - unifPart T n k))) μ :=
@@ -510,7 +519,7 @@ theorem tendsto_weighted_qv_process
         = fun ω => (Ssum n ω - Rsum n ω) * (Ssum n ω - Rsum n ω) := by funext ω; ring
     rw [hsq]; exact hmemS.integrable_mul hmemS
   have hInt_II : ∀ n, Integrable (fun ω => (Rsum n ω - Ipath ω) ^ 2) μ := fun n =>
-    integrable_riemann_defect_sq (μ := μ) hw_meas hw_cont hC0 hw_bdd T n
+    integrable_riemann_defect_sq hw_meas hw_cont hC0 hw_bdd T n
   -- **Assembly**: `(Ssum−Ipath)² ≤ 2(Ssum−Rsum)² + 2(Rsum−Ipath)²`, squeeze both terms to `0`
   have hupper : Tendsto (fun n => 2 * ∫ ω, (Ssum n ω - Rsum n ω) ^ 2 ∂μ
       + 2 * ∫ ω, (Rsum n ω - Ipath ω) ^ 2 ∂μ) atTop (𝓝 0) := by
@@ -541,13 +550,14 @@ theorem tendsto_weighted_qv
                   * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
               - ∫ s in Set.Ioc 0 T, g (B s ω) ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
       atTop (𝓝 0) :=
-  tendsto_weighted_qv_process (μ := μ) hBmeas
+  tendsto_weighted_qv_process hB hBmeas
     (w := fun s ω => g (B s ω))
     (fun _s => adaptedAt_comp_eval le_rfl hg_cont.measurable)
     (fun ω => hg_cont.comp (hBcont ω))
     (le_trans (abs_nonneg _) (hg_bdd 0))
     (fun _s _ω => hg_bdd _) T
 
+omit hB in
 /-- The pathwise integral `ω ↦ ∫₀ᵀ w_s(ω) ds` of a bounded measurable process with
 continuous paths lies in `L²(μ)`: it is measurable (a pointwise limit of the measurable
 Riemann sums via `tendsto_riemann_continuous`) and bounded by `C·T`. Exported for the
