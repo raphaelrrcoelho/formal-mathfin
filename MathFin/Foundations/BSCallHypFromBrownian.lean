@@ -75,11 +75,11 @@ variance computation `T.toNNReal / NNReal.mk((√T)², _) = 1` reduces to
 lemma scaled_isPreBrownian_eval_law
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
+    (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
     {T : ℝ} (hT : 0 < T) :
     HasLaw (fun ω => W T.toNNReal ω / Real.sqrt T) (gaussianReal 0 1) Q := by
   have h_eval : HasLaw (W T.toNNReal) (gaussianReal 0 T.toNNReal) Q :=
-    IsPreBrownianReal.hasLaw_eval T.toNNReal
+    hW.hasLaw_eval T.toNNReal
   have h_div := gaussianReal_div_const h_eval (Real.sqrt T)
   convert h_div using 2
   · rw [zero_div]
@@ -100,11 +100,11 @@ hypothesis. -/
 theorem BSCallHyp.of_isPreBrownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
+    (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     BSCallHyp Q S_0 K r σ T (fun ω => W T.toNNReal ω / Real.sqrt T) :=
-  ⟨hS_0, hK, hσ, hT, scaled_isPreBrownian_eval_law W hT⟩
+  ⟨hS_0, hK, hσ, hT, scaled_isPreBrownian_eval_law W hW hT⟩
 
 /-- **`BachelierHyp` from a pre-Brownian motion**. Same scaled `Z := W
 T.toNNReal / √T` works for the Bachelier arithmetic-BM model (no
@@ -113,11 +113,11 @@ exponential), since both hypotheses share `Z_law : HasLaw Z (gaussianReal
 theorem BachelierHyp.of_isPreBrownian
     {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (Q : Measure Ω) [IsProbabilityMeasure Q]
-    (W : ℝ≥0 → Ω → ℝ) [IsPreBrownianReal W Q]
+    (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
     {S_0 K σ T : ℝ}
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     BachelierHyp Q S_0 K σ T (fun ω => W T.toNNReal ω / Real.sqrt T) :=
-  ⟨hK, hσ, hT, scaled_isPreBrownian_eval_law W hT⟩
+  ⟨hK, hσ, hT, scaled_isPreBrownian_eval_law W hW hT⟩
 
 /-- **`bsTerminal` expressed in terms of Brownian motion**: substituting the
 scaled `Z := W T.toNNReal / √T` into `bsTerminal` yields the *intrinsic*
