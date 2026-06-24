@@ -150,8 +150,7 @@ lemma hasDerivAt_gbmValue_space (S₀ μ σ t x : ℝ) :
   have h := h_exp.const_mul S₀
   -- `h : HasDerivAt (fun y => S₀ * exp(...)) (S₀ * (exp(...) * σ)) x`
   unfold gbmValue
-  convert h using 1
-  ring
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Time partial** `∂_t S = (μ − ½σ²) · S` — genuine `HasDerivAt`. -/
 lemma hasDerivAt_gbmValue_time (S₀ μ σ t x : ℝ) :
@@ -161,8 +160,7 @@ lemma hasDerivAt_gbmValue_time (S₀ μ σ t x : ℝ) :
     simpa using ((hasDerivAt_id t).const_mul (μ - σ ^ 2 / 2)).add_const (σ * x)
   have h := (h_lin.exp).const_mul S₀
   unfold gbmValue
-  convert h using 1
-  ring
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Second space partial** `∂_xx S = σ² · S` — the derivative of
 `∂_x S = σ · S` is `σ · (σ · S) = σ² · S`. -/
@@ -170,8 +168,7 @@ lemma hasDerivAt_gbmValue_space_space (S₀ μ σ t x : ℝ) :
     HasDerivAt (fun y => σ * gbmValue S₀ μ σ t y)
       (σ ^ 2 * gbmValue S₀ μ σ t x) x := by
   have h := (hasDerivAt_gbmValue_space S₀ μ σ t x).const_mul σ
-  convert h using 1
-  ring
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Geometric Brownian motion solves the GBM SDE (drift + diffusion).** The
 partials enter as `HasDerivAt` hypotheses — so by `HasDerivAt.unique` they are

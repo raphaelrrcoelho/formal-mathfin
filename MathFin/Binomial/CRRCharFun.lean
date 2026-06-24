@@ -513,7 +513,7 @@ lemma tendsto_integral_put {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS
     (crr_tendsto_gaussian_inDistribution hσ hT hp))
     (BoundedContinuousFunction.ofNormedAddCommGroup _ hcont _ hbound)
   simpa only [BoundedContinuousFunction.coe_ofNormedAddCommGroup, crrRowProbMeasure,
-    bsLimitProbMeasure] using hconv
+    bsLimitProbMeasure, MeasureTheory.ProbabilityMeasure.coe_mk] using hconv
 
 /-- **Cox–Ross–Rubinstein → Black–Scholes, the call-price convergence.** Under
 no-arbitrage at every step, the `n`-step CRR binomial price of a European call

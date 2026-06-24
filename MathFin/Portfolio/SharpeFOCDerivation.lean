@@ -90,7 +90,7 @@ lemma hasDerivAt_expectedReturnTwo (w r₁ r₂ : ℝ) :
     have := h_sub.mul_const r₂
     simpa using this
   have h := h1.add h2
-  convert h using 1
+  convert h using 1 <;> first | rfl | ring
 
 /-- **Derivative of `V(w) = w² σ₁² + (1−w)² σ₂² + 2 w (1−w) ρ σ₁ σ₂`** is
 `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`. Proof: polynomial rewrite of `V` in the form
@@ -107,24 +107,20 @@ lemma hasDerivAt_varianceTwo (w σ₁ σ₂ ρ : ℝ) :
     ring
   rw [h_v_poly]
   have h_sq : HasDerivAt (fun w' : ℝ => w'^2) (2*w) w := by
-    have := (hasDerivAt_id w).pow 2
-    simpa using this
+    have := hasDerivAt_pow 2 w
+    convert this using 1 <;> first | rfl | (push_cast; ring)
   have h_term1 := h_sq.const_mul (σ₁^2 + σ₂^2 - 2*ρ*σ₁*σ₂)
   have h_term2 := (hasDerivAt_id w).const_mul (-2*σ₂^2 + 2*ρ*σ₁*σ₂)
   have h_term3 : HasDerivAt (fun _ : ℝ => (σ₂^2 : ℝ)) 0 w := hasDerivAt_const w _
   have h := (h_term1.add h_term2).add h_term3
-  convert h using 1
-  unfold marginalVarOne marginalVarTwo
-  ring
+  convert h using 1 <;> first | rfl | (unfold marginalVarOne marginalVarTwo; ring)
 
 /-- **Derivative of `E²(w)`** is `2 E (r₁ − r₂)`. -/
 lemma hasDerivAt_expectedReturnTwo_sq (w r₁ r₂ : ℝ) :
     HasDerivAt (fun w' => (expectedReturnTwo w' r₁ r₂)^2)
                (2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂)) w := by
   have h := (hasDerivAt_expectedReturnTwo w r₁ r₂).pow 2
-  convert h using 1
-  push_cast
-  ring
+  convert h using 1 <;> first | rfl | (push_cast; ring)
 
 /-- **Derivative of `Sh²(w) = E²/V`**: textbook formula `Sh²'(w) = (2EE'V − E²V')/V²`. -/
 theorem hasDerivAt_sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ)
