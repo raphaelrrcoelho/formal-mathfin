@@ -61,8 +61,11 @@ namespace MathFin
 namespace ItoIntegralProcess
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
+include hB
+
+omit hB in
 /-- A continuous function is càdlàg: right-continuity is `ContinuousWithinAt` on
 each `Ioi`, and the left limit at `x` is `f x` (continuity gives the
 `𝓝[<] x`-limit). -/
@@ -71,6 +74,7 @@ private lemma isCadlag_of_continuous {ι E : Type*} [TopologicalSpace ι] [Parti
   right_continuous := fun _ => hf.continuousWithinAt
   left_limit := fun x => ⟨f x, hf.continuousWithinAt.tendsto⟩
 
+omit hB in
 /-- **Pathwise continuity of the elementary Itô integral.** Given continuous
 Brownian paths, for each `ω` the path `t ↦ (V ● B)_t ω` is continuous: it is the
 finite sum `∑_p V(p)ω·(B_{p.2∧t}ω − B_{p.1∧t}ω)` (`itoSimpleProcess_apply`), each
@@ -96,7 +100,7 @@ theorem itoSimpleProcess_isLocalMartingale (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
     IsLocalMartingale (fun t ω => itoSimpleProcess hBmeas V t ω)
       (ItoIntegralL2.natFiltration hBmeas) μ :=
-  Martingale.IsLocalMartingale (itoSimpleProcess_isMartingale hBmeas V)
+  Martingale.IsLocalMartingale (itoSimpleProcess_isMartingale hB hBmeas V)
     (fun ω => isCadlag_of_continuous (itoSimpleProcess_pathContinuous hBmeas hBcont V ω))
 
 end ItoIntegralProcess
