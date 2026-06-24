@@ -126,7 +126,9 @@ lemma itoSimpleProcess_eq_itoSimple (hBmeas : ∀ t, Measurable (B t))
   have h1 : min p.1 t = p.1 := min_eq_left ((V.le_of_mem_support_value p hp).trans (ht p hp))
   rw [h1, h2]
 
-variable [hB : IsPreBrownianReal B μ]
+variable (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- A simple process's value `V(p)` is in `L²(μ)`: it is `𝓕_{p.1}`-measurable and
 bounded by `V.valueBound`, hence `L²` on the probability space. -/
@@ -150,10 +152,10 @@ theorem memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
   by_cases ht : p.1 ≤ t
   · -- active interval: adapted coefficient × increment over `[p.1, p.2 ∧ t]`
     rw [min_eq_left ht]
-    exact ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas
+    exact ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas
       (le_min (V.le_of_mem_support_value p hp) ht)
       (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
-      (memLp_value hBmeas V p)
+      (memLp_value hB hBmeas V p)
   · -- interval entirely past `t`: both endpoints truncate to `t`, term is `0`
     push Not at ht
     have h1 : min p.1 t = t := min_eq_right ht.le
@@ -172,13 +174,13 @@ theorem memLp_itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
   rw [show itoSimpleProcess hBmeas V t
         = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)
       from funext fun ω => by rw [itoSimpleProcess_apply]; rfl]
-  exact memLp_finsetSum _ fun p hp => memLp_truncated_term hBmeas V t hp
+  exact memLp_finsetSum _ fun p hp => memLp_truncated_term hB hBmeas V t hp
 
 /-- The process Itô integral at time `t` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def itoSimpleProcessLp (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
     (t : ℝ≥0) : Lp ℝ 2 μ :=
-  (memLp_itoSimpleProcess hBmeas V t).toLp _
+  (memLp_itoSimpleProcess hB hBmeas V t).toLp _
 
 end ItoIntegralProcess
 end MathFin
