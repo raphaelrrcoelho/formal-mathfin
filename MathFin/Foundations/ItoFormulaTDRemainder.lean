@@ -73,8 +73,9 @@ theorem abs_taylor1_le {g g' g'' : ℝ → ℝ}
       (mul_le_mul_of_nonneg_left (hmem t ht) hM0)
   -- Level 0: the remainder itself
   have hd0 : ∀ u, HasDerivAt (fun s => g s - g x - g' x * (s - x)) (g' u - g' x) u := fun u => by
-    simpa using ((hg u).sub_const (g x)).sub
+    have h := ((hg u).sub_const (g x)).sub
       (((hasDerivAt_id u).sub_const x).const_mul (g' x))
+    convert h using 1 <;> first | rfl | ring
   have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
     (fun u _ => (hd0 u).hasDerivWithinAt)
     (fun u hu => by rw [Real.norm_eq_abs]; exact hL1 u hu)
@@ -176,14 +177,16 @@ theorem sq_discreteTaylorRemainder2D_le
         rw [h4, h6, sq_abs, sq_abs]; ring
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownianReal B μ]
+  (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- A squared Brownian increment is integrable: `(ΔB)² = ((ΔB)² − Δt) + Δt`, the centered
 part being `L²` (`memLp_increment_sq_centered_two`) over a probability space. -/
 theorem integrable_increment_sq (t₀ t₁ : ℝ≥0) :
     Integrable (fun ω => (B t₁ ω - B t₀ ω) ^ 2) μ := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have h := (memLp_increment_sq_centered_two (B := B) (μ := μ) t₀ t₁
+  have h := (memLp_increment_sq_centered_two (B := B) (μ := μ) hB t₀ t₁
       ((t₁ : ℝ) - t₀)).integrable one_le_two
   refine (h.add (integrable_const ((t₁ : ℝ) - t₀))).congr
     (Eventually.of_forall fun ω => ?_)
@@ -232,8 +235,8 @@ theorem memLp_discreteTaylorRemainder2D_two
         + 3 * Ctx ^ 2 * ((t₁ : ℝ) - t₀) ^ 2 * (B t₁ ω - B t₀ ω) ^ 2
         + 3 * Cxxx ^ 2 * (B t₁ ω - B t₀ ω) ^ 6) μ :=
     ((integrable_const _).add
-      ((integrable_increment_sq (B := B) _ _).const_mul _)).add
-      ((integrable_increment_pow6 (B := B) _ _).const_mul _)
+      ((integrable_increment_sq hB _ _).const_mul _)).add
+      ((integrable_increment_pow6 (B := B) hB _ _).const_mul _)
   rw [memLp_two_iff_integrable_sq hmeas.aestronglyMeasurable]
   refine Integrable.mono' hdom (hmeas.pow_const 2).aestronglyMeasurable
     (Eventually.of_forall fun ω => ?_)
@@ -270,13 +273,13 @@ theorem tendsto_ito_remainder_td
         + 3 * Cxxx ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6) μ :=
     fun n k =>
       ((integrable_const _).add
-        ((integrable_increment_sq (B := B) _ _).const_mul _)).add
-        ((integrable_increment_pow6 (B := B) _ _).const_mul _)
+        ((integrable_increment_sq hB _ _).const_mul _)).add
+        ((integrable_increment_pow6 (B := B) hB _ _).const_mul _)
   have hRsq_int : ∀ n k, Integrable (fun ω => (discreteTaylorRemainder2D f f_t f_x f_xx
       (unifPart T n k) (unifPart T n (k + 1))
       (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2) μ := fun n k =>
-    (memLp_discreteTaylorRemainder2D_two hBmeas hf_t hf_tt hf_tx hf_x hf_xx hf_xxx
-      hbd_tt hbd_tx hbd_xxx _ _).integrable_sq
+    (memLp_discreteTaylorRemainder2D_two hB hBmeas hf_t hf_tt hf_tx hf_x hf_xx hf_xxx
+      hbd_tt hbd_tx hbd_xxx _ _ |>.integrable_sq)
   -- squeeze: `∫ (∑ₖ Rₖ)² ≤ K·T³/n → 0`, `K = 3C_tt²T + 3C_tx² + 45C_xxx²`
   set K : ℝ := 3 * Ctt ^ 2 * T + 3 * Ctx ^ 2 + 45 * Cxxx ^ 2 with hK_def
   refine squeeze_zero' (g := fun n : ℕ => K * (T : ℝ) ^ 3 / n)
@@ -303,10 +306,10 @@ theorem tendsto_ito_remainder_td
     have hi2 : Integrable (fun ω =>
         3 * Ctx ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) μ :=
-      (integrable_increment_sq (B := B) (μ := μ) _ _).const_mul _
+      (integrable_increment_sq hB _ _).const_mul _
     have hi3 : Integrable (fun ω =>
         3 * Cxxx ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6) μ :=
-      (integrable_increment_pow6 (B := B) (μ := μ) _ _).const_mul _
+      (integrable_increment_pow6 (B := B) hB _ _).const_mul _
     have hi12 : Integrable (fun ω =>
         3 * Ctt ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 4
           + 3 * Ctx ^ 2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2
@@ -329,8 +332,8 @@ theorem tendsto_ito_remainder_td
           rw [integral_add hi12 hi3, integral_add hi1 hi2,
             integral_const, probReal_univ, one_smul,
             integral_const_mul, integral_const_mul,
-            ItoIsometryAdapted.integral_increment_sq (B := B) hle,
-            integral_increment_pow6 (B := B) hle]
+            ItoIsometryAdapted.integral_increment_sq (B := B) hB hle,
+            integral_increment_pow6 (B := B) hB hle]
       _ ≤ K * ((T : ℝ) / n) ^ 3 := by
           rw [hΔ k hk, hK_def]
           have h4 : ((T : ℝ) / n) ^ 4 ≤ (T : ℝ) * ((T : ℝ) / n) ^ 3 := by
