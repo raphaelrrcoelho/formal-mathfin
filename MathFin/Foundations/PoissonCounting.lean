@@ -103,13 +103,14 @@ private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
   have h1 : HasDerivAt (fun u : ℝ => (r * u) ^ (m + 1))
       (((m + 1 : ℕ) : ℝ) * (r * s) ^ m * r) s := by
     have := (hasDerivAt_pow (m + 1) (r * s)).comp s ((hasDerivAt_id s).const_mul r)
-    simpa using this
+    convert this using 1 <;> first | rfl | (push_cast; ring) | ring
   have h2 : HasDerivAt (fun u : ℝ => rexp (-(r * u)))
       (rexp (-(r * s)) * (-r)) s := by
     have := (((hasDerivAt_id s).const_mul r).neg).exp
     simpa using this
   have h3 := (h1.mul h2).div_const ((m + 1)! : ℝ)
   convert h3 using 1
+  all_goals try rfl
   -- value identity: γ_{m+1}(s) − γ_{m+2}(s) equals the product-rule expression
   have hGm : Real.Gamma ((m + 1 : ℕ) : ℝ) = (m ! : ℝ) := by
     push_cast
