@@ -61,7 +61,9 @@ theorem itoSimpleProcess_adaptedAt (hBmeas : ∀ t, Measurable (B t))
     simp only [h1, h2, sub_self, mul_zero]
     exact measurable_const
 
-variable [hB : IsPreBrownianReal B μ]
+variable (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- **Conditional martingale-difference** — the conditional sibling of the
 unconditional `ItoIsometryAdapted.integral_adapted_mul_increment`, packaged for
@@ -85,7 +87,7 @@ theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
     MemLp.of_bound hφm.aestronglyMeasurable C
       (ae_of_all _ fun ω => (Real.norm_eq_abs _).trans_le (hC ω))
   have hg_int : Integrable (fun ω => φ ω * (B t₁ ω - B t₀ ω)) μ :=
-    (ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas ht hφ hφ_L2).integrable
+    (ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas ht hφ hφ_L2).integrable
       (by norm_num)
   symm
   refine ae_eq_condExp_of_forall_setIntegral_eq hm hg_int
@@ -104,9 +106,10 @@ theorem condExp_adapted_mul_increment (hBmeas : ∀ t, Measurable (B t))
       funext ω; by_cases h : ω ∈ s <;> simp [h]
     simp only [Pi.zero_apply, integral_zero]
     rw [← integral_indicator (hm s hs), heq2]
-    exact (ItoIsometryAdapted.integral_adapted_mul_increment hBmeas ht hind_adapt).symm
+    exact (ItoIsometryAdapted.integral_adapted_mul_increment hB hBmeas ht hind_adapt).symm
   · exact stronglyMeasurable_const.aestronglyMeasurable
 
+omit hB in
 /-- **Clamped-increment identity.** For `u ≤ v` and `i ≤ j`, the increment between
 times `i` and `j` of the single-interval contribution `t ↦ B_{v∧t} − B_{u∧t}` is
 the Brownian increment over `[u∨i, (u∨i)∨(v∧j)]` — so it is a martingale
@@ -134,12 +137,12 @@ theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
   refine ⟨fun t => (itoSimpleProcess_adaptedAt hBmeas V t).stronglyMeasurable, ?_⟩
   intro i j hij
   have hint : ∀ t : ℝ≥0, Integrable (fun ω => itoSimpleProcess hBmeas V t ω) μ :=
-    fun t => (memLp_itoSimpleProcess hBmeas V t).integrable (by norm_num)
+    fun t => (memLp_itoSimpleProcess hB hBmeas V t).integrable (by norm_num)
   have hadapt : ∀ p ∈ V.value.support,
       ItoIsometryAdapted.AdaptedAt B (max p.1 i) (V.value p) := fun p _ =>
     (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas
       (V.measurable_value p)).mono (le_max_left _ _)
-  have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p => memLp_value hBmeas V p
+  have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p => memLp_value hB hBmeas V p
   have hle_mM : ∀ p : ℝ≥0 × ℝ≥0,
       max p.1 i ≤ max (max p.1 i) (min p.2 j) := fun _ => le_max_left _ _
   symm
@@ -163,7 +166,7 @@ theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
   have hterm_int : ∀ p ∈ V.value.support,
       Integrable (fun ω => V.value p ω
         * (B (max (max p.1 i) (min p.2 j)) ω - B (max p.1 i) ω)) (μ.restrict s) :=
-    fun p hp => ((ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (hle_mM p)
+    fun p hp => ((ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (hle_mM p)
       (hadapt p hp) (hVL2 p)).integrable (by norm_num)).integrableOn
   rw [← sub_eq_zero, ← integral_sub (hint i).integrableOn (hint j).integrableOn, hpt,
       integral_neg, neg_eq_zero, integral_finsetSum _ hterm_int]
@@ -183,7 +186,7 @@ theorem itoSimpleProcess_isMartingale (hBmeas : ∀ t, Measurable (B t))
           = fun ω => s.indicator (V.value p) ω
             * (B (max (max p.1 i) (min p.2 j)) ω - B (max p.1 i) ω) from by
         funext ω; by_cases h : ω ∈ s <;> simp [h]]
-  exact ItoIsometryAdapted.integral_adapted_mul_increment hBmeas (hle_mM p) hAadapt
+  exact ItoIsometryAdapted.integral_adapted_mul_increment hB hBmeas (hle_mM p) hAadapt
 
 /-- **Time-indexed Itô isometry.** `E[(V●B)_t²]` equals the predictable-rectangle
 double sum with every interval endpoint truncated at `t`:
@@ -207,7 +210,7 @@ theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
   set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ :=
     fun p ω => V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω) with ha_def
   have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ :=
-    fun p hp => memLp_truncated_term hBmeas V t hp
+    fun p hp => memLp_truncated_term hB hBmeas V t hp
   have hint : ∀ p ∈ V.value.support, ∀ q ∈ V.value.support,
       Integrable (fun ω => a p ω * a q ω) μ :=
     fun p hp q hq => (ha_L2 p hp).integrable_mul (ha_L2 q hq)
@@ -231,7 +234,7 @@ theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
         · by_cases htq : q.1 ≤ t
           · -- both rectangles active: collapse via the rectangle pairing
             simp only [ha_def, min_eq_left htp, min_eq_left htq]
-            exact ItoIsometryAdapted.rect_increment_pairing hBmeas
+            exact ItoIsometryAdapted.rect_increment_pairing hB hBmeas
               (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
               (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value q))
               (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
@@ -261,7 +264,7 @@ single-increment isometry `integral_adapted_sq_mul_increment_sq` give the `√`-
 modulus `‖(V●B)_t − (V●B)_s‖² ≤ (|support|·∑_p E[V(p)²])·|t − s|`, whence continuity. -/
 theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
-    Continuous (fun t : ℝ≥0 => (itoSimpleProcessLp hBmeas V t : Lp ℝ 2 μ)) := by
+    Continuous (fun t : ℝ≥0 => (itoSimpleProcessLp hB hBmeas V t : Lp ℝ 2 μ)) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   set C : ℝ := (V.value.support.card : ℝ)
     * ∑ p ∈ V.value.support, ∫ ω, (V.value p ω) ^ 2 ∂μ with hC
@@ -277,10 +280,10 @@ theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
     have hadapt : ∀ p, ItoIsometryAdapted.AdaptedAt B (max p.1 s) (V.value p) := fun p =>
       (ItoIntegralL2.adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)).mono
         (le_max_left _ _)
-    have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p => memLp_value hBmeas V p
+    have hVL2 : ∀ p, MemLp (V.value p) 2 μ := fun p => memLp_value hB hBmeas V p
     have hXL2 : ∀ p, MemLp (fun ω => V.value p ω
         * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) 2 μ := fun p =>
-      ItoIsometryAdapted.memLp_adapted_mul_increment hBmeas (le_max_left _ _) (hadapt p) (hVL2 p)
+      ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (le_max_left _ _) (hadapt p) (hVL2 p)
     have hintXsq : ∀ p, Integrable (fun ω => (V.value p ω
         * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2) μ :=
       fun p => (hXL2 p).integrable_sq
@@ -323,7 +326,7 @@ theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
               * (B (max (max p.1 s) (min p.2 t)) ω - B (max p.1 s) ω)) ^ 2 ∂μ
               = (∫ ω, (V.value p ω) ^ 2 ∂μ)
                 * (((max (max p.1 s) (min p.2 t) : ℝ≥0) : ℝ) - ((max p.1 s : ℝ≥0) : ℝ)) := by
-            rw [← ItoIsometryAdapted.integral_adapted_sq_mul_increment_sq hBmeas
+            rw [← ItoIsometryAdapted.integral_adapted_sq_mul_increment_sq hB hBmeas
               (le_max_left _ _) (hadapt p)]
             exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
           rw [hXsq_eq]
@@ -349,7 +352,7 @@ theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
           = (fun ω => (itoSimpleProcess hBmeas V s ω - itoSimpleProcess hBmeas V t ω) ^ 2)
           from funext fun ω => by ring]
       exact hmod h
-  set F : ℝ≥0 → Lp ℝ 2 μ := fun t => itoSimpleProcessLp hBmeas V t with hF
+  set F : ℝ≥0 → Lp ℝ 2 μ := fun t => itoSimpleProcessLp hB hBmeas V t with hF
   rw [continuous_iff_continuousAt]
   intro s
   have hbound : ∀ t : ℝ≥0, ‖F t - F s‖ ≤ Real.sqrt C * Real.sqrt (dist t s) := by
@@ -357,14 +360,16 @@ theorem itoSimpleProcessLp_l2_continuous (hBmeas : ∀ t, Measurable (B t))
     have hnorm_sq : ‖F t - F s‖ ^ 2
         = ∫ ω, (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω) ^ 2 ∂μ := by
       have hsub : F t - F s
-          = ((memLp_itoSimpleProcess hBmeas V t).sub
-              (memLp_itoSimpleProcess hBmeas V s)).toLp _ := by
-        simp only [hF, itoSimpleProcessLp]
+          = ((memLp_itoSimpleProcess hB hBmeas V t).sub
+              (memLp_itoSimpleProcess hB hBmeas V s)).toLp _ := by
+        simp only [hF]
+        show (memLp_itoSimpleProcess hB hBmeas V t).toLp _ -
+            (memLp_itoSimpleProcess hB hBmeas V s).toLp _ = _
         rw [← MemLp.toLp_sub]
       rw [hsub, ← real_inner_self_eq_norm_sq, L2.inner_def]
       refine integral_congr_ae ?_
-      filter_upwards [MemLp.coeFn_toLp ((memLp_itoSimpleProcess (μ := μ) hBmeas V t).sub
-        (memLp_itoSimpleProcess (μ := μ) hBmeas V s))] with ω hω
+      filter_upwards [MemLp.coeFn_toLp ((memLp_itoSimpleProcess (μ := μ) hB hBmeas V t).sub
+        (memLp_itoSimpleProcess (μ := μ) hB hBmeas V s))] with ω hω
       rw [hω]; simp only [Pi.sub_apply]
       show (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω)
           * (itoSimpleProcess hBmeas V t ω - itoSimpleProcess hBmeas V s ω)

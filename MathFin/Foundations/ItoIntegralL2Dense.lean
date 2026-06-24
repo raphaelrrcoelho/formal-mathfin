@@ -63,10 +63,13 @@ namespace MathFin
 namespace ItoIntegralL2
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) [IsProbabilityMeasure μ]
+
+include hB
 
 /-! ### The rectangle indicator as a simple process -/
 
+omit hB [IsProbabilityMeasure μ] in
 /-- The simple process realising the indicator of `Ioc a b ×ˢ F` (`F ∈ ℱₐ`), via
 upstream `ElementaryPredictableSet.IocProd.indicator`. Unlike `iocSP_T` there is
 no horizon bound: this is a plain `SimpleProcess`, not a member of the
@@ -76,6 +79,7 @@ private noncomputable def iocSP (hBmeas : ∀ t, Measurable (B t)) (a b : ℝ≥
     SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas) :=
   (ElementaryPredictableSet.IocProd a b hF).indicator (1 : ℝ)
 
+omit hB [IsProbabilityMeasure μ] in
 /-- The uncurry of `iocSP hBmeas a b hF` is the indicator of `Ioc a b ×ˢ F`. -/
 private lemma uncurry_iocSP_eq (hBmeas : ∀ t, Measurable (B t)) (a b : ℝ≥0) {F : Set Ω}
     (hF : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas) a] F) :
@@ -88,6 +92,7 @@ private lemma uncurry_iocSP_eq (hBmeas : ∀ t, Measurable (B t)) (a b : ℝ≥0
       ElementaryPredictableSet.coe_IocProd a b hF]
   rfl
 
+omit hB in
 /-- Inner product of `simpleAssembly (iocSP …)` with `g` is the set-integral of
 `g` over the rectangle `Ioc a b ×ˢ F` in `trim_full`. -/
 private lemma inner_simpleAssembly_iocSP (hBmeas : ∀ t, Measurable (B t)) (a b : ℝ≥0)
@@ -127,6 +132,7 @@ private lemma inner_simpleAssembly_iocSP (hBmeas : ∀ t, Measurable (B t)) (a b
 
 /-! ### Orthogonality on rectangles -/
 
+omit hB in
 /-- A function `g` orthogonal to the range of `simpleAssembly` has vanishing
 set-integral over every basic predictable rectangle. The `{0} ×ˢ F₀` piece is
 `trim_full`-null (`timeMeasure {0} = 0`); the `Ioc a b ×ˢ F` piece is the inner
@@ -139,7 +145,6 @@ private lemma itoOrthRect (hBmeas : ∀ t, Measurable (B t))
     ∀ R ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas,
       ∫ z in R, g z ∂((timeMeasure.prod μ).trim
         (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) = 0 := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   intro R hR
   rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, F, _hab, hF, rfl⟩
   · -- `{0} ×ˢ F₀` is `trim_full`-null.
@@ -159,6 +164,7 @@ private lemma itoOrthRect (hBmeas : ∀ t, Measurable (B t))
 
 /-! ### σ-finite exhaustion: orthogonal ⇒ a.e. zero -/
 
+omit hB in
 /-- A function `g` orthogonal to the range of `simpleAssembly` is a.e. zero. The
 σ-finite exhaustion uses finite frames `Φ n = Ioc 0 (n+1) ×ˢ univ`: on each, the
 trim measure restricts to the *finite* `ItoIntegralCLM.trimMeasure_T (n+1)`
@@ -173,7 +179,6 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
       ⟪simpleAssembly (μ := μ) hBmeas V, g⟫_ℝ = 0) :
     (g : ℝ≥0 × Ω → ℝ) =ᵐ[(timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod] 0 := by
-  haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration (mΩ := mΩ) hBmeas).predictable
   have h_rect := itoOrthRect (μ := μ) hBmeas g h_orth
   -- predictable-measurability of any rectangle in `predictableRect`
@@ -279,6 +284,7 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
 
 /-! ### Density, the CLM, and the unbounded-horizon isometry -/
 
+omit hB in
 /-- **Density**: the image of `simpleAssembly` is dense in the predictable `L²`.
 Orthogonal-complement argument: a `g` orthogonal to the range is a.e. zero
 (`aezeroOfOrth`). -/
@@ -302,24 +308,24 @@ along the (now dense) `simpleAssembly` via `LinearMap.extendOfNorm`. Its domain
 noncomputable def itoIntegralL2 (hBmeas : ∀ t, Measurable (B t)) :
     Lp ℝ 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod) →L[ℝ] Lp ℝ 2 μ :=
-  (itoAssembly (μ := μ) hBmeas).extendOfNorm (simpleAssembly (μ := μ) hBmeas)
+  (itoAssembly (μ := μ) hB hBmeas).extendOfNorm (simpleAssembly (μ := μ) hBmeas)
 
 /-- **The unbounded-horizon Itô isometry.** For every `f ∈ Lp 2 trim_full`,
 `‖itoIntegralL2 f‖ = ‖f‖`. -/
 theorem itoIntegralL2_norm (hBmeas : ∀ t, Measurable (B t))
     (f : Lp ℝ 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)) :
-    ‖itoIntegralL2 (μ := μ) hBmeas f‖ = ‖f‖ := by
-  set I := itoIntegralL2 (μ := μ) hBmeas with hI
+    ‖itoIntegralL2 (μ := μ) hB hBmeas f‖ = ‖f‖ := by
+  set I := itoIntegralL2 (μ := μ) hB hBmeas with hI
   have h_dense := simpleAssembly_denseRange (μ := μ) hBmeas
   have h_norm : ∀ V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas),
-      ‖itoAssembly (μ := μ) hBmeas V‖ ≤ 1 * ‖simpleAssembly (μ := μ) hBmeas V‖ :=
-    fun V => by rw [one_mul]; exact (assembly_isometry (μ := μ) hBmeas V).le
+      ‖itoAssembly (μ := μ) hB hBmeas V‖ ≤ 1 * ‖simpleAssembly (μ := μ) hBmeas V‖ :=
+    fun V => by rw [one_mul]; exact (assembly_isometry (μ := μ) hB hBmeas V).le
   have h_on_range : ∀ V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas),
       ‖I (simpleAssembly (μ := μ) hBmeas V)‖ = ‖simpleAssembly (μ := μ) hBmeas V‖ := by
     intro V
     rw [hI, itoIntegralL2, LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩,
-        assembly_isometry]
+        assembly_isometry hB]
   exact h_dense.induction_on (p := fun y => ‖I y‖ = ‖y‖) f
     (isClosed_eq (continuous_norm.comp I.continuous) continuous_norm) h_on_range
 

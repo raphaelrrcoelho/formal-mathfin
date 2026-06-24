@@ -58,7 +58,7 @@ open MeasureTheory ProbabilityTheory MathFin.QuadraticVariationL2 Filter
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ}
 
 /-- **Variance-swap drift immunity.** For a GBM price
 `S_t = S₀ · exp((μd − σ²/2)t + σ B_t)` with arbitrary drift `μd`, the
@@ -66,7 +66,8 @@ realized variance of log-returns along the uniform partition of `[0, T]`
 converges in mean-square to `σ²·T`. The drift is absent from the limit:
 the fair variance strike is a quadratic-variation functional, immune to
 the (physical vs. risk-neutral) drift. -/
-theorem tendsto_realizedVariance_gbm_L2 (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+theorem tendsto_realizedVariance_gbm_L2 (hB : IsPreBrownianReal B μ)
+    (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {S : ℝ≥0 → Ω → ℝ} {S₀ μd σ : ℝ} (hS₀ : 0 < S₀)
     (hS : ∀ t ω, S t ω = S₀ * Real.exp ((μd - σ ^ 2 / 2) * (t : ℝ) + σ * B t ω)) :
     Tendsto (fun n : ℕ => ∫ ω, (∑ k ∈ Finset.range n,
@@ -81,7 +82,7 @@ theorem tendsto_realizedVariance_gbm_L2 (hBmeas : ∀ t, Measurable (B t)) (T : 
     intro t ω
     rw [hS t ω, Real.log_mul hS₀.ne' (Real.exp_pos _).ne', Real.log_exp]
     ring
-  exact ItoProcessQV.tendsto_qv_ito_process hBmeas T
+  exact ItoProcessQV.tendsto_qv_ito_process hB hBmeas T
     (X := fun t ω => Real.log (S t ω))
     (Ca := |μd - σ ^ 2 / 2|) (abs_nonneg _) hlog
     (fun t => measurable_const)
