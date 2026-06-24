@@ -64,8 +64,7 @@ lemma hasDerivAt_neg_gaussianPDFReal_zero_one (z : ℝ) :
       (c * (Real.exp (-(z^2)/2) * -z)) z := h_exp.const_mul c
   -- neg
   have h_neg := h_const.neg
-  convert h_neg using 1
-  ring
+  convert h_neg using 1 <;> first | rfl | ring
 
 /-- `ϕ(0,1,·)' = -z · ϕ(0,1,z)` — the standard-normal PDF derivative (the
 `.neg`-flip of `hasDerivAt_neg_gaussianPDFReal_zero_one`). The single

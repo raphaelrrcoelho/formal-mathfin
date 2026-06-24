@@ -67,11 +67,11 @@ lemma hasDerivAt_bondPortfolioValue_r
     intro i _
     have h_lin : HasDerivAt (fun r' : ℝ => -(r' * (T i - t))) (-(T i - t)) r := by
       have h := (hasDerivAt_id r).mul_const (T i - t)
-      simpa using h.neg
+      rw [one_mul] at h
+      exact h.neg
     have h_exp := h_lin.exp
     have h_prod := h_exp.const_mul (w i)
-    convert h_prod using 1
-    ring
+    convert h_prod using 1 <;> first | rfl | ring | field_simp
   have h_raw := HasDerivAt.sum h_each
   -- `HasDerivAt.sum` yields a Pi-typed sum; convert back to a function of a sum.
   have h_fn_eq :
@@ -115,8 +115,8 @@ lemma bondPortfolio_immunization_first_order
   have hA := hasDerivAt_bondPortfolioValue_r sA wA TA t r
   have hL := hasDerivAt_bondPortfolioValue_r sL wL TL t r
   have h := hA.sub hL
-  convert h using 1
-  rw [h_match]
-  ring
+  rw [show (0 : ℝ) = -bondPortfolioDur sA wA TA t r - -bondPortfolioDur sL wL TL t r from by
+    rw [h_match]; ring]
+  exact h
 
 end MathFin

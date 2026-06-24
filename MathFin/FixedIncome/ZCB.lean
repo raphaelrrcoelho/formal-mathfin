@@ -60,7 +60,8 @@ lemma hasDerivAt_zcb_r (t T : ℝ) (r : ℝ) :
   unfold zcb
   have h_lin : HasDerivAt (fun r' : ℝ => -(r' * (T - t))) (-(T - t)) r := by
     have h := (hasDerivAt_id r).mul_const (T - t)
-    simpa using h.neg
+    rw [one_mul] at h
+    exact h.neg
   have h := h_lin.exp
   convert h using 1
   ring
@@ -75,8 +76,8 @@ lemma zcb_duration_eq_time_to_maturity (t T r : ℝ) :
 lemma hasDerivAt_zcb_r_r (t T : ℝ) (r : ℝ) :
     HasDerivAt (fun r' => -(T - t) * zcb r' t T) ((T - t)^2 * zcb r t T) r := by
   have h := (hasDerivAt_zcb_r t T r).const_mul (-(T - t))
-  convert h using 1
-  ring
+  rw [show (T - t) ^ 2 * zcb r t T = -(T - t) * (-(T - t) * zcb r t T) from by ring]
+  exact h
 
 /-- ZCB convexity = squared time-to-maturity: `∂²_r B / B = (T - t)²`. -/
 lemma zcb_convexity_eq_time_to_maturity_sq (t T r : ℝ) :

@@ -100,8 +100,8 @@ theorem gompertz_cumulative_force (B c t : ℝ) (hc : c ≠ 0) :
     have h_exp : HasDerivAt (fun u => Real.exp (c * u))
                   (Real.exp (c * u) * c) u := h_cu.exp
     have h := h_exp.const_mul (B / c)
-    convert h using 1
-    field_simp
+    rw [show B * Real.exp (c * u) = B / c * (Real.exp (c * u) * c) from by field_simp]
+    exact h
   rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _ => h_anti u)
         (Continuous.intervalIntegrable (by fun_prop) _ _)]
   simp [Real.exp_zero]

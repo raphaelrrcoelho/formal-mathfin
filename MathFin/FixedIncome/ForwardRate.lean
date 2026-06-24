@@ -53,8 +53,7 @@ theorem hasDerivAt_T_mul_spotRate {R : ℝ → ℝ} {R'_T T : ℝ}
     HasDerivAt (fun t => t * R t) (R T + T * R'_T) T := by
   have h_id : HasDerivAt (fun t : ℝ => t) 1 T := hasDerivAt_id _
   have h_mul := h_id.mul hR
-  convert h_mul using 1
-  ring
+  convert h_mul using 1 <;> first | rfl | ring | field_simp
 
 /-- **Forward rate as the negative log-derivative of the bond price**
 (`Foundations/ExponentialDiscount`, instantiated at `H(T) = T · R(T)`). The

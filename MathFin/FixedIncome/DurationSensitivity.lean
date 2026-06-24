@@ -63,14 +63,16 @@ lemma hasDerivAt_coupon_term (c_val : ℝ) (n : ℕ) {y : ℝ} (hy : 1 + y ≠ 0
   have h_pow_ne : (1 + y) ^ n ≠ 0 := pow_ne_zero _ hy
   have h_const : HasDerivAt (fun _ : ℝ => c_val) 0 y := hasDerivAt_const y c_val
   have h_div := h_const.div h_pow h_pow_ne
-  convert h_div using 1
-  cases n with
-  | zero => simp
-  | succ m =>
-    simp only [Nat.add_sub_cancel]
-    have h_pow_m_ne : (1 + y) ^ m ≠ 0 := pow_ne_zero _ hy
-    field_simp
-    ring
+  rw [show (-((n : ℝ) * c_val / (1 + y) ^ (n + 1)))
+        = (0 * (1 + y) ^ n - c_val * ((n : ℝ) * (1 + y) ^ (n - 1) * 1)) / ((1 + y) ^ n) ^ 2 from by
+      cases n with
+      | zero => simp
+      | succ m =>
+        simp only [Nat.add_sub_cancel]
+        have h_pow_m_ne : (1 + y) ^ m ≠ 0 := pow_ne_zero _ hy
+        field_simp
+        ring]
+  exact h_div
 
 /-- **Bond price has derivative `-ModNum(y)`**: the modified duration
 numerator is the negative slope of the bond price.
