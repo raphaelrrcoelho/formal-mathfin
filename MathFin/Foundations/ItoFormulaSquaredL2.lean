@@ -56,14 +56,13 @@ open MeasureTheory ProbabilityTheory Filter MathFin.QuadraticVariationL2
 open scoped NNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownianReal B μ]
 
 /-- **L² Itô formula for the squaring function — quantitative form.** Along
 the uniform partition of `[0, T]` into `n` pieces, the integrated squared
 difference between `2 · ∑ B_{kT/n} · ΔB_k` and `B_T² − B_0² − T` tends to
 zero. The proof is one algebraic step from the pathwise discrete identity
 (`discrete_squaring_identity`) plus `tendsto_qv` (the L² QV of BM). -/
-theorem itoSquared_L2_tendsto (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
+theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     Tendsto (fun n : ℕ =>
         ∫ ω, (2 * (∑ k ∈ Finset.range n,
                       B (unifPart T n k) ω *
@@ -89,7 +88,7 @@ theorem itoSquared_L2_tendsto (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     rw [hsn, hs0] at h
     linarith
   -- Replace the integrand and use `tendsto_qv` (filter out the trivial n=0 case).
-  refine (tendsto_qv (μ := μ) (B := B) hBmeas T).congr' ?_
+  refine (tendsto_qv (μ := μ) (B := B) hB hBmeas T).congr' ?_
   filter_upwards [eventually_gt_atTop 0] with n hn
   apply integral_congr_ae
   filter_upwards with ω
@@ -101,7 +100,7 @@ theorem itoSquared_L2_tendsto (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
 `[0, T]` tend to `½·(B_T² − B_0² − T)` in `L²(μ)`. The canonical statement of
 "the Itô integral of `s ↦ B_s` against `dB_s` equals `½(B_T² − B_0² − T)`",
 extracted from the `factor-of-2` form `itoSquared_L2_tendsto`. -/
-theorem itoSquared_L2_tendsto_div2 (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
+theorem itoSquared_L2_tendsto_div2 (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     Tendsto (fun n : ℕ =>
         ∫ ω, ((∑ k ∈ Finset.range n,
                   B (unifPart T n k) ω *
@@ -110,7 +109,7 @@ theorem itoSquared_L2_tendsto_div2 (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
               - (1 / 2) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   -- The half-form is (factor-of-2 form) / 4, by `(2A − B)² = 4(A − B/2)²`.
-  have h := itoSquared_L2_tendsto (μ := μ) (B := B) hBmeas T
+  have h := itoSquared_L2_tendsto (μ := μ) (B := B) hB hBmeas T
   -- Substitute `(2A − B)² = 4(A − B/2)²` pointwise, then divide-by-4 limit.
   have h_eq : ∀ n : ℕ,
       ∫ ω, (2 * (∑ k ∈ Finset.range n,

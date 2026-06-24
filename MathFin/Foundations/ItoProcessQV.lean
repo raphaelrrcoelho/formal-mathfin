@@ -51,11 +51,11 @@ open MeasureTheory ProbabilityTheory ItoIsometryAdapted MathFin.QuadraticVariati
 open scoped NNReal ENNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ}
 
 /-- Per-`n` mean-square bound: the squared-increment sum of the Itô process
 misses `σ²T` by at most `C/n`. -/
-private lemma qv_bound (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+private lemma qv_bound (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {X A : ℝ≥0 → Ω → ℝ} {X₀ : Ω → ℝ} {σ Ca : ℝ} (hCa : 0 ≤ Ca)
     (hX : ∀ t ω, X t ω = X₀ ω + A t ω + σ * B t ω)
     (hA_meas : ∀ t, Measurable (A t))
@@ -123,12 +123,12 @@ private lemma qv_bound (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   -- Brownian increment moments
   have hΔB2 : ∀ k : ℕ, MemLp (fun ω =>
       B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) 2 μ := fun k =>
-    (memLp_increment_four (unifPart T n k) (unifPart T n (k + 1))).mono_exponent
+    (memLp_increment_four hB (unifPart T n k) (unifPart T n (k + 1))).mono_exponent
       (by norm_num)
   have hΔB_int_sq : ∀ k : ℕ, ∫ ω,
       (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 ∂μ = (T : ℝ) / n := by
     intro k
-    rw [integral_increment_sq (μ := μ) (hle k), hgapeq k]
+    rw [integral_increment_sq (μ := μ) hB (hle k), hgapeq k]
   -- ===== bound for the pure-drift term =====
   have hE_nonneg : ∀ ω, 0 ≤ E ω := fun ω =>
     Finset.sum_nonneg fun k _ => sq_nonneg _
@@ -159,10 +159,10 @@ private lemma qv_bound (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
       apply memLp_finsetSum
       intro k _
-      simpa using memLp_increment_sq_centered_two (unifPart T n k) (unifPart T n (k + 1)) 0
+      simpa using memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) 0
     exact hsum.sub (memLp_const (T : ℝ))
   have hIG : ∫ ω, (G ω) ^ 2 ∂μ ≤ σ ^ 4 * (2 * ((T : ℝ) / n) * T) := by
-    have hbound := sum_increment_sq_sub_sq_le (μ := μ) hBmeas hmono hs0 n
+    have hbound := sum_increment_sq_sub_sq_le (μ := μ) hB hBmeas hmono hs0 n
       (fun k _ => le_of_eq (hgapeq k))
     rw [hsn] at hbound
     have hpt : ∀ ω, (G ω) ^ 2 = σ ^ 4 * ((∑ k ∈ Finset.range n,
@@ -325,7 +325,7 @@ regime, fully derived.** For `X_t = X₀ + A_t + σ·B_t` with `A` a
 equipartition squared-increment sums of `X` over `[0, T]` converge in mean
 square to `σ²·T = ∫₀ᵀ σ² ds`: the **drift contributes nothing** to the
 quadratic variation. -/
-theorem tendsto_qv_ito_process (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+theorem tendsto_qv_ito_process (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {X A : ℝ≥0 → Ω → ℝ} {X₀ : Ω → ℝ} {σ Ca : ℝ} (hCa : 0 ≤ Ca)
     (hX : ∀ t ω, X t ω = X₀ ω + A t ω + σ * B t ω)
     (hA_meas : ∀ t, Measurable (A t))
@@ -341,7 +341,7 @@ theorem tendsto_qv_ito_process (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     (Eventually.of_forall fun n => integral_nonneg fun ω => sq_nonneg _) ?_
     (tendsto_const_div_atTop_nhds_zero_nat _)
   filter_upwards [eventually_gt_atTop 0] with n hn
-  exact qv_bound hBmeas T hCa hX hA_meas hA_lip hn
+  exact qv_bound hB hBmeas T hCa hX hA_meas hA_lip hn
 
 end ItoProcessQV
 
