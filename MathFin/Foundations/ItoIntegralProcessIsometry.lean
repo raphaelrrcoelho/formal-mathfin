@@ -30,7 +30,9 @@ open MeasureTheory ProbabilityTheory ItoIntegralL2 ItoIntegralCLM ItoIntegralPro
 open scoped NNReal ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
-  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+
+include hB
 
 omit [IsProbabilityMeasure μ] in
 /-- **Band-restricted rectangle cross-integral.** The `ItoIntegralL2.integral_rectTerm_mul`
@@ -70,6 +72,7 @@ private lemma integral_rectTerm_mul_band (t : ℝ≥0) (hBmeas : ∀ u, Measurab
   rw [max_eq_left (le_max_of_le_left (by positivity))]
   exact max_comm _ _
 
+omit hB in
 /-- **Band-overlap reconciliation (pure ℝ).** B1a's time-indexed isometry expresses the
 overlap of two predictable rectangles as `max 0 (min(p.2∧t, q.2∧t) − max(p.1∧t, q.1∧t))`
 (each endpoint individually truncated at `t`), whereas the band-restricted cross-integral
@@ -169,7 +172,7 @@ private lemma band_integral_uncurry_sq {t T : ℝ≥0} (htT : t ≤ T)
         (integrable_finsetSum _ fun q hq => hint p hp q hq).integrableOn)]
   refine Finset.sum_congr rfl fun p hp => ?_
   rw [integral_finsetSum _ fun q hq => (hint p hp q hq).integrableOn]
-  exact Finset.sum_congr rfl fun q _ => integral_rectTerm_mul_band t hBmeas V p q
+  exact Finset.sum_congr rfl fun q _ => integral_rectTerm_mul_band hB t hBmeas V p q
 
 omit [IsProbabilityMeasure μ] in
 /-- **Time-indexed Itô isometry on a simple process.** `‖(V●B)_t‖² = ∫_{(0,t]×Ω}(uncurry V)²`
@@ -179,28 +182,30 @@ for `t ≤ T`: the LHS is B1a's `itoSimpleProcess_isometry_time` (the per-endpoi
 `band_overlap_real`. -/
 private lemma itoSimpleProcessLp_band_isometry {t T : ℝ≥0} (htT : t ≤ T)
     (hBmeas : ∀ u, Measurable (B u)) (V : SimpleProcess ℝ (natFiltration hBmeas)) :
-    ‖itoSimpleProcessLp (μ := μ) hBmeas V t‖ ^ 2
+    ‖itoSimpleProcessLp (μ := μ) hB hBmeas V t‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)),
           (Function.uncurry ⇑V z) ^ 2 ∂(trimMeasure_T (μ := μ) T hBmeas) := by
-  rw [band_integral_uncurry_sq htT hBmeas V]
-  have hLHS : ‖itoSimpleProcessLp (μ := μ) hBmeas V t‖ ^ 2
+  rw [band_integral_uncurry_sq hB htT hBmeas V]
+  have hLHS : ‖itoSimpleProcessLp (μ := μ) hB hBmeas V t‖ ^ 2
       = ∫ ω, (itoSimpleProcess hBmeas V t ω) ^ 2 ∂μ := by
-    rw [lp_two_norm_sq (itoSimpleProcessLp hBmeas V t)]
+    rw [lp_two_norm_sq (itoSimpleProcessLp hB hBmeas V t)]
     refine integral_congr_ae ?_
-    filter_upwards [(memLp_itoSimpleProcess hBmeas V t).coeFn_toLp] with ω hω
-    rw [show (itoSimpleProcessLp hBmeas V t : Ω → ℝ) ω = itoSimpleProcess hBmeas V t ω from hω]
-  rw [hLHS, itoSimpleProcess_isometry_time hBmeas V t]
+    filter_upwards [(memLp_itoSimpleProcess hB hBmeas V t).coeFn_toLp] with ω hω
+    rw [show (itoSimpleProcessLp hB hBmeas V t : Ω → ℝ) ω = itoSimpleProcess hBmeas V t ω from hω]
+  rw [hLHS, itoSimpleProcess_isometry_time hB hBmeas V t]
   refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
   congr 1
   push_cast
   exact band_overlap_real _ _ _ _ _
 
+omit hB in
 /-- `(0,t]×Ω` is measurable for the predictable σ-algebra carried by `trimMeasure_T`. -/
 private lemma measurableSet_band (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
     MeasurableSet[(natFiltration hBmeas).predictable] (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)) :=
   MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 t
     MeasurableSet.univ
 
+omit hB in
 /-- **Band truncation as a norm-`≤1` CLM** on the predictable `L²` space: pointwise
 indicator multiplication `φ ↦ 𝟙_{(0,t]×Ω} · φ` (on `L²` this is the orthogonal projection
 onto the `(0,t]`-band, but it is formalised here only as a norm-`≤1` CLM — `mkContinuous`
@@ -264,17 +269,17 @@ everywhere (`DenseRange.equalizer`). This is the deferred L²-energy law complet
 — the per-`t` refinement of the terminal `itoProcessCLM_norm_terminal`. -/
 theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ‖itoProcessCLM (μ := μ) T t hBmeas φ‖ ^ 2
+    ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2
       = ∫ z in (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)), (φ z) ^ 2
           ∂(trimMeasure_T (μ := μ) T hBmeas) := by
   rw [← truncCLM_norm_sq T t hBmeas φ]
   refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    ((continuous_pow 2).comp (itoProcessCLM (μ := μ) T t hBmeas).continuous.norm)
+    ((continuous_pow 2).comp (itoProcessCLM hB T t hBmeas).continuous.norm)
     ((continuous_pow 2).comp (truncCLM (μ := μ) T t hBmeas).continuous.norm)
     (funext fun V => ?_)) φ
   simp only [Function.comp_apply]
   rw [itoProcessCLM_simpleAssembly_T, truncCLM_norm_sq,
-      itoSimpleProcessLp_band_isometry htT hBmeas V.val]
+      itoSimpleProcessLp_band_isometry hB htT hBmeas V.val]
   refine integral_congr_ae ?_
   filter_upwards [ae_restrict_of_ae (memLp_uncurry_trim_T T hBmeas V.val).coeFn_toLp] with z hz
   rw [show (simpleAssembly_T (μ := μ) T hBmeas V : ℝ≥0 × Ω → ℝ) z

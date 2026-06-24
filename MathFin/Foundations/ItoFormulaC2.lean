@@ -33,7 +33,9 @@ open MeasureTheory ProbabilityTheory Filter QuadraticVariationL2
 open scoped NNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownianReal B μ]
+  (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- **Bounded-derivative Itô formula in `L²` (named-limit form).** For `f ∈ C³` with
 `|f″| ≤ C₂` and `|f‴| ≤ C₃`, the uniform-partition Riemann–Itô sums `∑ f′(B_{tₖ})·ΔBₖ`
@@ -57,8 +59,8 @@ theorem ito_formula_L2
     (continuous_iff_continuousAt.mpr fun x => (hf' x).continuousAt).measurable
   have hf''m : Measurable f'' := hf''_cont.measurable
   have hfm : Measurable f := (continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt).measurable
-  have hA1 := tendsto_weighted_qv (μ := μ) hBmeas hBcont (g := f'') hf''_cont hf2 T
-  have hA2 := tendsto_ito_remainder (μ := μ) hBmeas T hf hf' hf'' hf3
+  have hA1 := tendsto_weighted_qv (μ := μ) hB hBmeas hBcont (g := f'') hf''_cont hf2 T
+  have hA2 := tendsto_ito_remainder hB hBmeas T hf hf' hf'' hf3
   set Isum : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
       f' (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) with hIsum
   set QV : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
@@ -69,13 +71,13 @@ theorem ito_formula_L2
   show Tendsto (fun n => ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ)
     atTop (𝓝 0)
   -- `L²` membership of the second-order integral and the two discrete sums
-  have hI2_memLp : MemLp I2 2 μ := memLp_pathIntegral hBmeas hBcont hf''_cont hf2 T
+  have hI2_memLp : MemLp I2 2 μ := memLp_pathIntegral (μ := μ) hB hBmeas hBcont hf''_cont hf2 T
   have hQV_memLp : ∀ n, MemLp (QV n) 2 μ := by
     intro n
     rw [hQVdef]
     refine memLp_finsetSum _ fun k _ => ?_
     have hZ : MemLp (fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
-      have h := (memLp_increment_sq_centered_two (B := B) (unifPart T n k) (unifPart T n (k + 1))
+      have h := (memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1))
           ((unifPart T n (k + 1) : ℝ) - unifPart T n k)).add
           (memLp_const (μ := μ) ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
       have heq : ((fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
@@ -103,7 +105,7 @@ theorem ito_formula_L2
         (((hf''m.comp (hBmeas _)).mul (((hBmeas _).sub (hBmeas _)).pow_const 2)).const_mul (1 / 2))
     rw [memLp_two_iff_integrable_sq hmeas.aestronglyMeasurable]
     refine Integrable.mono'
-      ((integrable_increment_pow6 (B := B) (unifPart T n k) (unifPart T n (k + 1))).const_mul (C3 ^ 2))
+      ((integrable_increment_pow6 hB (unifPart T n k) (unifPart T n (k + 1))).const_mul (C3 ^ 2))
       (hmeas.pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω => ?_)
     rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
     have hb := abs_discreteTaylorRemainder_le hf hf' hf'' hf3

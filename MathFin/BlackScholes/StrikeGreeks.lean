@@ -55,7 +55,9 @@ lemma hasDerivAt_bsd1_K (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 <
       (fun k : ℝ => Real.log S - Real.log k) (-(1 / K)) K := by
     have h_neg := h_log.neg
     have h_add := h_neg.const_add (Real.log S)
-    convert h_add using 1
+    have : (fun k : ℝ => Real.log S - Real.log k) = fun x => Real.log S + (-Real.log) x := by
+      funext x; simp [sub_eq_add_neg]
+    rw [this]; exact h_add
   -- log(S/k) =ᶠ[𝓝 K] log S - log k (since K ≠ 0 in a nbhd).
   have h_eventually : (fun k : ℝ => Real.log (S / k)) =ᶠ[nhds K]
                        (fun k => Real.log S - Real.log k) := by
@@ -129,10 +131,14 @@ lemma hasDerivAt_bsV_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     unfold bsV
     ring
   rw [← h_fun_eq]
-  convert h_V using 1
-  -- Value side: collapse via magic identity
+  -- Value from h_V equals -(exp(-rτ)·Φ(d₂)) via magic identity
   have h_bs := bs_identity (r := r) hS hK hσ hτ
+  have hKστ_ne : K * σ * Real.sqrt τ ≠ 0 := by positivity
+  refine h_V.congr_deriv ?_
+  -- Goal: S*(g1*(-(1/(Kστ)))) - exp*(1*Φ2 + K*(g2*(-(1/(Kστ))))) = -(exp*Φ2)
+  -- by h_bs: S*g1 = K*exp*g2, so the extra terms cancel
   simp only [Function.comp_apply]
+  have hKστ_pos : (0 : ℝ) < K * σ * Real.sqrt τ := by positivity
   field_simp
   linarith [h_bs]
 
@@ -153,12 +159,18 @@ lemma hasDerivAt_bsP_K {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     have := (hasDerivAt_id K).mul_const (Real.exp (-(r * τ)))
     simpa using this
   have h := (h_V.sub h_const).add h_lin
-  convert h using 1
-  -- Value: e^{-rτ}·Φ(-d_2) = -(e^{-rτ}·Φ(d_2)) - 0 + e^{-rτ}
-  --                      = e^{-rτ}·(1 - Φ(d_2))
-  --                      = e^{-rτ}·Φ(-d_2)  by Phi_neg
+  -- Adapt h's function and value to match the goal
   have h_Phi := Phi_neg (bsd2 S K r σ τ)
-  linear_combination Real.exp (-(r * τ)) * h_Phi
+  -- Step 1: fix the function (regrouped form), keeping the same value
+  have h1 := h.congr_of_eventuallyEq (f₁ := fun k => bsV k r σ S τ - S + k * Real.exp (-(r * τ)))
+    (Filter.Eventually.of_forall fun k => by simp only [Pi.add_apply, Pi.sub_apply])
+  -- Step 2: fix the value: -(exp*Φ(d2)) - 0 + exp = exp*Φ(-d2)
+  have hval : -(Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)) - 0 + Real.exp (-(r * τ))
+      = Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ) := by
+    have : Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ) =
+        Real.exp (-(r * τ)) * (1 - Phi (bsd2 S K r σ τ)) := by rw [h_Phi]
+    linarith [mul_comm (Real.exp (-(r * τ))) (Phi (bsd2 S K r σ τ))]
+  exact hval ▸ h1
 
 /-- **Convexity of the call price in `K`** (Greek `∂²_K bsV`):
 `∂²_K bsV = e^{-rτ} · ϕ(d₂) / (K σ √τ) ≥ 0`. This is butterfly-spread
@@ -171,12 +183,11 @@ lemma hasDerivAt_bsV_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
   have h_d2_K := hasDerivAt_bsd2_K S r σ τ hS hσ hτ hK
   have h_Phi_d2 := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp K h_d2_K
   have h := (h_Phi_d2.const_mul (Real.exp (-(r * τ)))).neg
-  convert h using 1
-  -- value: e^{-rτ}·ϕ(d_2)/(K·σ·√τ) = -(e^{-rτ}·(ϕ(d_2)·(-1/(K·σ·√τ))))
-  have h_sqrt_τ_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
-  have h_sqrt_τ_ne : Real.sqrt τ ≠ 0 := h_sqrt_τ_pos.ne'
+  have h_sqrt_τ_ne : Real.sqrt τ ≠ 0 := (Real.sqrt_pos.mpr hτ).ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'
   have hK_ne : K ≠ 0 := hK.ne'
+  refine h.congr_deriv ?_
+  -- value: -(e^{-rτ}·(ϕ(d_2)·(-1/(K·σ·√τ)))) = e^{-rτ}·ϕ(d_2)/(K·σ·√τ)
   field_simp
 
 end MathFin
