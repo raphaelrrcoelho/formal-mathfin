@@ -273,7 +273,7 @@ lemma trimMeasure_T_eq_restrict (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       ← MeasureTheory.restrict_trim 𝓕.predictable_le_prod _
         (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ)]
 
-variable [hB : IsPreBrownianReal B μ]
+variable (hB : IsPreBrownianReal B μ)
 
 /-- `uncurry V ∈ L²` in the T-restricted trim. Mirrors
 `ItoIntegralL2.memLp_uncurry_trim` via the bridge + `MemLp.restrict`. -/
@@ -327,12 +327,11 @@ lemma uncurry_eq_zero_of_lt {T : ℝ≥0} {hBmeas : ∀ t, Measurable (B t)}
   intro _
   exact lt_of_le_of_lt (V.property p hp) ht
 
-omit hB in
 /-- For T-bounded `V`, the `L²` norm of `uncurry V` in `trim_T` equals the norm
 in the full trim. Both integrate `|uncurry V|²` over the same effective support:
 trim_T integrates over `[0,T] × Ω`, and `uncurry V` vanishes off it (the bot
 fibre `{0} × Ω` has measure zero in `timeMeasure.prod μ`). Pure
-measure-theoretic equality — `[IsPreBrownianReal B μ]` is omitted. -/
+measure-theoretic equality — `IsPreBrownianReal B μ` is not needed. -/
 private lemma eLpNorm_uncurry_trim_T_eq_trim (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : TBoundedSP T hBmeas) :
     eLpNorm (Function.uncurry ⇑V.val) 2 (trimMeasure_T (μ := μ) T hBmeas)
@@ -418,19 +417,20 @@ noncomputable def simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
 /-- The Itô assembly composed with the inclusion `TBoundedSP T ↪ SimpleProcess`.
 For T-bounded `V`, the discrete Itô integral `∑ V(p)(B_{p.2}−B_{p.1})`
 automatically lives in `[0,T]`. -/
-noncomputable def itoAssembly_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+noncomputable def itoAssembly_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) :
     TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 μ :=
-  (ItoIntegralL2.itoAssembly (μ := μ) hBmeas).comp (TBoundedSP T hBmeas).subtype
+  (ItoIntegralL2.itoAssembly hB hBmeas).comp (TBoundedSP T hBmeas).subtype
 
 /-- **The T-restricted Itô isometry on simple processes.** Inherits the full
 isometry (`ItoIntegralL2.assembly_isometry`) via the trim-norm equality. -/
-theorem assembly_isometry_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (V : TBoundedSP T hBmeas) :
-    ‖itoAssembly_T (μ := μ) T hBmeas V‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
-  show ‖ItoIntegralL2.itoAssembly hBmeas V.val‖
+theorem assembly_isometry_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
+    ‖itoAssembly_T hB T hBmeas V‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
+  show ‖ItoIntegralL2.itoAssembly hB hBmeas V.val‖
       = ‖simpleProcessL2_T (μ := μ) T hBmeas V.val‖
   rw [simpleProcessL2_T_norm_eq T hBmeas V]
-  exact ItoIntegralL2.assembly_isometry hBmeas V.val
+  exact ItoIntegralL2.assembly_isometry hB hBmeas V.val
 
 /-! ### Phase 5: Set-integral vanishing on the orthogonal complement
 
@@ -449,7 +449,6 @@ instance (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
   unfold trimMeasure_T
   infer_instance
 
-omit hB in
 /-- The heart of the density argument, reused by the unbounded-horizon CLM
 (`ItoIntegralL2Dense`): a function `g ∈ L²(trim_T)` whose set-integral over every
 basic predictable rectangle vanishes has vanishing set-integral over every
@@ -613,7 +612,6 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
 
 /-! ### Density of `simpleAssembly_T` -/
 
-omit hB in
 /-- Bridge lemma: integrating any `g : Lp 2 trim_T` over a predictable-measurable
 `R` equals the integral over `R ∩ (Ioc 0 T × univ)`. The complement of
 `Ioc 0 T × univ` is `trim_T`-null because `trim_T = trim_full.restrict
@@ -717,27 +715,29 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
 
 /-- **The continuous Itô integral as a CLM on `[0,T]`.** Built from
 `itoAssembly_T` along `simpleAssembly_T` via `LinearMap.extendOfNorm`. -/
-noncomputable def itoIntegralCLM_T (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+noncomputable def itoIntegralCLM_T (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) :
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ] Lp ℝ 2 μ :=
-  (itoAssembly_T (μ := μ) T hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T hBmeas)
+  (itoAssembly_T hB T hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T hBmeas)
 
 /-- **The continuous-time Itô isometry on `[0,T]`.** For every
 `f ∈ Lp 2 trim_T`, `‖itoIntegralCLM_T f‖ = ‖f‖`. -/
-theorem itoIntegralCLM_T_norm (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+theorem itoIntegralCLM_T_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t))
     (f : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ‖itoIntegralCLM_T (μ := μ) T hBmeas f‖ = ‖f‖ := by
-  set I := itoIntegralCLM_T (μ := μ) T hBmeas with hI
+    ‖itoIntegralCLM_T hB T hBmeas f‖ = ‖f‖ := by
+  set I := itoIntegralCLM_T hB T hBmeas with hI
   have h_dense := simpleAssembly_T_denseRange (μ := μ) T hBmeas
   -- Norm bound `‖itoAssembly_T V‖ ≤ 1 * ‖simpleAssembly_T V‖` (i.e., the isometry).
   have h_norm : ∀ V : TBoundedSP T hBmeas,
-      ‖itoAssembly_T (μ := μ) T hBmeas V‖ ≤ 1 * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
-    fun V => by rw [one_mul]; exact (assembly_isometry_T T hBmeas V).le
+      ‖itoAssembly_T hB T hBmeas V‖ ≤ 1 * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
+    fun V => by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le
   -- Equality on `range simpleAssembly_T` by `extendOfNorm_eq` + assembly isometry.
   have h_on_range : ∀ V : TBoundedSP T hBmeas,
       ‖I (simpleAssembly_T (μ := μ) T hBmeas V)‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
     intro V
     rw [hI, itoIntegralCLM_T, LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩,
-        assembly_isometry_T]
+        assembly_isometry_T hB T hBmeas V]
   -- Both sides continuous in `f`; agree on a dense set ⇒ agree everywhere.
   exact h_dense.induction_on (p := fun y => ‖I y‖ = ‖y‖) f
     (isClosed_eq (continuous_norm.comp I.continuous) continuous_norm) h_on_range
