@@ -77,7 +77,7 @@ private lemma condExp_func_increment {s t : ℝ≥0} (hst : s ≤ t)
     P[fun ω ↦ φ (X t ω - X s ω) | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ c := by
   have h_indep : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)) (𝓕 s) P := by
     have := hX.indep s t hst
-    convert this using 2
+    exact this
   have hφ_comap :
       Measurable[MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)]
         (fun ω ↦ φ (X t ω - X s ω)) :=
@@ -98,7 +98,7 @@ theorem squareSubTime_isMartingale :
   -- Adaptedness of `(X u)² − u`.
   · have hB : StronglyMeasurable[𝓕 u] (X u) := hX.stronglyAdapted u
     have hsq : StronglyMeasurable[𝓕 u] (fun ω ↦ (X u ω) ^ 2) := by
-      simpa [pow_two] using hB.mul hB
+      simp only [pow_two]; exact hB.mul hB
     exact hsq.sub stronglyMeasurable_const
   -- Conditional-expectation step.
   have h_int_s : Integrable (X s) P := hX.integrable_eval s
@@ -109,8 +109,12 @@ theorem squareSubTime_isMartingale :
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
   have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
   -- HasLaws from `IsPreBrownianReal`.
-  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P :=
-    hX.hasLaw_sub t s
+  have hmax : (max (t - s) (s - t) : ℝ≥0) = nndist (t : ℝ) (s : ℝ) := by
+    apply NNReal.coe_injective
+    rw [coe_nndist, Real.dist_eq, max_sub_coe_eq_of_le hst,
+      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
+  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P := by
+    rw [hmax]; exact hX.hasLaw_sub t s
   have hL_s : HasLaw (X s) (gaussianReal 0 s) P := hX.hasLaw_eval s
   -- L² membership transferred via HasLaw + `memLp_id_gaussianReal`.
   have h_Bs_memLp : MemLp (X s) 2 P :=
@@ -126,7 +130,7 @@ theorem squareSubTime_isMartingale :
   have h_int_diff_sq : Integrable (fun ω ↦ (X t ω - X s ω) ^ 2) P := h_diff_memLp.integrable_sq
   have h_int_cross : Integrable (fun ω ↦ X s ω * (X t ω - X s ω)) P := by
     have := h_Bs_memLp.integrable_mul h_diff_memLp
-    simpa using this
+    exact this
   -- Mean of increment is 0.
   have h_int_diff_zero : ∫ ω, (X t ω - X s ω) ∂P = 0 := by
     rw [h_eq_diff, hL_diff.integral_eq, integral_id_gaussianReal]
@@ -140,7 +144,7 @@ theorem squareSubTime_isMartingale :
   -- `𝓕_s`-measurability of `X_s` and `(X_s)²`.
   have h_smeas_s : StronglyMeasurable[𝓕 s] (X s) := hX.stronglyAdapted s
   have h_smeas_s_sq : StronglyMeasurable[𝓕 s] (fun ω ↦ (X s ω) ^ 2) := by
-    simpa [pow_two] using h_smeas_s.mul h_smeas_s
+    simp only [pow_two]; exact h_smeas_s.mul h_smeas_s
   -- `E[(X_s)² | 𝓕_s] = (X_s)²`.
   have h_condBs_sq :
       P[fun ω ↦ (X s ω) ^ 2 | (𝓕 s : MeasurableSpace Ω)] = fun ω ↦ (X s ω) ^ 2 :=
@@ -272,8 +276,12 @@ theorem waldExponential_isMartingale (α : ℝ) :
   have h_meas_s : Measurable (X s) := ((hX.stronglyAdapted s).mono (𝓕.le s)).measurable
   have h_meas_diff : Measurable (fun ω ↦ X t ω - X s ω) := h_meas_t.sub h_meas_s
   have h_eq_diff : (fun ω ↦ X t ω - X s ω) = (X t - X s : Ω → ℝ) := rfl
-  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P :=
-    hX.hasLaw_sub t s
+  have hmax : (max (t - s) (s - t) : ℝ≥0) = nndist (t : ℝ) (s : ℝ) := by
+    apply NNReal.coe_injective
+    rw [coe_nndist, Real.dist_eq, max_sub_coe_eq_of_le hst,
+      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
+  have hL_diff : HasLaw (X t - X s) (gaussianReal 0 (max (t - s) (s - t))) P := by
+    rw [hmax]; exact hX.hasLaw_sub t s
   -- Integrability of `exp(α (X_t − X_s))`.
   have h_int_exp_diff : Integrable (fun ω ↦ Real.exp (α * (X t ω - X s ω))) P := by
     have := integrable_exp_mul_of_hasLaw h_meas_diff (h_eq_diff ▸ hL_diff) α
