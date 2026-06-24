@@ -61,8 +61,10 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
   -- Level 1: `|f′ t − f′ x − f″ x·(t−x)| ≤ Cf3·|y−x|²`
   have hd1 : ∀ u, HasDerivAt (fun s => f' s - f' x - f'' x * (s - x)) (f'' u - f'' x) u :=
     fun u => by
-      simpa using ((hf' u).sub_const (f' x)).sub
+      have h := ((hf' u).sub_const (f' x)).sub
         (((hasDerivAt_id u).sub_const x).const_mul (f'' x))
+      simp only [id_eq] at h
+      convert h using 1 <;> first | rfl | ring
   have hL1 : ∀ t ∈ Set.uIcc x y, |f' t - f' x - f'' x * (t - x)| ≤ Cf3 * |y - x| ^ 2 := by
     intro t ht
     have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
@@ -81,8 +83,7 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
         (((hasDerivAt_id u).sub_const x).const_mul (f' x))).sub
         ((((hasDerivAt_id u).sub_const x).pow 2).const_mul (1 / 2 * f'' x))
     simp only [id_eq] at h
-    convert h using 1
-    ring
+    convert h using 1 <;> first | rfl | ring
   have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
     (fun u _ => (hd0 u).hasDerivWithinAt)
     (fun u hu => by rw [Real.norm_eq_abs]; exact hL1 u hu)
@@ -94,7 +95,9 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
   exact h.trans_eq (by ring)
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
-  [hB : IsPreBrownianReal B μ]
+  (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- **Sixth moment of a Brownian increment**: `E[(B_{t₁} − B_{t₀})⁶] = 15(t₁ − t₀)³`
 for `t₀ ≤ t₁` (law-transfer of the Gaussian identity `integral_pow6_gaussianReal`). -/
@@ -102,7 +105,13 @@ theorem integral_increment_pow6 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     ∫ ω, (B t₁ ω - B t₀ ω) ^ 6 ∂μ = 15 * ((t₁ : ℝ) - t₀) ^ 3 := by
   have hmax : ((max (t₁ - t₀) (t₀ - t₁) : ℝ≥0) : ℝ) = (t₁ : ℝ) - t₀ := by
     rw [max_eq_left (by rw [tsub_eq_zero_of_le ht]; exact zero_le), NNReal.coe_sub ht]
-  have hcomp := (hB.hasLaw_sub t₁ t₀).integral_comp (f := fun x : ℝ => x ^ 6)
+  have hbridge : (max (t₁ - t₀) (t₀ - t₁) : ℝ≥0) = nndist (t₁ : ℝ) (t₀ : ℝ) := by
+    apply NNReal.coe_injective
+    rw [coe_nndist, Real.dist_eq, hmax,
+      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
+  have hlaw : HasLaw (B t₁ - B t₀) (gaussianReal 0 (max (t₁ - t₀) (t₀ - t₁))) μ := by
+    rw [hbridge]; exact hB.hasLaw_sub t₁ t₀
+  have hcomp := hlaw.integral_comp (f := fun x : ℝ => x ^ 6)
     (measurable_id.pow_const 6).aestronglyMeasurable
   simp only [Function.comp_def, Pi.sub_apply] at hcomp
   rw [hcomp, integral_pow6_gaussianReal, hmax]
@@ -111,15 +120,16 @@ theorem integral_increment_pow6 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
 finite); the companion to `integral_increment_pow6`. -/
 theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
     Integrable (fun ω => (B t₁ ω - B t₀ ω) ^ 6) μ := by
-  have hg : Integrable (fun x : ℝ => x ^ 6) (gaussianReal 0 (max (t₁ - t₀) (t₀ - t₁))) := by
-    have h := (memLp_id_gaussianReal (μ := (0 : ℝ)) (v := max (t₁ - t₀) (t₀ - t₁)) 6).integrable_norm_pow
+  have hg : Integrable (fun x : ℝ => x ^ 6) (gaussianReal 0 (nndist (t₁ : ℝ) (t₀ : ℝ))) := by
+    have h := (memLp_id_gaussianReal (μ := (0 : ℝ)) (v := nndist (t₁ : ℝ) (t₀ : ℝ)) 6).integrable_norm_pow
       (p := 6) (by norm_num)
     simp only [id_eq, Real.norm_eq_abs] at h
     have hfe : (fun x : ℝ => |x| ^ 6) = fun x : ℝ => x ^ 6 :=
       funext fun x => by rw [pow_abs, abs_of_nonneg (by positivity)]
     rwa [hfe] at h
-  rw [← (hB.hasLaw_sub t₁ t₀).map_eq] at hg
-  exact (integrable_map_measure hg.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hg
+  have hmap : Integrable (fun x : ℝ => x ^ 6) (Measure.map (B t₁ - B t₀) μ) := by
+    rw [(hB.hasLaw_sub t₁ t₀).map_eq]; exact hg
+  exact (integrable_map_measure hmap.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hmap
 
 /-- **The Itô–Taylor remainder vanishes in `L²`.** For `f ∈ C³` with `|f‴| ≤ Cf3`,
 `∑ₖ Rₖ → 0` in `L²(μ)` along the uniform partition of `[0,T]`. -/
@@ -166,7 +176,7 @@ theorem tendsto_ito_remainder
       (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2) μ := by
     intro n k
     refine Integrable.mono'
-      ((integrable_increment_pow6 (B := B) (unifPart T n k) (unifPart T n (k + 1))).const_mul (Cf3 ^ 2))
+      ((integrable_increment_pow6 hB (unifPart T n k) (unifPart T n (k + 1))).const_mul (Cf3 ^ 2))
       ((hRk_meas n k).pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω => ?_)
     rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
     exact hRsq_le n k ω
@@ -198,12 +208,12 @@ theorem tendsto_ito_remainder
               (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ
             ≤ ∫ ω, Cf3 ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 ∂μ :=
               integral_mono_of_nonneg (Eventually.of_forall fun ω => sq_nonneg _)
-                ((integrable_increment_pow6 (B := B) _ _).const_mul _)
+                ((integrable_increment_pow6 hB _ _).const_mul _)
                 (Eventually.of_forall fun ω => hRsq_le n k ω)
           _ = Cf3 ^ 2 * ∫ ω, (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 ∂μ :=
               integral_const_mul _ _
           _ = Cf3 ^ 2 * (15 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 3) := by
-              rw [integral_increment_pow6 (hmono n (Nat.le_succ k))]
+              rw [integral_increment_pow6 hB (hmono n (Nat.le_succ k))]
           _ = 15 * Cf3 ^ 2 * ((T : ℝ) / n) ^ 3 := by rw [hΔ k hk]; ring
     _ = 15 * Cf3 ^ 2 * (T : ℝ) ^ 3 / n := by
         rw [Finset.sum_const, Finset.card_range, nsmul_eq_mul]; field_simp
