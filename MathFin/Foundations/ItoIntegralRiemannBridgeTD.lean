@@ -34,8 +34,11 @@ open scoped MeasureTheory NNReal ENNReal InnerProductSpace
 open ItoIntegralL2 ItoIntegralCLM ItoIsometryAdapted ItoIntegralBrownian ItoIntegralRiemannBridge
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
+include hB
+
+omit hB in
 /-- The uniform-partition Riemann–Itô sum for the time-dependent integrand
 `(s, ω) ↦ φ(s, B_s ω)`: `∑_{k<n} φ(tₖ, B_{tₖ})·(B_{t_{k+1}} − B_{tₖ})`. -/
 noncomputable def riemannφTD (_hBmeas : ∀ t, Measurable (B t)) (φ : ℝ → ℝ → ℝ) (T : ℝ≥0)
@@ -51,11 +54,12 @@ lemma memLp_riemannφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ →
     MemLp (riemannφTD hBmeas φ T n) 2 μ := by
   unfold riemannφTD
   refine memLp_finsetSum _ fun k _ => ?_
-  exact memLp_adapted_mul_increment hBmeas (unifPart_mono T n (Nat.le_succ k))
+  exact memLp_adapted_mul_increment hB hBmeas (unifPart_mono T n (Nat.le_succ k))
     (adaptedAt_comp_eval le_rfl (hφ_meas _))
     (MemLp.of_bound (((hφ_meas _).comp (hBmeas _)).aestronglyMeasurable) C
       (ae_of_all _ fun ω => by rw [Real.norm_eq_abs]; exact hφ_bdd _ _))
 
+omit hB in
 /-- The **bounded left-endpoint step process** for the time-dependent integrand over the
 uniform partition of `[0,T]`: `∑_{k<n} φ(tₖ, B_{tₖ}) · 𝟙_{(tₖ, t_{k+1}]}`. A genuine
 `TBoundedSP` (`φ` bounded by `C`); the time-dependent analogue of
@@ -71,6 +75,7 @@ noncomputable def stepφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ 
       ((hφ_meas _).comp (measurable_eval_natFiltration hBmeas (unifPart T n k.1)))
       (M := C) (fun ω => hφ_bdd _ (B (unifPart T n k.1) ω))
 
+omit hB in
 /-- The bounded step process integrates to the time-dependent Riemann sum. -/
 lemma itoSimple_stepφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ → ℝ}
     (hφ_meas : ∀ c : ℝ, Measurable (φ c))
@@ -88,16 +93,17 @@ lemma itoSimple_stepφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ �
 lemma itoIntegralCLM_T_stepφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ → ℝ}
     (hφ_meas : ∀ c : ℝ, Measurable (φ c))
     {C : ℝ} (hφ_bdd : ∀ t x, |φ t x| ≤ C) (T : ℝ≥0) (n : ℕ) :
-    itoIntegralCLM_T (μ := μ) T hBmeas
+    itoIntegralCLM_T hB T hBmeas
         (simpleAssembly_T (μ := μ) T hBmeas (stepφTD hBmeas hφ_meas hφ_bdd T n))
-      = (memLp_riemannφTD hBmeas hφ_meas hφ_bdd T n).toLp (riemannφTD hBmeas φ T n) := by
+      = (memLp_riemannφTD hB hBmeas hφ_meas hφ_bdd T n).toLp (riemannφTD hBmeas φ T n) := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
-        ⟨1, fun V => by rw [one_mul]; exact (assembly_isometry_T T hBmeas V).le⟩]
-  show itoSimpleLp hBmeas (stepφTD hBmeas hφ_meas hφ_bdd T n).val = _
+        ⟨1, fun V => by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
+  show itoSimpleLp hB hBmeas (stepφTD hBmeas hφ_meas hφ_bdd T n).val = _
   rw [itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
     (Filter.Eventually.of_forall fun ω => itoSimple_stepφTD hBmeas hφ_meas hφ_bdd T n ω)
 
+omit hB in
 /-- **The uncurried time-dependent step process is a sum of cell indicators**:
 `uncurry (stepφTD n) (s,ω) = ∑_{k<n} 𝟙_{(tₖ,t_{k+1}]}(s)·φ(tₖ, B_{tₖ}ω)`. -/
 lemma uncurry_stepφTD (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ → ℝ}
@@ -127,10 +133,10 @@ theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
     {φ : ℝ → ℝ → ℝ} (hφ_cont : Continuous fun p : ℝ × ℝ => φ p.1 p.2)
     {C : ℝ} (hφ_bdd : ∀ t x, |φ t x| ≤ C) (T : ℝ≥0) :
     ∃ gφ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      Tendsto (fun n => (memLp_riemannφTD hBmeas
+      Tendsto (fun n => (memLp_riemannφTD hB hBmeas
           (fun _c => (hφ_cont.comp (continuous_const.prodMk continuous_id)).measurable)
           hφ_bdd T n).toLp (riemannφTD hBmeas φ T n))
-        atTop (𝓝 (itoIntegralCLM_T (μ := μ) T hBmeas gφ)) := by
+        atTop (𝓝 (itoIntegralCLM_T hB T hBmeas gφ)) := by
   classical
   have hφ_meas : ∀ c : ℝ, Measurable (φ c) := fun c =>
     (hφ_cont.comp (continuous_const.prodMk continuous_id)).measurable
@@ -220,11 +226,11 @@ theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
   refine ⟨hgφ_memLp.toLp gφ_fn, ?_⟩
   have hLp : Tendsto (fun n => (hf_memLp n).toLp (f n)) atTop (𝓝 (hgφ_memLp.toLp gφ_fn)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hf_memLp hgφ_memLp hint)
-  have key : ∀ n, itoIntegralCLM_T (μ := μ) T hBmeas ((hf_memLp n).toLp (f n))
-      = (memLp_riemannφTD hBmeas hφ_meas hφ_bdd T n).toLp (riemannφTD hBmeas φ T n) := fun n =>
-    itoIntegralCLM_T_stepφTD hBmeas hφ_meas hφ_bdd T n
+  have key : ∀ n, itoIntegralCLM_T hB T hBmeas ((hf_memLp n).toLp (f n))
+      = (memLp_riemannφTD hB hBmeas hφ_meas hφ_bdd T n).toLp (riemannφTD hBmeas φ T n) := fun n =>
+    itoIntegralCLM_T_stepφTD hB hBmeas hφ_meas hφ_bdd T n
   exact (Filter.tendsto_congr key).mp
-    (((itoIntegralCLM_T (μ := μ) T hBmeas).continuous.tendsto _).comp hLp)
+    (((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp hLp)
 
 end ItoIntegralRiemannBridgeTD
 end MathFin

@@ -32,7 +32,9 @@ open MeasureTheory ProbabilityTheory Filter QuadraticVariationL2 ItoIntegralCLM
 open scoped NNReal Topology
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- **CLM-identified bounded-derivative Itô formula in `L²`.** For `f ∈ C³` with `|f′| ≤ C₁`,
 `|f″| ≤ C₂`, `|f‴| ≤ C₃`, there is an Itô-`L²` integrand `gf'` (the realization of
@@ -46,12 +48,12 @@ theorem ito_formula_L2_bddDeriv
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
     ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
       (fun ω => f (B T ω) - f (B 0 ω)) =ᵐ[μ]
-        (fun ω => (itoIntegralCLM_T (μ := μ) T hBmeas gf') ω
+        (fun ω => (itoIntegralCLM_T hB T hBmeas gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure) := by
   have hf'_cont : Continuous f' := continuous_iff_continuousAt.mpr fun x => (hf' x).continuousAt
   have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x => (hf'' x).continuousAt
   have hf_cont : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
-  obtain ⟨gf', hgf'⟩ := itoIntegralCLM_T_of_bdd_cont (μ := μ) hBmeas hBcont hf'_cont hf1 T
+  obtain ⟨gf', hgf'⟩ := itoIntegralCLM_T_of_bdd_cont hB hBmeas hBcont hf'_cont hf1 T
   refine ⟨gf', ?_⟩
   set I : Ω → ℝ := fun ω => f (B T ω) - f (B 0 ω)
     - (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure with hI
@@ -65,36 +67,37 @@ theorem ito_formula_L2_bddDeriv
     linarith [h, h2]
   have hfB : ∀ t : ℝ≥0, MemLp (fun ω => f (B t ω)) 2 μ := fun t => by
     refine MemLp.mono ((memLp_const (μ := μ) |f 0|).add
-        ((memLp_eval (B := B) t).norm.const_mul C1))
+        ((memLp_eval hB t).norm.const_mul C1))
       ((hf_cont.measurable.comp (hBmeas t)).aestronglyMeasurable) (ae_of_all _ fun ω => ?_)
     calc ‖f (B t ω)‖ = |f (B t ω)| := Real.norm_eq_abs _
       _ ≤ |f 0| + C1 * ‖B t ω‖ := by rw [Real.norm_eq_abs]; exact hlip (B t ω)
       _ ≤ ‖|f 0| + C1 * ‖B t ω‖‖ := le_abs_self _
   have hI_memLp : MemLp I 2 μ :=
     ((hfB T).sub (hfB 0)).sub
-      ((memLp_pathIntegral hBmeas hBcont hf''_cont hf2 T).const_mul (1 / 2))
+      ((memLp_pathIntegral hB hBmeas hBcont hf''_cont hf2 T).const_mul (1 / 2))
   -- A-core: the Riemann sums converge in `L²` to `I`; lift to `Lp`
-  have hcore := ito_formula_L2 (μ := μ) hBmeas hBcont T hf hf' hf'' hf2 hf3
-  have hcore_Lp : Tendsto (fun n => (memLp_riemannφ (μ := μ) hBmeas hf'_cont.measurable hf1 T n).toLp
+  have hcore := ito_formula_L2 hB hBmeas hBcont T hf hf' hf'' hf2 hf3
+  have hcore_Lp : Tendsto (fun n => (memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n).toLp
         (riemannφ hBmeas f' T n)) atTop (𝓝 (hI_memLp.toLp I)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr
-      (tendsto_norm_toLp_sub' (fun n => memLp_riemannφ (μ := μ) hBmeas hf'_cont.measurable hf1 T n)
+      (tendsto_norm_toLp_sub' (fun n => memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n)
         hI_memLp hcore)
   -- both limits are the same `L²` limit ⇒ they coincide
-  have huniq : hI_memLp.toLp I = itoIntegralCLM_T (μ := μ) T hBmeas gf' :=
+  have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gf' :=
     tendsto_nhds_unique hcore_Lp hgf'
-  have hae : I =ᵐ[μ] (itoIntegralCLM_T (μ := μ) T hBmeas gf') := by
+  have hae : I =ᵐ[μ] (itoIntegralCLM_T hB T hBmeas gf') := by
     rw [← huniq]; exact (hI_memLp.coeFn_toLp).symm
   filter_upwards [hae] with ω hω
   rw [hI] at hω
   simp only at hω
   linarith [hω]
 
+omit hB in
 /-- **Continuity discharged.** The bounded-derivative Itô formula for the continuous
 modification `IsPreBrownianReal.mk X` of any pre-Brownian `X`: the path-continuity hypothesis is
 supplied for free by the Kolmogorov–Chentsov modification (`IsPreBrownianReal.continuous_mk`), so
 no separate continuity assumption on the process is needed. -/
-theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} [hX : IsPreBrownianReal X μ] (T : ℝ≥0)
+theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBrownianReal X μ) (T : ℝ≥0)
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
@@ -102,10 +105,12 @@ theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} [hX : IsPreBrown
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
     ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t => IsPreBrownianReal.measurable_mk (h := hX) t)),
       (fun ω => f (IsPreBrownianReal.mk (h := hX) X T ω) - f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
-        (fun ω => (itoIntegralCLM_T (μ := μ) T (fun t => IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω
+        (fun ω => (itoIntegralCLM_T (hX.isBrownianReal_mk).toIsPreBrownianReal T
+                    (fun t => IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T,
               f'' (IsPreBrownianReal.mk (h := hX) X s ω) ∂ItoIntegralL2.timeMeasure) :=
-  ito_formula_L2_bddDeriv (B := IsPreBrownianReal.mk (h := hX) X)
+  ito_formula_L2_bddDeriv (hB := (hX.isBrownianReal_mk).toIsPreBrownianReal)
+    (B := IsPreBrownianReal.mk (h := hX) X)
     (fun t => IsPreBrownianReal.measurable_mk (h := hX) t)
     (fun ω => IsPreBrownianReal.continuous_mk (h := hX) ω) T hf hf' hf'' hf1 hf2 hf3
 

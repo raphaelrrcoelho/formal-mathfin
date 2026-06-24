@@ -32,8 +32,11 @@ open scoped MeasureTheory NNReal ENNReal InnerProductSpace
 open ItoIntegralL2 ItoIntegralCLM ItoIsometryAdapted ItoIntegralBrownian
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
+include hB
+
+omit hB in
 /-- The uniform-partition Riemann–Itô sum for integrand `φ∘B`:
 `∑_{k<n} φ(B_{tₖ})·(B_{t_{k+1}} − B_{tₖ})`. -/
 noncomputable def riemannφ (_hBmeas : ∀ t, Measurable (B t)) (φ : ℝ → ℝ) (T : ℝ≥0) (n : ℕ)
@@ -47,11 +50,12 @@ lemma memLp_riemannφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (hφ
     MemLp (riemannφ hBmeas φ T n) 2 μ := by
   unfold riemannφ
   refine memLp_finsetSum _ fun k _ => ?_
-  exact memLp_adapted_mul_increment hBmeas (unifPart_mono T n (Nat.le_succ k))
+  exact memLp_adapted_mul_increment hB hBmeas (unifPart_mono T n (Nat.le_succ k))
     (adaptedAt_comp_eval le_rfl hφ_meas)
     (MemLp.of_bound ((hφ_meas.comp (hBmeas _)).aestronglyMeasurable) C
       (ae_of_all _ fun ω => by rw [Real.norm_eq_abs]; exact hφ_bdd _))
 
+omit hB in
 /-- The **bounded left-endpoint step process** over the uniform partition of `[0,T]`:
 `∑_{k<n} φ(B_{tₖ}) · 𝟙_{(tₖ, t_{k+1}]}`. A genuine `TBoundedSP` (φ bounded by `C`); the
 clamp-free analogue of `ItoIntegralBrownian.truncStep`. -/
@@ -65,6 +69,7 @@ noncomputable def stepφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (
       (hφ_meas.comp (measurable_eval_natFiltration hBmeas (unifPart T n k.1)))
       (M := C) (fun ω => hφ_bdd (B (unifPart T n k.1) ω))
 
+omit hB in
 /-- The bounded step process integrates to the φ-Riemann sum. -/
 lemma itoSimple_stepφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (hφ_meas : Measurable φ)
     {C : ℝ} (hφ_bdd : ∀ x, |φ x| ≤ C) (T : ℝ≥0) (n : ℕ) (ω : Ω) :
@@ -79,16 +84,17 @@ lemma itoSimple_stepφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (h�
 analogue of `ItoIntegralBrownian.itoIntegralCLM_T_truncStep`. -/
 lemma itoIntegralCLM_T_stepφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (hφ_meas : Measurable φ)
     {C : ℝ} (hφ_bdd : ∀ x, |φ x| ≤ C) (T : ℝ≥0) (n : ℕ) :
-    itoIntegralCLM_T (μ := μ) T hBmeas
+    itoIntegralCLM_T hB T hBmeas
         (simpleAssembly_T (μ := μ) T hBmeas (stepφ hBmeas hφ_meas hφ_bdd T n))
-      = (memLp_riemannφ hBmeas hφ_meas hφ_bdd T n).toLp (riemannφ hBmeas φ T n) := by
+      = (memLp_riemannφ hB hBmeas hφ_meas hφ_bdd T n).toLp (riemannφ hBmeas φ T n) := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
-        ⟨1, fun V => by rw [one_mul]; exact (assembly_isometry_T T hBmeas V).le⟩]
-  show itoSimpleLp hBmeas (stepφ hBmeas hφ_meas hφ_bdd T n).val = _
+        ⟨1, fun V => by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
+  show itoSimpleLp hB hBmeas (stepφ hBmeas hφ_meas hφ_bdd T n).val = _
   rw [itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
     (Filter.Eventually.of_forall fun ω => itoSimple_stepφ hBmeas hφ_meas hφ_bdd T n ω)
 
+omit hB in
 /-- The simple-process coercion is additive over a finite sum (pointwise). -/
 lemma coe_finsetSum_apply {ι' : Type*} (hBmeas : ∀ t, Measurable (B t)) (s : Finset ι')
     (W : ι' → SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (i : ℝ≥0) (ω : Ω) :
@@ -100,6 +106,7 @@ lemma coe_finsetSum_apply {ι' : Type*} (hBmeas : ∀ t, Measurable (B t)) (s : 
     rw [Finset.sum_insert ha, SimpleProcess.coe_add, Pi.add_apply, Pi.add_apply, ih,
       Finset.sum_insert ha]
 
+omit hB in
 /-- **The uncurried bounded step process is a sum of cell indicators**:
 `uncurry (stepφ n) (s,ω) = ∑_{k<n} 𝟙_{(tₖ,t_{k+1}]}(s)·φ(B_{tₖ}ω)`. -/
 lemma uncurry_stepφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (hφ_meas : Measurable φ)
@@ -118,6 +125,7 @@ lemma uncurry_stepφ (hBmeas : ∀ t, Measurable (B t)) {φ : ℝ → ℝ} (hφ_
   rw [Finsupp.sum_single_index (by simp)]
   simp
 
+omit hB in
 /-- On `(0,T]`, the cell-indicator sum collapses to the unique containing cell's value,
 whose left endpoint is within `T/n` of `s` (the `Nat.find` partition-cell argument). -/
 lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s ∈ Set.Ioc 0 T)
@@ -163,6 +171,7 @@ lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s �
     have hTn : (0 : ℝ) ≤ (T : ℝ) / n := div_nonneg (NNReal.coe_nonneg T) (Nat.cast_nonneg n)
     exact ⟨by nlinarith [hcoe_low, hcoe_hi, hg], by nlinarith [hcoe_low, hTn]⟩
 
+omit hB in
 /-- If `∫ (Fₙ − G)² → 0` then `‖⟦Fₙ⟧ − ⟦G⟧‖ → 0`, any measure. The single-fixed-limit
 variant of `ItoIntegralBrownian.tendsto_norm_toLp_sub` (which compares two *sequences*
 `Fₙ, Gₙ`); kept as a separate lemma because the `G`-shape genuinely differs. The generic
@@ -174,7 +183,10 @@ lemma tendsto_norm_toLp_sub' {α : Type*} {m : MeasurableSpace α} {ν : Measure
   have heq : (fun n => ‖(hF n).toLp (F n) - hG.toLp G‖)
       = fun n => Real.sqrt (∫ z, (F n z - G z) ^ 2 ∂ν) := by
     funext n; rw [← lp_dist_sq (hF n) hG, Real.sqrt_sq (norm_nonneg _)]
-  rw [heq]; simpa using (Real.continuous_sqrt.tendsto 0).comp h
+  rw [heq]
+  have h2 := (Real.continuous_sqrt.tendsto 0).comp h
+  simp only [Function.comp_def, Real.sqrt_zero] at h2
+  exact h2
 
 /-- **Riemann ↔ CLM bridge.** For bounded continuous `φ`, the uniform-partition
 Riemann–Itô sums `∑ φ(B_{tₖ})·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM_T gφ`, where
@@ -184,9 +196,9 @@ theorem itoIntegralCLM_T_of_bdd_cont (hBmeas : ∀ t, Measurable (B t))
     (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 => B s ω))
     {φ : ℝ → ℝ} (hφ_cont : Continuous φ) {C : ℝ} (hφ_bdd : ∀ x, |φ x| ≤ C) (T : ℝ≥0) :
     ∃ gφ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      Tendsto (fun n => (memLp_riemannφ hBmeas hφ_cont.measurable hφ_bdd T n).toLp
+      Tendsto (fun n => (memLp_riemannφ hB hBmeas hφ_cont.measurable hφ_bdd T n).toLp
           (riemannφ hBmeas φ T n))
-        atTop (𝓝 (itoIntegralCLM_T (μ := μ) T hBmeas gφ)) := by
+        atTop (𝓝 (itoIntegralCLM_T hB T hBmeas gφ)) := by
   classical
   have hφ_meas : Measurable φ := hφ_cont.measurable
   have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hφ_bdd 0)
@@ -269,11 +281,11 @@ theorem itoIntegralCLM_T_of_bdd_cont (hBmeas : ∀ t, Measurable (B t))
   refine ⟨hgφ_memLp.toLp gφ_fn, ?_⟩
   have hLp : Tendsto (fun n => (hf_memLp n).toLp (f n)) atTop (𝓝 (hgφ_memLp.toLp gφ_fn)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hf_memLp hgφ_memLp hint)
-  have key : ∀ n, itoIntegralCLM_T (μ := μ) T hBmeas ((hf_memLp n).toLp (f n))
-      = (memLp_riemannφ hBmeas hφ_meas hφ_bdd T n).toLp (riemannφ hBmeas φ T n) := fun n =>
-    itoIntegralCLM_T_stepφ hBmeas hφ_meas hφ_bdd T n
+  have key : ∀ n, itoIntegralCLM_T hB T hBmeas ((hf_memLp n).toLp (f n))
+      = (memLp_riemannφ hB hBmeas hφ_meas hφ_bdd T n).toLp (riemannφ hBmeas φ T n) := fun n =>
+    itoIntegralCLM_T_stepφ hB hBmeas hφ_meas hφ_bdd T n
   exact (Filter.tendsto_congr key).mp
-    (((itoIntegralCLM_T (μ := μ) T hBmeas).continuous.tendsto _).comp hLp)
+    (((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp hLp)
 
 end ItoIntegralRiemannBridge
 end MathFin

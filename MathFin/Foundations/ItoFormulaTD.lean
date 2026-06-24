@@ -76,7 +76,9 @@ theorem continuous_uncurry_of_bdd_partials {g g_t g_x : ℝ → ℝ → ℝ}
   nlinarith [h3, e1, e2]
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
-  {B : ℝ≥0 → Ω → ℝ} [hB : IsPreBrownianReal B μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+
+include hB
 
 /-- **Time-dependent Itô formula in `L²` (named-limit form).** For `f(t, x)` with the
 `C^{1,2}`-with-bounds package (`f_t, f_tt, f_tx` and `f_x, f_xx, f_xxx`, with `f_t, f_xx,
@@ -125,7 +127,7 @@ theorem ito_formula_td_L2
     hf_xx_cont.comp ((NNReal.continuous_coe).prodMk (hBcont ω))
   -- the three vanishing terms: drift Riemann sums (A2′), weighted QV with the adapted
   -- weight `f_xx(·, B)` (A1′), and the 2D Itô–Taylor remainder (A3′)
-  have hA1 := tendsto_weighted_qv_process (μ := μ) hBmeas
+  have hA1 := tendsto_weighted_qv_process hB hBmeas
     (w := fun s ω => f_xx s (B s ω))
     (fun s => adaptedAt_comp_eval le_rfl (hf_xxm s))
     hwxx_cont hC20 (fun s ω => hbd_xx _ _) T
@@ -133,7 +135,7 @@ theorem ito_formula_td_L2
     (w := fun s ω => f_t s (B s ω))
     (fun s => (hf_tm s).comp (hBmeas s))
     hwt_cont hCt0 (fun s ω => hbd_t _ _) T
-  have hA3 := tendsto_ito_remainder_td (μ := μ) hBmeas T hf_t hf_tt hf_tx hf_x hf_xx hf_xxx
+  have hA3 := tendsto_ito_remainder_td hB hBmeas T hf_t hf_tt hf_tx hf_x hf_xx hf_xxx
     hbd_tt hbd_tx hbd_xxx
   set Isum : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
       f_x (unifPart T n k) (B (unifPart T n k) ω)
@@ -174,7 +176,7 @@ theorem ito_formula_td_L2
     rw [hQVw]
     refine memLp_finsetSum _ fun k _ => ?_
     have hZ : MemLp (fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
-      have h := (memLp_increment_sq_centered_two (B := B) (unifPart T n k) (unifPart T n (k + 1))
+      have h := (memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1))
           ((unifPart T n (k + 1) : ℝ) - unifPart T n k)).add
           (memLp_const (μ := μ) ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
       have heq : ((fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
@@ -194,7 +196,7 @@ theorem ito_formula_td_L2
     intro n
     rw [hRem]
     exact memLp_finsetSum _ fun k _ =>
-      memLp_discreteTaylorRemainder2D_two hBmeas hf_t hf_tt hf_tx hf_x hf_xx hf_xxx
+      memLp_discreteTaylorRemainder2D_two hB hBmeas hf_t hf_tt hf_tx hf_x hf_xx hf_xxx
         hbd_tt hbd_tx hbd_xxx _ _
   have hInt_t : ∀ n, Integrable (fun ω => (Tsum n ω - It ω) ^ 2) μ := fun n =>
     ((hTsum_memLp n).sub hIt_memLp).integrable_sq
@@ -272,7 +274,7 @@ theorem ito_formula_td_L2_bddDeriv
     (hbd_xxx : ∀ t x, |f_xxx t x| ≤ Cxxx) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
       (fun ω => f T (B T ω) - f 0 (B 0 ω)) =ᵐ[μ]
-        (fun ω => (itoIntegralCLM_T (μ := μ) T hBmeas gfx) ω
+        (fun ω => (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
               (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure) := by
   classical
@@ -292,7 +294,7 @@ theorem ito_formula_td_L2_bddDeriv
     hf_xx_cont.comp ((NNReal.continuous_coe).prodMk (hBcont ω))
   -- the bridge: `gfx` is the trim-`L²` realization of `s ↦ f_x(s, B_s)`
   obtain ⟨gfx, hgfx⟩ :=
-    itoIntegralCLM_T_of_bdd_cont_td (μ := μ) hBmeas hBcont hf_x_cont hbd_x T
+    itoIntegralCLM_T_of_bdd_cont_td hB hBmeas hBcont hf_x_cont hbd_x T
   refine ⟨gfx, ?_⟩
   set I : Ω → ℝ := fun ω => f T (B T ω) - f 0 (B 0 ω)
     - ∫ s in Set.Ioc 0 T, f_t s (B s ω) ∂ItoIntegralL2.timeMeasure
@@ -308,7 +310,7 @@ theorem ito_formula_td_L2_bddDeriv
     have hft_cont : Continuous (f (t : ℝ)) :=
       continuous_iff_continuousAt.mpr fun x => (hf_x (t : ℝ) x).continuousAt
     refine MemLp.mono ((memLp_const (μ := μ) |f (t : ℝ) 0|).add
-        ((memLp_eval (B := B) t).norm.const_mul C1))
+        ((memLp_eval hB t).norm.const_mul C1))
       ((hft_cont.measurable.comp (hBmeas t)).aestronglyMeasurable)
       (ae_of_all _ fun ω => ?_)
     calc ‖f (t : ℝ) (B t ω)‖ = |f (t : ℝ) (B t ω)| := Real.norm_eq_abs _
@@ -325,19 +327,19 @@ theorem ito_formula_td_L2_bddDeriv
   have hI_memLp : MemLp I 2 μ :=
     (((hfB T).sub (hfB 0)).sub hIt_memLp).sub (hIxx_memLp.const_mul (1 / 2))
   -- the named-limit core: the Riemann–Itô sums converge in `L²` to `I`; lift to `Lp`
-  have hcore := ito_formula_td_L2 (μ := μ) hBmeas hBcont T hf_t hf_tt hf_tx hf_x hf_xx
+  have hcore := ito_formula_td_L2 hB hBmeas hBcont T hf_t hf_tt hf_tx hf_x hf_xx
     hf_xxx hf_xx_cont hbd_t hbd_xx hbd_tt hbd_tx hbd_xxx
   have hcoreI : Tendsto (fun n =>
       ∫ ω, (riemannφTD hBmeas f_x T n ω - I ω) ^ 2 ∂μ) atTop (𝓝 0) := hcore
-  have hcore_Lp : Tendsto (fun n => (memLp_riemannφTD (μ := μ) hBmeas hfx_meas hbd_x T n).toLp
+  have hcore_Lp : Tendsto (fun n => (memLp_riemannφTD hB hBmeas hfx_meas hbd_x T n).toLp
       (riemannφTD hBmeas f_x T n)) atTop (𝓝 (hI_memLp.toLp I)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr
-      (tendsto_norm_toLp_sub' (fun n => memLp_riemannφTD (μ := μ) hBmeas hfx_meas hbd_x T n)
+      (tendsto_norm_toLp_sub' (fun n => memLp_riemannφTD hB hBmeas hfx_meas hbd_x T n)
         hI_memLp hcoreI)
   -- both are the `L²` limit of the same sums ⇒ they coincide
-  have huniq : hI_memLp.toLp I = itoIntegralCLM_T (μ := μ) T hBmeas gfx :=
+  have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gfx :=
     tendsto_nhds_unique hcore_Lp hgfx
-  have hae : I =ᵐ[μ] (itoIntegralCLM_T (μ := μ) T hBmeas gfx) := by
+  have hae : I =ᵐ[μ] (itoIntegralCLM_T hB T hBmeas gfx) := by
     rw [← huniq]; exact (hI_memLp.coeFn_toLp).symm
   filter_upwards [hae] with ω hω
   rw [hI] at hω
@@ -363,7 +365,7 @@ theorem ito_formula_td_L2_bddDeriv
       = (∫ s in Set.Ioc 0 T, f_t s (B s ω) ∂ItoIntegralL2.timeMeasure)
         + (1 / 2) * ∫ s in Set.Ioc 0 T, f_xx s (B s ω) ∂ItoIntegralL2.timeMeasure := by
     rw [integral_add h1 h2, integral_const_mul]
-  show f T (B T ω) - f 0 (B 0 ω) = (itoIntegralCLM_T (μ := μ) T hBmeas gfx) ω
+  show f T (B T ω) - f 0 (B 0 ω) = (itoIntegralCLM_T hB T hBmeas gfx) ω
     + ∫ s in Set.Ioc 0 T,
         (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure
   rw [hsplit]

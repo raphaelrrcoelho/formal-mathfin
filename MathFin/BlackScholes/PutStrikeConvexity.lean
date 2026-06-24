@@ -60,7 +60,10 @@ lemma hasDerivAt_bsP_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
   have h_sqrt_τ_ne : Real.sqrt τ ≠ 0 := h_sqrt_τ_pos.ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'
   have hK_ne : K ≠ 0 := hK.ne'
-  convert h using 1
+  have h1 := h.congr_of_eventuallyEq
+    (f₁ := fun k => Real.exp (-(r * τ)) * Phi (-bsd2 S k r σ τ))
+    (Filter.Eventually.of_forall fun x => by simp only [Function.comp_def, Pi.neg_apply])
+  refine h1.congr_deriv ?_
   rw [h_pdf_sym]
   field_simp
 

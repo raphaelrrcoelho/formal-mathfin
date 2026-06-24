@@ -173,7 +173,9 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have hσ2 : (0 : ℝ) < σ ^ 2 := by positivity
   have hexp : HasDerivAt (fun τ' => Real.exp (-(r * τ'))) (-r * Real.exp (-(r * τ))) τ := by
     have h1 : HasDerivAt (fun τ' : ℝ => -(r * τ')) (-r) τ := by
-      simpa using ((hasDerivAt_id τ).const_mul r).neg
+      have h := (hasDerivAt_id τ).const_mul (-r)
+      simp only [neg_mul, mul_one] at h
+      exact h
     have h2 := h1.exp
     convert h2 using 1
     ring
@@ -208,15 +210,20 @@ private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     ((Real.hasDerivAt_log hS.ne').add_const ((r - σ ^ 2 / 2) * τ))
   have hprod := (hg.mul (hasDerivAt_inv hS.ne')).const_mul (Real.exp (-(r * τ)))
   have hSne : S ≠ 0 := hS.ne'
-  convert hprod using 1
-  simp only [Function.comp_apply]
   set Uxx := ∫ z, max (Real.exp z - K) 0
       * (heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ))
           * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) ^ 2 - σ ^ 2 * τ) / (σ ^ 2 * τ) ^ 2)
   set Ux := ∫ z, max (Real.exp z - K) 0
       * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
           * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)))
-  field_simp
+  have hUx_eq : ((fun x' => ∫ (z : ℝ), max (Real.exp z - K) 0 * ((z - x') / (σ ^ 2 * τ)
+                      * heatKernel (σ ^ 2 * τ) (z - x'))) ∘
+                   fun x => Real.log x + (r - σ ^ 2 / 2) * τ) S = Ux := by
+    simp only [Function.comp_def]
+    rfl
+  refine hprod.congr_deriv ?_
+  rw [hUx_eq]
+  field_simp [hS.ne']
   ring
 
 /-- Integrability of the call payoff against the kernel's time-derivative integrand `h·∂_t K`
@@ -291,7 +298,6 @@ theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0
     have hSne : S ≠ 0 := hS.ne'
     set c₀ : ℝ := Real.log S + (r - σ ^ 2 / 2) * τ
     have hheat := feynmanU_heat_equation ht₀ (fun ξ => max (Real.exp ξ - K) 0) c₀
-    simp only [] at hheat
     rw [bsV_eq_discount_feynmanU hS hK hσ hτ,
       show (∫ z, max (Real.exp z - K) 0
             * (σ ^ 2 * (heatKernel (σ ^ 2 * τ) (z - c₀)
