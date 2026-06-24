@@ -53,6 +53,80 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-24 — commit 4e921c4 — corpus 285
+
+**Scope**: the v4.31 toolchain bump + full-library port (branch
+`bump-bm-mathlib-4.31`: ~36 MathFin files across the BrownianMotion `d6f23da`
++ Mathlib `v4.31.0` + toolchain `v4.31.0` co-bump) and the lint-cleanup commit
+`4e921c4`. Mechanical drift-fixing — no new theorems, no benchmark entries added
+(corpus unchanged at 285). Library green (8810 jobs), axiom-clean.
+
+| lens | verdict |
+| --- | --- |
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS-WITH-NOTES |
+
+**Panel**: three independent review agents, lenses split (2+3 / 4+5+6 / 1+7+8),
+reading `git diff origin/main...HEAD -- MathFin/` read-only (no Lean run — the
+ledger build held the one local Lean slot).
+
+**Statement integrity (the port's #1 risk) — verified clean**: every changed
+`theorem`/`lemma`/`def` signature is exactly one of (a) `IsPreBrownian` →
+`IsPreBrownianReal` rename, (b) instance binder `[hB]` → explicit `(hB)` +
+`include`/`omit hB in` (same hypothesis, v4.31-mandated since it is now a `Prop`),
+or (c) a definitionally-equal reformulation (`max (t-s)(s-t)` ↔ `nndist ↑t ↑s`,
+`B t - B s` ↔ `fun ω => B t ω - B s ω`). No hypothesis dropped, no conclusion
+weakened, no measure/variance changed to a non-equal value. Deprecations migrated
+1:1 to the non-deprecated upstream lemma (`measure_sdiff`, `FunLike.coe_*`,
+`apply_sup'_eq_sup'_comp`, `zero_le`, unqualified CLM `*_apply`) — consumed, not
+wrapped. The cleanup removed only provably-dead tactic arms + a no-op `change` +
+unused simp args; no live step lost. Docstrings updated in lockstep (incl. the
+`@[blueprint]` spine); exhaustive grep found zero surviving `IsPreBrownian` or
+deprecated-name references in changed files.
+
+**Blocking findings**: none.
+
+**Benchmark corpus**: the ledger sweep surfaced that the port had been
+library-only — 20 benchmark snippets (the inline re-exports in `benchmarks/*.json`)
+still used the v4.30 API. All 20 were ported: explicit `(hB : IsPreBrownianReal …)`
+threading with `hB` as the re-exported lemma's first argument, and the BM-API
+renames (`IsPreBrownian.isMartingale`→`IsPreBrownianReal.isMartingale`,
+`memHolder_mk`/`mk` now on `IsPreBrownianReal`). `bm-prop-5.1.2` was the one that
+looked like a removed constructor (`IsGaussianProcess.isPreBrownian_of_covariance`)
+but is in fact *absorbed into Mathlib* as `IsGaussianProcess.isPreBrownianReal_of_covariance`
+(`Mathlib.Probability.BrownianMotion.Basic`) — same min-covariance characterization,
+so it stays a faithful one-line library_wrapper. All **285** ledger entries now
+re-verify fresh under the v4.31 pins (`lake env lean` per snippet); pytest 19/19.
+
+**Recorded actions (non-blocking, next-session tidy)**:
+1. *(nit)* `Foundations/ItoIntegralBrownian.lean:251` — `riemannFn` `def` sits under
+   an active `include hB` with no `omit hB in`, so it carries a vacuous `hB` argument
+   (harmless; build green). Inconsistent with the file's own `omit hB in` discipline;
+   one-line fix deferred (it touches `riemannFn`'s callers, so out of scope for a
+   mid-finalize edit on the memory-constrained box).
+2. *(minor)* `BlackScholes/StrikeGreeks.lean:136/141` — `hasDerivAt_bsV_K` declares
+   two side conditions for `K·σ·√τ` (`≠ 0` and `0 <`); `field_simp` may not need both.
+   No unused-variable warning fired (both are referenced), so it is at most a
+   functional redundancy — confirm with a build which (if either) is droppable.
+3. *(nit)* the `nndist ↑t ↑s = (t-s)` bridge is hand-inlined ~7× (QuadraticVariationL2,
+   BrownianMartingale, ItoFormulaRemainder, WienerIntegral); orientations differ per
+   site, but a shared helper would DRY it.
+4. *(nit)* the `convert … <;> try rfl` / `<;> first | rfl | ring` module-instance-diamond
+   closer idiom is marginally noisier than the pre-bump closers — the honest minimal
+   response to the v4.31 elaborator (drives the lone PASS-WITH-NOTES on lens 8), not
+   obfuscation. The `StrikeGreeks` rewrite to `congr_deriv` + named value lemmas is a
+   net clarity gain.
+
+**Verdict: PASS-WITH-NOTES** — a faithful mechanical port that preserves every
+statement and improves coherence (current API) and one proof's legibility; the only
+blemishes are cosmetic idiom noise and one vacuous-binder nit, none blocking.
+
 ## 2026-06-23 — commit 2e23025 — corpus 285
 
 **Scope**: D1 — covariation of Itô integrals (the bilinear Itô isometry).
