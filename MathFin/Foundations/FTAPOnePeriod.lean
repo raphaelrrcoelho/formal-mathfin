@@ -170,4 +170,63 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
     rw [hfe]; exact hZY
   exact ⟨Q, hQprob, hQP, hPQ, hYintQ, hQfair⟩
 
+/-- **Integrable backward direction**. For an integrable `Y`, no arbitrage gives an
+EMM. The scalar no-arbitrage *dichotomy*: a one-signed `Y` (`Y ≥ 0` a.e. or `Y ≤ 0`
+a.e.) is killed by the position `θ = ±1`, so if `Y ≢ 0` then it is strictly
+positive on a set of positive measure and strictly negative on another — whence
+`∫_{Y≥0} Y > 0` and `∫_{Y<0} Y < 0`, and the balancing density applies. The
+degenerate `Y =ᵐ 0` case takes `Q = P`. -/
+theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Integrable Y P)
+    (hNA : NoArbitrage P Y) : ∃ Q, IsEMM P Y Q := by
+  classical
+  -- the two halves of the no-arbitrage dichotomy: a one-signed `Y` is null
+  have hpos_kills : 0 ≤ᵐ[P] Y → Y =ᵐ[P] 0 := fun h => by
+    have hk := hNA 1 (by filter_upwards [h] with ω hh; simpa using hh)
+    filter_upwards [hk] with ω hh; simpa using hh
+  have hneg_kills : Y ≤ᵐ[P] 0 → Y =ᵐ[P] 0 := fun h => by
+    have hk := hNA (-1) (by
+      filter_upwards [h] with ω hh
+      rw [neg_one_mul]; exact neg_nonneg.mpr (by simpa using hh))
+    filter_upwards [hk] with ω hh; simpa using hh
+  by_cases hY0 : Y =ᵐ[P] 0
+  · -- degenerate: `Y` is already fair under `P`
+    exact ⟨P, inferInstance, Measure.AbsolutelyContinuous.refl P,
+      Measure.AbsolutelyContinuous.refl P, hYint, by rw [integral_congr_ae hY0]; simp⟩
+  · -- non-degenerate: both tails are strictly signed
+    set s : Set Ω := {ω | 0 ≤ Y ω} with hsdef
+    have hs : MeasurableSet s := measurableSet_le measurable_const hY
+    have hYs : ∀ ω ∈ s, 0 ≤ Y ω := fun ω hω => hω
+    have hYsc : ∀ ω ∈ sᶜ, Y ω ≤ 0 := fun ω hω => le_of_lt (not_le.mp hω)
+    have ha0 : 0 ≤ ∫ ω in s, Y ω ∂P := setIntegral_nonneg hs hYs
+    have hc0 : ∫ ω in sᶜ, Y ω ∂P ≤ 0 := setIntegral_nonpos hs.compl hYsc
+    have ha_pos : 0 < ∫ ω in s, Y ω ∂P := by
+      rcases lt_or_eq_of_le ha0 with h | h
+      · exact h
+      · -- `∫_s Y = 0` with `Y ≥ 0` on `s` ⟹ `Y ≤ᵐ 0` ⟹ (NA, θ=−1) `Y =ᵐ 0`
+        refine absurd (hneg_kills ?_) hY0
+        have hsz := (ae_restrict_iff' hs).mp
+          ((integral_eq_zero_iff_of_nonneg_ae ((ae_restrict_iff' hs).mpr (ae_of_all _ hYs))
+            hYint.restrict).mp h.symm)
+        filter_upwards [hsz] with ω hω
+        by_cases hωs : ω ∈ s
+        · exact (hω hωs).le
+        · exact hYsc ω hωs
+    have hc_neg : ∫ ω in sᶜ, Y ω ∂P < 0 := by
+      rcases lt_or_eq_of_le hc0 with h | h
+      · exact h
+      · -- `∫_{sᶜ} Y = 0` with `Y ≤ 0` on `sᶜ` ⟹ `Y ≥ᵐ 0` ⟹ (NA, θ=1) `Y =ᵐ 0`
+        refine absurd (hpos_kills ?_) hY0
+        have hscz : (fun ω => -Y ω) =ᵐ[P.restrict sᶜ] 0 := by
+          have hnn : 0 ≤ᵐ[P.restrict sᶜ] (fun ω => -Y ω) :=
+            (ae_restrict_iff' hs.compl).mpr (ae_of_all _ fun ω hω => by simpa using hYsc ω hω)
+          have hint0 : ∫ ω in sᶜ, -Y ω ∂P = 0 := by rw [integral_neg, h, neg_zero]
+          exact (integral_eq_zero_iff_of_nonneg_ae hnn hYint.neg.restrict).mp hint0
+        filter_upwards [(ae_restrict_iff' hs.compl).mp hscz] with ω hω
+        by_cases hωs : ω ∈ s
+        · exact hYs ω hωs
+        · have hz : -Y ω = 0 := hω hωs
+          show (0 : ℝ) ≤ Y ω
+          linarith
+    exact exists_isEMM_of_pos_tails P Y hY hYint ha_pos hc_neg
+
 end MathFin.OnePeriod
