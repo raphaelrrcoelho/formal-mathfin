@@ -17,6 +17,7 @@
 - Git: specific adds only; no `Co-Authored-By`/Claude trailer.
 - Build = test: per-file `./scripts/lean-check.sh <file>` (warm daemon ~8s); green ⇒ `{"success": true, "sorry_count": 0}`, no warnings. Final `lake build` gate via daemon restart.
 - Honest scope (docstrings + corpus): one period, **one scalar asset**, arbitrary Ω, no integrability assumed; general-Ω **multi-period** DMW + d-asset are named open follow-ons.
+- **Namespace:** `namespace MathFin.OnePeriod` (NOT bare `MathFin`) — `NoArbitrage`/`IsEMM` already exist in `MathFin` from `FTAPDiscrete.lean`, so the one-period versions must live under `MathFin.OnePeriod` to avoid a duplicate-declaration clash. Public names: `MathFin.OnePeriod.{NoArbitrage, IsEMM, ftap_one_period, …}`; the corpus snippet and AxiomAudit pin use the qualified `MathFin.OnePeriod.ftap_one_period`.
 
 ---
 
