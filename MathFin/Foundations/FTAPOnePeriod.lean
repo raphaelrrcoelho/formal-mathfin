@@ -58,4 +58,18 @@ structure IsEMM (Q : Measure Ω) : Prop where
   int  : Integrable Y Q
   fair : ∫ ω, Y ω ∂Q = 0
 
+omit [IsProbabilityMeasure P] in
+/-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
+Under `Q`, a non-negative discounted gain integrates to `θ · E_Q[Y] = 0`, so it is
+`0` a.e.; equivalence transports this back to `P`. -/
+theorem noArbitrage_of_isEMM {Q : Measure Ω} (hQ : IsEMM P Y Q) : NoArbitrage P Y := by
+  haveI := hQ.prob
+  intro θ hpos
+  have hposQ : 0 ≤ᵐ[Q] (fun ω => θ * Y ω) := hQ.absP.ae_le hpos
+  have hintegral : ∫ ω, θ * Y ω ∂Q = 0 := by
+    rw [integral_const_mul, hQ.fair, mul_zero]
+  have hzeroQ : (fun ω => θ * Y ω) =ᵐ[Q] 0 :=
+    (integral_eq_zero_iff_of_nonneg_ae hposQ (hQ.int.const_mul θ)).mp hintegral
+  exact hQ.Pabs.ae_eq hzeroQ
+
 end MathFin.OnePeriod
