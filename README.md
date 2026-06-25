@@ -3,7 +3,7 @@
 [![build](https://github.com/raphaelrrcoelho/formal-mathfin/actions/workflows/build.yml/badge.svg)](https://github.com/raphaelrrcoelho/formal-mathfin/actions/workflows/build.yml)
 [![axioms](https://img.shields.io/badge/axioms-propext%2C%20Classical.choice%2C%20Quot.sound-blue)](MathFin/AxiomAudit.lean)
 [![blueprint](https://img.shields.io/badge/blueprint-deductive_spine-blue)](docs/blueprint.md)
-[![Lean](https://img.shields.io/badge/Lean-4.30.0--rc2-blue)](lean-toolchain)
+[![Lean](https://img.shields.io/badge/Lean-4.31.0-blue)](lean-toolchain)
 [![license](https://img.shields.io/badge/license-Apache_2.0-blue)](LICENSE)
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.20477782.svg)](https://doi.org/10.5281/zenodo.20477782)
 [![arXiv](https://img.shields.io/badge/arXiv-2606.01356-b31b1b)](https://arxiv.org/abs/2606.01356)
@@ -12,7 +12,7 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa)](CODE_OF_CONDUCT.md)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 274 theorems across 11 areas — Black-Scholes
+and Degenne's BrownianMotion. 287 theorems across 11 areas — Black-Scholes
 with the full Greek matrix, the exotics, and Merton jump-diffusion, binomial
 trees with American / Bermudan / Snell envelope, fixed income with hazard
 credit, first-to-default baskets, and Vasicek SDE, portfolio theory from
@@ -29,13 +29,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 274 |
-| **full derivations** | **239** |
+| total theorems | 287 |
+| **full derivations** | **252** |
 | library wrappers | 18 |
 | reduced cores | 17 |
 | placeholders | **0** |
 
-**257 of the 274 are delivery-ready** (`full` + `library_wrapper`); the 17
+**270 of the 287 are delivery-ready** (`full` + `library_wrapper`); the 17
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
