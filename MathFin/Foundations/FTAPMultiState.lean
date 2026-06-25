@@ -10,15 +10,17 @@ public import MathFin.Foundations.FTAPTwoState
 public import MathFin.Foundations.ConvexSeparation
 
 /-!
-# Multi-state FTAP: forward direction (phase 42)
+# Multi-state FTAP (both directions)
 
 The pre-existing `Foundations/FTAPTwoState.lean` (phase 37) gives the
 Fundamental Theorem of Asset Pricing in the **one-period, one-asset,
-two-state** market. This file extends the **forward direction** (EMM ⟹
-no arbitrage) to **arbitrary finite-state markets with multiple assets**.
-The **backward direction** — constructing the EMM from no-arbitrage,
-which needs finite-dimensional separation (Farkas) — is not attempted
-here; see the scope note below.
+two-state** market. This file extends it to **arbitrary finite-state
+markets with multiple assets**, in **both directions**: the forward
+direction (EMM ⟹ no arbitrage, phase 42) and the backward direction
+(no arbitrage ⟹ EMM, 2026-06-25) — the latter constructs the EMM by
+finite-dimensional geometric Hahn–Banach separation of the
+attainable-payoff span from the standard simplex
+(`exists_pos_dual_of_disjoint_stdSimplex`, `Foundations/ConvexSeparation.lean`).
 
 ## Setup
 

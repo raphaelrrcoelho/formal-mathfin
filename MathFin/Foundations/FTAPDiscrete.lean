@@ -46,13 +46,25 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory
 open scoped BigOperators
 
--- The lemmas below intentionally share one rich `variable` context; individual
--- lemmas use different subsets, so silence the unused-section-variable linter.
+-- Heterogeneous use of one rich `variable` context: the algebraic transform
+-- lemmas need only `S`, and several theorems do not touch
+-- `Nonempty`/`MeasurableSingletonClass`/`IsProbabilityMeasure`. Five scattered
+-- `omit … in` clauses would be noisier than a single suppression, so we disable
+-- the unused-section-variable linter file-wide (deliberate, localized).
 set_option linter.unusedSectionVars false
 
 variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
   [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)
   (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)
+
+/-- On a full-support measure a null set is empty — hence any two full-support
+measures on `Ω` are mutually absolutely continuous. -/
+private lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ {ω})
+    {s : Set Ω} (hs : μ s = 0) : s = ∅ := by
+  rw [← Set.not_nonempty_iff_eq_empty]
+  rintro ⟨ω, hω⟩
+  exact absurd (hs ▸ measure_mono (Set.singleton_subset_iff.mpr hω) : μ {ω} ≤ 0)
+    (not_le.mpr (hμ ω))
 
 /-- **No arbitrage**: no predictable strategy turns zero initial wealth into a
 sure non-loss (`0 ≤ᵐ[P]` discounted gains) with a positive chance of gain. On a
@@ -152,9 +164,9 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
     have hle : ∑ ω, v ω ≤ 0 := Finset.sum_nonpos fun ω _ => hcon ω
     rw [hsimplex.2] at hle; linarith
   have hnull : P {ω | v ω ≠ 0} = 0 := by simpa using ae_iff.mp hzero
-  have hsub : ({ω₀} : Set Ω) ⊆ {ω | v ω ≠ 0} := by
-    intro x hx; rw [Set.mem_singleton_iff] at hx; subst hx; exact ne_of_gt hω₀
-  exact absurd (hnull ▸ measure_mono hsub : P {ω₀} ≤ 0) (not_le.mpr (hP ω₀))
+  have hmem : ω₀ ∈ {ω | v ω ≠ 0} := ne_of_gt hω₀
+  rw [eq_empty_of_pos_singleton hP hnull] at hmem
+  simp at hmem
 
 /-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure
 exists. The separating-dual `q` of the gains subspace, normalised to a
@@ -186,15 +198,11 @@ theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
     rw [hQdef, PMF.integral_eq_sum]
     exact Finset.sum_congr rfl fun ω _ => by
       rw [PMF.ofFintype_apply, ENNReal.toReal_ofReal (hmnn ω), smul_eq_mul]
-  -- Both `P` and `Q` have full support, so a null set is empty: they are equivalent.
-  have hnull : ∀ (μ : Measure Ω), (∀ ω, 0 < μ {ω}) → ∀ s : Set Ω, μ s = 0 → s = ∅ := by
-    intro μ hμ s hs
-    rw [← Set.not_nonempty_iff_eq_empty]
-    rintro ⟨ω, hω⟩
-    have hle : μ {ω} ≤ 0 := hs ▸ measure_mono (Set.singleton_subset_iff.mpr hω)
-    exact absurd hle (not_le.mpr (hμ ω))
-  have hQP : Q ≪ P := by intro s hs; rw [hnull P hP s hs]; exact measure_empty
-  have hPQ : P ≪ Q := by intro s hs; rw [hnull Q hQpos s hs]; exact measure_empty
+  -- Full support ⇒ `P` and `Q` are mutually absolutely continuous.
+  have hQP : Q ≪ P := by
+    intro s hs; rw [eq_empty_of_pos_singleton hP hs]; exact measure_empty
+  have hPQ : P ≪ Q := by
+    intro s hs; rw [eq_empty_of_pos_singleton hQpos hs]; exact measure_empty
   refine ⟨Q, hQprob, hQP, hPQ, fun t htT => ?_⟩
   -- Martingale property via the conditional-expectation characterisation.
   refine ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le t) Integrable.of_finite

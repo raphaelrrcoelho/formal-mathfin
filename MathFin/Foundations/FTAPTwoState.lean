@@ -10,8 +10,8 @@ Theorem 7.1 (forward FTAP `EMM ⟹ no arbitrage`), Theorem 7.2 (signs of
 no-arb implies opposite-sign components), and Theorem 7.3 (explicit EMM
 construction from sign data) are adapted from Nagy's Lean 4 snippets in
 the paper, restricted to the one-period, one-asset, two-state case for
-concreteness. The general finite-state forward direction is in our
-existing `Foundations/NoArbitrageDerivations.lean`.
+concreteness. The general finite-state FTAP — both directions, multiple
+assets — is in `Foundations/FTAPMultiState.lean`.
 
 Author of this MathFin Lean 4 adaptation: Raphael Coelho.
 Original Lean derivation: Tamás Nagy (SSRN 6336503, 2026).

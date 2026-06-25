@@ -53,6 +53,82 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-25 — commit 74e94b6 — corpus 287
+
+**Scope**: the finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska /
+finite Dalang–Morton–Willinger), shipped this session to public `main`. New proof
+content: `Foundations/ConvexSeparation.lean` (the separating-dual kernel
+`exists_pos_dual_of_disjoint_stdSimplex`); `Foundations/FTAPMultiState.lean`
+backward direction + biconditional `hasEMM_multi_iff_not_hasArbitrage`;
+`Foundations/FTAPDiscrete.lean` (the multi-period model `NoArbitrage`/`IsEMM`, both
+directions, `ftap_discrete : NoArbitrage ↔ ∃ EMM`); two `full` corpus entries
+(`mf-ftap-discrete-complete`, `mf-ftap-single-period-complete`). Also a build-env fix
+(`7b15319`, warm REPL daemon on v4.31 — infra, not proof content). Library green,
+axioms-clean, ledger 287/287 fresh, pytest 19/19.
+
+| lens | verdict |
+| --- | --- |
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS-WITH-NOTES |
+| zero slop | PASS-WITH-NOTES |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS-WITH-NOTES |
+| beautiful, elegant math | PASS-WITH-NOTES |
+
+**Panel**: four independent review agents, lenses paired (3+6 / 2+4 / 5+7 / 1+8),
+reading the new files read-only (no Lean run — the daemon held the local Lean slot).
+
+**Honesty — the headline checks, verified clean**: the backward direction genuinely
+**constructs** the EMM from no-arbitrage (gains subspace disjoint from the simplex →
+`geometric_hahn_banach_compact_closed` → strictly-positive dual → `PMF` measure → the
+one-step martingale property via `ae_eq_condExp_of_forall_setIntegral_eq`) — `Q` is
+built, never posited. `IsEMM.mart`'s one-step-up-to-`T` form is the **faithful**
+finite-horizon object (`S` genuinely need not be a `Q`-martingale past `T`); it is
+proved via the textbook set-integral condExp characterisation and consumed
+substantively by the forward telescoping, so the biconditional is non-trivial both
+ways. The full-support hypothesis `∀ ω, 0 < P {ω}` is standard finite-state hygiene
+(makes `~P` ≡ full support and `ᵐ[P]` ≡ pointwise), not a trivialiser, and is not
+droppable without a messier theorem. Scope stated honestly in three places (module
+docstrings, corpus `formalization_scope`, `coverage.md`) — "finite case of DMW"; the
+general-Ω multi-period crown (L⁰-closedness + measurable selection) is named as open.
+
+**Coherence / ingenuity checks**: `martingaleTransform_add`/`_smul` are genuinely new
+(Mathlib has only `martingalePart` linearity for the Doob decomposition — a different
+object; no `martingaleTransform` upstream). The separating-dual kernel is consumed by
+**both** the single-period multi-state and the multi-period scalar backward
+directions — genuine reuse at the right altitude. The forward-direction overlap with
+`FTAP.emm_implies_no_arbitrage` is **not** a missed factoring: the honest
+finite-horizon one-step `IsEMM` is strictly weaker than the all-time `Martingale` the
+abstract forward (and `martingaleTransform_isMartingale`) require, so no shared core
+is extractable without weakening the theorem — the hand telescoping is forced and
+correct. The global-separation architecture is decisively the elegant route for
+finite Ω (vs per-atom backward induction + gluing).
+
+**Blocking findings**: none.
+
+**Recorded actions**:
+1. *(done this verdict)* Stale public-doc claims corrected — all three **under**-stated
+   the work after this session: `README.md` (FTAP line said "multi-state forward" →
+   now multi-state biconditional + multi-period finite-Ω biconditional),
+   `FTAPMultiState.lean` module header (said "forward direction / backward not attempted
+   here" → "both directions"), `FTAPTwoState.lean` cross-ref (mis-cited
+   `NoArbitrageDerivations` for the general forward → `FTAPMultiState`).
+2. *(done this verdict)* The "full-support ⇒ null set empty" reasoning, written twice in
+   `FTAPDiscrete.lean` (`gains_disjoint_stdSimplex` + `exists_isEMM_of_noArbitrage`),
+   extracted to one `private lemma eq_empty_of_pos_singleton` consumed at both sites.
+3. *(considered, kept)* `FTAPDiscrete.lean`'s file-wide
+   `set_option linter.unusedSectionVars false` (the repo's only such suppression; house
+   style is `omit … in`). Switching needs **five** `omit` clauses — the two algebraic
+   lemmas, the span-induction, and `gains_disjoint`/`noArbitrage_of_isEMM` all use
+   heterogeneous subsets of the rich shared `variable` context — noisier than one
+   suppression. Kept with an explanatory comment; revisit if the file is split.
+4. *(nit, open)* `ConvexSeparation.lean:84–101` hand-rolls "a linear functional equals
+   the coordinate-sum of its standard-basis values" + a sign-flip `calc`; correct but
+   ~12 lines more verbose than a `Pi.basisFun`/`Finset.sum_pi_single` collapse. Sharpen
+   on next touch of the file.
+
 ## 2026-06-24 — commit 4e921c4 — corpus 285
 
 **Scope**: the v4.31 toolchain bump + full-library port (branch
