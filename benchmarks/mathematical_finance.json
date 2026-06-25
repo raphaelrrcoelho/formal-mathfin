@@ -3280,6 +3280,22 @@
       }
     },
     {
+      "id": "mf-ftap-one-period-general",
+      "name": "General-Ω One-Period FTAP (Föllmer–Schied)",
+      "description": "On an arbitrary probability space, a single scalar discounted excess return Y ∈ L⁰ admits no arbitrage ⟺ there is an equivalent martingale measure Q ~ P under which Y is integrable with E_Q[Y] = 0. The Föllmer–Schied / one-period Dalang–Morton–Willinger theorem — the measure-theoretic step beyond finite Ω: backward via a bounded-density reduction to L¹, the scalar no-arbitrage dichotomy, and a two-region balancing withDensity (no Hahn–Banach, no Kreps–Yan).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPOnePeriod\n\nopen MeasureTheory\n\n/-- **General-Ω one-period FTAP** (Föllmer–Schied 1.55 / one-period\n    Dalang–Morton–Willinger). For a single measurable scalar discounted excess\n    return `Y` on an arbitrary probability space `(Ω, P)`, no arbitrage holds iff\n    there is an equivalent martingale measure `Q ~ P` under which `Y` is\n    integrable and `E_Q[Y] = 0`. Backward: a bounded-density reduction to `L¹`,\n    the scalar no-arbitrage dichotomy, and a two-region balancing `withDensity`.\n    Re-exports `MathFin.OnePeriod.ftap_one_period`. -/\ntheorem ftap_one_period_general {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] (Y : Ω → ℝ) (hY : Measurable Y) :\n    MathFin.OnePeriod.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriod.IsEMM P Y Q :=\n  MathFin.OnePeriod.ftap_one_period P Y hY\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "General-Ω one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.55; one-period Dalang–Morton–Willinger)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriod.lean. Scope: one trading period, one scalar L⁰ return Y, arbitrary probability space (Ω, P). Backward direction (NA ⟹ EMM) is the elementary Föllmer–Schied route: a bounded strictly-positive density reduction (P̃ = P.withDensity of (1+|Y|)⁻¹/κ) making Y integrable, the scalar no-arbitrage dichotomy (a one-signed Y is killed by θ = ±1), and the two-region balancing withDensity Z = λ·𝟙_{Y≥0} + μ·𝟙_{Y<0} that re-weights up/down moves until Y is fair — no Hahn–Banach, no Kreps–Yan. Forward via E_Q[θ·Y] = 0. The general-Ω multi-period DMW (measurable selection) and the d-asset case are out of scope. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-variance-swap-equivalence",
       "name": "Variance Swap: Log-Payoff = Realised-Variance Limit",
       "description": "The log-payoff static-replication strike (2/T)·E[log(F/S_T)] = σ² and the realised-variance equipartition functional E[Σ(Δlog S)²] → σ²·T — two distinct functionals of the BS log-price both recover the model variance.",

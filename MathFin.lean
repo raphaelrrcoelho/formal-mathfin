@@ -148,6 +148,8 @@ import MathFin.Foundations.PricingKernel
 -- Phase 42: Multi-state FTAP backward (hypothesis-form, forward direction proved)
 import MathFin.Foundations.FTAPMultiState
 import MathFin.Foundations.FTAPDiscrete
+-- General-Ω one-period FTAP (Föllmer–Schied 1.55 / one-period DMW, scalar)
+import MathFin.Foundations.FTAPOnePeriod
 -- BlackScholes
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.Put

@@ -1130,6 +1130,13 @@
       "input_hash": "964abeea5156943913201ee17214d8dcada7918f576db0d34532787e59e7beb2",
       "verified_at_commit": "bf6a903"
     },
+    "mf-ftap-one-period-general": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-25",
+      "elapsed_s": 19.1,
+      "input_hash": "0ac0828ca0c430bbf2b1c695dfd75cc4d8dac7b90f193e1cca4a1e94cb11e626",
+      "verified_at_commit": "fb7b641"
+    },
     "mf-ftap-single-period-complete": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-25",

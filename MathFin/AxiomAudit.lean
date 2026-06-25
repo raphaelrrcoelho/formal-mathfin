@@ -652,4 +652,12 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ftap_discrete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ftap_discrete
 
+-- General-Ω one-period FTAP (`FTAPOnePeriod.lean`): NoArbitrage ⟺ ∃ EMM for a
+-- scalar L⁰ return on an arbitrary probability space (Föllmer–Schied 1.55 /
+-- one-period DMW). Backward via the bounded-density reduction to L¹, the scalar
+-- no-arbitrage dichotomy, and the two-region balancing `withDensity` — no
+-- Hahn–Banach, no Kreps–Yan.
+/-- info: 'MathFin.OnePeriod.ftap_one_period' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.OnePeriod.ftap_one_period
+
 end MathFin.AxiomAudit

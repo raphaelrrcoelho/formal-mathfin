@@ -26,19 +26,25 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-25, finite-Ω FTAP):** corpus **287**, **252 full +
-> 18 wrappers = 270/287 delivery-ready**, 17 reduced cores, 0 placeholders.
-> Finite-Ω **Fundamental Theorem of Asset Pricing** (Harrison–Pliska / finite
-> Dalang–Morton–Willinger): `ftap_discrete` — no arbitrage ⟺ ∃ equivalent
-> martingale measure, multi-period, finite Ω, scalar discounted asset
-> (`Foundations/FTAPDiscrete.lean`, entry `mf-ftap-discrete-complete`), backward
-> via a global geometric Hahn–Banach separation of the attainable-gains subspace
-> from the standard simplex (the reusable kernel `Foundations/ConvexSeparation.lean`),
-> forward via martingale-transform telescoping; plus the single-period multi-state
-> biconditional `hasEMM_multi_iff_not_hasArbitrage` (entry
-> `mf-ftap-single-period-complete`), completing `FTAPMultiState`'s flagged
-> "Phase 42c" backward direction. Open follow-ons: general-Ω DMW (L⁰-closedness +
-> measurable selection, absent from the pin) and the d-asset generalisation.
+> **Live status (2026-06-25, general-Ω one-period FTAP):** corpus **288**,
+> **253 full + 18 wrappers = 271/288 delivery-ready**, 17 reduced cores, 0
+> placeholders. General-Ω one-period **Fundamental Theorem of Asset Pricing**
+> (Föllmer–Schied 1.55 / one-period Dalang–Morton–Willinger): `ftap_one_period`
+> — for a scalar `L⁰` excess return on an **arbitrary** probability space, no
+> arbitrage ⟺ ∃ equivalent martingale measure `Q ~ P` with `Y` integrable and
+> `E_Q[Y] = 0` (`Foundations/FTAPOnePeriod.lean`, entry
+> `mf-ftap-one-period-general`), backward via a bounded-density reduction to `L¹`,
+> the scalar no-arbitrage dichotomy, and a two-region balancing `withDensity` —
+> no Hahn–Banach, no Kreps–Yan. This is the genuine measure-theoretic step beyond
+> the finite-Ω **Harrison–Pliska** `ftap_discrete` (no arbitrage ⟺ ∃ EMM,
+> multi-period, finite Ω, scalar discounted asset; `Foundations/FTAPDiscrete.lean`,
+> entry `mf-ftap-discrete-complete`), itself backward via a global geometric
+> Hahn–Banach separation of the attainable-gains subspace from the standard simplex
+> (the reusable kernel `Foundations/ConvexSeparation.lean`) and forward via
+> martingale-transform telescoping; plus the single-period multi-state biconditional
+> `hasEMM_multi_iff_not_hasArbitrage` (entry `mf-ftap-single-period-complete`).
+> Open follow-ons: general-Ω **multi-period** DMW (L⁰-closedness + measurable
+> selection, absent from the pin) and the d-asset generalisation.
 > Since B3: **D1** (the **bilinear Itô isometry** — the `[0,T]` Itô CLM bundled as
 > a `LinearIsometry`, so it preserves the L²-inner product by polarization:
 > `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫`, the diagonal recovering the isometry;
