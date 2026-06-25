@@ -113,7 +113,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
   the three Mathlib standard axioms.
 - **Verification ledger.** [`verification_ledger.json`](verification_ledger.json)
   records the input-hash (snippet code + transitive imports + toolchain pins)
-  each of the 274 benchmark entries last verified under; only entries whose
+  each of the 287 benchmark entries last verified under; only entries whose
   inputs changed ever re-run.
 - **CI gates.** Every push runs the Python gates (status taxonomy, forbidden
   tactics, a definitional-`rfl` tripwire, blueprint ⊆ audit, ledger
@@ -165,7 +165,7 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-17 of the 274 theorems are `reduced_core` — an honest special case or
+17 of the 287 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 
@@ -216,9 +216,9 @@ Drafted as part of this project (source under [`upstream/`](upstream/)):
 
 The verify Docker image pins:
 
-- Lean toolchain `4.30.0-rc2`
-- Mathlib at commit `c87cc9752221`
-- Remy Degenne's `brownian-motion` library at commit `fa590b1a198c`
+- Lean toolchain `4.31.0`
+- Mathlib at commit `fabf563a7c95`
+- Remy Degenne's `brownian-motion` library at commit `d6f23daf48f9`
 
 These are frozen in [`lakefile.lean`](lakefile.lean) + [`lake-manifest.json`](lake-manifest.json) + [`lean-toolchain`](lean-toolchain) at the repo root.
 
