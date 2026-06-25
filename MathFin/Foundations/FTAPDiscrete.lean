@@ -216,4 +216,53 @@ theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
     integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
   linarith [hkey]
 
+/-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
+Under the EMM `Q`, the discounted gains telescope to `∫ G_T dQ = 0`; a
+non-negative integrand with zero integral is `0` a.e., and equivalence transports
+this back to `P`. -/
+theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
+    {Q : Measure Ω} (hQ : IsEMM 𝓕 P S T Q) : NoArbitrage 𝓕 P S T := by
+  haveI := hQ.prob
+  intro φ hφ hpos
+  -- Each one-step gain integrates to zero under `Q` (the pull-out + martingale step).
+  have hstep : ∀ k, k < T → ∫ ω, (φ (k + 1) * (S (k + 1) - S k)) ω ∂Q = 0 := by
+    intro k hk
+    have hcondS : Q[S (k + 1) - S k | 𝓕 k] =ᵐ[Q] 0 := by
+      have h1 := condExp_sub (μ := Q) (Integrable.of_finite (f := S (k + 1)))
+        (Integrable.of_finite (f := S k)) (𝓕 k)
+      have h2 : Q[S (k + 1) | 𝓕 k] =ᵐ[Q] S k := (hQ.mart k hk).symm
+      have h3 : Q[S k | 𝓕 k] = S k :=
+        condExp_of_stronglyMeasurable (𝓕.le k) (hS k) (Integrable.of_finite (μ := Q))
+      filter_upwards [h1, h2] with ω e1 e2
+      rw [Pi.zero_apply, e1, Pi.sub_apply, e2, congrFun h3 ω, sub_self]
+    have hpull0 : Q[φ (k + 1) * (S (k + 1) - S k) | 𝓕 k] =ᵐ[Q] 0 := by
+      have hpull := condExp_mul_of_stronglyMeasurable_left (μ := Q) (m := 𝓕 k)
+        (f := φ (k + 1)) (g := S (k + 1) - S k) (hφ k) Integrable.of_finite Integrable.of_finite
+      filter_upwards [hpull, hcondS] with ω ep ec
+      rw [Pi.zero_apply] at ec ⊢
+      rw [ep, Pi.mul_apply, ec, mul_zero]
+    rw [← integral_condExp (𝓕.le k), integral_congr_ae hpull0]; simp
+  -- Sum the steps: `∫ G_T dQ = 0`.
+  have hGint : ∫ ω, martingaleTransform φ S T ω ∂Q = 0 := by
+    have hsplit : ∀ ω, martingaleTransform φ S T ω
+        = ∑ k ∈ Finset.range T, φ (k + 1) ω * (S (k + 1) ω - S k ω) := fun ω => by
+      rw [martingaleTransform]
+    simp_rw [hsplit]
+    rw [integral_finsetSum _ (fun k _ => Integrable.of_finite)]
+    exact Finset.sum_eq_zero fun k hk => hstep k (Finset.mem_range.mp hk)
+  -- `G_T ≥ 0` `Q`-a.e. (equivalence) and `∫ G_T = 0` give `G_T = 0` a.e.
+  have hposQ : 0 ≤ᵐ[Q] martingaleTransform φ S T := hQ.absP.ae_le hpos
+  have hzeroQ : martingaleTransform φ S T =ᵐ[Q] 0 :=
+    (integral_eq_zero_iff_of_nonneg_ae hposQ Integrable.of_finite).mp hGint
+  exact hQ.Pabs.ae_eq hzeroQ
+
+/-- **Finite-Ω Fundamental Theorem of Asset Pricing** (Harrison–Pliska; the
+finite case of Dalang–Morton–Willinger): a finite-horizon, single-asset market
+on a finite full-support probability space has no arbitrage **iff** it admits an
+equivalent martingale measure. -/
+theorem ftap_discrete (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
+    NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=
+  ⟨fun hNA => exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
+   fun ⟨_, hQ⟩ => noArbitrage_of_isEMM 𝓕 P S T hS hQ⟩
+
 end MathFin
