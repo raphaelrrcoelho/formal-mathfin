@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.FTAPTwoState
+public import MathFin.Foundations.ConvexSeparation
 
 /-!
 # Multi-state FTAP: forward direction (phase 42)
@@ -38,23 +39,24 @@ under EMM, every portfolio's `q`-weighted excess return is zero, but
 non-negative components with one strictly positive ⟹ strictly positive
 weighted sum, contradiction.
 
-## Backward FTAP (not formalized — Phase 42c)
+## Backward FTAP (proved)
 
-The backward direction requires Hahn-Banach separation in finite
-dimensions (or Farkas' lemma). Mathlib has
-`Mathlib.Analysis.NormedSpace.HahnBanach.Separation` for normed spaces;
-specialising to finite-dim ℝ^N to produce an EMM from the no-arbitrage
-condition is the open work item ("Phase 42c"). For our scope: **the
-forward direction is fully proved in arbitrary finite-state, and the
-backward direction exists only as the two-state construction from
-Phase 37** (`FTAPTwoState.emm_of_signs`).
+`hasEMM_multi_of_not_hasArbitrage`: no arbitrage ⟹ an EMM exists. The
+attainable-payoff subspace `span {z k}` misses the standard simplex (that is
+exactly no arbitrage), so the separating-dual kernel
+`exists_pos_dual_of_disjoint_stdSimplex` (`Foundations/ConvexSeparation.lean`,
+finite-dimensional geometric Hahn–Banach) produces a strictly-positive `q`
+annihilating every asset's excess return; normalising `q` to a probability is
+the EMM. Together with the forward direction this is the biconditional
+`hasEMM_multi_iff_not_hasArbitrage`.
 
 ## Results
 
 * `HasEMM_multi_state`: EMM existence for an N-state market with M assets.
 * `HasArbitrage_multi_state`: arbitrage definition.
-* `noArbitrage_of_emm_multi`: forward FTAP for arbitrary finite state +
-  finite assets.
+* `noArbitrage_of_emm_multi`: forward FTAP (EMM ⟹ no arbitrage).
+* `hasEMM_multi_of_not_hasArbitrage`: backward FTAP (no arbitrage ⟹ EMM).
+* `hasEMM_multi_iff_not_hasArbitrage`: the multi-state FTAP biconditional.
 -/
 
 @[expose] public section
@@ -114,5 +116,51 @@ theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
   have h_sum_pos : 0 < ∑ i, q i * (∑ k, θ k * z k i) :=
     Finset.sum_pos' h_term_nn ⟨i₀, Finset.mem_univ _, h_term_pos⟩
   exact h_sum_pos.ne' h_zero
+
+/-- **Backward FTAP, multi-state**: no arbitrage ⟹ an EMM exists. The
+attainable-payoff subspace `span {z k}` is disjoint from the standard simplex
+(no arbitrage), so `exists_pos_dual_of_disjoint_stdSimplex` yields a
+strictly-positive dual `q` with `∑ i, q i · z k i = 0` for every asset `k`;
+normalising `q` to a probability is the equivalent martingale measure. -/
+theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
+    (z : Fin M → Fin N → ℝ) (h : ¬ HasArbitrage_multi_state z) :
+    HasEMM_multi_state z := by
+  classical
+  -- The attainable-payoff subspace.
+  set V : Submodule ℝ (Fin N → ℝ) := Submodule.span ℝ (Set.range z) with hVdef
+  -- No arbitrage ⇒ `V` misses the standard simplex.
+  have hdisj : ∀ v ∈ V, v ∉ stdSimplex ℝ (Fin N) := by
+    intro v hv hsimplex
+    rw [hVdef, Submodule.mem_span_range_iff_exists_fun] at hv
+    obtain ⟨c, hc⟩ := hv
+    have hpayoff : ∀ i, (∑ k, c k * z k i) = v i := by
+      intro i
+      have h1 : (∑ k, c k • z k) i = v i := by rw [hc]
+      rw [Finset.sum_apply] at h1
+      simpa only [Pi.smul_apply, smul_eq_mul] using h1
+    refine absurd ⟨c, fun i => ?_, ?_⟩ h
+    · rw [hpayoff i]; exact hsimplex.1 i
+    · obtain ⟨i₀, hi₀⟩ : ∃ i₀, 0 < v i₀ := by
+        by_contra hcon
+        simp only [not_exists, not_lt] at hcon
+        have hle : ∑ i, v i ≤ 0 := Finset.sum_nonpos fun i _ => hcon i
+        rw [hsimplex.2] at hle; linarith
+      exact ⟨i₀, by rw [hpayoff i₀]; exact hi₀⟩
+  obtain ⟨q, hq_pos, hq_dual⟩ := exists_pos_dual_of_disjoint_stdSimplex V hdisj
+  have hzk : ∀ k, (∑ i, q i * z k i) = 0 := fun k =>
+    hq_dual (z k) (Submodule.subset_span ⟨k, rfl⟩)
+  set Z : ℝ := ∑ i, q i with hZdef
+  have hZ_pos : 0 < Z := Finset.sum_pos (fun i _ => hq_pos i) Finset.univ_nonempty
+  refine ⟨fun i => q i / Z, fun i => div_pos (hq_pos i) hZ_pos, ?_, fun k => ?_⟩
+  · rw [← Finset.sum_div, ← hZdef, div_self hZ_pos.ne']
+  · have hcongr : ∀ i, (q i / Z) * z k i = (q i * z k i) / Z := fun i => by ring
+    rw [Finset.sum_congr rfl (fun i _ => hcongr i), ← Finset.sum_div, hzk k, zero_div]
+
+/-- **Multi-state FTAP biconditional**: an EMM exists iff there is no
+arbitrage. -/
+theorem hasEMM_multi_iff_not_hasArbitrage {N M : ℕ} [NeZero N]
+    (z : Fin M → Fin N → ℝ) :
+    HasEMM_multi_state z ↔ ¬ HasArbitrage_multi_state z :=
+  ⟨noArbitrage_of_emm_multi z, hasEMM_multi_of_not_hasArbitrage z⟩
 
 end MathFin
