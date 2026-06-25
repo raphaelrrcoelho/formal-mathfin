@@ -3,9 +3,11 @@
 from __future__ import annotations
 
 import logging
+import os
 import shutil
 import threading
 import time
+from pathlib import Path
 from typing import Any
 
 from .models import (
@@ -45,6 +47,38 @@ def _looks_like_server_death(exc: Exception) -> bool:
         return True
     msg = str(exc).lower()
     return any(marker in msg for marker in _SERVER_DEATH_MARKERS)
+
+
+# Upstream Lean REPL — tags every toolchain (v4.31.0, v4.30.0, …).
+_DEFAULT_REPL_GIT = "https://github.com/leanprover-community/repl"
+
+
+def _resolve_repl_source(project_dir: str) -> tuple[str | None, str | None]:
+    """Pick ``(repl_git, repl_rev)`` for lean-interact's REPL.
+
+    lean-interact's bundled default (``augustepoiroux/repl`` @ ``v1.3.17``) only
+    has toolchain-tagged builds through ~v4.26, so on a v4.31 project it silently
+    falls back to an older toolchain and the REPL cannot load the project's
+    oleans (version mismatch) — the "daemon unfixable on v4.31" symptom. Upstream
+    ``leanprover-community/repl`` tags each toolchain, so we point at it and pick
+    the tag matching the project's ``lean-toolchain``. lean-interact then tries
+    ``{rev}_lean-toolchain-{ver}`` and falls back to ``{rev}`` (the bare tag,
+    which exists upstream). Override either with ``MATHFIN_REPL_GIT`` /
+    ``MATHFIN_REPL_REV``.
+
+    Returns ``(None, None)`` — meaning "use lean-interact's own defaults" — only
+    when the toolchain file is unreadable and no env override is set.
+    """
+    repl_git = os.environ.get("MATHFIN_REPL_GIT", _DEFAULT_REPL_GIT)
+    repl_rev = os.environ.get("MATHFIN_REPL_REV")
+    if repl_rev is None:
+        try:
+            toolchain = Path(project_dir, "lean-toolchain").read_text().strip()
+        except OSError:
+            return None, None
+        # e.g. "leanprover/lean4:v4.31.0" -> "v4.31.0"
+        repl_rev = toolchain.split(":", 1)[1].strip() if ":" in toolchain else toolchain
+    return repl_git, repl_rev
 
 
 class LeanBackend:
@@ -118,7 +152,8 @@ class LeanBackend:
             directory=self._local_project,
             auto_build=auto_build,
         )
-        self._config = LeanREPLConfig(
+        repl_git, repl_rev = _resolve_repl_source(self._local_project)
+        config_kwargs: dict[str, Any] = dict(
             project=self._project,
             verbose=False,
             memory_hard_limit_mb=self._memory_hard_limit_mb,
@@ -126,6 +161,14 @@ class LeanBackend:
             # are True by default — keep them; both help per-request latency
             # at modest memory cost.
         )
+        if repl_rev is not None:
+            # Override lean-interact's fork default with a toolchain-matched
+            # upstream REPL so the daemon works on v4.31+ (see
+            # `_resolve_repl_source`).
+            config_kwargs["repl_git"] = repl_git
+            config_kwargs["repl_rev"] = repl_rev
+            logger.info("REPL source: %s @ %s (toolchain-matched)", repl_git, repl_rev)
+        self._config = LeanREPLConfig(**config_kwargs)
         self._server = AutoLeanServer(
             self._config,
             max_total_memory=self._max_total_memory,
