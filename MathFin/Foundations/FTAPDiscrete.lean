@@ -1,0 +1,159 @@
+/-
+Copyright (c) 2026 Raphael Coelho. All rights reserved.
+Released under Apache 2.0 license as described in the file LICENSE.
+Authors: Raphael Coelho
+-/
+module
+
+public import Mathlib
+public import MathFin.Foundations.ConvexSeparation
+public import MathFin.Foundations.MartingaleTransform
+
+/-!
+# Discrete-time FTAP on a finite probability space (scalar, finite horizon)
+
+The finite-Ω, finite-horizon, single-asset **Fundamental Theorem of Asset
+Pricing** (Harrison–Pliska / the finite case of Dalang–Morton–Willinger): a
+market has **no arbitrage** iff it admits an **equivalent martingale measure**.
+
+The discounted price `S : ℕ → Ω → ℝ` is adapted to a filtration `𝓕` on a finite
+probability space `(Ω, P)` with full support; a trading strategy `φ` is
+predictable (`φ (n+1)` is `𝓕 n`-measurable) and its discounted gains are the
+martingale transform `martingaleTransform φ S`.
+
+The backward direction is the geometric heart of the theorem: the attainable
+gains span a subspace of `Ω → ℝ` that, under no arbitrage, misses the standard
+simplex, so the separating-dual kernel `exists_pos_dual_of_disjoint_stdSimplex`
+(`Foundations/ConvexSeparation.lean`) produces a strictly-positive pricing
+functional — the EMM. The forward direction is martingale-transform telescoping.
+
+## Scope
+
+Finite Ω, one scalar discounted asset, finite horizon `T`. The general-Ω DMW
+theorem (which needs L⁰-closedness under no arbitrage and measurable selection)
+and the `d`-asset generalisation are out of scope here.
+
+## Main definitions / results (assembled across this file)
+
+* `MathFin.NoArbitrage`, `MathFin.IsEMM`
+* `MathFin.ftap_discrete` — the biconditional `NoArbitrage ↔ ∃ Q, IsEMM Q`
+-/
+
+@[expose] public section
+
+namespace MathFin
+
+open MeasureTheory ProbabilityTheory
+open scoped BigOperators
+
+-- The lemmas below intentionally share one rich `variable` context; individual
+-- lemmas use different subsets, so silence the unused-section-variable linter.
+set_option linter.unusedSectionVars false
+
+variable {Ω : Type*} [Fintype Ω] [Nonempty Ω] {mΩ : MeasurableSpace Ω}
+  [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)
+  (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)
+
+/-- **No arbitrage**: no predictable strategy turns zero initial wealth into a
+sure non-loss (`0 ≤ᵐ[P]` discounted gains) with a positive chance of gain. On a
+full-support finite space the `ᵐ[P]` form coincides with the pointwise one. -/
+def NoArbitrage : Prop :=
+  ∀ φ : ℕ → Ω → ℝ, StronglyAdapted 𝓕 (fun n => φ (n + 1)) →
+    0 ≤ᵐ[P] martingaleTransform φ S T → martingaleTransform φ S T =ᵐ[P] 0
+
+/-- **Equivalent martingale measure** for the finite horizon. The martingale
+property is the one-step form up to `T` (the honest finite-horizon object: `S`
+need not be a `Q`-martingale past the horizon). -/
+structure IsEMM (Q : Measure Ω) : Prop where
+  prob : IsProbabilityMeasure Q
+  absP : Q ≪ P
+  Pabs : P ≪ Q
+  mart : ∀ t, t < T → S t =ᵐ[Q] Q[S (t + 1) | 𝓕 t]
+
+/-- `𝟙_A · (S_{t+1} − S_t)` — the discounted gain of holding one unit on the
+event `A` over period `t+1`. -/
+noncomputable def incrementIndicator (t : ℕ) (A : Set Ω) : Ω → ℝ :=
+  fun ω => A.indicator (fun _ => (1 : ℝ)) ω * (S (t + 1) ω - S t ω)
+
+/-- The **attainable-gains subspace**: the span of the single-period
+increment-indicators `𝟙_A · (S_{t+1} − S_t)` over `t < T` and `𝓕_t`-measurable
+events `A`. Every element is the discounted gains of some predictable strategy
+(see `mem_gains_imp_predictable`). -/
+noncomputable def gainsSubspace : Submodule ℝ (Ω → ℝ) :=
+  Submodule.span ℝ
+    { g | ∃ t, t < T ∧ ∃ A : Set Ω, MeasurableSet[𝓕 t] A ∧ g = incrementIndicator S t A }
+
+/-- The martingale transform is additive in the strategy. -/
+private lemma martingaleTransform_add (φ ψ : ℕ → Ω → ℝ) (n : ℕ) :
+    martingaleTransform (φ + ψ) S n
+      = martingaleTransform φ S n + martingaleTransform ψ S n := by
+  funext ω
+  simp only [martingaleTransform, Pi.add_apply, add_mul, Finset.sum_add_distrib]
+
+/-- The martingale transform is homogeneous in the strategy. -/
+private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : ℕ) :
+    martingaleTransform (c • φ) S n = c • martingaleTransform φ S n := by
+  funext ω
+  simp only [martingaleTransform, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
+  exact Finset.sum_congr rfl fun k _ => by ring
+
+/-- Every element of the attainable-gains subspace is the discounted gains of a
+predictable strategy. (`span`-induction: the generators are the gains of the
+single-period indicator strategies, and predictable gains are closed under the
+vector-space operations.) -/
+theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace 𝓕 S T) :
+    ∃ φ : ℕ → Ω → ℝ,
+      StronglyAdapted 𝓕 (fun n => φ (n + 1)) ∧ martingaleTransform φ S T = g := by
+  classical
+  induction hg using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨t, htT, A, hA, rfl⟩ := hx
+    refine ⟨fun s => if s = t + 1 then A.indicator (fun _ => (1 : ℝ)) else 0, ?_, ?_⟩
+    · intro n
+      dsimp only
+      split_ifs with h
+      · have hnt : n = t := by omega
+        subst hnt
+        exact stronglyMeasurable_const.indicator hA
+      · exact stronglyMeasurable_const
+    · funext ω
+      simp only [martingaleTransform]
+      rw [Finset.sum_eq_single t]
+      · simp [incrementIndicator]
+      · intro k _ hk
+        rw [if_neg (by omega : ¬ k + 1 = t + 1)]
+        simp
+      · intro ht
+        exact absurd (Finset.mem_range.mpr htT) ht
+  | zero => exact ⟨0, fun _ => stronglyMeasurable_const, by funext ω; simp [martingaleTransform]⟩
+  | add x y _ _ ihx ihy =>
+    obtain ⟨φ, hφ, hφeq⟩ := ihx
+    obtain ⟨ψ, hψ, hψeq⟩ := ihy
+    exact ⟨φ + ψ, fun n => (hφ n).add (hψ n),
+      by rw [martingaleTransform_add, hφeq, hψeq]⟩
+  | smul c x _ ih =>
+    obtain ⟨φ, hφ, hφeq⟩ := ih
+    exact ⟨c • φ, fun n => (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
+
+/-- Under no arbitrage, the attainable-gains subspace is disjoint from the
+standard simplex: a non-negative, non-zero gains vector would be an arbitrage. -/
+theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
+    ∀ v ∈ gainsSubspace 𝓕 S T, v ∉ stdSimplex ℝ Ω := by
+  intro v hv hsimplex
+  obtain ⟨φ, hφ, hφeq⟩ := mem_gains_imp_predictable 𝓕 S T hv
+  -- The gains are `≥ 0` (`v` is in the simplex), so no arbitrage forces them `= 0`.
+  have hge : 0 ≤ᵐ[P] martingaleTransform φ S T := by
+    rw [hφeq]; exact Filter.Eventually.of_forall fun ω => hsimplex.1 ω
+  have hzero : v =ᵐ[P] 0 := by rw [← hφeq]; exact hNA φ hφ hge
+  -- But `∑ v = 1`, so some `v ω₀ > 0`, contradicting `v = 0` a.e. on full support.
+  obtain ⟨ω₀, hω₀⟩ : ∃ ω₀, 0 < v ω₀ := by
+    by_contra hcon
+    simp only [not_exists, not_lt] at hcon
+    have hle : ∑ ω, v ω ≤ 0 := Finset.sum_nonpos fun ω _ => hcon ω
+    rw [hsimplex.2] at hle; linarith
+  have hnull : P {ω | v ω ≠ 0} = 0 := by simpa using ae_iff.mp hzero
+  have hsub : ({ω₀} : Set Ω) ⊆ {ω | v ω ≠ 0} := by
+    intro x hx; rw [Set.mem_singleton_iff] at hx; subst hx; exact ne_of_gt hω₀
+  exact absurd (hnull ▸ measure_mono hsub : P {ω₀} ≤ 0) (not_le.mpr (hP ω₀))
+
+end MathFin
