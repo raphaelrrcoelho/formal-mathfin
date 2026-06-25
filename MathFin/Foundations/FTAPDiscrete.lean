@@ -156,4 +156,64 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
     intro x hx; rw [Set.mem_singleton_iff] at hx; subst hx; exact ne_of_gt hω₀
   exact absurd (hnull ▸ measure_mono hsub : P {ω₀} ≤ 0) (not_le.mpr (hP ω₀))
 
+/-- **Backward direction**: no arbitrage ⟹ an equivalent martingale measure
+exists. The separating-dual `q` of the gains subspace, normalised to a
+probability `Q`, is the EMM: strict positivity gives `Q ~ P`, and the
+annihilation of every increment-indicator gives the martingale property via the
+conditional-expectation characterisation. -/
+theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
+    (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage 𝓕 P S T) :
+    ∃ Q, IsEMM 𝓕 P S T Q := by
+  classical
+  obtain ⟨q, hq_pos, hq_dual⟩ :=
+    exists_pos_dual_of_disjoint_stdSimplex (gainsSubspace 𝓕 S T)
+      (gains_disjoint_stdSimplex 𝓕 P S T hP hNA)
+  set Z : ℝ := ∑ ω, q ω with hZ
+  have hZpos : 0 < Z := Finset.sum_pos (fun ω _ => hq_pos ω) Finset.univ_nonempty
+  have hmnn : ∀ ω, (0 : ℝ) ≤ q ω / Z := fun ω => (div_pos (hq_pos ω) hZpos).le
+  have hsum1 : ∑ ω, ENNReal.ofReal (q ω / Z) = 1 := by
+    rw [← ENNReal.ofReal_sum_of_nonneg (fun ω _ => hmnn ω), ← Finset.sum_div, ← hZ,
+      div_self hZpos.ne', ENNReal.ofReal_one]
+  set Q : Measure Ω := (PMF.ofFintype (fun ω => ENNReal.ofReal (q ω / Z)) hsum1).toMeasure
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q := by rw [hQdef]; infer_instance
+  have hQsingle : ∀ ω, Q {ω} = ENNReal.ofReal (q ω / Z) := fun ω => by
+    rw [hQdef, PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton ω), PMF.ofFintype_apply]
+  have hQpos : ∀ ω, 0 < Q {ω} := fun ω => by
+    rw [hQsingle ω]; exact ENNReal.ofReal_pos.mpr (div_pos (hq_pos ω) hZpos)
+  have hQint : ∀ h : Ω → ℝ, ∫ ω, h ω ∂Q = ∑ ω, (q ω / Z) * h ω := by
+    intro h
+    rw [hQdef, PMF.integral_eq_sum]
+    exact Finset.sum_congr rfl fun ω _ => by
+      rw [PMF.ofFintype_apply, ENNReal.toReal_ofReal (hmnn ω), smul_eq_mul]
+  -- Both `P` and `Q` have full support, so a null set is empty: they are equivalent.
+  have hnull : ∀ (μ : Measure Ω), (∀ ω, 0 < μ {ω}) → ∀ s : Set Ω, μ s = 0 → s = ∅ := by
+    intro μ hμ s hs
+    rw [← Set.not_nonempty_iff_eq_empty]
+    rintro ⟨ω, hω⟩
+    have hle : μ {ω} ≤ 0 := hs ▸ measure_mono (Set.singleton_subset_iff.mpr hω)
+    exact absurd hle (not_le.mpr (hμ ω))
+  have hQP : Q ≪ P := by intro s hs; rw [hnull P hP s hs]; exact measure_empty
+  have hPQ : P ≪ Q := by intro s hs; rw [hnull Q hQpos s hs]; exact measure_empty
+  refine ⟨Q, hQprob, hQP, hPQ, fun t htT => ?_⟩
+  -- Martingale property via the conditional-expectation characterisation.
+  refine ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le t) Integrable.of_finite
+    (fun s _ _ => Integrable.of_finite.integrableOn) (fun s hs _ => ?_)
+    (hS t).aestronglyMeasurable
+  -- Key: `∫_s (S_{t+1} − S_t) dQ = 0` because the increment-indicator is annihilated.
+  have hsm : MeasurableSet s := 𝓕.le t s hs
+  have hinc_eq : s.indicator (fun ω => S (t + 1) ω - S t ω) = incrementIndicator S t s := by
+    funext ω; simp only [incrementIndicator, Set.indicator_apply]; split_ifs <;> ring
+  have hkey : ∫ ω, s.indicator (fun ω => S (t + 1) ω - S t ω) ω ∂Q = 0 := by
+    rw [hinc_eq, hQint]
+    have hdual := hq_dual (incrementIndicator S t s)
+      (Submodule.subset_span ⟨t, htT, s, hs, rfl⟩)
+    calc ∑ ω, (q ω / Z) * incrementIndicator S t s ω
+        = (∑ ω, q ω * incrementIndicator S t s ω) / Z := by
+          rw [Finset.sum_div]; exact Finset.sum_congr rfl fun ω _ => by ring
+      _ = 0 := by rw [hdual, zero_div]
+  rw [integral_indicator hsm,
+    integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
+  linarith [hkey]
+
 end MathFin
