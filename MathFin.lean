@@ -77,6 +77,7 @@ import MathFin.Foundations.TriangleArbitrage
 import MathFin.Foundations.CarrMadan
 import MathFin.Foundations.AlmgrenChriss
 import MathFin.Foundations.ConvexPricingFunctional
+import MathFin.Foundations.ConvexSeparation
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
 import MathFin.Foundations.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)
@@ -146,6 +147,7 @@ import MathFin.Foundations.VarianceSwapEquivalence
 import MathFin.Foundations.PricingKernel
 -- Phase 42: Multi-state FTAP backward (hypothesis-form, forward direction proved)
 import MathFin.Foundations.FTAPMultiState
+import MathFin.Foundations.FTAPDiscrete
 -- BlackScholes
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.Put

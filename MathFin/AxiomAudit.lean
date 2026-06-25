@@ -632,4 +632,24 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T
 
+/-! ## Finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska, 2026-06-25) -/
+
+-- The separating-dual kernel (`Foundations/ConvexSeparation.lean`): a finite-dim
+-- subspace disjoint from the standard simplex admits a strictly-positive
+-- annihilating dual (finite-dimensional geometric Hahn–Banach). The geometric
+-- core shared by the single- and multi-period FTAP backward directions.
+/-- info: 'MathFin.exists_pos_dual_of_disjoint_stdSimplex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_pos_dual_of_disjoint_stdSimplex
+
+-- Multi-state single-period FTAP, now a biconditional (`FTAPMultiState.lean`):
+-- the backward direction (no arbitrage ⟹ EMM) via the separating-dual kernel.
+/-- info: 'MathFin.hasEMM_multi_iff_not_hasArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.hasEMM_multi_iff_not_hasArbitrage
+
+-- Finite-Ω multi-period FTAP (`FTAPDiscrete.lean`): NoArbitrage ⟺ ∃ EMM, the
+-- finite case of Dalang–Morton–Willinger. Backward via global separation of the
+-- attainable-gains subspace from the simplex; forward via transform telescoping.
+/-- info: 'MathFin.ftap_discrete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ftap_discrete
+
 end MathFin.AxiomAudit

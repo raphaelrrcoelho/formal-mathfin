@@ -3248,6 +3248,38 @@
       }
     },
     {
+      "id": "mf-ftap-single-period-complete",
+      "name": "Multi-State Single-Period FTAP (Biconditional)",
+      "description": "No arbitrage ⟺ an equivalent martingale measure exists, in an arbitrary finite-state, finite-asset one-period market. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional geometric Hahn–Banach separation of the attainable-payoff span from the standard simplex, completing the multi-state FTAP to a biconditional.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPMultiState\n\n/-- **Multi-state single-period FTAP, biconditional** (Harrison–Pliska). In an\n    arbitrary finite-state, finite-asset one-period market with excess-return\n    matrix `z`, an equivalent martingale measure exists iff there is no\n    arbitrage. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional\n    geometric Hahn–Banach separation of the attainable-payoff span from the\n    standard simplex. Re-exports `MathFin.hasEMM_multi_iff_not_hasArbitrage`. -/\ntheorem ftap_single_period_complete {N M : ℕ} [NeZero N] (z : Fin M → Fin N → ℝ) :\n    MathFin.HasEMM_multi_state z ↔ ¬ MathFin.HasArbitrage_multi_state z :=\n  MathFin.hasEMM_multi_iff_not_hasArbitrage z\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Fundamental Theorem of Asset Pricing, multi-state biconditional (Harrison–Pliska 1981; Nagy 2026 §7)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full derivation re-exported from MathFin/Foundations/FTAPMultiState.lean: completes the multi-state single-period FTAP to a biconditional by adding the backward direction (no arbitrage ⟹ EMM) via the separating-dual kernel exists_pos_dual_of_disjoint_stdSimplex (finite-dimensional geometric Hahn–Banach, Foundations/ConvexSeparation.lean). Closes the file's flagged Phase-42c open item. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-ftap-discrete-complete",
+      "name": "Finite-Ω Multi-Period FTAP (Harrison–Pliska)",
+      "description": "On a finite full-support probability space with a filtration and an adapted scalar discounted price over a finite horizon, the market has no arbitrage ⟺ it admits an equivalent martingale measure. The finite case of Dalang–Morton–Willinger: backward via global separation of the attainable-gains subspace from the standard simplex, forward via martingale-transform telescoping.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPDiscrete\n\nopen MeasureTheory\n\n/-- **Finite-Ω multi-period FTAP** (Harrison–Pliska; the finite case of\n    Dalang–Morton–Willinger). On a finite full-support probability space with a\n    filtration `𝓕` and an adapted scalar discounted price `S` over a finite\n    horizon `T`, the market has no arbitrage iff it admits an equivalent\n    martingale measure. Backward: the attainable-gains subspace misses the\n    standard simplex under no arbitrage, so the separating hyperplane is the EMM.\n    Forward: martingale-transform telescoping. Re-exports\n    `MathFin.ftap_discrete`. -/\ntheorem ftap_discrete_complete {Ω : Type*} [Fintype Ω] [Nonempty Ω]\n    {mΩ : MeasurableSpace Ω} [MeasurableSingletonClass Ω] (𝓕 : Filtration ℕ mΩ)\n    (P : Measure Ω) [IsProbabilityMeasure P] (S : ℕ → Ω → ℝ) (T : ℕ)\n    (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :\n    MathFin.NoArbitrage 𝓕 P S T ↔ ∃ Q, MathFin.IsEMM 𝓕 P S T Q :=\n  MathFin.ftap_discrete 𝓕 P S T hS hP\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Finite-Ω Fundamental Theorem of Asset Pricing / Harrison–Pliska 1981 (finite Dalang–Morton–Willinger)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full multi-period biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPDiscrete.lean. Scope: finite Ω, one scalar discounted asset, finite horizon T, full-support P. Backward direction via global geometric Hahn–Banach separation of the attainable-gains subspace from the standard simplex (Foundations/ConvexSeparation.lean) + PMF normalisation + the conditional-expectation characterisation; forward via martingale-transform telescoping. The general-Ω DMW (L⁰-closedness + measurable selection) and the d-asset generalisation are out of scope. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-variance-swap-equivalence",
       "name": "Variance Swap: Log-Payoff = Realised-Variance Limit",
       "description": "The log-payoff static-replication strike (2/T)·E[log(F/S_T)] = σ² and the realised-variance equipartition functional E[Σ(Δlog S)²] → σ²·T — two distinct functionals of the BS log-price both recover the model variance.",
