@@ -1900,6 +1900,13 @@
       "input_hash": "a696f1d22fb9144978e86c3c7cf0ccf9071f7090572b7d7b0e010591ff1852b4",
       "verified_at_commit": "4e921c4"
     },
+    "sc-ito-general-local-martingale": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-26",
+      "elapsed_s": 55.3,
+      "input_hash": "fb1134415d460a1603d969f7eacb1380624143e390ba20c5ba9fd0f50ab0e351",
+      "verified_at_commit": "1c82a97"
+    },
     "sc-ito-general-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-24",

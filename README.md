@@ -205,6 +205,24 @@ localization step (Summit C), not yet formalized. What remains gated beyond
 that is the SDE / Lévy layer that builds on it. See
 [`docs/roadmap.md`](docs/roadmap.md).
 
+**Pathwise regularity of the general-integrand Itô integral** is now built on top
+of the L² tower. The L²-valued process `t ↦ (φ●B)_t` admits a **continuous
+modification on `[0,T]`**
+(`Foundations/ItoIntegralProcessContinuousModification.lean`,
+`exists_continuous_modification_itoProcess`): an honest sample-path process agreeing
+a.e. with the L² value at each `t ≤ T` and a.s. continuous — the first sample-path
+result for the *general* integrand, from Degenne's continuous-time Doob maximal
+inequality + Borel–Cantelli on a fast subsequence. This is then upgraded to a genuine
+**continuous local martingale**
+(`Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`,
+`exists_continuous_localMartingale_modification`): the everywhere-continuous
+representative, adapted to the **null-augmented** Brownian filtration `𝓕ᴮ ⊔ 𝓝`,
+satisfies Degenne's `IsLocalMartingale` interface. The measure-theoretic core is
+`condExp_sup_nulls` — conditioning on the null augmentation agrees a.e. with
+conditioning on `𝓕ᴮ` (the σ-algebra crux consuming Mathlib's
+`eventuallyMeasurableSpace`). Both are axioms-clean and non-redundant with Degenne's
+(sorry-backed) general càdlàg modification.
+
 ## Related upstream contributions
 
 Drafted as part of this project (source under [`upstream/`](upstream/)):

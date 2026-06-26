@@ -53,6 +53,70 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-26 (IV) — the general-integrand Itô process as a continuous local martingale (the IsLocalMartingale follow-on) — corpus 291
+
+New file `MathFin/Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`
+(augmentation core + the assembly) + corpus entry `sc-ito-general-local-martingale`
+(`full`). Upgrades the gate (III) to Degenne's local-martingale interface:
+`exists_continuous_localMartingale_modification` — an everywhere-continuous process
+`X` that is a modification of `itoProcessCLM T t φ` for `t ≤ T`, has continuous paths
+for **every** `ω`, and is a genuine `IsLocalMartingale` for the **null-augmented**
+Brownian filtration `𝓕ᴮ ⊔ 𝓝`. Degenne's `Martingale.IsLocalMartingale` needs paths
+càdlàg for every `ω`, forcing the everywhere-continuous representative; on a null set it
+can only be repaired while staying adapted if the filtration carries the null sets —
+hence the augmentation, whose cond-expectation invariance (`condExp_sup_nulls`) transfers
+the L² martingale property to the repaired process.
+
+**Panel**: three independent agents — (math correctness + first principles
+[adversarial]), (Mathlib/Degenne coherence + zero slop + idiomatic register),
+(skeptic: honest scope + concept clarity + no-overclaim).
+
+| lens | verdict |
+|---|---|
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS (blocking finding fixed in this commit) |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS (notes fixed in this commit) |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: one, **fixed in this commit**. The coherence reviewer caught that
+`exists_ae_eq_of_sup_nulls` hand-rolled a `MeasurableSpace M` (sets `=ᵐ` an `m₁`-set) that
+**is** Mathlib's `eventuallyMeasurableSpace m₁ (ae μ)` — an anti-wrapper reproof of a named
+Mathlib construction. Rewritten to consume `eventuallyMeasurableSpace` +
+`le_eventuallyMeasurableSpace` directly (the theorem statement, genuinely new, is unchanged);
+`condExp_sup_nulls` and the null-augmented filtration were confirmed genuinely absent upstream
+(no Mathlib/Degenne "completed filtration" constructor; BM has only the `IsComplete` predicate).
+
+**Notes addressed** (non-blocking, fixed): the "usual conditions" phrasing overclaimed (the
+construction adds the **completeness** half only — null sets — not right-continuity); reworded
+across the module/`nullsAlg`/`augFiltration` docstrings + the two benchmark scopes. The theorem
+docstring mis-cited `condExp_sup_nulls` for *adaptedness* (adaptedness comes from `G ∈ 𝓝`;
+`condExp_sup_nulls` transfers the *martingale* property) — corrected, and the "[0,T]" framing
+clarified (the martingale property holds **globally** on `ℝ≥0` via the `min · T` freeze; only
+the modification clause is horizon-scoped). Scope "impossible" → "not achievable"; "consumes" →
+"is built to consume".
+
+**Checks that mattered**:
+- **No mathematical hole** (full adversarial trace of all five concerns). The two cruxes
+  (`exists_ae_eq_of_sup_nulls`, `condExp_sup_nulls`) are true and correctly proven; the
+  `by_cases i ≤ T` martingale-identity transfer at clamped indices `min i T ≤ min j T` is valid
+  in both branches (L² identity for `i ≤ T`; cond-exp of an already-`𝓕_i`-measurable terminal
+  value for `T < i`); the `min · T` clamp genuinely yields a **global** martingale without
+  needing values past `T` (the standard "freeze a `[0,T]` martingale" device, not degenerate).
+- **The `IsLocalMartingale` is genuine, not vacuous**: it is obtained by first proving the
+  strictly stronger `Martingale` (everywhere-continuous, frozen past `T`) and downgrading via
+  `Martingale.IsLocalMartingale` (Degenne's `Locally.of_prop` with the constant `τ ≡ ⊤`). The
+  result therefore *under*-claims relative to what is proved.
+- **The null augmentation earns its keep** exactly at adaptedness: the good set `G = Nᶜ` is
+  co-null but **not** `natFiltration`-measurable, so `𝓝` is what keeps the everywhere-continuous
+  representative adapted (`stronglyMeasurable_of_tendsto` on the pointwise limit of
+  `G.indicator`(simple integrals), each `natFiltration`-measurable, `G ∈ 𝓝`).
+- **Axioms-clean** `[propext, Classical.choice, Quot.sound]` (AxiomAudit pin); `lake build`
+  green (8817 jobs); ledger 291/291 fresh; pytest 19/19.
+
 ## 2026-06-26 (III) — continuous modification of the general-integrand Itô process (the gate) — corpus 290
 
 New file `MathFin/Foundations/ItoIntegralProcessContinuousModification.lean`

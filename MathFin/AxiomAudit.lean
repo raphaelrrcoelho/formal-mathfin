@@ -652,6 +652,17 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralProcessContinuousModification.exists_continuous_modification_itoProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.exists_continuous_modification_itoProcess
 
+-- The IsLocalMartingale follow-on (`Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`):
+-- the everywhere-continuous representative of the modification, adapted to the
+-- NULL-AUGMENTED Brownian filtration `𝓕ᴮ ⊔ 𝓝`, is a genuine `IsLocalMartingale`.
+-- The measure-theoretic heart is `condExp_sup_nulls` — conditioning on the null
+-- augmentation agrees a.e. with conditioning on `𝓕ᴮ` (proved via the σ-algebra crux
+-- `exists_ae_eq_of_sup_nulls`), which transfers the L² martingale property to the
+-- a.e.-defined modification while repairing it into an everywhere-continuous adapted
+-- process — the `∀ ω, IsCadlag` hypothesis of Degenne's `Martingale.IsLocalMartingale`.
+/-- info: 'MathFin.ItoIntegralProcessLocalMartingaleGeneral.exists_continuous_localMartingale_modification' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessLocalMartingaleGeneral.exists_continuous_localMartingale_modification
+
 /-! ## Finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska, 2026-06-25) -/
 
 -- The separating-dual kernel (`Foundations/ConvexSeparation.lean`): a finite-dim

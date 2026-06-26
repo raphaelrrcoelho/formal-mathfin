@@ -26,9 +26,22 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-26, d-asset one-period FTAP — now FULL):** corpus **289**,
-> **254 full + 18 wrappers = 272/289 delivery-ready**, 17 reduced cores, 0
-> placeholders. The **d-asset** one-period FTAP `ftap_one_period_vector`
+> **Live status (2026-06-26, Itô pathwise-regularity layer — now FULL):** corpus **291**,
+> **256 full + 18 wrappers = 274/291 delivery-ready**, 17 reduced cores, 0
+> placeholders. **Pathwise regularity of the general-integrand Itô integral:** the
+> L²-valued process `(φ●B)_t` now has a **continuous modification on `[0,T]`**
+> (`Foundations/ItoIntegralProcessContinuousModification.lean`, entry
+> `sc-ito-general-continuous-modification`, **`full`**) — the first sample-path result for the
+> *general* integrand, via Degenne's continuous-time Doob maximal inequality + Borel–Cantelli
+> on a fast subsequence — upgraded to a genuine **continuous local martingale**
+> (`Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`, entry
+> `sc-ito-general-local-martingale`, **`full`**): the everywhere-continuous representative,
+> adapted to the **null-augmented** Brownian filtration `𝓕ᴮ ⊔ 𝓝`, meets Degenne's
+> `IsLocalMartingale` interface. The measure-theoretic core is `condExp_sup_nulls`
+> (cond-expectation invariance under the null augmentation, its σ-algebra crux consuming
+> Mathlib's `eventuallyMeasurableSpace`); both are axioms-clean and non-redundant with
+> Degenne's sorry-backed general càdlàg modification. Earlier this day: the **d-asset**
+> one-period FTAP `ftap_one_period_vector`
 > (`Foundations/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`, **`full`**)
 > is the unrestricted Föllmer–Schied 1.6 for a discounted excess return valued in any
 > **finite-dimensional** inner-product space `F` (the `ℝᵈ` market is `F = EuclideanSpace ℝ

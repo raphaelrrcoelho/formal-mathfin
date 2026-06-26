@@ -115,6 +115,8 @@ import MathFin.Foundations.ItoIntegralProcessGeneral
 import MathFin.Foundations.ItoIntegralProcessIsometry
 -- Continuous modification of the general-integrand Itô process on [0,T] (the gate)
 import MathFin.Foundations.ItoIntegralProcessContinuousModification
+-- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
+import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- Pathwise discrete Itô identity for `f(x) = x²` (the squaring keystone)
 import MathFin.Foundations.ItoSquaringIdentity
 -- Polynomial Itô remainders (x³, x⁴) + the pathwise discrete cubing identity
