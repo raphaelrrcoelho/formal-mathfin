@@ -70,5 +70,42 @@ theorem itoSimpleProcess_maximal_weak (hBmeas : ∀ t, Measurable (B t))
   maximal_ineq_norm (itoSimpleProcess_isMartingale hB hBmeas V) ε T
     (fun ω _ => (itoSimpleProcess_pathContinuous hBmeas hBcont V ω).continuousWithinAt)
 
+/-- **Chebyshev form** of the maximal bound, with the `L²` terminal norm on the
+right. For a `T`-bounded simple process `V`, the probability that the running
+maximum of `(V ● B)` over `[0,T]` reaches `ε` is at most
+`ε⁻¹ · ‖simpleAssembly_T V‖`: combine the weak bound with `∫_S ‖(V●B)_T‖ ≤
+∫ ‖(V●B)_T‖ ≤ ‖(V●B)_T‖_{L²}` (set-integral monotonicity + `L¹ ≤ L²` on the
+probability space) and the terminal Itô isometry
+`‖(V●B)_T‖_{L²} = ‖simpleAssembly_T V‖`. -/
+theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (T : ℝ≥0) (V : TBoundedSP T hBmeas) {ε : ℝ} (hε : 0 < ε) :
+    μ.real {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖}
+      ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
+  set f := itoSimpleProcess hBmeas V.val T with hf_def
+  set S := {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖} with hS
+  have hf : MemLp f 2 μ := memLp_itoSimpleProcess hB hBmeas V.val T
+  have hfi : Integrable f μ := hf.integrable (by norm_num)
+  have hweak := itoSimpleProcess_maximal_weak hB hBmeas hBcont V.val T ε
+  -- ∫_S ‖f‖ ≤ ∫ ‖f‖
+  have hsub : ∫ ω in S, ‖f ω‖ ∂μ ≤ ∫ ω, ‖f ω‖ ∂μ :=
+    setIntegral_le_integral hfi.norm (ae_of_all _ fun ω => norm_nonneg _)
+  -- ∫ ‖f‖ ≤ ‖f‖_{L²} = ‖itoSimpleProcessLp V T‖
+  have hL2 : ∫ ω, ‖f ω‖ ∂μ ≤ ‖itoSimpleProcessLp hB hBmeas V.val T‖ := by
+    rw [itoSimpleProcessLp, Lp.norm_toLp,
+      ← ENNReal.toReal_ofReal (integral_nonneg fun ω => norm_nonneg _),
+      ofReal_integral_norm_eq_lintegral_enorm hfi, ← eLpNorm_one_eq_lintegral_enorm]
+    exact ENNReal.toReal_mono hf.2.ne (eLpNorm_le_eLpNorm_of_exponent_le (by norm_num) hf.1)
+  -- terminal Itô isometry on the simple embedding
+  have hterm : ‖itoSimpleProcessLp hB hBmeas V.val T‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
+    rw [← itoProcessCLM_simpleAssembly_T hB T T hBmeas V, itoProcessCLM_norm_terminal hB T hBmeas]
+  -- assemble: ε * μ.real S ≤ ‖simpleAssembly_T V‖, then divide by ε > 0
+  rw [smul_eq_mul] at hweak
+  have hchain : ε * μ.real S ≤ ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
+    hweak.trans (hsub.trans (hL2.trans_eq hterm))
+  calc μ.real S = ε⁻¹ * (ε * μ.real S) := by field_simp
+    _ ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
+        mul_le_mul_of_nonneg_left hchain (inv_nonneg.mpr hε.le)
+
 end ItoIntegralProcessContinuousModification
 end MathFin
