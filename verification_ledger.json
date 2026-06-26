@@ -1886,6 +1886,13 @@
       "input_hash": "a86c6a510f26284b134455d6fe2504407f242a24720dc5064ebb4be589c47a20",
       "verified_at_commit": "4e921c4"
     },
+    "sc-ito-general-continuous-modification": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-26",
+      "elapsed_s": 65.7,
+      "input_hash": "3e37e4e9ca1b18450414526e6378df66651241cb1a8b41c400fd0255a94757c6",
+      "verified_at_commit": "4ac022c"
+    },
     "sc-ito-general-l2-continuity": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-24",
