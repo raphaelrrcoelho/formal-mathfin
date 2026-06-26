@@ -127,5 +127,51 @@ theorem approxSeq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   choose V hV using hex
   exact ⟨V, hV⟩
 
+omit hB in
+/-- The elementary process Itô integral is **subtractive** in the simple
+process (from B1a's `itoSimpleProcess_add` / `_neg`). -/
+lemma itoSimpleProcess_sub (hBmeas : ∀ t, Measurable (B t))
+    (V W : SimpleProcess ℝ (natFiltration hBmeas)) (t : ℝ≥0) :
+    itoSimpleProcess hBmeas (V - W) t
+      = itoSimpleProcess hBmeas V t - itoSimpleProcess hBmeas W t := by
+  rw [sub_eq_add_neg, itoSimpleProcess_add, itoSimpleProcess_neg, ← sub_eq_add_neg]
+
+/-- **Summable maximal tail.** For the fast subsequence `V` (`approxSeq`), the
+probabilities that the running max of the consecutive difference
+`(Vₙ − Vₙ₊₁) ● B` over `[0,T]` reaches `εₙ := (3/4)ⁿ` are summable: each is
+`≤ εₙ⁻¹ · ‖simpleAssembly_T (Vₙ − Vₙ₊₁)‖ ≤ εₙ⁻¹ · 2·2⁻ⁿ = 2·(2/3)ⁿ`. The choice
+`εₙ = (3/4)ⁿ ∈ (2⁻¹, 1)ⁿ` makes both `Σ εₙ⁻¹·2⁻ⁿ` and `Σ εₙ` converge. -/
+theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : ∀ n, ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
+    Summable (fun n => μ.real {ω | (3 / 4 : ℝ) ^ n ≤
+      ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖}) := by
+  refine Summable.of_nonneg_of_le (fun n => measureReal_nonneg) (fun n => ?_)
+    ((summable_geometric_of_lt_one (r := 2 / 3) (by norm_num) (by norm_num)).mul_left 2)
+  -- per-term: μ.real {…} ≤ 2 * (2/3)ⁿ
+  refine (itoSimpleProcess_maximal_prob hB hBmeas hBcont T (V n - V (n + 1))
+    (ε := (3 / 4 : ℝ) ^ n) (by positivity)).trans ?_
+  have hnorm : ‖simpleAssembly_T (μ := μ) T hBmeas (V n - V (n + 1))‖ ≤ 2 * (2⁻¹ : ℝ) ^ n := by
+    rw [map_sub]
+    calc ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - simpleAssembly_T (μ := μ) T hBmeas (V (n + 1))‖
+        ≤ ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - φ‖
+            + ‖φ - simpleAssembly_T (μ := μ) T hBmeas (V (n + 1))‖ := by
+          have h := norm_add_le (simpleAssembly_T (μ := μ) T hBmeas (V n) - φ)
+            (φ - simpleAssembly_T (μ := μ) T hBmeas (V (n + 1)))
+          simpa using h
+      _ ≤ (2⁻¹ : ℝ) ^ n + (2⁻¹ : ℝ) ^ (n + 1) := by
+          gcongr
+          · exact hV n
+          · rw [norm_sub_rev]; exact hV (n + 1)
+      _ ≤ 2 * (2⁻¹ : ℝ) ^ n := by
+          rw [pow_succ]; nlinarith [pow_nonneg (by norm_num : (0 : ℝ) ≤ 2⁻¹) n]
+  calc ((3 / 4 : ℝ) ^ n)⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas (V n - V (n + 1))‖
+      ≤ ((3 / 4 : ℝ) ^ n)⁻¹ * (2 * (2⁻¹ : ℝ) ^ n) :=
+        mul_le_mul_of_nonneg_left hnorm (by positivity)
+    _ = 2 * (2 / 3 : ℝ) ^ n := by
+        rw [← inv_pow, mul_comm (2 : ℝ) ((2⁻¹ : ℝ) ^ n), ← mul_assoc, ← mul_pow,
+          show ((3 / 4 : ℝ)⁻¹ * 2⁻¹) = 2 / 3 from by norm_num, mul_comm]
+
 end ItoIntegralProcessContinuousModification
 end MathFin
