@@ -196,5 +196,26 @@ theorem ae_eventually_sup_lt (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   filter_upwards [hω] with n hn
   rwa [hA, Set.mem_setOf_eq, not_le] at hn
 
+/-! ## Phase 3 — continuous limit, modification, capstone -/
+
+omit hB in
+/-- **The running-max keystone.** For `i ≤ T`, the value `‖(W ● B)_i ω‖` is
+bounded by the running maximum over `[0,T]`. The supremum is genuine (not the
+junk value of an unbounded family): `(W ● B)_· ω` is continuous (B3) and `[0,T]`
+is compact, so the family is bounded above. This unlocks the pointwise control of
+consecutive differences. -/
+lemma norm_le_iSup_Iic (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (W : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) {i : ℝ≥0} (hi : i ≤ T) :
+    ‖itoSimpleProcess hBmeas W i ω‖
+      ≤ ⨆ j : Set.Iic T, ‖itoSimpleProcess hBmeas W (j : ℝ≥0) ω‖ := by
+  have hcont : Continuous fun j : Set.Iic T => ‖itoSimpleProcess hBmeas W (j : ℝ≥0) ω‖ :=
+    (continuous_norm.comp (itoSimpleProcess_pathContinuous hBmeas hBcont W ω)).comp
+      continuous_subtype_val
+  have hIic : (Set.Iic T : Set ℝ≥0) = Set.Icc 0 T := by
+    ext x; simp only [Set.mem_Iic, Set.mem_Icc, zero_le, true_and]
+  haveI : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
+  exact le_ciSup (isCompact_range hcont).bddAbove ⟨i, hi⟩
+
 end ItoIntegralProcessContinuousModification
 end MathFin
