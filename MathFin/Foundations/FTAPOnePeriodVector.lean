@@ -327,4 +327,56 @@ lemma exists_pos_lower_bound [Nonempty (Fin d)] (hYint : Integrable Y P)
       _ = g θ := by
           rw [hg_hom ‖θ‖⁻¹ (inv_nonneg.mpr hθ0.le) θ, ← mul_assoc, mul_inv_cancel₀ hθ0.ne', one_mul]
 
+/-- **The potential attains a global minimum** (non-redundant, no arbitrage). Coercivity
+makes the sublevel set `{f ≤ f 0}` bounded, so the minimum over a large closed ball — which
+exists by continuity and compactness — is global. -/
+lemma exists_global_min_potential [Nonempty (Fin d)] (hYint : Integrable Y P)
+    (hNA : NoArbitrage P Y)
+    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+    ∃ θ₀, ∀ θ, potential P Y θ₀ ≤ potential P Y θ := by
+  obtain ⟨c, hc, hlb⟩ := exists_pos_lower_bound P Y hYint hNA hndg
+  have hp0 : 0 ≤ potential P Y 0 := integral_nonneg fun ω => softplus_nonneg _
+  set R : ℝ := potential P Y 0 / c with hRdef
+  have hR0 : 0 ≤ R := div_nonneg hp0 hc.le
+  obtain ⟨θ₀, _, hθ₀min⟩ :=
+    (isCompact_closedBall (0 : EuclideanSpace ℝ (Fin d)) R).exists_isMinOn
+      ⟨0, Metric.mem_closedBall_self hR0⟩ (continuous_potential P Y hYint).continuousOn
+  have hcR : c * R = potential P Y 0 := by rw [hRdef]; field_simp
+  refine ⟨θ₀, fun θ => ?_⟩
+  rcases le_or_gt ‖θ‖ R with hle | hlt
+  · exact isMinOn_iff.mp hθ₀min θ (by rw [Metric.mem_closedBall, dist_zero_right]; exact hle)
+  · calc potential P Y θ₀
+        ≤ potential P Y 0 := isMinOn_iff.mp hθ₀min 0 (Metric.mem_closedBall_self hR0)
+      _ = c * R := hcR.symm
+      _ ≤ c * ‖θ‖ := mul_le_mul_of_nonneg_left hlt.le hc.le
+      _ ≤ potential P Y θ := hlb θ
+
+/-- **First-order condition**. At a global minimiser `θ₀` of the potential, every
+directional derivative vanishes (`IsLocalMin.hasDerivAt_eq_zero`), so the gradient
+`∫ σ⟪θ₀,Y⟫ • Y` is the zero vector — the candidate density `z = σ⟪θ₀,Y⟫` makes `Y` fair. -/
+lemma integral_logistic_smul_eq_zero (hY : Measurable Y) (hYint : Integrable Y P)
+    {θ₀ : EuclideanSpace ℝ (Fin d)} (hmin : ∀ θ, potential P Y θ₀ ≤ potential P Y θ) :
+    ∫ ω, logistic (inner ℝ θ₀ (Y ω)) • Y ω ∂P = 0 := by
+  -- every directional derivative at `θ₀` is `0`
+  have hdir : ∀ u, ∫ ω, logistic (inner ℝ θ₀ (Y ω)) * inner ℝ u (Y ω) ∂P = 0 := by
+    intro u
+    have hmin0 : IsLocalMin (fun t : ℝ => potential P Y (θ₀ + t • u)) 0 :=
+      Filter.Eventually.of_forall fun t => by simp only [zero_smul, add_zero]; exact hmin _
+    exact hmin0.hasDerivAt_eq_zero (hasDerivAt_potential_dir P Y hY hYint θ₀ u)
+  -- the gradient vector is `0`: it is `inner`-orthogonal to everything
+  have hGint : Integrable (fun ω => logistic (inner ℝ θ₀ (Y ω)) • Y ω) P := by
+    refine Integrable.mono' hYint.norm
+      ((continuous_logistic.comp_aestronglyMeasurable
+        ((continuous_const.inner continuous_id).comp_aestronglyMeasurable
+          hYint.aestronglyMeasurable)).smul hYint.aestronglyMeasurable)
+      (Filter.Eventually.of_forall fun ω => ?_)
+    rw [norm_smul, Real.norm_eq_abs, abs_of_pos (logistic_pos _)]
+    exact mul_le_of_le_one_left (norm_nonneg _) (logistic_lt_one _).le
+  have hGu : ∀ u, inner ℝ (∫ ω, logistic (inner ℝ θ₀ (Y ω)) • Y ω ∂P) u = 0 := by
+    intro u
+    rw [real_inner_comm, ← integral_inner hGint]
+    simp_rw [real_inner_smul_right]
+    exact hdir u
+  exact inner_self_eq_zero.mp (hGu _)
+
 end MathFin.OnePeriodVector
