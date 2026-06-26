@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralL2Dense
+public import MathFin.Foundations.ItoIntegralProcessGeneral
 
 /-!
 # The unbounded-horizon Itô integral as an L² process
@@ -42,7 +43,7 @@ open scoped NNReal ENNReal
 namespace MathFin
 namespace ItoIntegralProcessL2Infinite
 
-open ItoIntegralL2
+open ItoIntegralL2 ItoIntegralProcess ItoIntegralProcessGeneral
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
@@ -108,6 +109,42 @@ theorem itoProcessL2Inf_norm_le (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   rw [itoProcessL2Inf_apply]
   exact (norm_condExpL2_le ((natFiltration hBmeas).le t) (itoIntegralL2 hB hBmeas f)).trans
     (itoIntegralL2_norm hB hBmeas f).le
+
+/-! ## Step 2 — horizon consistency with the finite-horizon process
+
+The crux relating `itoProcessL2Inf` (`[0,∞)`) to `itoProcessCLM` (`[0,T]`) is the
+**Itô increment-independence**: `E[∫₀^∞ f dB | 𝓕_T] = ∫₀ᵀ f dB`. On the dense
+simple processes this is concrete — the conditional expectation of the `[0,∞)`
+integral onto `𝓕_t` is exactly the `[0,t]` truncation `(V●B)_t`, which is B1a's
+martingale property applied past the simple process's (finite) support. -/
+
+/-- **Bridge:** the `[0,∞)` integral of a simple process is its explicit simple
+integral `itoSimpleLp V` (`extendOfNorm` on the dense embedding). -/
+lemma itoIntegralL2_simpleAssembly (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) = itoSimpleLp hB hBmeas V := by
+  rw [itoIntegralL2, LinearMap.extendOfNorm_eq (simpleAssembly_denseRange (μ := μ) hBmeas)
+    ⟨1, fun W => by rw [one_mul]; exact (assembly_isometry hB hBmeas W).le⟩]
+  rfl
+
+/-- **Simple-process increment-independence (the step-2 core).** For a simple
+process `V`, the conditional expectation of its `[0,∞)` integral onto `𝓕_t` is the
+`[0,t]` truncation `(V●B)_t`: pick a horizon past `V`'s finite support, where the
+`[0,∞)` integral coincides with the truncated process, and apply B1a's martingale
+property (`condExp_itoSimple_eq`). The density lift to all `f ∈ Lp 2 trim_full`
+(via a restriction CLM `Lp 2 trim_full → Lp 2 (trimMeasure_T T)` + `DenseRange`) is
+the remaining work of step 2. -/
+lemma condExp_itoIntegralL2_simple (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    μ[(itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ) | natFiltration hBmeas t]
+      =ᵐ[μ] fun ω => itoSimpleProcess hBmeas V t ω := by
+  have hbridge : (itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ)
+      =ᵐ[μ] itoSimple hBmeas V := by
+    rw [itoIntegralL2_simpleAssembly]
+    exact (memLp_itoSimple hB hBmeas V).coeFn_toLp
+  exact (condExp_congr_ae hbridge).trans
+    (condExp_itoSimple_eq hB (V.value.support.sup (fun p => p.2)) t hBmeas V
+      (fun p hp => Finset.le_sup hp))
 
 end ItoIntegralProcessL2Infinite
 end MathFin
