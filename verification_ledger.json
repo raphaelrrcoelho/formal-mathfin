@@ -1132,17 +1132,17 @@
     },
     "mf-ftap-one-period-general": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-25",
-      "elapsed_s": 10.5,
-      "input_hash": "f5b9b104919435cb0250da296644f3939f83a28e3fe3250d66399e1fff397c76",
-      "verified_at_commit": "1125371"
+      "date": "2026-06-26",
+      "elapsed_s": 3.5,
+      "input_hash": "c7bdaa7783dc8860006a6023d5ba546307dde8493bee8ef7fa9077b14ba7b29c",
+      "verified_at_commit": "9d3be0f"
     },
     "mf-ftap-one-period-vector": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-26",
-      "elapsed_s": 56.0,
-      "input_hash": "724e786ccebcf98008e3a33f0ae7f4b1e6b1966465839e3759b7c9ec7c7b5c3b",
-      "verified_at_commit": "165dd48"
+      "elapsed_s": 52.6,
+      "input_hash": "708baff25c53fb188e393d6a2bba206e6e8da0e8dee2e6d4761d5556389ba580",
+      "verified_at_commit": "9d3be0f"
     },
     "mf-ftap-single-period-complete": {
       "benchmark_file": "mathematical_finance.json",

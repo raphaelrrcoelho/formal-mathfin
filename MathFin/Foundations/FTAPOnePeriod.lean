@@ -24,10 +24,11 @@ Kreps–Yan).
 
 ## Scope
 
-One trading period, **one scalar asset**, arbitrary `(Ω, P)`. The general-Ω
-**multi-period** Dalang–Morton–Willinger theorem (which glues one-period
-conditional markets and needs a measurable selection theorem) and the `d`-asset
-case remain open.
+One trading period, **one scalar asset**, arbitrary `(Ω, P)`. The `d`-asset
+generalisation is now closed in full (`Foundations/FTAPOnePeriodVector.lean`,
+`ftap_one_period_vector`); only the general-Ω **multi-period** Dalang–Morton–Willinger
+theorem (which glues one-period conditional markets and needs a measurable selection
+theorem) remains open.
 
 ## Main result
 

@@ -26,17 +26,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-26, d-asset one-period FTAP):** corpus **289**,
-> **253 full + 18 wrappers = 271/289 delivery-ready**, 18 reduced cores, 0
+> **Live status (2026-06-26, d-asset one-period FTAP — now FULL):** corpus **289**,
+> **254 full + 18 wrappers = 272/289 delivery-ready**, 17 reduced cores, 0
 > placeholders. The **d-asset** one-period FTAP `ftap_one_period_vector`
-> (`Foundations/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`,
-> `reduced_core`: **non-redundant** markets) extends the scalar case to `ℝᵈ` returns
-> via the explicit **Esscher / minimal-divergence** EMM — minimise the convex softplus
-> potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`; coercivity gives a minimiser `θ₀` whose
-> first-order condition (differentiation under the integral) hands back the
-> strictly-positive bounded density `σ⟪θ₀,Y⟫`. No Hahn–Banach, no L⁰-closedness, no
-> measurable selection; the redundant-asset generalisation (quotient by the gains
-> kernel) is the localised follow-up. General-Ω one-period **Fundamental Theorem of Asset Pricing**
+> (`Foundations/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`, **`full`**)
+> is the unrestricted Föllmer–Schied 1.6 for a discounted excess return valued in any
+> **finite-dimensional** inner-product space `F` (the `ℝᵈ` market is `F = EuclideanSpace ℝ
+> (Fin d)`) — **no non-redundancy hypothesis**. The explicit **Esscher / minimal-divergence**
+> EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`; it is constant
+> along the **gains kernel** `N = {θ : ⟪θ,Y⟫ = 0 a.e.}` and coercive on `Nᗮ`, so a
+> minimiser on `Nᗮ` is automatically global (redundant directions are absorbed, dropping
+> the earlier non-redundancy assumption), and its first-order condition (differentiation
+> under the integral) hands back the strictly-positive bounded density `σ⟪θ₀,Y⟫`. No
+> Hahn–Banach, no L⁰-closedness, no measurable selection — those remain only for the
+> general-Ω **multi-period** DMW. General-Ω one-period **Fundamental Theorem of Asset Pricing**
 > (Föllmer–Schied 1.55 / one-period Dalang–Morton–Willinger): `ftap_one_period`
 > — for a scalar `L⁰` excess return on an **arbitrary** probability space, no
 > arbitrage ⟺ ∃ equivalent martingale measure `Q ~ P` with `Y` integrable and
@@ -51,8 +54,9 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > (the reusable kernel `Foundations/ConvexSeparation.lean`) and forward via
 > martingale-transform telescoping; plus the single-period multi-state biconditional
 > `hasEMM_multi_iff_not_hasArbitrage` (entry `mf-ftap-single-period-complete`).
-> Open follow-ons: general-Ω **multi-period** DMW (L⁰-closedness + measurable
-> selection, absent from the pin) and the d-asset generalisation.
+> Open follow-on: the general-Ω **multi-period** DMW (L⁰-closedness + measurable
+> selection, absent from the pin) — the d-asset one-period case is now closed in full
+> (`ftap_one_period_vector`, redundant assets included).
 > Since B3: **D1** (the **bilinear Itô isometry** — the `[0,T]` Itô CLM bundled as
 > a `LinearIsometry`, so it preserves the L²-inner product by polarization:
 > `𝔼[(∫φ dB)(∫ψ dB)] = ⟪φ, ψ⟫`, the diagonal recovering the isometry;

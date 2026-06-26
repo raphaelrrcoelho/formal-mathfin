@@ -53,6 +53,80 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-26 (II) — d-asset one-period FTAP: reduced_core → FULL — corpus 289
+
+**Scope**: dropping the non-redundancy hypothesis from the **d-asset** one-period FTAP, this
+session. `Foundations/FTAPOnePeriodVector.lean` was generalised from
+`Y : Ω → EuclideanSpace ℝ (Fin d)` to a discounted return valued in any **finite-dimensional**
+real inner-product space `F` (the `ℝᵈ` market is the instance `F = EuclideanSpace ℝ (Fin d)`),
+and the coercivity/minimiser machinery was rebuilt around the **gains kernel**
+`N = gainsKernel = {θ : ⟪θ,Y⟫ = 0 a.e.}`: the softplus potential is constant along `N` and
+coercive on `Nᗮ`, so it is minimised over `Nᗮ` and — being `N`-translation-invariant — a
+minimiser there is **automatically global** over all of `F`. This discharges the old `hndg`
+assumption entirely; the first-order-condition lemma and the whole Esscher/`withDensity` EMM
+block are reused verbatim. The corpus entry `mf-ftap-one-period-vector` is now **`full`**
+(254 full + 18 wrappers = 272/289 delivery-ready, 17 reduced cores). Library green
+(`lake build` 8814 jobs), axioms-clean (`[propext, Classical.choice, Quot.sound]`), ledger
+289/289 fresh, pytest 19/19, zero warnings/sorries.
+
+| lens | verdict |
+| --- | --- |
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS (after fix) |
+| beautiful, elegant math | PASS |
+
+**Panel**: three independent review agents, lenses grouped (1+4+5+8 / 2+3+6 / clarity+faithfulness),
+reading the module, the corpus entry, and `coverage.md` read-only against the pinned Mathlib (no Lean
+run — the daemon held the local Lean slot). Initial outcome **2 PASS + 1 BLOCK**.
+
+**Honesty — the "full" claim, verified clean**: the headline `ftap_one_period_vector` carries
+**only** `Measurable Y` — no integrability, no boundedness, no non-redundancy. `NoArbitrage` is the
+genuine textbook NA; `IsEMM` carries true equivalence (`Q ≪ P` **and** `P ≪ Q`), `Integrable Y Q`,
+and `∫ Y ∂Q = 0`. The redundant-everything case (`Nᗮ = ⊥ ⟺ Y =ᵐ 0`) is handled explicitly
+(`Q = P`); redundant directions are absorbed by the `Nᗮ`-minimisation + `N ⊔ Nᗮ = ⊤` decomposition,
+with `N ⊓ Nᗮ = ⊥` (via `inner_right_of_mem_orthogonal`) keeping the `Nᗮ`-coercivity honest.
+`FiniteDimensional F` is the d-asset model itself (Föllmer–Schied 1.6), not a narrowing. The panel
+confirmed no hidden hypothesis sneaks the restriction back in.
+
+**Coherence / ingenuity**: no reproved lemma — the orthogonal-complement API (`isCompl_orthogonal`,
+`sup_orthogonal_of_hasOrthogonalProjection`, `inner_right_of_mem_orthogonal`,
+`closed_of_finiteDimensional`, `orthogonal_orthogonal`, `bot_orthogonal_eq_top`), extreme-value,
+Fermat, and differentiation-under-the-integral are all consumed upstream. Generalising to abstract
+`F` is the **minimal-interface** move (the proof uses only the inner product + finite-dimensionality,
+never a coordinate basis), making `ℝᵈ` and even the scalar `ℝ` free instances; the verbatim reuse of
+the FOC + `withDensity` block is good factoring.
+
+**Blocking finding (remediated before this verdict)**: the corpus entry's **metadata** prose (`name`
+"…Non-Redundant", `description`, and especially `formalization_scope` "…NARROWER… assumes the market
+is NON-REDUNDANT… the redundant-asset generalisation… remain out of scope") still described the
+pre-upgrade reduced core, flatly contradicting the `full` status flipped one field above — a
+restriction-in-disguise surfaced in metadata, exactly what the values gate exists to catch. Plus
+`coverage.md` listed the now-closed d-asset case as an open follow-on. All synced to the full theorem.
+
+**Recorded actions**:
+1. *(done this verdict)* Corpus `name` / `description` / `formalization_scope` for
+   `mf-ftap-one-period-vector` rewritten to the full statement; `coverage.md` live-status +
+   open-follow-ons line corrected (only the general-Ω multi-period DMW remains open).
+2. *(done this verdict)* `set F`/`F'` in `hasDerivAt_potential_dir` renamed to `Φ`/`Φ'` (they
+   shadowed the market type `F`); two unused `set N := … with hN` binders dropped; the scalar sibling
+   `FTAPOnePeriod.lean`'s `## Scope` (which still called the d-asset case open) repointed at the
+   now-complete `ftap_one_period_vector`.
+3. *(deferred, unchanged)* The `isEquivProbMeasure_withDensity` cross-file dedup (the `withDensity` →
+   equivalent-probability-measure ritual, ~4 sites across this file and scalar `FTAPOnePeriod.lean`)
+   remains the open cleanup-pass opportunity, now slightly larger after the redundant-case work;
+   deferred to a dedicated cross-file pass so the two FTAP files move together.
+4. *(noted, kept)* "Esscher" stays the project's chosen label for the softplus/logistic construction
+   (the density is the bounded logistic `σ`, not the raw exponential tilt); the body shows `σ`
+   explicitly, so no reader is misled.
+
+**The actual crown still open**: the general-Ω **multi-period** DMW (L⁰-cone closedness + measurable
+selection), unchanged by this rung.
+
 ## 2026-06-26 — commit bc9a258 — corpus 289
 
 **Scope**: the **d-asset** one-period FTAP (Föllmer–Schied Thm 1.6, non-redundant

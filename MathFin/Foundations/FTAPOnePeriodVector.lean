@@ -8,32 +8,36 @@ module
 public import Mathlib
 
 /-!
-# One-period FTAP on a general probability space (d assets)
+# One-period FTAP on a general probability space (finite-dimensional market)
 
 The Föllmer–Schied / one-period Dalang–Morton–Willinger Fundamental Theorem of Asset
-Pricing for a `ℝᵈ`-valued discounted excess return `Y` and **constant** portfolios
-`θ ∈ ℝᵈ` (trivial initial information) on an **arbitrary** probability space `(Ω, P)`:
-no arbitrage ⟺ there is an equivalent martingale measure `Q ~ P` with `Y` integrable
-and `E_Q[Y] = 0 ∈ ℝᵈ`.
+Pricing for a discounted excess return `Y : Ω → F` valued in a **finite-dimensional**
+real inner-product space `F` (the `d`-asset market is `F = EuclideanSpace ℝ (Fin d)`) and
+**constant** portfolios `θ ∈ F` (trivial initial information) on an **arbitrary**
+probability space `(Ω, P)`: no arbitrage ⟺ there is an equivalent martingale measure
+`Q ~ P` with `Y` integrable and `E_Q[Y] = 0 ∈ F`.
 
 This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`.
-Because `θ` ranges over the **finite-dimensional** `ℝᵈ`, the equivalent martingale
-measure is **explicit** — the backward direction is the Esscher / minimal-divergence
-construction: minimise the smooth convex potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`; under
-no arbitrage it is coercive transverse to `{u : ⟪u,Y⟫ = 0 a.e.}`, so a minimiser `θ*`
-exists, and its first-order condition `E[Y · σ(⟪θ*,Y⟫)] = 0` (with `σ` the logistic
-function) hands back a strictly-positive bounded weight `z = σ(⟪θ*,Y⟫)` whose
-normalisation `z / E[z]` is the EMM density. No Hahn–Banach, no L⁰-cone closedness, no
-measurable selection — those are needed only for the general-Ω **multi-period** DMW.
+Because `θ` ranges over the **finite-dimensional** `F`, the equivalent martingale measure
+is **explicit** — the backward direction is the Esscher / minimal-divergence
+construction: minimise the smooth convex potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`. The
+potential is constant along the **gains kernel** `N = {θ : ⟪θ,Y⟫ = 0 a.e.}` (the
+redundant portfolio directions) and, under no arbitrage, coercive on its orthogonal
+complement `Nᗮ`; so a minimiser `θ*` exists on `Nᗮ` and — because the potential is flat
+along `N` — is a *global* minimiser. Its first-order condition `E[Y · σ(⟪θ*,Y⟫)] = 0`
+(with `σ` the logistic function) hands back a strictly-positive bounded weight
+`z = σ(⟪θ*,Y⟫)` whose normalisation `z / E[z]` is the EMM density. No Hahn–Banach, no
+L⁰-cone closedness, no measurable selection — those are needed only for the general-Ω
+**multi-period** DMW.
 
 ## Scope
 
-One trading period, **`d` assets**, **trivial `ℱ₀`** (constant `θ`), arbitrary
-`(Ω, P)`, and a **non-redundant** market (no `θ ≠ 0` with `⟪θ,Y⟫ = 0` a.e.) — the
-hypothesis the coercivity step needs. Out of scope (open follow-ups): the **redundant**
-one-period d-asset case (quotient by the gains kernel `{θ : ⟪θ,Y⟫ = 0 a.e.}`) and the
-general-Ω **multi-period** DMW (predictable `L⁰(ℱ_t)`-strategies and the L⁰ gains-cone
-closedness).
+One trading period, a **finite-dimensional** market `F`, **trivial `ℱ₀`** (constant `θ`),
+and an arbitrary `(Ω, P)`. **No non-redundancy hypothesis**: redundant assets (a `θ ≠ 0`
+with `⟪θ,Y⟫ = 0` a.e.) are absorbed by minimising the potential over the gains kernel's
+orthogonal complement, where coercivity is recovered. Out of scope (the remaining open
+rung): the general-Ω **multi-period** DMW (predictable `L⁰(ℱ_t)`-strategies and the L⁰
+gains-cone closedness).
 
 ## Main result
 
@@ -47,17 +51,18 @@ namespace MathFin.OnePeriodVector
 open MeasureTheory
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Measure Ω) [IsProbabilityMeasure P]
-  {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))
+  {F : Type*} [NormedAddCommGroup F] [InnerProductSpace ℝ F] [FiniteDimensional ℝ F]
+  [MeasurableSpace F] [BorelSpace F] (Y : Ω → F)
 
-/-- **No arbitrage** (`d` assets, one period): no constant portfolio `θ ∈ ℝᵈ` turns
+/-- **No arbitrage** (finite-dim market, one period): no constant portfolio `θ ∈ F` turns
 zero cost into a sure non-negative discounted gain `⟪θ, Y⟫` with a chance of profit —
 any `θ` whose gain `⟪θ, Y⟫` is `≥ 0` a.e. already has `⟪θ, Y⟫ = 0` a.e. -/
 def NoArbitrage : Prop :=
-  ∀ θ : EuclideanSpace ℝ (Fin d), 0 ≤ᵐ[P] (fun ω => inner ℝ θ (Y ω)) →
+  ∀ θ : F, 0 ≤ᵐ[P] (fun ω => inner ℝ θ (Y ω)) →
     (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0
 
-/-- **Equivalent martingale measure** (one period, vector): `Q ~ P`, `Y` is
-`Q`-integrable, and `E_Q[Y] = 0 ∈ ℝᵈ`. -/
+/-- **Equivalent martingale measure** (one period, finite-dim): `Q ~ P`, `Y` is
+`Q`-integrable, and `E_Q[Y] = 0 ∈ F`. -/
 structure IsEMM (Q : Measure Ω) : Prop where
   prob : IsProbabilityMeasure Q
   absP : Q ≪ P
@@ -65,7 +70,7 @@ structure IsEMM (Q : Measure Ω) : Prop where
   int  : Integrable Y Q
   fair : ∫ ω, Y ω ∂Q = 0
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [MeasurableSpace F] [BorelSpace F] in
 /-- **Forward direction**: an equivalent martingale measure precludes arbitrage.
 Under `Q`, `∫ ⟪θ, Y⟫ ∂Q = ⟪θ, E_Q[Y]⟫ = 0`, so a non-negative `⟪θ, Y⟫` is `0` a.e.;
 equivalence transports this back to `P`. -/
@@ -141,11 +146,12 @@ lemma continuous_logistic : Continuous logistic := by
 
 /-- The **softplus potential** `f(θ) = ∫ softplus⟪θ,Y⟫ ∂P`, minimised in the backward
 direction; its first-order condition produces the equivalent martingale measure. -/
-noncomputable def potential (θ : EuclideanSpace ℝ (Fin d)) : ℝ :=
+noncomputable def potential (θ : F) : ℝ :=
   ∫ ω, softplus (inner ℝ θ (Y ω)) ∂P
 
+omit [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 /-- `softplus⟪θ,Y⟫` is `P`-integrable, dominated by `‖θ‖‖Y‖ + log 2`. -/
-lemma integrable_softplus_inner (hYint : Integrable Y P) (θ : EuclideanSpace ℝ (Fin d)) :
+lemma integrable_softplus_inner (hYint : Integrable Y P) (θ : F) :
     Integrable (fun ω => softplus (inner ℝ θ (Y ω))) P := by
   have hmeas : AEStronglyMeasurable (fun ω => softplus (inner ℝ θ (Y ω))) P :=
     continuous_softplus.comp_aestronglyMeasurable
@@ -159,31 +165,30 @@ lemma integrable_softplus_inner (hYint : Integrable Y P) (θ : EuclideanSpace �
 /-- **Directional derivative of the potential**. For `Y ∈ L¹`, `t ↦ f(θ + t•u)` is
 differentiable at `0` with derivative `∫ σ⟪θ,Y⟫ · ⟪u,Y⟫ ∂P` — differentiation under the
 integral, dominated by `‖u‖‖Y‖` since `σ ∈ (0,1)`. -/
-lemma hasDerivAt_potential_dir (hY : Measurable Y) (hYint : Integrable Y P)
-    (θ u : EuclideanSpace ℝ (Fin d)) :
+lemma hasDerivAt_potential_dir (hY : Measurable Y) (hYint : Integrable Y P) (θ u : F) :
     HasDerivAt (fun t : ℝ => potential P Y (θ + t • u))
       (∫ ω, logistic (inner ℝ θ (Y ω)) * inner ℝ u (Y ω) ∂P) 0 := by
   have hbmeas : Measurable (fun ω => inner ℝ u (Y ω)) := measurable_const.inner hY
   have hexp : ∀ (t : ℝ) (ω : Ω),
       inner ℝ (θ + t • u) (Y ω) = inner ℝ θ (Y ω) + t * inner ℝ u (Y ω) := fun t ω => by
     rw [inner_add_left, real_inner_smul_left]
-  set F : ℝ → Ω → ℝ :=
-    fun t ω => softplus (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) with hF
-  set F' : ℝ → Ω → ℝ :=
-    fun t ω => logistic (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) * inner ℝ u (Y ω) with hF'
+  set Φ : ℝ → Ω → ℝ :=
+    fun t ω => softplus (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) with hΦ
+  set Φ' : ℝ → Ω → ℝ :=
+    fun t ω => logistic (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) * inner ℝ u (Y ω) with hΦ'
   have hmeas_arg : ∀ t : ℝ, AEStronglyMeasurable
       (fun ω => inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) P :=
     fun t => ((measurable_const.inner hY).add (hbmeas.const_mul t)).aestronglyMeasurable
-  have hF_meas : ∀ᶠ t in nhds (0 : ℝ), AEStronglyMeasurable (F t) P :=
+  have hΦ_meas : ∀ᶠ t in nhds (0 : ℝ), AEStronglyMeasurable (Φ t) P :=
     Filter.Eventually.of_forall fun t =>
       continuous_softplus.comp_aestronglyMeasurable (hmeas_arg t)
-  have hF_int : Integrable (F 0) P := by
-    simp only [hF, zero_mul, add_zero]; exact integrable_softplus_inner P Y hYint θ
-  have hF'_meas : AEStronglyMeasurable (F' 0) P :=
+  have hΦ_int : Integrable (Φ 0) P := by
+    simp only [hΦ, zero_mul, add_zero]; exact integrable_softplus_inner P Y hYint θ
+  have hΦ'_meas : AEStronglyMeasurable (Φ' 0) P :=
     (continuous_logistic.comp_aestronglyMeasurable (hmeas_arg 0)).mul hbmeas.aestronglyMeasurable
-  have h_bound : ∀ᵐ ω ∂P, ∀ x ∈ (Set.univ : Set ℝ), ‖F' x ω‖ ≤ ‖u‖ * ‖Y ω‖ := by
+  have h_bound : ∀ᵐ ω ∂P, ∀ x ∈ (Set.univ : Set ℝ), ‖Φ' x ω‖ ≤ ‖u‖ * ‖Y ω‖ := by
     filter_upwards with ω x _
-    rw [hF', Real.norm_eq_abs, abs_mul]
+    rw [hΦ', Real.norm_eq_abs, abs_mul]
     have h1 : |logistic (inner ℝ θ (Y ω) + x * inner ℝ u (Y ω))| ≤ 1 := by
       rw [abs_of_pos (logistic_pos _)]; exact (logistic_lt_one _).le
     have h2 : |inner ℝ u (Y ω)| ≤ ‖u‖ * ‖Y ω‖ := abs_real_inner_le_norm u (Y ω)
@@ -191,21 +196,21 @@ lemma hasDerivAt_potential_dir (hY : Measurable Y) (hYint : Integrable Y P)
         ≤ 1 * (‖u‖ * ‖Y ω‖) := mul_le_mul h1 h2 (abs_nonneg _) zero_le_one
       _ = ‖u‖ * ‖Y ω‖ := one_mul _
   have h_diff : ∀ᵐ ω ∂P, ∀ x ∈ (Set.univ : Set ℝ),
-      HasDerivAt (fun t => F t ω) (F' x ω) x := by
+      HasDerivAt (fun t => Φ t ω) (Φ' x ω) x := by
     filter_upwards with ω x _
     have haff : HasDerivAt (fun t : ℝ => inner ℝ θ (Y ω) + t * inner ℝ u (Y ω))
         (inner ℝ u (Y ω)) x := by
       simpa using ((hasDerivAt_id x).mul_const (inner ℝ u (Y ω))).const_add (inner ℝ θ (Y ω))
     have hc := (hasDerivAt_softplus _).comp x haff
-    simpa only [hF, hF', Function.comp_def] using hc
+    simpa only [hΦ, hΦ', Function.comp_def] using hc
   obtain ⟨-, hderiv⟩ := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := P)
-    (bound := fun ω => ‖u‖ * ‖Y ω‖) Filter.univ_mem hF_meas hF_int hF'_meas h_bound
+    (bound := fun ω => ‖u‖ * ‖Y ω‖) Filter.univ_mem hΦ_meas hΦ_int hΦ'_meas h_bound
     (hYint.norm.const_mul ‖u‖) h_diff
-  have hpot : (fun t : ℝ => potential P Y (θ + t • u)) = fun t => ∫ ω, F t ω ∂P := by
-    funext t; simp only [potential, hF]
+  have hpot : (fun t : ℝ => potential P Y (θ + t • u)) = fun t => ∫ ω, Φ t ω ∂P := by
+    funext t; simp only [potential, hΦ]
     exact integral_congr_ae (by filter_upwards with ω; rw [hexp t ω])
-  have hval : (∫ ω, F' 0 ω ∂P) = ∫ ω, logistic (inner ℝ θ (Y ω)) * inner ℝ u (Y ω) ∂P := by
-    refine integral_congr_ae ?_; filter_upwards with ω; simp only [hF', zero_mul, add_zero]
+  have hval : (∫ ω, Φ' 0 ω ∂P) = ∫ ω, logistic (inner ℝ θ (Y ω)) * inner ℝ u (Y ω) ∂P := by
+    refine integral_congr_ae ?_; filter_upwards with ω; simp only [hΦ', zero_mul, add_zero]
   rw [hpot, ← hval]; exact hderiv
 
 /-- `softplus` is `1`-Lipschitz (its derivative `σ` lies in `(0,1)`). -/
@@ -216,16 +221,16 @@ lemma lipschitzWith_softplus : LipschitzWith 1 softplus := by
     Real.norm_eq_abs, abs_of_pos (logistic_pos x)]
   exact (logistic_lt_one x).le
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 /-- For a `1`-Lipschitz `φ`, the averaged map `θ ↦ ∫ φ⟪θ,Y⟫ ∂P` is `(∫‖Y‖)`-Lipschitz
 (`φ` is `1`-Lipschitz and `θ ↦ ⟪θ,Y ω⟫` is `‖Y ω‖`-Lipschitz, by Cauchy–Schwarz). -/
 lemma lipschitzWith_integral_inner {φ : ℝ → ℝ} (hφ : LipschitzWith 1 φ)
-    (hint : ∀ θ : EuclideanSpace ℝ (Fin d), Integrable (fun ω => φ (inner ℝ θ (Y ω))) P)
+    (hint : ∀ θ : F, Integrable (fun ω => φ (inner ℝ θ (Y ω))) P)
     (hYint : Integrable Y P) :
     LipschitzWith (∫ ω, ‖Y ω‖ ∂P).toNNReal (fun θ => ∫ ω, φ (inner ℝ θ (Y ω)) ∂P) := by
   have hnn : 0 ≤ ∫ ω, ‖Y ω‖ ∂P := integral_nonneg fun ω => norm_nonneg _
   refine LipschitzWith.of_dist_le_mul fun θ θ' => ?_
-  rw [Real.dist_eq, Real.coe_toNNReal _ hnn, ← integral_sub (hint θ) (hint θ')]
+  rw [Real.dist_eq, Real.coe_toNNReal _ hnn, ← integral_sub (hint θ) (hint θ'), dist_eq_norm]
   have hbound : ∀ ω, ‖φ (inner ℝ θ (Y ω)) - φ (inner ℝ θ' (Y ω))‖ ≤ ‖Y ω‖ * ‖θ - θ'‖ := by
     intro ω
     have h1 := hφ.dist_le_mul (inner ℝ θ (Y ω)) (inner ℝ θ' (Y ω))
@@ -242,6 +247,7 @@ lemma lipschitzWith_integral_inner {φ : ℝ → ℝ} (hφ : LipschitzWith 1 φ)
           (Filter.Eventually.of_forall hbound)
     _ = (∫ ω, ‖Y ω‖ ∂P) * ‖θ - θ'‖ := integral_mul_const _ _
 
+omit [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 /-- The potential is continuous. -/
 lemma continuous_potential (hYint : Integrable Y P) : Continuous (potential P Y) :=
   (lipschitzWith_integral_inner P Y lipschitzWith_softplus
@@ -251,9 +257,9 @@ lemma continuous_potential (hYint : Integrable Y P) : Continuous (potential P Y)
 lemma lipschitzWith_posPart : LipschitzWith 1 (fun s : ℝ => max s 0) :=
   LipschitzWith.id.max_const 0
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 /-- `max⟪θ,Y⟫ 0` is `P`-integrable (dominated by `‖θ‖‖Y‖`). -/
-lemma integrable_posPart_inner (hYint : Integrable Y P) (θ : EuclideanSpace ℝ (Fin d)) :
+lemma integrable_posPart_inner (hYint : Integrable Y P) (θ : F) :
     Integrable (fun ω => max (inner ℝ θ (Y ω)) 0) P := by
   have hmeas : AEStronglyMeasurable (fun ω => max (inner ℝ θ (Y ω)) 0) P :=
     (continuous_id.max continuous_const).comp_aestronglyMeasurable
@@ -262,7 +268,7 @@ lemma integrable_posPart_inner (hYint : Integrable Y P) (θ : EuclideanSpace ℝ
   rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _), max_le_iff]
   exact ⟨(le_abs_self _).trans (abs_real_inner_le_norm θ (Y ω)), by positivity⟩
 
-omit [IsProbabilityMeasure P] in
+omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 /-- The positive-gain average `g(θ) = ∫⟪θ,Y⟫⁺ ∂P` is continuous. It lower-bounds the
 potential (`softplus s ≥ s⁺`) and drives the coercivity argument. -/
 lemma continuous_gainsPos (hYint : Integrable Y P) :
@@ -270,22 +276,57 @@ lemma continuous_gainsPos (hYint : Integrable Y P) :
   (lipschitzWith_integral_inner P Y lipschitzWith_posPart
     (integrable_posPart_inner P Y hYint) hYint).continuous
 
-/-- **Coercivity** of the potential (non-redundant market, no arbitrage). The positive
-gain average `g(θ) = ∫⟪θ,Y⟫⁺` is positive off `0` (no arbitrage + non-redundancy),
-continuous and positively homogeneous; its minimum `c` over the unit sphere is positive,
-and `softplus s ≥ s⁺` gives `c‖θ‖ ≤ f(θ)`. -/
-lemma exists_pos_lower_bound [Nonempty (Fin d)] (hYint : Integrable Y P)
-    (hNA : NoArbitrage P Y)
-    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
-    ∃ c > 0, ∀ θ, c * ‖θ‖ ≤ potential P Y θ := by
+/-! ### The gains kernel and coercivity over its complement
+
+`N = {θ : ⟪θ,Y⟫ = 0 a.e.}` is the linear subspace of **redundant** portfolio directions.
+The potential is constant along `N`, so the backward construction minimises it over the
+orthogonal complement `Nᗮ`, where no arbitrage makes it coercive. A minimiser on `Nᗮ` is
+automatically a *global* minimiser (the potential is `N`-translation-invariant), so no
+non-redundancy hypothesis is required. -/
+
+/-- The **gains kernel** `N = {θ : ⟪θ,Y⟫ = 0 a.e.}`: portfolios whose discounted gain is
+a.e. zero. A linear subspace of `F`; the market is non-redundant iff `N = ⊥`. -/
+def gainsKernel : Submodule ℝ F where
+  carrier := {θ | (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0}
+  zero_mem' := by
+    show (fun ω => inner ℝ (0 : F) (Y ω)) =ᵐ[P] 0
+    filter_upwards with ω; simp
+  add_mem' := by
+    intro a b ha hb
+    show (fun ω => inner ℝ (a + b) (Y ω)) =ᵐ[P] 0
+    have ha' : (fun ω => inner ℝ a (Y ω)) =ᵐ[P] 0 := ha
+    have hb' : (fun ω => inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
+    filter_upwards [ha', hb'] with ω ea eb
+    simp only [Pi.zero_apply] at ea eb ⊢
+    rw [inner_add_left, ea, eb, add_zero]
+  smul_mem' := by
+    intro c b hb
+    show (fun ω => inner ℝ (c • b) (Y ω)) =ᵐ[P] 0
+    have hb' : (fun ω => inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
+    filter_upwards [hb'] with ω eb
+    simp only [Pi.zero_apply] at eb ⊢
+    rw [real_inner_smul_left, eb, mul_zero]
+
+omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
+@[simp] lemma mem_gainsKernel {θ : F} :
+    θ ∈ gainsKernel P Y ↔ (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 := Iff.rfl
+
+omit [MeasurableSpace F] [BorelSpace F] in
+/-- **Coercivity** of the potential on `Nᗮ` (no arbitrage). The positive gain average
+`g(θ) = ∫⟪θ,Y⟫⁺` is positive on `Nᗮ \ {0}` (no arbitrage, plus `N ⊓ Nᗮ = ⊥`), continuous
+and positively homogeneous; its minimum `c` over the unit sphere of `Nᗮ` is positive, and
+`softplus s ≥ s⁺` gives `c‖θ‖ ≤ f(θ)` for `θ ∈ Nᗮ`. -/
+lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
+    (hNbot : (gainsKernel P Y)ᗮ ≠ ⊥) :
+    ∃ c > 0, ∀ θ ∈ (gainsKernel P Y)ᗮ, c * ‖θ‖ ≤ potential P Y θ := by
   classical
-  set g : EuclideanSpace ℝ (Fin d) → ℝ := fun θ => ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P with hg
+  set N := gainsKernel P Y
+  set g : F → ℝ := fun θ => ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P with hg
   have hg_nonneg : ∀ θ, 0 ≤ g θ := fun θ => integral_nonneg fun ω => le_max_right _ _
-  -- `g` is positive off `0`
-  have hg_pos : ∀ θ, θ ≠ 0 → 0 < g θ := by
-    intro θ hθ
+  -- `g` is positive on `Nᗮ \ {0}`
+  have hg_pos : ∀ θ ∈ Nᗮ, θ ≠ 0 → 0 < g θ := by
+    intro θ hθK hθ
     refine (hg_nonneg θ).lt_of_ne fun h => hθ ?_
-    apply hndg
     have hmax : (fun ω => max (inner ℝ θ (Y ω)) 0) =ᵐ[P] 0 :=
       (integral_eq_zero_iff_of_nonneg_ae (Filter.Eventually.of_forall fun ω => le_max_right _ _)
         (integrable_posPart_inner P Y hYint θ)).mp h.symm
@@ -296,8 +337,11 @@ lemma exists_pos_lower_bound [Nonempty (Fin d)] (hYint : Integrable Y P)
     have hneg := hNA (-θ) (by
       filter_upwards [hnonpos] with ω h
       simp only [Pi.zero_apply] at h ⊢; rw [inner_neg_left]; linarith)
-    filter_upwards [hneg] with ω h
-    simp only [Pi.zero_apply, inner_neg_left] at h ⊢; linarith
+    have hθN : θ ∈ N := by
+      show (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0
+      filter_upwards [hneg] with ω hh
+      simp only [Pi.zero_apply, inner_neg_left] at hh ⊢; linarith
+    exact inner_self_eq_zero.mp (N.inner_right_of_mem_orthogonal hθN hθK)
   -- `g` is positively homogeneous
   have hg_hom : ∀ (r : ℝ), 0 ≤ r → ∀ θ, g (r • θ) = r * g θ := by
     intro r hr θ
@@ -309,12 +353,21 @@ lemma exists_pos_lower_bound [Nonempty (Fin d)] (hYint : Integrable Y P)
     rcases le_total 0 (inner ℝ θ (Y ω)) with hs | hs
     · rw [max_eq_left hs, max_eq_left (mul_nonneg hr hs)]
     · rw [max_eq_right hs, max_eq_right (mul_nonpos_of_nonneg_of_nonpos hr hs), mul_zero]
-  -- minimum of `g` over the unit sphere is positive
-  obtain ⟨u₀, hu₀S, hu₀min⟩ := (isCompact_sphere (0 : EuclideanSpace ℝ (Fin d)) 1).exists_isMinOn
-    (NormedSpace.sphere_nonempty.mpr zero_le_one) (continuous_gainsPos P Y hYint).continuousOn
+  -- minimum of `g` over the unit sphere of `Nᗮ` is positive
+  have hScompact : IsCompact ((Nᗮ : Set F) ∩ Metric.sphere 0 1) :=
+    (isCompact_sphere 0 1).inter_left Nᗮ.closed_of_finiteDimensional
+  have hSne : ((Nᗮ : Set F) ∩ Metric.sphere 0 1).Nonempty := by
+    obtain ⟨v, hvK, hv0⟩ := (Submodule.ne_bot_iff _).mp hNbot
+    have hvnorm : 0 < ‖v‖ := norm_pos_iff.mpr hv0
+    refine ⟨(‖v‖⁻¹ : ℝ) • v, Nᗮ.smul_mem _ hvK, ?_⟩
+    rw [Metric.mem_sphere, dist_zero_right, norm_smul, norm_inv, Real.norm_eq_abs,
+      abs_of_pos hvnorm, inv_mul_cancel₀ hvnorm.ne']
+  obtain ⟨u₀, hu₀mem, hu₀min⟩ :=
+    hScompact.exists_isMinOn hSne (continuous_gainsPos P Y hYint).continuousOn
+  obtain ⟨hu₀K, hu₀S⟩ := hu₀mem
   have hu₀ne : u₀ ≠ 0 := fun h => by
     rw [Metric.mem_sphere, h, dist_self] at hu₀S; exact one_ne_zero hu₀S.symm
-  refine ⟨g u₀, hg_pos u₀ hu₀ne, fun θ => ?_⟩
+  refine ⟨g u₀, hg_pos u₀ hu₀K hu₀ne, fun θ hθK => ?_⟩
   have hpg : g θ ≤ potential P Y θ := by
     rw [hg, potential]
     exact integral_mono_ae (integrable_posPart_inner P Y hYint θ)
@@ -324,7 +377,8 @@ lemma exists_pos_lower_bound [Nonempty (Fin d)] (hYint : Integrable Y P)
   rcases eq_or_ne θ 0 with rfl | hθ
   · simpa using hg_nonneg 0
   · have hθ0 : (0 : ℝ) < ‖θ‖ := norm_pos_iff.mpr hθ
-    have hunit : (‖θ‖⁻¹ : ℝ) • θ ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin d)) 1 := by
+    have hunit : (‖θ‖⁻¹ : ℝ) • θ ∈ (Nᗮ : Set F) ∩ Metric.sphere 0 1 := by
+      refine ⟨Nᗮ.smul_mem _ hθK, ?_⟩
       rw [Metric.mem_sphere, dist_zero_right, norm_smul, norm_inv, Real.norm_eq_abs,
         abs_of_pos hθ0, inv_mul_cancel₀ hθ0.ne']
     calc g u₀ * ‖θ‖ = ‖θ‖ * g u₀ := mul_comm _ _
@@ -333,35 +387,62 @@ lemma exists_pos_lower_bound [Nonempty (Fin d)] (hYint : Integrable Y P)
       _ = g θ := by
           rw [hg_hom ‖θ‖⁻¹ (inv_nonneg.mpr hθ0.le) θ, ← mul_assoc, mul_inv_cancel₀ hθ0.ne', one_mul]
 
-/-- **The potential attains a global minimum** (non-redundant, no arbitrage). Coercivity
-makes the sublevel set `{f ≤ f 0}` bounded, so the minimum over a large closed ball — which
-exists by continuity and compactness — is global. -/
-lemma exists_global_min_potential [Nonempty (Fin d)] (hYint : Integrable Y P)
-    (hNA : NoArbitrage P Y)
-    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+omit [MeasurableSpace F] [BorelSpace F] in
+/-- **The potential attains a global minimum** (no arbitrage). On `Nᗮ`, coercivity makes
+the minimum over a large closed ball global; and the potential is constant along `N`
+(`⟪n,Y⟫ = 0` a.e.), so a minimiser over `Nᗮ` minimises over all of `F` after the
+decomposition `θ = n + z`, `n ∈ N`, `z ∈ Nᗮ`. -/
+lemma exists_global_min_potential (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
+    (hNbot : (gainsKernel P Y)ᗮ ≠ ⊥) :
     ∃ θ₀, ∀ θ, potential P Y θ₀ ≤ potential P Y θ := by
-  obtain ⟨c, hc, hlb⟩ := exists_pos_lower_bound P Y hYint hNA hndg
+  set N := gainsKernel P Y
+  obtain ⟨c, hc, hlb⟩ := exists_pos_lower_bound P Y hYint hNA hNbot
+  -- the potential is constant along `N`
+  have hinv : ∀ ψ : F, ∀ n ∈ N, potential P Y (ψ + n) = potential P Y ψ := by
+    intro ψ n hn
+    have hn' : (fun ω => inner ℝ n (Y ω)) =ᵐ[P] 0 := hn
+    refine integral_congr_ae ?_
+    filter_upwards [hn'] with ω he
+    simp only [Pi.zero_apply] at he
+    show softplus (inner ℝ (ψ + n) (Y ω)) = softplus (inner ℝ ψ (Y ω))
+    rw [inner_add_left, he, add_zero]
+  -- minimise over the compact set `Nᗮ ∩ closedBall 0 R`
   have hp0 : 0 ≤ potential P Y 0 := integral_nonneg fun ω => softplus_nonneg _
   set R : ℝ := potential P Y 0 / c with hRdef
   have hR0 : 0 ≤ R := div_nonneg hp0 hc.le
-  obtain ⟨θ₀, _, hθ₀min⟩ :=
-    (isCompact_closedBall (0 : EuclideanSpace ℝ (Fin d)) R).exists_isMinOn
-      ⟨0, Metric.mem_closedBall_self hR0⟩ (continuous_potential P Y hYint).continuousOn
+  have hKcompact : IsCompact ((Nᗮ : Set F) ∩ Metric.closedBall 0 R) :=
+    (isCompact_closedBall 0 R).inter_left Nᗮ.closed_of_finiteDimensional
+  have hKne : ((Nᗮ : Set F) ∩ Metric.closedBall 0 R).Nonempty :=
+    ⟨0, Nᗮ.zero_mem, Metric.mem_closedBall_self hR0⟩
+  obtain ⟨θ₀, hθ₀mem, hθ₀min⟩ :=
+    hKcompact.exists_isMinOn hKne (continuous_potential P Y hYint).continuousOn
+  obtain ⟨hθ₀K, _⟩ := hθ₀mem
   have hcR : c * R = potential P Y 0 := by rw [hRdef]; field_simp
+  -- θ₀ minimises over all of `Nᗮ` (coercivity escapes the ball)
+  have hθ₀minK : ∀ θ ∈ Nᗮ, potential P Y θ₀ ≤ potential P Y θ := by
+    intro θ hθK
+    rcases le_or_gt ‖θ‖ R with hle | hlt
+    · exact isMinOn_iff.mp hθ₀min θ ⟨hθK, by rw [Metric.mem_closedBall, dist_zero_right]; exact hle⟩
+    · calc potential P Y θ₀
+          ≤ potential P Y 0 := isMinOn_iff.mp hθ₀min 0 ⟨Nᗮ.zero_mem, Metric.mem_closedBall_self hR0⟩
+        _ = c * R := hcR.symm
+        _ ≤ c * ‖θ‖ := mul_le_mul_of_nonneg_left hlt.le hc.le
+        _ ≤ potential P Y θ := hlb θ hθK
+  -- lift to all of `F`: `f(θ) = f(z) ≥ f(θ₀)` for the `Nᗮ`-component `z` of `θ`
   refine ⟨θ₀, fun θ => ?_⟩
-  rcases le_or_gt ‖θ‖ R with hle | hlt
-  · exact isMinOn_iff.mp hθ₀min θ (by rw [Metric.mem_closedBall, dist_zero_right]; exact hle)
-  · calc potential P Y θ₀
-        ≤ potential P Y 0 := isMinOn_iff.mp hθ₀min 0 (Metric.mem_closedBall_self hR0)
-      _ = c * R := hcR.symm
-      _ ≤ c * ‖θ‖ := mul_le_mul_of_nonneg_left hlt.le hc.le
-      _ ≤ potential P Y θ := hlb θ
+  obtain ⟨n, hn, z, hz, hnz⟩ : ∃ n ∈ N, ∃ z ∈ Nᗮ, n + z = θ := by
+    have hmem : θ ∈ N ⊔ Nᗮ := by
+      rw [Submodule.sup_orthogonal_of_hasOrthogonalProjection]; trivial
+    exact Submodule.mem_sup.mp hmem
+  have hfθ : potential P Y θ = potential P Y z := by
+    rw [← hnz, add_comm n z, hinv z n hn]
+  rw [hfθ]; exact hθ₀minK z hz
 
 /-- **First-order condition**. At a global minimiser `θ₀` of the potential, every
 directional derivative vanishes (`IsLocalMin.hasDerivAt_eq_zero`), so the gradient
 `∫ σ⟪θ₀,Y⟫ • Y` is the zero vector — the candidate density `z = σ⟪θ₀,Y⟫` makes `Y` fair. -/
 lemma integral_logistic_smul_eq_zero (hY : Measurable Y) (hYint : Integrable Y P)
-    {θ₀ : EuclideanSpace ℝ (Fin d)} (hmin : ∀ θ, potential P Y θ₀ ≤ potential P Y θ) :
+    {θ₀ : F} (hmin : ∀ θ, potential P Y θ₀ ≤ potential P Y θ) :
     ∫ ω, logistic (inner ℝ θ₀ (Y ω)) • Y ω ∂P = 0 := by
   -- every directional derivative at `θ₀` is `0`
   have hdir : ∀ u, ∫ ω, logistic (inner ℝ θ₀ (Y ω)) * inner ℝ u (Y ω) ∂P = 0 := by
@@ -385,21 +466,32 @@ lemma integral_logistic_smul_eq_zero (hY : Measurable Y) (hYint : Integrable Y P
     exact hdir u
   exact inner_self_eq_zero.mp (hGu _)
 
-/-- **Integrable backward direction** (`d` assets). For an integrable, **non-redundant**
-`Y`, no arbitrage gives an equivalent martingale measure: the Esscher density
-`z = σ⟪θ₀,Y⟫` at the potential's minimiser is strictly positive, bounded, and fair, so
-`Q = P.withDensity (z / ∫z)` is the EMM. (`d = 0` is the trivial empty market.) -/
+/-- **Integrable backward direction** (finite-dim market). For an integrable `Y`, no
+arbitrage gives an equivalent martingale measure. If `Y =ᵐ 0` (every direction redundant)
+then `Q = P`; otherwise the Esscher density `z = σ⟪θ₀,Y⟫` at the potential's global
+minimiser is strictly positive, bounded, and fair, so `Q = P.withDensity (z / ∫z)` is the
+EMM. -/
 theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Integrable Y P)
-    (hNA : NoArbitrage P Y)
-    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+    (hNA : NoArbitrage P Y) :
     ∃ Q, IsEMM P Y Q := by
   classical
-  rcases isEmpty_or_nonempty (Fin d) with _ | hd
-  · -- empty market: `Y =ᵐ 0`, so `Q = P`
+  by_cases hY0 : (gainsKernel P Y)ᗮ = ⊥
+  · -- `Nᗮ = ⊥ ⟹ N = ⊤`: `Y` is a.e. orthogonal to every `θ`, so `E[Y] = 0` and `Q = P`
     refine ⟨P, inferInstance, Measure.AbsolutelyContinuous.refl P,
       Measure.AbsolutelyContinuous.refl P, hYint, ?_⟩
-    rw [show Y = 0 from funext fun ω => Subsingleton.elim _ _]; simp
-  · obtain ⟨θ₀, hmin⟩ := exists_global_min_potential P Y hYint hNA hndg
+    have hNtop : gainsKernel P Y = ⊤ := by
+      have hoo := Submodule.orthogonal_orthogonal (gainsKernel P Y)
+      rw [hY0, Submodule.bot_orthogonal_eq_top] at hoo
+      exact hoo.symm
+    have hall : ∀ θ : F, inner ℝ θ (∫ ω, Y ω ∂P) = (0 : ℝ) := by
+      intro θ
+      have hmem : θ ∈ gainsKernel P Y := by rw [hNtop]; exact Submodule.mem_top
+      have hθN : (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 := (mem_gainsKernel P Y).mp hmem
+      calc inner ℝ θ (∫ ω, Y ω ∂P)
+          = ∫ ω, inner ℝ θ (Y ω) ∂P := (integral_inner hYint θ).symm
+        _ = 0 := by rw [integral_congr_ae hθN]; simp
+    exact inner_self_eq_zero.mp (hall _)
+  · obtain ⟨θ₀, hmin⟩ := exists_global_min_potential P Y hYint hNA hY0
     have hfair := integral_logistic_smul_eq_zero P Y hY hYint hmin
     set z : Ω → ℝ := fun ω => logistic (inner ℝ θ₀ (Y ω))
     have hzpos : ∀ ω, 0 < z ω := fun ω => logistic_pos _
@@ -463,13 +555,12 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
       rw [heq, integral_smul, hfair, smul_zero]
     exact ⟨Q, hQprob, hQP, hPQ, hYintQ, hQfair⟩
 
-/-- **General backward direction** (`d` assets, integrability dropped). For a measurable,
-non-redundant `Y`, no arbitrage gives an EMM. Pass to the equivalent probability measure
-`P̃ = P.withDensity (w/κ)`, `w = (1+‖Y‖)⁻¹`, under which `Y` is integrable; no arbitrage and
-non-redundancy are a.e. notions preserved by `P̃ ~ P`, so the integrable backward direction
-applies, and `Q ~ P̃ ~ P` by transitivity. -/
-theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y)
-    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+/-- **General backward direction** (finite-dim market, integrability dropped). For a
+measurable `Y`, no arbitrage gives an EMM. Pass to the equivalent probability measure
+`P̃ = P.withDensity (w/κ)`, `w = (1+‖Y‖)⁻¹`, under which `Y` is integrable; no arbitrage is
+an a.e. notion preserved by `P̃ ~ P`, so the integrable backward direction applies, and
+`Q ~ P̃ ~ P` by transitivity. -/
+theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) :
     ∃ Q, IsEMM P Y Q := by
   classical
   set w : Ω → ℝ := fun ω => (1 + ‖Y ω‖)⁻¹ with hwdef
@@ -526,21 +617,19 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y)
     rw [ENNReal.toReal_ofReal (hd_pos ω).le]
   have hNAt : NoArbitrage Pt Y := fun θ h =>
     hPt_ll_P.ae_eq (hNA θ (hP_ll_Pt.ae_le h))
-  have hndgt : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[Pt] 0 → θ = 0 :=
-    fun θ h => hndg θ (hP_ll_Pt.ae_eq h)
-  obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_integrable Pt Y hY hYintPt hNAt hndgt
+  obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_integrable Pt Y hY hYintPt hNAt
   exact ⟨Q, hQ.prob, hQ.absP.trans hPt_ll_P, hP_ll_Pt.trans hQ.Pabs, hQ.int, hQ.fair⟩
 
-/-- **One-period Fundamental Theorem of Asset Pricing**, `d` assets, general `Ω`, for a
-**non-redundant** market (no portfolio with `⟪θ,Y⟫ = 0` a.e. for `θ ≠ 0`). For a measurable
-`ℝᵈ`-valued discounted excess return `Y`, no arbitrage holds iff there is an equivalent
-martingale measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`. The backward direction is
-the explicit Esscher / minimal-divergence construction (no Hahn–Banach, no L⁰-cone closedness,
-no measurable selection). -/
-theorem ftap_one_period_vector (hY : Measurable Y)
-    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+/-- **One-period Fundamental Theorem of Asset Pricing**, finite-dimensional market, general
+`Ω`. For a measurable `F`-valued discounted excess return `Y` (`F = EuclideanSpace ℝ (Fin
+d)` is the `d`-asset case), no arbitrage holds iff there is an equivalent martingale
+measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`. The backward direction is the
+explicit Esscher / minimal-divergence construction — minimise the softplus potential over
+the gains kernel's orthogonal complement — needing no Hahn–Banach, no L⁰-cone closedness,
+no measurable selection, and **no non-redundancy hypothesis**. -/
+theorem ftap_one_period_vector (hY : Measurable Y) :
     NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
-  ⟨fun hNA => exists_isEMM_of_noArbitrage P Y hY hNA hndg,
+  ⟨fun hNA => exists_isEMM_of_noArbitrage P Y hY hNA,
    fun ⟨_, hQ⟩ => noArbitrage_of_isEMM P Y hQ⟩
 
 end MathFin.OnePeriodVector
