@@ -52,5 +52,23 @@ open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessGeneral
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
+include hB
+
+/-! ## Phase 1 — the maximal estimate -/
+
+/-- **Continuous-time weak-type maximal bound** for the elementary Itô integral.
+The process `t ↦ (V ● B)_t` is a continuous `L²` martingale (B1a's martingale
+property + B3's path continuity), so Degenne's continuous-time maximal inequality
+`maximal_ineq_norm` applies directly at `n := T`, where `⨆ i : Set.Iic T` is the
+running supremum over the whole interval `[0,T]`. -/
+theorem itoSimpleProcess_maximal_weak (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (V : SimpleProcess ℝ (natFiltration hBmeas)) (T : ℝ≥0) (ε : ℝ) :
+    ε • μ.real {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V i ω‖}
+      ≤ ∫ ω in {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V i ω‖},
+          ‖itoSimpleProcess hBmeas V T ω‖ ∂μ :=
+  maximal_ineq_norm (itoSimpleProcess_isMartingale hB hBmeas V) ε T
+    (fun ω _ => (itoSimpleProcess_pathContinuous hBmeas hBcont V ω).continuousWithinAt)
+
 end ItoIntegralProcessContinuousModification
 end MathFin
