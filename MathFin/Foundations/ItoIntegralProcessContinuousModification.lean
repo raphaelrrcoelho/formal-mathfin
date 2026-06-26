@@ -107,5 +107,25 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
     _ ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
         mul_le_mul_of_nonneg_left hchain (inv_nonneg.mpr hε.le)
 
+/-! ## Phase 2 — approximating subsequence, Borel–Cantelli, continuous limit -/
+
+omit hB in
+/-- **Fast approximating subsequence.** By density of the simple-process
+embedding (`simpleAssembly_T_denseRange`), every predictable integrand `φ` is
+approximated by `T`-bounded simple processes `Vₙ` with
+`‖simpleAssembly_T Vₙ − φ‖ ≤ 2⁻ⁿ`. -/
+theorem approxSeq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ∃ V : ℕ → TBoundedSP T hBmeas,
+      ∀ n, ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n := by
+  have hd := simpleAssembly_T_denseRange (μ := μ) T hBmeas
+  have hex : ∀ n : ℕ, ∃ V : TBoundedSP T hBmeas,
+      ‖simpleAssembly_T (μ := μ) T hBmeas V - φ‖ ≤ (2⁻¹ : ℝ) ^ n := by
+    intro n
+    obtain ⟨V, hV⟩ := hd.exists_dist_lt φ (by positivity : (0 : ℝ) < (2⁻¹ : ℝ) ^ n)
+    exact ⟨V, by rw [← dist_eq_norm, dist_comm]; exact hV.le⟩
+  choose V hV using hex
+  exact ⟨V, hV⟩
+
 end ItoIntegralProcessContinuousModification
 end MathFin
