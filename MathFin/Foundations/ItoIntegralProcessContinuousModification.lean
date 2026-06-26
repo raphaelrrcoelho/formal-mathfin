@@ -303,5 +303,71 @@ theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
       (Lp.aestronglyMeasurable _) heLp
   exact tendstoInMeasure_ae_unique hmeasG hmeasH
 
+omit hB in
+/-- Consecutive-difference bound combining linearity with the running-max keystone:
+for `t ≤ T`, `‖(Vₐ ● B)_t − (Vₐ₊₁ ● B)_t‖` is at most the running max of
+`(Vₐ − Vₐ₊₁) ● B` over `[0,T]`. -/
+lemma consecutive_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω) (V : ℕ → TBoundedSP T hBmeas)
+    (ω : Ω) {t : ℝ≥0} (ht : t ≤ T) (a : ℕ) :
+    ‖itoSimpleProcess hBmeas (V a).val t ω - itoSimpleProcess hBmeas (V (a + 1)).val t ω‖
+      ≤ ⨆ j : Set.Iic T, ‖itoSimpleProcess hBmeas (V a - V (a + 1)).val (j : ℝ≥0) ω‖ := by
+  have hcoe : ((V a - V (a + 1)).val : SimpleProcess ℝ (natFiltration hBmeas))
+      = (V a).val - (V (a + 1)).val := rfl
+  rw [show itoSimpleProcess hBmeas (V a).val t ω - itoSimpleProcess hBmeas (V (a + 1)).val t ω
+        = itoSimpleProcess hBmeas (V a - V (a + 1)).val t ω from by
+      rw [hcoe]; exact (congrFun (itoSimpleProcess_sub hBmeas (V a).val (V (a + 1)).val t) ω).symm]
+  exact norm_le_iSup_Iic T hBmeas hBcont (V a - V (a + 1)).val ω ht
+
+/-- **Pathwise continuity (the rest of Task 6).** For almost every `ω`, the
+pathwise limit `t ↦ itoContinuousMod φ t ω` is continuous on `[0,T]`. The
+approximating continuous paths `(Vₙ ● B)_· ω` (B3) converge to it *uniformly* on
+`[0,T]`: the running max gives `‖itoContinuousMod φ t ω − (Vₙ ● B)_t ω‖ ≤
+4·(3/4)ⁿ` for all `t ≤ T` once `n` is large (geometric tail of the consecutive
+differences, uniform in `t`). A uniform limit of continuous functions is
+continuous. -/
+theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ∀ᵐ ω ∂μ, ContinuousOn (fun t => itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
+  set V := (approxSeq T hBmeas φ).choose with hVdef
+  have hV := (approxSeq T hBmeas φ).choose_spec
+  filter_upwards [ae_eventually_sup_lt hB T hBmeas hBcont φ V hV,
+    itoContinuousMod_tendsto hB T hBmeas hBcont φ] with ω hω htends
+  rw [show (Set.Icc 0 T : Set ℝ≥0) = Set.Iic T from by
+    ext x; simp only [Set.mem_Icc, Set.mem_Iic, zero_le, true_and]]
+  obtain ⟨N, hN⟩ := eventually_atTop.mp hω
+  have huniform : TendstoUniformlyOn (fun n t => itoSimpleProcess hBmeas (V n).val t ω)
+      (fun t => itoContinuousMod T hBmeas φ t ω) atTop (Set.Iic T) := by
+    rw [Metric.tendstoUniformlyOn_iff]
+    intro ε hε
+    have htend0 : Tendsto (fun n => 4 * (3 / 4 : ℝ) ^ n) atTop (𝓝 0) := by
+      rw [show (0 : ℝ) = 4 * 0 from by ring]
+      exact (tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num)).const_mul 4
+    filter_upwards [eventually_ge_atTop N, htend0.eventually_lt_const hε] with n hn hnε
+    intro t ht
+    rw [Set.mem_Iic] at ht
+    rw [dist_comm]
+    -- the uniform bound: dist (fₙ t ω) (X t ω) ≤ 4·(3/4)ⁿ
+    have htendsto : Tendsto (fun k => itoSimpleProcess hBmeas (V (k + n)).val t ω) atTop
+        (𝓝 (itoContinuousMod T hBmeas φ t ω)) := (htends t ht).comp (tendsto_add_atTop_nat n)
+    have hstep : ∀ k, dist (itoSimpleProcess hBmeas (V (k + n)).val t ω)
+        (itoSimpleProcess hBmeas (V (k + 1 + n)).val t ω) ≤ (3 / 4 : ℝ) ^ n * (3 / 4 : ℝ) ^ k := by
+      intro k
+      rw [show k + 1 + n = (k + n) + 1 from by ring, dist_eq_norm]
+      refine (consecutive_norm_le T hBmeas hBcont V ω ht (k + n)).trans ?_
+      exact (hN (k + n) (hn.trans (Nat.le_add_left n k))).le.trans
+        (le_of_eq (by rw [pow_add]; ring))
+    have h0 :=
+      dist_le_of_le_geometric_of_tendsto₀ (3 / 4) ((3 / 4 : ℝ) ^ n) (by norm_num) hstep htendsto
+    simp only [zero_add] at h0
+    refine lt_of_le_of_lt (h0.trans (le_of_eq ?_)) hnε
+    rw [show (1 : ℝ) - 3 / 4 = 1 / 4 from by norm_num]; ring
+  have hcont : ∀ᶠ n in atTop,
+      ContinuousOn (fun t => itoSimpleProcess hBmeas (V n).val t ω) (Set.Iic T) :=
+    Eventually.of_forall fun n =>
+      (itoSimpleProcess_pathContinuous hBmeas hBcont (V n).val ω).continuousOn
+  exact huniform.continuousOn hcont.frequently
+
 end ItoIntegralProcessContinuousModification
 end MathFin
