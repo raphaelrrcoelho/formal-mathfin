@@ -1133,9 +1133,9 @@
     "mf-ftap-one-period-general": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-25",
-      "elapsed_s": 19.1,
-      "input_hash": "0ac0828ca0c430bbf2b1c695dfd75cc4d8dac7b90f193e1cca4a1e94cb11e626",
-      "verified_at_commit": "fb7b641"
+      "elapsed_s": 10.5,
+      "input_hash": "f5b9b104919435cb0250da296644f3939f83a28e3fe3250d66399e1fff397c76",
+      "verified_at_commit": "1125371"
     },
     "mf-ftap-single-period-complete": {
       "benchmark_file": "mathematical_finance.json",

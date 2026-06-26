@@ -83,7 +83,7 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
     (hb : ∫ ω in {ω | 0 ≤ Y ω}ᶜ, Y ω ∂P < 0) :
     ∃ Q, IsEMM P Y Q := by
   classical
-  set s : Set Ω := {ω | 0 ≤ Y ω} with hsdef
+  set s : Set Ω := {ω | 0 ≤ Y ω}
   have hs : MeasurableSet s := measurableSet_le measurable_const hY
   set a : ℝ := ∫ ω in s, Y ω ∂P with hadef
   set c : ℝ := ∫ ω in sᶜ, Y ω ∂P with hcdef
@@ -92,7 +92,7 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
   have hppn : (P s).toReal + (P sᶜ).toReal = 1 := by
     rw [← ENNReal.toReal_add (measure_ne_top P s) (measure_ne_top P sᶜ),
       measure_add_measure_compl hs, measure_univ, ENNReal.toReal_one]
-  -- weights `λ, m > 0`
+  -- weights `λ, μ > 0`
   set D : ℝ := (-c) * (P s).toReal + a * (P sᶜ).toReal with hDdef
   have hD : 0 < D := by
     rcases eq_or_lt_of_le hpp0 with hpp | hpp
@@ -102,22 +102,22 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
       have h2 : 0 ≤ a * (P sᶜ).toReal := mul_nonneg ha.le hpn0
       rw [hDdef]; linarith
   set lam : ℝ := (-c) / D with hlamdef
-  set m : ℝ := a / D with hmdef
+  set mu : ℝ := a / D with hmudef
   have hlam : 0 < lam := div_pos (neg_pos.mpr hb) hD
-  have hm : 0 < m := div_pos ha hD
-  set Z : Ω → ℝ := fun ω => if 0 ≤ Y ω then lam else m with hZdef
+  have hmu : 0 < mu := div_pos ha hD
+  set Z : Ω → ℝ := fun ω => if 0 ≤ Y ω then lam else mu with hZdef
   have hZpos : ∀ ω, 0 < Z ω := fun ω => by simp only [hZdef]; split_ifs <;> assumption
   have hZmeas : Measurable Z := Measurable.ite hs measurable_const measurable_const
-  have hZbound : ∀ ω, ‖Z ω‖ ≤ max lam m := fun ω => by
+  have hZbound : ∀ ω, ‖Z ω‖ ≤ max lam mu := fun ω => by
     rw [Real.norm_eq_abs, abs_of_pos (hZpos ω)]
     simp only [hZdef]; split_ifs <;> [exact le_max_left _ _; exact le_max_right _ _]
   have hZint : Integrable Z P :=
     ⟨hZmeas.aestronglyMeasurable, HasFiniteIntegral.of_bounded (Filter.Eventually.of_forall hZbound)⟩
   have hZYint : Integrable (fun ω => Z ω * Y ω) P :=
     hYint.bdd_mul hZmeas.aestronglyMeasurable (Filter.Eventually.of_forall hZbound)
-  -- `∫ Z·g = λ·∫_s g + m·∫_sᶜ g`
+  -- `∫ Z·g = λ·∫_s g + μ·∫_sᶜ g`
   have hsplit : ∀ g : Ω → ℝ, Integrable (fun ω => Z ω * g ω) P →
-      ∫ ω, Z ω * g ω ∂P = lam * (∫ ω in s, g ω ∂P) + m * (∫ ω in sᶜ, g ω ∂P) := by
+      ∫ ω, Z ω * g ω ∂P = lam * (∫ ω in s, g ω ∂P) + mu * (∫ ω in sᶜ, g ω ∂P) := by
     intro g hZg
     rw [← integral_add_compl hs hZg]
     congr 1
@@ -125,7 +125,7 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
         setIntegral_congr_fun hs fun ω hω => by
           simp only [hZdef, if_pos (show (0 : ℝ) ≤ Y ω from hω)],
         integral_const_mul]
-    · rw [show (∫ ω in sᶜ, Z ω * g ω ∂P) = ∫ ω in sᶜ, m * g ω ∂P from
+    · rw [show (∫ ω in sᶜ, Z ω * g ω ∂P) = ∫ ω in sᶜ, mu * g ω ∂P from
         setIntegral_congr_fun hs.compl fun ω hω => by
           simp only [hZdef, if_neg (show ¬ (0 : ℝ) ≤ Y ω from hω)],
         integral_const_mul]
@@ -133,12 +133,12 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
   have hZsum : ∫ ω, Z ω ∂P = 1 := by
     have h := hsplit (fun _ => 1) (by simpa using hZint)
     simp only [mul_one, setIntegral_const, smul_eq_mul, Measure.real] at h
-    rw [h, hlamdef, hmdef]
+    rw [h, hlamdef, hmudef]
     field_simp [hD.ne']
     rw [hDdef]; ring
   -- fairness `∫ Z·Y = 0`
   have hZY : ∫ ω, Z ω * Y ω ∂P = 0 := by
-    rw [hsplit Y hZYint, ← hadef, ← hcdef, hlamdef, hmdef]
+    rw [hsplit Y hZYint, ← hadef, ← hcdef, hlamdef, hmudef]
     field_simp
     ring
   -- the EMM measure
@@ -193,7 +193,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     exact ⟨P, inferInstance, Measure.AbsolutelyContinuous.refl P,
       Measure.AbsolutelyContinuous.refl P, hYint, by rw [integral_congr_ae hY0]; simp⟩
   · -- non-degenerate: both tails are strictly signed
-    set s : Set Ω := {ω | 0 ≤ Y ω} with hsdef
+    set s : Set Ω := {ω | 0 ≤ Y ω}
     have hs : MeasurableSet s := measurableSet_le measurable_const hY
     have hYs : ∀ ω ∈ s, 0 ≤ Y ω := fun ω hω => hω
     have hYsc : ∀ ω ∈ sᶜ, Y ω ≤ 0 := fun ω hω => le_of_lt (not_le.mp hω)
