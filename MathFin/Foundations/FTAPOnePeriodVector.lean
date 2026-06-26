@@ -457,4 +457,84 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
       rw [heq, integral_smul, hfair, smul_zero]
     exact ⟨Q, hQprob, hQP, hPQ, hYintQ, hQfair⟩
 
+/-- **General backward direction** (`d` assets, integrability dropped). For a measurable,
+non-redundant `Y`, no arbitrage gives an EMM. Pass to the equivalent probability measure
+`P̃ = P.withDensity (w/κ)`, `w = (1+‖Y‖)⁻¹`, under which `Y` is integrable; no arbitrage and
+non-redundancy are a.e. notions preserved by `P̃ ~ P`, so the integrable backward direction
+applies, and `Q ~ P̃ ~ P` by transitivity. -/
+theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y)
+    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+    ∃ Q, IsEMM P Y Q := by
+  classical
+  set w : Ω → ℝ := fun ω => (1 + ‖Y ω‖)⁻¹ with hwdef
+  have hw_meas : Measurable w := (measurable_const.add hY.norm).inv
+  have hden_pos : ∀ ω, (0 : ℝ) < 1 + ‖Y ω‖ := fun ω => by positivity
+  have hw_pos : ∀ ω, 0 < w ω := fun ω => by simp only [hwdef]; exact inv_pos.mpr (hden_pos ω)
+  have hw_le_one : ∀ ω, w ω ≤ 1 := fun ω => by
+    simp only [hwdef]; exact inv_le_one_of_one_le₀ (by linarith [norm_nonneg (Y ω)])
+  have hw_int : Integrable w P :=
+    ⟨hw_meas.aestronglyMeasurable, HasFiniteIntegral.of_bounded
+      (Filter.Eventually.of_forall fun ω => by
+        rw [Real.norm_eq_abs, abs_of_pos (hw_pos ω)]; exact hw_le_one ω)⟩
+  set κ : ℝ := ∫ ω, w ω ∂P with hκdef
+  have hκ_pos : 0 < κ := by
+    rw [hκdef, integral_pos_iff_support_of_nonneg_ae
+        (Filter.Eventually.of_forall fun ω => (hw_pos ω).le) hw_int,
+      show Function.support w = Set.univ from Set.eq_univ_of_forall fun ω => (hw_pos ω).ne']
+    rw [measure_univ]; exact one_pos
+  set dens : Ω → ℝ := fun ω => w ω / κ with hddef
+  have hd_meas : Measurable dens := hw_meas.div_const κ
+  have hd_pos : ∀ ω, 0 < dens ω := fun ω => div_pos (hw_pos ω) hκ_pos
+  have hd_int : Integrable dens P := hw_int.div_const κ
+  have hd_sum : ∫ ω, dens ω ∂P = 1 := by
+    simp only [hddef, div_eq_inv_mul]
+    rw [integral_const_mul, ← hκdef, inv_mul_cancel₀ hκ_pos.ne']
+  set Pt : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (dens ω)) with hPtdef
+  have hd_ofReal_meas : Measurable (fun ω => ENNReal.ofReal (dens ω)) :=
+    ENNReal.measurable_ofReal.comp hd_meas
+  haveI hPt_prob : IsProbabilityMeasure Pt := by
+    refine ⟨?_⟩
+    rw [hPtdef, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
+      ← ofReal_integral_eq_lintegral_ofReal hd_int
+        (Filter.Eventually.of_forall fun ω => (hd_pos ω).le), hd_sum, ENNReal.ofReal_one]
+  have hPt_ll_P : Pt ≪ P := by rw [hPtdef]; exact withDensity_absolutelyContinuous _ _
+  have hP_ll_Pt : P ≪ Pt := by
+    rw [hPtdef]
+    refine withDensity_absolutelyContinuous' hd_ofReal_meas.aemeasurable ?_
+    exact Filter.Eventually.of_forall fun ω => by
+      simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le]; exact hd_pos ω
+  have hdY_int : Integrable (fun ω => dens ω • Y ω) P := by
+    refine ⟨(hd_meas.aestronglyMeasurable.smul hY.aestronglyMeasurable),
+      HasFiniteIntegral.of_bounded (C := κ⁻¹) (Filter.Eventually.of_forall fun ω => ?_)⟩
+    rw [norm_smul, Real.norm_eq_abs, abs_of_pos (hd_pos ω)]
+    have h1 : w ω * ‖Y ω‖ ≤ 1 := by
+      simp only [hwdef, inv_mul_eq_div, div_le_one (hden_pos ω)]
+      linarith [norm_nonneg (Y ω)]
+    simp only [hddef, div_mul_eq_mul_div]
+    rw [div_le_iff₀ hκ_pos, inv_mul_cancel₀ hκ_pos.ne']; exact h1
+  have hYintPt : Integrable Y Pt := by
+    rw [hPtdef, integrable_withDensity_iff_integrable_smul' hd_ofReal_meas
+      (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
+    refine hdY_int.congr (Filter.Eventually.of_forall fun ω => ?_)
+    show dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
+    rw [ENNReal.toReal_ofReal (hd_pos ω).le]
+  have hNAt : NoArbitrage Pt Y := fun θ h =>
+    hPt_ll_P.ae_eq (hNA θ (hP_ll_Pt.ae_le h))
+  have hndgt : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[Pt] 0 → θ = 0 :=
+    fun θ h => hndg θ (hP_ll_Pt.ae_eq h)
+  obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_integrable Pt Y hY hYintPt hNAt hndgt
+  exact ⟨Q, hQ.prob, hQ.absP.trans hPt_ll_P, hP_ll_Pt.trans hQ.Pabs, hQ.int, hQ.fair⟩
+
+/-- **One-period Fundamental Theorem of Asset Pricing**, `d` assets, general `Ω`, for a
+**non-redundant** market (no portfolio with `⟪θ,Y⟫ = 0` a.e. for `θ ≠ 0`). For a measurable
+`ℝᵈ`-valued discounted excess return `Y`, no arbitrage holds iff there is an equivalent
+martingale measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`. The backward direction is
+the explicit Esscher / minimal-divergence construction (no Hahn–Banach, no L⁰-cone closedness,
+no measurable selection). -/
+theorem ftap_one_period_vector (hY : Measurable Y)
+    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+    NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
+  ⟨fun hNA => exists_isEMM_of_noArbitrage P Y hY hNA hndg,
+   fun ⟨_, hQ⟩ => noArbitrage_of_isEMM P Y hQ⟩
+
 end MathFin.OnePeriodVector
