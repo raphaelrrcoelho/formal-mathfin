@@ -76,5 +76,25 @@ theorem exists_ae_eq_of_sup_nulls {m₁ : MeasurableSpace Ω}
     exact ⟨by simpa using hu.2, by simp⟩
   exact (sup_le hm₁M hnM) s hs
 
+/-- **Cond-expectation invariance under the null augmentation.** Conditioning on
+the null-augmented σ-algebra `m₁ ⊔ 𝓝` agrees `μ`-a.e. with conditioning on `m₁`:
+the extra information is only null sets, which carry no information. Proof:
+`μ[f | m₁]` is `m₁`-measurable (hence `(m₁ ⊔ 𝓝)`-measurable) and satisfies the
+`(m₁ ⊔ 𝓝)`-set-integral characterisation of the conditional expectation, because
+every `(m₁ ⊔ 𝓝)`-set is `=ᵐ` an `m₁`-set (`exists_ae_eq_of_sup_nulls`) over which
+the `m₁`-characterisation already holds. -/
+theorem condExp_sup_nulls [IsFiniteMeasure μ] {m₁ : MeasurableSpace Ω} (hm₁ : m₁ ≤ m0)
+    {f : Ω → ℝ} (hf : Integrable f μ) :
+    μ[f | m₁ ⊔ nullsAlg m0 μ] =ᵐ[μ] μ[f | m₁] := by
+  have hm : m₁ ⊔ nullsAlg m0 μ ≤ m0 := sup_le hm₁ nullsAlg_le
+  haveI : SigmaFinite (μ.trim hm₁) := (isFiniteMeasure_trim hm₁).toSigmaFinite
+  haveI : SigmaFinite (μ.trim hm) := (isFiniteMeasure_trim hm).toSigmaFinite
+  refine (ae_eq_condExp_of_forall_setIntegral_eq hm hf
+    (fun s _ _ => integrable_condExp.integrableOn) (fun s hs _ => ?_)
+    ((stronglyMeasurable_condExp.mono le_sup_left).aestronglyMeasurable)).symm
+  obtain ⟨t, htm, hst⟩ := exists_ae_eq_of_sup_nulls hs
+  rw [setIntegral_congr_set hst, setIntegral_condExp hm₁ hf htm]
+  exact (setIntegral_congr_set hst).symm
+
 end ItoLocalMartingale
 end MathFin
