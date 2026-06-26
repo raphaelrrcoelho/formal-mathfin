@@ -217,5 +217,48 @@ lemma norm_le_iSup_Iic (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   haveI : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
   exact le_ciSup (isCompact_range hcont).bddAbove ⟨i, hi⟩
 
+/-- The pathwise limit process: for each `t, ω` the limit (if it exists) of the
+approximating simple integrals `(Vₙ ● B)_t ω`, junk off the convergence set. The
+subsequence `Vₙ` is `approxSeq`'s choice for `φ`. -/
+noncomputable def itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) (ω : Ω) : ℝ :=
+  limUnder atTop fun n => itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω
+
+/-- **Pointwise a.s. convergence.** For almost every `ω` and every `t ≤ T`, the
+approximating sequence `(Vₙ ● B)_t ω` converges to `itoContinuousMod φ t ω`. The
+consecutive distances are eventually `< (3/4)ⁿ` (a.s., uniformly in `t ≤ T`, by
+`ae_eventually_sup_lt` + the running-max keystone + linearity), hence summable,
+so the sequence is Cauchy in the complete space `ℝ`. -/
+theorem itoContinuousMod_tendsto (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ∀ᵐ ω ∂μ, ∀ t : ℝ≥0, t ≤ T →
+      Tendsto (fun n => itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
+        (𝓝 (itoContinuousMod T hBmeas φ t ω)) := by
+  set V := (approxSeq T hBmeas φ).choose with hVdef
+  have hV := (approxSeq T hBmeas φ).choose_spec
+  filter_upwards [ae_eventually_sup_lt hB T hBmeas hBcont φ V hV] with ω hω
+  intro t ht
+  have hcauchy : CauchySeq (fun n => itoSimpleProcess hBmeas (V n).val t ω) := by
+    apply cauchySeq_of_summable_dist
+    obtain ⟨N, hN⟩ := eventually_atTop.mp hω
+    rw [← summable_nat_add_iff N]
+    refine Summable.of_nonneg_of_le (fun n => dist_nonneg) (fun n => ?_)
+      (f := fun n => (3 / 4 : ℝ) ^ (n + N)) ?_
+    · rw [dist_eq_norm]
+      have hcoe : ((V (n + N) - V (n + N + 1)).val : SimpleProcess ℝ (natFiltration hBmeas))
+          = (V (n + N)).val - (V (n + N + 1)).val := rfl
+      have hlin : itoSimpleProcess hBmeas (V (n + N)).val t ω
+            - itoSimpleProcess hBmeas (V (n + N + 1)).val t ω
+          = itoSimpleProcess hBmeas (V (n + N) - V (n + N + 1)).val t ω := by
+        rw [hcoe]
+        exact (congrFun (itoSimpleProcess_sub hBmeas (V (n + N)).val (V (n + N + 1)).val t) ω).symm
+      rw [hlin]
+      exact (norm_le_iSup_Iic T hBmeas hBcont (V (n + N) - V (n + N + 1)).val ω ht).trans
+        (hN (n + N) (Nat.le_add_left N n)).le
+    · simp_rw [pow_add]
+      exact (summable_geometric_of_lt_one (by norm_num) (by norm_num)).mul_right _
+  simpa only [itoContinuousMod, hVdef] using hcauchy.tendsto_limUnder
+
 end ItoIntegralProcessContinuousModification
 end MathFin
