@@ -369,5 +369,23 @@ theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
       (itoSimpleProcess_pathContinuous hBmeas hBcont (V n).val ω).continuousOn
   exact huniform.continuousOn hcont.frequently
 
+/-! ## Phase 4 — the headline existence theorem (the gate) -/
+
+/-- **The continuous modification of the general-integrand Itô process on `[0,T]`
+exists (the gate).** There is a process `X : ℝ≥0 → Ω → ℝ` that (i) agrees almost
+everywhere with the `L²` process value `itoProcessCLM T t φ` at every `t ≤ T` — a
+**modification** — and (ii) has almost-surely continuous paths on `[0,T]`. This is
+the first pathwise-regularity result for the general integrand, and the
+localization gateway for the unbounded-coefficient Itô calculus. -/
+theorem exists_continuous_modification_itoProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ∃ X : ℝ≥0 → Ω → ℝ,
+      (∀ t, t ≤ T → X t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ) ∧
+      (∀ᵐ ω ∂μ, ContinuousOn (fun t => X t ω) (Set.Icc 0 T)) :=
+  ⟨itoContinuousMod T hBmeas φ,
+    fun _ ht => itoContinuousMod_modification hB T hBmeas hBcont φ ht,
+    itoContinuousMod_continuousOn hB T hBmeas hBcont φ⟩
+
 end ItoIntegralProcessContinuousModification
 end MathFin
