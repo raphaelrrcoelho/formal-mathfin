@@ -53,6 +53,83 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-25 — commit a5197ee — corpus 288
+
+**Scope**: the general-Ω one-period Fundamental Theorem of Asset Pricing
+(Föllmer–Schied Thm 1.55 / one-period Dalang–Morton–Willinger), shipped this session.
+New proof content: `Foundations/FTAPOnePeriod.lean` — the scalar L⁰ model
+(`NoArbitrage`, `IsEMM` with mutual absolute continuity), the forward direction
+`noArbitrage_of_isEMM`, the balancing-density core `exists_isEMM_of_pos_tails`
+(EMM `Q = P.withDensity (λ·𝟙_{Y≥0} + μ·𝟙_{Y<0})`, weights solved so `Y` is fair), the
+scalar no-arbitrage dichotomy + integrable backward `exists_isEMM_of_noArbitrage_integrable`,
+the integrability-dropping reduction `exists_isEMM_of_noArbitrage` (equivalent
+`P̃ = P.withDensity (1+|Y|)⁻¹/κ`), and the biconditional
+`ftap_one_period : NoArbitrage ↔ ∃ EMM`; one `full` corpus entry
+(`mf-ftap-one-period-general`). Library green (`lake build` 8813 jobs), axioms-clean
+(`[propext, Classical.choice, Quot.sound]`), ledger 288/288 fresh, pytest 19/19.
+
+| lens | verdict |
+| --- | --- |
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS |
+
+**Panel**: three independent review agents, lenses grouped (1+2+8 / 3+4+5 / 6+7),
+reading `FTAPOnePeriod.lean` read-only against the pinned Mathlib (no Lean run — the
+daemon held the local Lean slot).
+
+**Honesty — the headline checks, verified clean**: the backward direction genuinely
+**constructs** the EMM, never posits it. `exists_isEMM_of_pos_tails` builds
+`Q = P.withDensity (ofReal Z)` with `Z = λ·𝟙_{Y≥0} + μ·𝟙_{Y<0}`, the weights **solved**
+from the fairness + normalisation 2×2 system (`D = −c·P(s) + a·P(sᶜ)`, `λ = −c/D`,
+`μ = a/D`), with `D > 0` proved by a genuine case-split on `P(s)=0`; `∫Z=1` and `∫Z·Y=0`
+are then *derived* (`field_simp; ring` bottoming out in the chosen weights, not a
+definitional `rfl` — the `test_values.py` rfl-tripwire does not fire). The scalar
+dichotomy (`θ=±1` annihilates a one-signed `Y`) upgrades the weak tail inequalities to
+strict via `integral_eq_zero_iff_of_nonneg_ae` on the restricted measure — real
+measure-theoretic work. Mutual absolute continuity `Q ~ P` is established from the
+strictly-positive density on **both** sides (`withDensity_absolutelyContinuous` / `…'`),
+never assumed. Scope honest in module docstring + corpus `formalization_scope` +
+`coverage.md`: one period, one scalar asset, arbitrary Ω; the general-Ω **multi-period**
+DMW (measurable selection) and the d-asset case named as open.
+
+**Coherence / ingenuity checks**: library consumption is clean — no reproved lemma. The
+one bespoke helper `hsplit` (`∫ Z·g = λ·∫_s g + μ·∫_sᶜ g`) is the problem-specific
+two-region decomposition over `integral_add_compl`, not a re-derivation of additivity.
+The elementary Föllmer–Schied route (bounded-density reduction + scalar dichotomy +
+balancing `withDensity`) is the inspired choice: it avoids Hahn–Banach / Kreps–Yan
+precisely because the one-period scalar case makes the EMM *explicit* — the verified
+contrast with the finite-Ω sibling `ftap_discrete`, which *does* route through
+`exists_pos_dual_of_disjoint_stdSimplex`. The 5-theorem decomposition cuts at the right
+joints: `exists_isEMM_of_pos_tails` is a reusable quantitative core knowing nothing of
+no-arbitrage; integrability is dropped in a separate, conceptually-orthogonal reduction
+rather than inlined.
+
+**Blocking findings**: none.
+
+**Recorded actions**:
+1. *(done this verdict)* Dead `with hsdef` binders removed from both
+   `exists_isEMM_of_pos_tails` and `exists_isEMM_of_noArbitrage_integrable`
+   (`set s := … with hsdef` where `hsdef` was never referenced — a dead hypothesis, the
+   panel's one concrete slop flag).
+2. *(done this verdict)* Down-weight renamed `m → μ` (`lam`/`mu` for `λ`/`μ`) so the
+   up/down symmetry the docstrings describe is literal in the source — flagged by two
+   panellists (idiomatic register + elegant math).
+3. *(considered, kept)* The two sign-asymmetric contrapositive tail blocks (`{Y≥0}`
+   direct, `{Y<0}` via `−Y`) and the ~6-line `withDensity`-⇒-equivalent-probability
+   boilerplate shared by the two existence theorems. Both panellists judged a `wlog` /
+   shared `equivProbOfDensity` abstraction below the threshold where factoring pays (the
+   sign-flip is genuine math; the boilerplate is over two differently-named densities at
+   the only two sites). Kept; revisit if a third site appears.
+4. *(nit, kept)* `exists_isEMM_of_noArbitrage`'s docstring states `κ = ∫ w ∈ (0,1]` while
+   the proof establishes/uses only `0 < κ` (upper bound true but unused). Kept as honest
+   exposition of the object — proving an unused `κ ≤ 1` would itself be slop.
+
 ## 2026-06-25 — commit 74e94b6 — corpus 287
 
 **Scope**: the finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska /
