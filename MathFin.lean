@@ -113,6 +113,8 @@ import MathFin.Foundations.ItoIntegralProcessLocalMartingale
 import MathFin.Foundations.ItoIntegralProcessGeneral
 -- The deferred time-indexed Itô isometry E[(φ●B)_t²] = ∫₀ᵗ E[φ²] ds (B1b refinement)
 import MathFin.Foundations.ItoIntegralProcessIsometry
+-- Continuous modification of the general-integrand Itô process on [0,T] (the gate)
+import MathFin.Foundations.ItoIntegralProcessContinuousModification
 -- Pathwise discrete Itô identity for `f(x) = x²` (the squaring keystone)
 import MathFin.Foundations.ItoSquaringIdentity
 -- Polynomial Itô remainders (x³, x⁴) + the pathwise discrete cubing identity

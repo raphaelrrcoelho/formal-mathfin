@@ -14,7 +14,7 @@ public import BrownianMotion.StochasticIntegral.DoobLp
 
 The first pathwise-regularity result for the **general** integrand: a continuous
 modification of the `L²`-valued process `t ↦ itoProcessCLM T t φ` on a finite
-horizon `[0,T]`, packaged as a continuous (hence local) martingale.
+horizon `[0,T]`.
 
 B1b (`ItoIntegralProcessGeneral`) built the general-integrand Itô integral as an
 `Lp ℝ 2 μ`-valued process — adapted, an `L²` martingale, `L²`-continuous in `t`,
@@ -23,9 +23,17 @@ pathwise continuity only for the **simple** integrand. This file closes the gap:
 approximate `φ` by simple processes `Vₙ` (density, B1b); each `Vₙ ● B` has
 continuous paths (B3); Degenne's continuous-time weak-type maximal inequality
 (`maximal_ineq_norm`) + Borel–Cantelli on a fast subsequence make `(Vₙ ● B)`
-a.s.-uniformly Cauchy on `[0,T]`, so the uniform limit is pathwise continuous,
-equals `(φ ● B)_t` a.e. at every `t` (a **modification**), and is a continuous
-`L²` martingale — hence an `IsLocalMartingale`, the localization gateway.
+a.s.-uniformly Cauchy on `[0,T]`, so the uniform limit `itoContinuousMod` is
+pathwise continuous (`itoContinuousMod_continuousOn`) and equals `(φ ● B)_t` a.e.
+at every `t ≤ T` (a **modification**, `itoContinuousMod_modification`), bundled by
+`exists_continuous_modification_itoProcess`.
+
+This continuous modification is the *input* the localized stochastic calculus
+consumes: the `IsLocalMartingale` packaging is an explicit follow-on (Degenne's
+`Martingale.IsLocalMartingale` needs paths càdlàg for **every** `ω`, which for the
+general integrand requires an augmented filtration — the "usual conditions" — that
+`natFiltration` does not carry; B3 sidesteps this because the *simple* process is
+continuous and adapted for every `ω`). It is **not** proved here.
 
 ## Coherence
 
@@ -103,7 +111,8 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
   rw [smul_eq_mul] at hweak
   have hchain : ε * μ.real S ≤ ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
     hweak.trans (hsub.trans (hL2.trans_eq hterm))
-  calc μ.real S = ε⁻¹ * (ε * μ.real S) := by field_simp
+  calc μ.real S = ε⁻¹ * (ε * μ.real S) := by
+        rw [← mul_assoc, inv_mul_cancel₀ hε.ne', one_mul]
     _ ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
         mul_le_mul_of_nonneg_left hchain (inv_nonneg.mpr hε.le)
 
@@ -165,7 +174,7 @@ theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
           · exact hV n
           · rw [norm_sub_rev]; exact hV (n + 1)
       _ ≤ 2 * (2⁻¹ : ℝ) ^ n := by
-          rw [pow_succ]; nlinarith [pow_nonneg (by norm_num : (0 : ℝ) ≤ 2⁻¹) n]
+          rw [pow_succ]; linarith [pow_nonneg (by norm_num : (0 : ℝ) ≤ 2⁻¹) n]
   calc ((3 / 4 : ℝ) ^ n)⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas (V n - V (n + 1))‖
       ≤ ((3 / 4 : ℝ) ^ n)⁻¹ * (2 * (2⁻¹ : ℝ) ^ n) :=
         mul_le_mul_of_nonneg_left hnorm (by positivity)
@@ -217,6 +226,7 @@ lemma norm_le_iSup_Iic (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
   haveI : CompactSpace (Set.Iic T) := isCompact_iff_compactSpace.mp (hIic ▸ isCompact_Icc)
   exact le_ciSup (isCompact_range hcont).bddAbove ⟨i, hi⟩
 
+omit hB in
 /-- The pathwise limit process: for each `t, ω` the limit (if it exists) of the
 approximating simple integrals `(Vₙ ● B)_t ω`, junk off the convergence set. The
 subsequence `Vₙ` is `approxSeq`'s choice for `φ`. -/

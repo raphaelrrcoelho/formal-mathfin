@@ -632,6 +632,26 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralCovariation.variance_itoIntegralCLM_T
 
+-- Continuous modification of the general-integrand Itô process (2026-06-26): the
+-- first PATHWISE-regularity result for the general integrand and the tower→pricing
+-- gate. Simple approximants `Vₙ ● B` (B3-continuous) are a.s.-uniformly Cauchy on
+-- `[0,T]` (Doob's continuous-time maximal inequality + Borel–Cantelli on a fast
+-- subsequence), so their uniform limit `itoContinuousMod` is pathwise continuous,
+-- equals the L² process `itoProcessCLM T t φ` a.e. at every `t ≤ T` (a modification,
+-- via `tendstoInMeasure_ae_unique`), and is bundled by `exists_continuous_modification_itoProcess`
+-- (`Foundations/ItoIntegralProcessContinuousModification.lean`). Non-redundant: Degenne's
+-- general càdlàg modification is `sorry`-backed, and this L²+Doob route yields a
+-- genuinely continuous (not merely càdlàg) version.
+
+/-- info: 'MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_modification' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_modification
+
+/-- info: 'MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_continuousOn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.itoContinuousMod_continuousOn
+
+/-- info: 'MathFin.ItoIntegralProcessContinuousModification.exists_continuous_modification_itoProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.exists_continuous_modification_itoProcess
+
 /-! ## Finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska, 2026-06-25) -/
 
 -- The separating-dual kernel (`Foundations/ConvexSeparation.lean`): a finite-dim
