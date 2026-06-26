@@ -45,6 +45,47 @@ namespace ItoIntegralProcessL2Infinite
 
 open ItoIntegralL2 ItoIntegralProcess ItoIntegralProcessGeneral
 
+/-! ## Restriction of an L² function to a sub-measure (generic) -/
+
+section RestrictLp
+variable {α : Type*} [MeasurableSpace α] (ν : Measure α) (s : Set α)
+
+/-- **Restriction to a sub-measure as a CLM.** For `f ∈ Lp 2 ν` the *same* function
+lies in `Lp 2 (ν.restrict s)` with no larger norm (restricting the measure can only
+shrink the `L²` norm), so `f ↦ f` is a norm-`≤ 1` continuous linear map
+`Lp 2 ν →L[ℝ] Lp 2 (ν.restrict s)`. Mathlib has `MemLp.restrict` but no packaged
+CLM; generic measure theory, a natural upstream candidate. -/
+noncomputable def restrictLp : Lp ℝ 2 ν →L[ℝ] Lp ℝ 2 (ν.restrict s) :=
+  LinearMap.mkContinuous
+    { toFun := fun f => ((Lp.memLp f).restrict s).toLp
+      map_add' := fun f g => by
+        refine Lp.ext ?_
+        filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (f + g)).restrict s),
+          Lp.coeFn_add (((Lp.memLp f).restrict s).toLp) (((Lp.memLp g).restrict s).toLp),
+          MemLp.coeFn_toLp ((Lp.memLp f).restrict s),
+          MemLp.coeFn_toLp ((Lp.memLp g).restrict s),
+          ae_restrict_of_ae (Lp.coeFn_add f g)] with x h1 h2 h3 h4 h5
+        simp only [h1, h2, h3, h4, h5, Pi.add_apply]
+      map_smul' := fun c f => by
+        refine Lp.ext ?_
+        filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (c • f)).restrict s),
+          Lp.coeFn_smul c (((Lp.memLp f).restrict s).toLp),
+          MemLp.coeFn_toLp ((Lp.memLp f).restrict s),
+          ae_restrict_of_ae (Lp.coeFn_smul c f)] with x h1 h2 h3 h4
+        simp only [h1, h2, h3, h4, Pi.smul_apply, RingHom.id_apply] }
+    1 (fun f => by
+      simp only [LinearMap.coe_mk, AddHom.coe_mk, one_mul, Lp.norm_def]
+      refine ENNReal.toReal_mono (Lp.memLp f).2.ne ?_
+      rw [eLpNorm_congr_ae (MemLp.coeFn_toLp ((Lp.memLp f).restrict s))]
+      exact eLpNorm_mono_measure _ Measure.restrict_le_self)
+
+@[simp] lemma restrictLp_coeFn (f : Lp ℝ 2 ν) :
+    ⇑(restrictLp ν s f) =ᵐ[ν.restrict s] ⇑f := by
+  simp only [restrictLp, LinearMap.mkContinuous_apply, LinearMap.coe_mk, AddHom.coe_mk]
+  exact MemLp.coeFn_toLp _
+
+end RestrictLp
+
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
