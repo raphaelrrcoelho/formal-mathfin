@@ -22,15 +22,18 @@ measure is **explicit** — the backward direction is the Esscher / minimal-dive
 construction: minimise the smooth convex potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`; under
 no arbitrage it is coercive transverse to `{u : ⟪u,Y⟫ = 0 a.e.}`, so a minimiser `θ*`
 exists, and its first-order condition `E[Y · σ(⟪θ*,Y⟫)] = 0` (with `σ` the logistic
-function) hands back a strictly-positive bounded density `z = σ(⟪θ*,Y⟫)`. No
-Hahn–Banach, no L⁰-cone closedness, no measurable selection — those are needed only
-for the general-Ω **multi-period** DMW.
+function) hands back a strictly-positive bounded weight `z = σ(⟪θ*,Y⟫)` whose
+normalisation `z / E[z]` is the EMM density. No Hahn–Banach, no L⁰-cone closedness, no
+measurable selection — those are needed only for the general-Ω **multi-period** DMW.
 
 ## Scope
 
 One trading period, **`d` assets**, **trivial `ℱ₀`** (constant `θ`), arbitrary
-`(Ω, P)`. The general-Ω multi-period DMW (predictable `L⁰(ℱ_t)`-strategies and the
-L⁰ gains-cone closedness) remains open.
+`(Ω, P)`, and a **non-redundant** market (no `θ ≠ 0` with `⟪θ,Y⟫ = 0` a.e.) — the
+hypothesis the coercivity step needs. Out of scope (open follow-ups): the **redundant**
+one-period d-asset case (quotient by the gains kernel `{θ : ⟪θ,Y⟫ = 0 a.e.}`) and the
+general-Ω **multi-period** DMW (predictable `L⁰(ℱ_t)`-strategies and the L⁰ gains-cone
+closedness).
 
 ## Main result
 
@@ -398,7 +401,7 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     rw [show Y = 0 from funext fun ω => Subsingleton.elim _ _]; simp
   · obtain ⟨θ₀, hmin⟩ := exists_global_min_potential P Y hYint hNA hndg
     have hfair := integral_logistic_smul_eq_zero P Y hY hYint hmin
-    set z : Ω → ℝ := fun ω => logistic (inner ℝ θ₀ (Y ω)) with hz
+    set z : Ω → ℝ := fun ω => logistic (inner ℝ θ₀ (Y ω))
     have hzpos : ∀ ω, 0 < z ω := fun ω => logistic_pos _
     have hzlt : ∀ ω, z ω < 1 := fun ω => logistic_lt_one _
     have hzmeas : Measurable z := continuous_logistic.measurable.comp (measurable_const.inner hY)
