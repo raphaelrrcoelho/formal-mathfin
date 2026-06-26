@@ -379,4 +379,82 @@ lemma integral_logistic_smul_eq_zero (hY : Measurable Y) (hYint : Integrable Y P
     exact hdir u
   exact inner_self_eq_zero.mp (hGu _)
 
+/-- **Integrable backward direction** (`d` assets). For an integrable, **non-redundant**
+`Y`, no arbitrage gives an equivalent martingale measure: the Esscher density
+`z = σ⟪θ₀,Y⟫` at the potential's minimiser is strictly positive, bounded, and fair, so
+`Q = P.withDensity (z / ∫z)` is the EMM. (`d = 0` is the trivial empty market.) -/
+theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Integrable Y P)
+    (hNA : NoArbitrage P Y)
+    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+    ∃ Q, IsEMM P Y Q := by
+  classical
+  rcases isEmpty_or_nonempty (Fin d) with _ | hd
+  · -- empty market: `Y =ᵐ 0`, so `Q = P`
+    refine ⟨P, inferInstance, Measure.AbsolutelyContinuous.refl P,
+      Measure.AbsolutelyContinuous.refl P, hYint, ?_⟩
+    rw [show Y = 0 from funext fun ω => Subsingleton.elim _ _]; simp
+  · obtain ⟨θ₀, hmin⟩ := exists_global_min_potential P Y hYint hNA hndg
+    have hfair := integral_logistic_smul_eq_zero P Y hY hYint hmin
+    set z : Ω → ℝ := fun ω => logistic (inner ℝ θ₀ (Y ω)) with hz
+    have hzpos : ∀ ω, 0 < z ω := fun ω => logistic_pos _
+    have hzlt : ∀ ω, z ω < 1 := fun ω => logistic_lt_one _
+    have hzmeas : Measurable z := continuous_logistic.measurable.comp (measurable_const.inner hY)
+    have hzint : Integrable z P :=
+      ⟨hzmeas.aestronglyMeasurable, HasFiniteIntegral.of_bounded
+        (Filter.Eventually.of_forall fun ω => by
+          rw [Real.norm_eq_abs, abs_of_pos (hzpos ω)]; exact (hzlt ω).le)⟩
+    set ζ : ℝ := ∫ ω, z ω ∂P with hζ
+    have hζpos : 0 < ζ := by
+      rw [hζ, integral_pos_iff_support_of_nonneg_ae
+          (Filter.Eventually.of_forall fun ω => (hzpos ω).le) hzint,
+        show Function.support z = Set.univ from Set.eq_univ_of_forall fun ω => (hzpos ω).ne']
+      rw [measure_univ]; exact one_pos
+    set dens : Ω → ℝ := fun ω => z ω / ζ with hdens
+    have hdpos : ∀ ω, 0 < dens ω := fun ω => div_pos (hzpos ω) hζpos
+    have hdmeas : Measurable dens := hzmeas.div_const ζ
+    have hdint : Integrable dens P := hzint.div_const ζ
+    have hdsum : ∫ ω, dens ω ∂P = 1 := by
+      simp only [hdens, div_eq_inv_mul]
+      rw [integral_const_mul, ← hζ, inv_mul_cancel₀ hζpos.ne']
+    have hdbound : ∀ ω, dens ω ≤ ζ⁻¹ := fun ω => by
+      rw [hdens, div_le_iff₀ hζpos, inv_mul_cancel₀ hζpos.ne']; exact (hzlt ω).le
+    set Q : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (dens ω)) with hQ
+    have hofReal_meas : Measurable (fun ω => ENNReal.ofReal (dens ω)) :=
+      ENNReal.measurable_ofReal.comp hdmeas
+    haveI hQprob : IsProbabilityMeasure Q := by
+      refine ⟨?_⟩
+      rw [hQ, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
+        ← ofReal_integral_eq_lintegral_ofReal hdint
+          (Filter.Eventually.of_forall fun ω => (hdpos ω).le), hdsum, ENNReal.ofReal_one]
+    have hQP : Q ≪ P := by rw [hQ]; exact withDensity_absolutelyContinuous _ _
+    have hPQ : P ≪ Q := by
+      rw [hQ]
+      refine withDensity_absolutelyContinuous' hofReal_meas.aemeasurable ?_
+      exact Filter.Eventually.of_forall fun ω => by
+        simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le]; exact hdpos ω
+    have hdY_int : Integrable (fun ω => dens ω • Y ω) P := by
+      refine Integrable.mono' (hYint.norm.const_mul ζ⁻¹)
+        (hdmeas.aestronglyMeasurable.smul hYint.aestronglyMeasurable)
+        (Filter.Eventually.of_forall fun ω => ?_)
+      rw [norm_smul, Real.norm_eq_abs, abs_of_pos (hdpos ω)]
+      exact mul_le_mul_of_nonneg_right (hdbound ω) (norm_nonneg _)
+    have hYintQ : Integrable Y Q := by
+      rw [hQ, integrable_withDensity_iff_integrable_smul' hofReal_meas
+        (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
+      refine hdY_int.congr (Filter.Eventually.of_forall fun ω => ?_)
+      show dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
+      rw [ENNReal.toReal_ofReal (hdpos ω).le]
+    have hQfair : ∫ ω, Y ω ∂Q = 0 := by
+      rw [hQ, integral_withDensity_eq_integral_toReal_smul hofReal_meas
+        (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
+      have heq : (fun ω => (ENNReal.ofReal (dens ω)).toReal • Y ω)
+          = fun ω => ζ⁻¹ • (z ω • Y ω) := by
+        funext ω
+        show (ENNReal.ofReal (dens ω)).toReal • Y ω = ζ⁻¹ • (z ω • Y ω)
+        rw [ENNReal.toReal_ofReal (hdpos ω).le]
+        show (z ω / ζ) • Y ω = ζ⁻¹ • (z ω • Y ω)
+        rw [div_eq_inv_mul, mul_smul]
+      rw [heq, integral_smul, hfair, smul_zero]
+    exact ⟨Q, hQprob, hQP, hPQ, hYintQ, hQfair⟩
+
 end MathFin.OnePeriodVector
