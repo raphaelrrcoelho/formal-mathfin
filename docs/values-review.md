@@ -116,10 +116,14 @@ restriction-in-disguise surfaced in metadata, exactly what the values gate exist
    shadowed the market type `F`); two unused `set N := … with hN` binders dropped; the scalar sibling
    `FTAPOnePeriod.lean`'s `## Scope` (which still called the d-asset case open) repointed at the
    now-complete `ftap_one_period_vector`.
-3. *(deferred, unchanged)* The `isEquivProbMeasure_withDensity` cross-file dedup (the `withDensity` →
-   equivalent-probability-measure ritual, ~4 sites across this file and scalar `FTAPOnePeriod.lean`)
-   remains the open cleanup-pass opportunity, now slightly larger after the redundant-case work;
-   deferred to a dedicated cross-file pass so the two FTAP files move together.
+3. *(done — follow-up commit)* The `isEquivProbMeasure_withDensity` cross-file dedup is landed: new
+   shared module `Foundations/EquivMeasure.lean` (a measurable, strictly-positive, normalised density
+   → equivalent probability measure: `IsProbabilityMeasure` ∧ `Q ≪ P` ∧ `P ≪ Q`), consumed at all
+   **four** sites (the two `FTAPOnePeriodVector` densities + the two scalar `FTAPOnePeriod` densities),
+   each `obtain ⟨…⟩ := isEquivProbMeasure_withDensity P … ; rw [← h…def] at …`. Term-preserving
+   extraction, net −~40 lines of duplicated ritual; the helper bundles four Mathlib lemmas consumed
+   four times (a real abstraction, not a thin wrapper — zero-slop / coherence). lake build 8815 jobs,
+   ledger 289/289 fresh, pytest 19/19, axiom-clean.
 4. *(noted, kept)* "Esscher" stays the project's chosen label for the softplus/logistic construction
    (the density is the bounded logistic `σ`, not the raw exponential tilt); the body shows `σ`
    explicitly, so no reader is misled.

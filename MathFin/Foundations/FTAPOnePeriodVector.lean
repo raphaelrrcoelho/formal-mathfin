@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.EquivMeasure
 
 /-!
 # One-period FTAP on a general probability space (finite-dimensional market)
@@ -519,17 +520,9 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     set Q : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (dens ω)) with hQ
     have hofReal_meas : Measurable (fun ω => ENNReal.ofReal (dens ω)) :=
       ENNReal.measurable_ofReal.comp hdmeas
-    haveI hQprob : IsProbabilityMeasure Q := by
-      refine ⟨?_⟩
-      rw [hQ, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
-        ← ofReal_integral_eq_lintegral_ofReal hdint
-          (Filter.Eventually.of_forall fun ω => (hdpos ω).le), hdsum, ENNReal.ofReal_one]
-    have hQP : Q ≪ P := by rw [hQ]; exact withDensity_absolutelyContinuous _ _
-    have hPQ : P ≪ Q := by
-      rw [hQ]
-      refine withDensity_absolutelyContinuous' hofReal_meas.aemeasurable ?_
-      exact Filter.Eventually.of_forall fun ω => by
-        simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le]; exact hdpos ω
+    obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hdmeas hdpos hdint hdsum
+    rw [← hQ] at hQprob hQP hPQ
+    haveI := hQprob
     have hdY_int : Integrable (fun ω => dens ω • Y ω) P := by
       refine Integrable.mono' (hYint.norm.const_mul ζ⁻¹)
         (hdmeas.aestronglyMeasurable.smul hYint.aestronglyMeasurable)
@@ -589,17 +582,10 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
   set Pt : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (dens ω)) with hPtdef
   have hd_ofReal_meas : Measurable (fun ω => ENNReal.ofReal (dens ω)) :=
     ENNReal.measurable_ofReal.comp hd_meas
-  haveI hPt_prob : IsProbabilityMeasure Pt := by
-    refine ⟨?_⟩
-    rw [hPtdef, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
-      ← ofReal_integral_eq_lintegral_ofReal hd_int
-        (Filter.Eventually.of_forall fun ω => (hd_pos ω).le), hd_sum, ENNReal.ofReal_one]
-  have hPt_ll_P : Pt ≪ P := by rw [hPtdef]; exact withDensity_absolutelyContinuous _ _
-  have hP_ll_Pt : P ≪ Pt := by
-    rw [hPtdef]
-    refine withDensity_absolutelyContinuous' hd_ofReal_meas.aemeasurable ?_
-    exact Filter.Eventually.of_forall fun ω => by
-      simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le]; exact hd_pos ω
+  obtain ⟨hPt_prob, hPt_ll_P, hP_ll_Pt⟩ :=
+    isEquivProbMeasure_withDensity P hd_meas hd_pos hd_int hd_sum
+  rw [← hPtdef] at hPt_prob hPt_ll_P hP_ll_Pt
+  haveI := hPt_prob
   have hdY_int : Integrable (fun ω => dens ω • Y ω) P := by
     refine ⟨(hd_meas.aestronglyMeasurable.smul hY.aestronglyMeasurable),
       HasFiniteIntegral.of_bounded (C := κ⁻¹) (Filter.Eventually.of_forall fun ω => ?_)⟩
