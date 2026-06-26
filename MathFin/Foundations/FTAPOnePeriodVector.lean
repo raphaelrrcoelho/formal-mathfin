@@ -205,4 +205,126 @@ lemma hasDerivAt_potential_dir (hY : Measurable Y) (hYint : Integrable Y P)
     refine integral_congr_ae ?_; filter_upwards with ω; simp only [hF', zero_mul, add_zero]
   rw [hpot, ← hval]; exact hderiv
 
+/-- `softplus` is `1`-Lipschitz (its derivative `σ` lies in `(0,1)`). -/
+lemma lipschitzWith_softplus : LipschitzWith 1 softplus := by
+  refine lipschitzWith_of_nnnorm_deriv_le
+    (fun x => (hasDerivAt_softplus x).differentiableAt) fun x => ?_
+  rw [(hasDerivAt_softplus x).deriv, ← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_one,
+    Real.norm_eq_abs, abs_of_pos (logistic_pos x)]
+  exact (logistic_lt_one x).le
+
+/-- For a `1`-Lipschitz `φ`, the averaged map `θ ↦ ∫ φ⟪θ,Y⟫ ∂P` is `(∫‖Y‖)`-Lipschitz
+(`φ` is `1`-Lipschitz and `θ ↦ ⟪θ,Y ω⟫` is `‖Y ω‖`-Lipschitz, by Cauchy–Schwarz). -/
+lemma lipschitzWith_integral_inner {φ : ℝ → ℝ} (hφ : LipschitzWith 1 φ)
+    (hint : ∀ θ : EuclideanSpace ℝ (Fin d), Integrable (fun ω => φ (inner ℝ θ (Y ω))) P)
+    (hYint : Integrable Y P) :
+    LipschitzWith (∫ ω, ‖Y ω‖ ∂P).toNNReal (fun θ => ∫ ω, φ (inner ℝ θ (Y ω)) ∂P) := by
+  have hnn : 0 ≤ ∫ ω, ‖Y ω‖ ∂P := integral_nonneg fun ω => norm_nonneg _
+  refine LipschitzWith.of_dist_le_mul fun θ θ' => ?_
+  rw [Real.dist_eq, Real.coe_toNNReal _ hnn, ← integral_sub (hint θ) (hint θ')]
+  have hbound : ∀ ω, ‖φ (inner ℝ θ (Y ω)) - φ (inner ℝ θ' (Y ω))‖ ≤ ‖Y ω‖ * ‖θ - θ'‖ := by
+    intro ω
+    have h1 := hφ.dist_le_mul (inner ℝ θ (Y ω)) (inner ℝ θ' (Y ω))
+    rw [Real.dist_eq, Real.dist_eq, NNReal.coe_one, one_mul] at h1
+    calc ‖φ (inner ℝ θ (Y ω)) - φ (inner ℝ θ' (Y ω))‖
+        = |φ (inner ℝ θ (Y ω)) - φ (inner ℝ θ' (Y ω))| := Real.norm_eq_abs _
+      _ ≤ |inner ℝ θ (Y ω) - inner ℝ θ' (Y ω)| := h1
+      _ = |inner ℝ (θ - θ') (Y ω)| := by rw [inner_sub_left]
+      _ ≤ ‖Y ω‖ * ‖θ - θ'‖ := by rw [mul_comm]; exact abs_real_inner_le_norm (θ - θ') (Y ω)
+  calc |∫ ω, (φ (inner ℝ θ (Y ω)) - φ (inner ℝ θ' (Y ω))) ∂P|
+      ≤ ∫ ω, ‖φ (inner ℝ θ (Y ω)) - φ (inner ℝ θ' (Y ω))‖ ∂P := abs_integral_le_integral_abs ..
+    _ ≤ ∫ ω, ‖Y ω‖ * ‖θ - θ'‖ ∂P :=
+        integral_mono_ae ((hint θ).sub (hint θ')).norm (hYint.norm.mul_const _)
+          (Filter.Eventually.of_forall hbound)
+    _ = (∫ ω, ‖Y ω‖ ∂P) * ‖θ - θ'‖ := integral_mul_const _ _
+
+/-- The potential is continuous. -/
+lemma continuous_potential (hYint : Integrable Y P) : Continuous (potential P Y) :=
+  (lipschitzWith_integral_inner P Y lipschitzWith_softplus
+    (integrable_softplus_inner P Y hYint) hYint).continuous
+
+/-- `s ↦ max s 0` (positive part) is `1`-Lipschitz. -/
+lemma lipschitzWith_posPart : LipschitzWith 1 (fun s : ℝ => max s 0) :=
+  LipschitzWith.id.max_const 0
+
+/-- `max⟪θ,Y⟫ 0` is `P`-integrable (dominated by `‖θ‖‖Y‖`). -/
+lemma integrable_posPart_inner (hYint : Integrable Y P) (θ : EuclideanSpace ℝ (Fin d)) :
+    Integrable (fun ω => max (inner ℝ θ (Y ω)) 0) P := by
+  have hmeas : AEStronglyMeasurable (fun ω => max (inner ℝ θ (Y ω)) 0) P :=
+    (continuous_id.max continuous_const).comp_aestronglyMeasurable
+      ((continuous_const.inner continuous_id).comp_aestronglyMeasurable hYint.aestronglyMeasurable)
+  refine Integrable.mono' (hYint.norm.const_mul ‖θ‖) hmeas (Filter.Eventually.of_forall fun ω => ?_)
+  rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _), max_le_iff]
+  exact ⟨(le_abs_self _).trans (abs_real_inner_le_norm θ (Y ω)), by positivity⟩
+
+/-- The positive-gain average `g(θ) = ∫⟪θ,Y⟫⁺ ∂P` is continuous. It lower-bounds the
+potential (`softplus s ≥ s⁺`) and drives the coercivity argument. -/
+lemma continuous_gainsPos (hYint : Integrable Y P) :
+    Continuous (fun θ => ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P) :=
+  (lipschitzWith_integral_inner P Y lipschitzWith_posPart
+    (integrable_posPart_inner P Y hYint) hYint).continuous
+
+/-- **Coercivity** of the potential (non-redundant market, no arbitrage). The positive
+gain average `g(θ) = ∫⟪θ,Y⟫⁺` is positive off `0` (no arbitrage + non-redundancy),
+continuous and positively homogeneous; its minimum `c` over the unit sphere is positive,
+and `softplus s ≥ s⁺` gives `c‖θ‖ ≤ f(θ)`. -/
+lemma exists_pos_lower_bound [Nonempty (Fin d)] (hYint : Integrable Y P)
+    (hNA : NoArbitrage P Y)
+    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :
+    ∃ c > 0, ∀ θ, c * ‖θ‖ ≤ potential P Y θ := by
+  classical
+  set g : EuclideanSpace ℝ (Fin d) → ℝ := fun θ => ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P with hg
+  have hg_nonneg : ∀ θ, 0 ≤ g θ := fun θ => integral_nonneg fun ω => le_max_right _ _
+  -- `g` is positive off `0`
+  have hg_pos : ∀ θ, θ ≠ 0 → 0 < g θ := by
+    intro θ hθ
+    refine (hg_nonneg θ).lt_of_ne fun h => hθ ?_
+    apply hndg
+    have hmax : (fun ω => max (inner ℝ θ (Y ω)) 0) =ᵐ[P] 0 :=
+      (integral_eq_zero_iff_of_nonneg_ae (Filter.Eventually.of_forall fun ω => le_max_right _ _)
+        (integrable_posPart_inner P Y hYint θ)).mp h.symm
+    have hnonpos : (fun ω => inner ℝ θ (Y ω)) ≤ᵐ[P] 0 := by
+      filter_upwards [hmax] with ω hm
+      have hle : inner ℝ θ (Y ω) ≤ max (inner ℝ θ (Y ω)) 0 := le_max_left _ _
+      simp only [Pi.zero_apply] at hm ⊢; rwa [hm] at hle
+    have hneg := hNA (-θ) (by
+      filter_upwards [hnonpos] with ω h
+      simp only [Pi.zero_apply] at h ⊢; rw [inner_neg_left]; linarith)
+    filter_upwards [hneg] with ω h
+    simp only [Pi.zero_apply, inner_neg_left] at h ⊢; linarith
+  -- `g` is positively homogeneous
+  have hg_hom : ∀ (r : ℝ), 0 ≤ r → ∀ θ, g (r • θ) = r * g θ := by
+    intro r hr θ
+    simp only [hg]
+    rw [← integral_const_mul]
+    refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+    show max (inner ℝ (r • θ) (Y ω)) 0 = r * max (inner ℝ θ (Y ω)) 0
+    rw [real_inner_smul_left]
+    rcases le_total 0 (inner ℝ θ (Y ω)) with hs | hs
+    · rw [max_eq_left hs, max_eq_left (mul_nonneg hr hs)]
+    · rw [max_eq_right hs, max_eq_right (mul_nonpos_of_nonneg_of_nonpos hr hs), mul_zero]
+  -- minimum of `g` over the unit sphere is positive
+  obtain ⟨u₀, hu₀S, hu₀min⟩ := (isCompact_sphere (0 : EuclideanSpace ℝ (Fin d)) 1).exists_isMinOn
+    (NormedSpace.sphere_nonempty.mpr zero_le_one) (continuous_gainsPos P Y hYint).continuousOn
+  have hu₀ne : u₀ ≠ 0 := fun h => by
+    rw [Metric.mem_sphere, h, dist_self] at hu₀S; exact one_ne_zero hu₀S.symm
+  refine ⟨g u₀, hg_pos u₀ hu₀ne, fun θ => ?_⟩
+  have hpg : g θ ≤ potential P Y θ := by
+    rw [hg, potential]
+    exact integral_mono_ae (integrable_posPart_inner P Y hYint θ)
+      (integrable_softplus_inner P Y hYint θ)
+      (Filter.Eventually.of_forall fun ω => posPart_le_softplus _)
+  refine le_trans ?_ hpg
+  rcases eq_or_ne θ 0 with rfl | hθ
+  · simpa using hg_nonneg 0
+  · have hθ0 : (0 : ℝ) < ‖θ‖ := norm_pos_iff.mpr hθ
+    have hunit : (‖θ‖⁻¹ : ℝ) • θ ∈ Metric.sphere (0 : EuclideanSpace ℝ (Fin d)) 1 := by
+      rw [Metric.mem_sphere, dist_zero_right, norm_smul, norm_inv, Real.norm_eq_abs,
+        abs_of_pos hθ0, inv_mul_cancel₀ hθ0.ne']
+    calc g u₀ * ‖θ‖ = ‖θ‖ * g u₀ := mul_comm _ _
+      _ ≤ ‖θ‖ * g ((‖θ‖⁻¹ : ℝ) • θ) :=
+          mul_le_mul_of_nonneg_left (isMinOn_iff.mp hu₀min _ hunit) hθ0.le
+      _ = g θ := by
+          rw [hg_hom ‖θ‖⁻¹ (inv_nonneg.mpr hθ0.le) θ, ← mul_assoc, mul_inv_cancel₀ hθ0.ne', one_mul]
+
 end MathFin.OnePeriodVector
