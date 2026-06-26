@@ -150,6 +150,8 @@ import MathFin.Foundations.FTAPMultiState
 import MathFin.Foundations.FTAPDiscrete
 -- General-Ω one-period FTAP (Föllmer–Schied 1.55 / one-period DMW, scalar)
 import MathFin.Foundations.FTAPOnePeriod
+-- General-Ω one-period FTAP, d assets (Esscher minimal-divergence EMM, non-redundant)
+import MathFin.Foundations.FTAPOnePeriodVector
 -- BlackScholes
 import MathFin.BlackScholes.Call
 import MathFin.BlackScholes.Put

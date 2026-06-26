@@ -660,4 +660,11 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.OnePeriod.ftap_one_period' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.OnePeriod.ftap_one_period
 
+-- General-Ω one-period FTAP, d assets (`FTAPOnePeriodVector.lean`): NoArbitrage ⟺ ∃ EMM
+-- for a non-redundant ℝᵈ-valued L⁰ return on an arbitrary probability space. Backward via
+-- the explicit Esscher / minimal-divergence density z = σ⟪θ₀,Y⟫ minimising the softplus
+-- potential — no Hahn–Banach, no L⁰-cone closedness, no measurable selection.
+/-- info: 'MathFin.OnePeriodVector.ftap_one_period_vector' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.OnePeriodVector.ftap_one_period_vector
+
 end MathFin.AxiomAudit

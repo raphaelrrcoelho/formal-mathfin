@@ -3296,6 +3296,22 @@
       }
     },
     {
+      "id": "mf-ftap-one-period-vector",
+      "name": "d-Asset One-Period FTAP (Esscher EMM, Non-Redundant)",
+      "description": "On an arbitrary probability space, for a non-redundant ℝᵈ-valued discounted excess return Y (no portfolio with ⟪θ,Y⟫ = 0 a.e. for θ ≠ 0), no arbitrage ⟺ there is an equivalent martingale measure Q ~ P with Y integrable and E_Q[Y] = 0 ∈ ℝᵈ. The backward direction is the explicit Esscher / minimal-divergence construction: minimise the smooth convex potential θ ↦ E[log(1 + exp⟪θ,Y⟫)]; under no-arbitrage + non-redundancy it is coercive, so its minimiser θ₀ exists, and its first-order condition E[Y·σ⟪θ₀,Y⟫] = 0 (σ logistic) yields a strictly-positive bounded density.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.FTAPOnePeriodVector\n\nopen MeasureTheory\n\n/-- **d-asset one-period FTAP** (Föllmer–Schied, non-redundant). For a measurable\n    `ℝᵈ`-valued discounted excess return `Y` on an arbitrary probability space and\n    constant portfolios `θ ∈ ℝᵈ`, with no redundant portfolio (`⟪θ,Y⟫ = 0` a.e. forces\n    `θ = 0`), no arbitrage holds iff there is an equivalent martingale measure `Q ~ P`\n    with `Y` integrable and `E_Q[Y] = 0`. Backward: the explicit Esscher /\n    minimal-divergence EMM from minimising `θ ↦ E[log(1+exp⟪θ,Y⟫)]`. Re-exports\n    `MathFin.OnePeriodVector.ftap_one_period_vector`. -/\ntheorem ftap_one_period_vector_market {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (P : Measure Ω) [IsProbabilityMeasure P] {d : ℕ} (Y : Ω → EuclideanSpace ℝ (Fin d))\n    (hY : Measurable Y)\n    (hndg : ∀ θ : EuclideanSpace ℝ (Fin d), (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 → θ = 0) :\n    MathFin.OnePeriodVector.NoArbitrage P Y ↔ ∃ Q, MathFin.OnePeriodVector.IsEMM P Y Q :=\n  MathFin.OnePeriodVector.ftap_one_period_vector P Y hY hndg\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "d-asset one-period Fundamental Theorem of Asset Pricing (Föllmer–Schied Thm 1.6; Esscher / minimal-entropy martingale measure)",
+        "difficulty": "advanced",
+        "formalization_status": "reduced_core",
+        "formalization_scope": "Honest derivation of the biconditional NoArbitrage ⟺ ∃ EMM re-exported from MathFin/Foundations/FTAPOnePeriodVector.lean, NARROWER than the unrestricted textbook d-asset FTAP: it assumes the market is NON-REDUNDANT (∀ θ, ⟪θ,Y⟫ = 0 a.e. → θ = 0). Scope: one trading period, d assets, trivial ℱ₀ (constant θ), arbitrary probability space. Backward direction (NA ⟹ EMM) is the explicit Esscher / minimal-divergence construction: minimise the smooth convex softplus potential θ ↦ ∫ log(1+exp⟪θ,Y⟫); coercivity (from no-arbitrage + non-redundancy, via the unit-sphere minimum of g(θ)=∫⟪θ,Y⟫⁺) gives a global minimiser θ₀ whose first-order condition (differentiation under the integral) is ∫ Y·σ⟪θ₀,Y⟫ = 0, so z = σ⟪θ₀,Y⟫ ∈ (0,1) is a strictly-positive bounded fair density and Q = P.withDensity(z/∫z) is the EMM; integrability is dropped by a bounded-density reduction P̃ = P.withDensity((1+‖Y‖)⁻¹/κ). No Hahn–Banach, no L⁰-cone closedness, no measurable selection. The redundant-asset generalisation (quotient by the gains kernel) and the general-Ω multi-period DMW remain out of scope. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-variance-swap-equivalence",
       "name": "Variance Swap: Log-Payoff = Realised-Variance Limit",
       "description": "The log-payoff static-replication strike (2/T)·E[log(F/S_T)] = σ² and the realised-variance equipartition functional E[Σ(Δlog S)²] → σ²·T — two distinct functionals of the BS log-price both recover the model variance.",

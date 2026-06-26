@@ -26,9 +26,17 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-25, general-Ω one-period FTAP):** corpus **288**,
-> **253 full + 18 wrappers = 271/288 delivery-ready**, 17 reduced cores, 0
-> placeholders. General-Ω one-period **Fundamental Theorem of Asset Pricing**
+> **Live status (2026-06-26, d-asset one-period FTAP):** corpus **289**,
+> **253 full + 18 wrappers = 271/289 delivery-ready**, 18 reduced cores, 0
+> placeholders. The **d-asset** one-period FTAP `ftap_one_period_vector`
+> (`Foundations/FTAPOnePeriodVector.lean`, entry `mf-ftap-one-period-vector`,
+> `reduced_core`: **non-redundant** markets) extends the scalar case to `ℝᵈ` returns
+> via the explicit **Esscher / minimal-divergence** EMM — minimise the convex softplus
+> potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`; coercivity gives a minimiser `θ₀` whose
+> first-order condition (differentiation under the integral) hands back the
+> strictly-positive bounded density `σ⟪θ₀,Y⟫`. No Hahn–Banach, no L⁰-closedness, no
+> measurable selection; the redundant-asset generalisation (quotient by the gains
+> kernel) is the localised follow-up. General-Ω one-period **Fundamental Theorem of Asset Pricing**
 > (Föllmer–Schied 1.55 / one-period Dalang–Morton–Willinger): `ftap_one_period`
 > — for a scalar `L⁰` excess return on an **arbitrary** probability space, no
 > arbitrage ⟺ ∃ equivalent martingale measure `Q ~ P` with `Y` integrable and

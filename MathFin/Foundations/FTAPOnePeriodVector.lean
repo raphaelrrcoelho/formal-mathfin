@@ -213,6 +213,7 @@ lemma lipschitzWith_softplus : LipschitzWith 1 softplus := by
     Real.norm_eq_abs, abs_of_pos (logistic_pos x)]
   exact (logistic_lt_one x).le
 
+omit [IsProbabilityMeasure P] in
 /-- For a `1`-Lipschitz `φ`, the averaged map `θ ↦ ∫ φ⟪θ,Y⟫ ∂P` is `(∫‖Y‖)`-Lipschitz
 (`φ` is `1`-Lipschitz and `θ ↦ ⟪θ,Y ω⟫` is `‖Y ω‖`-Lipschitz, by Cauchy–Schwarz). -/
 lemma lipschitzWith_integral_inner {φ : ℝ → ℝ} (hφ : LipschitzWith 1 φ)
@@ -247,6 +248,7 @@ lemma continuous_potential (hYint : Integrable Y P) : Continuous (potential P Y)
 lemma lipschitzWith_posPart : LipschitzWith 1 (fun s : ℝ => max s 0) :=
   LipschitzWith.id.max_const 0
 
+omit [IsProbabilityMeasure P] in
 /-- `max⟪θ,Y⟫ 0` is `P`-integrable (dominated by `‖θ‖‖Y‖`). -/
 lemma integrable_posPart_inner (hYint : Integrable Y P) (θ : EuclideanSpace ℝ (Fin d)) :
     Integrable (fun ω => max (inner ℝ θ (Y ω)) 0) P := by
@@ -257,6 +259,7 @@ lemma integrable_posPart_inner (hYint : Integrable Y P) (θ : EuclideanSpace ℝ
   rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _), max_le_iff]
   exact ⟨(le_abs_self _).trans (abs_real_inner_le_norm θ (Y ω)), by positivity⟩
 
+omit [IsProbabilityMeasure P] in
 /-- The positive-gain average `g(θ) = ∫⟪θ,Y⟫⁺ ∂P` is continuous. It lower-bounds the
 potential (`softplus s ≥ s⁺`) and drives the coercivity argument. -/
 lemma continuous_gainsPos (hYint : Integrable Y P) :
