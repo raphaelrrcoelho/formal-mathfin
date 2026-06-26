@@ -53,6 +53,78 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-26 — commit bc9a258 — corpus 289
+
+**Scope**: the **d-asset** one-period FTAP (Föllmer–Schied Thm 1.6, non-redundant
+markets), this session. New proof content: `Foundations/FTAPOnePeriodVector.lean`
+(~580 lines) — the vector model (`NoArbitrage`, `IsEMM` over `EuclideanSpace ℝ (Fin d)`),
+the forward direction, the **softplus potential** `f(θ)=∫ log(1+exp⟪θ,Y⟫)` with its
+logistic derivative, differentiation under the integral (`hasDerivAt_potential_dir`),
+coercivity (`exists_pos_lower_bound`), the global minimiser (`exists_global_min_potential`),
+the first-order condition (`integral_logistic_smul_eq_zero`), the integrable Esscher-EMM
+core, the bounded-density reduction, and the biconditional `ftap_one_period_vector`; one
+`reduced_core` corpus entry (`mf-ftap-one-period-vector`). Library green (`lake build`
+8814 jobs), axioms-clean (`[propext, Classical.choice, Quot.sound]`), ledger 289/289 fresh,
+pytest 19/19.
+
+| lens | verdict |
+| --- | --- |
+| inspired math quality | PASS |
+| Mathlib/BrownianMotion coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS |
+
+**Panel**: three independent review agents, lenses grouped (1+2+8 / 3+4+5 / 6+7), reading
+`FTAPOnePeriodVector.lean` read-only against the pinned Mathlib (no Lean run — the daemon
+held the local Lean slot).
+
+**Honesty — the headline checks, verified clean**: the backward direction **constructs**
+the EMM, never posits it. The Esscher density `z = σ⟪θ₀,Y⟫` is the first-order condition of
+a genuine optimisation: the softplus potential is convex and finite on all of `ℝᵈ` (the
+`log(1+exp)` tempering avoids the exponential-moment restriction of the classical Esscher
+tilt while keeping `σ ∈ (0,1)` for a uniform `L¹` domination), coercivity comes from the
+**attained** unit-sphere minimum of `g(θ)=∫⟪θ,Y⟫⁺` (genuinely needing both no-arbitrage —
+applied to `−θ` — and non-redundancy), the minimiser exists by compactness, and its FOC
+`∫ Y·σ⟪θ₀,Y⟫ = 0` is real differentiation under the integral
+(`hasDerivAt_integral_of_dominated_loc_of_deriv_le` + `IsLocalMin.hasDerivAt_eq_zero`,
+scalarised per direction then assembled via `inner_self_eq_zero` — strictly less machinery
+than a Fréchet-derivative route). Nothing is a definitional `rfl`. Non-redundancy enters
+**only** the coercivity step (one `apply hndg`), is honestly the `reduced_core` narrowing,
+and is named in the module `## Scope`, the theorem docstring, and the corpus scope.
+
+**Coherence / ingenuity checks**: no reproved lemma — parametric differentiation, Fermat,
+extreme-value, Lipschitz, inner/integral, and `withDensity` APIs are all consumed upstream.
+`lipschitzWith_integral_inner` is a clean reusable abstraction ("averaging a 1-Lipschitz
+function of `⟪θ,Y⟫` is `(∫‖Y‖)`-Lipschitz"), consumed for both the potential and the
+positive-gain average so continuity falls out of Lipschitz for free. The integrable-core →
+reduction → biconditional layering and the single `d = 0` empty-market split (at the first
+point `Nonempty (Fin d)` is needed) are the right shape.
+
+**Blocking findings**: none.
+
+**Recorded actions**:
+1. *(done this verdict)* Module `## Scope` now lists **non-redundant** among the
+   restrictions and the **redundant** one-period d-asset case (quotient by the gains kernel)
+   among the open follow-ups — the panel's one substantive clarity gap (the narrowing was
+   stated everywhere except its dedicated Scope block).
+2. *(done this verdict)* Intro wording sharpened: `z = σ⟪θ₀,Y⟫` is the unnormalised **weight**;
+   its normalisation `z/E[z]` is the EMM density.
+3. *(done this verdict)* Dead `with hz` binder dropped (the unused-variable linter does not
+   flag `set … with`).
+4. *(considered, deferred)* The "equivalent probability measure from a strictly-positive
+   normalised density" block (`IsProbabilityMeasure` + `Q≪P` + `P≪Q` via `withDensity`)
+   recurs ~3× across this file and the scalar `FTAPOnePeriod.lean`. Both panellists flagged a
+   shared `isEquivProbMeasure_withDensity` helper. It is a **cross-file** dedup of ritual (the
+   densities — logistic Esscher vs `(1+‖Y‖)⁻¹` tempering — differ), judged a non-blocking
+   cleanup-pass opportunity; deferred to a dedicated cross-file pass so the two FTAP files
+   move together.
+5. *(noted, kept)* Three `classical` (lines 278/393/471) read defensively; standard idiom,
+   removability unconfirmed without a compile. Kept.
+
 ## 2026-06-25 — commit a5197ee — corpus 288
 
 **Scope**: the general-Ω one-period Fundamental Theorem of Asset Pricing
