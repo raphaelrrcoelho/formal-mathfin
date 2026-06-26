@@ -173,5 +173,28 @@ theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
         rw [← inv_pow, mul_comm (2 : ℝ) ((2⁻¹ : ℝ) ^ n), ← mul_assoc, ← mul_pow,
           show ((3 / 4 : ℝ)⁻¹ * 2⁻¹) = 2 / 3 from by norm_num, mul_comm]
 
+/-- **A.s. eventual smallness (Borel–Cantelli).** Since the maximal tail is
+summable, for almost every `ω` the running maximum of the consecutive difference
+`(Vₙ − Vₙ₊₁) ● B` over `[0,T]` is eventually below `(3/4)ⁿ`. This is the pathwise
+input to the uniform-Cauchy argument. -/
+theorem ae_eventually_sup_lt (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : ∀ n, ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
+    ∀ᵐ ω ∂μ, ∀ᶠ n in atTop,
+      (⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖) < (3 / 4 : ℝ) ^ n := by
+  set A : ℕ → Set Ω := fun n => {ω | (3 / 4 : ℝ) ^ n ≤
+    ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖} with hA
+  have hconv : (∑' n, μ (A n)) ≠ ∞ := by
+    have heq : ∀ n, μ (A n) = ENNReal.ofReal (μ.real (A n)) :=
+      fun n => (ENNReal.ofReal_toReal (measure_ne_top μ _)).symm
+    simp_rw [heq]
+    rw [← ENNReal.ofReal_tsum_of_nonneg (fun n => measureReal_nonneg)
+      (summable_maximal_tail hB T hBmeas hBcont φ V hV)]
+    exact ENNReal.ofReal_ne_top
+  filter_upwards [ae_eventually_notMem hconv] with ω hω
+  filter_upwards [hω] with n hn
+  rwa [hA, Set.mem_setOf_eq, not_le] at hn
+
 end ItoIntegralProcessContinuousModification
 end MathFin
