@@ -795,7 +795,32 @@ half-line.
   the entire time domain `ℝ≥0`. values panel 8/8 PASS. build green, axioms-clean,
   corpus → **292**, **257 full** + 18 = 275/292 delivery-ready, 17 reduced, 0 placeholders.
 
+## phase: Itô tower → pricing bridge — Vasicek terminal law derived (2026-06-27)
+
+The deepest analytic Itô tower (complete through the `[0,∞)` continuous local
+martingale) had **no pricing consumer**; pricing modules touched it only at the
+*drift-algebra* level (`ItoLemma`/`ItoLemma2D`). This phase makes the
+deterministic-integrand layer load-bearing in a pricing module for the first time.
+
+- **The deterministic-integrand Wiener integral is Gaussian**
+  (`sc-wiener-integral-gaussian`, `wienerIntegralLp_map_eq_gaussianReal`,
+  `Foundations/WienerIntegralGaussian.lean`). `WienerIntegralL2` built the integral
+  as an isometry but pinned only its *norm*; this supplies the *law*:
+  `μ.map (wienerIntegralLp B hB T f) = gaussianReal 0 ‖f‖²`. Characteristic-function
+  route — simple-process Gaussianity (`IsGaussianProcess.of_isGaussianProcess` +
+  `map_eq_gaussianReal`, mean 0 + the isometry as variance) lifted to all `L²` by a
+  `|t|`-Lipschitz-charFun `DenseRange.induction_on` + `Measure.ext_of_charFun`.
+
+- **Vasicek terminal law derived** (`mf-vasicek-sde-terminal-gaussian`,
+  `vasicekShortRate_hasLaw_gaussian`, `FixedIncome/VasicekSDEGaussian.lean`). The SDE
+  solution `r_T = mean + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` has law
+  `N(vasicekSDEMean, σ²(1−e^{−2κT})/(2κ))` — the closed form `VasicekSDE.lean` posited
+  is now a theorem. Variance via the FTC integral `∫₀ᵀ e^{−2κ(T−s)} ds`; affine
+  transport via `gaussianReal_const_mul`/`gaussianReal_const_add`. **First Itô-tower
+  consumer in FixedIncome.** corpus 292 → **294**, 257 → **259 full**.
+
 **Open frontier:** unrestricted C² Itô formula via localization (Summit C); localized
-Itô formula for unbounded/GBM coefficients; general-Ω multi-period DMW FTAP; SDE
+Itô formula for unbounded/GBM coefficients (the genuinely-*random*-integrand bridge —
+this phase did the *deterministic*-integrand case); general-Ω multi-period DMW FTAP; SDE
 existence and uniqueness (Itô–Picard iteration); Lévy's martingale characterization of
 Brownian motion.

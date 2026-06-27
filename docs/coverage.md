@@ -26,8 +26,8 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-27, the `[0,∞)` crown — FULL):** corpus **292**,
-> **257 full + 18 wrappers = 275/292 delivery-ready**, 17 reduced cores, 0
+> **Live status (2026-06-27, Itô→pricing bridge — Vasicek terminal law derived):** corpus **294**,
+> **259 full + 18 wrappers = 277/294 delivery-ready**, 17 reduced cores, 0
 > placeholders. **The unbounded-horizon Itô integral is a continuous local martingale on
 > the whole half-line `ℝ≥0`** (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`,
 > entry `sc-ito-infinite-local-martingale`, **`full`**): an everywhere-continuous
@@ -534,6 +534,24 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > *global* `itoProcessL2Inf_isMartingale` delivered through `condExp_sup_nulls`.
 > All three entries are axioms-clean and values-panel PASS. Net: corpus 289 → **292**,
 > **257 full** + 18 = 275/292 delivery-ready, 17 reduced, 0 placeholders.
+
+> **Itô → pricing bridge: the deterministic-integrand Wiener integral is Gaussian, and
+> the Vasicek terminal law derived (2026-06-27, corpus 292→294).** The deep Itô tower
+> (complete through the `[0,∞)` continuous local martingale) gained its first
+> *deterministic-integrand* pricing consumer. `sc-wiener-integral-gaussian`
+> (`wienerIntegralLp_map_eq_gaussianReal`, `Foundations/WienerIntegralGaussian.lean`):
+> a deterministic-integrand Wiener integral is `gaussianReal 0 ‖f‖²` — the distribution
+> the isometry construction left open — by the characteristic-function route
+> (simple-process Gaussianity via `IsGaussianProcess.of_isGaussianProcess` +
+> `map_eq_gaussianReal`, lifted to all `L²` by a `|t|`-Lipschitz-charFun
+> `DenseRange.induction_on` + `Measure.ext_of_charFun`). Its consumer
+> `mf-vasicek-sde-terminal-gaussian` (`vasicekShortRate_hasLaw_gaussian`,
+> `FixedIncome/VasicekSDEGaussian.lean`) **derives** the Vasicek terminal law
+> `r_T ~ N(vasicekSDEMean, σ²(1−e^{−2κT})/(2κ))` that `VasicekSDE.lean` previously only
+> posited — variance via the FTC integral `∫₀ᵀ e^{−2κ(T−s)} ds`, affine transport via
+> `gaussianReal_const_mul`/`gaussianReal_const_add`. First Itô-tower consumer in
+> FixedIncome. Both axioms-clean. Net: corpus 292 → **294**, **259 full** + 18 =
+> 277/294 delivery-ready, 17 reduced, 0 placeholders.
 
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.

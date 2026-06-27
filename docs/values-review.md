@@ -53,6 +53,46 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-27 — working tree (uncommitted) — corpus 294 — Itô tower → pricing bridge: the deterministic-integrand Wiener integral is Gaussian, Vasicek terminal law derived
+
+The first time the deep analytic Itô tower feeds a pricing module at the
+*integral-law* level (not the drift-algebra level). Two new files:
+`MathFin/Foundations/WienerIntegralGaussian.lean` proves the distributional
+fact the isometry construction left open — a deterministic-integrand Wiener
+integral is Gaussian, `μ.map (wienerIntegralLp B hB T f) = gaussianReal 0 ‖f‖²`
+(`wienerIntegralLp_map_eq_gaussianReal`) — by the characteristic-function
+route: simple-process Gaussianity (`IsGaussianProcess.of_isGaussianProcess` on
+the scaled-increment family + `HasGaussianLaw.map_eq_gaussianReal`, mean 0 from
+`IsPreBrownianReal.integral_eval`, variance the Itô isometry
+`wiener_assembly_isometry`), lifted to all `L²` by a `|t|`-Lipschitz
+characteristic-function bound (`Real.norm_exp_I_mul_ofReal_sub_one_le` + an
+`L¹ ≤ L²` estimate on the probability space) feeding `DenseRange.induction_on`,
+then `Measure.ext_of_charFun`. Its consumer
+`MathFin/FixedIncome/VasicekSDEGaussian.lean` (`vasicekShortRate_hasLaw_gaussian`)
+makes the Vasicek SDE terminal law a *theorem*:
+`r_T = mean + σ ∫₀ᵀ e^{−κ(T−s)} dB_s ~ N(vasicekSDEMean, σ²(1−e^{−2κT})/(2κ))` —
+variance pinned by the FTC integral `∫₀ᵀ e^{−2κ(T−s)} ds` (`vasicekKernel_integral_sq`,
+antiderivative `e^{−2κ(T−s)}/(2κ)`), affine transport via
+`gaussianReal_const_mul`/`gaussianReal_const_add`. Retires `VasicekSDE.lean`'s
+"stated, not derived". Corpus entries `sc-wiener-integral-gaussian`,
+`mf-vasicek-sde-terminal-gaussian` (both `full`); corpus 292 → 294, 257 → 259 full.
+lake build 8821 jobs (0 errors, 0 sorries; only Degenne-package `sorry` + benign
+unused-section-variable warnings); ledger 294/294 fresh; AxiomAudit +
+AxiomAuditGen pin both headlines at `[propext, Classical.choice, Quot.sound]`.
+
+Review panel (focused, the 8 lenses + a dedicated mathematical-honesty pass):
+**PASS, no blocking findings.** Honesty pass confirmed: the FTC integral is the
+claimed value; `κ > 0` (and the weaker `0 ≤ κ` / `κ ≠ 0` in the helpers) are
+genuinely necessary, not vacuous; the charFun density argument is gap-free (no
+`convert`/`simp` papering over a step); the scope claim (deterministic integrand)
+matches what the theorem delivers. Coherence: consumes the upstream Gaussian /
+charFun / affine-map API throughout, reproving nothing. The review's one
+non-blocking note — a private `lpTwoNormSq` helper duplicating the (private)
+`Lp_real_two_norm_sq` in `WienerIntegralL2.lean` — was **resolved**: the
+foundational lemma was de-privatised and is now consumed directly, with the
+duplicate deleted (no copy). Honest scope: the *deterministic*-integrand case;
+the genuinely-random-integrand localized Itô formula remains the open frontier.
+
 ## 2026-06-27 — commit 913f969 — corpus 292 — the [0,∞) unbounded-horizon Itô integral as a continuous local martingale
 
 The `[0,∞)` crown of the continuous-time Itô tower. New files

@@ -68,6 +68,7 @@ import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.WienerIntegral
 import MathFin.Foundations.WienerIntegralL2
+import MathFin.Foundations.WienerIntegralGaussian
 -- Structural / principle modules:
 import MathFin.Foundations.StandardGaussianMGF
 import MathFin.Foundations.ExponentialDiscount
@@ -290,6 +291,8 @@ import MathFin.FixedIncome.KMVMertonStructural
 import MathFin.FixedIncome.CDSTimeVarying
 -- Phase 41: Vasicek SDE closed-form (full SDE, mean + variance)
 import MathFin.FixedIncome.VasicekSDE
+-- Itô→pricing bridge: Vasicek terminal law derived (Wiener integral is Gaussian)
+import MathFin.FixedIncome.VasicekSDEGaussian
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz

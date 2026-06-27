@@ -3342,6 +3342,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof in MathFin/Binomial/PathReflection.lean: the reflectAtFirstHit involution, the reflected-endpoint identity, the discrete IVT (HitsLevel_of_walkPos_endpoint_ge), and the bijection reflectionPrincipleEquiv_below; the snippet re-exports the counting identity via Nat.card_congr."
       }
+    },
+    {
+      "id": "mf-vasicek-sde-terminal-gaussian",
+      "name": "Vasicek SDE Terminal Distribution is Gaussian (derived)",
+      "domain": "mathematical_finance",
+      "description": "The Vasicek short-rate SDE dr = κ(θ − r)dt + σ dB has terminal solution r_T = r₀e^{−κT} + θ(1 − e^{−κT}) + σ ∫₀ᵀ e^{−κ(T−s)} dB_s, and this theorem DERIVES (no longer posits) its terminal law r_T ~ N(vasicekSDEMean, vasicekSDEVariance) = N(r₀e^{−κT}+θ(1−e^{−κT}), σ²(1−e^{−2κT})/(2κ)). The stochastic term is the Wiener integral of the DETERMINISTIC integrand e^{−κ(T−s)}, hence Gaussian (sc-wiener-integral-gaussian) with variance its squared L²-norm ∫₀ᵀ e^{−2κ(T−s)} ds = (1−e^{−2κT})/(2κ) (an FTC computation); the affine map x ↦ mean + σx then sends N(0, ∫kernel²) to N(mean, σ²·∫kernel²) = N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add. This is the FIRST consumer of the deterministic-integrand Itô tower in the FixedIncome layer — the analytic Wiener/Itô machinery made load-bearing in a pricing module, closing the two-tower gap for the Vasicek short rate (VasicekSDE.lean previously stated this law without derivation).",
+      "code": {
+        "lean": "import MathFin.FixedIncome.VasicekSDEGaussian\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\ntheorem vasicek_sde_terminal_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    HasLaw (fun ω => vasicekSDEMean r₀ θ κ (T : ℝ)\n        + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω))\n      (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ))\n        (vasicekSDEVariance σ κ (T : ℝ)).toNNReal) μ :=\n  MathFin.vasicekShortRate_hasLaw_gaussian hB r₀ θ σ hκ T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Vasicek 1977 short-rate model (terminal distribution, derived from the SDE via the Wiener integral)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekSDEGaussian (vasicekShortRate_hasLaw_gaussian). DERIVES the Vasicek terminal Gaussian law (previously posited as closed-form defs in VasicekSDE.lean) from the SDE: the diffusion term sigma * (Wiener integral of e^{-kappa(T-s)}) is Gaussian by the deterministic-integrand Wiener-Gaussian theorem (sc-wiener-integral-gaussian); the variance is fixed by the FTC integral int_0^T e^{-2kappa(T-s)} ds = (1-e^{-2kappa T})/(2kappa) (vasicekKernel_integral_sq, antiderivative e^{-2kappa(T-s)}/(2kappa)); the affine map x |-> mean + sigma*x transports the law N(0, var) to N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add with the NNReal variance algebra. First consumer of the deterministic-integrand Ito tower in FixedIncome -- the two-tower bridge. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
     }
   ]
 }

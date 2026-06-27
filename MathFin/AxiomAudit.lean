@@ -707,4 +707,19 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.OnePeriodVector.ftap_one_period_vector' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.OnePeriodVector.ftap_one_period_vector
 
+/-! ## Itô → pricing bridge: the deterministic-integrand Wiener integral is Gaussian
+
+`WienerIntegralGaussian.lean`: a deterministic-integrand Itô integral
+`∫ f dB` is `gaussianReal 0 ‖f‖²` (charFun route: simple-process Gaussianity +
+density + Lévy / `Measure.ext_of_charFun`). Its first pricing consumer is the
+Vasicek terminal law (`VasicekSDEGaussian.lean`): the SDE solution
+`r_T = mean + σ ∫₀ᵀ e^{−κ(T−s)} dB_s` has the posited law `N(mean, σ²(1−e^{−2κT})/(2κ))`,
+**derived** rather than assumed — the first Itô-tower consumer in FixedIncome. -/
+
+/-- info: 'MathFin.WienerIntegralL2.wienerIntegralLp_map_eq_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.WienerIntegralL2.wienerIntegralLp_map_eq_gaussianReal
+
+/-- info: 'MathFin.vasicekShortRate_hasLaw_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.vasicekShortRate_hasLaw_gaussian
+
 end MathFin.AxiomAudit

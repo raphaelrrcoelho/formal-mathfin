@@ -429,8 +429,10 @@ theorem wienerIntegralLp_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   exact h_dense.induction_on (p := fun y => ‖W y‖ = ‖y‖) f
     (isClosed_eq (continuous_norm.comp W.continuous) continuous_norm) h_on_range
 
-/-- Helper: for any `g : Lp ℝ 2 ν`, `‖g‖² = ∫ ω, (g ω)² ∂ν`. -/
-private lemma Lp_real_two_norm_sq {α : Type*} {mα : MeasurableSpace α} (ν : Measure α)
+/-- Helper: for any `g : Lp ℝ 2 ν`, `‖g‖² = ∫ ω, (g ω)² ∂ν`. (Public so the
+Gaussian-law companion `Foundations/WienerIntegralGaussian.lean` reuses it on
+both the Ω-side and the time-side measures.) -/
+lemma Lp_real_two_norm_sq {α : Type*} {mα : MeasurableSpace α} (ν : Measure α)
     (g : Lp ℝ 2 ν) : ‖g‖ ^ 2 = ∫ ω, (g ω) ^ 2 ∂ν := by
   have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
   rw [L2.inner_def] at h
