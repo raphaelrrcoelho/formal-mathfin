@@ -129,7 +129,8 @@ theorem exists_continuous_localMartingale_modification (T : ℝ≥0)
     ∃ X : ℝ≥0 → Ω → ℝ,
       (∀ t, t ≤ T → X t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ) ∧
       (∀ ω, Continuous fun t => X t ω) ∧
-      IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ := by
+      IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ ∧
+      (∀ i, StronglyMeasurable[augFiltration (μ := μ) hBmeas i] (X i)) := by
   -- the a.e. good behaviour: pointwise convergence (∀ t ≤ T) + path continuity on [0,T]
   have hae : ∀ᵐ ω ∂μ,
       (∀ t : ℝ≥0, t ≤ T → Tendsto
@@ -224,7 +225,8 @@ theorem exists_continuous_localMartingale_modification (T : ℝ≥0)
       · simp only [Set.indicator_of_notMem hω, itoLocalMod]
         exact tendsto_const_nhds
   -- assemble
-  refine ⟨fun t ω => itoLocalMod G T t hBmeas φ ω, fun t ht => ?_, hcont, ?_⟩
+  refine ⟨fun t ω => itoLocalMod G T t hBmeas φ ω, fun t ht => ?_, hcont, ?_,
+    fun i => by rw [augFiltration_apply]; exact hadapt i⟩
   · have h := hmod t; rwa [min_eq_left ht] at h
   · refine Martingale.IsLocalMartingale ⟨fun i => ?_, fun i j hij => ?_⟩
       (fun ω => isCadlag_of_continuous (hcont ω))
