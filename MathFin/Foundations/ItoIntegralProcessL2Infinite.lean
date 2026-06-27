@@ -43,51 +43,66 @@ open scoped NNReal ENNReal
 namespace MathFin
 namespace ItoIntegralProcessL2Infinite
 
-open ItoIntegralL2 ItoIntegralProcess ItoIntegralProcessGeneral
+open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessGeneral
 
-/-! ## Restriction of an L² function to a sub-measure (generic) -/
+/-! ## The `Lp` inclusion for `ν ≤ μ` (generic) -/
 
-section RestrictLp
-variable {α : Type*} [MeasurableSpace α] (ν : Measure α) (s : Set α)
+section MonoMeasureLp
+variable {α : Type*} {_mα : MeasurableSpace α} {μ ν : Measure α}
 
-/-- **Restriction to a sub-measure as a CLM.** For `f ∈ Lp 2 ν` the *same* function
-lies in `Lp 2 (ν.restrict s)` with no larger norm (restricting the measure can only
-shrink the `L²` norm), so `f ↦ f` is a norm-`≤ 1` continuous linear map
-`Lp 2 ν →L[ℝ] Lp 2 (ν.restrict s)`. Mathlib has `MemLp.restrict` but no packaged
-CLM; generic measure theory, a natural upstream candidate. -/
-noncomputable def restrictLp : Lp ℝ 2 ν →L[ℝ] Lp ℝ 2 (ν.restrict s) :=
+/-- **The `Lp` inclusion for `ν ≤ μ`.** For `f ∈ Lp 2 μ` the *same* function lies in
+`Lp 2 ν` with no larger norm (a smaller measure can only shrink the `L²` norm), so
+`f ↦ f` is a norm-`≤ 1` continuous linear map `Lp 2 μ →L[ℝ] Lp 2 ν`. Mathlib has
+`MemLp.mono_measure` but no packaged CLM; generic measure theory, a natural upstream
+candidate. Specialises to measure restriction (`ν = μ.restrict s`, via
+`Measure.restrict_le_self`). -/
+noncomputable def monoMeasureLp (h : ν ≤ μ) : Lp ℝ 2 μ →L[ℝ] Lp ℝ 2 ν :=
   LinearMap.mkContinuous
-    { toFun := fun f => ((Lp.memLp f).restrict s).toLp
+    { toFun := fun f => ((Lp.memLp f).mono_measure h).toLp
       map_add' := fun f g => by
         refine Lp.ext ?_
-        filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (f + g)).restrict s),
-          Lp.coeFn_add (((Lp.memLp f).restrict s).toLp) (((Lp.memLp g).restrict s).toLp),
-          MemLp.coeFn_toLp ((Lp.memLp f).restrict s),
-          MemLp.coeFn_toLp ((Lp.memLp g).restrict s),
-          ae_restrict_of_ae (Lp.coeFn_add f g)] with x h1 h2 h3 h4 h5
+        filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (f + g)).mono_measure h),
+          Lp.coeFn_add (((Lp.memLp f).mono_measure h).toLp) (((Lp.memLp g).mono_measure h).toLp),
+          MemLp.coeFn_toLp ((Lp.memLp f).mono_measure h),
+          MemLp.coeFn_toLp ((Lp.memLp g).mono_measure h),
+          (Lp.coeFn_add f g).filter_mono (ae_mono h)] with x h1 h2 h3 h4 h5
         simp only [h1, h2, h3, h4, h5, Pi.add_apply]
       map_smul' := fun c f => by
         refine Lp.ext ?_
-        filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (c • f)).restrict s),
-          Lp.coeFn_smul c (((Lp.memLp f).restrict s).toLp),
-          MemLp.coeFn_toLp ((Lp.memLp f).restrict s),
-          ae_restrict_of_ae (Lp.coeFn_smul c f)] with x h1 h2 h3 h4
+        filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (c • f)).mono_measure h),
+          Lp.coeFn_smul c (((Lp.memLp f).mono_measure h).toLp),
+          MemLp.coeFn_toLp ((Lp.memLp f).mono_measure h),
+          (Lp.coeFn_smul c f).filter_mono (ae_mono h)] with x h1 h2 h3 h4
         simp only [h1, h2, h3, h4, Pi.smul_apply, RingHom.id_apply] }
     1 (fun f => by
       simp only [LinearMap.coe_mk, AddHom.coe_mk, one_mul, Lp.norm_def]
       refine ENNReal.toReal_mono (Lp.memLp f).2.ne ?_
-      rw [eLpNorm_congr_ae (MemLp.coeFn_toLp ((Lp.memLp f).restrict s))]
-      exact eLpNorm_mono_measure _ Measure.restrict_le_self)
+      rw [eLpNorm_congr_ae (MemLp.coeFn_toLp ((Lp.memLp f).mono_measure h))]
+      exact eLpNorm_mono_measure _ h)
 
-@[simp] lemma restrictLp_coeFn (f : Lp ℝ 2 ν) :
-    ⇑(restrictLp ν s f) =ᵐ[ν.restrict s] ⇑f := by
-  simp only [restrictLp, LinearMap.mkContinuous_apply, LinearMap.coe_mk, AddHom.coe_mk]
+@[simp] lemma monoMeasureLp_coeFn (h : ν ≤ μ) (f : Lp ℝ 2 μ) :
+    ⇑(monoMeasureLp h f) =ᵐ[ν] ⇑f := by
+  simp only [monoMeasureLp, LinearMap.mkContinuous_apply, LinearMap.coe_mk, AddHom.coe_mk]
   exact MemLp.coeFn_toLp _
 
-end RestrictLp
+end MonoMeasureLp
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+
+/-- **Restriction of a `[0,∞)` predictable integrand to the band `[0,T]`** as a CLM
+`Lp 2 trim_full →L[ℝ] Lp 2 (trimMeasure_T T)`: the `Lp` inclusion for
+`trimMeasure_T T ≤ trim_full` (the band restriction, `trimMeasure_T_eq_restrict` +
+`Measure.restrict_le_self`). The integrand seen on `[0,T]`. -/
+noncomputable def restrictToBand (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)) :
+    Lp ℝ 2 ((timeMeasure.prod μ).trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)
+      →L[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+  monoMeasureLp ((trimMeasure_T_eq_restrict T hBmeas).le.trans Measure.restrict_le_self)
+
+@[simp] lemma restrictToBand_coeFn (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (f : Lp ℝ 2 ((timeMeasure.prod μ).trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)) :
+    ⇑(restrictToBand (μ := μ) T hBmeas f) =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑f :=
+  monoMeasureLp_coeFn _ f
 
 /-- **The unbounded-horizon Itô process** `(f●B)_t = E[∫₀^∞ f dB | 𝓕_t]`: the
 conditional-expectation projection of the terminal `[0,∞)` integral `itoIntegralL2 f`
