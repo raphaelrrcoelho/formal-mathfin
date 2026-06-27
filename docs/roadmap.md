@@ -702,3 +702,100 @@ bearing prerequisite for localizing the Itô formula
 (`ItoFormulaTD.ito_formula_td_L2_bddDeriv`, presently bounded-derivative only) to
 unbounded/GBM coefficients — the bridge from the analytic Itô tower to the
 drift-algebra pricing tower (`ItoLemma2D`, `PDEFromIto`, `VasicekSDE`).
+
+## phase: FTAP tower (2026-06-24 through 2026-06-26, corpus 285→289)
+
+Three FTAP rungs, each built to `full` standard, ascending from finite to infinite
+state space and from scalar to vector excess returns.
+
+- **Rung 1 (finite-Ω multi-period, Harrison–Pliska), corpus 285→287.** `ftap_discrete`
+  (`mf-ftap-discrete-complete`, `Foundations/FTAPDiscrete.lean`): for a full-support
+  finite probability space and a scalar discounted excess return, no-arbitrage ⟺ ∃ EMM,
+  multi-period, finite filtration. Forward: EMM ⟹ NA by martingale-transform telescoping.
+  Backward: global geometric Hahn–Banach separation of the attainable-gains subspace from
+  the standard simplex, via a reusable kernel `Foundations/ConvexSeparation.lean` (Mazur +
+  `Finset` relative-interior certificate). The multi-state single-period biconditional
+  `hasEMM_multi_iff_not_hasArbitrage` (`mf-ftap-single-period-complete`) was wired at the
+  same time. build 8808 jobs green, axioms-clean, corpus → **287**, **252 full** + 18 =
+  270/287 delivery-ready, 17 reduced.
+
+- **Rung 2 (general-Ω one-period scalar, Föllmer–Schied 1.55), corpus 287→288.**
+  `ftap_one_period` (`mf-ftap-one-period-general`, `Foundations/FTAPOnePeriod.lean`): for
+  an arbitrary probability space and a single scalar `L⁰` excess return `Y`, no-arbitrage
+  ⟺ ∃ equivalent martingale measure `Q ~ P` with `E_Q[Y] = 0`. Forward: EMM ⟹ NA
+  immediately. Backward: bounded-density reduction (clamp `Y` to `L¹`), scalar NA
+  dichotomy (sign analysis on `E_P[Y·1_A]` for each event `A`), two-region balancing
+  `withDensity` construction of the EMM density. No Hahn–Banach, no Kreps–Yan — the
+  general-Ω step beyond Harrison–Pliska is purely measure-theoretic.
+  `isEquivProbMeasure_withDensity` extracted into `Foundations/EquivMeasure.lean` to
+  avoid duplication with the d-asset rung. values panel 8/8 PASS. corpus → **288**,
+  **253 full** + 18 = 271/288 delivery-ready.
+
+- **Rung 3 (d-asset one-period, Föllmer–Schied 1.6), corpus 288→289.** `ftap_one_period_vector`
+  (`mf-ftap-one-period-vector`, `Foundations/FTAPOnePeriodVector.lean`): for any
+  finite-dimensional inner-product space `F` (the `ℝᵈ` market is `F = EuclideanSpace ℝ
+  (Fin d)`) and an `F`-valued excess return `Y`, no-arbitrage ⟺ ∃ EMM. The explicit
+  **Esscher/minimal-divergence** EMM is the minimiser of the convex softplus potential
+  `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`: coercive on `Nᗮ` (the orthogonal complement of the gains
+  kernel `N = {θ : ⟪θ,Y⟫ = 0 a.e.}`), so a minimiser on `Nᗮ` is automatically global
+  (redundant directions absorbed); the first-order condition (differentiation under the
+  integral) yields the strictly-positive bounded density `σ⟨θ₀,Y⟩`. Drops the
+  earlier non-redundancy hypothesis. No Hahn–Banach, no L⁰-closedness, no measurable
+  selection. values panel 8/8 PASS. build 8817 jobs green, axioms-clean, corpus → **289**,
+  **254 full** + 18 = 272/289 delivery-ready, 17 reduced.
+
+**Open rung:** general-Ω multi-period DMW (Dalang–Morton–Willinger). Requires
+L⁰-closedness of the attainable-gains set and measurable selection — neither in the
+current Mathlib/BrownianMotion pin. This is the M2 crown (see `docs/roadmap.md`
+strategy framing); the d-asset one-period case is now closed in full.
+
+## phase: Itô pathwise regularity arc (2026-06-25 through 2026-06-26, corpus 289→292)
+
+The D2 gate identified in the B1b/D1 phase — continuous modification of the
+general-integrand Itô integral — is now fully built, and extended to the whole
+half-line.
+
+- **Continuous modification on `[0,T]`** (`sc-ito-general-continuous-modification`,
+  `exists_continuous_modification_itoProcess`,
+  `Foundations/ItoIntegralProcessContinuousModification.lean`, corpus 289→290).
+  The L²-valued process `t ↦ (φ●B)_t` admits an a.s.-continuous representative.
+  Route: Degenne's continuous-time Doob maximal inequality (applied to the approximating
+  simple-process martingales `(V_n●B)_t`) → Chebyshev on the maximal deviation
+  → Borel–Cantelli on a fast geometric subsequence → pathwise uniform convergence to a
+  continuous limit `itoContinuousMod`. The running-max keystone
+  (`itoContinuousMod_sup_le`) bounds the pathwise norm under the supremum over `[0,T]`.
+  This is the first sample-path result for the *general* integrand; the bounded-derivative
+  Itô formula localization to unbounded coefficients follows from here.
+  values panel PASS. build green, axioms-clean, corpus → **290**, **255 full** + 18 =
+  273/290 delivery-ready.
+
+- **Continuous local martingale on `[0,T]`** (`sc-ito-general-local-martingale`,
+  `exists_continuous_localMartingale_modification`,
+  `Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`, corpus 290→291).
+  The continuous modification is upgraded to Degenne's `IsLocalMartingale` interface,
+  adapted to the **null-augmented** Brownian filtration `𝓕ᴮ ⊔ 𝓝`. The
+  measure-theoretic core is `condExp_sup_nulls`: conditioning on the null augmentation
+  agrees a.e. with conditioning on `𝓕ᴮ` (its σ-algebra crux consuming Mathlib's
+  `eventuallyMeasurableSpace`); every `(𝓕 ⊔ 𝓝)`-measurable set is a.e. a `𝓕`-set.
+  Non-redundant with Degenne's sorry-backed general càdlàg modification (different
+  objects: his is a BM modification, ours is an integral-process modification).
+  corpus → **291**, **256 full** + 18 = 274/291 delivery-ready.
+
+- **Continuous local martingale on `[0,∞)`** (`sc-ito-infinite-local-martingale`,
+  `exists_continuous_localMartingale_modification_infinite`,
+  `Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`, corpus 291→292).
+  The per-horizon `[0,T=n]` continuous local martingales are **glued** into one path
+  continuous on all of `ℝ≥0`. The key steps: horizon consistency
+  (`itoProcessL2Inf_eq_itoProcessCLM`) resting on the band-restriction CLM
+  `restrictToBand` and a hand-built `[0,T]` clamp of Degenne's `SimpleProcess`
+  (`simpleProcessL2_T`); `indistinguishable_of_modification_on` agrees the
+  per-horizon modifications on overlapping windows; with no horizon clamp the
+  martingale property is the global `itoProcessL2Inf_isMartingale` via
+  `condExp_sup_nulls`. This is the Itô integral as a continuous local martingale on
+  the entire time domain `ℝ≥0`. values panel 8/8 PASS. build green, axioms-clean,
+  corpus → **292**, **257 full** + 18 = 275/292 delivery-ready, 17 reduced, 0 placeholders.
+
+**Open frontier:** unrestricted C² Itô formula via localization (Summit C); localized
+Itô formula for unbounded/GBM coefficients; general-Ω multi-period DMW FTAP; SDE
+existence and uniqueness (Itô–Picard iteration); Lévy's martingale characterization of
+Brownian motion.

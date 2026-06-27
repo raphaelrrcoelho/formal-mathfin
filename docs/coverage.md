@@ -476,6 +476,65 @@ Coverage as of 2026-06-22 (extended mathematical-finance pass: put greeks, highe
 > the ten entries whose snippet docstrings changed were re-verified
 > in-container.
 
+> **FTAP tower (2026-06-24 through 2026-06-26, corpus 285→289).** Three new
+> FTAP rungs, each `full`, built in sequence: (1) **finite-Ω multi-period FTAP**
+> `ftap_discrete` (`mf-ftap-discrete-complete`) — Harrison–Pliska for a scalar
+> discounted excess return on a full-support finite probability space and a finite
+> discrete filtration; backward via a global geometric Hahn–Banach separation of
+> the attainable-gains subspace from the standard simplex (the reusable kernel
+> `Foundations/ConvexSeparation.lean`) and forward via martingale-transform
+> telescoping (`Foundations/FTAPDiscrete.lean`). (2) **General-Ω one-period
+> scalar FTAP** `ftap_one_period` (`mf-ftap-one-period-general`) — Föllmer–Schied
+> 1.55 for an arbitrary probability space and a single scalar `L⁰` excess return;
+> backward via a bounded-density reduction to `L¹`, the scalar no-arbitrage
+> dichotomy, and a two-region balancing `withDensity` — no Hahn–Banach, no
+> Kreps–Yan (`Foundations/FTAPOnePeriod.lean`). (3) **D-asset one-period FTAP**
+> `ftap_one_period_vector` (`mf-ftap-one-period-vector`) — Föllmer–Schied 1.6 for
+> any finite-dimensional inner-product space `F`; the Esscher/minimal-divergence
+> EMM minimises the convex softplus potential `θ ↦ ∫ log(1 + exp⟪θ,Y⟫)`, which
+> is coercive on `Nᗮ` (the orthogonal complement of the gains kernel `N = {θ :
+> ⟪θ,Y⟫ = 0 a.e.}`), so its minimiser on `Nᗮ` is automatically global; the
+> first-order condition (differentiation under the integral) produces the
+> strictly-positive bounded density; redundant assets are absorbed by `N`,
+> dropping the earlier non-redundancy assumption (`Foundations/FTAPOnePeriodVector.lean`).
+> `isEquivProbMeasure_withDensity` de-duplicated into `Foundations/EquivMeasure.lean`.
+> Net: corpus 285 → **289**, **254 full** + 18 = 272/289 delivery-ready, 17 reduced.
+> Open rung: general-Ω multi-period DMW (L⁰-closedness + measurable selection).
+
+> **Itô pathwise regularity arc (2026-06-25 through 2026-06-26, corpus 289→292).**
+> Three full entries complete the pathwise-regularity layer. (1) **Continuous
+> modification on `[0,T]`** (`sc-ito-general-continuous-modification`,
+> `exists_continuous_modification_itoProcess`,
+> `Foundations/ItoIntegralProcessContinuousModification.lean`, corpus 290): the
+> general-integrand Itô process `t ↦ (φ●B)_t` admits an a.s.-continuous
+> representative agreeing a.e. with the L² value at each `t ≤ T`. Route: Degenne's
+> continuous-time Doob maximal inequality → Chebyshev on simple-process maxima →
+> Borel–Cantelli on a fast subsequence (geometric `2⁻ⁿ` bounds) → pathwise uniform
+> convergence on the subsequence → continuous limit process `itoContinuousMod`.
+> The running-max keystone binds the pathwise norm under the supremum over `[0,T]`.
+> (2) **Continuous local martingale on `[0,T]`** (`sc-ito-general-local-martingale`,
+> `exists_continuous_localMartingale_modification`,
+> `Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`, corpus 291): the
+> continuous modification is upgraded to a genuine `IsLocalMartingale` on the
+> **null-augmented** Brownian filtration `𝓕ᴮ ⊔ 𝓝`. The measure-theoretic core is
+> `condExp_sup_nulls` (conditioning on the null augmentation agrees a.e. with
+> conditioning on `𝓕ᴮ`, its σ-algebra crux consuming Mathlib's
+> `eventuallyMeasurableSpace`); the null-augmentation setup shows every
+> `(𝓕 ⊔ 𝓝)`-measurable set is a.e. a `𝓕`-set. Non-redundant with Degenne's
+> (sorry-backed) general càdlàg modification. (3) **Continuous local martingale on
+> `[0,∞)`** (`sc-ito-infinite-local-martingale`,
+> `exists_continuous_localMartingale_modification_infinite`,
+> `Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`, corpus 292): the
+> per-horizon `[0,T=n]` continuous local martingales are **glued** into one path
+> continuous on all of `ℝ≥0`. Horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
+> resting on a hand-built `[0,T]` clamp of Degenne's `SimpleProcess` and the
+> band-restriction CLM `restrictToBand`) makes each finite-horizon local martingale a
+> modification of the *same* unbounded-horizon process; `indistinguishable_of_modification_on`
+> agrees them on overlaps. With no horizon clamp, the martingale property is the
+> *global* `itoProcessL2Inf_isMartingale` delivered through `condExp_sup_nulls`.
+> All three entries are axioms-clean and values-panel PASS. Net: corpus 289 → **292**,
+> **257 full** + 18 = 275/292 delivery-ready, 17 reduced, 0 placeholders.
+
 The line below is the pre-re-audit historical record (kept for provenance):
 **235 / 251 delivery-ready** (211 full + 24 library wrappers), 16 reduced cores, 0 placeholders.
 

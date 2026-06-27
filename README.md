@@ -12,7 +12,7 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa)](CODE_OF_CONDUCT.md)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 287 theorems across 11 areas — Black-Scholes
+and Degenne's BrownianMotion. 292 theorems across 11 areas — Black-Scholes
 with the full Greek matrix, the exotics, and Merton jump-diffusion, binomial
 trees with American / Bermudan / Snell envelope, fixed income with hazard
 credit, first-to-default baskets, and Vasicek SDE, portfolio theory from
@@ -29,13 +29,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 287 |
-| **full derivations** | **252** |
+| total theorems | 292 |
+| **full derivations** | **257** |
 | library wrappers | 18 |
 | reduced cores | 17 |
 | placeholders | **0** |
 
-**270 of the 287 are delivery-ready** (`full` + `library_wrapper`); the 17
+**275 of the 292 are delivery-ready** (`full` + `library_wrapper`); the 17
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
@@ -113,7 +113,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
   the three Mathlib standard axioms.
 - **Verification ledger.** [`verification_ledger.json`](verification_ledger.json)
   records the input-hash (snippet code + transitive imports + toolchain pins)
-  each of the 287 benchmark entries last verified under; only entries whose
+  each of the 292 benchmark entries last verified under; only entries whose
   inputs changed ever re-run.
 - **CI gates.** Every push runs the Python gates (status taxonomy, forbidden
   tactics, a definitional-`rfl` tripwire, blueprint ⊆ audit, ledger
@@ -140,7 +140,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
 | **Risk measures** | Gaussian VaR / CVaR closed forms; coherent axioms (translation, homogeneity, monotonicity, subadditivity) **verified on the gaussian closed form** (acceptance-set convexity is separately derived from concave utility in `UtilityDerivation.lean`); joint-stdev triangle; VaR/CVaR additivity at ρ=1; **Rockafellar-Uryasev** algebraic form; spectral risk measures; **Herfindahl-Hirschman** with Cauchy-Schwarz lower bound. |
 | **Actuarial** | Annuity-due closed form; net premium principle; **Gompertz** cumulative force of mortality. |
 | **DeFi** | Constant-product AMM (Uniswap v2) invariants — adapted from Pusceddu-Bartoletti. |
-| **Foundations** | **Static Girsanov** — the risk-neutral measure *derived* from the physical measure via an Esscher density, making `BSCallHyp` a theorem and the discounted asset a proven `Q`-martingale ([`docs/leaps.md`](docs/leaps.md)); Brownian motion martingales (square-sub-time, Wald exponential); Wiener integral + L² version; **the adapted Itô isometry** — the genuinely-stochastic `E[(Σ φₖ·ΔBₖ)²]=Σ E[φₖ²]·Δtₖ` for *random adapted* integrands, cross-terms killed by the weak Markov property (`∫B dB` capstone) ([`docs/leaps.md`](docs/leaps.md)); quadratic variation; Doob L^p continuous-time convergence; conditional Jensen; **discrete Itô lemma** (after Nagy); simple Itô integral; FTAP (two-state explicit EMM; multi-state single-period biconditional; **multi-period finite-Ω biconditional** NA ⟺ ∃ EMM via geometric Hahn–Banach separation); pricing kernels; state prices; Itô structural drift (GBM log-drift, log return mean); BS PDE from Itô + no-arbitrage; **the Black–Scholes PDE re-derived from Feynman–Kac** — the heat kernel's joint Fréchet-differentiability makes the orphaned `feynmanU` heat-flow load-bearing for pricing (closing the two-tower gap). |
+| **Foundations** | **Static Girsanov** — the risk-neutral measure *derived* from the physical measure via an Esscher density, making `BSCallHyp` a theorem and the discounted asset a proven `Q`-martingale ([`docs/leaps.md`](docs/leaps.md)); Brownian motion martingales (square-sub-time, Wald exponential); Wiener integral + L² version; **the adapted Itô isometry** — the genuinely-stochastic `E[(Σ φₖ·ΔBₖ)²]=Σ E[φₖ²]·Δtₖ` for *random adapted* integrands, cross-terms killed by the weak Markov property (`∫B dB` capstone) ([`docs/leaps.md`](docs/leaps.md)); quadratic variation; Doob L^p continuous-time convergence; conditional Jensen; **discrete Itô lemma** (after Nagy); simple Itô integral; **FTAP tower** (two-state explicit EMM; multi-state single-period biconditional; **multi-period finite-Ω biconditional** NA ⟺ ∃ EMM via geometric Hahn–Banach separation, `ftap_discrete`; **general-Ω one-period scalar** NA ⟺ ∃ EMM via bounded-density reduction, `ftap_one_period`; **d-asset one-period** NA ⟺ ∃ EMM for any finite-dimensional market via Esscher/softplus minimisation on the gains kernel, `ftap_one_period_vector`; open rung: general-Ω multi-period DMW); pricing kernels; state prices; Itô structural drift (GBM log-drift, log return mean); BS PDE from Itô + no-arbitrage; **the Black–Scholes PDE re-derived from Feynman–Kac** — the heat kernel's joint Fréchet-differentiability makes the orphaned `feynmanU` heat-flow load-bearing for pricing (closing the two-tower gap). |
 
 The library leans on seven **structural-principle modules** where one named
 fact generates dozens of one-line corollaries (Garman normal form, price
@@ -165,7 +165,7 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-17 of the 287 theorems are `reduced_core` — an honest special case or
+17 of the 292 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 
