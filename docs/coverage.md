@@ -26,10 +26,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-26, Itô pathwise-regularity layer — now FULL):** corpus **291**,
-> **256 full + 18 wrappers = 274/291 delivery-ready**, 17 reduced cores, 0
-> placeholders. **Pathwise regularity of the general-integrand Itô integral:** the
-> L²-valued process `(φ●B)_t` now has a **continuous modification on `[0,T]`**
+> **Live status (2026-06-27, the `[0,∞)` crown — FULL):** corpus **292**,
+> **257 full + 18 wrappers = 275/292 delivery-ready**, 17 reduced cores, 0
+> placeholders. **The unbounded-horizon Itô integral is a continuous local martingale on
+> the whole half-line `ℝ≥0`** (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`,
+> entry `sc-ito-infinite-local-martingale`, **`full`**): an everywhere-continuous
+> representative modifying the process at *every* `t`. The per-horizon `[0,T=n]` continuous
+> local martingales are **glued** — horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
+> resting on a hand-built `[0,T]` clamp of Degenne's `SimpleProcess`) makes each a
+> modification of the *same* unbounded-horizon process and
+> `indistinguishable_of_modification_on` agrees them on overlaps — into one path continuous
+> on all of `ℝ≥0`; with **no horizon clamp**, the martingale property is the *global*
+> `itoProcessL2Inf_isMartingale` through `condExp_sup_nulls`. This crowns the
+> pathwise-regularity layer (2026-06-26): the
+> L²-valued process `(φ●B)_t` has a **continuous modification on `[0,T]`**
 > (`Foundations/ItoIntegralProcessContinuousModification.lean`, entry
 > `sc-ito-general-continuous-modification`, **`full`**) — the first sample-path result for the
 > *general* integrand, via Degenne's continuous-time Doob maximal inequality + Borel–Cantelli

@@ -242,8 +242,8 @@ lemma clampSP_apply (T s : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   exact clampSP_value_sum T hBmeas V (fun p v => (Set.Ioc p.1 p.2).indicator (fun _ => v ω) s)
     (fun p => by simp)
     (fun p u v => by
-      simp only [Pi.add_apply]
-      by_cases hmem : s ∈ Set.Ioc p.1 p.2 <;> simp [Set.indicator_apply, hmem])
+      simp only [Set.indicator_apply, Pi.add_apply]
+      split_ifs <;> simp)
     (fun a ha hP => by
       simp only [Set.indicator_apply]
       refine if_congr (Iff.intro (fun h => ⟨h.1, h.2.trans inf_le_left⟩)

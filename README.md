@@ -223,6 +223,20 @@ conditioning on `𝓕ᴮ` (the σ-algebra crux consuming Mathlib's
 `eventuallyMeasurableSpace`). Both are axioms-clean and non-redundant with Degenne's
 (sorry-backed) general càdlàg modification.
 
+Finally the local martingale is extended to the **whole half-line `ℝ≥0`**
+(`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`,
+`exists_continuous_localMartingale_modification_infinite`): the unbounded-horizon Itô
+integral has an everywhere-continuous local-martingale representative modifying the
+process at *every* `t`, not just on a fixed `[0,T]`. The per-horizon `[0,T=n]` continuous
+local martingales are **glued** — horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
+itself resting on a hand-built `[0,T]` clamp of Degenne's `SimpleProcess`) makes each a
+modification of the *same* unbounded-horizon process, and
+`indistinguishable_of_modification_on` agrees them on overlaps — into one path continuous
+on all of `ℝ≥0`. Unlike the finite-horizon version there is no clamp: the martingale
+property holds globally, supplied directly by the unbounded-horizon `L²` martingale through
+`condExp_sup_nulls`. This is the continuous-time Itô integral as a continuous local
+martingale on the entire time domain.
+
 ## Related upstream contributions
 
 Drafted as part of this project (source under [`upstream/`](upstream/)):

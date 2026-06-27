@@ -663,6 +663,15 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ItoIntegralProcessLocalMartingaleGeneral.exists_continuous_localMartingale_modification' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessLocalMartingaleGeneral.exists_continuous_localMartingale_modification
 
+-- The [0,∞) crown (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`): the per-horizon
+-- continuous local martingales are glued — horizon consistency (`itoProcessL2Inf_eq_itoProcessCLM`,
+-- itself resting on the `[0,T]` `SimpleProcess` clamp) makes each a modification of the SAME
+-- unbounded-horizon process, and `indistinguishable_of_modification_on` agrees them on overlaps —
+-- into a single everywhere-continuous local martingale on the WHOLE half-line, whose martingale
+-- property is the GLOBAL `itoProcessL2Inf_isMartingale` through `condExp_sup_nulls` (no horizon clamp).
+/-- info: 'MathFin.ItoLocalMartingaleInfinite.exists_continuous_localMartingale_modification_infinite' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoLocalMartingaleInfinite.exists_continuous_localMartingale_modification_infinite
+
 /-! ## Finite-Ω Fundamental Theorem of Asset Pricing (Harrison–Pliska, 2026-06-25) -/
 
 -- The separating-dual kernel (`Foundations/ConvexSeparation.lean`): a finite-dim

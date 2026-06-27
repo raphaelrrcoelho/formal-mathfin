@@ -1902,10 +1902,10 @@
     },
     "sc-ito-general-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-26",
-      "elapsed_s": 55.3,
-      "input_hash": "fb1134415d460a1603d969f7eacb1380624143e390ba20c5ba9fd0f50ab0e351",
-      "verified_at_commit": "1c82a97"
+      "date": "2026-06-27",
+      "elapsed_s": 4.1,
+      "input_hash": "c7ec74830ea7f2e929129d801388c4d89c783133963c4c47cf15e1836eea215a",
+      "verified_at_commit": "75146d3"
     },
     "sc-ito-general-martingale": {
       "benchmark_file": "stochastic_calculus.json",
@@ -1934,6 +1934,13 @@
       "elapsed_s": 7.3,
       "input_hash": "529bbca06aa1c6736b4b84e496a9aae59d667a7ab729afc8d684d1d7f71ac94e",
       "verified_at_commit": "4e921c4"
+    },
+    "sc-ito-infinite-local-martingale": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-27",
+      "elapsed_s": 50.2,
+      "input_hash": "99b659c88663f87a9066d04f59f9332f7231b7be993b03cd647f691d5531c0b4",
+      "verified_at_commit": "75146d3"
     },
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",
