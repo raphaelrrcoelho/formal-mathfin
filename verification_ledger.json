@@ -1903,9 +1903,9 @@
     "sc-ito-general-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-27",
-      "elapsed_s": 4.1,
-      "input_hash": "c7ec74830ea7f2e929129d801388c4d89c783133963c4c47cf15e1836eea215a",
-      "verified_at_commit": "75146d3"
+      "elapsed_s": 35.5,
+      "input_hash": "1294607e11f41b0b00dc71981ce75f8c3b36e113d97cdb281ee3953a716c9157",
+      "verified_at_commit": "913f969"
     },
     "sc-ito-general-martingale": {
       "benchmark_file": "stochastic_calculus.json",
@@ -1938,9 +1938,9 @@
     "sc-ito-infinite-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-27",
-      "elapsed_s": 50.2,
-      "input_hash": "99b659c88663f87a9066d04f59f9332f7231b7be993b03cd647f691d5531c0b4",
-      "verified_at_commit": "75146d3"
+      "elapsed_s": 49.4,
+      "input_hash": "d7d4d8c9f1ef8cec9bd3453c98f6bc126e96fea5c8a0781b5978cc645602a2b5",
+      "verified_at_commit": "913f969"
     },
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",

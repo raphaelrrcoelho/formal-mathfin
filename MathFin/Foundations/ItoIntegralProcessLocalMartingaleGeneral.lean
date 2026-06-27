@@ -115,10 +115,12 @@ noncomputable def itoLocalMod (G : Set Ω) (T t : ℝ≥0) (hBmeas : ∀ s, Meas
 /-- **The general-integrand Itô process has an everywhere-continuous local-martingale
 representative.** There is a process `X : ℝ≥0 → Ω → ℝ` that (i) is a **modification** of
 the `L²` Itô process on the horizon — `X t =ᵐ itoProcessCLM T t φ` for every `t ≤ T`;
-(ii) has **everywhere**-continuous paths; and (iii) is a genuine `IsLocalMartingale` for the
+(ii) has **everywhere**-continuous paths; (iii) is a genuine `IsLocalMartingale` for the
 **null-augmented** Brownian filtration `augFiltration` (the martingale property holds globally
 on `ℝ≥0`, the clamp `min · T` freezing it past `T`; only the modification clause (i) is
-horizon-scoped). This upgrades the gate (`exists_continuous_modification_itoProcess`, an
+horizon-scoped); and (iv) is `StronglyMeasurable[augFiltration i]` at each `i` — the per-horizon
+adaptedness, exposed explicitly so the `[0,∞)` gluing arc can consume it. This upgrades the gate
+(`exists_continuous_modification_itoProcess`, an
 a.e.-continuous *modification*) to Degenne's local-martingale interface, whose `∀ ω, IsCadlag`
 hypothesis forces the everywhere-continuous representative: its **adaptedness** the null
 augmentation supplies (the repaired good set `G ∈ 𝓝`), its **martingale property** transferring

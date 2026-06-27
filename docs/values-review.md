@@ -53,6 +53,59 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-27 — commit 913f969 — corpus 292 — the [0,∞) unbounded-horizon Itô integral as a continuous local martingale
+
+The `[0,∞)` crown of the continuous-time Itô tower. New files
+`MathFin/Foundations/ItoIntegralProcessL2Infinite.lean` (the `L²` process
+`itoProcessL2Inf`, the `SimpleProcess` clamp `clampSP` + horizon consistency
+`itoProcessL2Inf_eq_itoProcessCLM`) and
+`MathFin/Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean` (the per-horizon
+gluing + the headline `exists_continuous_localMartingale_modification_infinite`); the
+`[0,T]` follow-on (`…LocalMartingaleGeneral.lean`) strengthened to also expose per-horizon
+`StronglyMeasurable[augFiltration]`. Corpus entry `sc-ito-infinite-local-martingale`
+(`full`); `sc-ito-general-local-martingale` updated to the strengthened conclusion. lake
+build 8819 jobs (0 warnings, 0 sorries); ledger 292/292 fresh; AxiomAudit pins the headline
+at `[propext, Classical.choice, Quot.sound]`.
+
+Three-agent panel (lenses split 1·2·8 / 3·6·7 / 4·5):
+
+| lens | verdict |
+|------|---------|
+| inspired math quality | PASS |
+| Mathlib / BrownianMotion coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS (one note, fixed in this commit) |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: none.
+
+**Checks that mattered**: the result is *not* a degenerate witness —
+`itoProcessL2Inf t f = E[∫₀^∞ f dB | 𝓕_t]` is a genuine CLM composition and its martingale
+property is the honest conditional-expectation tower (not assumed); the glued process is
+`0` only off a co-null set (an honest a.e.-modification, not a cheat trivializing
+continuity/martingale); the three conclusions (modification at *every* `t`,
+everywhere-continuous on all of `ℝ≥0`, real `IsLocalMartingale`) are each derived, none
+degenerate; no hidden hypotheses beyond `IsPreBrownianReal` + measurability + pathwise
+continuity of `B`. The `clampSP` `SimpleProcess` truncation genuinely preserves
+`𝓕(left-endpoint)`-measurability (drop intervals starting past `T`, clamp surviving right
+endpoints — *not* both, which would break it); `clampSP_value_sum` factors the three
+agreement statistics into one principled identity rather than triplicated case-work. The
+key architectural win — horizon-independent integrand ⇒ *global* martingale ⇒ no clamp in
+step 4 (vs. the `min·T` clamp of the `[0,T]` follow-on) — is real and load-bearing. No
+reproving of Mathlib/Degenne lemmas; `monoMeasureLp` is a clean upstream candidate (Mathlib
+has `MemLp.mono_measure`, no packaged CLM), not wrapper-slop.
+
+**Recorded actions**:
+1. *(done in this commit)* the `[0,T]` theorem docstring now enumerates the new 4th
+   conjunct `(iv) StronglyMeasurable[augFiltration i]` (panel concept-clarity note).
+2. *(nit, accepted)* `isCadlag_of_continuous` is re-derived in the `[0,∞)` file because the
+   `[0,T]` copy is `private`; a shared public helper is a fold-in for the next touch.
+3. *(nit, open)* `monoMeasureLp` is a genuine Mathlib-upstream candidate; route it through
+   the BM-upstream triage when that window opens.
+
 ## 2026-06-26 (IV) — the general-integrand Itô process as a continuous local martingale (the IsLocalMartingale follow-on) — corpus 291
 
 New file `MathFin/Foundations/ItoIntegralProcessLocalMartingaleGeneral.lean`
