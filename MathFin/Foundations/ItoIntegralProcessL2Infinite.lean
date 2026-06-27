@@ -104,6 +104,28 @@ noncomputable def restrictToBand (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
     ⇑(restrictToBand (μ := μ) T hBmeas f) =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑f :=
   monoMeasureLp_coeFn _ f
 
+/-- **The `[0,T]`-restriction of a simple process's `[0,∞)` assembly is its `[0,T]`
+simple-process element** `simpleProcessL2_T`. Both are `toLp (uncurry V)` — one against
+the full trim, one against the `[0,T]` trim — and `restrictToBand` only re-reads the
+*same* function against the smaller measure, so they coincide a.e. on `[0,T]` (where
+`trimMeasure_T` is supported). **No truncation of `V` is needed**: the `[0,T]` element is
+literally `V`'s integrand re-measured, not a clamped process. -/
+lemma restrictToBand_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
+    restrictToBand (μ := μ) T hBmeas (simpleAssembly hBmeas V)
+      = simpleProcessL2_T (μ := μ) T hBmeas V := by
+  have hmono : trimMeasure_T (μ := μ) T hBmeas
+      ≤ (timeMeasure.prod μ).trim (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod :=
+    (trimMeasure_T_eq_restrict T hBmeas).le.trans Measure.restrict_le_self
+  refine Lp.ext ?_
+  calc ⇑(restrictToBand (μ := μ) T hBmeas (simpleAssembly hBmeas V))
+      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑(simpleAssembly hBmeas V) :=
+        restrictToBand_coeFn T hBmeas _
+    _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry ⇑V :=
+        (MemLp.coeFn_toLp (memLp_uncurry_trim hBmeas V)).filter_mono (ae_mono hmono)
+    _ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑(simpleProcessL2_T (μ := μ) T hBmeas V) :=
+        (MemLp.coeFn_toLp (memLp_uncurry_trim_T T hBmeas V)).symm
+
 /-- **The unbounded-horizon Itô process** `(f●B)_t = E[∫₀^∞ f dB | 𝓕_t]`: the
 conditional-expectation projection of the terminal `[0,∞)` integral `itoIntegralL2 f`
 onto `𝓕_t`. The horizon-independent analogue of `itoProcessCLM`. -/
