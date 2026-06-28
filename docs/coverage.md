@@ -27,7 +27,7 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 ## Current Audit
 
 > **Live status (2026-06-28, Itô's lemma as a process / semimartingale decomposition):** corpus
-> **299**, **264 full + 18 wrappers = 282/299 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **300**, **265 full + 18 wrappers = 283/300 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The time-dependent Itô formula now holds as a process identity for every `t ≤ T`
 > simultaneously** (`Foundations/ItoFormulaProcess.lean`, entry `sc-ito-formula-td-process`,
 > **`full`**): `f(t,B_t) − f(0,B_0) =ᵐ (itoProcessL2Inf t F) + ∫₀ᵗ (f_t + ½f_xx)(s,B_s) ds`, the

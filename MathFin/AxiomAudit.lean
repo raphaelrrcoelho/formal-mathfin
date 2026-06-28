@@ -776,4 +776,21 @@ Vasicek terminal law (`VasicekSDEGaussian.lean`): the SDE solution
 /-- info: 'MathFin.vasicekShortRate_hasLaw_gaussian' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.vasicekShortRate_hasLaw_gaussian
 
+/-! ## The Brownian exit times as a localizing sequence — the localization engine
+
+`ExitTime.lean`: the exit times `τ_N = inf {t : N ≤ |B_t|}` of the closed exterior form the
+repo's first genuine `IsLocalizingSequence` (`isLocalizingSequence_exitTime`). Each `τ_N` is a
+stopping time for the **raw** Brownian filtration (`isStoppingTime_exitTime`) — the closed
+exterior makes `{τ_N ≤ i}` the attained-`sInf` event, a rational `⋂ₘ⋃_{q≤i}` measurable in
+`𝓕_i` with **no right-continuity** (the open-exterior route would need `𝓕_{i⁺}`, i.e. Blumenthal).
+Monotone in `N` and escaping to `⊤` a.s. (continuous paths bounded on compacts), it is the
+localization machinery that lifts the bounded-derivative Itô formula toward unbounded
+coefficients (Summit C). -/
+
+/-- info: 'MathFin.isStoppingTime_exitTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.isStoppingTime_exitTime
+
+/-- info: 'MathFin.isLocalizingSequence_exitTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.isLocalizingSequence_exitTime
+
 end MathFin.AxiomAudit

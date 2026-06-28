@@ -147,6 +147,7 @@ import MathFin.Foundations.ItoFormulaLocalized
 import MathFin.Foundations.ItoFormulaItoProcess
 import MathFin.Foundations.ItoFormulaGBM
 import MathFin.Foundations.ItoFormulaProcess
+import MathFin.Foundations.ExitTime
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)

@@ -53,6 +53,50 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-28 — corpus 300 — Brownian exit times: the first localizing sequence
+
+**Scope**: `Foundations/ExitTime.lean` (new — `exitTime`, `exists_rat_time_below`,
+`exitTime_le_iff`, `exists_le_abs_eq_iInter_iUnion`, `isStoppingTime_exitTime`,
+`exitTime_mono`/`exitTime_monotone`, `exitTime_tendsto_top`, capstone
+`isLocalizingSequence_exitTime`); umbrella import; curated `AxiomAudit` pins
+(`isStoppingTime_exitTime`, `isLocalizingSequence_exitTime`) + regenerated `AxiomAuditGen`.
+Entry `sc-exit-times-localizing-sequence` (`full`). Two-agent panel
+(inspired / coherence / architecture / first-principles ; zero-slop / idiom / clarity / beauty).
+
+| lens | verdict |
+| --- | --- |
+| inspired math quality | PASS |
+| Mathlib / Degenne coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: none.
+
+**Checks that mattered**: the closed-exterior design is load-bearing, not laziness — the panel
+verified `IsClosed.csInf_mem` is the pivot (the `sInf` of the closed hit-set is *attained*), so
+`{τ_N ≤ i}` is genuinely the attained-`sInf` event, measurable in `𝓕_i` **without** right-continuity;
+the open-exterior `{N < |x|}` route would only characterize `{τ_N < i} ∈ 𝓕_{i⁺}` (Blumenthal), which
+the raw Brownian filtration does not provide. The from-scratch `exitTime_le_iff` is necessary, not a
+reproval: Mathlib's `hittingAfter_le_iff` needs `[WellFoundedLT ι]`, which `ℝ≥0` lacks. The module
+**consumes** the right Mathlib lemmas (`hittingAfter`, `NNReal.lt_iff_exists_rat_btwn`,
+`IsCompact.exists_isMaxOn`, `WithTop.tendsto_nhds_top_iff`, `Filtration.mono`,
+`measurable_eval_natFiltration`) — nothing reproved; the backward measurability direction is a
+compact-max (`IsCompact.exists_isMaxOn`), not a Bolzano–Weierstrass subsequence. Automation is
+targeted (`linarith`/`positivity`/one `simpa`), no `simp`/`grind` obfuscation; no
+`sorry`/`admit`/`native_decide`/uncertificated `nlinarith`. Corpus entry honest: `full` re-export,
+no overclaiming — the unrestricted-`C²` Itô formula it enables is named as the open Summit-C
+frontier, not claimed. Axioms-clean (`[propext, Classical.choice, Quot.sound]`), confirmed by the
+`#print axioms` guards in the 8813-job green build.
+
+**Recorded actions**: none blocking. Next session — Summit C Stages 2–4: the time+space truncation
+of a general `C³` `f` (via `SmoothTrunc.cut` in **both** arguments → `ito_formula_td_process`), then
+the `Locally` / `Martingale.stoppedProcess_indicator` assembly stopping the truncated martingales at
+these exit times.
+
 ## 2026-06-28 — corpus 299 — Itô's lemma as a process (semimartingale decomposition)
 
 **Scope**: `Foundations/ItoFormulaProcess.lean` (new — `ito_formula_td_process`,

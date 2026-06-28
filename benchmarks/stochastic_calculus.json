@@ -528,6 +528,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.WienerIntegralGaussian (wienerIntegralLp_map_eq_gaussianReal). The law of the deterministic-integrand Wiener integral, derived by characteristic functions: simple-process Gaussianity (IsGaussianProcess.of_isGaussianProcess on the scaled-increment family + HasGaussianLaw.map_eq_gaussianReal, with mean 0 from IsPreBrownianReal.integral_eval and variance = the Ito isometry wiener_assembly_isometry), then a |t|-Lipschitz characteristic-function bound (Real.norm_exp_I_mul_ofReal_sub_one_le + an L1<=L2 estimate on the probability space) makes g |-> charFun (mu.map (wienerIntegralLp g)) t continuous, so DenseRange.induction_on transfers the Gaussian charFun from the dense simple processes to all L2, and Measure.ext_of_charFun concludes. Closes the gap between the isometry (norm) and the distribution (law). Axioms-clean: [propext, Classical.choice, Quot.sound]."
       }
+    },
+    {
+      "id": "sc-exit-times-localizing-sequence",
+      "name": "Brownian Exit Times Form a Localizing Sequence",
+      "domain": "stochastic_calculus",
+      "description": "The exit times tau_N = inf{t : N <= |B_t|} of a continuous Brownian path form a LOCALIZING SEQUENCE for the null-augmented Brownian filtration: each tau_N is a stopping time, the sequence is a.s. monotone in N, and it escapes to infinity (top) a.s. This is the repo's FIRST genuine IsLocalizingSequence -- the localization engine that lifts the bounded-coefficient Ito formula toward unbounded coefficients (Summit C). The decisive design choice is the CLOSED exterior {x : N <= |x|}: continuity of paths makes the hit-set sInf attained (IsClosed.csInf_mem), so {tau_N <= i} is the event {exists s in [0,i], N <= |B_s|}, which reduces (continuity + rational density) to the measurable event intersect_m union_{q<=i} {N - 1/(m+1) <= |B_q|} -- a stopping time for the RAW filtration with NO right-continuity. (The open-exterior {N < |x|} route only characterizes {tau_N < i}, landing in the right-continuous F_{i+} the natural Brownian filtration does not provide -- Blumenthal.) Monotonicity follows from the exterior shrinking in N; the escape-to-infinity from a continuous path being bounded on every compact [0,c].",
+      "code": {
+        "lean": "import MathFin.Foundations.ExitTime\n\nopen MeasureTheory ProbabilityTheory MathFin\nopen scoped NNReal\n\ntheorem exit_times_localizing_sequence\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ}\n    (hBmeas : ∀ t, Measurable (B t))\n    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 => B s ω) :\n    IsLocalizingSequence\n      (ItoIntegralProcessLocalMartingaleGeneral.augFiltration (μ := μ) hBmeas)\n      (fun N => exitTime B N) μ :=\n  MathFin.isLocalizingSequence_exitTime hBmeas hBcont\n"
+      },
+      "metadata": {
+        "chapter": 4,
+        "reference": "Brownian exit times as a localizing sequence (hitting times, Saporito Prop. 4.3.6 milieu)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.ExitTime (isLocalizingSequence_exitTime). exitTime B N := MeasureTheory.hittingAfter B {x | N <= |x|} 0 (ireq = R>=0, a ConditionallyCompleteLinearOrder). The IsLocalizingSequence record bundles: (i) isStoppingTime -- isStoppingTime_exitTime, the closed-set route via exitTime_le_iff (IsClosed.csInf_mem) + exists_le_abs_eq_iInter_iUnion (NNReal.lt_iff_exists_rat_btwn density forward, IsCompact.exists_isMaxOn backward) + measurable_eval_natFiltration + Filtration.mono, transferred natFiltration -> augFiltration by le_sup_left; (ii) mono -- exitTime_monotone (hittingAfter_le_of_mem on the smaller exterior); (iii) tendsto_top -- exitTime_tendsto_top (WithTop.tendsto_nhds_top_iff + path bounded on compacts). hittingAfter_le_iff needs [WellFoundedLT ireq] which R>=0 fails, so exitTime_le_iff is proved from scratch. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
     }
   ]
 }

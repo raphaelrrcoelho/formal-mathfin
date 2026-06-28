@@ -885,8 +885,26 @@ deterministic-integrand layer load-bearing in a pricing module for the first tim
   by the existing consistency `itoProcessL2Inf_eq_itoProcessCLM`. corpus 298 → **299**,
   263 → **264 full**.
 
-**Open frontier:** **Summit C** — the unrestricted-`C²` Itô formula via stopping-time localization
-(its prerequisite, the process-form formula, is now built); the Itô formula against a general Itô
+- **The Brownian exit times as a localizing sequence — the localization engine**
+  (`Foundations/ExitTime.lean`, entry `sc-exit-times-localizing-sequence`, `full`). The exit times
+  `τ_N = inf {t : N ≤ |B_t|}` of the **closed** exterior `{x : N ≤ |x|}` form the repo's **first
+  genuine `IsLocalizingSequence`** (`isLocalizingSequence_exitTime`) for the null-augmented Brownian
+  filtration: each `τ_N` is a stopping time for the **raw** filtration (`isStoppingTime_exitTime`),
+  the sequence is a.s. monotone (`exitTime_monotone`), and it escapes to `⊤` a.s.
+  (`exitTime_tendsto_top`). The **closed** exterior is the decisive design choice — it makes
+  `{τ_N ≤ i}` the *attained*-`sInf` event (continuity of paths + `IsClosed.csInf_mem`), hence the
+  rational `⋂ₘ ⋃_{q≤i} {N−1/(m+1) ≤ |B_q|}` event, measurable in `𝓕_i` with **no right-continuity**.
+  (The open-exterior `{N < |x|}` route only characterizes `{τ_N < i}`, which lands in the
+  right-continuous `𝓕_{i⁺}` the natural Brownian filtration does not provide — Blumenthal.) This is
+  **Stage 1 of Summit C**: the localization machinery that lifts the bounded-derivative Itô formula
+  toward unbounded coefficients. corpus 299 → **300**, 264 → **265 full**.
+
+**Open frontier:** **Summit C** — the unrestricted-`C²` Itô formula via stopping-time localization.
+*Stage 1 (the localizing sequence) is now built* (`ExitTime.lean`); the remaining stages are the
+time+space truncation of a general `C³` `f` (via `SmoothTrunc.cut` in **both** arguments — general
+`f` needs the time cut too, unlike the exp-growth `cutoff_bddDeriv`) feeding
+`ito_formula_td_process`, then the genuine `Locally` / `Martingale.stoppedProcess_indicator`
+assembly stopping the truncated martingales at the exit times. Also open: the Itô formula against a general Itô
 process with **adapted** coefficients
 (the random-integrand semimartingale form — a new tower layer beyond the constant-coefficient case
 just landed); re-ground `discountedGBM_isMartingale` at the *process* level (all `t`, on the

@@ -1893,6 +1893,13 @@
       "input_hash": "fe9d3950e8c869accdc793463b7795897bbba93040209695b6bda5b4b14f47b4",
       "verified_at_commit": "4e921c4"
     },
+    "sc-exit-times-localizing-sequence": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-28",
+      "elapsed_s": 178.0,
+      "input_hash": "45acbc1e2bdc89ffa6cc1bef8e883688c8cf0bd85fe28416edabf840a8d1f6f3",
+      "verified_at_commit": "7892658"
+    },
     "sc-ito-covariation-bilinear-isometry": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-27",
