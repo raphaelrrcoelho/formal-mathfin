@@ -257,6 +257,43 @@ end SmoothTrunc
 noncomputable def fCut (f : ℝ → ℝ → ℝ) (S : SmoothTrunc) (n : ℕ) (t x : ℝ) : ℝ :=
   f t (S.cut n x)
 
+/-- **A section of `f` with exponential-growth derivative grows at most exponentially.** From
+`|f_x t x| ≤ C·exp(λ|x|)` and the segment mean value inequality, `|f t y| ≤ |f t 0| +
+C·exp((λ+1)|y|)` (absorbing the `|y|` factor into the exponent via `|y| ≤ exp|y|`). This turns
+the *derivative* growth hypothesis into the `f`-value bound the dominated-convergence
+dominators need. -/
+private lemma abs_le_of_expGrowth_deriv {f f_x : ℝ → ℝ → ℝ}
+    (hf_x : ∀ t x, HasDerivAt (fun u => f t u) (f_x t x) x)
+    {C lam : ℝ} (hlam : 0 ≤ lam) (hg_x : ∀ t x, |f_x t x| ≤ C * Real.exp (lam * |x|)) (t y : ℝ) :
+    |f t y| ≤ |f t 0| + C * Real.exp ((lam + 1) * |y|) := by
+  have hC0 : 0 ≤ C := by
+    have h := hg_x 0 0; simp only [abs_zero, mul_zero, Real.exp_zero, mul_one] at h
+    exact le_trans (abs_nonneg _) h
+  have hseg : |f t y - f t 0| ≤ C * Real.exp (lam * |y|) * |y| := by
+    have hbound : ∀ x ∈ Set.Icc (-|y|) |y|, ‖f_x t x‖ ≤ C * Real.exp (lam * |y|) := by
+      intro x hx
+      rw [Real.norm_eq_abs]
+      refine (hg_x t x).trans (mul_le_mul_of_nonneg_left ?_ hC0)
+      exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left
+        (by rw [abs_le]; exact ⟨hx.1, hx.2⟩) hlam)
+    have hd : ∀ x ∈ Set.Icc (-|y|) |y|,
+        HasDerivWithinAt (fun u => f t u) (f_x t x) (Set.Icc (-|y|) |y|) x :=
+      fun x _ => (hf_x t x).hasDerivWithinAt
+    have h := (convex_Icc (-|y|) |y|).norm_image_sub_le_of_norm_hasDerivWithin_le hd hbound
+      (⟨neg_nonpos.mpr (abs_nonneg y), abs_nonneg y⟩ : (0 : ℝ) ∈ Set.Icc (-|y|) |y|)
+      (⟨neg_abs_le y, le_abs_self y⟩ : y ∈ Set.Icc (-|y|) |y|)
+    rwa [Real.norm_eq_abs, Real.norm_eq_abs, sub_zero] at h
+  have hy : |y| ≤ Real.exp |y| := by linarith [Real.add_one_le_exp |y|]
+  have habs : |f t y| ≤ |f t 0| + |f t y - f t 0| := by
+    linarith [abs_sub_abs_le_abs_sub (f t y) (f t 0)]
+  have hexp : C * Real.exp (lam * |y|) * |y| ≤ C * Real.exp ((lam + 1) * |y|) := by
+    rw [show (lam + 1) * |y| = lam * |y| + |y| by ring, Real.exp_add]
+    calc C * Real.exp (lam * |y|) * |y|
+        ≤ C * Real.exp (lam * |y|) * Real.exp |y| :=
+          mul_le_mul_of_nonneg_left hy (mul_nonneg hC0 (Real.exp_nonneg _))
+      _ = C * (Real.exp (lam * |y|) * Real.exp |y|) := by ring
+  linarith
+
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
@@ -577,5 +614,334 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
         exact ENNReal.ofReal_le_ofReal (hRbound n)
     _ = ENNReal.ofReal Bnd := liminf_const _
     _ < ⊤ := ENNReal.ofReal_lt_top
+
+/-- **Boundary `L²` convergence.** The cutoff boundary `fₙ(T,B_T) − fₙ(0,B_0)` converges to
+the genuine `f(T,B_T) − f(0,B_0)` in `L²(μ)`. Each path eventually satisfies `φₙ = id` at the
+sampled point (`cut_eventually_id`), so the difference is pointwise eventually `0`; the
+`f`-value bound `abs_le_of_expGrowth_deriv` together with the Brownian marginal exponential
+moments (`memLp_exp_abs_eval`) furnishes a fixed `L²` dominator, and dominated convergence
+gives the `L²` limit. -/
+theorem boundary_tendsto_L2 (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (S : SmoothTrunc)
+    {f f_x : ℝ → ℝ → ℝ} (hf_x : ∀ t x, HasDerivAt (fun u => f t u) (f_x t x) x)
+    {C lam : ℝ} (hlam : 0 ≤ lam) (hg_x : ∀ t x, |f_x t x| ≤ C * Real.exp (lam * |x|)) :
+    Tendsto (fun n => ∫ ω,
+        ((fCut f S n T (B T ω) - fCut f S n 0 (B 0 ω)) - (f T (B T ω) - f 0 (B 0 ω))) ^ 2 ∂μ)
+      atTop (𝓝 0) := by
+  classical
+  have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (by simpa using hg_x 0 0)
+  have hcont_f : ∀ t : ℝ, Continuous (fun x => f t x) := fun t =>
+    Differentiable.continuous fun x => (hf_x t x).differentiableAt
+  set bn : ℕ → Ω → ℝ := fun n ω =>
+    (fCut f S n T (B T ω) - fCut f S n 0 (B 0 ω)) - (f T (B T ω) - f 0 (B 0 ω)) with hbn
+  set H : Ω → ℝ := fun ω => 2 * (|f (T : ℝ) 0| + C * Real.exp ((lam + 1) * |B T ω|))
+    + 2 * (|f (0 : ℝ) 0| + C * Real.exp ((lam + 1) * |B 0 ω|)) with hH
+  -- the `f`-value bound, specialised to a cutoff argument
+  have hfc : ∀ (n : ℕ) (t z : ℝ), |f t (S.cut n z)| ≤ |f t 0| + C * Real.exp ((lam + 1) * |z|) :=
+    fun n t z => (abs_le_of_expGrowth_deriv hf_x hlam hg_x t (S.cut n z)).trans (by
+      have hmono : Real.exp ((lam + 1) * |S.cut n z|) ≤ Real.exp ((lam + 1) * |z|) :=
+        Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (S.cut_le_abs n z) (by linarith))
+      linarith [mul_le_mul_of_nonneg_left hmono hC0])
+  -- `H ∈ L²(μ)` and the dominator `H²` is integrable
+  have hHmemLp : MemLp H 2 μ := by
+    refine MemLp.add ?_ ?_
+    · exact (((memLp_const (|f (T : ℝ) 0|)).add
+        ((memLp_exp_abs_eval hB T (lam + 1)).const_mul C)).const_mul 2)
+    · exact (((memLp_const (|f (0 : ℝ) 0|)).add
+        ((memLp_exp_abs_eval hB 0 (lam + 1)).const_mul C)).const_mul 2)
+  have hGint : Integrable (fun ω => (H ω) ^ 2) μ := by
+    have hsq : (fun ω => (H ω) ^ 2) = fun ω => H ω * H ω := by funext ω; ring
+    rw [hsq]; exact hHmemLp.integrable_mul hHmemLp
+  -- the uniform pointwise bound `|bn n ω| ≤ H ω`
+  have htri : ∀ a b : ℝ, |a - b| ≤ |a| + |b| := fun a b => by
+    rw [sub_eq_add_neg]; exact (abs_add_le a (-b)).trans (by rw [abs_neg])
+  have hbnd : ∀ n ω, |bn n ω| ≤ H ω := by
+    intro n ω
+    have e1 := hfc n (T : ℝ) (B T ω)
+    have e2 := hfc n (0 : ℝ) (B 0 ω)
+    have e3 := abs_le_of_expGrowth_deriv hf_x hlam hg_x (T : ℝ) (B T ω)
+    have e4 := abs_le_of_expGrowth_deriv hf_x hlam hg_x (0 : ℝ) (B 0 ω)
+    simp only [hbn, hH, fCut]
+    calc |(f (T : ℝ) (S.cut n (B T ω)) - f (0 : ℝ) (S.cut n (B 0 ω)))
+            - (f (T : ℝ) (B T ω) - f (0 : ℝ) (B 0 ω))|
+        ≤ |f (T : ℝ) (S.cut n (B T ω)) - f (0 : ℝ) (S.cut n (B 0 ω))|
+            + |f (T : ℝ) (B T ω) - f (0 : ℝ) (B 0 ω)| := htri _ _
+      _ ≤ (|f (T : ℝ) (S.cut n (B T ω))| + |f (0 : ℝ) (S.cut n (B 0 ω))|)
+            + (|f (T : ℝ) (B T ω)| + |f (0 : ℝ) (B 0 ω)|) := add_le_add (htri _ _) (htri _ _)
+      _ ≤ 2 * (|f (T : ℝ) 0| + C * Real.exp ((lam + 1) * |B T ω|))
+            + 2 * (|f (0 : ℝ) 0| + C * Real.exp ((lam + 1) * |B 0 ω|)) := by linarith
+  -- measurability of each squared difference
+  have hbn_meas : ∀ n, Measurable (bn n) := fun n => by
+    have m1 : Measurable (fun ω => f (T : ℝ) (S.cut n (B T ω))) :=
+      ((hcont_f (T : ℝ)).comp (S.continuous_cut n)).measurable.comp (hBmeas T)
+    have m2 : Measurable (fun ω => f (0 : ℝ) (S.cut n (B 0 ω))) :=
+      ((hcont_f (0 : ℝ)).comp (S.continuous_cut n)).measurable.comp (hBmeas 0)
+    have m3 : Measurable (fun ω => f (T : ℝ) (B T ω)) := (hcont_f (T : ℝ)).measurable.comp (hBmeas T)
+    have m4 : Measurable (fun ω => f (0 : ℝ) (B 0 ω)) := (hcont_f (0 : ℝ)).measurable.comp (hBmeas 0)
+    simpa only [hbn, fCut] using (m1.sub m2).sub (m3.sub m4)
+  -- pointwise: eventually `bn n ω = 0`, hence `(bn n ω)² → 0`
+  have hlim : ∀ ω, Tendsto (fun n => (bn n ω) ^ 2) atTop (𝓝 0) := fun ω =>
+    (tendsto_congr' (by
+      filter_upwards [S.cut_eventually_id (B T ω), S.cut_eventually_id (B 0 ω)] with n hT h0
+      simp only [hbn, fCut, hT, h0]; ring)).mpr tendsto_const_nhds
+  have key := tendsto_integral_of_dominated_convergence
+    (F := fun n ω => (bn n ω) ^ 2) (f := fun _ : Ω => (0 : ℝ)) (bound := fun ω => (H ω) ^ 2)
+    (fun n => ((hbn_meas n).pow_const 2).aestronglyMeasurable) hGint
+    (fun n => ae_of_all _ fun ω => by
+      rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _), ← sq_abs (bn n ω)]
+      exact pow_le_pow_left₀ (abs_nonneg _) (hbnd n ω) 2)
+    (ae_of_all _ fun ω => hlim ω)
+  simpa using key
+
+/-- **Drift `L²` convergence.** The cutoff drift integrand converges to the genuine drift
+`f_t(s,B_s) + ½f_xx(s,B_s)` in `L²(μ)`. For each path, the inner `ds`-integrand converges
+pointwise (`φₙ → id`, `φₙ' → 1`, `φₙ'' /(n+1) → 0`) and is uniformly bounded on the compact
+`[0,T]`, so bounded convergence gives the inner integral's limit; the outer difference is then
+dominated by the exponential-growth path integral `H = ∫₀ᵀ Kdom·exp(λ|B_s|) ds ∈ L²(μ)`
+(`pathIntegral_expGrowth_memLp`), and dominated convergence closes the `L²` limit. -/
+theorem drift_tendsto_L2 (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 => B s ω) (T : ℝ≥0) (S : SmoothTrunc)
+    {f_t f_x f_xx : ℝ → ℝ → ℝ}
+    (hf_t_cont : Continuous fun p : ℝ × ℝ => f_t p.1 p.2)
+    (hf_x_cont : Continuous fun p : ℝ × ℝ => f_x p.1 p.2)
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ => f_xx p.1 p.2)
+    {C lam : ℝ} (hlam : 0 ≤ lam)
+    (hg_t : ∀ t x, |f_t t x| ≤ C * Real.exp (lam * |x|))
+    (hg_x : ∀ t x, |f_x t x| ≤ C * Real.exp (lam * |x|))
+    (hg_xx : ∀ t x, |f_xx t x| ≤ C * Real.exp (lam * |x|)) :
+    Tendsto (fun n => ∫ ω,
+        ((∫ s in Set.Ioc 0 T, (f_t s (S.cut n (B s ω))
+              + (1 / 2) * (f_xx s (S.cut n (B s ω)) * S.cutD1 n (B s ω) ^ 2
+                  + f_x s (S.cut n (B s ω)) * S.cutD2 n (B s ω))) ∂ItoIntegralL2.timeMeasure)
+          - (∫ s in Set.Ioc 0 T, (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω))
+              ∂ItoIntegralL2.timeMeasure)) ^ 2 ∂μ) atTop (𝓝 0) := by
+  classical
+  haveI hνT : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) :=
+    ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
+        ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
+  have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (by simpa using hg_t 0 0)
+  have hM1 : 0 ≤ S.M₁ := le_trans (abs_nonneg _) (S.bdd₁ 0)
+  have hM2 : 0 ≤ S.M₂ := le_trans (abs_nonneg _) (S.bdd₂ 0)
+  set K1 : ℝ := C * (1 + (1 / 2) * S.M₁ ^ 2 + (1 / 2) * S.M₂) with hK1
+  set Kdom : ℝ := K1 + C * (1 + 1 / 2) with hKdom
+  have hK1_0 : 0 ≤ K1 := by rw [hK1]; positivity
+  have hKdom0 : 0 ≤ Kdom := by rw [hKdom]; positivity
+  -- inner integrands and their per-path data
+  set Jn : ℕ → Ω → ℝ≥0 → ℝ := fun n ω s => f_t s (S.cut n (B s ω))
+      + (1 / 2) * (f_xx s (S.cut n (B s ω)) * S.cutD1 n (B s ω) ^ 2
+          + f_x s (S.cut n (B s ω)) * S.cutD2 n (B s ω)) with hJn
+  set Jl : Ω → ℝ≥0 → ℝ := fun ω s => f_t s (B s ω) + (1 / 2) * f_xx s (B s ω) with hJl
+  set driftCut : ℕ → Ω → ℝ := fun n ω =>
+    ∫ s in Set.Ioc 0 T, Jn n ω s ∂ItoIntegralL2.timeMeasure with hdriftCut
+  set drift : Ω → ℝ := fun ω => ∫ s in Set.Ioc 0 T, Jl ω s ∂ItoIntegralL2.timeMeasure with hdrift
+  show Tendsto (fun n => ∫ ω, (driftCut n ω - drift ω) ^ 2 ∂μ) atTop (𝓝 0)
+  -- the growth bound on the cutoff inner integrand, uniform in `n`
+  have hJn_bound : ∀ n ω s, |Jn n ω s| ≤ K1 * Real.exp (lam * |B s ω|) := by
+    intro n ω s
+    set Ec : ℝ := Real.exp (lam * |S.cut n (B s ω)|) with hEc
+    have hEc0 : 0 ≤ Ec := Real.exp_nonneg _
+    have hCEc0 : 0 ≤ C * Ec := mul_nonneg hC0 hEc0
+    have hcut : Ec ≤ Real.exp (lam * |B s ω|) :=
+      Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (S.cut_le_abs n (B s ω)) hlam)
+    have ht : |f_t (s : ℝ) (S.cut n (B s ω))| ≤ C * Ec := hg_t s (S.cut n (B s ω))
+    have hxx : |f_xx (s : ℝ) (S.cut n (B s ω))| ≤ C * Ec := hg_xx s (S.cut n (B s ω))
+    have hx : |f_x (s : ℝ) (S.cut n (B s ω))| ≤ C * Ec := hg_x s (S.cut n (B s ω))
+    have hd1 : S.cutD1 n (B s ω) ^ 2 ≤ S.M₁ ^ 2 := by
+      rw [← sq_abs (S.cutD1 n (B s ω))]; exact pow_le_pow_left₀ (abs_nonneg _) (S.cutD1_bdd n _) 2
+    have hd2 : |S.cutD2 n (B s ω)| ≤ S.M₂ := S.cutD2_bdd n _
+    calc |Jn n ω s|
+        ≤ C * Ec + (1 / 2) * (C * Ec * S.M₁ ^ 2 + C * Ec * S.M₂) := by
+          simp only [hJn]
+          refine (abs_add_le _ _).trans (add_le_add ht ?_)
+          rw [abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 1 / 2)]
+          refine mul_le_mul_of_nonneg_left ((abs_add_le _ _).trans (add_le_add ?_ ?_))
+            (by norm_num)
+          · rw [abs_mul, abs_of_nonneg (sq_nonneg (S.cutD1 n (B s ω)))]
+            exact mul_le_mul hxx hd1 (sq_nonneg _) hCEc0
+          · rw [abs_mul]; exact mul_le_mul hx hd2 (abs_nonneg _) hCEc0
+      _ = K1 * Ec := by rw [hK1]; ring
+      _ ≤ K1 * Real.exp (lam * |B s ω|) := mul_le_mul_of_nonneg_left hcut hK1_0
+  -- the inner integrand is continuous in `s` (joint continuity of the partials)
+  have hJn_cont : ∀ n ω, Continuous (Jn n ω) := by
+    intro n ω
+    have hpair : Continuous fun s : ℝ≥0 => ((s : ℝ), S.cut n (B s ω)) :=
+      NNReal.continuous_coe.prodMk ((S.continuous_cut n).comp (hBcont ω))
+    rw [hJn]
+    refine (hf_t_cont.comp hpair).add (continuous_const.mul ((((hf_xx_cont.comp hpair).mul
+      (((S.continuous_cutD1 n).comp (hBcont ω)).pow 2))).add
+      ((hf_x_cont.comp hpair).mul ((S.continuous_cutD2 n).comp (hBcont ω)))))
+  have hJl_cont : ∀ ω, Continuous (Jl ω) := by
+    intro ω
+    have hpair : Continuous fun s : ℝ≥0 => ((s : ℝ), B s ω) :=
+      NNReal.continuous_coe.prodMk (hBcont ω)
+    rw [hJl]
+    exact (hf_t_cont.comp hpair).add (continuous_const.mul (hf_xx_cont.comp hpair))
+  -- per-path inner convergence `driftCut n ω → drift ω` (bounded convergence on `[0,T]`)
+  have hinner : ∀ ω, Tendsto (fun n => driftCut n ω) atTop (𝓝 (drift ω)) := by
+    intro ω
+    obtain ⟨Mω, hMω⟩ := (isCompact_Icc (a := (0 : ℝ≥0)) (b := T)).exists_bound_of_continuousOn
+      (hBcont ω).continuousOn
+    have hconst : Integrable (fun _ : ℝ≥0 => K1 * Real.exp (lam * Mω))
+        (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) := integrable_const _
+    -- pointwise convergence of the inner integrand
+    have hz0 : ∀ z : ℝ, Tendsto (fun n : ℕ => z / ((n : ℝ) + 1)) atTop (𝓝 0) := fun z => by
+      have := tendsto_one_div_add_atTop_nhds_zero_nat.const_mul z
+      simpa [div_eq_mul_inv] using this
+    have hcutD1 : ∀ z : ℝ, Tendsto (fun n => S.cutD1 n z) atTop (𝓝 1) := fun z => by
+      have h : Tendsto (fun n : ℕ => S.φ' (z / ((n : ℝ) + 1))) atTop (𝓝 (S.φ' 0)) :=
+        (S.cont₁.continuousAt).tendsto.comp (hz0 z)
+      rw [S.at_zero₁] at h
+      exact h
+    have hcutD2 : ∀ z : ℝ, Tendsto (fun n => S.cutD2 n z) atTop (𝓝 0) := fun z => by
+      have hφ : Tendsto (fun n : ℕ => S.φ'' (z / ((n : ℝ) + 1))) atTop (𝓝 (S.φ'' 0)) :=
+        (S.cont₂.continuousAt).tendsto.comp (hz0 z)
+      have hrec : Tendsto (fun n : ℕ => 1 / ((n : ℝ) + 1)) atTop (𝓝 0) :=
+        tendsto_one_div_add_atTop_nhds_zero_nat
+      have hmul := hφ.mul hrec
+      rw [mul_zero] at hmul
+      exact Tendsto.congr (fun n => by simp only [SmoothTrunc.cutD2]; ring) hmul
+    have hptw : ∀ s : ℝ≥0, Tendsto (fun n => Jn n ω s) atTop (𝓝 (Jl ω s)) := by
+      intro s
+      have hft : Tendsto (fun n => f_t (s : ℝ) (S.cut n (B s ω))) atTop (𝓝 (f_t s (B s ω))) :=
+        ((hf_t_cont.comp (continuous_const.prodMk continuous_id)).continuousAt
+          (x := B s ω)).tendsto.comp (S.cut_tendsto (B s ω))
+      have hfxx : Tendsto (fun n => f_xx (s : ℝ) (S.cut n (B s ω))) atTop (𝓝 (f_xx s (B s ω))) :=
+        ((hf_xx_cont.comp (continuous_const.prodMk continuous_id)).continuousAt
+          (x := B s ω)).tendsto.comp (S.cut_tendsto (B s ω))
+      have hfx : Tendsto (fun n => f_x (s : ℝ) (S.cut n (B s ω))) atTop (𝓝 (f_x s (B s ω))) :=
+        ((hf_x_cont.comp (continuous_const.prodMk continuous_id)).continuousAt
+          (x := B s ω)).tendsto.comp (S.cut_tendsto (B s ω))
+      have hsq : Tendsto (fun n => S.cutD1 n (B s ω) ^ 2) atTop (𝓝 1) := by
+        have := (hcutD1 (B s ω)).pow 2; simpa using this
+      rw [hJn, hJl]
+      have := hft.add (((hfxx.mul hsq).add (hfx.mul (hcutD2 (B s ω)))).const_mul (1 / 2))
+      simpa using this
+    have hmeas : ∀ n, AEStronglyMeasurable (Jn n ω)
+        (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) :=
+      fun n => (hJn_cont n ω).aestronglyMeasurable
+    have hbound : ∀ n, ∀ᵐ s ∂(ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)),
+        ‖Jn n ω s‖ ≤ K1 * Real.exp (lam * Mω) := by
+      intro n
+      refine (ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ fun s hs => ?_)
+      rw [Real.norm_eq_abs]
+      refine (hJn_bound n ω s).trans ?_
+      refine mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr ?_) hK1_0
+      refine mul_le_mul_of_nonneg_left ?_ hlam
+      have := hMω s ⟨zero_le, hs.2⟩
+      rwa [Real.norm_eq_abs] at this
+    exact tendsto_integral_of_dominated_convergence _ hmeas hconst hbound
+      (ae_of_all _ fun s => hptw s)
+  -- the outer `L²` dominator `H = ∫₀ᵀ Kdom·exp(λ|B_s|) ds ∈ L²(μ)`
+  set H : Ω → ℝ := fun ω =>
+    ∫ s in Set.Ioc 0 T, Kdom * Real.exp (lam * |B s ω|) ∂ItoIntegralL2.timeMeasure with hHdef
+  have hHmemLp : MemLp H 2 μ :=
+    pathIntegral_expGrowth_memLp hB hBmeas T
+      (w := fun _ x => Kdom * Real.exp (lam * |x|))
+      (fun s => (continuous_const.mul (Real.continuous_exp.comp
+        (continuous_const.mul continuous_abs))).measurable)
+      hKdom0 (fun s x => by rw [abs_of_nonneg (mul_nonneg hKdom0 (Real.exp_nonneg _))])
+      (fun ω => continuous_const.mul (Real.continuous_exp.comp
+        (continuous_const.mul ((continuous_abs).comp (hBcont ω)))))
+  -- `|driftCut n ω − drift ω| ≤ H ω`
+  have hHbound : ∀ n ω, |driftCut n ω - drift ω| ≤ H ω := by
+    intro n ω
+    obtain ⟨Mω, hMω⟩ := (isCompact_Icc (a := (0 : ℝ≥0)) (b := T)).exists_bound_of_continuousOn
+      (hBcont ω).continuousOn
+    have habs_Bω : ∀ s ∈ Set.Ioc (0 : ℝ≥0) T, |B s ω| ≤ Mω := fun s hs => by
+      have := hMω s ⟨zero_le, hs.2⟩; rwa [Real.norm_eq_abs] at this
+    have hintJn : IntegrableOn (Jn n ω) (Set.Ioc 0 T) ItoIntegralL2.timeMeasure := by
+      refine Integrable.mono' (integrable_const (K1 * Real.exp (lam * Mω)))
+        (hJn_cont n ω).aestronglyMeasurable ((ae_restrict_iff' measurableSet_Ioc).mpr
+          (ae_of_all _ fun s hs => ?_))
+      rw [Real.norm_eq_abs]
+      exact (hJn_bound n ω s).trans (mul_le_mul_of_nonneg_left
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (habs_Bω s hs) hlam)) hK1_0)
+    have hintJl : IntegrableOn (Jl ω) (Set.Ioc 0 T) ItoIntegralL2.timeMeasure := by
+      refine Integrable.mono' (integrable_const (C * (1 + 1 / 2) * Real.exp (lam * Mω)))
+        (hJl_cont ω).aestronglyMeasurable ((ae_restrict_iff' measurableSet_Ioc).mpr
+          (ae_of_all _ fun s hs => ?_))
+      rw [Real.norm_eq_abs, hJl]
+      have hb : |f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)|
+          ≤ C * Real.exp (lam * |B s ω|) + (1 / 2) * (C * Real.exp (lam * |B s ω|)) := by
+        refine (abs_add_le _ _).trans (add_le_add (hg_t _ _) ?_)
+        rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/2)]
+        exact mul_le_mul_of_nonneg_left (hg_xx _ _) (by norm_num)
+      refine hb.trans ?_
+      have hmono : Real.exp (lam * |B s ω|) ≤ Real.exp (lam * Mω) :=
+        Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (habs_Bω s hs) hlam)
+      nlinarith [hmono, hC0, Real.exp_nonneg (lam * |B s ω|), Real.exp_nonneg (lam * Mω)]
+    have hintH : IntegrableOn (fun s => Kdom * Real.exp (lam * |B s ω|))
+        (Set.Ioc 0 T) ItoIntegralL2.timeMeasure := by
+      refine Integrable.mono' (integrable_const (Kdom * Real.exp (lam * Mω)))
+        (continuous_const.mul (Real.continuous_exp.comp (continuous_const.mul
+          ((continuous_abs).comp (hBcont ω))))).aestronglyMeasurable
+        ((ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ fun s hs => ?_))
+      rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg hKdom0 (Real.exp_nonneg _))]
+      exact mul_le_mul_of_nonneg_left
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (habs_Bω s hs) hlam)) hKdom0
+    calc |driftCut n ω - drift ω|
+        = |∫ s in Set.Ioc 0 T, (Jn n ω s - Jl ω s) ∂ItoIntegralL2.timeMeasure| := by
+          rw [hdriftCut, hdrift, integral_sub hintJn hintJl]
+      _ ≤ ∫ s in Set.Ioc 0 T, |Jn n ω s - Jl ω s| ∂ItoIntegralL2.timeMeasure :=
+          abs_integral_le_integral_abs
+      _ ≤ ∫ s in Set.Ioc 0 T, Kdom * Real.exp (lam * |B s ω|) ∂ItoIntegralL2.timeMeasure := by
+          refine integral_mono_of_nonneg (ae_of_all _ fun s => abs_nonneg _)
+            hintH ((ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ fun s hs => ?_))
+          calc |Jn n ω s - Jl ω s| ≤ |Jn n ω s| + |Jl ω s| := by
+                rw [sub_eq_add_neg]; exact (abs_add_le _ _).trans (by rw [abs_neg])
+            _ ≤ K1 * Real.exp (lam * |B s ω|)
+                + C * (1 + 1 / 2) * Real.exp (lam * |B s ω|) := by
+                refine add_le_add (hJn_bound n ω s) ?_
+                rw [hJl]
+                refine (abs_add_le _ _).trans ?_
+                have h1 := hg_t (s : ℝ) (B s ω)
+                rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/2)]
+                nlinarith [hg_t (s:ℝ) (B s ω), hg_xx (s:ℝ) (B s ω),
+                  Real.exp_nonneg (lam * |B s ω|), hC0]
+            _ = Kdom * Real.exp (lam * |B s ω|) := by rw [hKdom]; ring
+      _ = H ω := by rw [hHdef]
+  -- measurability of the path integrals (via the exposed `measurable_pathIntegral`)
+  have hJn_meas : ∀ n s, Measurable (fun ω => Jn n ω s) := by
+    intro n s
+    have hcomp : ∀ g : ℝ → ℝ → ℝ, Continuous (fun p : ℝ × ℝ => g p.1 p.2) →
+        Measurable (fun ω => g (s : ℝ) (S.cut n (B s ω))) := fun g hg =>
+      (((hg.comp (continuous_const.prodMk continuous_id)).comp
+        (S.continuous_cut n)).measurable).comp (hBmeas s)
+    have hd1 : Measurable (fun ω => S.cutD1 n (B s ω)) :=
+      (S.continuous_cutD1 n).measurable.comp (hBmeas s)
+    have hd2 : Measurable (fun ω => S.cutD2 n (B s ω)) :=
+      (S.continuous_cutD2 n).measurable.comp (hBmeas s)
+    rw [hJn]
+    exact (hcomp f_t hf_t_cont).add
+      (((((hcomp f_xx hf_xx_cont).mul (hd1.pow_const 2)).add
+        ((hcomp f_x hf_x_cont).mul hd2))).const_mul (1 / 2))
+  have hJl_meas : ∀ s, Measurable (fun ω => Jl ω s) := by
+    intro s
+    have hcomp : ∀ g : ℝ → ℝ → ℝ, Continuous (fun p : ℝ × ℝ => g p.1 p.2) →
+        Measurable (fun ω => g (s : ℝ) (B s ω)) := fun g hg =>
+      ((hg.comp (continuous_const.prodMk continuous_id)).measurable).comp (hBmeas s)
+    rw [hJl]
+    exact (hcomp f_t hf_t_cont).add ((hcomp f_xx hf_xx_cont).const_mul (1 / 2))
+  have hdriftCut_meas : ∀ n, Measurable (driftCut n) := fun n => by
+    rw [hdriftCut]
+    exact measurable_pathIntegral (w := fun s ω => Jn n ω s) (fun s => hJn_meas n s)
+      (fun ω => hJn_cont n ω) T
+  have hdrift_meas : Measurable drift := by
+    rw [hdrift]
+    exact measurable_pathIntegral (w := fun s ω => Jl ω s) (fun s => hJl_meas s)
+      (fun ω => hJl_cont ω) T
+  -- outer dominated convergence
+  have hGint : Integrable (fun ω => (H ω) ^ 2) μ := by
+    have hsq : (fun ω => (H ω) ^ 2) = fun ω => H ω * H ω := by funext ω; ring
+    rw [hsq]; exact hHmemLp.integrable_mul hHmemLp
+  have key := tendsto_integral_of_dominated_convergence
+    (F := fun n ω => (driftCut n ω - drift ω) ^ 2) (f := fun _ : Ω => (0 : ℝ))
+    (bound := fun ω => (H ω) ^ 2)
+    (fun n => (((hdriftCut_meas n).sub hdrift_meas).pow_const 2).aestronglyMeasurable) hGint
+    (fun n => ae_of_all _ fun ω => by
+      rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _), ← sq_abs (driftCut n ω - drift ω)]
+      exact pow_le_pow_left₀ (abs_nonneg _) (hHbound n ω) 2)
+    (ae_of_all _ fun ω => by
+      have h := ((hinner ω).sub_const (drift ω)).pow 2; simpa using h)
+  simpa using key
 
 end MathFin

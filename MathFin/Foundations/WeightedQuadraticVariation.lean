@@ -358,19 +358,23 @@ lemma abs_riemann_weight_sum_le {w : ℝ≥0 → Ω → ℝ} {C : ℝ} (hC0 : 0 
       _ = C * T := by rw [unifPart_mesh_sum T hn]
 
 omit hB in
-/-- The pathwise integral `ω ↦ ∫₀ᵀ w_s(ω) ds` of a bounded measurable process with
-continuous paths is measurable: the pointwise limit of the (measurable) left-endpoint
-Riemann sums. The shared measurability core of the `L²` Riemann lemmas below and of
-`memLp_pathIntegral_process`. -/
-private theorem measurable_pathIntegral
+/-- **The pathwise integral `ω ↦ ∫₀ᵀ w_s(ω) ds` of a measurable process with continuous paths
+is measurable.** It is the pointwise limit of the (measurable) left-endpoint Riemann sums —
+each path is bounded on the compact `[0,T]` (no *uniform* bound needed), so
+`tendsto_riemann_continuous` applies per path. The shared measurability core of the `L²`
+Riemann lemmas and `memLp_pathIntegral_process`, exported for the exponential-growth path
+integral (`ItoFormulaLocalized`), whose integrand has no uniform bound. -/
+theorem measurable_pathIntegral
     {w : ℝ≥0 → Ω → ℝ} (hw_meas : ∀ s, Measurable (w s))
-    (hw_cont : ∀ ω, Continuous fun s => w s ω)
-    {C : ℝ} (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
+    (hw_cont : ∀ ω, Continuous fun s => w s ω) (T : ℝ≥0) :
     Measurable fun ω => ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure :=
   measurable_of_tendsto_metrizable
     (fun n => Finset.measurable_sum _ fun k _ => (hw_meas (unifPart T n k)).mul_const _)
-    (tendsto_pi_nhds.mpr fun ω =>
-      tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) T (fun s _ => hw_bdd s ω))
+    (tendsto_pi_nhds.mpr fun ω => by
+      obtain ⟨C, hC⟩ := (isCompact_Icc (a := (0 : ℝ≥0)) (b := T)).exists_bound_of_continuousOn
+        (hw_cont ω).continuousOn
+      exact tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) T
+        (fun s hs => by rw [← Real.norm_eq_abs]; exact hC s ⟨zero_le, hs⟩))
 
 omit hB in
 /-- The pathwise integral inherits the Riemann sums' uniform bound `C·T`
@@ -407,7 +411,7 @@ theorem tendsto_riemann_L2_process [IsFiniteMeasure μ]
     tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) T (fun s _ => hw_bdd _ _)
   have hR_meas : ∀ n, Measurable (Rsum n) := fun n =>
     Finset.measurable_sum _ (fun k _ => (hw_meas _).mul_const _)
-  have hI_meas : Measurable Ipath := measurable_pathIntegral hw_meas hw_cont hw_bdd T
+  have hI_meas : Measurable Ipath := measurable_pathIntegral hw_meas hw_cont T
   have hR_bdd : ∀ n ω, |Rsum n ω| ≤ C * T := fun n ω => by
     simp only [hRsum]; exact abs_riemann_weight_sum_le hC0 hw_bdd T n ω
   have hI_bdd : ∀ ω, |Ipath ω| ≤ C * T := fun ω => abs_pathIntegral_le hw_cont hC0 hw_bdd T ω
@@ -442,7 +446,7 @@ theorem integrable_riemann_defect_sq [IsFiniteMeasure μ]
       w (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
     - ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) :=
     (Finset.measurable_sum _ fun k _ => (hw_meas _).mul_const _).sub
-      (measurable_pathIntegral hw_meas hw_cont hw_bdd T)
+      (measurable_pathIntegral hw_meas hw_cont T)
   refine Integrable.mono' (integrable_const ((2 * C * (T : ℝ)) ^ 2))
     (hmeas.pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω => ?_)
   rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
@@ -569,7 +573,7 @@ theorem memLp_pathIntegral_process [IsFiniteMeasure μ]
     (hw_cont : ∀ ω, Continuous fun s => w s ω)
     {C : ℝ} (hC0 : 0 ≤ C) (hw_bdd : ∀ s ω, |w s ω| ≤ C) (T : ℝ≥0) :
     MemLp (fun ω => ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) 2 μ :=
-  MemLp.of_bound (measurable_pathIntegral hw_meas hw_cont hw_bdd T).aestronglyMeasurable
+  MemLp.of_bound (measurable_pathIntegral hw_meas hw_cont T).aestronglyMeasurable
     (C * T) (Eventually.of_forall fun ω => by
       rw [Real.norm_eq_abs]; exact abs_pathIntegral_le hw_cont hC0 hw_bdd T ω)
 
