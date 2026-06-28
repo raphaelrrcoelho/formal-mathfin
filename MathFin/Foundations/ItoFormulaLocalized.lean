@@ -37,8 +37,8 @@ partials are bounded). The headline `ito_formula_td_localized` is a drop-in for 
 
 namespace MathFin
 
-open MeasureTheory ProbabilityTheory Filter ItoIntegralCLM
-open scoped NNReal Topology
+open MeasureTheory ProbabilityTheory Filter ItoIntegralCLM QuadraticVariationL2
+open scoped NNReal Topology ENNReal
 
 /-- A smooth, bounded, "identity near `0`" modification of `id : ℝ → ℝ`: `C³` with globally
 bounded derivatives, `φ x = x` on `[−1, 1]`, `φ'(0) = 1`, `|φ| ≤ min(|·|, M₀)`. Rescaling
@@ -385,5 +385,197 @@ theorem cutoff_bddDeriv (hBmeas : ∀ t, Measurable (B t))
         abs_of_pos (by norm_num : (0 : ℝ) < 3)]
       exact mul_le_mul_of_nonneg_left hb (by norm_num)
     · rw [abs_mul]; exact mul_le_mul (hcb f_x hg_x t x) (S.cutD3_bdd n x) (abs_nonneg _) hEn0
+
+/-- **The path integral of an exponential-growth integrand lies in `L²(μ)`.** For a weight
+`w : ℝ≥0 → ℝ → ℝ`, measurable in space, with `|w s x| ≤ K·exp(c|x|)`, the pathwise integral
+`ω ↦ ∫₀ᵀ w_s(B_s ω) ds` is square-integrable. This is the exponential-growth generalization
+of `memLp_pathIntegral_process` (which needs a *uniform* bound), and the reusable base stone
+the localized formula's drift dominator stands on. The proof is Fatou over the left-endpoint
+Riemann sums: each path `s ↦ w_s(B_s ω)` is continuous, hence locally bounded on `[0,T]`, so
+its Riemann sums converge to the integral (`tendsto_riemann_continuous` — applied per path,
+the integrand having *no uniform bound*); the limit is therefore measurable, and a discrete
+Cauchy–Schwarz `(∑ w·Δ)² ≤ (∑Δ)(∑ w²·Δ)` plus the Brownian marginal moment
+`∫ exp(2c|B_{tₖ}|) ≤ 2·exp(2c²·tₖ)` bound `∫ (Riemannₙ)² ≤ 2K²T²·exp(2c²T)` uniformly in `n`;
+`lintegral_liminf_le` lifts that to `∫ (path integral)²`. -/
+theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    {w : ℝ≥0 → ℝ → ℝ} (hw_meas : ∀ s, Measurable (w s)) {K : ℝ} (hK : 0 ≤ K) {c : ℝ}
+    (hw_bdd : ∀ s x, |w s x| ≤ K * Real.exp (c * |x|))
+    (hw_cont : ∀ ω, Continuous fun s : ℝ≥0 => w s (B s ω)) :
+    MemLp (fun ω => ∫ s in Set.Ioc 0 T, w s (B s ω) ∂ItoIntegralL2.timeMeasure) 2 μ := by
+  classical
+  set P : Ω → ℝ := fun ω => ∫ s in Set.Ioc 0 T, w s (B s ω) ∂ItoIntegralL2.timeMeasure with hP
+  set Rsum : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
+    w (unifPart T n k) (B (unifPart T n k) ω)
+      * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) with hRsum
+  have hg_meas : ∀ s, Measurable (fun ω => w s (B s ω)) := fun s => (hw_meas s).comp (hBmeas s)
+  have hR_meas : ∀ n, Measurable (Rsum n) := fun n =>
+    Finset.measurable_sum _ fun k _ => (hg_meas _).mul_const _
+  -- per-path Riemann convergence: each path is continuous, hence bounded on the compact `[0,T]`
+  have hpath : ∀ ω, Tendsto (fun n => Rsum n ω) atTop (𝓝 (P ω)) := by
+    intro ω
+    obtain ⟨Cω, hCω⟩ := (isCompact_Icc (a := (0 : ℝ≥0)) (b := T)).exists_bound_of_continuousOn
+      (hw_cont ω).continuousOn
+    exact tendsto_riemann_continuous (h := fun s => w s (B s ω)) (hw_cont ω) T
+      (fun s hs => by rw [← Real.norm_eq_abs]; exact hCω s ⟨zero_le, hs⟩)
+  have hP_meas : Measurable P := measurable_of_tendsto_metrizable hR_meas (tendsto_pi_nhds.mpr hpath)
+  -- pointwise growth domination and the per-marginal `L²` bound
+  have hdom : ∀ (s : ℝ≥0) (ω : Ω),
+      (w s (B s ω)) ^ 2 ≤ K ^ 2 * Real.exp (2 * c * |B s ω|) := by
+    intro s ω
+    calc (w s (B s ω)) ^ 2 = |w s (B s ω)| ^ 2 := (sq_abs _).symm
+      _ ≤ (K * Real.exp (c * |B s ω|)) ^ 2 :=
+          pow_le_pow_left₀ (abs_nonneg _) (hw_bdd s (B s ω)) 2
+      _ = K ^ 2 * Real.exp (2 * c * |B s ω|) := by
+          have hexp2 : Real.exp (c * |B s ω|) ^ 2 = Real.exp (2 * c * |B s ω|) := by
+            rw [← Real.exp_nat_mul]; congr 1; push_cast; ring
+          rw [mul_pow, hexp2]
+  have hwsq_int : ∀ s : ℝ≥0, Integrable (fun ω => (w s (B s ω)) ^ 2) μ := fun s =>
+    ((integrable_exp_abs_eval hB s (2 * c)).const_mul (K ^ 2)).mono'
+      ((hg_meas s).pow_const 2).aestronglyMeasurable
+      (ae_of_all _ fun ω => by rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]; exact hdom s ω)
+  set A : ℝ := 2 * K ^ 2 * Real.exp (2 * c ^ 2 * (T : ℝ)) with hA
+  have hpoint : ∀ s : ℝ≥0, s ≤ T → ∫ ω, (w s (B s ω)) ^ 2 ∂μ ≤ A := by
+    intro s hsT
+    calc ∫ ω, (w s (B s ω)) ^ 2 ∂μ
+        ≤ ∫ ω, K ^ 2 * Real.exp (2 * c * |B s ω|) ∂μ :=
+          integral_mono (hwsq_int s) ((integrable_exp_abs_eval hB s (2 * c)).const_mul _)
+            (hdom s)
+      _ = K ^ 2 * ∫ ω, Real.exp (2 * c * |B s ω|) ∂μ := integral_const_mul _ _
+      _ ≤ K ^ 2 * (2 * Real.exp ((2 * c) ^ 2 * (s : ℝ) / 2)) :=
+          mul_le_mul_of_nonneg_left (integral_exp_abs_eval_le hB s (2 * c)) (sq_nonneg K)
+      _ ≤ A := by
+          rw [hA]
+          have hexp : Real.exp ((2 * c) ^ 2 * (s : ℝ) / 2) ≤ Real.exp (2 * c ^ 2 * (T : ℝ)) := by
+            apply Real.exp_le_exp.mpr
+            rw [show (2 * c) ^ 2 * (s : ℝ) / 2 = 2 * c ^ 2 * (s : ℝ) by ring]
+            exact mul_le_mul_of_nonneg_left (by exact_mod_cast hsT) (by positivity)
+          nlinarith [mul_nonneg (sq_nonneg K) (sub_nonneg.mpr hexp), Real.exp_nonneg (2 * c ^ 2 * (T : ℝ))]
+  -- the uniform `L²` bound on the Riemann sums via discrete Cauchy–Schwarz
+  set Bnd : ℝ := (T : ℝ) * ((T : ℝ) * A) with hBnd
+  have hgap_nonneg : ∀ n k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k := by
+    intro n k
+    have : unifPart T n k ≤ unifPart T n (k + 1) := by
+      simp only [unifPart]; gcongr <;> simp
+    exact sub_nonneg.mpr (by exact_mod_cast this)
+  have hle_T : ∀ n k, k ≤ n → unifPart T n k ≤ T := by
+    intro n k hk
+    rcases Nat.eq_zero_or_pos n with hn0 | hn
+    · subst hn0; simp only [Nat.le_zero.mp hk]; simp [unifPart]
+    · have hkn : (k : ℝ≥0) ≤ (n : ℝ≥0) := by exact_mod_cast hk
+      have hnpos : (0 : ℝ≥0) < (n : ℝ≥0) := by exact_mod_cast hn
+      simp only [unifPart]
+      calc (k : ℝ≥0) / (n : ℝ≥0) * T ≤ 1 * T :=
+            mul_le_mul_of_nonneg_right ((div_le_one hnpos).mpr hkn) zero_le
+        _ = T := one_mul _
+  have hsumgap : ∀ n, 0 < n →
+      ∑ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) := by
+    intro n hn
+    rw [Finset.sum_range_sub (fun k => (unifPart T n k : ℝ))]
+    have h1 : unifPart T n n = T := by
+      have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
+      simp only [unifPart, div_self hne, one_mul]
+    have h0 : unifPart T n 0 = 0 := by simp [unifPart]
+    rw [h1, h0]; simp
+  have hCS : ∀ n, ∀ ω, (Rsum n ω) ^ 2 ≤ (T : ℝ) *
+      ∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
+        * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
+    intro n ω
+    rcases Nat.eq_zero_or_pos n with hn0 | hn
+    · subst hn0; simp [hRsum]
+    · have e1 : (∑ k ∈ Finset.range n, Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
+            * (w (unifPart T n k) (B (unifPart T n k) ω)
+                * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)))
+          = Rsum n ω := by
+        rw [hRsum]; refine Finset.sum_congr rfl fun k _ => ?_
+        rw [show Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
+              * (w (unifPart T n k) (B (unifPart T n k) ω)
+                  * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
+            = w (unifPart T n k) (B (unifPart T n k) ω)
+              * (Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
+                  * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) by ring,
+          Real.mul_self_sqrt (hgap_nonneg n k)]
+      have e2 : (∑ k ∈ Finset.range n,
+            (Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2) = (T : ℝ) := by
+        rw [← hsumgap n hn]; refine Finset.sum_congr rfl fun k _ => Real.sq_sqrt (hgap_nonneg n k)
+      have e3 : (∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)
+            * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2)
+          = ∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
+              * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
+        refine Finset.sum_congr rfl fun k _ => ?_
+        rw [mul_pow, Real.sq_sqrt (hgap_nonneg n k)]
+      calc (Rsum n ω) ^ 2
+          = (∑ k ∈ Finset.range n, Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
+              * (w (unifPart T n k) (B (unifPart T n k) ω)
+                  * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k))) ^ 2 := by rw [e1]
+        _ ≤ (∑ k ∈ Finset.range n,
+              (Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2)
+            * (∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)
+                * Real.sqrt ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) ^ 2) :=
+            Finset.sum_mul_sq_le_sq_mul_sq _ _ _
+        _ = (T : ℝ) * ∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
+              * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by rw [e2, e3]
+  -- the `L²` membership of each Riemann sum (finite sum of `L²` functions)
+  have hwk_memLp : ∀ s : ℝ≥0, MemLp (fun ω => w s (B s ω)) 2 μ := fun s =>
+    (memLp_two_iff_integrable_sq (hg_meas s).aestronglyMeasurable).mpr (hwsq_int s)
+  have hRsum_memLp : ∀ n, MemLp (Rsum n) 2 μ := fun n => by
+    rw [hRsum]
+    refine memLp_finsetSum _ fun k _ => ?_
+    have := (hwk_memLp (unifPart T n k)).const_mul ((unifPart T n (k + 1) : ℝ) - unifPart T n k)
+    simpa [mul_comm] using this
+  have hRsq_int : ∀ n, Integrable (fun ω => (Rsum n ω) ^ 2) μ := fun n => by
+    have hsq : (fun ω => (Rsum n ω) ^ 2) = fun ω => Rsum n ω * Rsum n ω := by funext ω; ring
+    rw [hsq]; exact (hRsum_memLp n).integrable_mul (hRsum_memLp n)
+  -- integrate the Cauchy–Schwarz bound to a uniform `∫ (Rsumₙ)² ≤ Bnd`
+  have hRbound : ∀ n, ∫ ω, (Rsum n ω) ^ 2 ∂μ ≤ Bnd := by
+    intro n
+    rcases Nat.eq_zero_or_pos n with hn0 | hn
+    · subst hn0
+      simp only [hRsum, Finset.range_zero, Finset.sum_empty]
+      rw [show (fun _ : Ω => (0 : ℝ) ^ 2) = fun _ : Ω => (0 : ℝ) by funext ω; ring, integral_zero]
+      rw [hBnd, hA]; positivity
+    · have hint_rhs : Integrable (fun ω => (T : ℝ) *
+          ∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
+            * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) μ :=
+        (integrable_finset_sum _ fun k _ =>
+          (hwsq_int (unifPart T n k)).mul_const _).const_mul _
+      calc ∫ ω, (Rsum n ω) ^ 2 ∂μ
+          ≤ ∫ ω, (T : ℝ) * ∑ k ∈ Finset.range n,
+              (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
+                * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ∂μ :=
+            integral_mono (hRsq_int n) hint_rhs (hCS n)
+        _ = (T : ℝ) * ∑ k ∈ Finset.range n,
+              (∫ ω, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2 ∂μ)
+                * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
+            rw [integral_const_mul, integral_finset_sum _ fun k _ =>
+              (hwsq_int (unifPart T n k)).mul_const _]
+            refine congrArg _ (Finset.sum_congr rfl fun k _ => ?_)
+            rw [integral_mul_const]
+        _ ≤ (T : ℝ) * ∑ k ∈ Finset.range n, A
+              * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
+            refine mul_le_mul_of_nonneg_left (Finset.sum_le_sum fun k hk => ?_) (NNReal.coe_nonneg T)
+            exact mul_le_mul_of_nonneg_right
+              (hpoint _ (hle_T n k (Nat.le_of_lt_succ (Nat.lt_succ_of_lt (Finset.mem_range.mp hk)))))
+              (hgap_nonneg n k)
+        _ = Bnd := by
+            rw [← Finset.mul_sum, hsumgap n hn, hBnd]; ring
+  -- Fatou: lift the uniform bound to the limit `P`
+  refine (memLp_two_iff_integrable_sq hP_meas.aestronglyMeasurable).mpr ?_
+  refine ⟨(hP_meas.pow_const 2).aestronglyMeasurable, ?_⟩
+  rw [hasFiniteIntegral_iff_enorm]
+  have hconv : ∀ ω, Tendsto (fun n => ‖(Rsum n ω) ^ 2‖ₑ) atTop (𝓝 (‖(P ω) ^ 2‖ₑ)) := fun ω =>
+    (continuous_enorm.tendsto _).comp ((hpath ω).pow 2)
+  calc ∫⁻ ω, ‖(P ω) ^ 2‖ₑ ∂μ
+      = ∫⁻ ω, liminf (fun n => ‖(Rsum n ω) ^ 2‖ₑ) atTop ∂μ :=
+        lintegral_congr fun ω => (hconv ω).liminf_eq.symm
+    _ ≤ liminf (fun n => ∫⁻ ω, ‖(Rsum n ω) ^ 2‖ₑ ∂μ) atTop :=
+        lintegral_liminf_le fun n => ((hR_meas n).pow_const 2).enorm
+    _ ≤ liminf (fun _ : ℕ => ENNReal.ofReal Bnd) atTop := by
+        refine liminf_le_liminf (Eventually.of_forall fun n => ?_)
+        have hee : (fun ω => ‖(Rsum n ω) ^ 2‖ₑ) = fun ω => ENNReal.ofReal ((Rsum n ω) ^ 2) :=
+          funext fun ω => Real.enorm_eq_ofReal (sq_nonneg _)
+        rw [hee, ← ofReal_integral_eq_lintegral_ofReal (hRsq_int n) (ae_of_all _ fun ω => sq_nonneg _)]
+        exact ENNReal.ofReal_le_ofReal (hRbound n)
+    _ = ENNReal.ofReal Bnd := liminf_const _
+    _ < ⊤ := ENNReal.ofReal_lt_top
 
 end MathFin

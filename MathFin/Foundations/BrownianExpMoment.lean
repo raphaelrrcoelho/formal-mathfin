@@ -93,19 +93,23 @@ lemma memLp_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
     abs_of_nonneg (by positivity : (0 : ℝ) ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω))]
   exact exp_abs_le_add c (B s ω)
 
+/-- `exp(c · |B_s|)` is integrable: dominated by `exp(c·B_s) + exp(−c·B_s) ∈ L¹`. -/
+lemma integrable_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
+    Integrable (fun ω => Real.exp (c * |B s ω|)) μ :=
+  ((integrable_exp_mul_eval hB s c).add (integrable_exp_mul_eval hB s (-c))).mono'
+    ((Real.continuous_exp.comp (continuous_const.mul continuous_abs)).measurable.comp_aemeasurable
+      (hB.hasLaw_eval s).aemeasurable).aestronglyMeasurable
+    (ae_of_all _ fun ω => by
+      rw [Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _)]; exact exp_abs_le_add c (B s ω))
+
 /-- Uniform exponential-moment bound: `∫ exp(c · |B_s|) ∂μ ≤ 2 · exp(c² s / 2)`. -/
 lemma integral_exp_abs_eval_le (s : ℝ≥0) (c : ℝ) :
     ∫ ω, Real.exp (c * |B s ω|) ∂μ ≤ 2 * Real.exp (c ^ 2 * (s : ℝ) / 2) := by
   have hbnd : ∀ ω, Real.exp (c * |B s ω|)
       ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω) := fun ω => exp_abs_le_add c (B s ω)
+  have hlhs_int : Integrable (fun ω => Real.exp (c * |B s ω|)) μ := integrable_exp_abs_eval hB s c
   have hsum_int : Integrable (fun ω => Real.exp (c * B s ω) + Real.exp (-c * B s ω)) μ :=
     (integrable_exp_mul_eval hB s c).add (integrable_exp_mul_eval hB s (-c))
-  have hlhs_int : Integrable (fun ω => Real.exp (c * |B s ω|)) μ :=
-    hsum_int.mono'
-      ((Real.continuous_exp.comp (continuous_const.mul continuous_abs)).measurable.comp_aemeasurable
-        (hB.hasLaw_eval s).aemeasurable).aestronglyMeasurable
-      (ae_of_all _ fun ω => by
-        rw [Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _)]; exact hbnd ω)
   calc ∫ ω, Real.exp (c * |B s ω|) ∂μ
       ≤ ∫ ω, (Real.exp (c * B s ω) + Real.exp (-c * B s ω)) ∂μ :=
         integral_mono hlhs_int hsum_int hbnd

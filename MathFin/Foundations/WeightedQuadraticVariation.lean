@@ -181,24 +181,26 @@ private theorem tendsto_weighted_fluctuation
   field_simp
 
 omit hB in
-/-- **Riemann sums of a continuous, bounded path converge to its integral.** For
-`h : ℝ≥0 → ℝ` continuous and bounded by `C`, the left-endpoint Riemann sums along the
-uniform partition of `[0,T]` converge to `∫₀ᵀ h ∂timeMeasure`. Mathlib has no Riemann-sum
-lemma, so this is built from scratch: the left-endpoint step function integrates (over
-`timeMeasure`, via `timeMeasure_Ioc`) to the Riemann sum, converges pointwise to `h` on
-`(0,T]` by continuity (each `s` lies in a unique partition cell whose left endpoint is
-within `T/n`), and dominated convergence (bound `C`, finite measure `timeMeasure (0,T]=T`)
-upgrades this to convergence of the integrals. The pathwise core: consumed in-file by the
-two exported `L²` wrappers (`tendsto_riemann_L2_process`, `memLp_pathIntegral_process`)
-and by Term II of `tendsto_weighted_qv_process` — the Itô-formula layers see only the
-wrappers. -/
-private theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
-    {C : ℝ} (hbdd : ∀ s, |h s| ≤ C) (T : ℝ≥0) :
+/-- **Riemann sums of a continuous path, bounded on `[0,T]`, converge to its integral.** For
+`h : ℝ≥0 → ℝ` continuous with `|h s| ≤ C` for `s ≤ T` (a *local* bound — only the values on
+`[0,T]` matter), the left-endpoint Riemann sums along the uniform partition of `[0,T]`
+converge to `∫₀ᵀ h ∂timeMeasure`. Mathlib has no Riemann-sum lemma, so this is built from
+scratch: the left-endpoint step function integrates (over `timeMeasure`, via
+`timeMeasure_Ioc`) to the Riemann sum, converges pointwise to `h` on `(0,T]` by continuity
+(each `s` lies in a unique partition cell whose left endpoint is within `T/n`), and dominated
+convergence (bound `C`, finite measure `timeMeasure (0,T]=T`) upgrades this to convergence of
+the integrals. The pathwise core: consumed in-file by the `L²` wrappers
+(`tendsto_riemann_L2_process`, `memLp_pathIntegral_process`) and Term II of
+`tendsto_weighted_qv_process`, and — through the local bound, applied per path of a process
+with no *uniform* bound — by the exponential-growth path integral
+(`ItoFormulaLocalized.pathIntegral_expGrowth_memLp`). -/
+theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
+    (T : ℝ≥0) {C : ℝ} (hbdd : ∀ s ≤ T, |h s| ≤ C) :
     Tendsto (fun n : ℕ => ∑ k ∈ Finset.range n,
         h (unifPart T n k) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
       atTop (𝓝 (∫ s in Set.Ioc 0 T, h s ∂ItoIntegralL2.timeMeasure)) := by
   classical
-  have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hbdd 0)
+  have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hbdd 0 (by positivity))
   set ν := ItoIntegralL2.timeMeasure with hν
   haveI hfin : IsFiniteMeasure (ν.restrict (Set.Ioc 0 T)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter, hν,
@@ -263,8 +265,8 @@ private theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Contin
     intro n s hs
     rcases Nat.eq_zero_or_pos n with hn0 | hn
     · simp only [hF, hn0, Finset.range_zero, Finset.sum_empty, norm_zero]; exact hC0
-    · obtain ⟨k, _, hval, _⟩ := hkey n hn s hs
-      rw [hval, Real.norm_eq_abs]; exact hbdd _
+    · obtain ⟨k, hklt, hval, _⟩ := hkey n hn s hs
+      rw [hval, Real.norm_eq_abs]; exact hbdd _ (hle_T n k hklt.le)
   -- pointwise convergence `F n s → h s` on `(0,T]`
   have hptwise : ∀ s ∈ Set.Ioc (0 : ℝ≥0) T, Tendsto (fun n => F n s) atTop (𝓝 (h s)) := by
     intro s hs
@@ -368,7 +370,7 @@ private theorem measurable_pathIntegral
   measurable_of_tendsto_metrizable
     (fun n => Finset.measurable_sum _ fun k _ => (hw_meas (unifPart T n k)).mul_const _)
     (tendsto_pi_nhds.mpr fun ω =>
-      tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) (fun s => hw_bdd s ω) T)
+      tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) T (fun s _ => hw_bdd s ω))
 
 omit hB in
 /-- The pathwise integral inherits the Riemann sums' uniform bound `C·T`
@@ -380,7 +382,7 @@ private theorem abs_pathIntegral_le
     |∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure| ≤ C * T :=
   le_of_tendsto
     (Filter.Tendsto.abs
-      (tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) (fun s => hw_bdd s ω) T))
+      (tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) T (fun s _ => hw_bdd s ω)))
     (Eventually.of_forall fun n => abs_riemann_weight_sum_le hC0 hw_bdd T n ω)
 
 omit hB in
@@ -402,7 +404,7 @@ theorem tendsto_riemann_L2_process [IsFiniteMeasure μ]
       w (unifPart T n k) ω * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) with hRsum
   set Ipath : Ω → ℝ := fun ω => ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure with hIpath
   have hpath : ∀ ω, Tendsto (fun n => Rsum n ω) atTop (𝓝 (Ipath ω)) := fun ω =>
-    tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) (fun s => hw_bdd _ _) T
+    tendsto_riemann_continuous (h := fun s => w s ω) (hw_cont ω) T (fun s _ => hw_bdd _ _)
   have hR_meas : ∀ n, Measurable (Rsum n) := fun n =>
     Finset.measurable_sum _ (fun k _ => (hw_meas _).mul_const _)
   have hI_meas : Measurable Ipath := measurable_pathIntegral hw_meas hw_cont hw_bdd T
