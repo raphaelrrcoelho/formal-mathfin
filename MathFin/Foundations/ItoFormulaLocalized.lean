@@ -247,6 +247,145 @@ lemma continuous_cutD1 (S : SmoothTrunc) (n : ℕ) : Continuous (S.cutD1 n) :=
 lemma continuous_cutD2 (S : SmoothTrunc) (n : ℕ) : Continuous (S.cutD2 n) :=
   (S.cont₂.comp (continuous_id.div_const _)).div_const _
 
+lemma continuous_φ (S : SmoothTrunc) : Continuous S.φ :=
+  Differentiable.continuous fun x => (S.hasDeriv₁ x).differentiableAt
+
+lemma continuous_cut (S : SmoothTrunc) (n : ℕ) : Continuous (S.cut n) :=
+  continuous_const.mul (S.continuous_φ.comp (continuous_id.div_const _))
+
 end SmoothTrunc
+
+/-- The cutoff function `fₙ(t, x) = f(t, φₙ(x))`. -/
+noncomputable def fCut (f : ℝ → ℝ → ℝ) (S : SmoothTrunc) (n : ℕ) (t x : ℝ) : ℝ :=
+  f t (S.cut n x)
+
+variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
+  {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
+
+include hB
+
+/-- **The bounded-derivative Itô formula applied to the cutoff `fₙ = f(t, φₙ(x))`.** For `f`
+of exponential growth, each `fₙ` has globally bounded partials (the truncation `φₙ` confines
+the argument to `[−M₀(n+1), M₀(n+1)]`, where the growth bound is a constant, times the
+`n`-uniform bounds on `φₙ`'s derivatives), so `ito_formula_td_L2_bddDeriv` applies and yields
+a trim-`L²` integrand `gfxₙ` realizing the chain-rule integrand. The drift integrand is the
+genuine `(fₙ)_t + ½(fₙ)_xx` written through the chain rule. -/
+theorem cutoff_bddDeriv (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 => B s ω) (T : ℝ≥0) (S : SmoothTrunc) (n : ℕ)
+    {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
+    (hf_t : ∀ t x, HasDerivAt (fun s => f s x) (f_t t x) t)
+    (hf_tt : ∀ t x, HasDerivAt (fun s => f_t s x) (f_tt t x) t)
+    (hf_tx : ∀ t x, HasDerivAt (fun u => f_t t u) (f_tx t x) x)
+    (hf_x : ∀ t x, HasDerivAt (fun u => f t u) (f_x t x) x)
+    (hf_xx : ∀ t x, HasDerivAt (fun u => f_x t u) (f_xx t x) x)
+    (hf_xxx : ∀ t x, HasDerivAt (fun u => f_xx t u) (f_xxx t x) x)
+    (hf_x_cont : Continuous fun p : ℝ × ℝ => f_x p.1 p.2)
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ => f_xx p.1 p.2)
+    {C lam : ℝ} (hlam : 0 ≤ lam)
+    (hg_t : ∀ t x, |f_t t x| ≤ C * Real.exp (lam * |x|))
+    (hg_x : ∀ t x, |f_x t x| ≤ C * Real.exp (lam * |x|))
+    (hg_xx : ∀ t x, |f_xx t x| ≤ C * Real.exp (lam * |x|))
+    (hg_tt : ∀ t x, |f_tt t x| ≤ C * Real.exp (lam * |x|))
+    (hg_tx : ∀ t x, |f_tx t x| ≤ C * Real.exp (lam * |x|))
+    (hg_xxx : ∀ t x, |f_xxx t x| ≤ C * Real.exp (lam * |x|)) :
+    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (fun ω => fCut f S n T (B T ω) - fCut f S n 0 (B 0 ω)) =ᵐ[μ]
+        (fun ω => (itoIntegralCLM_T hB T hBmeas gfx) ω
+          + ∫ s in Set.Ioc 0 T,
+              (f_t s (S.cut n (B s ω))
+                + (1 / 2) * (f_xx s (S.cut n (B s ω)) * S.cutD1 n (B s ω) ^ 2
+                    + f_x s (S.cut n (B s ω)) * S.cutD2 n (B s ω)))
+              ∂ItoIntegralL2.timeMeasure) := by
+  classical
+  have hC0 : 0 ≤ C := by
+    have h := hg_t 0 0
+    simp only [abs_zero, mul_zero, Real.exp_zero, mul_one] at h
+    exact le_trans (abs_nonneg _) h
+  set En : ℝ := C * Real.exp (lam * (S.M₀ * ((n : ℝ) + 1))) with hEn
+  have hEn0 : 0 ≤ En := mul_nonneg hC0 (Real.exp_nonneg _)
+  -- the growth bound becomes a constant once the argument is confined by the truncation
+  have hcb : ∀ (g : ℝ → ℝ → ℝ), (∀ t x, |g t x| ≤ C * Real.exp (lam * |x|)) →
+      ∀ t x, |g t (S.cut n x)| ≤ En := by
+    intro g hg t x
+    refine (hg t (S.cut n x)).trans (mul_le_mul_of_nonneg_left ?_ hC0)
+    exact Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_left (S.cut_bdd n x) hlam)
+  have hcont_cut2 : Continuous fun p : ℝ × ℝ => f_x p.1 (S.cut n p.2) :=
+    hf_x_cont.comp (continuous_fst.prodMk ((S.continuous_cut n).comp continuous_snd))
+  have hcont_cutxx : Continuous fun p : ℝ × ℝ => f_xx p.1 (S.cut n p.2) :=
+    hf_xx_cont.comp (continuous_fst.prodMk ((S.continuous_cut n).comp continuous_snd))
+  refine ito_formula_td_L2_bddDeriv hB hBmeas hBcont T (f := fCut f S n)
+    (f_t := fun t x => f_t t (S.cut n x))
+    (f_x := fun t x => f_x t (S.cut n x) * S.cutD1 n x)
+    (f_xx := fun t x => f_xx t (S.cut n x) * S.cutD1 n x ^ 2 + f_x t (S.cut n x) * S.cutD2 n x)
+    (f_tt := fun t x => f_tt t (S.cut n x))
+    (f_tx := fun t x => f_tx t (S.cut n x) * S.cutD1 n x)
+    (f_xxx := fun t x => f_xxx t (S.cut n x) * S.cutD1 n x ^ 3
+        + 3 * f_xx t (S.cut n x) * S.cutD1 n x * S.cutD2 n x + f_x t (S.cut n x) * S.cutD3 n x)
+    (Ct := En) (C1 := En * S.M₁) (C2 := En * S.M₁ ^ 2 + En * S.M₂) (Ctt := En)
+    (Ctx := En * S.M₁) (Cxxx := En * S.M₁ ^ 3 + 3 * (En * S.M₁ * S.M₂) + En * S.M₃)
+    ?ht ?htt ?htx ?hx ?hxx ?hxxx ?hxc ?hxxc ?bt ?bx ?bxx ?btt ?btx ?bxxx
+  case ht => exact fun t x => hf_t t (S.cut n x)
+  case htt => exact fun t x => hf_tt t (S.cut n x)
+  case htx => exact fun t x => (hf_tx t (S.cut n x)).comp x (S.cut_hasDerivAt n x)
+  case hx => exact fun t x => (hf_x t (S.cut n x)).comp x (S.cut_hasDerivAt n x)
+  case hxx =>
+    intro t x
+    rw [show f_xx t (S.cut n x) * S.cutD1 n x ^ 2 + f_x t (S.cut n x) * S.cutD2 n x
+        = f_xx t (S.cut n x) * S.cutD1 n x * S.cutD1 n x + f_x t (S.cut n x) * S.cutD2 n x by ring]
+    exact ((hf_xx t (S.cut n x)).comp x (S.cut_hasDerivAt n x)).mul (S.cutD1_hasDerivAt n x)
+  case hxxx =>
+    intro t x
+    have hsq : HasDerivAt (fun u => S.cutD1 n u ^ 2) (2 * S.cutD1 n x * S.cutD2 n x) x := by
+      have h := (S.cutD1_hasDerivAt n x).mul (S.cutD1_hasDerivAt n x)
+      rw [show (fun u => S.cutD1 n u ^ 2) = (fun u => S.cutD1 n u * S.cutD1 n u) from
+            funext fun u => sq (S.cutD1 n u),
+          show 2 * S.cutD1 n x * S.cutD2 n x
+            = S.cutD2 n x * S.cutD1 n x + S.cutD1 n x * S.cutD2 n x from by ring]
+      exact h
+    rw [show f_xxx t (S.cut n x) * S.cutD1 n x ^ 3
+            + 3 * f_xx t (S.cut n x) * S.cutD1 n x * S.cutD2 n x + f_x t (S.cut n x) * S.cutD3 n x
+          = f_xxx t (S.cut n x) * S.cutD1 n x * S.cutD1 n x ^ 2
+              + f_xx t (S.cut n x) * (2 * S.cutD1 n x * S.cutD2 n x)
+            + (f_xx t (S.cut n x) * S.cutD1 n x * S.cutD2 n x + f_x t (S.cut n x) * S.cutD3 n x)
+          by ring]
+    exact (((hf_xxx t (S.cut n x)).comp x (S.cut_hasDerivAt n x)).mul hsq).add
+      (((hf_xx t (S.cut n x)).comp x (S.cut_hasDerivAt n x)).mul (S.cutD2_hasDerivAt n x))
+  case hxc => exact hcont_cut2.mul ((S.continuous_cutD1 n).comp continuous_snd)
+  case hxxc =>
+    exact (hcont_cutxx.mul (((S.continuous_cutD1 n).comp continuous_snd).pow 2)).add
+      (hcont_cut2.mul ((S.continuous_cutD2 n).comp continuous_snd))
+  case bt => exact fun t x => hcb f_t hg_t t x
+  case btt => exact fun t x => hcb f_tt hg_tt t x
+  case btx =>
+    intro t x
+    rw [abs_mul]
+    exact mul_le_mul (hcb f_tx hg_tx t x) (S.cutD1_bdd n x) (abs_nonneg _) hEn0
+  case bx =>
+    intro t x
+    rw [abs_mul]
+    exact mul_le_mul (hcb f_x hg_x t x) (S.cutD1_bdd n x) (abs_nonneg _) hEn0
+  case bxx =>
+    intro t x
+    refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
+    · rw [abs_mul, abs_pow]
+      exact mul_le_mul (hcb f_xx hg_xx t x) (pow_le_pow_left₀ (abs_nonneg _) (S.cutD1_bdd n x) 2)
+        (by positivity) hEn0
+    · rw [abs_mul]; exact mul_le_mul (hcb f_x hg_x t x) (S.cutD2_bdd n x) (abs_nonneg _) hEn0
+  case bxxx =>
+    intro t x
+    refine (abs_add_le _ _).trans (add_le_add ((abs_add_le _ _).trans (add_le_add ?_ ?_)) ?_)
+    · rw [abs_mul, abs_pow]
+      exact mul_le_mul (hcb f_xxx hg_xxx t x) (pow_le_pow_left₀ (abs_nonneg _) (S.cutD1_bdd n x) 3)
+        (by positivity) hEn0
+    · have hM1 : 0 ≤ S.M₁ := le_trans (abs_nonneg _) (S.cutD1_bdd n x)
+      have hb : |f_xx t (S.cut n x) * S.cutD1 n x * S.cutD2 n x| ≤ En * S.M₁ * S.M₂ := by
+        rw [abs_mul, abs_mul]
+        exact mul_le_mul (mul_le_mul (hcb f_xx hg_xx t x) (S.cutD1_bdd n x) (abs_nonneg _) hEn0)
+          (S.cutD2_bdd n x) (abs_nonneg _) (mul_nonneg hEn0 hM1)
+      rw [show (3 : ℝ) * f_xx t (S.cut n x) * S.cutD1 n x * S.cutD2 n x
+            = 3 * (f_xx t (S.cut n x) * S.cutD1 n x * S.cutD2 n x) by ring, abs_mul,
+        abs_of_pos (by norm_num : (0 : ℝ) < 3)]
+      exact mul_le_mul_of_nonneg_left hb (by norm_num)
+    · rw [abs_mul]; exact mul_le_mul (hcb f_x hg_x t x) (S.cutD3_bdd n x) (abs_nonneg _) hEn0
 
 end MathFin
