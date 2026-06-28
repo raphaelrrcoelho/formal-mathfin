@@ -149,4 +149,45 @@ theorem smoothTrunc_exists : Nonempty SmoothTrunc := by
     id_near := hidn, at_zero₁ := hr_one 0 (by norm_num),
     le_abs := hla, bdd := hbdd, bdd₁ := hb1, bdd₂ := hM₂, bdd₃ := hM₃ }⟩
 
+namespace SmoothTrunc
+
+/-- The rescaled cutoff `φₙ(x) = (n+1)·φ(x/(n+1))`. It equals `id` on `[−(n+1), n+1]`
+(so `φₙ → id` pointwise), with `|φₙ| ≤ min(|·|, M₀(n+1))` and `n`-uniform derivative
+bounds — exactly the truncation the localized Itô formula applies `ito_formula_td_L2_bddDeriv`
+to. -/
+noncomputable def cut (S : SmoothTrunc) (n : ℕ) (x : ℝ) : ℝ :=
+  ((n : ℝ) + 1) * S.φ (x / ((n : ℝ) + 1))
+
+/-- For `n + 1 ≥ |x|`, the cutoff is exactly the identity at `x` (since `φ = id` near `0`). -/
+lemma cut_eventually_id (S : SmoothTrunc) (x : ℝ) : ∀ᶠ n : ℕ in atTop, S.cut n x = x := by
+  filter_upwards [eventually_ge_atTop ⌈|x|⌉₊] with n hn
+  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  have hle : |x / ((n : ℝ) + 1)| ≤ 1 := by
+    rw [abs_div, abs_of_pos hn1, div_le_one hn1]
+    calc |x| ≤ (⌈|x|⌉₊ : ℝ) := Nat.le_ceil _
+      _ ≤ (n : ℝ) := by exact_mod_cast hn
+      _ ≤ (n : ℝ) + 1 := by linarith
+  rw [cut, S.id_near _ hle]; field_simp
+
+/-- `φₙ(x) → x` as `n → ∞`. -/
+lemma cut_tendsto (S : SmoothTrunc) (x : ℝ) : Tendsto (fun n => S.cut n x) atTop (𝓝 x) :=
+  tendsto_const_nhds.congr' ((S.cut_eventually_id x).mono fun _ h => h.symm)
+
+/-- `|φₙ| ≤ |·|` — the `n`-uniform dominator the limit passes use. -/
+lemma cut_le_abs (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cut n x| ≤ |x| := by
+  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  rw [cut, abs_mul, abs_of_pos hn1]
+  calc ((n : ℝ) + 1) * |S.φ (x / ((n : ℝ) + 1))|
+      ≤ ((n : ℝ) + 1) * |x / ((n : ℝ) + 1)| := mul_le_mul_of_nonneg_left (S.le_abs _) hn1.le
+    _ = |x| := by rw [abs_div, abs_of_pos hn1]; field_simp
+
+/-- `|φₙ| ≤ M₀(n+1)` — so `φₙ` is bounded for each fixed `n` (makes `fₙ`'s derivatives
+bounded under exponential growth). -/
+lemma cut_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cut n x| ≤ S.M₀ * ((n : ℝ) + 1) := by
+  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  rw [cut, abs_mul, abs_of_pos hn1, mul_comm]
+  exact mul_le_mul_of_nonneg_right (S.bdd _) hn1.le
+
+end SmoothTrunc
+
 end MathFin
