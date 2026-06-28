@@ -403,6 +403,24 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ito_formula_td_localized' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_localized
 
+/-! ## Itô → pricing bridge: geometric Brownian motion decomposed by the Itô integral
+
+`ItoFormulaGBM.lean`: the **first pricing-ward consumer of the analytic Itô tower** (which
+until now had none — GBM/BS pricing ran via separate algebraic towers and the Wald
+exponential). The localized formula, applied to the *time-localized* GBM exponent
+`(t,x) ↦ S₀ exp((m−σ²/2)·φₙ(t) + σx)` (identity on `[0,T]`, globally bounded so the
+exp-growth hypotheses hold uniformly in time), yields `ito_formula_gbm`:
+`Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds`. Setting `m = 0`
+(`discountedGBM_eq_itoIntegral`) makes the drift vanish — the Itô-integral content of the
+discounted-GBM martingale, grounding it on the continuous Itô integral rather than the Wald
+exponential. -/
+
+/-- info: 'MathFin.ito_formula_gbm' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_gbm
+
+/-- info: 'MathFin.discountedGBM_eq_itoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_eq_itoIntegral
+
 /-! ## Carr–Madan static replication / spanning formula -/
 
 /-- info: 'MathFin.carrMadan_spanning' depends on axioms: [propext, Classical.choice, Quot.sound] -/

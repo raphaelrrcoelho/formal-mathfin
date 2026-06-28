@@ -12,7 +12,7 @@
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa)](CODE_OF_CONDUCT.md)
 
 A Lean 4 library of machine-checked mathematical-finance theorems, built on Mathlib
-and Degenne's BrownianMotion. 295 theorems across 11 areas — Black-Scholes
+and Degenne's BrownianMotion. 297 theorems across 11 areas — Black-Scholes
 with the full Greek matrix, the exotics, and Merton jump-diffusion, binomial
 trees with American / Bermudan / Snell envelope, fixed income with hazard
 credit, first-to-default baskets, and Vasicek SDE, portfolio theory from
@@ -29,13 +29,13 @@ Public artifacts: [paper (arXiv:2606.01356)](https://arxiv.org/abs/2606.01356),
 
 |  | count |
 |---|---:|
-| total theorems | 295 |
+| total theorems | 297 |
 | **full derivations** | **259** |
 | library wrappers | 18 |
 | reduced cores | 17 |
 | placeholders | **0** |
 
-**278 of the 295 are delivery-ready** (`full` + `library_wrapper`); the 17
+**280 of the 297 are delivery-ready** (`full` + `library_wrapper`); the 17
 `reduced_core` entries are honest special cases or algebraic/structural cores
 of results whose general form is not yet formalized here (see *What's not
 done*).
@@ -113,7 +113,7 @@ See [`CONTRIBUTING.md`](CONTRIBUTING.md) for the full development workflow.
   the three Mathlib standard axioms.
 - **Verification ledger.** [`verification_ledger.json`](verification_ledger.json)
   records the input-hash (snippet code + transitive imports + toolchain pins)
-  each of the 295 benchmark entries last verified under; only entries whose
+  each of the 297 benchmark entries last verified under; only entries whose
   inputs changed ever re-run.
 - **CI gates.** Every push runs the Python gates (status taxonomy, forbidden
   tactics, a definitional-`rfl` tripwire, blueprint ⊆ audit, ledger
@@ -165,7 +165,7 @@ gaussian MGF, exponential discount, Snell envelope). See
 
 ## What's not done (yet)
 
-17 of the 295 theorems are `reduced_core` — an honest special case or
+17 of the 297 theorems are `reduced_core` — an honest special case or
 algebraic/structural core of a result whose fully general form is not yet
 formalized here. By area:
 

@@ -53,6 +53,58 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-28 — corpus 297 — the Itô tower reaches pricing: GBM decomposed by the Itô integral
+
+**Scope.** New proof content in `Foundations/ItoFormulaGBM.lean`: `ito_formula_gbm` (the GBM
+Itô decomposition `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` via time-localization),
+`discountedGBM_eq_itoIntegral` (the `m=0` pure-Itô-integral specialization), and the plateau-slope
+lemma `SmoothTrunc.phi'_eq_one_of_lt`. Corpus entries `sc-ito-formula-gbm`, `sc-discounted-gbm-ito`
+(both `full`, axioms-clean `[propext, Classical.choice, Quot.sound]`).
+
+**Panel.** Two independent reviewers, four lenses each.
+
+| lens | verdict |
+|---|---|
+| inspired math | PASS |
+| Mathlib/Degenne coherence | PASS |
+| zero slop | PASS (after fix) |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: one, **fixed before this verdict** — a dead `have hM0 : 0 ≤ S.M₀` (never
+referenced; the value bound `hDbd` needs only `abs_nonneg`/`cut_bdd`) was deleted. Also applied a
+clean non-blocking dedup: the GBM-value joint continuity, copy-pasted across the three partial
+continuity arguments, is now factored into a single `hScont` (each partial is `(const)·Ŝ`).
+
+**Checks that mattered.** (1) This is the **first pricing-ward consumer of the analytic Itô
+tower** — closing the standing two-tower disconnect on the Itô side: GBM is now decomposed by the
+*genuine* `itoIntegralCLM_T`, not the algebraic `ItoLemma`/`PDEFromIto` tower or the Wald
+exponential. (2) The route is the *classic* one and the right idea, not a hack: the GBM value is
+`t`-exponential (`exp(a·t)`, `a=m−σ²/2`), which fails the localized formula's `t`-uniform
+exp-in-`x` growth, so the formula is applied to the **time-localized** exponent
+`S₀ exp(a·φₙ(t)+σx)` (`φₙ=cut`, `n=⌈T⌉₊`) — identity on `[0,T]`, globally bounded off it — and the
+cutoff is *invisible in the statement*, eliminated at `T`, `0`, and a.e. `s≤T` by
+`hcut_id`/`hcutD1_one`. (3) The `m·Ŝ` drift is *derived*: on `[0,T]` `φₙ=id`, `φₙ'=1`, so the
+localization drift `(m−σ²/2)·Ŝ` plus the Itô correction `½σ²·Ŝ` collapse to `m·Ŝ` by `ring`; the
+`m=0` corollary shows the cancellation that makes the discounted increment a pure Itô integral.
+(4) Coherence: every derivative is a real `HasDerivAt` combinator, every bound a `cutDi_bdd`, every
+continuity a `continuous_cut(D1)` — nothing reproved; the only new fact, `phi'_eq_one_of_lt`, is
+the minimal honest addition (`at_zero₁` gives unit slope only at `0`; the plateau needs it on all
+`|y|<1`, from `id_near` + `HasDerivAt.unique`). The `hbound`/`hDbd`/`hlinx` helpers factor the
+common "coef ≤ Cs, ×Ŝ ⇒ ≤ C·exp" / value-bound / clean-`x`-derivative patterns at the right
+register.
+
+**Recorded follow-up (non-blocking).** Both reviewers noted `hcut_id`/`hcutD1_one` duplicate the
+core of `SmoothTrunc.cut_eventually_id`; extracting them as `SmoothTrunc.cut_eq_id_of_abs_le` /
+`cutD1_eq_one_of_abs_lt` in `ItoFormulaLocalized.lean` (and relocating `phi'_eq_one_of_lt` beside
+the other `SmoothTrunc` lemmas) would dedup the shared `rw [cut, id_near]; field_simp`. Deferred to
+avoid a full rebuild of the localized file and its dependents for a cosmetic coherence gain.
+
+**Verdict: PASS.** Zero blocking findings outstanding; corpus 297, axioms-clean.
+
 ## 2026-06-28 — working tree (uncommitted) — corpus 295 — localized (exponential-growth) time-dependent Itô formula: the rung-3 unlock to GBM
 
 **Scope.** New proof content in `Foundations/ItoFormulaLocalized.lean` (`SmoothTrunc`,

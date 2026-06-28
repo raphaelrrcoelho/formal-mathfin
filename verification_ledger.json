@@ -1879,6 +1879,13 @@
       "input_hash": "0c520bbcdc0337de1fefacef30ba9a4a95f200cfae7f71344aed599745dd04a0",
       "verified_at_commit": "4e921c4"
     },
+    "sc-discounted-gbm-ito": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-28",
+      "elapsed_s": 11.8,
+      "input_hash": "7749651d3ced1af4852fd157f6b7cf1c94dde8ae168c08fa1b32872ebbe8fcf6",
+      "verified_at_commit": "19fe49a"
+    },
     "sc-discrete-cubing-identity": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-24",
@@ -1892,6 +1899,13 @@
       "elapsed_s": 98.6,
       "input_hash": "9bac1a3496ebc5da14d0c25d5347220ba072ec9252904d9f4c5fd167e68b56b3",
       "verified_at_commit": "141e4f5"
+    },
+    "sc-ito-formula-gbm": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-28",
+      "elapsed_s": 53.8,
+      "input_hash": "851da682808b22a4dc626222a2c54c92e51f9a5ca1198e511394fb260889dae8",
+      "verified_at_commit": "19fe49a"
     },
     "sc-ito-formula-localized": {
       "benchmark_file": "stochastic_calculus.json",

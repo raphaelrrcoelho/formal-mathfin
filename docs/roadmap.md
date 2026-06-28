@@ -840,7 +840,25 @@ deterministic-integrand layer load-bearing in a pricing module for the first tim
   isometry, CLM) carries the pricing weight with zero new analytic machinery beyond the cutoff.
   corpus 294 → **295**, 259 → **260 full**.
 
-**Open frontier:** unrestricted C² Itô formula via localization (Summit C); the Itô formula
-*against an Itô process* `∫ f'(X) dX` (drift+diffusion `X`, the GBM/BS case closed-form);
-general-Ω multi-period DMW FTAP; SDE existence and uniqueness (Itô–Picard iteration); Lévy's
-martingale characterization of Brownian motion.
+- **The Itô tower reaches pricing — GBM decomposed by the Itô integral**
+  (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm`, `sc-discounted-gbm-ito`, both
+  `full`). The **first pricing-ward consumer of the analytic Itô tower**, which until now had
+  *none*: GBM/BS pricing ran via separate algebraic towers (`ItoLemma`/`PDEFromIto`, Feynman–Kac)
+  and `discountedGBM_isMartingale` was proved via the Wald exponential, never the Itô integral.
+  `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` for the GBM value
+  `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the *genuine* continuous Itô integral. The
+  route is the **classic one — localization in time**: the GBM value is `t`-exponential and fails
+  the localized formula's `t`-uniform growth, so the localized formula is applied to the
+  time-localized exponent `S₀ exp((m−σ²/2)·φₙ(t)+σx)` (`φₙ=SmoothTrunc.cut n`, `n=⌈T⌉₊`), the
+  identity on `[0,T]` yet globally bounded so the exp-growth hypotheses hold uniformly in time;
+  on `[0,T]` `φₙ=id`, `φₙ'=1`, so the localization drift `(m−σ²/2)·Ŝ` and the Itô correction
+  `½σ²·Ŝ` collapse to `m·Ŝ`. Setting `m=0` (`discountedGBM_eq_itoIntegral`) makes the drift
+  vanish — the Itô-integral content of the discounted-GBM martingale (no new analytic machinery
+  beyond the `phi'_eq_one_of_lt` plateau-slope lemma). corpus 295 → **297**, 260 → **262 full**.
+
+**Open frontier:** re-ground `discountedGBM_isMartingale` at the *process* level (all `t`, on the
+Brownian filtration) on the Itô integral, completing the GBM/BS pricing-tower migration the
+terminal-time `discountedGBM_eq_itoIntegral` opens; unrestricted C² Itô formula via localization
+(Summit C); the Itô formula *against a general Itô process* `∫ f'(X) dX` (drift+diffusion `X`
+beyond the GBM closed form); general-Ω multi-period DMW FTAP; SDE existence and uniqueness
+(Itô–Picard iteration); Lévy's martingale characterization of Brownian motion.

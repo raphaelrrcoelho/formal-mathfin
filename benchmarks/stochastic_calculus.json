@@ -98,6 +98,38 @@
       }
     },
     {
+      "id": "sc-ito-formula-gbm",
+      "name": "Itô Formula for Geometric Brownian Motion",
+      "description": "The GBM Itô decomposition Ŝ(T) − Ŝ(0) = ∫₀ᵀ σ Ŝ(s) dB_s + ∫₀ᵀ m Ŝ(s) ds for the value function Ŝ(t) = S₀ exp((m−σ²/2)t + σ B_t), via the localized Itô formula applied to the time-localized exponent. First pricing-ward consumer of the analytic Itô tower.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoFormulaGBM\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralCLM\nopen scoped NNReal\n\n/-- **Itô formula for geometric Brownian motion.** For the GBM value function\n`Ŝ(t) = S₀ exp((m − σ²/2)t + σ B_t)`, the increment over `[0,T]` decomposes as the genuine\ncontinuous Itô integral `itoIntegralCLM_T` of the `σ Ŝ` diffusion plus the `m·Ŝ` drift:\n`Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ(s) ds`. The first pricing-ward consumer of the\nanalytic Itô tower: GBM is decomposed by the real Itô integral, not an algebraic drift or a heat\nkernel. Obtained from the localized (exponential-growth) Itô formula applied to the\nTIME-localized exponent `(t,x) ↦ S₀ exp((m−σ²/2)·φₙ(t) + σx)` (φₙ = the smooth cutoff,\nn = ⌈T⌉₊), which equals the GBM exponent on `[0,T]` yet is globally bounded so the\nexponential-in-x growth hypotheses hold uniformly in time; on `[0,T]` φₙ = id, φₙ' = 1, so the\nlocalization drift `(m−σ²/2)·Ŝ` plus the Itô correction `½σ²·Ŝ` collapse to `m·Ŝ`. Lives in\n`MathFin/Foundations/ItoFormulaGBM.lean`. -/\ntheorem ito_formula_gbm_corpus\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 => B s ω))\n    (T : ℝ≥0) (S₀ m σ : ℝ) :\n    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),\n      (fun ω => S₀ * Real.exp ((m - σ ^ 2 / 2) * (T : ℝ) + σ * B T ω)\n              - S₀ * Real.exp ((m - σ ^ 2 / 2) * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]\n        (fun ω => (itoIntegralCLM_T hB T hBmeas gfx) ω\n          + ∫ s in Set.Ioc 0 T, m * (S₀ * Real.exp ((m - σ ^ 2 / 2) * (s : ℝ) + σ * B s ω))\n              ∂ItoIntegralL2.timeMeasure) :=\n  MathFin.ito_formula_gbm hB hBmeas hBcont T S₀ m σ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Itô formula for GBM (S_t = S0 exp((m-sigma^2/2)t + sigma B_t))",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal derivation (MathFin.ito_formula_gbm): the Ito decomposition of geometric Brownian motion S_hat(t) = S0*exp((m-sigma^2/2)t + sigma*B_t) over [0,T] -- the increment equals the GENUINE continuous Ito integral itoIntegralCLM_T of the sigma*S_hat diffusion plus the m*S_hat drift. This is the FIRST pricing-ward consumer of the analytic Ito tower (ItoIntegralCLM/ItoFormulaTD/ItoFormulaLocalized), which until now had ZERO pricing consumers (GBM/BS pricing ran via separate algebraic towers and the Wald exponential). Method = localization in TIME (the classic route): the GBM value function is t-EXPONENTIAL, so it fails the localized formula's t-uniform exponential-in-x growth bound; apply the localized formula instead to the time-localized exponent S_check(t,x) = S0*exp((m-sigma^2/2)*phi_n(t) + sigma*x) with phi_n = SmoothTrunc.cut n, n = ceil(T), which equals the identity on [0,T] (so S_check IS the GBM exponent there) yet is globally bounded (so the six exponential-growth derivative bounds hold UNIFORMLY in time). On [0,T], phi_n = id and phi_n' = 1, so the localization drift (m-sigma^2/2)*S_hat plus the Ito second-order term (1/2)sigma^2*S_hat collapse to m*S_hat. Setting m=0 makes the drift vanish (discountedGBM_eq_itoIntegral). Lives in MathFin/Foundations/ItoFormulaGBM.lean. Axioms-clean."
+      }
+    },
+    {
+      "id": "sc-discounted-gbm-ito",
+      "name": "Discounted GBM as a Pure Itô Integral",
+      "description": "The discounted GBM increment Ŝ(T) − Ŝ(0) = ∫₀ᵀ σ Ŝ(s) dB_s (zero drift) for Ŝ(t) = S₀ exp(−(σ²/2)t + σ B_t) — the m=0 case of the GBM Itô formula, the Itô-integral content of the discounted-GBM martingale.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoFormulaGBM\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralCLM\nopen scoped NNReal\n\n/-- **The discounted GBM increment is a pure Itô integral (zero drift).** Specializing the GBM\nItô formula at the risk-neutral drift `m = 0`: the discounted GBM `Ŝ(t) = S₀ exp(−(σ²/2)t + σ B_t)`\nsatisfies `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx` — the drift vanishes because the localization\ndrift `−σ²/2` exactly cancels the Itô second-order correction `½σ²`. This is the Itô-integral\ncontent of the discounted-GBM martingale (`discountedGBM_isMartingale`, obtained there via the\nWald exponential): the discounted price moves only through its `σ Ŝ` diffusion against `dB`, so\nits increment is a pure Itô integral. Lives in `MathFin/Foundations/ItoFormulaGBM.lean`. -/\ntheorem discountedGBM_eq_itoIntegral_corpus\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 => B s ω))\n    (T : ℝ≥0) (S₀ σ : ℝ) :\n    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),\n      (fun ω => S₀ * Real.exp (-(σ ^ 2 / 2) * (T : ℝ) + σ * B T ω)\n              - S₀ * Real.exp (σ * B 0 ω)) =ᵐ[μ]\n        (fun ω => (itoIntegralCLM_T hB T hBmeas gfx) ω) :=\n  MathFin.discountedGBM_eq_itoIntegral hB hBmeas hBcont T S₀ σ\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Discounted GBM Ito decomposition (zero drift, m=0)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal derivation (MathFin.discountedGBM_eq_itoIntegral): the m=0 specialization of the GBM Ito formula. The discounted geometric Brownian motion S_hat(t) = S0*exp(-(sigma^2/2)t + sigma*B_t) has increment over [0,T] equal to a PURE continuous Ito integral itoIntegralCLM_T gfx, with NO drift -- the localization drift -sigma^2/2 exactly cancels the Ito second-order correction (1/2)sigma^2. This is the Ito-integral CONTENT of the discounted-GBM martingale (MathFin.discountedGBM_isMartingale, obtained there via the Wald exponential): the discounted price moves only through its sigma*S_hat diffusion against dB, so its increment is a pure Ito integral and the martingale property is the martingale property of that integral. Lives in MathFin/Foundations/ItoFormulaGBM.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "sc-thm-7.5.2",
       "name": "Two-Dimensional Itô Formula",
       "description": "Theorem 7.5.2: For f ∈ C^{1,2}(R+ × R²) and Itô processes X, Y, df(t,X_t,Y_t) = ∂_t f dt + ∂_x f dX + ∂_y f dY + (1/2) ∂_xx f d⟨X⟩ + ∂_xy f d⟨X,Y⟩ + (1/2) ∂_yy f d⟨Y⟩",

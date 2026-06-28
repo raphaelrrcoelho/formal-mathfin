@@ -26,9 +26,23 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-28, localized Itô formula — the rung-3 unlock to GBM):** corpus **295**,
-> **260 full + 18 wrappers = 278/295 delivery-ready**, 17 reduced cores, 0
-> placeholders. **The time-dependent Itô formula now reaches at-most-exponential growth**
+> **Live status (2026-06-28, the Itô tower reaches pricing — GBM decomposed by the Itô
+> integral):** corpus **297**, **262 full + 18 wrappers = 280/297 delivery-ready**, 17 reduced
+> cores, 0 placeholders. **Geometric Brownian motion is now decomposed by the genuine continuous
+> Itô integral** (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
+> `sc-discounted-gbm-ito`, both **`full`**) — the **first pricing-ward consumer of the analytic
+> Itô tower**, which until now had *none* (GBM/BS pricing ran via separate algebraic towers and
+> the Wald exponential). `ito_formula_gbm` gives `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds`
+> for the GBM value `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the *real* Itô integral.
+> The route is the classic one — **localization in time**: the GBM value is `t`-exponential (fails
+> the localized formula's `t`-uniform growth), so the localized formula is applied to the
+> time-localized exponent `S₀ exp((m−σ²/2)·φₙ(t)+σx)` (`φₙ` = smooth cutoff, `n=⌈T⌉₊`), the
+> identity on `[0,T]` yet globally bounded; there `φₙ=id`, `φₙ'=1`, so the localization drift
+> `(m−σ²/2)·Ŝ` and the Itô correction `½σ²·Ŝ` collapse to `m·Ŝ`. Setting `m=0`
+> (`discountedGBM_eq_itoIntegral`) makes the drift vanish — the Itô-integral content of the
+> discounted-GBM martingale (`discountedGBM_isMartingale`, there via the Wald exponential).
+> Axioms-clean `[propext, Classical.choice, Quot.sound]`. Earlier:
+> **The time-dependent Itô formula reaches at-most-exponential growth**
 > (`Foundations/ItoFormulaLocalized.lean`, entry `sc-ito-formula-localized`, **`full`**):
 > `ito_formula_td_localized` lifts the bounded-derivative `ito_formula_td_L2_bddDeriv` to `f`
 > with `|f_• t x| ≤ C·exp(λ|x|)`, so it reaches the Black–Scholes/GBM value function

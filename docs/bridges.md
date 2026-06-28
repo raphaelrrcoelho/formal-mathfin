@@ -247,3 +247,24 @@ L²-cutoff localization that *consumes* the bounded engine rather than re-provin
 - the limit is identified by the Itô **isometry** `itoIntegralCLM_T_norm` (Cauchy transfer)
   + completeness + CLM **continuity** — the deep Itô tower (QV, isometry, CLM) carries the
   pricing weight with zero new analytic machinery beyond the cutoff.
+
+**The rung-3 unlock realized — GBM decomposed by the Itô integral (2026-06-28).** The localized
+formula was the *capability*; `Foundations/ItoFormulaGBM.lean` is the **first actual
+pricing-ward consumer of the analytic Itô tower** (corpus `sc-ito-formula-gbm`,
+`sc-discounted-gbm-ito`, both `full`). This closes the standing two-tower disconnect *on the
+Itô side*: until now the deep tower (`ItoIntegralCLM`/`ItoFormulaTD`/`ItoFormulaLocalized`) had
+**zero** pricing consumers — GBM/BS pricing ran via the algebraic `ItoLemma`/`PDEFromIto` tower
+and Feynman–Kac, and `discountedGBM_isMartingale` (`ContinuousFTAP.lean`) was proved via the
+Wald exponential, never the Itô integral.
+- `ito_formula_gbm`: `Ŝ(T) − Ŝ(0) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ m·Ŝ ds` for the GBM value
+  `Ŝ(t)=S₀ exp((m−σ²/2)t+σ B_t)`, the stochastic term the **genuine continuous Itô integral**.
+- Route = **localization in time** (the classic argument): the GBM value is `t`-exponential and
+  fails the localized formula's `t`-uniform growth, so the localized formula is applied to the
+  time-localized exponent `S₀ exp((m−σ²/2)·φₙ(t)+σx)` (`φₙ=SmoothTrunc.cut n`, `n=⌈T⌉₊`), the
+  identity on `[0,T]` yet globally bounded; on `[0,T]` `φₙ=id`, `φₙ'=1`, so the localization
+  drift `(m−σ²/2)·Ŝ` and the Itô correction `½σ²·Ŝ` collapse to `m·Ŝ`. The only new ingredient
+  is the plateau-slope lemma `SmoothTrunc.phi'_eq_one_of_lt` (derivative-uniqueness vs `id`).
+- `discountedGBM_eq_itoIntegral` (`m=0`): the drift vanishes, so the discounted-GBM increment
+  is a **pure Itô integral** — the Itô-integral content of the discounted-GBM martingale.
+  *Open:* re-grounding `discountedGBM_isMartingale` at the **process** level (all `t`, Brownian
+  filtration) on the Itô integral, which this terminal-time decomposition opens.
