@@ -280,3 +280,19 @@ handles directly. The shared `SmoothTrunc` plateau lemmas (`cut_eq_id_of_abs_le`
 `cutD1_eq_one_of_abs_lt`, `phi'_eq_one_of_lt`) now live in `ItoFormulaLocalized.lean` so both
 formulas consume them. *Open:* **adapted**-coefficient drift/diffusion — the random-integrand
 semimartingale Itô formula, a new tower layer.
+
+## Itô's lemma as a process — analytic Itô tower ↔ pathwise CLM tower
+
+`ItoFormulaProcess.lean` (`ito_formula_td_process`) bridges the two Itô towers that had run in
+parallel: the **analytic** terminal Itô-formula tower (`ItoFormulaTD`/`…Localized`, a single
+fixed-`T` `Lp` statement) and the **pathwise** continuous-local-martingale tower
+(`ItoIntegralProcess…LocalMartingaleInfinite`, the integral as a process on `[0,∞)`). It lifts the
+terminal formula to a process identity for every `t ≤ T` — `f(t,B_t) − f(0,B_0) =ᵐ itoProcessL2Inf
+t F + ∫₀ᵗ (f_t + ½f_xx) ds` — so the compensated process is (a modification of) a continuous local
+martingale: *Itô's lemma as a semimartingale decomposition*. The bridge is **one new stone**, the
+canonical-witness exposure `ito_formula_td_L2_bddDeriv_explicit` (`gfx =ᵐ [f_x(·,B)]`) plus the
+zero-extension `exists_fullHorizon_extension`; the horizon-matching is the *existing*
+`itoProcessL2Inf_eq_itoProcessCLM`. No Markov property, no PDE. This makes the `[0,∞)` CLM tower
+load-bearing as an Itô-formula consumer for the first time, and is the prerequisite for the
+unrestricted-`C²` (Summit C) Itô formula. *Open:* Summit C; **adapted**-coefficient (random
+integrand) drift/diffusion.

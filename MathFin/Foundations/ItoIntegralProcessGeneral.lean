@@ -217,20 +217,25 @@ theorem itoProcessCLM_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   rw [eLpNorm_congr_ae hae]
   exact eLpNorm_condExp_le
 
+/-- **At the terminal time the process is the terminal integral.** `(φ●B)_T = itoIntegralCLM_T φ`
+as `Lp` elements: both are continuous-linear in `φ` and reproduce `itoSimple V` on the dense
+simple processes (`(V●B)_T = itoSimple V`). -/
+theorem itoProcessCLM_terminal_eq (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    itoProcessCLM hB T T hBmeas φ = itoIntegralCLM_T hB T hBmeas φ :=
+  congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+    (itoProcessCLM hB T T hBmeas).continuous (itoIntegralCLM_T hB T hBmeas).continuous
+    (funext fun V => by
+      simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T,
+        itoIntegralCLM_T_simpleAssembly_T, itoSimpleProcessLp, itoSimpleLp,
+        itoSimpleProcess_eq_itoSimple hBmeas V.val (fun p hp => V.property p hp)])) φ
+
 /-- **Terminal Itô isometry.** At the horizon the process is the terminal integral
-(`itoProcessCLM hB T T = itoIntegralCLM_T T`, equal on the dense simple processes since
-`(V●B)_T = itoSimple V`), so `‖(φ●B)_T‖ = ‖φ‖` exactly. -/
+(`itoProcessCLM_terminal_eq`), so `‖(φ●B)_T‖ = ‖φ‖` exactly. -/
 theorem itoProcessCLM_norm_terminal (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ‖itoProcessCLM hB T T hBmeas φ‖ = ‖φ‖ := by
-  have heq : itoProcessCLM hB T T hBmeas φ = itoIntegralCLM_T hB T hBmeas φ :=
-    congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-      (itoProcessCLM hB T T hBmeas).continuous (itoIntegralCLM_T hB T hBmeas).continuous
-      (funext fun V => by
-        simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T,
-          itoIntegralCLM_T_simpleAssembly_T, itoSimpleProcessLp, itoSimpleLp,
-          itoSimpleProcess_eq_itoSimple hBmeas V.val (fun p hp => V.property p hp)])) φ
-  rw [heq, itoIntegralCLM_T_norm hB T hBmeas φ]
+  rw [itoProcessCLM_terminal_eq hB T hBmeas φ, itoIntegralCLM_T_norm hB T hBmeas φ]
 
 /-- **L²-continuity.** `t ↦ (φ●B)_t` is continuous into `Lp ℝ 2 μ`. The simple-
 process integrals `t ↦ (Vₙ●B)_t` (continuous by B1a's

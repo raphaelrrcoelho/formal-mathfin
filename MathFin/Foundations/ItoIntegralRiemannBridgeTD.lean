@@ -133,6 +133,7 @@ theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
     {φ : ℝ → ℝ → ℝ} (hφ_cont : Continuous fun p : ℝ × ℝ => φ p.1 p.2)
     {C : ℝ} (hφ_bdd : ∀ t x, |φ t x| ≤ C) (T : ℝ≥0) :
     ∃ gφ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
+      (⇑gφ =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z => φ z.1 (B z.1 z.2)) ∧
       Tendsto (fun n => (memLp_riemannφTD hB hBmeas
           (fun _c => (hφ_cont.comp (continuous_const.prodMk continuous_id)).measurable)
           hφ_bdd T n).toLp (riemannφTD hBmeas φ T n))
@@ -223,7 +224,7 @@ theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
       (fun n => ((hf_memLp n).aestronglyMeasurable.sub hgφ_aesm).pow 2)
       (integrable_const _) hbnd hlim
     simpa using this
-  refine ⟨hgφ_memLp.toLp gφ_fn, ?_⟩
+  refine ⟨hgφ_memLp.toLp gφ_fn, MemLp.coeFn_toLp _, ?_⟩
   have hLp : Tendsto (fun n => (hf_memLp n).toLp (f n)) atTop (𝓝 (hgφ_memLp.toLp gφ_fn)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr (tendsto_norm_toLp_sub' hf_memLp hgφ_memLp hint)
   have key : ∀ n, itoIntegralCLM_T hB T hBmeas ((hf_memLp n).toLp (f n))

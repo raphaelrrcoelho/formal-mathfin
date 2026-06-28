@@ -26,19 +26,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-28, the Itô formula reaches a general Itô process):** corpus **298**,
-> **263 full + 18 wrappers = 281/298 delivery-ready**, 17 reduced cores, 0 placeholders. **The Itô
-> formula now decomposes `f(X)` for a general `C³` exponential-growth `f` against a
-> constant-coefficient Itô process** `X_t = X₀ + b·t + σ B_t`
-> (`Foundations/ItoFormulaItoProcess.lean`, entry `sc-ito-formula-ito-process`, **`full`**):
-> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` — i.e.
-> `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine continuous Itô integral. It generalizes
-> `ito_formula_gbm` (the `f = S₀·exp` case) to arbitrary `f` by the *same* time-localization of the
-> inner exponent `b·t`. Constant coefficients keep the diffusion integrand `σ f'(X_s)` a function of
-> `B_s` (handled directly); general adapted coefficients (the random-integrand semimartingale Itô
-> formula) remain the open frontier. The shared `SmoothTrunc` plateau lemmas
-> (`cut_eq_id_of_abs_le`, `cutD1_eq_one_of_abs_lt`, `phi'_eq_one_of_lt`) were lifted into
-> `ItoFormulaLocalized.lean` so both the GBM and the general formula consume them. Earlier:
+> **Live status (2026-06-28, Itô's lemma as a process / semimartingale decomposition):** corpus
+> **299**, **264 full + 18 wrappers = 282/299 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **The time-dependent Itô formula now holds as a process identity for every `t ≤ T`
+> simultaneously** (`Foundations/ItoFormulaProcess.lean`, entry `sc-ito-formula-td-process`,
+> **`full`**): `f(t,B_t) − f(0,B_0) =ᵐ (itoProcessL2Inf t F) + ∫₀ᵗ (f_t + ½f_xx)(s,B_s) ds`, the
+> stochastic term the genuine Itô-integral **process** `(f_x(·,B) ● B)_t` — a continuous `L²`
+> martingale admitting an everywhere-continuous **local-martingale** modification on the
+> null-augmented Brownian filtration. So the compensated process `f(t,B_t)−f(0,B_0)−∫₀ᵗ drift` is
+> (a modification of) a continuous local martingale: *Itô's lemma as a semimartingale
+> decomposition*. This makes the `[0,∞)` continuous-local-martingale tower load-bearing as an
+> Itô-**formula** consumer for the first time, and is the prerequisite for the unrestricted-`C²`
+> (stopping-time localization) Itô formula. The construction is entirely inside the Itô tower —
+> **no Markov property, no PDE**: the terminal formula's witness is now canonical
+> (`ito_formula_td_L2_bddDeriv_explicit` exposes `gfx =ᵐ [f_x(·,B)]`), zero-extended to a `[0,∞)`
+> integrand `F` (`exists_fullHorizon_extension`) and matched to each horizon via the existing
+> consistency `itoProcessL2Inf_eq_itoProcessCLM`. Earlier (corpus 298): **the Itô
+> formula decomposes `f(X)` for a general `C³` exp-growth `f` against a constant-coefficient Itô
+> process** `X_t = X₀ + b·t + σ B_t` (`Foundations/ItoFormulaItoProcess.lean`,
+> `sc-ito-formula-ito-process`, **`full`**),
+> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`. Earlier:
 > **Geometric Brownian motion is decomposed by the genuine continuous
 > Itô integral** (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
 > `sc-discounted-gbm-ito`, both **`full`**) — the **first pricing-ward consumer of the analytic

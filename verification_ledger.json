@@ -1882,9 +1882,9 @@
     "sc-discounted-gbm-ito": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-28",
-      "elapsed_s": 25.2,
-      "input_hash": "65d401cdef56297af6fb3e8a57b8a5fd119b9d021de5f8cb412d0e25a274bb95",
-      "verified_at_commit": "3e250e9"
+      "elapsed_s": 68.0,
+      "input_hash": "27d53a00cdc4d6304c1589817ec2c56771ab71b60079102ded76b8063378ac5a",
+      "verified_at_commit": "48e4018"
     },
     "sc-discrete-cubing-identity": {
       "benchmark_file": "stochastic_calculus.json",
@@ -1903,65 +1903,72 @@
     "sc-ito-formula-gbm": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-28",
-      "elapsed_s": 105.8,
-      "input_hash": "4d6db006ae74dcb3f9b0d3d4a7ab0222968c3e079eb573c44f09d7d66ce4d55c",
-      "verified_at_commit": "3e250e9"
+      "elapsed_s": 126.7,
+      "input_hash": "77bfb4591060f7d7cd983911ec28e3a87ddd11cb4a3af8953f341c114ce8750b",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-formula-ito-process": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-28",
-      "elapsed_s": 76.2,
-      "input_hash": "81b3a041cab821d30d7107f33591bb880fb26434903b1b689f803301ffb4d1df",
-      "verified_at_commit": "3e250e9"
+      "elapsed_s": 51.1,
+      "input_hash": "9e57f831e76a81e92175754eae24ed8c6ec23a2d23fe135b57eed093850d81e1",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-formula-localized": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-28",
-      "elapsed_s": 210.4,
-      "input_hash": "e1c0a0b23f5d5efeb06bdef24029fb3fa0fe363e851a7e2baf90040fcf5f3460",
-      "verified_at_commit": "3e250e9"
+      "elapsed_s": 77.9,
+      "input_hash": "ff99768a43bcfef08f22b7c6e62b8d8db63ee0e12f2faa191f14b4c0ec50d20e",
+      "verified_at_commit": "48e4018"
+    },
+    "sc-ito-formula-td-process": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-28",
+      "elapsed_s": 67.9,
+      "input_hash": "7b58d40604a949cdc46123a46395971e1ef4628ff346c45ef9b5eabc2f05379c",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-27",
-      "elapsed_s": 231.1,
-      "input_hash": "6c7259f481996764fa4fc0d0e096c51fbf7bfc8a02e3312879bb2bf7518d41d2",
-      "verified_at_commit": "141e4f5"
+      "date": "2026-06-28",
+      "elapsed_s": 34.4,
+      "input_hash": "ef7d638411027f01491291ffb31f5de8bb2d2595934388ff87154d9236cd059d",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-general-l2-continuity": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-27",
-      "elapsed_s": 343.5,
-      "input_hash": "008ea9c75d39d92317035ebf85a90accbc32e3a3b0622a025dac499b372d5af5",
-      "verified_at_commit": "141e4f5"
+      "date": "2026-06-28",
+      "elapsed_s": 71.0,
+      "input_hash": "7764e57dcc108eba1142c319a1b84037ff5af57720dec4448c472ba7bf3cc9c9",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-general-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-27",
-      "elapsed_s": 47.1,
-      "input_hash": "66839aca00e0c333ae04597d376568685467afb4ff9a9a3da94953d59c8cbc3f",
-      "verified_at_commit": "141e4f5"
+      "date": "2026-06-28",
+      "elapsed_s": 69.5,
+      "input_hash": "3c5eb8a37386d36a6469860e43f697cbaa9377bd4a8454787e7498492b25b466",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-general-martingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-27",
-      "elapsed_s": 49.0,
-      "input_hash": "9dd2ef37fb8646d53e1e9413be8f8b80c2c981942ee9d6858b2c091840832de5",
-      "verified_at_commit": "141e4f5"
+      "date": "2026-06-28",
+      "elapsed_s": 43.8,
+      "input_hash": "ffd1276080bddf46b86b137d905887ab8b7aec226238c622f1dc690db230ae78",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-general-terminal-isometry": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-27",
-      "elapsed_s": 48.6,
-      "input_hash": "d7d6f682053301e2d1388052b00426f90a8cdf180c1a7071e76a8657fda712ae",
-      "verified_at_commit": "141e4f5"
+      "date": "2026-06-28",
+      "elapsed_s": 60.3,
+      "input_hash": "a0cbd2173e8c279b08fed70dd731fb669b4bdb3cdb4a015dd68fb52ce15b7bd2",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-general-time-isometry": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-27",
-      "elapsed_s": 45.1,
-      "input_hash": "ee36c08a05fc18bdd97d44fadb192cafb9b6bf188670892a023e6a849923b330",
-      "verified_at_commit": "141e4f5"
+      "date": "2026-06-28",
+      "elapsed_s": 33.5,
+      "input_hash": "f0666398af2f1d3f4f41aad7657b744ba8a7373c7ce85e6ad43448349ca7c760",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-infinite-horizon-isometry": {
       "benchmark_file": "stochastic_calculus.json",
@@ -1972,10 +1979,10 @@
     },
     "sc-ito-infinite-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-27",
-      "elapsed_s": 55.0,
-      "input_hash": "deec71e61a380d4b2c50d83e2dea6ee926d3edb96ec0bf48cc218818341673e4",
-      "verified_at_commit": "141e4f5"
+      "date": "2026-06-28",
+      "elapsed_s": 36.2,
+      "input_hash": "001135bd507922bc9d447855ea6a66488affe2d457a7fe1f7b83147ca02e0867",
+      "verified_at_commit": "48e4018"
     },
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2036,9 +2043,9 @@
     "sc-thm-7.1.2": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-28",
-      "elapsed_s": 85.2,
-      "input_hash": "32109c7a8b20d86489127d1c705831088ed2e9f89ce6d6d4456ddd7b778196c0",
-      "verified_at_commit": "3551011"
+      "elapsed_s": 69.1,
+      "input_hash": "2546bb44bee47065724114906e72a53ebb6aeb57a1a6375cf102c6b0422e824a",
+      "verified_at_commit": "48e4018"
     },
     "sc-thm-7.4.5": {
       "benchmark_file": "stochastic_calculus.json",

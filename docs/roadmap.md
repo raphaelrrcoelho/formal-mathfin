@@ -868,7 +868,26 @@ deterministic-integrand layer load-bearing in a pricing module for the first tim
   `phi'_eq_one_of_lt`) were lifted into `ItoFormulaLocalized.lean` so both formulas consume them
   (the values-panel coherence follow-up, now done). corpus 297 → **298**, 262 → **263 full**.
 
-**Open frontier:** the Itô formula against a general Itô process with **adapted** coefficients
+- **Itô's lemma as a process — the semimartingale decomposition**
+  (`Foundations/ItoFormulaProcess.lean`, entry `sc-ito-formula-td-process`, `full`). Lifts the
+  terminal time-dependent formula (a single fixed-`T` `Lp` statement) to a **process identity**
+  holding for *every* `t ≤ T` simultaneously:
+  `f(t,B_t) − f(0,B_0) =ᵐ (itoProcessL2Inf t F) + ∫₀ᵗ (f_t + ½f_xx) ds`, the stochastic term the
+  genuine Itô-integral **process** `(f_x(·,B) ● B)_t` — a continuous `L²` martingale with an
+  everywhere-continuous **local-martingale** modification on the null-augmented filtration, so the
+  compensated process `f(t,B_t)−f(0,B_0)−∫₀ᵗ drift` is (a modification of) a continuous local
+  martingale. This makes the `[0,∞)` continuous-local-martingale arc (corpus 289→292)
+  **load-bearing as an Itô-formula consumer** for the first time, and is the chosen prerequisite for
+  the unrestricted-`C²` (stopping-time localization) Itô formula — **Summit C**, now scoped next.
+  The build is entirely inside the Itô tower (**no Markov property, no PDE**): the terminal formula's
+  witness is now canonical (`ito_formula_td_L2_bddDeriv_explicit` exposes `gfx =ᵐ [f_x(·,B)]`),
+  zero-extended to a `[0,∞)` integrand (`exists_fullHorizon_extension`) and matched to each horizon
+  by the existing consistency `itoProcessL2Inf_eq_itoProcessCLM`. corpus 298 → **299**,
+  263 → **264 full**.
+
+**Open frontier:** **Summit C** — the unrestricted-`C²` Itô formula via stopping-time localization
+(its prerequisite, the process-form formula, is now built); the Itô formula against a general Itô
+process with **adapted** coefficients
 (the random-integrand semimartingale form — a new tower layer beyond the constant-coefficient case
 just landed); re-ground `discountedGBM_isMartingale` at the *process* level (all `t`, on the
 Brownian filtration) on the Itô integral, completing the GBM/BS pricing-tower migration the

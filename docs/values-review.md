@@ -53,6 +53,51 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-28 — corpus 299 — Itô's lemma as a process (semimartingale decomposition)
+
+**Scope**: `Foundations/ItoFormulaProcess.lean` (new — `ito_formula_td_process`,
+`exists_fullHorizon_extension`); the witness-exposure strengthening of
+`ItoIntegralRiemannBridgeTD.itoIntegralCLM_T_of_bdd_cont_td`; the `_explicit` core +
+thin wrapper refactor of `ItoFormulaTD.ito_formula_td_L2_bddDeriv`; the extraction of
+`itoProcessCLM_terminal_eq` into `ItoIntegralProcessGeneral`. Entry `sc-ito-formula-td-process`
+(`full`). Two-agent panel (coherence + architecture + first-principles; zero-slop + idiom +
+clarity + beauty/inspired).
+
+| lens | verdict |
+| --- | --- |
+| inspired math quality | PASS |
+| Mathlib / Degenne coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: none.
+
+**Checks that mattered**: the "no Markov property, no PDE" claim is literally true — the
+import closure is `ItoFormulaTD` + `ItoIntegralProcessLocalMartingaleInfinite` only, no
+Feynman–Kac/heat-kernel/Markov module is reachable; the stochastic term is built analytically
+through the Riemann↔CLM bridge, the continuity/local-martingale structure through the existing
+`[0,∞)` tower (Degenne maximal inequality + Borel–Cantelli), *not* a semigroup. The crux
+`M_t =ᵐ itoProcessL2Inf t F` is genuinely derived (terminal-explicit at horizon `t` →
+witness restriction `restrictToBand t F = gfxₜ` → horizon consistency), nothing circular. The
+witness-exposure is a **one-conjunct** strengthening returning the bridge's already-built `toLp`
+witness (`MemLp.coeFn_toLp _`), not a second copy of the bridge — the minimality is the tell of
+the right abstraction. Both the `_explicit`/wrapper split and the `itoProcessCLM_terminal_eq`
+extraction are pure dedups (verified against the diffs: zero proof duplication; both have two real
+consumers). The full `C^{1,2}`-with-bounds package is genuinely needed (forwarded to the terminal
+formula's 2D Itô–Taylor remainder), not vestigial. Scope honest: bounded-derivative base, general
+**adapted** coefficients named as the open frontier. Axioms-clean
+(`[propext, Classical.choice, Quot.sound]`).
+
+**Recorded actions**:
+1. *(done in this commit)* cleared the panel's three cosmetic nits — dropped the unused
+   `with hm`/`with hh` bindings on two `set`s, tightened the `exists_fullHorizon_extension`
+   docstring (`restrictToBand T F =ᵐ g` is a stated consequence, not the returned conjunct),
+   restored the trailing newline on `benchmarks/stochastic_calculus.json`.
+
 ## 2026-06-28 — corpus 298 — the Itô formula reaches a general (constant-coefficient) Itô process
 
 **Scope.** New `Foundations/ItoFormulaItoProcess.lean` (`ito_formula_itoProcess`: the Itô formula
