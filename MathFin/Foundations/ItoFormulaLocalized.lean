@@ -188,6 +188,65 @@ lemma cut_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cut n x| ≤ S.M₀ * (
   rw [cut, abs_mul, abs_of_pos hn1, mul_comm]
   exact mul_le_mul_of_nonneg_right (S.bdd _) hn1.le
 
+/-- `φₙ'(x) = φ'(x/(n+1))`. -/
+noncomputable def cutD1 (S : SmoothTrunc) (n : ℕ) (x : ℝ) : ℝ := S.φ' (x / ((n : ℝ) + 1))
+/-- `φₙ''(x) = φ''(x/(n+1)) / (n+1)`. -/
+noncomputable def cutD2 (S : SmoothTrunc) (n : ℕ) (x : ℝ) : ℝ :=
+  S.φ'' (x / ((n : ℝ) + 1)) / ((n : ℝ) + 1)
+/-- `φₙ'''(x) = φ'''(x/(n+1)) / (n+1)²`. -/
+noncomputable def cutD3 (S : SmoothTrunc) (n : ℕ) (x : ℝ) : ℝ :=
+  S.φ''' (x / ((n : ℝ) + 1)) / ((n : ℝ) + 1) ^ 2
+
+/-- The inner rescaling `x ↦ x/(n+1)` has derivative `1/(n+1)`. -/
+private lemma hasDerivAt_div_succ (n : ℕ) (x : ℝ) :
+    HasDerivAt (fun y => y / ((n : ℝ) + 1)) (1 / ((n : ℝ) + 1)) x := by
+  simpa using (hasDerivAt_id x).div_const ((n : ℝ) + 1)
+
+lemma cut_hasDerivAt (S : SmoothTrunc) (n : ℕ) (x : ℝ) :
+    HasDerivAt (S.cut n) (S.cutD1 n x) x := by
+  have heq : S.cutD1 n x = ((n : ℝ) + 1) * (S.φ' (x / ((n : ℝ) + 1)) * (1 / ((n : ℝ) + 1))) := by
+    rw [cutD1]; field_simp
+  rw [heq]
+  exact ((S.hasDeriv₁ (x / ((n : ℝ) + 1))).comp x (hasDerivAt_div_succ n x)).const_mul ((n : ℝ) + 1)
+
+lemma cutD1_hasDerivAt (S : SmoothTrunc) (n : ℕ) (x : ℝ) :
+    HasDerivAt (S.cutD1 n) (S.cutD2 n x) x := by
+  have heq : S.cutD2 n x = S.φ'' (x / ((n : ℝ) + 1)) * (1 / ((n : ℝ) + 1)) := by
+    rw [cutD2]; field_simp
+  rw [heq]
+  exact (S.hasDeriv₂ (x / ((n : ℝ) + 1))).comp x (hasDerivAt_div_succ n x)
+
+lemma cutD2_hasDerivAt (S : SmoothTrunc) (n : ℕ) (x : ℝ) :
+    HasDerivAt (S.cutD2 n) (S.cutD3 n x) x := by
+  have heq : S.cutD3 n x = S.φ''' (x / ((n : ℝ) + 1)) * (1 / ((n : ℝ) + 1)) / ((n : ℝ) + 1) := by
+    rw [cutD3]; field_simp
+  rw [heq]
+  exact ((S.hasDeriv₃ (x / ((n : ℝ) + 1))).comp x (hasDerivAt_div_succ n x)).div_const ((n : ℝ) + 1)
+
+lemma cutD1_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD1 n x| ≤ S.M₁ := S.bdd₁ _
+
+lemma cutD2_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD2 n x| ≤ S.M₂ := by
+  have hM : 0 ≤ S.M₂ := le_trans (abs_nonneg _) (S.bdd₂ 0)
+  have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+  rw [cutD2, abs_div, abs_of_pos (by positivity : (0 : ℝ) < (n : ℝ) + 1), div_le_iff₀ (by positivity)]
+  calc |S.φ'' (x / ((n : ℝ) + 1))| ≤ S.M₂ := S.bdd₂ _
+    _ ≤ S.M₂ * ((n : ℝ) + 1) := by nlinarith [hM, hn]
+
+lemma cutD3_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD3 n x| ≤ S.M₃ := by
+  have hM : 0 ≤ S.M₃ := le_trans (abs_nonneg _) (S.bdd₃ 0)
+  have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
+  rw [cutD3, abs_div, abs_of_pos (by positivity : (0 : ℝ) < ((n : ℝ) + 1) ^ 2),
+    div_le_iff₀ (by positivity)]
+  calc |S.φ''' (x / ((n : ℝ) + 1))| ≤ S.M₃ := S.bdd₃ _
+    _ ≤ S.M₃ * ((n : ℝ) + 1) ^ 2 := by
+        nlinarith [mul_nonneg hM (mul_nonneg hn hn), mul_nonneg hM hn]
+
+lemma continuous_cutD1 (S : SmoothTrunc) (n : ℕ) : Continuous (S.cutD1 n) :=
+  S.cont₁.comp (continuous_id.div_const _)
+
+lemma continuous_cutD2 (S : SmoothTrunc) (n : ℕ) : Continuous (S.cutD2 n) :=
+  (S.cont₂.comp (continuous_id.div_const _)).div_const _
+
 end SmoothTrunc
 
 end MathFin
