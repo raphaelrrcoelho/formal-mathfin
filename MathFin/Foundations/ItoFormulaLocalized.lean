@@ -6,9 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoFormulaTD
--- NOTE: `public import MathFin.Foundations.BrownianExpMoment` is added at Task 4
--- (the first consumer of the exponential moments); deferred so Tasks 2-3 check
--- against the already-built oleans without a daemon restart.
+public import MathFin.Foundations.BrownianExpMoment
 
 /-! # Localized (exponential-growth) time-dependent Itô formula
 
