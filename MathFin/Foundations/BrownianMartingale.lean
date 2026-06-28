@@ -43,22 +43,25 @@ private lemma max_sub_coe_eq_of_le {s t : ℝ≥0} (hst : s ≤ t) :
   exact NNReal.coe_sub hst
 
 /-- MGF specialization: for `α : ℝ` and `v : ℝ≥0`,
-`∫ x, exp(α x) ∂(gaussianReal 0 v) = exp(α² v / 2)`. -/
-private lemma integral_exp_mul_gaussianReal_zero (α : ℝ) (v : ℝ≥0) :
+`∫ x, exp(α x) ∂(gaussianReal 0 v) = exp(α² v / 2)`. The Gaussian-MGF-along-a-law base
+stone, also consumed by `BrownianExpMoment` (the natural long-term home is `GaussianMoments`,
+which both files import; kept here to avoid a corpus-wide restale). -/
+lemma integral_exp_mul_gaussianReal_zero (α : ℝ) (v : ℝ≥0) :
     ∫ x, Real.exp (α * x) ∂(gaussianReal 0 v) = Real.exp (α ^ 2 * (v : ℝ) / 2) := by
   have h := congr_fun (mgf_id_gaussianReal (μ := 0) (v := v)) α
   show mgf id (gaussianReal 0 v) α = _
   rw [h]
   ring_nf
 
-/-- `Real.exp (α · X) ∘ Z` is integrable when `Z` has a Gaussian law.
-Shared helper for `waldExponential_isMartingale` (used 3× there). -/
-private lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
-    {P : Measure Ω} {Z : Ω → ℝ} (hZ_meas : Measurable Z)
-    {m : ℝ} {v : ℝ≥0} (hZ : HasLaw Z (gaussianReal m v) P) (α : ℝ) :
+/-- `Real.exp (α · X) ∘ Z` is integrable when `Z` has a Gaussian law (the law supplies the
+required `AEMeasurable`). Shared helper for `waldExponential_isMartingale` and the marginal
+exponential moments in `BrownianExpMoment`. -/
+lemma integrable_exp_mul_of_hasLaw {Ω : Type*} {mΩ : MeasurableSpace Ω}
+    {P : Measure Ω} {Z : Ω → ℝ} {m : ℝ} {v : ℝ≥0}
+    (hZ : HasLaw Z (gaussianReal m v) P) (α : ℝ) :
     Integrable (fun ω ↦ Real.exp (α * Z ω)) P := by
   rw [show (fun ω ↦ Real.exp (α * Z ω)) = (fun x ↦ Real.exp (α * x)) ∘ Z from rfl]
-  refine Integrable.comp_aemeasurable ?_ hZ_meas.aemeasurable
+  refine Integrable.comp_aemeasurable ?_ hZ.aemeasurable
   rw [hZ.map_eq]
   exact integrable_exp_mul_gaussianReal α
 
@@ -284,7 +287,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
     rw [hmax]; exact hX.hasLaw_sub t s
   -- Integrability of `exp(α (X_t − X_s))`.
   have h_int_exp_diff : Integrable (fun ω ↦ Real.exp (α * (X t ω - X s ω))) P := by
-    have := integrable_exp_mul_of_hasLaw h_meas_diff (h_eq_diff ▸ hL_diff) α
+    have := integrable_exp_mul_of_hasLaw (h_eq_diff ▸ hL_diff) α
     convert this
   -- Mean of `exp(α (X_t − X_s))` (Gaussian MGF at `α`).
   have h_int_exp_diff_eq :
@@ -341,7 +344,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
       change Real.exp _ = _ * Real.exp _
       rw [← Real.exp_add]; congr 1; ring
     rw [hMs_factor]
-    exact (integrable_exp_mul_of_hasLaw h_meas_s (hX.hasLaw_eval s) α).const_mul _
+    exact (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval s) α).const_mul _
   have h_int_MsDst : Integrable (fun ω ↦ Ms ω * Dst ω) P := by
     rw [← funext h_decomp]
     have h_eq : (fun ω ↦ Real.exp (α * X t ω - α ^ 2 * (t : ℝ) / 2))
@@ -349,7 +352,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
       funext ω
       rw [← Real.exp_add]; congr 1; ring
     rw [h_eq]
-    exact (integrable_exp_mul_of_hasLaw h_meas_t (hX.hasLaw_eval t) α).const_mul _
+    exact (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval t) α).const_mul _
   have h_pullout :
       P[fun ω ↦ Ms ω * Dst ω | (𝓕 s : MeasurableSpace Ω)]
         =ᵐ[P] Ms * (P[Dst | (𝓕 s : MeasurableSpace Ω)]) := by

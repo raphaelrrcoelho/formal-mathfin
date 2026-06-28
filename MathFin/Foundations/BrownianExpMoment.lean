@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralBrownian
+public import MathFin.Foundations.BrownianMartingale
 
 /-! # Exponential moments of Brownian marginals
 
@@ -46,27 +47,20 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 include hB
 
-/-- `exp(c · B_s)` is integrable: transfer `integrable_exp_mul_gaussianReal` along the
-marginal law `B_s ~ N(0, s)`. -/
+/-- `exp(c · B_s)` is integrable: the Gaussian-law-transfer base stone
+`integrable_exp_mul_of_hasLaw` at the marginal law `B_s ~ N(0, s)`. -/
 lemma integrable_exp_mul_eval (s : ℝ≥0) (c : ℝ) :
-    Integrable (fun ω => Real.exp (c * B s ω)) μ := by
-  rw [show (fun ω => Real.exp (c * B s ω)) = (fun x => Real.exp (c * x)) ∘ B s from rfl]
-  refine Integrable.comp_aemeasurable ?_ (hB.hasLaw_eval s).aemeasurable
-  rw [(hB.hasLaw_eval s).map_eq]
-  exact integrable_exp_mul_gaussianReal c
+    Integrable (fun ω => Real.exp (c * B s ω)) μ :=
+  integrable_exp_mul_of_hasLaw (hB.hasLaw_eval s) c
 
-/-- The Brownian marginal MGF: `∫ exp(c · B_s) ∂μ = exp(c² s / 2)`. -/
+/-- The Brownian marginal MGF: `∫ exp(c · B_s) ∂μ = exp(c² s / 2)`, the gaussianReal MGF
+`integral_exp_mul_gaussianReal_zero` transferred along `B_s ~ N(0, s)`. -/
 lemma integral_exp_mul_eval (s : ℝ≥0) (c : ℝ) :
     ∫ ω, Real.exp (c * B s ω) ∂μ = Real.exp (c ^ 2 * (s : ℝ) / 2) := by
   have hg : AEStronglyMeasurable (fun x : ℝ => Real.exp (c * x)) (Measure.map (B s) μ) :=
     (Real.continuous_exp.comp (continuous_const.mul continuous_id)).aestronglyMeasurable
-  have hint : ∫ ω, Real.exp (c * B s ω) ∂μ
-      = ∫ x, Real.exp (c * x) ∂(Measure.map (B s) μ) :=
-    (integral_map (hB.hasLaw_eval s).aemeasurable hg).symm
-  rw [hint, (hB.hasLaw_eval s).map_eq]
-  have h := congr_fun (mgf_id_gaussianReal (μ := (0 : ℝ)) (v := s)) c
-  show mgf id (gaussianReal 0 s) c = _
-  rw [h]; ring_nf
+  rw [(integral_map (hB.hasLaw_eval s).aemeasurable hg).symm, (hB.hasLaw_eval s).map_eq,
+    integral_exp_mul_gaussianReal_zero]
 
 /-- `exp(c · B_s) ∈ L²(μ)`: its square is `exp(2c · B_s)`, integrable by the marginal MGF. -/
 lemma memLp_exp_mul_eval (s : ℝ≥0) (c : ℝ) :
