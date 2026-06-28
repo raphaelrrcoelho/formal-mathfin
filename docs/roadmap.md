@@ -856,7 +856,21 @@ deterministic-integrand layer load-bearing in a pricing module for the first tim
   vanish — the Itô-integral content of the discounted-GBM martingale (no new analytic machinery
   beyond the `phi'_eq_one_of_lt` plateau-slope lemma). corpus 295 → **297**, 260 → **262 full**.
 
-**Open frontier:** re-ground `discountedGBM_isMartingale` at the *process* level (all `t`, on the
+- **The Itô formula reaches a general (constant-coefficient) Itô process**
+  (`Foundations/ItoFormulaItoProcess.lean`, entry `sc-ito-formula-ito-process`, `full`). The
+  natural successor to GBM: `ito_formula_itoProcess` decomposes `f(X)` for an *arbitrary* `C³`
+  exponential-growth `f` against `X_t = X₀ + b·t + σ B_t`, giving
+  `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` — i.e.
+  `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine continuous Itô integral. It generalizes
+  `ito_formula_gbm` (the `f = S₀·exp` case) by the *same* time-localization of the inner exponent
+  `b·t`; constant coefficients keep the diffusion integrand `σ f'(X_s)` a function of `B_s`. The
+  shared `SmoothTrunc` plateau lemmas (`cut_eq_id_of_abs_le`, `cutD1_eq_one_of_abs_lt`,
+  `phi'_eq_one_of_lt`) were lifted into `ItoFormulaLocalized.lean` so both formulas consume them
+  (the values-panel coherence follow-up, now done). corpus 297 → **298**, 262 → **263 full**.
+
+**Open frontier:** the Itô formula against a general Itô process with **adapted** coefficients
+(the random-integrand semimartingale form — a new tower layer beyond the constant-coefficient case
+just landed); re-ground `discountedGBM_isMartingale` at the *process* level (all `t`, on the
 Brownian filtration) on the Itô integral, completing the GBM/BS pricing-tower migration the
 terminal-time `discountedGBM_eq_itoIntegral` opens; unrestricted C² Itô formula via localization
 (Summit C); the Itô formula *against a general Itô process* `∫ f'(X) dX` (drift+diffusion `X`

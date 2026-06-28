@@ -268,3 +268,15 @@ Wald exponential, never the Itô integral.
   is a **pure Itô integral** — the Itô-integral content of the discounted-GBM martingale.
   *Open:* re-grounding `discountedGBM_isMartingale` at the **process** level (all `t`, Brownian
   filtration) on the Itô integral, which this terminal-time decomposition opens.
+
+**The Itô formula against a general Itô process (2026-06-28).** `Foundations/ItoFormulaItoProcess.lean`
+generalizes the GBM decomposition from the exponential value function to an arbitrary `C³`
+exponential-growth `f`. For the constant-coefficient Itô process `X_t = X₀ + b·t + σ B_t`,
+`ito_formula_itoProcess` gives `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`
+— i.e. `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine continuous Itô integral. Same
+time-localization of the `b·t` exponent as GBM (`ito_formula_gbm` is the `f = S₀·exp` case);
+constant coefficients keep the diffusion integrand `σ f'(X_s)` a function of `B_s`, which the tower
+handles directly. The shared `SmoothTrunc` plateau lemmas (`cut_eq_id_of_abs_le`,
+`cutD1_eq_one_of_abs_lt`, `phi'_eq_one_of_lt`) now live in `ItoFormulaLocalized.lean` so both
+formulas consume them. *Open:* **adapted**-coefficient drift/diffusion — the random-integrand
+semimartingale Itô formula, a new tower layer.

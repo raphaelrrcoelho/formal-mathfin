@@ -156,16 +156,20 @@ to. -/
 noncomputable def cut (S : SmoothTrunc) (n : ℕ) (x : ℝ) : ℝ :=
   ((n : ℝ) + 1) * S.φ (x / ((n : ℝ) + 1))
 
-/-- For `n + 1 ≥ |x|`, the cutoff is exactly the identity at `x` (since `φ = id` near `0`). -/
+/-- For `|x| ≤ n + 1` the cutoff is exactly the identity at `x` (since `φ = id` near `0`). -/
+lemma cut_eq_id_of_abs_le (S : SmoothTrunc) {n : ℕ} {x : ℝ} (hx : |x| ≤ (n : ℝ) + 1) :
+    S.cut n x = x := by
+  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  have hle : |x / ((n : ℝ) + 1)| ≤ 1 := by rw [abs_div, abs_of_pos hn1, div_le_one hn1]; exact hx
+  rw [cut, S.id_near _ hle]; field_simp
+
+/-- For `n + 1 ≥ |x|`, the cutoff is eventually (in `n`) the identity at `x`. -/
 lemma cut_eventually_id (S : SmoothTrunc) (x : ℝ) : ∀ᶠ n : ℕ in atTop, S.cut n x = x := by
   filter_upwards [eventually_ge_atTop ⌈|x|⌉₊] with n hn
-  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
-  have hle : |x / ((n : ℝ) + 1)| ≤ 1 := by
-    rw [abs_div, abs_of_pos hn1, div_le_one hn1]
-    calc |x| ≤ (⌈|x|⌉₊ : ℝ) := Nat.le_ceil _
-      _ ≤ (n : ℝ) := by exact_mod_cast hn
-      _ ≤ (n : ℝ) + 1 := by linarith
-  rw [cut, S.id_near _ hle]; field_simp
+  refine S.cut_eq_id_of_abs_le ?_
+  calc |x| ≤ (⌈|x|⌉₊ : ℝ) := Nat.le_ceil _
+    _ ≤ (n : ℝ) := by exact_mod_cast hn
+    _ ≤ (n : ℝ) + 1 := by linarith
 
 /-- `φₙ(x) → x` as `n → ∞`. -/
 lemma cut_tendsto (S : SmoothTrunc) (x : ℝ) : Tendsto (fun n => S.cut n x) atTop (𝓝 x) :=
@@ -194,6 +198,22 @@ noncomputable def cutD2 (S : SmoothTrunc) (n : ℕ) (x : ℝ) : ℝ :=
 /-- `φₙ'''(x) = φ'''(x/(n+1)) / (n+1)²`. -/
 noncomputable def cutD3 (S : SmoothTrunc) (n : ℕ) (x : ℝ) : ℝ :=
   S.φ''' (x / ((n : ℝ) + 1)) / ((n : ℝ) + 1) ^ 2
+
+/-- On the plateau `|y| < 1` where `φ = id`, the smooth truncation has unit slope `φ'(y) = 1`
+(uniqueness of derivative against `id`, which `φ` matches on the open interval). -/
+lemma phi'_eq_one_of_lt (S : SmoothTrunc) {y : ℝ} (hy : |y| < 1) : S.φ' y = 1 := by
+  have h2 : HasDerivAt S.φ 1 y :=
+    (hasDerivAt_id y).congr_of_eventuallyEq (by
+      filter_upwards [(isOpen_lt continuous_abs continuous_const).mem_nhds hy] with z hz
+      exact S.id_near z hz.le)
+  exact (S.hasDeriv₁ y).unique h2
+
+/-- For `|x| < n + 1` the rescaled cutoff has unit slope `φₙ'(x) = 1` (it is the identity there). -/
+lemma cutD1_eq_one_of_abs_lt (S : SmoothTrunc) {n : ℕ} {x : ℝ} (hx : |x| < (n : ℝ) + 1) :
+    S.cutD1 n x = 1 := by
+  have hn1 : (0 : ℝ) < (n : ℝ) + 1 := by positivity
+  rw [cutD1]
+  exact S.phi'_eq_one_of_lt (by rw [abs_div, abs_of_pos hn1, div_lt_one hn1]; exact hx)
 
 /-- The inner rescaling `x ↦ x/(n+1)` has derivative `1/(n+1)`. -/
 private lemma hasDerivAt_div_succ (n : ℕ) (x : ℝ) :

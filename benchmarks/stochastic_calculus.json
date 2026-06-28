@@ -130,6 +130,22 @@
       }
     },
     {
+      "id": "sc-ito-formula-ito-process",
+      "name": "Itô Formula against a Constant-Coefficient Itô Process",
+      "description": "The Itô formula f(X_T) − f(X₀) = ∫₀ᵀ f'(X_s) dX_s + ½∫₀ᵀ f''(X_s)σ² ds for X_t = X₀ + b·t + σ B_t and general C³ exponential-growth f, the diffusion ∫f'(X)σ dB the genuine continuous Itô integral. Generalizes ito_formula_gbm (f = S₀ exp) to arbitrary f.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ItoFormulaItoProcess\n\nopen MeasureTheory ProbabilityTheory MathFin MathFin.ItoIntegralCLM\nopen scoped NNReal\n\n/-- **Itô formula against a constant-coefficient Itô process** `X_t = X₀ + b·t + σ B_t`.\nFor a C³ function `f` of at-most-exponential growth (`|f^{(k)} x| ≤ C·exp(λ|x|)`, k = 1,2,3),\n`f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X_s)·b + ½ f''(X_s)·σ²) ds`, the stochastic\nterm the genuine continuous Itô integral carrying the `σ f'(X)` diffusion — together with the\ndrift's `f'(X)·b` this is `∫ f'(X) dX + ½∫ f''(X)σ² ds`. Generalizes the GBM case\n(`ito_formula_gbm`, f = S₀·exp) to arbitrary C³ exponential-growth f, via the same\ntime-localization of the inner exponent `b·t`. Lives in\n`MathFin/Foundations/ItoFormulaItoProcess.lean`. -/\ntheorem ito_formula_itoProcess_corpus\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 => B s ω))\n    (T : ℝ≥0) (X₀ b σ : ℝ) {f f' f'' f''' : ℝ → ℝ}\n    (hf' : ∀ x, HasDerivAt f (f' x) x) (hf'' : ∀ x, HasDerivAt f' (f'' x) x)\n    (hf''' : ∀ x, HasDerivAt f'' (f''' x) x)\n    {C lam : ℝ} (hlam : 0 ≤ lam)\n    (hg' : ∀ x, |f' x| ≤ C * Real.exp (lam * |x|))\n    (hg'' : ∀ x, |f'' x| ≤ C * Real.exp (lam * |x|))\n    (hg''' : ∀ x, |f''' x| ≤ C * Real.exp (lam * |x|)) :\n    ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),\n      (fun ω => f (X₀ + b * (T : ℝ) + σ * B T ω) - f (X₀ + b * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]\n        (fun ω => (itoIntegralCLM_T hB T hBmeas gfx) ω\n          + ∫ s in Set.Ioc 0 T,\n              (f' (X₀ + b * (s : ℝ) + σ * B s ω) * b\n                + (1 / 2) * (f'' (X₀ + b * (s : ℝ) + σ * B s ω) * σ ^ 2))\n              ∂ItoIntegralL2.timeMeasure) :=\n  MathFin.ito_formula_itoProcess hB hBmeas hBcont T X₀ b σ hf' hf'' hf''' hlam hg' hg'' hg'''\n"
+      },
+      "metadata": {
+        "chapter": 7,
+        "reference": "Ito formula vs a constant-coefficient Ito process (X = X0 + b*t + sigma*B)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal derivation (MathFin.ito_formula_itoProcess): the Ito formula for f(X) where X_t = X0 + b*t + sigma*B_t is a constant-coefficient Ito process (constant drift b, constant diffusion sigma) and f is any C^3 function of at-most-exponential growth (|f^(k) x| <= C*exp(lam*|x|), k=1,2,3). f(X_T) - f(X_0) decomposes as the GENUINE continuous Ito integral itoIntegralCLM_T of the diffusion s |-> sigma*f'(X_s), plus the drift integral of f'(X_s)*b + (1/2)*f''(X_s)*sigma^2 -- i.e. integral f'(X)dX + (1/2) integral f''(X)sigma^2 ds, exposing the dX = b ds + sigma dB structure. GENERALIZES ito_formula_gbm (the f = S0*exp, b = m-sigma^2/2 case) from the exponential value function to an arbitrary C^3 exponential-growth f. Method = the SAME time-localization: the inner exponent b*t is t-unbounded, so the localized formula is applied to the time-localized inner map (t,x) |-> X0 + b*phi_n(t) + sigma*x with phi_n = SmoothTrunc.cut n, n = ceil(T), the identity on [0,T] yet globally bounded, so the exponential-in-x growth bounds on the six partials hold UNIFORMLY in time; on [0,T] phi_n = id, phi_n' = 1, so the cutoff drops out. Constant coefficients keep the diffusion integrand sigma*f'(X_s) a function of B_s (handled directly by the tower); general adapted coefficients (the full semimartingale Ito formula, needing the Ito integral against random integrands) remain the open frontier. Lives in MathFin/Foundations/ItoFormulaItoProcess.lean. Axioms-clean."
+      }
+    },
+    {
       "id": "sc-thm-7.5.2",
       "name": "Two-Dimensional Itô Formula",
       "description": "Theorem 7.5.2: For f ∈ C^{1,2}(R+ × R²) and Itô processes X, Y, df(t,X_t,Y_t) = ∂_t f dt + ∂_x f dX + ∂_y f dY + (1/2) ∂_xx f d⟨X⟩ + ∂_xy f d⟨X,Y⟩ + (1/2) ∂_yy f d⟨Y⟩",

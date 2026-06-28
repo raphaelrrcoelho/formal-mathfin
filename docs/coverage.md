@@ -26,9 +26,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-28, the Itô tower reaches pricing — GBM decomposed by the Itô
-> integral):** corpus **297**, **262 full + 18 wrappers = 280/297 delivery-ready**, 17 reduced
-> cores, 0 placeholders. **Geometric Brownian motion is now decomposed by the genuine continuous
+> **Live status (2026-06-28, the Itô formula reaches a general Itô process):** corpus **298**,
+> **263 full + 18 wrappers = 281/298 delivery-ready**, 17 reduced cores, 0 placeholders. **The Itô
+> formula now decomposes `f(X)` for a general `C³` exponential-growth `f` against a
+> constant-coefficient Itô process** `X_t = X₀ + b·t + σ B_t`
+> (`Foundations/ItoFormulaItoProcess.lean`, entry `sc-ito-formula-ito-process`, **`full`**):
+> `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` — i.e.
+> `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine continuous Itô integral. It generalizes
+> `ito_formula_gbm` (the `f = S₀·exp` case) to arbitrary `f` by the *same* time-localization of the
+> inner exponent `b·t`. Constant coefficients keep the diffusion integrand `σ f'(X_s)` a function of
+> `B_s` (handled directly); general adapted coefficients (the random-integrand semimartingale Itô
+> formula) remain the open frontier. The shared `SmoothTrunc` plateau lemmas
+> (`cut_eq_id_of_abs_le`, `cutD1_eq_one_of_abs_lt`, `phi'_eq_one_of_lt`) were lifted into
+> `ItoFormulaLocalized.lean` so both the GBM and the general formula consume them. Earlier:
+> **Geometric Brownian motion is decomposed by the genuine continuous
 > Itô integral** (`Foundations/ItoFormulaGBM.lean`, entries `sc-ito-formula-gbm` and
 > `sc-discounted-gbm-ito`, both **`full`**) — the **first pricing-ward consumer of the analytic
 > Itô tower**, which until now had *none* (GBM/BS pricing ran via separate algebraic towers and

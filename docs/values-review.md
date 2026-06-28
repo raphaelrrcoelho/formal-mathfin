@@ -53,6 +53,47 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-28 — corpus 298 — the Itô formula reaches a general (constant-coefficient) Itô process
+
+**Scope.** New `Foundations/ItoFormulaItoProcess.lean` (`ito_formula_itoProcess`: the Itô formula
+`f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds` for `X_t = X₀ + b·t + σ B_t`
+and a general `C³` exponential-growth `f`); the coherence refactor lifting three `SmoothTrunc`
+lemmas (`cut_eq_id_of_abs_le`, `cutD1_eq_one_of_abs_lt`, `phi'_eq_one_of_lt`) into
+`ItoFormulaLocalized.lean` (with `cut_eventually_id` refactored to consume the first); and the
+**re-derivation of `ito_formula_gbm` as the `f = S₀·exp` specialization** of the new general
+theorem. Corpus entry `sc-ito-formula-ito-process` (`full`, axioms-clean
+`[propext, Classical.choice, Quot.sound]`).
+
+**Panel.** Two independent reviewers, eight lenses.
+
+| lens | verdict |
+|---|---|
+| inspired math | PASS |
+| Mathlib/Degenne coherence | PASS |
+| zero slop | PASS |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS |
+
+**Blocking findings**: none. The panel verified the new theorem is a genuine generalization (not a
+parallel rebuild) — it instantiates the shared `ito_formula_td_localized` exactly as GBM does, with
+the *right new abstraction* (`hfbd` over an arbitrary exp-growth `h ∘ affine`, then `hbound` for the
+coefficient), no dead `have`s (the GBM review's dead `hM0` is not repeated), the two-term `f_tt`
+bound handled cleanly, and the constant-coefficient scope stated honestly (adapted coefficients named
+as the open frontier). The refactor is behavior-preserving.
+
+**Top recommendation, executed in-session.** The panel flagged one substantive coherence debt the new
+theorem *created*: `ito_formula_gbm` was now a ~130-line near-clone of its own generalization. Per the
+repo's anti-parallel-rebuild and cleanup-pass values, this was fixed before close — `ito_formula_gbm`
+is re-derived as the `f = S₀·exp`, `X₀ = 0`, `b = m−σ²/2` specialization (`obtain` + `simp [zero_add]`
++ `ring`, ~15 lines), deleting ~130 lines of duplicated bound/derivative apparatus and establishing
+the clean hierarchy `ItoFormulaLocalized → ItoFormulaItoProcess → ItoFormulaGBM`.
+`discountedGBM_eq_itoIntegral` still consumes `ito_formula_gbm` unchanged.
+
+**Verdict: PASS.** Zero blocking findings; the one coherence debt is paid. corpus 298, axioms-clean.
+
 ## 2026-06-28 — corpus 297 — the Itô tower reaches pricing: GBM decomposed by the Itô integral
 
 **Scope.** New proof content in `Foundations/ItoFormulaGBM.lean`: `ito_formula_gbm` (the GBM

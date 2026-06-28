@@ -421,6 +421,18 @@ exponential. -/
 /-- info: 'MathFin.discountedGBM_eq_itoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_eq_itoIntegral
 
+/-! ## Itô formula against a constant-coefficient Itô process
+
+`ItoFormulaItoProcess.lean`: generalizes the GBM decomposition from the exponential value
+function to an arbitrary `C³` exponential-growth `f`. For `X_t = X₀ + b·t + σ B_t`,
+`ito_formula_itoProcess` gives `f(X_T) − f(X₀) =ᵐ itoIntegralCLM_T gfx + ∫₀ᵀ (f'(X)·b + ½f''(X)·σ²) ds`
+— i.e. `∫ f'(X) dX + ½∫ f''(X)σ² ds`, the diffusion the genuine Itô integral. Same
+time-localization of the `b·t` exponent as the GBM case; constant coefficients keep the
+diffusion integrand a function of `B`. -/
+
+/-- info: 'MathFin.ito_formula_itoProcess' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_itoProcess
+
 /-! ## Carr–Madan static replication / spanning formula -/
 
 /-- info: 'MathFin.carrMadan_spanning' depends on axioms: [propext, Classical.choice, Quot.sound] -/
