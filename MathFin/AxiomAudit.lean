@@ -395,6 +395,14 @@ namespace MathFin.AxiomAudit
 /-- info: 'MathFin.ito_formula_td_L2_bddDeriv' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_L2_bddDeriv
 
+/-! ## Localized (exponential-growth) time-dependent Itô formula — the rung-3 unlock to GBM -/
+
+/-- info: 'MathFin.pathIntegral_expGrowth_memLp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.pathIntegral_expGrowth_memLp
+
+/-- info: 'MathFin.ito_formula_td_localized' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_td_localized
+
 /-! ## Carr–Madan static replication / spanning formula -/
 
 /-- info: 'MathFin.carrMadan_spanning' depends on axioms: [propext, Classical.choice, Quot.sound] -/

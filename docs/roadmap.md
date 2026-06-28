@@ -819,8 +819,28 @@ deterministic-integrand layer load-bearing in a pricing module for the first tim
   transport via `gaussianReal_const_mul`/`gaussianReal_const_add`. **First Itô-tower
   consumer in FixedIncome.** corpus 292 → **294**, 257 → **259 full**.
 
-**Open frontier:** unrestricted C² Itô formula via localization (Summit C); localized
-Itô formula for unbounded/GBM coefficients (the genuinely-*random*-integrand bridge —
-this phase did the *deterministic*-integrand case); general-Ω multi-period DMW FTAP; SDE
-existence and uniqueness (Itô–Picard iteration); Lévy's martingale characterization of
-Brownian motion.
+## phase: localized (exponential-growth) Itô formula — the rung-3 unlock to GBM (2026-06-28)
+
+- **Localized time-dependent Itô formula** (`sc-ito-formula-localized`,
+  `ito_formula_td_localized`, `Foundations/ItoFormulaLocalized.lean`). Lifts the
+  bounded-derivative `ito_formula_td_L2_bddDeriv` (six *global* derivative bounds) to `f` of
+  **at-most-exponential growth** `|f_• t x| ≤ C·exp(λ|x|)` — so it reaches the GBM/Black–Scholes
+  value function `f(t,x)=S₀ exp((r−σ²/2)t+σx)`, the named out-of-scope gap of 7.1.1/7.1.2.
+  Same conclusion shape, a drop-in. The proof is an **L²-cutoff localization that consumes the
+  bounded engine**: smooth truncation `SmoothTrunc` = a `ContDiffBump` antiderivative (every
+  derivative + bound from Mathlib, no explicit calculus); `cutoff_bddDeriv` applies the bounded
+  formula to each `fₙ=f(t,φₙ(x))` via the chain rule; then `n→∞` — boundary (`boundary_tendsto_L2`)
+  and drift (`drift_tendsto_L2`) converge in `L²(μ)` by dominated convergence, the dominators
+  integrable because Brownian marginals have **every exponential moment** (`BrownianExpMoment`,
+  Mathlib's Gaussian MGF transferred along `B_s~N(0,s)`) and the drift dominator is the new
+  reusable base stone `pathIntegral_expGrowth_memLp` (exp-growth path integral in `L²`, Fatou
+  over Riemann sums + discrete Cauchy–Schwarz, no Tonelli). Hence `aₙ=itoIntegralCLM_T gfxₙ` is
+  Cauchy; the Itô **isometry** transfers Cauchy-ness to the integrands `gfxₙ`, completeness gives
+  the witness, CLM **continuity** identifies its image with the limit. The deep Itô tower (QV,
+  isometry, CLM) carries the pricing weight with zero new analytic machinery beyond the cutoff.
+  corpus 294 → **295**, 259 → **260 full**.
+
+**Open frontier:** unrestricted C² Itô formula via localization (Summit C); the Itô formula
+*against an Itô process* `∫ f'(X) dX` (drift+diffusion `X`, the GBM/BS case closed-form);
+general-Ω multi-period DMW FTAP; SDE existence and uniqueness (Itô–Picard iteration); Lévy's
+martingale characterization of Brownian motion.

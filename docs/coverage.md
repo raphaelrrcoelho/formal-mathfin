@@ -26,9 +26,21 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-27, Itô→pricing bridge — Vasicek terminal law derived):** corpus **294**,
-> **259 full + 18 wrappers = 277/294 delivery-ready**, 17 reduced cores, 0
-> placeholders. **The unbounded-horizon Itô integral is a continuous local martingale on
+> **Live status (2026-06-28, localized Itô formula — the rung-3 unlock to GBM):** corpus **295**,
+> **260 full + 18 wrappers = 278/295 delivery-ready**, 17 reduced cores, 0
+> placeholders. **The time-dependent Itô formula now reaches at-most-exponential growth**
+> (`Foundations/ItoFormulaLocalized.lean`, entry `sc-ito-formula-localized`, **`full`**):
+> `ito_formula_td_localized` lifts the bounded-derivative `ito_formula_td_L2_bddDeriv` to `f`
+> with `|f_• t x| ≤ C·exp(λ|x|)`, so it reaches the Black–Scholes/GBM value function
+> `f(t,x)=S₀ exp((r−σ²/2)t+σx)` — the named out-of-scope gap of 7.1.1/7.1.2. An L²-cutoff
+> localization *consumes* the bounded engine: smooth truncation `φₙ` (a `ContDiffBump`
+> antiderivative), the cutoff `fₙ=f(t,φₙ(x))` through `cutoff_bddDeriv`, then `n→∞` — boundary
+> and drift converge in `L²(μ)` (Brownian marginals have every exponential moment,
+> `BrownianExpMoment`; the drift dominator is the new base stone `pathIntegral_expGrowth_memLp`),
+> so `aₙ=itoIntegralCLM_T gfxₙ` is Cauchy, the Itô **isometry** transfers Cauchy-ness to the
+> integrands, completeness gives the witness, and CLM **continuity** identifies the limit.
+> Axioms-clean `[propext, Classical.choice, Quot.sound]`. Earlier:
+> **The unbounded-horizon Itô integral is a continuous local martingale on
 > the whole half-line `ℝ≥0`** (`Foundations/ItoIntegralProcessLocalMartingaleInfinite.lean`,
 > entry `sc-ito-infinite-local-martingale`, **`full`**): an everywhere-continuous
 > representative modifying the process at *every* `t`. The per-horizon `[0,T=n]` continuous

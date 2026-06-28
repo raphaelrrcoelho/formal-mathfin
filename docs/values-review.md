@@ -53,7 +53,66 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
-## 2026-06-27 — working tree (uncommitted) — corpus 294 — Itô tower → pricing bridge: the deterministic-integrand Wiener integral is Gaussian, Vasicek terminal law derived
+## 2026-06-28 — working tree (uncommitted) — corpus 295 — localized (exponential-growth) time-dependent Itô formula: the rung-3 unlock to GBM
+
+**Scope.** New proof content in `Foundations/ItoFormulaLocalized.lean` (`SmoothTrunc`,
+`abs_le_of_expGrowth_deriv`, `fCut`/`cutoff_bddDeriv`, `pathIntegral_expGrowth_memLp`,
+`boundary_tendsto_L2`, `drift_tendsto_L2`, headline `ito_formula_td_localized`),
+`Foundations/BrownianExpMoment.lean` (Brownian marginal exponential moments), and the
+strict generalization+exposure of `WeightedQuadraticVariation.tendsto_riemann_continuous`
+(global → local `[0,T]` bound) and `measurable_pathIntegral` (drop the uniform bound). Corpus
+entry `sc-ito-formula-localized` (`full`, axioms-clean `[propext, Classical.choice, Quot.sound]`).
+
+**Panel.** Two independent reviewers, four lenses each.
+
+| lens | verdict |
+|---|---|
+| inspired math | PASS |
+| Mathlib/Degenne coherence | PASS |
+| zero slop | PASS-WITH-NOTES |
+| architectural ingenuity | PASS |
+| first principles | PASS |
+| idiomatic register | PASS |
+| concept clarity | PASS |
+| beautiful, elegant math | PASS-WITH-NOTES |
+
+**Blocking findings**: none.
+
+**Checks that mattered.** (1) The localization recovers the limit integrand by the Itô
+**isometry** (two-way: forward to bound `aₙ`, backward to make `(gfxₙ)` Cauchy) +
+completeness + CLM continuity — never an explicit trim-L² realization of `s ↦ f_x(s,B_s)`;
+the elegant route. (2) `pathIntegral_expGrowth_memLp` gets its L² bound by Fatou over
+left-endpoint Riemann sums + discrete Cauchy–Schwarz × the per-marginal exponential moment —
+**no Tonelli, no joint measurability** — which is strictly more than `memLp_pathIntegral_process`
+and the honest way to avoid the Carathéodory wall the rest of the tower carefully sidesteps.
+(3) The result is *derived*, not assumed: `boundary_tendsto_L2`/`drift_tendsto_L2` target the
+**true** `f` (boundary `f(T,B_T)−f(0,B_0)`, drift `f_t+½f_xx`), and the conclusion is the
+genuine Itô identity. (4) The single extra cost vs the bounded engine — joint continuity of
+`f_t` — is disclosed honestly in the file/headline/corpus docs: the per-variable `HasDerivAt`
+hyps give only *separate* differentiability, and exp-growth (unlike a global derivative bound,
+which feeds `continuous_uncurry_of_bdd_partials`) does not supply joint continuity. (5)
+Consumes the right Mathlib/Degenne machinery throughout (`ContDiffBump` antiderivative,
+Gaussian MGF, `Convex.norm_image_sub_le_of_norm_hasDerivWithin_le`,
+`Finset.sum_mul_sq_le_sq_mul_sq`, `lintegral_liminf_le`, the existing `itoIntegralCLM_T_norm`
+isometry and `tendsto_norm_toLp_sub'` bridge); the WQV change is backward-compatible (the
+in-file callers still compile) and genuinely needed by the new lemma.
+
+**Recorded actions.**
+1. *(done in this review)* removed dead code the panel found — an unused `have h1` (drift
+   integrand bound, `nlinarith` re-derives it) and two unused `hM1 : 0 ≤ S.M₁` (only `M₁²`,
+   structurally nonneg, is ever used).
+2. *(done in this review)* replaced two trivial-monotonicity `nlinarith`s in `cutD2_bdd`/
+   `cutD3_bdd` with the named `le_mul_of_one_le_right`; fixed two deprecated
+   `integrable_finset_sum`/`integral_finset_sum` → `…finsetSum`.
+3. *(nit, accepted)* `SmoothTrunc.cont₁/cont₂` are derivable from the `hasDeriv` fields; kept
+   as a convenience (consumed in four places). `pathIntegral_expGrowth_memLp`'s `0 ≤ K`
+   precondition is unused by the proof (K² absorbs the sign) but kept as honest API for the
+   bound constant.
+4. *(nit, open)* the "reaches GBM/Black–Scholes" applicability claim has no consumer wiring it
+   to a pricing module yet — tracked on the roadmap open frontier (the Itô formula against an
+   Itô process `∫ f'(X) dX`).
+
+
 
 The first time the deep analytic Itô tower feeds a pricing module at the
 *integral-law* level (not the drift-algebra level). Two new files:

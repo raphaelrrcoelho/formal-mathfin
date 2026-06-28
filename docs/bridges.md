@@ -227,3 +227,23 @@ our sorry-free `L2MartingaleConvergence` engine (a.e. + L² convergence off our 
 L^p maximal inequality) is the natural donor toward discharging both upstream. The
 package's `QuadraticVariation.lean` (Doob–Meyer predictable-part abstraction, sorry'd)
 is orthogonal to our partition-limit QV files — no overlap either way.
+
+**Rung-3 unlock — the localized Itô formula reaches GBM (2026-06-28).** The
+bounded-derivative time-dependent formula `ito_formula_td_L2_bddDeriv` cannot reach the
+Black–Scholes value function `f(t,x) = S₀ exp((r−σ²/2)t + σx)` (derivatives `∝ exp(σx)`,
+unbounded). `Foundations/ItoFormulaLocalized.lean` lifts it to **at-most-exponential
+growth** (`ito_formula_td_localized`, corpus `sc-ito-formula-localized`, `full`) by an
+L²-cutoff localization that *consumes* the bounded engine rather than re-proving it:
+- the smooth truncation `SmoothTrunc` is the antiderivative of a Mathlib `ContDiffBump` —
+  smoothness + compact support hand every derivative and bound to Mathlib, no explicit
+  calculus (`ContDiff.deriv'`, `HasCompactSupport.exists_bound_of_continuous`);
+- the dominated-convergence dominators are integrable because Brownian marginals have
+  *every* exponential moment — `Foundations/BrownianExpMoment.lean` transfers Mathlib's
+  Gaussian MGF (`mgf_id_gaussianReal`) along `B_s ~ N(0,s)`, a small reusable base stone;
+- the new reusable base stone `pathIntegral_expGrowth_memLp` (the exp-growth path integral
+  in L²) reuses the exposed `WeightedQuadraticVariation.tendsto_riemann_continuous`
+  (generalized to a *local* bound) via Fatou over Riemann sums + discrete Cauchy–Schwarz —
+  no Tonelli, no joint measurability;
+- the limit is identified by the Itô **isometry** `itoIntegralCLM_T_norm` (Cauchy transfer)
+  + completeness + CLM **continuity** — the deep Itô tower (QV, isometry, CLM) carries the
+  pricing weight with zero new analytic machinery beyond the cutoff.

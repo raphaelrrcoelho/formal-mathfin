@@ -143,6 +143,7 @@ import MathFin.Foundations.ItoFormulaTDRemainder
 import MathFin.Foundations.ItoIntegralRiemannBridgeTD
 import MathFin.Foundations.ItoFormulaTD
 import MathFin.Foundations.BrownianExpMoment
+import MathFin.Foundations.ItoFormulaLocalized
 -- Phase 37: FTAP both directions, two-state market (adapted from Nagy 2026)
 import MathFin.Foundations.FTAPTwoState
 -- Phase 38: Constant-product AMM (adapted from Pusceddu-Bartoletti FMBC 2024)
