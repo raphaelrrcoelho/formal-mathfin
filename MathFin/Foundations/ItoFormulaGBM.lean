@@ -30,6 +30,15 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Filter ItoIntegralCLM
 open scoped NNReal Topology
 
+/-- On the plateau `|y| < 1` where `φ = id`, the smooth truncation has unit slope `φ'(y) = 1`
+(uniqueness of derivative against `id`, which `φ` matches on the open interval). -/
+lemma SmoothTrunc.phi'_eq_one_of_lt (S : SmoothTrunc) {y : ℝ} (hy : |y| < 1) : S.φ' y = 1 := by
+  have h2 : HasDerivAt S.φ 1 y :=
+    (hasDerivAt_id y).congr_of_eventuallyEq (by
+      filter_upwards [(isOpen_lt continuous_abs continuous_const).mem_nhds hy] with z hz
+      exact S.id_near z hz.le)
+  exact (S.hasDeriv₁ y).unique h2
+
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
