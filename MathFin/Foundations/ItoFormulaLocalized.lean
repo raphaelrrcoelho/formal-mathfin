@@ -228,7 +228,7 @@ lemma cutD2_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD2 n x| ≤ S.M₂
   have hn : (0 : ℝ) ≤ (n : ℝ) := Nat.cast_nonneg n
   rw [cutD2, abs_div, abs_of_pos (by positivity : (0 : ℝ) < (n : ℝ) + 1), div_le_iff₀ (by positivity)]
   calc |S.φ'' (x / ((n : ℝ) + 1))| ≤ S.M₂ := S.bdd₂ _
-    _ ≤ S.M₂ * ((n : ℝ) + 1) := by nlinarith [hM, hn]
+    _ ≤ S.M₂ * ((n : ℝ) + 1) := le_mul_of_one_le_right hM (by linarith)
 
 lemma cutD3_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD3 n x| ≤ S.M₃ := by
   have hM : 0 ≤ S.M₃ := le_trans (abs_nonneg _) (S.bdd₃ 0)
@@ -236,8 +236,7 @@ lemma cutD3_bdd (S : SmoothTrunc) (n : ℕ) (x : ℝ) : |S.cutD3 n x| ≤ S.M₃
   rw [cutD3, abs_div, abs_of_pos (by positivity : (0 : ℝ) < ((n : ℝ) + 1) ^ 2),
     div_le_iff₀ (by positivity)]
   calc |S.φ''' (x / ((n : ℝ) + 1))| ≤ S.M₃ := S.bdd₃ _
-    _ ≤ S.M₃ * ((n : ℝ) + 1) ^ 2 := by
-        nlinarith [mul_nonneg hM (mul_nonneg hn hn), mul_nonneg hM hn]
+    _ ≤ S.M₃ * ((n : ℝ) + 1) ^ 2 := le_mul_of_one_le_right hM (by nlinarith [hn])
 
 lemma continuous_cutD1 (S : SmoothTrunc) (n : ℕ) : Continuous (S.cutD1 n) :=
   S.cont₁.comp (continuous_id.div_const _)
@@ -573,7 +572,7 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
     · have hint_rhs : Integrable (fun ω => (T : ℝ) *
           ∑ k ∈ Finset.range n, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2
             * ((unifPart T n (k + 1) : ℝ) - unifPart T n k)) μ :=
-        (integrable_finset_sum _ fun k _ =>
+        (integrable_finsetSum _ fun k _ =>
           (hwsq_int (unifPart T n k)).mul_const _).const_mul _
       calc ∫ ω, (Rsum n ω) ^ 2 ∂μ
           ≤ ∫ ω, (T : ℝ) * ∑ k ∈ Finset.range n,
@@ -583,7 +582,7 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
         _ = (T : ℝ) * ∑ k ∈ Finset.range n,
               (∫ ω, (w (unifPart T n k) (B (unifPart T n k) ω)) ^ 2 ∂μ)
                 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
-            rw [integral_const_mul, integral_finset_sum _ fun k _ =>
+            rw [integral_const_mul, integral_finsetSum _ fun k _ =>
               (hwsq_int (unifPart T n k)).mul_const _]
             refine congrArg _ (Finset.sum_congr rfl fun k _ => ?_)
             rw [integral_mul_const]
@@ -719,7 +718,6 @@ theorem drift_tendsto_L2 (hBmeas : ∀ t, Measurable (B t))
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
         ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (by simpa using hg_t 0 0)
-  have hM1 : 0 ≤ S.M₁ := le_trans (abs_nonneg _) (S.bdd₁ 0)
   have hM2 : 0 ≤ S.M₂ := le_trans (abs_nonneg _) (S.bdd₂ 0)
   set K1 : ℝ := C * (1 + (1 / 2) * S.M₁ ^ 2 + (1 / 2) * S.M₂) with hK1
   set Kdom : ℝ := K1 + C * (1 + 1 / 2) with hKdom
@@ -893,7 +891,6 @@ theorem drift_tendsto_L2 (hBmeas : ∀ t, Measurable (B t))
                 refine add_le_add (hJn_bound n ω s) ?_
                 rw [hJl]
                 refine (abs_add_le _ _).trans ?_
-                have h1 := hg_t (s : ℝ) (B s ω)
                 rw [abs_mul, abs_of_nonneg (by norm_num : (0:ℝ) ≤ 1/2)]
                 nlinarith [hg_t (s:ℝ) (B s ω), hg_xx (s:ℝ) (B s ω),
                   Real.exp_nonneg (lam * |B s ω|), hC0]
@@ -1011,7 +1008,6 @@ theorem ito_formula_td_localized
       (hfeval (0 : ℝ) 0 (fun ω => S.cut n (B 0 ω))
         ((S.continuous_cut n).measurable.comp (hBmeas 0)) (fun ω => S.cut_le_abs n (B 0 ω)))
   -- `L²` membership of the drift terms, via the exp-growth path integral
-  have hM1 : 0 ≤ S.M₁ := le_trans (abs_nonneg _) (S.bdd₁ 0)
   have hM2 : 0 ≤ S.M₂ := le_trans (abs_nonneg _) (S.bdd₂ 0)
   have hdrift_memLp :
       MemLp (fun ω => ∫ s in Set.Ioc 0 T, (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω))
