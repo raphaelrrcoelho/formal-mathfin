@@ -74,6 +74,52 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-06-29 — corpus 306 — Phase 1: the convex-duality unification (FTAP = coherent-risk, one Hahn–Banach root)
+
+**Upgrade executed (the headline).** The architecture doc's **#1 unification** — the I↔IV convex-duality
+bridge — is now *realized in Lean*, not latent. The shared geometric root lives in `Foundations/ConvexDuality`
+(the cone↔simplex separation `exists_pos_separating_of_cone_disjoint_simplex` + its point↔cone companion
+`exists_separating_of_not_mem_cone`, sharing two named atoms `functional_eq_sum_single` /
+`functional_nonneg_on_cone`), and four consumers now *stand on it*:
+- **pricing**: the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` is **re-derived** from the root (a
+  subspace = two-sided cone), so "the separating hyperplane is the EMM" is load-bearing, not annotation;
+- **risk**: the coherent-risk ADEH representation `coherentRisk_isLUB` (a coherent ρ = sup of expected loss
+  over its representing measures), closedness **derived** from the four axioms, not assumed;
+- **concrete**: `worstCase_isLUB` (worst-case loss = sup over the whole probability simplex);
+- **superhedging**: the `emm_le_superReplication` bound (EMM price ≤ super-replication cost).
+**Proved: the FTAP and the coherent-risk representation are the same Hahn–Banach theorem** — the two
+most-disconnected towers (pricing ↔ risk) are now one. Four new `full` corpus entries (302→306); axioms-clean.
+
+**Method (a lens-4 / infra note).** Every proof was **spike-validated by the maintainer on the warm daemon
+first**, then handed to a transcription subagent under a two-stage (implementer → reviewer) gate. Result:
+6 tasks, zero proof rework, every per-task review clean. The novel kernels (the point-from-cone primitive,
+the full ADEH `IsLUB` with its `q*`-normalization) were the maintainer's to find; the subagents assembled and
+wired. Subagent-driven development adapted to research-grade Lean.
+
+**Per-lens gradient (exemplar → next upgrade).**
+- *Inspired math / first principles*: exemplar = the ADEH representation from four axioms + one separation
+  primitive (closedness derived). Upgrade = the superhedging **strong** duality (the root-using ≤ direction).
+- *Architectural ingenuity / concept clarity*: exemplar = `ConvexDuality` naming the two atoms both separation
+  theorems consume — the unification made structural. Upgrade = a capstone enumerating the instances in one place.
+- *Coherence*: exemplar = the in-place re-derivation of the FTAP kernel (one proof, no primed duplicate).
+- *Zero slop*: the env-linter is restored to a **blocking** per-push gate (build.yml), green via a
+  `scripts/nolints.json` baseline that catches *new* findings.
+
+**Refreshed ranked backlog (a future session's opening move).**
+1. **Superhedging strong duality** (`superhedge = sup_{EMM}`) — blocked on a finite-dim **Farkas /
+   polyhedral-cone closedness** (Mathlib gap at this pin; `PointedCone.isClosed_dual` covers only *dual* cones).
+   The genuine root-using direction; highest-value backlog item.
+2. **Girsanov (I↔II)** — the next bridge; derive the continuous EMM from the Itô tower (Phase 2).
+3. **The lint baseline's 28 grandfathered findings** — 4 genuine dead `_hBmeas` args (drop with the Phase-2
+   bundled-`IsBrownianMotion` refactor), 16 deliberate naming (`_T` / `Has…_state`), 8 internal-helper docstrings.
+4. **Gaussian CVaR robust form** + **numéraire (IV↔I)** — the continuous-instance and portfolio seams.
+
+**Evidence/context.** corpus 302→306 (4 new `full`), ledger fresh, `lake build` green, AxiomAudit `#guard_msgs`
+pins all four new headline theorems to `[propext, Classical.choice, Quot.sound]`. **CI fix embedded in Phase 1**:
+the env-linter had been silently breaking `main`'s build (lean-action auto-runs `lake lint` when a `lintDriver`
+is configured, and the linter exits 1 on findings) — restored to a green blocking per-push gate via the
+`scripts/nolints.json` baseline; `lint.yml` (workflow_dispatch) stays the on-demand inventory.
+
 ## 2026-06-29 — corpus 302 — WHOLE-REPO values-upgrade review (program-quality deep dive; first under the upgrade model)
 
 **Scope**: the entire library at corpus 302 (~41.9k lines, 212 modules, 267 full / 18 library_wrapper /

@@ -48,29 +48,32 @@ integrated intensity"* unifies discounting, mortality, credit hazard, and the Po
 |---|---|---|
 | **Girsanov / Esscher** (change of measure) | I (EMM) ↔ II (Itô) ↔ IV (exp tilt) | **OPEN at I↔II.** `ContinuousFTAP.discountedGBM_isMartingale` is proved via the **Wald-exponential shortcut**, not an Itô–Girsanov change of measure; `ItoFormulaGBM` carries a *second*, separate discounted-GBM fact. The d-asset Esscher FTAP (IV) is a *discrete* Girsanov, unlinked to the continuous one. `reduced_core gir/sc-thm-9.1.8` is the missing continuous Girsanov. |
 | **Feynman–Kac** (generator) | II ↔ III | **WIRED** (BS-PDE keystone). Not yet abstracted to a general generator / Kolmogorov-backward framework. |
-| **Convex duality** (separation / Legendre–Fenchel) | I (pricing) ↔ IV (risk) | **ABSENT.** `CoherentAxioms` (the ADEH axioms) and `RockafellarUryasev` (CVaR as a variational `min`) carry **no** dual representation and **no** link to the FTAP's separating functional — though they are the *same* sup-over-measures duality. |
+| **Convex duality** (separation / Legendre–Fenchel) | I (pricing) ↔ IV (risk) | **WIRED (Phase 1, 2026-06-29).** The shared root `Foundations/ConvexDuality.exists_pos_separating_of_cone_disjoint_simplex` (cone↔simplex) + its companion `exists_separating_of_not_mem_cone` (point↔cone) now carry **both** towers: the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` is *re-derived* from the root (pricing side), and the coherent-risk ADEH representation `RiskMeasures/AcceptanceSet.coherentRisk_isLUB` is its risk-side instance (`WorstCaseRisk.worstCase_isLUB` a concrete case). Superhedging is wired as the `SuperhedgingDuality.emm_le_superReplication` bound; the strong-duality *equality* awaits a finite-dim Farkas (Mathlib gap). |
 | **The numéraire** (log-optimal portfolio) | IV (Kelly/portfolio) ↔ I (EMM) | **ABSENT.** `Performance/Kelly` and `BlackScholes/StockNumeraire` exist; the numéraire-portfolio ⟷ EMM identity is unstated. |
 | **Donsker / CLT** (discrete → continuous) | Binomial ↔ Black–Scholes | **WIRED** (`CRRConvergence.binomialPrice_call_tendsto_bs`). |
 
 ## Coherence verdict
 
-Individually the towers are coherent and the *engineering* architecture is documented. But the
-**mathematical spine is latent, not realized**: two of the four bridges are open (Girsanov I↔II,
-convex-duality I↔IV), and the field's single organizing principle — *the FTAP separating functional =
-the coherent-risk-measure representation = the superhedging dual* — is split across five files that never
-name it. **The library is a set of coherent towers, not yet a unified theory.**
+Individually the towers are coherent and the *engineering* architecture is documented. **Phase 1
+(2026-06-29) realized the spine's #1 unification**: the convex-duality bridge (I↔IV) is now WIRED — the
+FTAP separating functional and the coherent-risk-measure representation are *proved* to be the same
+Hahn–Banach root (`Foundations/ConvexDuality`), no longer split across files that never name it. Of the
+four bridges, Feynman–Kac (II↔III), Donsker (discrete↔continuous), and now convex-duality (I↔IV) are
+WIRED; Girsanov (I↔II) and the numéraire (IV↔I) remain open. **The library's pricing↔risk spine is
+realized; the continuous-time (Girsanov) and portfolio (numéraire) seams are the next bridges.**
 
 ## The higher-math unification roadmap (apparently-disconnected fields that connect)
 
 Ranked by leverage × tractability:
 
-1. **The convex-duality unification (I↔IV) — HIGHEST LEVERAGE; the pieces already exist.**
-   Extract the shared root (a positive separating functional / Legendre–Fenchel dual) and make
-   `{FTAP, ConvexPricingFunctional, coherent-risk representation, CVaR robust form, superhedging bounds}`
-   instances of it. It connects the two *most-disconnected* towers (pricing ↔ risk), and it is
-   *finite-dimensional convex analysis* — Mathlib-strong, **more tractable than Girsanov.** The deep
-   truth: **the FTAP and the coherent-risk-measure representation are the same Hahn–Banach theorem**;
-   `CVaR_α(L) = sup_{Q∈Q_α} E_Q[L]` is literally pricing under a set of measures.
+1. **The convex-duality unification (I↔IV) — ✅ REALIZED (Phase 1, 2026-06-29).** The shared root is
+   extracted (`Foundations/ConvexDuality`: the cone↔simplex separation + the point↔cone companion, sharing
+   two named atoms), and the FTAP kernel (re-derived from it), the coherent-risk ADEH representation
+   (`coherentRisk_isLUB`), a concrete instance (`worstCase_isLUB`), and the superhedging bound
+   (`emm_le_superReplication`) are all instances/consumers of it. **Proved: the FTAP and the
+   coherent-risk-measure representation are the same Hahn–Banach theorem.** Remaining as backlog: the
+   superhedging strong-duality *equality* (needs a finite-dim Farkas — a Mathlib gap), and the Gaussian
+   `CVaR_α(L) = sup_{Q∈Q_α} E_Q[L]` robust form (the continuous instance, off the finite-state spine).
 
 2. **Girsanov as the I↔II connective tissue.** Reframes the crown-jewel conversion: not "convert a stub,"
    but *derive the continuous EMM from the Itô tower* — retiring the Wald shortcut, unifying the two
