@@ -1935,12 +1935,19 @@
       "input_hash": "7917a0f07e41f7d876dd02f179c4d8ecfb09f435ddb85634756e154348d64a4c",
       "verified_at_commit": "89bbc64"
     },
+    "sc-ito-formula-unrestricted-islocalmartingale": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-29",
+      "elapsed_s": 148.6,
+      "input_hash": "76ea9eb7869a9a3d016fc0f52aff2327fa62c0da1b5ff4692c84888ffe9cc411",
+      "verified_at_commit": "e006af6"
+    },
     "sc-ito-formula-unrestricted-local": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-28",
-      "elapsed_s": 85.6,
-      "input_hash": "511edfa953205612066369186923c8dc12728e5a73c78d54041d970faa03f01e",
-      "verified_at_commit": "89bbc64"
+      "date": "2026-06-29",
+      "elapsed_s": 110.2,
+      "input_hash": "e4c79f04eee19f6fc9e43ea7ddc8a01b4fd22fbd97c3e5c12f389226f7808335",
+      "verified_at_commit": "e006af6"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",

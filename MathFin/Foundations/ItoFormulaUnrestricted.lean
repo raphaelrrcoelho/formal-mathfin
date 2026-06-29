@@ -22,10 +22,11 @@ is a **continuous local martingale** on the null-augmented Brownian filtration.
 ## Strategy — localize in space *and* time, glue with the exit times
 
 The single gating ingredient is the genuine localizing sequence `exitTime` (`ExitTime.lean`).
-The local-martingale property is delivered in **explicit form** (a localizing sequence + per-`N`
+The local-martingale property is delivered here in **explicit form** (a localizing sequence + per-`N`
 continuous true martingales agreeing with `M` on the stochastic intervals) — this *is* the textbook
-definition of a continuous local martingale; packaging it into Degenne's `IsLocalMartingale`
-*typeclass* is deferred (see the closing note). Three steps:
+definition of a continuous local martingale; the packaging into Degenne's `IsLocalMartingale`
+*typeclass* is `ito_formula_unrestricted` in `ItoFormulaUnrestrictedLocMart.lean` (it consumes the
+all-time-agreement step below). Three steps:
 
 * **Double truncation** (this section). `fTrunc N (t, x) = f(cut N t, cut N x)` cuts **both**
   arguments smoothly onto the compact square `[−M₀(N+1), M₀(N+1)]²`, on which the continuous
@@ -39,9 +40,11 @@ definition of a continuous local martingale; packaging it into Degenne's `IsLoca
   returns. As `N → ∞` the exit times escape, so `M` is *locally* a true martingale.
 * **All-time indistinguishability** (`indistinguishable_on_stochInterval`). The per-`t` agreement
   lifts to `∀ᵐ ω, ∀ u ≤ σ_N, M_u = Mₙ_u` (continuity + countable rationals + `Set.EqOn.closure`).
-  This lemma is proved here and is the **bridge toward** the deferred `IsLocalMartingale` typeclass
-  wrapper (which would stop the indicator processes and invoke `Martingale.stoppedProcess_indicator`);
-  the wrapper itself remains open, blocked only on the drift-integral adaptedness of `M`.
+  This is the all-time-agreement crux consumed by the `IsLocalMartingale`-typeclass wrapper
+  (`ItoFormulaUnrestrictedLocMart.lean`, `ito_formula_unrestricted`), which stops the indicator
+  processes and invokes `Martingale.stoppedProcess_indicator`. That wrapper is **complete** — the
+  one remaining ingredient, the drift-integral adaptedness of `M`, is discharged via
+  `StronglyMeasurable.integral_prod_right` (a time-clamped Carathéodory argument).
 
 The time cut is essential: `cut N` confines `x`, but a general `C³` `f` has `t`-derivatives
 unbounded over `t ∈ ℝ`; capping the localizer at `N` keeps `t ≤ N` so the time cut is inert
@@ -524,10 +527,10 @@ deterministic time below a stopping time `σ` agree, a.s., on the whole stochast
 `[0, σ]` — the per-deterministic-`t` modification lifted to all-`t` by continuity on the dense
 countable set, then to the closed interval by left-continuity at the boundary.
 
-This is the staging lemma for the (deferred) `IsLocalMartingale`-typeclass wrapper of Summit C:
-it upgrades the per-`t` agreement that `ito_formula_unrestricted_local` returns to the all-time
-agreement a `Martingale.stoppedProcess_indicator` argument needs. It has no in-file consumer yet —
-the wrapper is blocked only on the drift-integral adaptedness of the residual `M`. -/
+This is the staging lemma for the `IsLocalMartingale`-typeclass wrapper of Summit C: it upgrades the
+per-`t` agreement that `ito_formula_unrestricted_local` returns to the all-time agreement a
+`Martingale.stoppedProcess_indicator` argument needs. It is consumed by `ito_formula_unrestricted`
+in `ItoFormulaUnrestrictedLocMart.lean`. -/
 lemma indistinguishable_on_stochInterval {M' X' : ℝ≥0 → Ω → ℝ} {σ : Ω → WithTop ℝ≥0}
     (hM'cont : ∀ ω, Continuous fun t => M' t ω) (hX'cont : ∀ ω, Continuous fun t => X' t ω)
     (hagree : ∀ t : ℝ≥0, ∀ᵐ ω ∂μ, (t : WithTop ℝ≥0) ≤ σ ω → M' t ω = X' t ω) :

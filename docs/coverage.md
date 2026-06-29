@@ -26,8 +26,16 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-28, unrestricted-`C³` Itô formula via stopping-time localization — Summit C):**
-> corpus **301**, **266 full + 18 wrappers = 284/301 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **Live status (2026-06-29, Summit C in Degenne's `IsLocalMartingale` typeclass — the wrapper
+> completed):** corpus **302**, **267 full + 18 wrappers = 285/302 delivery-ready**, 17 reduced
+> cores, 0 placeholders. **The unrestricted-`C³` residual `M` is now a genuine `IsLocalMartingale`**
+> (`Foundations/ItoFormulaUnrestrictedLocMart.lean`, entry
+> `sc-ito-formula-unrestricted-islocalmartingale`, **`full`**): the one ingredient beyond the
+> explicit form — adaptedness of `M` (`residual_stronglyMeasurable`), i.e. of the drift primitive
+> `D_t = ∫₀ᵗ drift` (`driftPrimitive_stronglyMeasurable`, time-clamp + Carathéodory +
+> `StronglyMeasurable.integral_prod_right`) — discharged; then
+> `StronglyAdapted.stoppedProcess_indicator` + the all-time agreement assemble
+> `Locally (Martingale ∧ cadlag)` with the exit-time localizer `σ_N`.
 > **Itô's formula now holds for a general `C³` `f` with NO growth/boundedness hypothesis**
 > (`Foundations/ItoFormulaUnrestricted.lean`, entry `sc-ito-formula-unrestricted-local`, **`full`**):
 > the residual `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ(f_t+½f_xx)ds` is a continuous local martingale in

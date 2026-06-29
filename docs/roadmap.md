@@ -913,14 +913,22 @@ deterministic-integrand layer load-bearing in a pricing module for the first tim
   exit-time confinement (`abs_le_N_of_le_exitTime`) + cut-inactivity collapsing `fTrunc → f`; the
   all-time agreement crux `indistinguishable_on_stochInterval` (dense-rational agreement +
   `Set.EqOn.closure` + boundary left-continuity) is proved and axioms-clean. corpus 300 → **301**,
-  265 → **266 full**. *The Degenne-`IsLocalMartingale`-typeclass packaging remains as
-  drift-integral-adaptedness plumbing — the explicit form is the full mathematical content.*
+  265 → **266 full**.
 
-**Open frontier:** the **`IsLocalMartingale`-typeclass wrapper for Summit C** (the only piece left
-is the parametrized-integral adaptedness of `M`, so the stopped residual is `StronglyAdapted`:
-`B` progressively measurable ⇒ the drift integral adapted, via `StronglyMeasurable.integral_prod_right`
-— ~50–80 lines of measure-theory plumbing, no off-the-shelf lemma; the indistinguishability crux is
-already green). Also open: the Itô formula against a general Itô
+- **Summit C in Degenne's `IsLocalMartingale` typeclass — the wrapper completed**
+  (`Foundations/ItoFormulaUnrestrictedLocMart.lean`, entry
+  `sc-ito-formula-unrestricted-islocalmartingale`, `full`). The unrestricted-`C³` residual `M` is now
+  a genuine **`IsLocalMartingale`** (`ito_formula_unrestricted`). The one ingredient beyond the
+  explicit form — adaptedness of `M` (`residual_stronglyMeasurable`), reducing to the drift primitive
+  `D_t = ∫₀ᵗ drift` being `𝓕_t`-measurable (`driftPrimitive_stronglyMeasurable`: time-clamp the
+  integrand so every slice is `𝓕_t`-measurable, then Carathéodory
+  `stronglyMeasurable_uncurry_of_continuous_of_stronglyMeasurable` + `StronglyMeasurable.integral_prod_right`,
+  worked under a `letI` sub-σ-algebra) — is discharged; then `StronglyAdapted.stoppedProcess_indicator`
+  + the all-time agreement `indistinguishable_on_stochInterval` assemble `Locally (Martingale ∧ cadlag)`
+  with the exit-time localizer `σ_N`. corpus 301 → **302**, 266 → **267 full**. *Summit C is now
+  complete in both the explicit and the typeclass forms.*
+
+**Open frontier:** the Itô formula against a general Itô
 process with **adapted** coefficients
 (the random-integrand semimartingale form — a new tower layer beyond the constant-coefficient case
 just landed); re-ground `discountedGBM_isMartingale` at the *process* level (all `t`, on the

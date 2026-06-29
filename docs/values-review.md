@@ -53,6 +53,49 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-29 — corpus 302 — Summit C in Degenne's `IsLocalMartingale` typeclass (the wrapper completed)
+
+**Scope**: `Foundations/ItoFormulaUnrestrictedLocMart.lean` (new — `driftPrimitive_stronglyMeasurable`
+[the drift primitive `D_t = ∫₀ᵗ drift` is `𝓕_t`-measurable via time-clamping + Carathéodory +
+`StronglyMeasurable.integral_prod_right`], `residual_stronglyMeasurable` [`M` adapted], and
+`ito_formula_unrestricted` [the genuine `IsLocalMartingale M`]), the docstring updates to
+`ItoFormulaUnrestricted.lean` (the wrapper is no longer "deferred"), and corpus entry
+`sc-ito-formula-unrestricted-islocalmartingale` (`full`).
+
+**Panel**: two independent reviewers across the eight lenses.
+
+**Verdict: 8/8 PASS** — no blocking findings.
+
+- **The headline question — is `IsLocalMartingale M` genuine or overclaimed?** Both reviewers traced
+  the `IsLocalMartingale → Locally → ∃ τ, IsLocalizingSequence ∧ ∀ N, p(stopped)` unfolding and
+  confirmed the proof discharges it honestly: the localizer is the **real** exit-time sequence
+  `σ_N = min(τ_N, N)` (not the trivial const-`⊤`), the reference martingale `Z` is the genuine
+  stopped truncated martingale, the target `Y`'s martingale identity is transferred via
+  `condExp_congr_ae` + `Z`'s identity + the all-time agreement `indistinguishable_on_stochInterval`,
+  and adaptedness is real (`residual_stronglyMeasurable`). No `sorry`/cheat; axioms-clean
+  `[propext, Classical.choice, Quot.sound]` (confirmed pinned).
+- **Math / coherence / ingenuity / first principles**: the time-clamp drift-adaptedness argument
+  (`min s t ≤ t` ⇒ each slice `𝓕_t`-measurable; Carathéodory joint measurability; `integral_prod_right`)
+  is correct; the `letI : MeasurableSpace Ω := natFiltration hBmeas t` sub-σ-algebra switch is sound
+  and well-commented (slice facts proved with `mΩ` ambient, then the product/integral lemmas
+  re-pointed); consumes the right Mathlib/Degenne lemmas (`stronglyMeasurable_uncurry_of_continuous_of_stronglyMeasurable`,
+  `Martingale.stoppedProcess_indicator`, `StronglyAdapted.stoppedProcess_indicator`, `isStable_isCadlag`,
+  `stoppedProcess_eq_of_le/ge`) without reproving; the `untopA` `WithTop`/`ℝ≥0` boundary handling is
+  necessary friction, not a workaround.
+- **Slop / idiom / clarity / beauty**: all three lemmas load-bearing, no unused hypotheses, idiomatic
+  combinators, the Itô identity discharged "by construction" (`simp only [hM]; ring`), the martingale
+  transfer a clean symmetric `=ᵐ` calc. Two tiny dedup observations (the `IsCadlag`-from-continuous
+  constructor appears twice; `M`'s definition/continuity is re-derived because the upstream
+  `ito_formula_unrestricted_local` packages `M` existentially) — both non-blocking, the latter forced
+  by the existential seam.
+- **One stale-language nit (fixed before commit)**: the Strategy *intro* in `ItoFormulaUnrestricted.lean`
+  still said the typeclass packaging "is deferred", contradicting the (already-updated) bullet that
+  says it is complete. Reworded to point at `ito_formula_unrestricted`.
+
+**Net**: Summit C is now complete in **both** the explicit local-martingale form
+(`ito_formula_unrestricted_local`) and Degenne's `IsLocalMartingale` typeclass
+(`ito_formula_unrestricted`). The deferred piece is genuinely done; no overclaiming remains.
+
 ## 2026-06-29 — corpus 301 — Summit C: the unrestricted-`C³` Itô formula via stopping-time localization (explicit local-martingale form)
 
 **Scope**: `Foundations/ItoFormulaUnrestricted.lean` (new — the double cutoff `fTrunc N` with its
