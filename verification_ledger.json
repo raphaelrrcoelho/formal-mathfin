@@ -1014,9 +1014,9 @@
     "mf-convex-duality-root": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-29",
-      "elapsed_s": 3.7,
-      "input_hash": "0c092adec1fc4450d79da2af6b13b50b6897278665cde0c1480b09c44fdcb221",
-      "verified_at_commit": "6b288a8"
+      "elapsed_s": 65.1,
+      "input_hash": "93627154fec596a65681bf6291f9530681ac1abf28c21fc71195f918e42dddfe",
+      "verified_at_commit": "f94f696"
     },
     "mf-coupon-bond-strict-anti": {
       "benchmark_file": "mathematical_finance.json",
@@ -1126,16 +1126,16 @@
     "mf-ftap-discrete-complete": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-29",
-      "elapsed_s": 74.0,
-      "input_hash": "5694c7a36cb83dd766c8258003c7690a1da99f590d2f6c5ad7b447ca957bd684",
-      "verified_at_commit": "6b288a8"
+      "elapsed_s": 32.7,
+      "input_hash": "3208fbbb08812a7b89f9ea615d91e218e820f53704430924305de077284f988f",
+      "verified_at_commit": "f94f696"
     },
     "mf-ftap-multi-state-forward": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-29",
-      "elapsed_s": 33.2,
-      "input_hash": "584815d3355eb810f260e7a62ff5a898a454f94139e5a5f0c9ca9bc4881b811d",
-      "verified_at_commit": "6b288a8"
+      "elapsed_s": 60.8,
+      "input_hash": "8d30fdd45b6879e2da1a7d5a614659196c4055ce242c2cd3c8692cf54f90ba97",
+      "verified_at_commit": "f94f696"
     },
     "mf-ftap-one-period-general": {
       "benchmark_file": "mathematical_finance.json",
@@ -1154,9 +1154,9 @@
     "mf-ftap-single-period-complete": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-29",
-      "elapsed_s": 56.7,
-      "input_hash": "0be03f0cd54e7f1d1dfaa3f8d765fceab13caf9c9fcd35841582fffd2b8d53bf",
-      "verified_at_commit": "6b288a8"
+      "elapsed_s": 44.7,
+      "input_hash": "f1436e159f2ab1847826f30dad8216b5ee40fc69868bd1b1cd3fe204951921e5",
+      "verified_at_commit": "f94f696"
     },
     "mf-garman-kohlhagen": {
       "benchmark_file": "mathematical_finance.json",
