@@ -292,10 +292,16 @@ def test_axiom_audit_gen_is_fresh() -> None:
 
 # The eight judgment lenses (docs/values-review.md) cannot be checked by a
 # machine — but "nobody looked" can. A recorded multi-agent review must
-# cover the corpus to within one session's growth.
+# cover the corpus to within one session's growth. A verdict header is a
+# dated `## ` heading carrying a `corpus <N>` count anywhere on the line; the
+# optional `commit <sha>` provenance segment (absent on working-tree verdicts)
+# is NOT required. Anchoring the regex on a mandatory `commit <sha>` silently
+# dropped the seven most-recent reviews (corpus 295–302) and let the gate
+# track a stale corpus-292 line — a freshness gate fooled into reading the
+# wrong anchor (fixed 2026-06-29).
 VALUES_REVIEW_PATH = Path("docs/values-review.md")
 REVIEW_HEADER_RE = re.compile(
-    r"^## \d{4}-\d{2}-\d{2} — commit [0-9a-f]{7,} — corpus (\d+)",
+    r"^## \d{4}-\d{2}-\d{2}\b.*?— corpus (\d+)",
     re.MULTILINE,
 )
 REVIEW_SLACK_ENTRIES = 12

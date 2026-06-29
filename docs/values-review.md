@@ -1,13 +1,19 @@
-# Values review — the final verification
+# Values review — the upgrade engine (not a pass/fail gate)
 
 The mechanical gates (`tests/test_values.py`, `AxiomAudit*.lean`, the
 verification ledger, the CI gates in `build.yml`) enforce everything a
-machine can check. This protocol covers what a machine cannot: the judgment
-lenses that define the repo's quality bar. The **review is judgment** — a
-multi-agent panel reading the work — and the **pipeline enforces that it
-happens**: `tests/test_values.py::test_values_review_is_current` fails when
-the corpus has grown more than 12 entries past the last recorded verdict
-below. A regex cannot check "beautiful"; a regex can check "nobody looked."
+machine can check. This protocol covers what a machine cannot: the eight
+judgment lenses that define the repo's quality bar. Its output is **not a
+pass/fail stamp** — a green "8/8 PASS" checkmark is exactly how a library
+quietly settles into being a *fine* dump. The lenses are read as
+**gradients**: for each, where is the work strongest (the exemplar to
+propagate) and what is the next concrete **upgrade** that raises its ceiling?
+Each review produces a ranked backlog of value-aligned upgrades and the
+upgrades executed that session — and the session's job is to *do the top
+ones*. The **pipeline enforces the cadence** (not a quality threshold):
+`tests/test_values.py::test_values_review_is_current` fails when the corpus
+has grown more than 12 entries past the last recorded review. A regex cannot
+check "beautiful"; it can check "nobody refreshed the backlog."
 
 ## The eight lenses
 
@@ -41,17 +47,122 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
   at latest every 12 corpus entries (the CI ratchet's slack — one session's
   growth).
 - **How**: at least three independent review agents, the lenses split among
-  them, reading the session's diff and its context (read-only; never running
-  Lean). Findings are triaged blocking / minor / nit. **Blocking findings
-  are fixed before the verdict is recorded**; minor findings become recorded
-  actions with owners (usually: next session's opening move).
-- **Record**: append a verdict block below, headed exactly
-  `## YYYY-MM-DD — commit <sha> — corpus <N>` (the test parses this line),
-  with per-lens verdicts and the findings ledger. Verdicts are honest:
-  PASS-WITH-NOTES is a normal outcome; an undeserved PASS is itself a values
-  violation.
+  them, reading the work and its context (read-only; never running Lean) —
+  then **adjudicated by the maintainer** against the settled doctrine (the
+  wrapper taxonomy, the two-tower direction) and `grep`-confirmed usage,
+  because panel agents lacking that context systematically over-escalate
+  (calling a consumed rewrite-handle "slop") or under-escalate (all-green
+  sycophancy). For each lens, name the current **exemplar** (the bar to
+  propagate) and the next **upgrade** (the gradient). Genuine slop uncovered
+  is fixed in-session; larger upgrades become ranked backlog items with
+  owners (usually a future session's opening move).
+- **Record**: append a review block below, headed
+  `## YYYY-MM-DD — corpus <N> — <one-line title>` (the freshness test parses
+  the date and the `corpus <N>` count anywhere in the heading; a
+  `commit <sha>` provenance segment is optional — older entries carry it,
+  working-tree entries omit it). Record (i) the **upgrades executed** this
+  session, (ii) the refreshed **ranked backlog** of value-aligned upgrades,
+  and (iii) the evidence/context (mechanical floor, panel findings confirmed
+  or dissolved). This is a record of **direction, not a grade** — there is no
+  PASS line to award; the failure mode the model guards against is a review
+  that finds nothing to improve.
 
-## Verdict log
+## Review log
+
+Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the **upgrade-driven model**
+(per-lens exemplar → next upgrade; upgrades executed + ranked backlog). Earlier entries are historical
+PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
+should *generate work*, not certify "OK").
+
+## 2026-06-29 — corpus 302 — WHOLE-REPO values-upgrade review (program-quality deep dive; first under the upgrade model)
+
+**Scope**: the entire library at corpus 302 (~41.9k lines, 212 modules, 267 full / 18 library_wrapper /
+17 reduced_core), commissioned as a standalone session: *given the drastic growth, is the program still
+coherent, or sliding toward a low-quality dump — and what are the next upgrades that keep it climbing?*
+Deep dive on the eight lenses **individually and as a set**, plus an infrastructure-modernity assessment.
+Read each lens as a **gradient**, not a threshold.
+
+**Method**: a three-agent read-only panel (Itô-tower coherence / pricing + reduced_core honesty /
+adversarial whole-repo slop sweep), then **maintainer adjudication** against the settled wrapper doctrine,
+`grep`-confirmed usage, and mechanical sweeps (`sorry`/`axiom`/`native_decide`/`maxHeartbeats` counts, the
+module import graph, orphan cross-reference).
+
+**Baseline / evidence (the floor the upgrades build from — context, not a grade).**
+- Mechanical floor clean: 0 `sorry`/`admit` in source (7 hits are comment prose), 0 `axiom` decls (1 grep
+  hit is a comment word), 0 `native_decide`, 0 `maxHeartbeats`, 0 true orphans (the 5 import-graph leaves
+  — `AxiomAudit`, `AxiomAuditGen`, `Blueprint`, `Blueprint/Export`, `Examples` — are deliberate
+  `globs := .andSubmodules` harnesses). `autoImplicit false`; `@[expose] public section` gate-enforced.
+  19/19 pytest, ledger 302/302. Lean's default build-time linters run green.
+- **The panel's "BLOCKING slop" escalations mostly DISSOLVED on adjudication**, which is the reassuring
+  signal: `Phi_def := rfl` is used 4× as a `rw` handle (idiomatic, not bookkeeping); the survival `rfl`
+  is a *declared* cross-domain coherence bridge ("**not** new finance"); the `GreekSigns` delta one-liners
+  complete a documented catalogue; the four `_pos := Real.exp_pos _` are domain positivity API over
+  `noncomputable def`s; `ItoLemma` is consumed by `GBMLogMoments`/`PDEFromIto`; the strong/weak Itô pair
+  is both load-bearing. Each flag violated one lens *in isolation* but satisfied the lens **system**. The
+  pricing agent's opposite failure (all-green sycophancy) was equally discounted. Net: the discipline is
+  holding — this is the *baseline*, not an end state.
+
+**Per-lens: exemplar (the bar to propagate) → next upgrade (the gradient).**
+1. **Inspired math** — exemplar: the Summit-C localization (`ito_formula_unrestricted`, a genuine
+   `IsLocalMartingale`). *Upgrade*: the general **adapted-coefficient** (random-integrand) Itô formula —
+   the open frontier that retires the last "bounded / exp-growth" caveat.
+2. **Mathlib/Degenne coherence** — exemplar: `VasicekSDEGaussian` consuming the Wiener-integral tower.
+   *Upgrade*: make the two-tower bridge **plural** — route a second pricing family (a barrier/lookback, or
+   a CIR/Heston short rate) through the Itô tower, so the bridge is structural rather than exemplary.
+3. **Zero slop** — exemplar: the certificate-shaped `nlinarith` convention. *Upgrade* **[EXECUTED]**: wire
+   the env-linter (`lake lint` → Batteries `runLinter`, advisory CI) so `unusedArguments` /
+   `unusedHavesSuffices` / `synTaut` mechanize this lens instead of human eyes. *Next*: triage its first
+   inventory into fixes + a `nolints.json` baseline.
+4. **Architectural ingenuity** — exemplar: hoisting `StandardNormal` out of pricing to fix a layering
+   inversion. *Upgrade* **[EXECUTED, this review]**: the review model itself — from pass/fail to an
+   upgrade engine. *Next structural*: the Itô-tower naming layer (`_T`/`_Infinite`/`_TD`) is debt; do it as
+   a deliberate tower-consolidation (a rename restales the whole ledger, so batch it with real work).
+5. **First principles** — exemplar: the reduced_core honesty taxonomy + the definitional-`rfl` tripwire.
+   The seven sampled reduced_core entries (SDE existence, Lévy, Girsanov, martingale representation,
+   Novikov, strong Markov, 2D Itô) are honest specification-level encodings. *Upgrade*: promote one
+   reduced_core sub-core (e.g. Lévy or martingale representation) from spec-encoding to a *derived*
+   statement.
+6. **Idiomatic register** — exemplar **[NEW, this session]**: consuming Batteries' `runLinter` via
+   `lintDriver` rather than re-implementing it. *Upgrade*: from the env-linter inventory, fix or `nolint`
+   each `simpNF` / `defLemma` / `dupNamespace` finding.
+7. **Concept clarity** — exemplar: the `GreekSigns` table + the honest verification-vs-derivation
+   docstrings. *Upgrade*: rename the two stale "deferred" doc filenames to their CLOSED status; let
+   `docBlame` surface public decls missing docstrings and fill the load-bearing ones.
+8. **Beautiful math** — exemplar: the heat-kernel-carries-the-BS-PDE route; the time-clamp
+   drift-adaptedness argument. *Upgrade*: an "elegant proofs" tour in `Examples.lean` that *propagates*
+   the obviously-right-once-seen arguments — beauty is also raised by being shown.
+
+**The lenses AS A SET (the meta-ask).** Three bands: **honesty** (3, 5, 7 — largely machine-enforceable;
+the env-linter extends lens-3's reach), **taste** (1, 4, 8 — irreducible human/agent judgment, what the
+review cadence protects), **coherence** (2, 6 — semi-mechanizable). The built-in tensions are *resolved
+doctrinally*, which is why the panel's surface findings dissolved: lens-2 *no thin wrappers* vs lens-7
+*name the concept* → the wrapper taxonomy; lens-8 *minimal* vs lens-3 *no opaque discharge* → the
+certificate-shaped `nlinarith`; lens-1/4 *earn-its-place / right-generality* vs over-engineering → *every
+headline theorem has a consumer*. The upgrade model makes each lens **point somewhere** instead of
+settling at a checkmark.
+
+**Upgrades EXECUTED this session.**
+- *(honesty machinery — lens 3/7)* Fixed the values-freshness gate's stale anchor: `REVIEW_HEADER_RE`
+  required a `commit <sha>` the 7 newest entries had dropped, so it tracked corpus 292 (gap 10) while real
+  reviews sat at 302. Loosened to parse `date … corpus N`; now anchors to 302 (gap 0). A freshness gate
+  reading the wrong line is the one place slop had reached the dump-prevention machinery itself.
+- *(lens 3 + 6)* Wired the advisory env-linter — lakefile `lintDriver := "batteries/runLinter"` +
+  `lintDriverArgs := #["MathFin"]`, and `.github/workflows/lint.yml` (`workflow_dispatch`, advisory).
+- *(lens 4 — the review itself)* Reframed this protocol from pass/fail verdict to value-aligned upgrade
+  engine (this entry, and the doctrine + Protocol above).
+
+**Ranked upgrade backlog (next moves, highest leverage first).**
+1. **Triage the env-linter's first CI inventory** — fix genuine dead-args (e.g. confirm/clear
+   `bsV_gamma_pos`'s `_hK`), `nolint` the deliberate conventions into `scripts/nolints.json`, then promote
+   `lint.yml` to PR-advisory (`continue-on-error`).
+2. **General adapted-coefficient Itô formula** (lens 1) — the standing open frontier.
+3. **Second two-tower bridge** to a new pricing family (lens 2).
+4. **Itô-tower naming-consolidation** pass, batched with structural work (lens 4/6).
+5. **Promote one reduced_core sub-core** from spec-encoding to derived (lens 5).
+6. **Rename the stale "deferred" docs**; fill load-bearing `docBlame` gaps (lens 7).
+
+This review records a **direction, not a grade**. The discipline is intact across both towers; the work is
+to keep climbing, not to certify "OK."
 
 ## 2026-06-29 — corpus 302 — Summit C in Degenne's `IsLocalMartingale` typeclass (the wrapper completed)
 
