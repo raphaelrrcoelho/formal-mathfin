@@ -340,6 +340,9 @@ import MathFin.RiskMeasures.Spectral
 import MathFin.RiskMeasures.Concentration
 -- Phase 21: first-principles coherent-axiom derivation from concave utility
 import MathFin.RiskMeasures.UtilityDerivation
+-- Phase 1 (convex-duality unification): coherent-risk ADEH representation — acceptance cone
+-- separation giving the representing probability measures (risk-side Hahn–Banach)
+import MathFin.RiskMeasures.AcceptanceSet
 
 -- Bridges (certified cross-domain unifications)
 import MathFin.Bridges.ConcentrationVariance

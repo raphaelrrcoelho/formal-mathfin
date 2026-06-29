@@ -3264,6 +3264,22 @@
       }
     },
     {
+      "id": "mf-coherent-risk-representation",
+      "name": "Coherent Risk Representation (ADEH, finite state)",
+      "description": "A coherent risk measure on a finite state space is the supremum of expected loss over a set of representing probability measures. The acceptance set is a closed convex cone, and a rejected position is separated from it by a representing density — the same Hahn–Banach separation the FTAP uses for the equivalent martingale measure. The risk-side face of the convex-duality unification.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.AcceptanceSet\n\nopen scoped BigOperators\n\n/-- **Coherent-risk representation (Artzner–Delbaen–Eber–Heath, finite state).** A coherent risk\n    measure `ρ` on `ι → ℝ` is the least upper bound of expected loss `∑ qᵢ (-Xᵢ)` over its representing\n    probability measures `q ∈ representingSet ρ`. The separating density realising the bound is the\n    point-from-cone Hahn–Banach functional — the risk-side instance of the FTAP's separating root.\n    Re-exports `MathFin.coherentRisk_isLUB`. -/\ntheorem coherent_risk_representation {ι : Type*} [Fintype ι] [Nonempty ι] {ρ : (ι → ℝ) → ℝ}\n    (hρ : MathFin.IsCoherentRisk ρ) (X : ι → ℝ) :\n    IsLUB ((fun q => ∑ i, q i * (- X i)) '' MathFin.representingSet ρ) (ρ X) :=\n  MathFin.coherentRisk_isLUB hρ X\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Artzner–Delbaen–Eber–Heath 1999 (coherent measures of risk); finite-state representation via convex duality",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof of the finite-state ADEH representation re-exported from MathFin/RiskMeasures/AcceptanceSet.lean: a coherent risk measure (the four ADEH axioms, bundled as IsCoherentRisk) equals the supremum (stated as IsLUB) of expected loss over its representing probability measures. Closedness of the acceptance set is derived from the axioms (ρ convex hence continuous on ℝ^ι), not assumed. The least-upper-bound direction separates the rejected position X + (ρX-ε)·1 from the acceptance cone via the point-from-cone primitive MathFin.exists_separating_of_not_mem_cone and normalises the separating functional to a representing density — the same Hahn–Banach root as the FTAP. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-ftap-single-period-complete",
       "name": "Multi-State Single-Period FTAP (Biconditional)",
       "description": "No arbitrage ⟺ an equivalent martingale measure exists, in an arbitrary finite-state, finite-asset one-period market. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional geometric Hahn–Banach separation of the attainable-payoff span from the standard simplex, completing the multi-state FTAP to a biconditional.",
