@@ -1,0 +1,64 @@
+name: lint
+
+# Advisory ENVIRONMENT-LINTER gate — the machine check for the parts of the
+# values bar a regex can reach: lens-3 (zero slop — `unusedArguments` flags
+# dead hypotheses, `unusedHavesSuffices` flags dead `have`s, `synTaut` flags
+# bookkeeping tautologies) and lens-6 (idiomatic register — `simpNF`,
+# `defLemma`, `dupNamespace`). `lake lint` invokes Batteries' canonical
+# `runLinter` over the MathFin package, configured in lakefile.lean
+# (`lintDriver := "batteries/runLinter"` + `lintDriverArgs := #["MathFin"]`) —
+# the exact mechanism Mathlib uses, so we consume the upstream tool instead of
+# re-implementing it. `getDeclsInPackage MathFin` scopes the lint to our
+# library; Mathlib / BrownianMotion declarations are not linted.
+#
+# ON-DEMAND ONLY (workflow_dispatch), ADVISORY, deliberately NOT per-push.
+# The env-linter suite reports findings that must be TRIAGED, not auto-blocked:
+# some are genuine slop to fix (a real dead argument), some are deliberate
+# conventions to record in `scripts/nolints.json` (e.g. a domain-documenting
+# `_hK` argument), and `docBlame` will flag public declarations missing
+# docstrings (real lens-7 signal, but high-volume — a non-upstreaming library
+# need not chase every one at once). Gating the per-push build on this would
+# stop development on style nits. The ENFORCED per-push floor stays build.yml
+# (green `lake build` + AxiomAudit `#guard_msgs`-pinned axioms + the Python
+# values gates). This job turns lens-3/6 from human-only review into a machine
+# inventory; promote it to PR-advisory (continue-on-error) once a
+# `scripts/nolints.json` baseline is committed.
+#
+# Runs on the GitHub runner by doctrine — a full-environment lint load must
+# never share the 10 GB local box with the lean-repl daemon (CLAUDE.md
+# "Memory doctrine").
+#
+# Fallback if `batteries/runLinter` does not resolve from this workspace:
+# vendor `batteries/scripts/runLinter.lean` to `scripts/runLinter.lean`, add a
+# `lean_exe runLinter` to lakefile.lean, and set `lintDriver := "runLinter"`.
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: lint
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    name: env-linter (lake lint MathFin)
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Same cache key family as build.yml (manifest-keyed) — on a cache hit
+      # the inner `lake build` is an incremental no-op and the lint driver
+      # only pays the import load + the env-linter pass.
+      - name: Build / restore (elan + Mathlib cache + lake build)
+        uses: leanprover/lean-action@v1
+
+      - name: Run the environment linters over the MathFin package
+        # `lake lint` runs the configured lintDriver (batteries/runLinter) with
+        # lintDriverArgs (#["MathFin"]); the driver self-builds any missing
+        # oleans, then runs every default `@[env_linter]` over
+        # `getDeclsInPackage MathFin`. It exits 1 on any finding — for this
+        # advisory dispatch job that is the intended signal (an inventory to
+        # triage); it gates no other workflow.
+        run: lake lint

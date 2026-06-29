@@ -5,6 +5,20 @@ package MathFin where
   leanOptions := #[
     ⟨`autoImplicit, false⟩
   ]
+  -- Advisory environment-linter gate. `lake lint` runs Batteries' canonical
+  -- `runLinter` over the MathFin package's declarations — the SAME mechanism
+  -- Mathlib uses (`lintDriver := "batteries/runLinter"`), so we consume the
+  -- upstream tool rather than re-implement it. The default `@[env_linter]`
+  -- suite is the machine check for the values bar's lens-3 (zero slop:
+  -- `unusedArguments` = dead hypotheses, `unusedHavesSuffices`, `synTaut`) and
+  -- lens-6 (idiomatic register: `simpNF`, `defLemma`, `dupNamespace`).
+  -- `lintDriverArgs` scopes the lint to the `MathFin` package root
+  -- (`getDeclsInPackage MathFin`), so Mathlib/BrownianMotion declarations are
+  -- not linted. Run on-demand + advisory via `.github/workflows/lint.yml`
+  -- (workflow_dispatch): it reports an inventory to triage, it does NOT gate
+  -- the per-push build (build.yml stays the enforced soundness floor).
+  lintDriver := "batteries/runLinter"
+  lintDriverArgs := #["MathFin"]
 
 -- Library `MathFin` lives at `MathFin/*.lean` (default srcDir = ".").
 -- `globs := .andSubmodules` builds the umbrella `MathFin` *and every*
