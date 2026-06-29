@@ -346,6 +346,9 @@ import MathFin.RiskMeasures.AcceptanceSet
 -- Phase 1 (convex-duality unification): worst-case loss — the most conservative coherent risk
 -- measure, concrete instance of the ADEH representation (sup over the entire probability simplex)
 import MathFin.RiskMeasures.WorstCaseRisk
+-- Phase 1 (convex-duality unification): fundamental superhedging bound — every EMM prices a claim
+-- at most its super-replication cost (the pricing-side companion of the coherent-risk representation)
+import MathFin.Foundations.SuperhedgingDuality
 
 -- Bridges (certified cross-domain unifications)
 import MathFin.Bridges.ConcentrationVariance

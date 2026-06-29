@@ -3296,6 +3296,22 @@
       }
     },
     {
+      "id": "mf-superhedging-emm-bound",
+      "name": "Fundamental Superhedging Bound",
+      "description": "In a finite-state market, every equivalent martingale measure prices a claim at most its super-replication cost. The EMM prices of a claim lie below its superhedging price — the dual side of the no-arbitrage pricing interval and the pricing-side companion of the coherent-risk representation.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.SuperhedgingDuality\n\nopen scoped BigOperators\n\n/-- **Fundamental superhedging bound.** For an excess-return matrix `z`, any equivalent martingale\n    measure `q` and any cost-`x` portfolio `θ` super-replicating the claim `Y`, the EMM price of `Y` is\n    at most `x`. Re-exports `MathFin.emm_le_superReplication`. -/\ntheorem superhedging_emm_bound {M N : ℕ} (z : Fin M → Fin N → ℝ) (Y : Fin N → ℝ)\n    {q : Fin N → ℝ} (hq : q ∈ MathFin.EMMSet z) {x : ℝ} {θ : Fin M → ℝ}\n    (hsr : MathFin.SuperReplicates z Y x θ) :\n    ∑ n, q n * Y n ≤ x :=\n  MathFin.emm_le_superReplication z Y hq hsr\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Fundamental theorem of superhedging (EMM bound); the dual side of the no-arbitrage price interval",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof re-exported from MathFin/Foundations/SuperhedgingDuality.lean: in a finite-state market with excess-return matrix z, every equivalent martingale measure (EMMSet) prices a claim Y at most any super-replication cost x (SuperReplicates). Proof: q-weight the super-replication inequality, then the martingale constraint kills the portfolio term (∑ₙ qₙ zₘₙ = 0) and ∑q = 1 leaves x. The reverse strong-duality equality (superhedging price = sup of EMM prices) needs closedness of the super-replication cone — a polyhedral/Farkas fact absent from Mathlib at this pin — and is a documented follow-up. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-ftap-single-period-complete",
       "name": "Multi-State Single-Period FTAP (Biconditional)",
       "description": "No arbitrage ⟺ an equivalent martingale measure exists, in an arbitrary finite-state, finite-asset one-period market. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional geometric Hahn–Banach separation of the attainable-payoff span from the standard simplex, completing the multi-state FTAP to a biconditional.",
