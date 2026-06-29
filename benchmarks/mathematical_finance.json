@@ -3248,6 +3248,22 @@
       }
     },
     {
+      "id": "mf-convex-duality-root",
+      "name": "Cone-Separation Root (Convex-Duality Unification)",
+      "description": "A closed convex cone in (ι → ℝ) disjoint from the standard simplex admits a strictly-positive functional that is ≤ 0 on the cone. This single geometric Hahn–Banach fact is the shared root of three apparently separate pillars: the FTAP (attainable-gains cone ⟹ the EMM), the coherent-risk representation (acceptance cone ⟹ representing density), and superhedging (super-replication cone ⟹ the price bound).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.ConvexDuality\n\n/-- **Cone-separation root — the shared kernel of the convex-duality unification.**\n    A closed convex cone `C ⊆ (ι → ℝ)` disjoint from the standard simplex admits a\n    strictly-positive functional `q` that is `≤ 0` on `C`. One Hahn–Banach fact, three\n    instances: the FTAP (apply to the attainable-gains cone — the separating `q` is the\n    equivalent martingale measure), the coherent-risk representation (apply to the\n    acceptance cone — `q` is a representing density), and superhedging (apply to the\n    super-replication cone — `q` prices the bound). Re-exports\n    `MathFin.exists_pos_separating_of_cone_disjoint_simplex`. -/\ntheorem convex_duality_root {ι : Type*} [Fintype ι] [Nonempty ι]\n    (C : Set (ι → ℝ)) (hCconv : Convex ℝ C) (hCclosed : IsClosed C)\n    (hCcone : ∀ ⦃x⦄, x ∈ C → ∀ ⦃c : ℝ⦄, 0 ≤ c → c • x ∈ C)\n    (hdisj : Disjoint (stdSimplex ℝ ι) C) :\n    ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ C, ∑ i, q i * v i ≤ 0 :=\n  MathFin.exists_pos_separating_of_cone_disjoint_simplex C hCconv hCclosed hCcone hdisj\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Convex-duality unification of asset pricing and risk (FTAP = coherent-risk representation = superhedging dual); finite-dimensional geometric Hahn–Banach",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full re-export of the cone-separation root MathFin.exists_pos_separating_of_cone_disjoint_simplex (MathFin/Foundations/ConvexDuality.lean), the shared geometric kernel of the convex-duality unification. Generalizes the subspace separating-dual kernel exists_pos_dual_of_disjoint_stdSimplex (now re-derived from it) to a closed convex cone with a one-sided ≤ 0 bound — the form the acceptance cone (coherent risk) and the super-replication cone (superhedging) need, not just the FTAP gains cone. Proof: geometric_hahn_banach_compact_closed; the cone's nonnegative-scaling homogeneity upgrades the subspace's two-sided vanishing to a one-sided sign bound. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-ftap-single-period-complete",
       "name": "Multi-State Single-Period FTAP (Biconditional)",
       "description": "No arbitrage ⟺ an equivalent martingale measure exists, in an arbitrary finite-state, finite-asset one-period market. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional geometric Hahn–Banach separation of the attainable-payoff span from the standard simplex, completing the multi-state FTAP to a biconditional.",
