@@ -1816,6 +1816,13 @@
       "input_hash": "09b7feb09670723a8472556d334f1c5f56bdc597ac91ff6ce7a0f6cffd55692e",
       "verified_at_commit": "4e921c4"
     },
+    "mf-worstcase-risk-representation": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-29",
+      "elapsed_s": 253.9,
+      "input_hash": "a95f3029b29218d110d082b61445bc7bab609a497a159566c81c89641d599935",
+      "verified_at_commit": "3ea980e"
+    },
     "mf-zcb-convexity": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-24",
