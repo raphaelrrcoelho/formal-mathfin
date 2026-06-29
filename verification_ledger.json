@@ -1690,6 +1690,13 @@
       "input_hash": "6ed3c01c709c712a8a311852755c1ec4494dd7bddf79c015afbf9f7fb2a010f1",
       "verified_at_commit": "4e921c4"
     },
+    "mf-superhedging-emm-bound": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-29",
+      "elapsed_s": 4.3,
+      "input_hash": "e28f35cc692ca776af3b3370a88744ade3a9d6cf938089514998928055cbc120",
+      "verified_at_commit": "6d85393"
+    },
     "mf-survival-at-zero": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-24",
