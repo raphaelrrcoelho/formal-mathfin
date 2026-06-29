@@ -8,6 +8,16 @@ breadth at this stage, and what the concrete next round would look like.
 
 ## 2026-06-29 — POST-ITÔ STRATEGIC UPDATE: the gate is open (supersedes the "out of reach" framing below)
 
+> **Update (2026-06-29, evening) — Phase 1 done (corpus 306).** Since this strategic update, the
+> **convex-duality unification** (I↔IV — the architecture doc's #1 seam,
+> [`mathematical-architecture.md`](mathematical-architecture.md)) was realized: the FTAP (pricing) and
+> the coherent-risk representation (risk) are now *one* Hahn–Banach root (`Foundations/ConvexDuality`,
+> `RiskMeasures/AcceptanceSet`). That was the most-tractable, highest-leverage seam (finite-dim convex
+> analysis, no Itô dependency). The Itô-track crown jewels below are next — **Girsanov (#2)** is the
+> queued bridge ([#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40); first brick = the
+> adapted Doléans–Dade exponential), and the superhedging strong-duality *equality* hit a Mathlib
+> **Farkas gap** ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).
+
 A whole-program validation (three independent reviewers + maintainer adjudication + the env-linter)
 re-grounds the strategy. **The 2026-05-22 head below is now partly stale, and that staleness is the
 single most important finding.** That section says the deep tier is *"out of reach … needs a fuller
