@@ -26,8 +26,16 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-28, Itô's lemma as a process / semimartingale decomposition):** corpus
-> **300**, **265 full + 18 wrappers = 283/300 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **Live status (2026-06-28, unrestricted-`C³` Itô formula via stopping-time localization — Summit C):**
+> corpus **301**, **266 full + 18 wrappers = 284/301 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **Itô's formula now holds for a general `C³` `f` with NO growth/boundedness hypothesis**
+> (`Foundations/ItoFormulaUnrestricted.lean`, entry `sc-ito-formula-unrestricted-local`, **`full`**):
+> the residual `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ(f_t+½f_xx)ds` is a continuous local martingale in
+> **explicit form** — a localizing sequence `σ_N = min(τ_N, N) ↑ ⊤` (exit times capped in time) plus
+> per-`N` continuous true martingales agreeing with `M` on `{t ≤ σ_N}`. The engine is the double
+> cutoff `f(φₙ·,φₙ·)` (time *and* space), whose globally-bounded derivatives let
+> `ito_formula_td_process` apply; the all-time agreement is `indistinguishable_on_stochInterval`. The
+> Degenne-`IsLocalMartingale`-typeclass packaging remains as drift-integral-adaptedness plumbing.
 > **The time-dependent Itô formula now holds as a process identity for every `t ≤ T`
 > simultaneously** (`Foundations/ItoFormulaProcess.lean`, entry `sc-ito-formula-td-process`,
 > **`full`**): `f(t,B_t) − f(0,B_0) =ᵐ (itoProcessL2Inf t F) + ∫₀ᵗ (f_t + ½f_xx)(s,B_s) ds`, the

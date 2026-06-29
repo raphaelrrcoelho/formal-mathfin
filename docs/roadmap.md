@@ -899,12 +899,28 @@ deterministic-integrand layer load-bearing in a pricing module for the first tim
   **Stage 1 of Summit C**: the localization machinery that lifts the bounded-derivative Itô formula
   toward unbounded coefficients. corpus 299 → **300**, 264 → **265 full**.
 
-**Open frontier:** **Summit C** — the unrestricted-`C²` Itô formula via stopping-time localization.
-*Stage 1 (the localizing sequence) is now built* (`ExitTime.lean`); the remaining stages are the
-time+space truncation of a general `C³` `f` (via `SmoothTrunc.cut` in **both** arguments — general
-`f` needs the time cut too, unlike the exp-growth `cutoff_bddDeriv`) feeding
-`ito_formula_td_process`, then the genuine `Locally` / `Martingale.stoppedProcess_indicator`
-assembly stopping the truncated martingales at the exit times. Also open: the Itô formula against a general Itô
+- **The unrestricted-`C³` Itô formula via stopping-time localization — Summit C**
+  (`Foundations/ItoFormulaUnrestricted.lean`, entry `sc-ito-formula-unrestricted-local`, `full`).
+  For a general `C³` `f` (six partials, all jointly continuous, **no** growth/boundedness), the
+  residual `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ(f_t+½f_xx)ds` is everywhere-continuous, satisfies the
+  Itô identity by construction, and is a continuous local martingale in **explicit form**
+  (`ito_formula_unrestricted_local`): a localizing sequence `σ_N = min(τ_N, N) ↑ ⊤`
+  (`isLocalizingSequence_sigma`, the exit times capped in time) plus per-`N` continuous **true**
+  martingales `Mₙ` (`exists_continuous_martingale_modification_infinite` of the truncated integrand)
+  agreeing with `M` on `{t ≤ σ_N}`. Stage 2 is the **double cutoff** `fTrunc N = f(φₙ·, φₙ·)`
+  (time *and* space — a general `C³` `f` has `t`-derivatives unbounded over `t ∈ ℝ`, so the time cut
+  is essential), whose globally-bounded derivatives feed `ito_formula_td_process`; Stage 3 the
+  exit-time confinement (`abs_le_N_of_le_exitTime`) + cut-inactivity collapsing `fTrunc → f`; the
+  all-time agreement crux `indistinguishable_on_stochInterval` (dense-rational agreement +
+  `Set.EqOn.closure` + boundary left-continuity) is proved and axioms-clean. corpus 300 → **301**,
+  265 → **266 full**. *The Degenne-`IsLocalMartingale`-typeclass packaging remains as
+  drift-integral-adaptedness plumbing — the explicit form is the full mathematical content.*
+
+**Open frontier:** the **`IsLocalMartingale`-typeclass wrapper for Summit C** (the only piece left
+is the parametrized-integral adaptedness of `M`, so the stopped residual is `StronglyAdapted`:
+`B` progressively measurable ⇒ the drift integral adapted, via `StronglyMeasurable.integral_prod_right`
+— ~50–80 lines of measure-theory plumbing, no off-the-shelf lemma; the indistinguishability crux is
+already green). Also open: the Itô formula against a general Itô
 process with **adapted** coefficients
 (the random-integrand semimartingale form — a new tower layer beyond the constant-coefficient case
 just landed); re-ground `discountedGBM_isMartingale` at the *process* level (all `t`, on the

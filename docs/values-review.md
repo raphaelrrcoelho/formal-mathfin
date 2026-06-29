@@ -53,6 +53,50 @@ below. A regex cannot check "beautiful"; a regex can check "nobody looked."
 
 ## Verdict log
 
+## 2026-06-29 — corpus 301 — Summit C: the unrestricted-`C³` Itô formula via stopping-time localization (explicit local-martingale form)
+
+**Scope**: `Foundations/ItoFormulaUnrestricted.lean` (new — the double cutoff `fTrunc N` with its
+six chain-rule `HasDerivAt` lemmas + constant bounds on the compact square + two joint-continuity
+facts; `continuous_timeMeasure_primitive`; `abs_le_N_of_le_exitTime`; `sigmaSeq` /
+`isLocalizingSequence_sigma`; the cut-inactivity helpers; `ito_formula_unrestricted_local`; and the
+indistinguishability crux `indistinguishable_on_stochInterval`), the refactor of
+`ItoIntegralProcessLocalMartingaleInfinite.lean` (exposing the global `Martingale` via
+`exists_continuous_martingale_modification_infinite`, with the local-martingale corollary derived
+from it), and corpus entry `sc-ito-formula-unrestricted-local` (`full`).
+
+**Panel**: two independent reviewers across the eight lenses.
+
+**Verdict: 8/8 PASS** after one blocking fix.
+
+- **Blocking finding (fixed before commit)**: *both* reviewers independently flagged the module-header
+  "Strategy" docstring's "Assembly" stage as an **overclaim** — it described the
+  `stoppedProcess_indicator → Locally → IsLocalMartingale` typeclass machinery as if realized in the
+  file ("…i.e. `IsLocalMartingale M`"), when the shipped theorem delivers the **explicit** local-martingale
+  form (localizing sequence + per-`N` continuous true martingales `Mₙ` agreeing with `M` on
+  `{t ≤ σ_N}`). Every other honesty surface (theorem name `ito_formula_unrestricted_local`, theorem
+  docstring, `AxiomAudit` prose, corpus `formalization_scope`) was already scrupulously honest. The
+  header was rewritten to describe the explicit form and to mark the typeclass wrapper as **deferred**
+  (staged by `indistinguishable_on_stochInterval`, blocked only on drift-integral adaptedness).
+- **Inspired math / coherence / ingenuity / first principles**: both reviewers verified the chain rule
+  for all six truncated partials, the compact-square bounds, the exit-time confinement (closed-exterior
+  + boundary left-continuity), the drift collapse, and the indistinguishability lemma — no errors. The
+  "time cut is essential" reasoning (a general `C³` `f` has `t`-derivatives unbounded over `t ∈ ℝ`, so
+  the localizer is capped at `N`) is correct and subtle. Consumes `ito_formula_td_process`, the newly
+  exposed global martingale, `Set.EqOn.of_subset_closure`/`closure_Iio'` without reproving; the
+  infinite-file refactor is clean. The explicit-residual `M` design (Itô identity by construction,
+  continuity free) is elegant.
+- **Zero slop / idiom / clarity / beauty**: no dead code, no unused hypotheses (all six `HasDerivAt`
+  + seven continuities consumed), idiomatic `HasDerivAt`/`Continuous` combinators, sensible naming.
+  `indistinguishable_on_stochInterval` is unused by the shipped theorem but justified under the
+  orphan/future-use doctrine (the documented foundation of the deferred wrapper) — its docstring was
+  augmented to say so. `continuous_timeMeasure_primitive` is genuinely new (no duplicate).
+
+**Honesty note**: the delivered result is the continuous-local-martingale property in *explicit form*
+— the full mathematical content of Summit C. The Degenne-`IsLocalMartingale`-typeclass packaging is
+*deferred* (open frontier), blocked only on the parametrized-integral adaptedness of `M`; this is
+recorded consistently across the file, `AxiomAudit`, the corpus scope, `docs/coverage.md`, and
+`docs/roadmap.md`. No overclaiming remains.
+
 ## 2026-06-28 — corpus 300 — Brownian exit times: the first localizing sequence
 
 **Scope**: `Foundations/ExitTime.lean` (new — `exitTime`, `exists_rat_time_below`,

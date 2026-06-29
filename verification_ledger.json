@@ -1931,9 +1931,16 @@
     "sc-ito-formula-td-process": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-28",
-      "elapsed_s": 67.9,
-      "input_hash": "7b58d40604a949cdc46123a46395971e1ef4628ff346c45ef9b5eabc2f05379c",
-      "verified_at_commit": "48e4018"
+      "elapsed_s": 75.4,
+      "input_hash": "7917a0f07e41f7d876dd02f179c4d8ecfb09f435ddb85634756e154348d64a4c",
+      "verified_at_commit": "89bbc64"
+    },
+    "sc-ito-formula-unrestricted-local": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-06-28",
+      "elapsed_s": 85.6,
+      "input_hash": "511edfa953205612066369186923c8dc12728e5a73c78d54041d970faa03f01e",
+      "verified_at_commit": "89bbc64"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",
@@ -1987,9 +1994,9 @@
     "sc-ito-infinite-local-martingale": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-06-28",
-      "elapsed_s": 36.2,
-      "input_hash": "001135bd507922bc9d447855ea6a66488affe2d457a7fe1f7b83147ca02e0867",
-      "verified_at_commit": "48e4018"
+      "elapsed_s": 53.6,
+      "input_hash": "895cfd1c0cf7013e10490b52b273e9b8e7aa2805181df2b65b0590fe5a762190",
+      "verified_at_commit": "89bbc64"
     },
     "sc-ito-simple-process-isometry": {
       "benchmark_file": "stochastic_calculus.json",

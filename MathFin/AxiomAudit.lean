@@ -793,4 +793,22 @@ coefficients (Summit C). -/
 /-- info: 'MathFin.isLocalizingSequence_exitTime' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.isLocalizingSequence_exitTime
 
+/-! ## The unrestricted-`C³` Itô formula via stopping-time localization (Summit C)
+
+`ItoFormulaUnrestricted.lean`: for a general `C³` `f` (six partials, all jointly continuous, **no**
+growth or boundedness hypothesis), the compensated process `M_t = f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift`
+is everywhere-continuous, satisfies the Itô identity by construction, and is a **continuous local
+martingale in explicit form** (`ito_formula_unrestricted_local`): a localizing sequence
+`σ_N = min(τ_N, N) ↑ ⊤` plus per-`N` continuous **true** martingales `Mₙ` agreeing with `M` on the
+stochastic interval `{t ≤ σ_N}`. The engine is the double cutoff `f(φₙ·, φₙ·)` (time *and* space),
+whose globally-bounded derivatives let `ito_formula_td_process` apply; the cuts are inert on
+`{t ≤ σ_N}`, where `Mₙ` agrees with `M`. The all-time agreement `indistinguishable_on_stochInterval`
+lifts the per-`t` agreement to the whole stochastic interval (dense rationals + continuity). -/
+
+/-- info: 'MathFin.ito_formula_unrestricted_local' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_unrestricted_local
+
+/-- info: 'MathFin.indistinguishable_on_stochInterval' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.indistinguishable_on_stochInterval
+
 end MathFin.AxiomAudit

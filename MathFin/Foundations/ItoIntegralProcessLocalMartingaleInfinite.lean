@@ -92,17 +92,20 @@ noncomputable def gluedProc (G : Set Ω) (t : ℝ≥0) (ω : Ω) : ℝ :=
 
 include hBcont
 
-/-- **The unbounded-horizon Itô integral is a continuous local martingale on all of `ℝ≥0`.**
+/-- **The unbounded-horizon Itô integral admits a continuous GLOBAL martingale modification.**
 There is a process `X` that (i) is a **modification** of the unbounded-horizon `L²` process at
 **every** `t` — `X t =ᵐ itoProcessL2Inf t f`; (ii) has **everywhere**-continuous paths on the whole
-half-line; and (iii) is a genuine `IsLocalMartingale` for the null-augmented Brownian filtration.
-Unlike the `[0,T]` follow-on there is no horizon clamp: the martingale property holds globally on
-`ℝ≥0`, supplied directly by `itoProcessL2Inf_isMartingale` through `condExp_sup_nulls`. -/
-theorem exists_continuous_localMartingale_modification_infinite :
+half-line; and (iii) is a genuine `Martingale` for the null-augmented Brownian filtration. Unlike
+the `[0,T]` follow-on there is no horizon clamp: the martingale property holds globally on `ℝ≥0`,
+supplied directly by `itoProcessL2Inf_isMartingale` through `condExp_sup_nulls`. The
+local-martingale corollary `exists_continuous_localMartingale_modification_infinite` wraps this;
+the exposed global martingale is what a genuine localizing sequence (e.g. exit times, Summit C)
+needs in order to stop `X`. -/
+theorem exists_continuous_martingale_modification_infinite :
     ∃ X : ℝ≥0 → Ω → ℝ,
       (∀ t, X t =ᵐ[μ] (itoProcessL2Inf hB t hBmeas f : Ω → ℝ)) ∧
       (∀ ω, Continuous fun t => X t ω) ∧
-      IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ := by
+      Martingale X (augFiltration (μ := μ) hBmeas) μ := by
   -- co-null good set on which every pair of horizons agrees on its overlap
   have hae : ∀ᵐ ω ∂μ, ∀ m n : ℕ, m ≤ n → ∀ t < (m : ℝ≥0),
       horizonProc hB hBmeas hBcont f m t ω = horizonProc hB hBmeas hBcont f n t ω := by
@@ -184,12 +187,24 @@ theorem exists_continuous_localMartingale_modification_infinite :
       _ =ᵐ[μ] (itoProcessL2Inf hB i hBmeas f : Ω → ℝ) :=
           itoProcessL2Inf_isMartingale hB hBmeas f hij
       _ =ᵐ[μ] (fun ω => gluedProc hB hBmeas hBcont f G i ω) := (hmod i).symm
-  -- assemble
-  refine ⟨fun t ω => gluedProc hB hBmeas hBcont f G t ω, hmod, hcont, ?_⟩
-  refine Martingale.IsLocalMartingale ⟨fun i => ?_, fun i j hij => ?_⟩
-    (fun ω => isCadlag_of_continuous (hcont ω))
+  -- assemble the GLOBAL martingale
+  refine ⟨fun t ω => gluedProc hB hBmeas hBcont f G t ω, hmod, hcont,
+    ⟨fun i => ?_, fun i j hij => ?_⟩⟩
   · rw [augFiltration_apply]; exact hadapt i
   · rw [augFiltration_apply]; exact hmart hij
+
+/-- **The unbounded-horizon Itô integral is a continuous local martingale on all of `ℝ≥0`** —
+the local-martingale wrapper of `exists_continuous_martingale_modification_infinite` (its global
+martingale plus the everywhere-continuous, hence càdlàg, paths). -/
+theorem exists_continuous_localMartingale_modification_infinite :
+    ∃ X : ℝ≥0 → Ω → ℝ,
+      (∀ t, X t =ᵐ[μ] (itoProcessL2Inf hB t hBmeas f : Ω → ℝ)) ∧
+      (∀ ω, Continuous fun t => X t ω) ∧
+      IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ := by
+  obtain ⟨X, hmod, hcont, hmart⟩ :=
+    exists_continuous_martingale_modification_infinite hB hBmeas hBcont f
+  exact ⟨X, hmod, hcont,
+    Martingale.IsLocalMartingale hmart (fun ω => isCadlag_of_continuous (hcont ω))⟩
 
 end ItoLocalMartingaleInfinite
 end MathFin
