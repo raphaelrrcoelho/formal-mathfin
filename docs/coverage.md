@@ -26,7 +26,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-29, Summit C in Degenne's `IsLocalMartingale` typeclass — the wrapper
+> **Live status (2026-06-29, Phase 1 — the convex-duality unification: pricing = risk):** corpus
+> **306**, **271 full + 18 wrappers = 289/306 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **The FTAP (pricing) and the coherent-risk representation (risk) are now proved to be the same
+> Hahn–Banach theorem.** A shared cone-separation root lives in `Foundations/ConvexDuality.lean` — the
+> cone↔simplex separation `exists_pos_separating_of_cone_disjoint_simplex` + the point↔cone companion
+> `exists_separating_of_not_mem_cone`, sharing two atoms (`functional_eq_sum_single`,
+> `functional_nonneg_on_cone`). Four new `full` corpus entries stand on it: `mf-convex-duality-root`
+> (the root); the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` **re-derived in place** from it
+> (signature byte-identical → no consumer churn); `mf-coherent-risk-representation`
+> (`RiskMeasures/AcceptanceSet.coherentRisk_isLUB`, the finite-state ADEH representation stated as an
+> `IsLUB`, acceptance-set closedness *derived* from the four axioms, not assumed);
+> `mf-worstcase-risk-representation` (`RiskMeasures/WorstCaseRisk.worstCase_isLUB`, a concrete instance
+> — worst-case loss = sup over the whole probability simplex); and `mf-superhedging-emm-bound`
+> (`Foundations/SuperhedgingDuality.emm_le_superReplication`, every equivalent martingale measure
+> prices a claim ≤ its super-replication cost). This realizes the architecture doc's #1 seam (I↔IV;
+> see `mathematical-architecture.md`). **Open:** the superhedging strong-duality *equality*
+> (`superhedge = sup_{EMM}`), blocked on a finite-dimensional Farkas / polyhedral-cone closedness
+> absent from Mathlib at this pin; the Gaussian CVaR robust form.
+
+> **Prior round (2026-06-29, Summit C in Degenne's `IsLocalMartingale` typeclass — the wrapper
 > completed):** corpus **302**, **267 full + 18 wrappers = 285/302 delivery-ready**, 17 reduced
 > cores, 0 placeholders. **The unrestricted-`C³` residual `M` is now a genuine `IsLocalMartingale`**
 > (`Foundations/ItoFormulaUnrestrictedLocMart.lean`, entry
