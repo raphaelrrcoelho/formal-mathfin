@@ -1011,6 +1011,13 @@
       "input_hash": "28672eefa9f97ef9f4c82449a8131ecdb77aa2846529ad15e5a67cb2245d6941",
       "verified_at_commit": "4e921c4"
     },
+    "mf-convex-duality-root": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-29",
+      "elapsed_s": 3.7,
+      "input_hash": "0c092adec1fc4450d79da2af6b13b50b6897278665cde0c1480b09c44fdcb221",
+      "verified_at_commit": "6b288a8"
+    },
     "mf-coupon-bond-strict-anti": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-24",
@@ -1118,17 +1125,17 @@
     },
     "mf-ftap-discrete-complete": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-25",
-      "elapsed_s": 4.6,
-      "input_hash": "67e2042fdc0f18e660286db543eb96fcc1358ae94ebc24b46c86799bbd9f4dea",
-      "verified_at_commit": "bf6a903"
+      "date": "2026-06-29",
+      "elapsed_s": 74.0,
+      "input_hash": "5694c7a36cb83dd766c8258003c7690a1da99f590d2f6c5ad7b447ca957bd684",
+      "verified_at_commit": "6b288a8"
     },
     "mf-ftap-multi-state-forward": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-25",
-      "elapsed_s": 51.0,
-      "input_hash": "964abeea5156943913201ee17214d8dcada7918f576db0d34532787e59e7beb2",
-      "verified_at_commit": "bf6a903"
+      "date": "2026-06-29",
+      "elapsed_s": 33.2,
+      "input_hash": "584815d3355eb810f260e7a62ff5a898a454f94139e5a5f0c9ca9bc4881b811d",
+      "verified_at_commit": "6b288a8"
     },
     "mf-ftap-one-period-general": {
       "benchmark_file": "mathematical_finance.json",
@@ -1146,10 +1153,10 @@
     },
     "mf-ftap-single-period-complete": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-25",
-      "elapsed_s": 42.7,
-      "input_hash": "130675920c857393be3cfce1f068055437ec873805285d5c567b08a7baab0609",
-      "verified_at_commit": "bf6a903"
+      "date": "2026-06-29",
+      "elapsed_s": 56.7,
+      "input_hash": "0be03f0cd54e7f1d1dfaa3f8d765fceab13caf9c9fcd35841582fffd2b8d53bf",
+      "verified_at_commit": "6b288a8"
     },
     "mf-garman-kohlhagen": {
       "benchmark_file": "mathematical_finance.json",
