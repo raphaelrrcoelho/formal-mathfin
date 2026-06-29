@@ -735,6 +735,15 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.exists_pos_dual_of_disjoint_stdSimplex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exists_pos_dual_of_disjoint_stdSimplex
 
+-- The cone-separation root (`Foundations/ConvexDuality.lean`): a closed convex
+-- CONE disjoint from the standard simplex admits a strictly-positive functional
+-- that is `≤ 0` on the cone (finite-dimensional geometric Hahn–Banach). Generalizes
+-- the separating-dual kernel from a subspace (two-sided `= 0`) to a cone (one-sided
+-- `≤ 0`); the geometric heart shared by the FTAP gains cone, the coherent-risk
+-- acceptance cone, and the superhedging super-replication cone.
+/-- info: 'MathFin.exists_pos_separating_of_cone_disjoint_simplex' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exists_pos_separating_of_cone_disjoint_simplex
+
 -- Multi-state single-period FTAP, now a biconditional (`FTAPMultiState.lean`):
 -- the backward direction (no arbitrage ⟹ EMM) via the separating-dual kernel.
 /-- info: 'MathFin.hasEMM_multi_iff_not_hasArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/

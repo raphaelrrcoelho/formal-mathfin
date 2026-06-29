@@ -79,6 +79,9 @@ import MathFin.Foundations.CarrMadan
 import MathFin.Foundations.AlmgrenChriss
 import MathFin.Foundations.ConvexPricingFunctional
 import MathFin.Foundations.ConvexSeparation
+-- Phase 1 (convex-duality unification): cone-separation root generalizing
+-- ConvexSeparation from a subspace (two-sided `= 0`) to a closed convex cone (`≤ 0`)
+import MathFin.Foundations.ConvexDuality
 -- Phase 30 (Bridge A): BSCallHyp / BachelierHyp from IsPreBrownian
 import MathFin.Foundations.BSCallHypFromBrownian
 -- Phase 31: Pricing entry points from IsPreBrownian (composite corollaries)
