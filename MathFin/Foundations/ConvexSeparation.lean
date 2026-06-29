@@ -23,10 +23,8 @@ a subspace is a two-sided cone, so the root's one-sided `≤ 0` bound plus neg-c
 yields the two-sided `= 0` annihilation. It is the subspace case of the convex-duality
 unification.
 
-The separation is `geometric_hahn_banach_compact_closed` (the simplex is compact
-convex; `V` is closed because it is finite-dimensional). A linear functional
-bounded below on a subspace vanishes on it, and its values on the simplex
-vertices `Pi.single i 1` give the strictly-positive dual.
+The underlying separation is the cone root `MathFin.exists_pos_separating_of_cone_disjoint_simplex`
+(`Foundations/ConvexDuality.lean`), specialised to the two-sided subspace case.
 
 ## Main result
 
