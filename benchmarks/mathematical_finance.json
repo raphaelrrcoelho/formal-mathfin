@@ -3280,6 +3280,22 @@
       }
     },
     {
+      "id": "mf-worstcase-risk-representation",
+      "name": "Worst-Case Loss as a Coherent-Risk Instance",
+      "description": "The worst-case loss maxᵢ(-Xᵢ) is a concrete coherent risk measure, and its ADEH representation specialises to the supremum of expected loss over the entire probability simplex — making the abstract finite-state representation tangible on a recognisable risk measure.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.RiskMeasures.WorstCaseRisk\n\nopen scoped BigOperators\n\n/-- **Worst-case loss = sup of expected loss over the probability simplex.** The most conservative\n    coherent risk measure `worstCase X = maxᵢ (-Xᵢ)` is a concrete `IsCoherentRisk`, and its ADEH\n    representation (Task 1.3) specialises to the supremum over the entire probability simplex.\n    Re-exports `MathFin.worstCase_isLUB`. -/\ntheorem worstcase_risk_representation {ι : Type*} [Fintype ι] [Nonempty ι] (X : ι → ℝ) :\n    IsLUB ((fun q => ∑ i, q i * (- X i)) '' stdSimplex ℝ ι) (MathFin.worstCase X) :=\n  MathFin.worstCase_isLUB X\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Worst-case (sup-norm) coherent risk measure; concrete instance of the ADEH representation",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full proof re-exported from MathFin/RiskMeasures/WorstCaseRisk.lean: the worst-case loss maxᵢ(-Xᵢ) is shown to satisfy the four ADEH axioms (worstCase_isCoherent), its acceptance set is the nonnegative orthant and its representing set is the entire probability simplex (representingSet_worstCase), so the abstract representation coherentRisk_isLUB specialises to IsLUB over stdSimplex. A concrete, recognisable instance making the finite-state ADEH representation tangible. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
       "id": "mf-ftap-single-period-complete",
       "name": "Multi-State Single-Period FTAP (Biconditional)",
       "description": "No arbitrage ⟺ an equivalent martingale measure exists, in an arbitrary finite-state, finite-asset one-period market. The backward direction (no arbitrage ⟹ EMM) is finite-dimensional geometric Hahn–Banach separation of the attainable-payoff span from the standard simplex, completing the multi-state FTAP to a biconditional.",
