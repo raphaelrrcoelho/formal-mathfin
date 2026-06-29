@@ -93,12 +93,18 @@ with failing gates or stale ledger claims go red.
 **The final verification — values review** (`docs/values-review.md`): the
 eight judgment lenses (inspired math, Mathlib/Degenne coherence, zero slop,
 architectural ingenuity, first principles, idiomatic register, concept
-clarity, beautiful/elegant math) are verified by a multi-agent review panel
-at the close of any session that adds or changes proof content — blocking
-findings are fixed before the verdict is appended to that file's log. The
-judgment is human/agent; the CADENCE is machine-enforced:
+clarity, beautiful/elegant math) drive a multi-agent review panel at the
+close of any session that adds or changes proof content. It is an UPGRADE
+ENGINE, not a pass/fail gate: each lens is read as a gradient (current
+exemplar → the next concrete upgrade that raises its ceiling), and the
+review's output is a ranked backlog of value-aligned upgrades plus the
+upgrades executed that session — never an "8/8 PASS" (a green checkmark is
+how a disciplined library quietly settles into being a *fine* dump). Genuine
+slop uncovered is fixed in-session; larger upgrades become backlog items with
+owners. The judgment is human/agent; the CADENCE is machine-enforced:
 `test_values_review_is_current` fails once the corpus outgrows the last
-recorded verdict by more than 12 entries.
+recorded review by more than 12 entries (a cadence threshold — did we refresh
+and act on the backlog — not a quality verdict).
 
 **Verification ledger** (`verification_ledger.json` + `tools/verify/ledger.py`):
 every benchmark entry's validity depends on exactly its snippet code, the

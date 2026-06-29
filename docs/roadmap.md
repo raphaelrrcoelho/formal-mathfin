@@ -4,6 +4,65 @@ This document captures the strategic discussion from 2026-05-22 on what
 "ultimate Lean/Mathlib mathematical finance repo" actually means, why depth beats
 breadth at this stage, and what the concrete next round would look like.
 
+---
+
+## 2026-06-29 — POST-ITÔ STRATEGIC UPDATE: the gate is open (supersedes the "out of reach" framing below)
+
+A whole-program validation (three independent reviewers + maintainer adjudication + the env-linter)
+re-grounds the strategy. **The 2026-05-22 head below is now partly stale, and that staleness is the
+single most important finding.** That section says the deep tier is *"out of reach … needs a fuller
+stochastic-calculus layer (unrestricted Itô, continuous-time Girsanov, BSDEs)"* and files Girsanov/SDE
+under *"explicitly out of scope (itô-gated, do not attempt without upstream)"* — predicting *"when Itô
+lands, the deepest quant results become possible."* **Itô has since landed** (Summits A–C; the phase log
+records it). The library spent a month building the exact gate it named, then never walked through it.
+
+**Validation verdict (where the program stands):**
+- **Floor — solid.** An adversarial pass over the headline `full` entries (Itô tower, BS-PDE keystone,
+  FTAP rungs, CRR→BS, Greeks) found no overclaims: hypotheses honest, scope documented, axioms clean.
+- **Infrastructure — exceeds world-class in rigor, with minor cosmetic gaps.** The input-hash
+  verification ledger, per-theorem `#print axioms` audit, kernel-replay, and the values-review cadence
+  exceed what Mathlib/FLT/Carleson ship. Genuine gaps are operational/cosmetic: no doc-gen4 API site,
+  no Leanblueprint web render. (The env-linter is now wired — `lake lint`, advisory.)
+- **Itô tower — publishable-grade, scalar-by-design, with navigability friction.** The Summit-C
+  double-cutoff localization is exemplary. Scalar-only is deliberate. Real debt: naming-suffix drift
+  (`_T`/`_Infinite`/`_TD`/none) and no single exported "the Itô formula."
+- **THE CEILING — the 17 `reduced_core` entries.** These are spec-level *encodings* (a `structure`
+  whose fields assume the conclusion), written when the deep theorems were genuinely out of reach.
+  **Girsanov, SDE existence/uniqueness, martingale representation, Lévy's characterization are stubs.**
+  This — a magnificent Itô tower whose deepest intended consumers are still stubs — is the precise gap
+  between "very-good structural-depth library" and "top-notch stochastic-finance library."
+
+**The path to top-notch — cash in the Itô tower (verified reachable, NOT upstream-gated):**
+The crown-jewel conversions build on assets that already exist (`waldExponential_isMartingale`,
+`itoIntegralCLM_T` + its isometry, `withDensity` change-of-measure, the static `GaussianGirsanov`
+Esscher tilt). They do **not** depend on the one genuinely upstream-gated frontier (general
+adapted-coefficient Itô, blocked on Degenne's continuous-modification π-system). Ranked by value × feasibility:
+
+| # | Conversion (reduced_core → full) | Value | Difficulty | Unlocks |
+|---|---|---|---|---|
+| 1 | **Novikov** (gir-thm-9.1.7) | 9 | MEDIUM (~150-200 ln) | the gateway: the adapted Doléans-Dade exponential `Z_t=exp(∫θdB−½∫θ²ds)` as a martingale |
+| 2 | **Girsanov** (gir/sc-thm-9.1.8) | 9 | MED-HIGH (~200-250) | risk-neutral pricing under measure change |
+| 3 | **SDE existence/uniqueness** (sc-thm-8.2.5) | 9 | HIGH (~300-400) | the SDE model zoo (Vasicek/CIR/Heston/jump-diffusion) — Picard on the Itô isometry |
+| 4 | **Martingale representation** (gir-thm-9.3.4) | 9 | HIGH (Clark-Hida; may need upstream) | hedging / replication / market completeness |
+| 5 | **2D Itô formula** (sc-thm-7.5.2) | 7 | LOW-MED | multi-asset derivatives (the 1-D TD formula is already built) |
+
+The **first brick** for #1-#3 is the same: the adapted **Doléans-Dade stochastic exponential** as a
+martingale — generalizing the existing constant-α Wald exponential to an adapted integrand via
+`itoIntegralCLM_T`. Lay it once; Novikov, Girsanov, and the SDE drift-term all consume it.
+
+**Lower-leverage / deliberately deferred** (per the reviewers): the Markov-chain reduced_core cluster
+(side branch for a *continuous-time* finance library), the reflection principle / LIL / nowhere-diff
+(canonical BM results, no finance consumers). **Engineering polish** (friction, not ceiling): the
+Itô-tower naming consolidation, a bundled `IsBrownianMotion` structure, a doc-gen4 site, Leanblueprint
+web. Do these to remove friction; they do not raise the mathematical ceiling.
+
+**Bottom line:** the program is already top-tier in rigor and floor-integrity. The distinctive move to
+top-notch is not more breadth or polish — it is to **convert the crown-jewel `reduced_core` stubs into
+genuine derivations**, starting with the Doléans-Dade exponential → Novikov → Girsanov chain. That is
+the work that turns "a deep tower" into "a deep tower that is actually used."
+
+---
+
 ## The honest distinction
 
 There are three different things people mean by "high-quality formal
