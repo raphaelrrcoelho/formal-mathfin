@@ -296,3 +296,19 @@ zero-extension `exists_fullHorizon_extension`; the horizon-matching is the *exis
 load-bearing as an Itô-formula consumer for the first time, and is the prerequisite for the
 unrestricted-`C²` (Summit C) Itô formula. *Open:* Summit C; **adapted**-coefficient (random
 integrand) drift/diffusion.
+
+## The convex-duality unification — pricing tower ↔ risk tower (Phase 1, 2026-06-29)
+
+`Foundations/ConvexDuality.lean` is the shared root that makes the no-arbitrage (pricing) and
+coherent-risk (risk) towers one Hahn–Banach theorem. The cone-separation root
+`exists_pos_separating_of_cone_disjoint_simplex` and its point-from-cone companion
+`exists_separating_of_not_mem_cone` share two atoms (`functional_eq_sum_single`,
+`functional_nonneg_on_cone`); the FTAP kernel `ConvexSeparation.exists_pos_dual_of_disjoint_stdSimplex`
+is **re-derived** from the root (pricing side), and `RiskMeasures/AcceptanceSet.coherentRisk_isLUB` (the
+finite-state ADEH representation, with `RiskMeasures/WorstCaseRisk.worstCase_isLUB` a concrete instance —
+worst-case loss = sup over the whole simplex) is its risk-side instance.
+`Foundations/SuperhedgingDuality.emm_le_superReplication` wires superhedging as the EMM bound. This is the
+architecture doc's #1 unification (I↔IV), realized: *the FTAP separating functional and the coherent-risk
+representation are the same separation theorem* — the two most-disconnected towers made one. *Open:* the
+superhedging strong-duality **equality** (a finite-dim Farkas / polyhedral-cone-closedness Mathlib gap);
+the Gaussian CVaR robust form (the continuous instance).
