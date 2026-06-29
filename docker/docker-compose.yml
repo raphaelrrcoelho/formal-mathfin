@@ -84,6 +84,13 @@ services:
       - ../lakefile.lean:/app/lakefile.lean
       - ../lake-manifest.json:/app/lake-manifest.json
       - ../lean-toolchain:/app/lean-toolchain
+      # The env-linter (`lake lint`, the blocking gate in build.yml) reads its
+      # `scripts/nolints.json` baseline from here; mounted RW so a local
+      # `lake lint -- --update` (regenerating the baseline) propagates to host.
+      # Run the gate locally before pushing:
+      #   docker compose -f docker/docker-compose.yml down lean-repl
+      #   docker compose -f docker/docker-compose.yml run --rm --entrypoint bash verify -lc 'lake lint'
+      - ../scripts:/app/scripts
     working_dir: /app
     command: ["benchmarks/cross_validated.json", "-v", "--config", "mathfin.toml", "--timeout", "120"]
     # The same `verify` service can run the fast static lints inside docker by
