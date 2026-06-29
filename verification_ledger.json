@@ -1004,6 +1004,13 @@
       "input_hash": "9cb8a9608edae9f94d1e7a2a0505904443ffdc11635cd14eb5fd82b0800c565c",
       "verified_at_commit": "4e921c4"
     },
+    "mf-coherent-risk-representation": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-06-29",
+      "elapsed_s": 36.1,
+      "input_hash": "c3f1f8d9e8054b6f25cb96770afc73c81f9945a79fda32d3873c3dbde89fb7a4",
+      "verified_at_commit": "a1f6211"
+    },
     "mf-compound-poisson-mgf": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-24",
