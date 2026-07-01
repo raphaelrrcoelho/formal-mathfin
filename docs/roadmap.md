@@ -40,6 +40,22 @@ breadth at this stage, and what the concrete next round would look like.
 > finance deliverable (the repo's finance uses closed forms; the *finance*-axis backlog is the numéraire
 > bridge / exotic + American options / Vasicek bond pricing / CVaR breadth). Its own dedicated session.
 
+> **Forward — two tracks (name the axis first).** The remaining work splits cleanly, and the axis
+> decides the phase:
+> - **Finance-delivery track** (finance theorems — the q-fin.MF / "formal theory of finance" artifact):
+>   the **numéraire bridge** IV↔I ([#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45) —
+>   log-optimal = numéraire ⇒ EMM; consumes the Girsanov EMM; an OPEN architecture seam); **finance
+>   breadth** ([#46](https://github.com/raphaelrrcoelho/formal-mathfin/issues/46) — exotic + American
+>   options, Vasicek bond pricing, coherent-risk/CVaR breadth). These ship finance results — bridges and
+>   theorems like convex-duality (I↔IV) and Feynman–Kac (II↔III).
+> - **Depth / landmark track** (Mathlib-absent formalization landmarks — the AI4Math axis): SDE existence
+>   ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)); general adapted-θ Girsanov
+>   ([#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40)); superhedging strong duality /
+>   finite-dim Farkas ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)); the
+>   generator/Kolmogorov (II↔III) and Cox/intensity (IV) abstractions (plan Phases 5.1–5.2). These deepen
+>   a pillar; they do not ship a finance result. **The 2026-05-22 head below (breadth vs depth) is the
+>   same tension, now named by axis.**
+
 A whole-program validation (three independent reviewers + maintainer adjudication + the env-linter)
 re-grounds the strategy. **The 2026-05-22 head below is now partly stale, and that staleness is the
 single most important finding.** That section says the deep tier is *"out of reach … needs a fuller
