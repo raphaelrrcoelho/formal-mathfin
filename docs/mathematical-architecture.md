@@ -46,7 +46,7 @@ integrated intensity"* unifies discounting, mortality, credit hazard, and the Po
 
 | Bridge | Connects | Status |
 |---|---|---|
-| **Girsanov / Esscher** (change of measure) | I (EMM) ↔ II (Itô) ↔ IV (exp tilt) | **OPEN at I↔II.** `ContinuousFTAP.discountedGBM_isMartingale` is proved via the **Wald-exponential shortcut**, not an Itô–Girsanov change of measure; `ItoFormulaGBM` carries a *second*, separate discounted-GBM fact. The d-asset Esscher FTAP (IV) is a *discrete* Girsanov, unlinked to the continuous one. `reduced_core gir/sc-thm-9.1.8` is the missing continuous Girsanov. |
+| **Girsanov / Esscher** (change of measure) | I (EMM) ↔ II (Itô) ↔ IV (exp tilt) | **PARTIALLY WIRED at I↔II (Phase 2, 2026-06-30) — the martingale side.** `Foundations/Girsanov.bs_discounted_isQMartingale` now exhibits the Black–Scholes EMM as an *explicit* Girsanov density change `Q = withDensity(exp(−θX_T − ½θ²T))` (constant market price of risk `θ = (μ−r)/σ`), under which the discounted stock is a `Q`-martingale — retiring the Wald shortcut of `discountedGBM_isMartingale` (which took `Q = P` from the start). It stands on the reusable **Bayes change-of-measure engine** `Foundations/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (`Z` and `Z·D` both `P`-martingales ⟹ `D` is a `Q`-martingale on `[0,T]` — no stochastic calculus, only conditional expectations). Still **open**: the *distributional* Girsanov (`reduced_core gir-thm-9.1.8`, the drift-corrected `B^θ = B − ∫θ ds` is a `Q`-Brownian motion) and general adapted `θ`, both blocked on an adapted-integrand Itô formula / pathwise QV absent from the tower. The d-asset Esscher FTAP (IV) is a *discrete* Girsanov, still unlinked to the continuous one. |
 | **Feynman–Kac** (generator) | II ↔ III | **WIRED** (BS-PDE keystone). Not yet abstracted to a general generator / Kolmogorov-backward framework. |
 | **Convex duality** (separation / Legendre–Fenchel) | I (pricing) ↔ IV (risk) | **WIRED (Phase 1, 2026-06-29).** The shared root `Foundations/ConvexDuality.exists_pos_separating_of_cone_disjoint_simplex` (cone↔simplex) + its companion `exists_separating_of_not_mem_cone` (point↔cone) now carry **both** towers: the FTAP kernel `exists_pos_dual_of_disjoint_stdSimplex` is *re-derived* from the root (pricing side), and the coherent-risk ADEH representation `RiskMeasures/AcceptanceSet.coherentRisk_isLUB` is its risk-side instance (`WorstCaseRisk.worstCase_isLUB` a concrete case). Superhedging is wired as the `SuperhedgingDuality.emm_le_superReplication` bound; the strong-duality *equality* awaits a finite-dim Farkas (Mathlib gap). |
 | **The numéraire** (log-optimal portfolio) | IV (Kelly/portfolio) ↔ I (EMM) | **ABSENT.** `Performance/Kelly` and `BlackScholes/StockNumeraire` exist; the numéraire-portfolio ⟷ EMM identity is unstated. |
@@ -58,9 +58,13 @@ Individually the towers are coherent and the *engineering* architecture is docum
 (2026-06-29) realized the spine's #1 unification**: the convex-duality bridge (I↔IV) is now WIRED — the
 FTAP separating functional and the coherent-risk-measure representation are *proved* to be the same
 Hahn–Banach root (`Foundations/ConvexDuality`), no longer split across files that never name it. Of the
-four bridges, Feynman–Kac (II↔III), Donsker (discrete↔continuous), and now convex-duality (I↔IV) are
-WIRED; Girsanov (I↔II) and the numéraire (IV↔I) remain open. **The library's pricing↔risk spine is
-realized; the continuous-time (Girsanov) and portfolio (numéraire) seams are the next bridges.**
+bridges, Feynman–Kac (II↔III), Donsker (discrete↔continuous), and convex-duality (I↔IV) are WIRED;
+Girsanov (I↔II) is now **partially wired** (Phase 2, 2026-06-30 — the EMM/change-of-measure *martingale*
+side, constant θ: the risk-neutral measure is an explicit density change, built on a reusable Bayes
+change-of-measure engine), with the *distributional* Girsanov and general θ still gated on an
+adapted-integrand Itô formula; the numéraire (IV↔I) remains absent. **The library's pricing↔risk spine
+is realized and the continuous-time EMM is now an explicit change of measure; the remaining seams are the
+distributional Girsanov (needs adapted-integrand Itô) and the numéraire.**
 
 ## The higher-math unification roadmap (apparently-disconnected fields that connect)
 
@@ -75,10 +79,14 @@ Ranked by leverage × tractability:
    superhedging strong-duality *equality* (needs a finite-dim Farkas — a Mathlib gap), and the Gaussian
    `CVaR_α(L) = sup_{Q∈Q_α} E_Q[L]` robust form (the continuous instance, off the finite-state spine).
 
-2. **Girsanov as the I↔II connective tissue.** Reframes the crown-jewel conversion: not "convert a stub,"
-   but *derive the continuous EMM from the Itô tower* — retiring the Wald shortcut, unifying the two
-   discounted-GBM facts, and making the discrete Esscher FTAP and continuous Girsanov *one* change-of-measure
-   principle. (First brick: the adapted Doléans–Dade exponential — see `roadmap.md`.)
+2. **Girsanov as the I↔II connective tissue — ✅ MARTINGALE SIDE DONE (Phase 2, 2026-06-30).** The
+   continuous EMM is now *derived as an explicit change of measure*: `Girsanov.bs_discounted_isQMartingale`
+   makes the Black–Scholes risk-neutral measure a Girsanov density tilt (constant θ), under which the
+   discounted stock is a `Q`-martingale — retiring the Wald shortcut, standing on a reusable Bayes engine
+   `ChangeOfMeasure.changeOfMeasure_setIntegral_eq`. Remaining as backlog: the *distributional* Girsanov
+   (drift removal → `Q`-Brownian, `gir-thm-9.1.8`) and general adapted θ — both blocked on an
+   adapted-integrand Itô formula (the adapted Doléans–Dade exponential needs a pathwise quadratic variation
+   the tower lacks; see `roadmap.md`) — and unifying the discrete Esscher FTAP with the continuous tilt.
 
 3. **The generator / Kolmogorov abstraction (II↔III).** Abstract Feynman–Kac into the infinitesimal
    generator → backward equation, of which the BS-PDE, the heat equation, and Vasicek are instances.

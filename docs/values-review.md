@@ -74,6 +74,34 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-06-30 — corpus 308 — Phase 2: Girsanov, the EMM as an explicit change of measure
+
+**Executed this session.** The continuous-time EMM is now *constructed*, not assumed:
+`Foundations/Girsanov.bs_discounted_isQMartingale` (the Black–Scholes risk-neutral measure as a Girsanov
+density tilt, constant θ; the discounted stock a `Q`-martingale on `[0,T]`) standing on a reusable
+abstract engine `Foundations/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (the Bayes change of
+measure: `Z` and `Z·D` `P`-martingales ⟹ `D` a `Q`-martingale). Two new `full` entries; retires the Wald
+shortcut of `discountedGBM_isMartingale`.
+
+**Lens reads (exemplar → next upgrade).**
+- *Architectural ingenuity* (strong): the deep content is a **general** engine (any density `Z`), with
+  Black–Scholes as one instance — so it already covers the constant-θ case and will consume the adapted-θ
+  Doléans–Dade exponential *unchanged* once the Itô tower exposes it. The abstraction is the reuse, not
+  decoration. **Next:** wire a *second* consumer (e.g. a numéraire change) so the engine's generality is
+  visible in the corpus, not just latent.
+- *First principles* (strong): no black-box Girsanov — the change of measure is a Bayes pull-out plus a
+  martingale set-integral, and the one estimate (mixed-time integrability) is an explicit AM–GM bound,
+  not a `positivity`/`fun_prop` incantation.
+- *Zero slop / honesty* (holding): the spike proved general adapted θ is **out of reach** in the tower
+  (no Itô for `F(∫θ dB)`; QV only in expectation), and the result is scoped and documented as such — no
+  overclaim that `gir-thm-9.1.8` (the distributional Girsanov) is done. **Next:** the distributional
+  statement is the honest headline once an adapted-integrand Itô formula lands.
+
+**Ranked backlog (carried + new).** (1) adapted-integrand Itô / pathwise QV of `∫θ dB` — unblocks general
+Girsanov + `gir-thm-9.1.8` (Itô-tower depth; re-scout upstream Degenne first); (2) superhedging
+strong-duality equality — finite-dim Farkas (#39); (3) the numéraire (IV↔I) — a natural *second* consumer
+of the change-of-measure engine; (4) the Gaussian CVaR robust form.
+
 ## 2026-06-29 — corpus 306 — Phase 1: the convex-duality unification (FTAP = coherent-risk, one Hahn–Banach root)
 
 **Upgrade executed (the headline).** The architecture doc's **#1 unification** — the I↔IV convex-duality

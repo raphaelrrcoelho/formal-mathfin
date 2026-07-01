@@ -206,6 +206,20 @@
       "input_hash": "908a2127afd8a5ea40d7180e7d9039256fc3af1b0a6470ca5edcc97276c6fe85",
       "verified_at_commit": "4e921c4"
     },
+    "gir-bs-emm-girsanov": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-01",
+      "elapsed_s": 73.9,
+      "input_hash": "8d38d91b4990e7552a955382fa08e7721f292c6a22dd6a49e069c31f311e613d",
+      "verified_at_commit": "8f5d3f0"
+    },
+    "gir-change-of-measure-engine": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-06-30",
+      "elapsed_s": 95.3,
+      "input_hash": "a1ec2e5e4eef7b2f800398cbeaa1683b88f23919d1b52ade36314228b022c6e3",
+      "verified_at_commit": "8f5d3f0"
+    },
     "gir-continuous-ftap": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-06-28",

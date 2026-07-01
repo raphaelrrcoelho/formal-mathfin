@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`306` theorems · `289` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`308` theorems · `291` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -60,7 +60,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Convex duality** | I ↔ IV (pricing ↔ risk) | ✅ **WIRED** — the FTAP and the coherent-risk representation are proved to be the *same* Hahn–Banach theorem |
 | **Feynman–Kac** | II ↔ III | ✅ **WIRED** — the Black–Scholes PDE from the risk-neutral expectation |
 | **Donsker / CLT** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes |
-| **Girsanov** | I ↔ II | ◻️ open — the next bridge ([#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40)) |
+| **Girsanov** | I ↔ II | ◐ **partially wired** — the EMM is now an *explicit* change of measure (constant θ); the distributional Girsanov + adapted θ stay open ([#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40)) |
 | **Numéraire** | IV ↔ I | ◻️ open |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
@@ -73,7 +73,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **BS PDE from Feynman–Kac** | the Black–Scholes PDE derived from the risk-neutral expectation by heat-kernel differentiation — independent of the closed form and of Itô | [`bsV_satisfies_bs_pde_via_feynmanKac`](MathFin/BlackScholes/PDEFromFeynmanKac.lean) |
 | **CRR → Black–Scholes** | the n-step binomial call price converges to `S₀Φ(d₁) − Ke^{−rT}Φ(d₂)` (characteristic functions + Lévy continuity + put-call parity) | [`binomialPrice_call_tendsto_bs_closed`](MathFin/Binomial/CRRClosedForm.lean) |
 | **Continuous-time Itô formula** | `f(B_T) − f(B_0) = ∫₀ᵀ f′(B_s) dB_s + ½∫₀ᵀ f″(B_s) ds`, on a from-scratch L² Itô integral, for a general `C³` `f` with no growth bound | [`ito_formula_unrestricted`](MathFin/Foundations/ItoFormulaUnrestricted.lean) |
-| **The EMM is a theorem** | static Girsanov via an Esscher tilt *constructs* the risk-neutral measure; the discounted asset is a proven `Q`-martingale | [`discountedGBM_isMartingale`](MathFin/Foundations/ContinuousFTAP.lean) |
+| **The EMM via Girsanov** | the risk-neutral measure is *constructed* as an explicit density change of the physical measure, `Q = withDensity(exp(−θX_T − ½θ²T))`; the discounted stock is a proven `Q`-martingale — retiring the Wald shortcut | [`bs_discounted_isQMartingale`](MathFin/Foundations/Girsanov.lean) |
 | **Jump risk is never free** | the Merton (1976) jump-diffusion price dominates Black–Scholes | [`bsV_le_mertonCallPrice`](MathFin/BlackScholes/MertonDominance.lean) |
 
 ## A theorem, up close
@@ -96,9 +96,9 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 
 | | |
 |---|---:|
-| theorems (machine-checked) | **306** |
-| delivery-ready (`full` + `library_wrapper`) | **289** |
-| full derivations | 271 |
+| theorems (machine-checked) | **308** |
+| delivery-ready (`full` + `library_wrapper`) | **291** |
+| full derivations | 273 |
 | reduced cores (honest special cases) | 17 |
 | placeholders / sorries | **0** |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
@@ -164,7 +164,7 @@ Honesty is the point, so the gaps are explicit:
 - **17 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
   not yet formalized (the 2-D Itô formula, Lévy's characterisation, SDE existence/uniqueness, continuous
   Girsanov, some Markov/Poisson cores). Tracked per-entry in [`docs/coverage.md`](docs/coverage.md).
-- **Two architecture bridges are open** — Girsanov (I↔II) and the numéraire (IV↔I).
+- **Girsanov (I↔II) is partially wired** — the EMM/change-of-measure martingale side is proved (constant θ); the *distributional* Girsanov and general θ remain open, as does the **numéraire (IV↔I)** bridge.
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
   ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).

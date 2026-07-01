@@ -26,7 +26,24 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-29, Phase 1 — the convex-duality unification: pricing = risk):** corpus
+> **Live status (2026-06-30, Phase 2 — Girsanov: the EMM as an explicit change of measure):** corpus
+> **308**, **273 full + 18 wrappers = 291/308 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **The Black–Scholes risk-neutral measure is now constructed as a Girsanov density change**, not taken
+> as given. `Foundations/Girsanov.bs_discounted_isQMartingale` (entry `gir-bs-emm-girsanov`, **`full`**)
+> tilts the physical measure by `Q = withDensity(exp(−θX_T − ½θ²T))` (constant market price of risk
+> `θ = (μ−r)/σ`) and proves the discounted stock is a `Q`-martingale on `[0,T]` — retiring the Wald
+> shortcut of `discountedGBM_isMartingale`, which took `Q = P` from the start. It stands on a reusable
+> **Bayes change-of-measure engine** `Foundations/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` (entry
+> `gir-change-of-measure-engine`, **`full`**): if `Z` and `Z·D` are both `P`-martingales then `D` is a
+> `Q`-martingale on `[0,T]` — no stochastic calculus, only conditional expectations (a Bayes pull-out and
+> a martingale set-integral). The one new estimate is the mixed-time integrability of `D_u·Z_T`, via
+> AM–GM (`exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T)`, each Gaussian-MGF-integrable). This partially
+> wires the architecture doc's Girsanov seam (I↔II, the martingale side; see `mathematical-architecture.md`).
+> **Open (still `reduced_core`):** the *distributional* Girsanov (`gir-thm-9.1.8`, the drift-corrected
+> `B^θ = B − ∫θ ds` is a `Q`-Brownian motion) and general adapted `θ` — both blocked on an
+> adapted-integrand Itô formula / pathwise quadratic variation absent from the Itô tower.
+
+> **Prior round (2026-06-29, Phase 1 — the convex-duality unification: pricing = risk):** corpus
 > **306**, **271 full + 18 wrappers = 289/306 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The FTAP (pricing) and the coherent-risk representation (risk) are now proved to be the same
 > Hahn–Banach theorem.** A shared cone-separation root lives in `Foundations/ConvexDuality.lean` — the

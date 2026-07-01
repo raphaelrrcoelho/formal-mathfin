@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (245 constants). Scope: proof-position MathFin names only —
+  corpus (247 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -176,6 +176,9 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.bs_cash_or_nothing_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bs_cash_or_nothing_formula
 
+/-- info: 'MathFin.bs_discounted_isQMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bs_discounted_isQMartingale
+
 /-- info: 'MathFin.bs_dividends_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.bs_dividends_call_formula
 
@@ -202,6 +205,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.cds_leg_equality' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.cds_leg_equality
+
+/-- info: 'MathFin.changeOfMeasure_setIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.changeOfMeasure_setIntegral_eq
 
 /-- info: 'MathFin.chooser_via_pcp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.chooser_via_pcp

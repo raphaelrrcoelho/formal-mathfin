@@ -66,6 +66,38 @@
       }
     },
     {
+      "id": "gir-change-of-measure-engine",
+      "name": "Bayes Change-of-Measure Martingale Engine",
+      "description": "The abstract kernel of Girsanov's theorem: if the density process Z and the product Z·D are both P-martingales and Z_T ≥ 0, then D is a martingale on [0,T] under the tilted measure Q = withDensity(Z_T). No stochastic calculus — only conditional expectations (a Bayes pull-out and a martingale set-integral). The reusable engine consumed by the Black-Scholes Girsanov instantiation.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.ChangeOfMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- **Bayes change-of-measure martingale engine** (Girsanov's abstract kernel). If `Z`\n    and the product `Z · D` are both `P`-martingales, `D` is adapted, and `Z_T ≥ 0` is a\n    density, then `D` is a martingale on `[0, T]` under `Q = P.withDensity Z_T`: for\n    `s ≤ t ≤ T` and `A ∈ 𝓕_s` the `Q`-integrals of `D_t` and `D_s` over `A` agree. No\n    stochastic calculus — only conditional expectations (a Bayes pull-out plus a\n    martingale set-integral). Re-exports `MathFin.changeOfMeasure_setIntegral_eq`. -/\ntheorem change_of_measure_martingale\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsFiniteMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]\n    {Z D : ℝ≥0 → Ω → ℝ} (T : ℝ≥0)\n    (hZmeasT : Measurable (Z T)) (hZpos : ∀ ω, 0 ≤ Z T ω)\n    (hDsm : ∀ u, StronglyMeasurable[𝓕 u] (D u))\n    (hZ : Martingale Z 𝓕 P)\n    (hZD : Martingale (fun t ω => Z t ω * D t ω) 𝓕 P)\n    (hmix : ∀ u, u ≤ T → Integrable (fun ω => D u ω * Z T ω) P)\n    {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T)\n    {A : Set Ω} (hA : MeasurableSet[𝓕 s] A) :\n    ∫ ω in A, D t ω ∂(P.withDensity (fun ω => ENNReal.ofReal (Z T ω)))\n      = ∫ ω in A, D s ω ∂(P.withDensity (fun ω => ENNReal.ofReal (Z T ω))) :=\n  MathFin.changeOfMeasure_setIntegral_eq T hZmeasT hZpos hDsm hZ hZD hmix hst htT hA\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov / abstract change of measure (Saporito Ch 9; Shreve II Ch 5.2)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin/Foundations/ChangeOfMeasure.lean. For Q = P.withDensity(ENNReal.ofReal Z_T), the identity ∫_A D_t dQ = ∫_A Z_t D_t dP = ∫_A Z_s D_s dP = ∫_A D_s dQ. The outer equalities are the Bayes pull-out: for A ∈ 𝓕_s ⊆ 𝓕_u and D_u 𝓕_u-measurable, ∫_A D_u Z_T dP = ∫_A D_u·P[Z_T|𝓕_u] dP = ∫_A D_u Z_u dP by the Z-martingale property (condExp_mul_of_stronglyMeasurable_left + setIntegral_condExp); the middle is the Z·D martingale set-integral (Martingale.setIntegral_eq). withDensity conversion via setIntegral_withDensity_eq_setIntegral_toReal_smul. Axioms-clean: propext, Classical.choice, Quot.sound."
+      }
+    },
+    {
+      "id": "gir-bs-emm-girsanov",
+      "name": "Black-Scholes EMM via an Explicit Girsanov Change of Measure",
+      "description": "The Black-Scholes risk-neutral measure constructed as a Girsanov density change of the physical measure. Under physical drift μ the discounted stock D_t = S_0·exp((μ−r−σ²/2)t + σX_t) is only a submartingale; tilting P by the Girsanov density exp(−θX_T − ½θ²T) with market price of risk θ = (μ−r)/σ turns it into a martingale on [0,T] under Q = withDensity(Z_T). Q is the equivalent martingale measure, exhibited as an explicit change of measure — retiring the Wald shortcut of the continuous FTAP. The martingale side of the I↔II (pricing↔Itô) seam; the distributional Girsanov (B^θ = B − ∫θ ds is Q-Brownian, gir-thm-9.1.8) needs an adapted-integrand Itô formula and remains open.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Girsanov\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\n\n/-- **Black–Scholes EMM as an explicit Girsanov change of measure.** With physical drift\n    `μ`, rate `r`, volatility `σ ≠ 0`, and market price of risk `θ = (μ − r)/σ`, the\n    discounted stock `D_t = S_0·exp((μ − r − σ²/2)t + σX_t)` is a martingale on `[0, T]`\n    under the tilted measure `Q = P.withDensity(exp(−θX_T − ½θ²T))` — the risk-neutral\n    measure constructed as a Girsanov density change, retiring the Wald shortcut. The\n    proof feeds two Wald exponentials (`Z`, `Z·D`) to the change-of-measure engine, with\n    mixed-time integrability of `D_u·Z_T` via AM–GM. Re-exports\n    `MathFin.bs_discounted_isQMartingale`. -/\ntheorem bs_emm_via_girsanov\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]\n    {X : ℝ≥0 → Ω → ℝ} [IsFilteredPreBrownian X 𝓕 P]\n    (S_0 r μ σ : ℝ) (hσ : σ ≠ 0) (T : ℝ≥0)\n    {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T)\n    {A : Set Ω} (hA : MeasurableSet[𝓕 s] A) :\n    ∫ ω in A, (S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (t : ℝ) + σ * X t ω))\n        ∂(P.withDensity fun ω => ENNReal.ofReal\n          (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2)))\n      = ∫ ω in A, (S_0 * Real.exp ((μ - r - σ ^ 2 / 2) * (s : ℝ) + σ * X s ω))\n        ∂(P.withDensity fun ω => ENNReal.ofReal\n          (Real.exp (-((μ - r) / σ) * X T ω - ((μ - r) / σ) ^ 2 * (T : ℝ) / 2))) :=\n  MathFin.bs_discounted_isQMartingale S_0 r μ σ hσ T hst htT hA\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov change of measure / risk-neutral pricing (Saporito Ch 9; Shreve II Ch 5.2-5.4)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin/Foundations/Girsanov.lean. Instantiates the change-of-measure engine (changeOfMeasure_setIntegral_eq) with two Wald exponentials: the Girsanov density Z = exp(−θX − ½θ²·) = waldExponential(−θ) and the product Z·D = S_0·exp((σ−θ)X − ½(σ−θ)²·) = S_0·waldExponential(σ−θ), both P-martingales by IsFilteredPreBrownian.waldExponential_isMartingale (using μ−r = σθ). Adaptedness of D via continuous-comp of the adapted X_u; the one new estimate is the mixed-time integrability of D_u·Z_T, handled by AM-GM exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T), each Gaussian-MGF-integrable (integrable_exp_mul_of_hasLaw). Does NOT claim the distributional Girsanov (drift-corrected process is Q-Brownian). Axioms-clean: propext, Classical.choice, Quot.sound."
+      }
+    },
+    {
       "id": "gir-thm-9.3.4",
       "name": "Martingale Representation Theorem",
       "description": "Corollary 9.3.4: Every square-integrable martingale M adapted to the BM filtration can be written M_t = M_0 + ∫₀ᵗ ϕ_s dB_s for some ϕ ∈ H²",

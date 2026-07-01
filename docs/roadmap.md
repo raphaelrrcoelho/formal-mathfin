@@ -18,6 +18,18 @@ breadth at this stage, and what the concrete next round would look like.
 > adapted Doléans–Dade exponential), and the superhedging strong-duality *equality* hit a Mathlib
 > **Farkas gap** ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).
 
+> **Update (2026-06-30) — Phase 2: Girsanov, the martingale side (corpus 308).** The continuous EMM is
+> now an *explicit* change of measure: `Foundations/Girsanov.bs_discounted_isQMartingale` tilts the
+> physical measure by the Girsanov density `Q = withDensity(exp(−θX_T − ½θ²T))` (constant `θ = (μ−r)/σ`)
+> and proves the discounted stock a `Q`-martingale on `[0,T]`, on a reusable Bayes engine
+> `Foundations/ChangeOfMeasure.changeOfMeasure_setIntegral_eq` — **retiring the Wald shortcut**. The
+> feasibility spike confirmed the tower's blocker: the general adapted Doléans–Dade exponential needs an
+> **Itô formula for a function of an `∫θ dB` process** (and a pathwise QV `⟨∫θdB⟩ = ∫θ² ds`), *neither*
+> present — every `ito_formula_*` is `f(t,B_t)`, and QV exists only in expectation. So general adapted
+> `θ` and the *distributional* Girsanov (`gir-thm-9.1.8`, drift-corrected `B^θ` is `Q`-Brownian) stay
+> `reduced_core`, honestly documented — an Itô-tower item to re-scout, not force. See
+> [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
+
 A whole-program validation (three independent reviewers + maintainer adjudication + the env-linter)
 re-grounds the strategy. **The 2026-05-22 head below is now partly stale, and that staleness is the
 single most important finding.** That section says the deep tier is *"out of reach … needs a fuller
@@ -51,7 +63,7 @@ adapted-coefficient Itô, blocked on Degenne's continuous-modification π-system
 | # | Conversion (reduced_core → full) | Value | Difficulty | Unlocks |
 |---|---|---|---|---|
 | 1 | **Novikov** (gir-thm-9.1.7) | 9 | MEDIUM (~150-200 ln) | the gateway: the adapted Doléans-Dade exponential `Z_t=exp(∫θdB−½∫θ²ds)` as a martingale |
-| 2 | **Girsanov** (gir/sc-thm-9.1.8) | 9 | MED-HIGH (~200-250) | risk-neutral pricing under measure change |
+| 2 | **Girsanov** — martingale side ✅ (2026-06-30) | 9 | DONE (const θ): `bs_discounted_isQMartingale` = the EMM as an explicit measure change + a reusable Bayes engine. Distributional Girsanov (gir-thm-9.1.8) + adapted θ blocked on adapted-integrand Itô | risk-neutral pricing under measure change |
 | 3 | **SDE existence/uniqueness** (sc-thm-8.2.5) | 9 | HIGH (~300-400) | the SDE model zoo (Vasicek/CIR/Heston/jump-diffusion) — Picard on the Itô isometry |
 | 4 | **Martingale representation** (gir-thm-9.3.4) | 9 | HIGH (Clark-Hida; may need upstream) | hedging / replication / market completeness |
 | 5 | **2D Itô formula** (sc-thm-7.5.2) | 7 | LOW-MED | multi-asset derivatives (the 1-D TD formula is already built) |

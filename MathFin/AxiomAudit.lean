@@ -756,6 +756,18 @@ Markov property, no PDE — entirely inside the Itô tower. -/
 /-- info: 'MathFin.emm_le_superReplication' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.emm_le_superReplication
 
+-- The Bayes change-of-measure engine (`Foundations/ChangeOfMeasure.lean`): `Z` and
+-- `Z·D` both `P`-martingales ⇒ `D` is a `Q`-martingale on `[0,T]` for `Q = withDensity Z_T`.
+-- The abstract kernel of Girsanov, no stochastic calculus — only conditional expectations.
+/-- info: 'MathFin.changeOfMeasure_setIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.changeOfMeasure_setIntegral_eq
+
+-- Black–Scholes EMM via Girsanov (`Foundations/Girsanov.lean`): the discounted stock is a
+-- martingale under the tilted measure `Q = withDensity(exp(−θX_T − ½θ²T))` — the risk-neutral
+-- measure as an explicit change of measure, retiring the Wald shortcut. Consumes the engine.
+/-- info: 'MathFin.bs_discounted_isQMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.bs_discounted_isQMartingale
+
 -- Multi-state single-period FTAP, now a biconditional (`FTAPMultiState.lean`):
 -- the backward direction (no arbitrage ⟹ EMM) via the separating-dual kernel.
 /-- info: 'MathFin.hasEMM_multi_iff_not_hasArbitrage' depends on axioms: [propext, Classical.choice, Quot.sound] -/

@@ -312,3 +312,26 @@ architecture doc's #1 unification (I↔IV), realized: *the FTAP separating funct
 representation are the same separation theorem* — the two most-disconnected towers made one. *Open:* the
 superhedging strong-duality **equality** (a finite-dim Farkas / polyhedral-cone-closedness Mathlib gap);
 the Gaussian CVaR robust form (the continuous instance).
+
+## The Girsanov change of measure — pricing tower ↔ Itô/Brownian tower (Phase 2, 2026-06-30)
+
+The Black–Scholes equivalent martingale measure is now *constructed* as an explicit Girsanov density
+change of the physical measure, not taken as given. `Foundations/Girsanov.bs_discounted_isQMartingale`
+tilts `P` by `Q = withDensity(exp(−θX_T − ½θ²T))` (constant market price of risk `θ = (μ−r)/σ`) and
+proves the discounted stock `S_0·exp((μ−r−σ²/2)t + σX_t)` a `Q`-martingale on `[0,T]` — retiring the
+Wald shortcut of `ContinuousFTAP.discountedGBM_isMartingale`, which took `Q = P` from the start.
+
+The bridge's reusable core is `Foundations/ChangeOfMeasure.changeOfMeasure_setIntegral_eq`, the abstract
+Bayes engine: if the density process `Z` and the product `Z·D` are both `P`-martingales (with `Z_T ≥ 0`,
+`D` adapted), then `D` is a `Q`-martingale on `[0,T]` — no stochastic calculus, only conditional
+expectations (a Bayes pull-out via `condExp_mul_of_stronglyMeasurable_left`, plus a martingale
+set-integral). The BS instance feeds it two Wald exponentials — `Z = waldExponential(−θ)` and
+`Z·D = S_0·waldExponential(σ−θ)`, both `IsFilteredPreBrownian.waldExponential_isMartingale` (using
+`μ−r = σθ`); the one genuinely new estimate is the mixed-time integrability of `D_u·Z_T`, handled by
+AM–GM (`exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T)`, each Gaussian-MGF-integrable).
+
+This partially wires the architecture doc's Girsanov seam (I↔II), on the **martingale side**. *Open:* the
+*distributional* Girsanov (`gir-thm-9.1.8`, the drift-corrected `B^θ = B − ∫θ ds` is a `Q`-Brownian
+motion) and general adapted `θ` — both need an adapted-integrand Itô formula / pathwise quadratic
+variation the Itô tower does not yet expose (every `ito_formula_*` is a function of `B_t`, and the
+Itô-integral QV exists only in expectation).
