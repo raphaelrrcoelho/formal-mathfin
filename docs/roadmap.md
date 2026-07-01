@@ -30,6 +30,16 @@ breadth at this stage, and what the concrete next round would look like.
 > `reduced_core`, honestly documented — an Itô-tower item to re-scout, not force. See
 > [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
 
+> **Next phase (queued + de-risked) — SDE existence via Picard
+> ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)).** `sc-thm-8.2.5`
+> `reduced_core → full`: the real Picard construction replacing the opaque `Iσ` operator. De-risked
+> 2026-07-01 — the contraction kernel is proved in Lean (`itoProcessCLM` + `LipschitzWith.compLp`), the
+> enabler is `itoIntegralProcessGen_l2_continuous` (the Itô process is continuous into `Lp μ`), and the
+> crux prerequisite is the path ↔ `Lp(trim_T)` fibration (`L²([0,T]×Ω) ≅ L²([0,T], L²(Ω))`). A
+> ~300-500-line **landmark** build (the AI4Math M2 class) — stochastic-calculus *infrastructure*, NOT a
+> finance deliverable (the repo's finance uses closed forms; the *finance*-axis backlog is the numéraire
+> bridge / exotic + American options / Vasicek bond pricing / CVaR breadth). Its own dedicated session.
+
 A whole-program validation (three independent reviewers + maintainer adjudication + the env-linter)
 re-grounds the strategy. **The 2026-05-22 head below is now partly stale, and that staleness is the
 single most important finding.** That section says the deep tier is *"out of reach … needs a fuller
