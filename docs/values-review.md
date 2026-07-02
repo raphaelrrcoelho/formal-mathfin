@@ -74,6 +74,74 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-02 — corpus 308 — SDE-existence keystone II: the drift assembled into `E` (values-upgrade pass)
+
+**Executed this session.** A three-agent upgrade pass on the drift keystone
+`Foundations/DriftProcessPredictable` (`driftProcessAssembled : E →L E`, the drift term of the Picard
+iterate as a bounded operator on the predictable `L²` space; landed `403b6f2`→`0a1a707`, lake-verified).
+Six in-session upgrades, all daemon-green (success, zero warnings, zero sorries; 431 lines):
+1. *coherence rename* `driftProcessLp` → `driftSimpleProcessLp` (+ `_norm_le`) — it takes a `SimpleProcess`,
+   so it now parallels the Itô sibling `itoSimpleProcessLp`/`_norm_le` exactly (file-local, no external refs);
+2. *slop* — the triplicated `IsFiniteMeasure (timeMeasure.restrict (Ioc a b))` `haveI` (lines 138/239/264)
+   folded into one file-local `instance isFiniteMeasure_timeMeasure_restrict_Ioc`; the three sites now
+   resolve it automatically;
+3. *concept clarity* — the module docstring rewritten to actually map the file: it had stopped at Part 1
+   (predictability) and never named the keystone (the honest-integral bridge, `driftSimpleProcessLp_norm_le`,
+   the `driftProcessAssembled` CLM); now a `Part 1 / Part 2` structure lists every deliverable;
+4. *inspired core, surfaced* — the header now states the elegant contrast where the reader meets it: the drift
+   carries **no randomness in its time-regularity**, so there is **no exceptional null set** and Degenne's
+   `…of_leftContinuous` applies to the *raw* `natFiltration` — vs. the Itô side, which applies it
+   per-elementary-process to dodge the augmented-filtration friction;
+5. *idiomatic register* — `push Not` → `rw [not_le]` (matching the file's other branch); `Finsupp.sum`-unfold
+   cleaned to `simp only [driftSimpleProcess, Finsupp.sum]` where the binder blocks `rw`, and dropped entirely
+   in `_stronglyAdapted` where the closing `exact` unifies by defeq;
+6. *clarity* — a one-line gloss on `driftSimpleProcess` explaining the `((min · t : ℝ≥0) : ℝ)` double coercion
+   (the clamp is taken in `ℝ≥0` to line up with `timeMeasure_Ioc_inter`'s endpoints in the bridge).
+
+**Panel**: three agents — (coherence + idiomatic), (slop + first principles + architecture),
+(clarity + inspired + elegant). Findings cross-verified against the code before acting (per the
+subagents-over-escalate discipline): the sum-unfold fix corrected a reviewer's `rw` suggestion — `rw` cannot
+rewrite under the `fun t =>` binder, `simp only` can; and the `_stronglyAdapted` unfold was shown *unnecessary*
+(the `exact` closes by defeq), removed rather than kept.
+
+**Lens reads (exemplar → next upgrade).**
+- *Coherence (strong)*: no lemma re-proves upstream — the file consumes `isStronglyPredictable_of_leftContinuous`,
+  `StronglyMeasurable.limUnder`, `LinearMap.extendOfNorm`, `integral_mul_le_Lp_mul_Lq_of_nonneg`,
+  `Finsupp.sum_add_index'` directly and reuses the repo's `simpleAssembly_T` / `memLp_uncurry_trim_T` /
+  `lp_two_norm_sq`. **Next:** factor the shared `‖toLp g‖² = ∫ (uncurry g)² ∂prod` computation (inlined here as
+  `hnorm` and again in `itoProcessAssembled_norm_sq`) into one lemma both keystones consume.
+- *Architectural ingenuity (strong, one open fork)*: the CLM-via-`extendOfNorm` route is cleaner than the Itô
+  side's element-valued `toLp` with hand-proven `_add`/`_sub`/`_norm_sq` — linearity, boundedness, and
+  predictability all fall out of `E`-membership. **The fork:** `driftContinuousMod` (Part 1) is an *orphan* —
+  the CLM never routes through it, and unlike the Itô sibling's `itoContinuousMod_modification` there is no
+  bridge tying the abstract CLM output to that pathwise realization. Now documented as a parity / future-use
+  track rather than deleted (orphan-reflection rule); the delete-vs-bridge call belongs to #18/#19.
+- *Zero slop (holding)*: the one Cauchy–Schwarz helper `sq_integral_le_measureReal_mul` is honestly the
+  canonical Hölder (`g = 1`), not a re-proof (confirmed no direct Bochner-`∫` Mathlib lemma exists); its
+  rpow-squaring tail is the only ceremony. Remaining duplication is measure-finiteness / `toReal` plumbing.
+- *Concept clarity (upgraded this session)*: header now maps the whole file and states the inspired point where
+  the reader arrives, closing the "header describes only Part 1" gap all three reviewers flagged.
+
+**Ranked backlog (carried + new).**
+1. **The Picard assembly (#16–#20 — the delivery, not a nit)**: `Φ = η + driftProcessAssembled(b∘X) +
+   itoProcessAssembled(σ∘X)`; Bielecki-weighted contraction; `ContractingWith.fixedPoint`; Grönwall
+   uniqueness; translate to `sc-thm-8.2.5` (still `reduced_core`) and retire the opaque `Iσ`.
+2. **`driftContinuousMod` fork resolution** — delete (YAGNI; the CLM route supersedes) *or* earn it with the
+   `driftProcessAssembled φ =ᵐ uncurry (driftContinuousMod φ)` bridge; decide when #18/#19 fix whether the
+   fixed point's a.s.-path-continuity needs a pathwise drift realization.
+3. **Repo-wide plumbing factor** (deferred: touching `ItoIntegralL2` restales the corpus, so batch on a
+   GitHub-runner ledger sweep): promote the `IsFiniteMeasure (timeMeasure.restrict (Ioc a b))` instance and add
+   a `timeMeasureReal_Ioc : (timeMeasure (Ioc a b)).toReal = b − a` helper into `ItoIntegralL2`, killing ~6
+   in-repo copies each; plus the shared `‖toLp g‖²` lemma (from the coherence lens above).
+4. **Micro, on next touch**: slim `sq_integral_le_measureReal_mul`'s rpow tail (try `Real.rpow_two` + `sq_abs`);
+   unify `driftSimpleProcess_add`/`_smul` onto the closed `Finsupp.sum` form (`_smul` currently detours through
+   the integral bridge).
+
+**Evidence/context.** corpus **308 unchanged** (a `MathFin/` upgrade pass — no benchmark entries added, so the
+cadence gate is untouched); ledger **fresh 308/0/0** (the file is imported by no benchmark snippet, so the edit
+stales nothing); `DriftProcessPredictable.lean` daemon-green. These upgrades are a follow-on to the pushed
+keystone (`8660775..0a1a707`), to be committed on top.
+
 ## 2026-06-30 — corpus 308 — Phase 2: Girsanov, the EMM as an explicit change of measure
 
 **Executed this session.** The continuous-time EMM is now *constructed*, not assumed:
