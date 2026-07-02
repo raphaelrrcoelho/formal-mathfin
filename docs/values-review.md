@@ -74,6 +74,46 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-02 — corpus 308 — SDE existence: the Picard fixed point in `E` (#16–#18)
+
+**Executed this session.** `MathFin/Foundations/SDEExistence.lean` (new, 210 lines, 0-sorry, in the umbrella,
+full-build-green 8838 jobs) — the Picard construction for `dX = b(X)dt + σ(X)dB` as a self-map of the
+predictable `L²` space `E`, through to the **unique fixed point**: `lipComp` (coefficient composition
+`f∘X ∈ E`), `picardMap` (Φ:E→E), the two operator bounds `driftProcessAssembled_norm_le` (`≤T‖·‖`) /
+`itoProcessAssembled_norm_le` (`≤√T‖·‖`), `picardMap_contraction` (`‖ΦX−ΦY‖ ≤ (T·L_b+√T·L_σ)‖X−Y‖`), and
+`picardMap_exists_unique_fixedPoint` (`∃!`, via `ContractingWith.fixedPoint`). Consumes #14/#15's assembled
+operators. The mathematical core of Theorem 8.2.5 — existence **and** uniqueness — is proved.
+
+**Panel**: maintainer self-review (built inline on the warm daemon; each lemma green before the next).
+
+**Lens reads (exemplar → next upgrade).**
+- *Mathlib/Degenne coherence (strong)*: no re-derivation — consumes `LipschitzWith.compLp` / `norm_compLp_sub_le`,
+  `LinearMap.norm_extendOfNorm_apply_le` (the extendOfNorm operator-norm), `integral_mono_of_nonneg` (dominated
+  form, avoids proving LHS integrability), `setIntegral_le_integral`, and `ContractingWith.fixedPoint` directly.
+- *Beautiful / first principles (exemplar)*: the estimate's `T·L_b + √T·L_σ` asymmetry is the classical SDE a
+  priori bound made structural — the drift contributes the operator norm `T` (Cauchy–Schwarz `∫₀ᵗ`), the Itô term
+  `√T` (the isometry's `[0,t]`-energy `≤` full energy). Each bound is *derived* from its energy identity.
+- *Zero slop / honesty (holding)*: proofs are certificate-shaped; the result is **stated conditional on
+  `T·L_b+√T·L_σ < 1`** (small-horizon) and the module docstring says so plainly — no overclaim as the
+  unconditional theorem, and `sc-thm-8.2.5` is left `reduced_core` (not faked).
+- *Architecture (one relocation)*: `driftProcessAssembled_norm_le` / `itoProcessAssembled_norm_le` are natural
+  companions of their assembled defs — they belong in `DriftProcessPredictable` / `ItoProcessPredictable` (the
+  drift keystone's docstring already advertises `‖·‖≤T‖·‖` without a witnessing lemma; relocating closes that gap).
+
+**Ranked backlog (carried + new).**
+1. **#19 — the `ℝ≥0`↔`ℝ`-time translation** to `sc-thm-8.2.5` (still `reduced_core`): realize the `E`-fixed-point as a
+   pointwise `X : ℝ→Ω→ℝ`, match the Bochner drift to `intervalIntegral ∫ s in 0..t` a.e., instantiate the opaque
+   `Iσ` as the real Itô term, prove the per-`t`-a.e. equation + Grönwall uniqueness. The real remaining mountain.
+2. **All-`T` extension** — a Bielecki exp-weighted norm on `E` to drop the `< 1` smallness condition (the benchmark
+   quantifies all `t ≥ 0`).
+3. **Relocate the two operator bounds** into their home files (architecture lens above).
+4. **#20 wiring** — benchmark entry + AxiomAudit pins (`picardMap_contraction`, `picardMap_exists_unique_fixedPoint`)
+   + AxiomAuditGen + ledger + coverage/docs, at delivery.
+
+**Evidence/context.** corpus **308 unchanged** (a `MathFin/` build — no benchmark entries added); ledger **fresh
+308/0/0** (imported by no benchmark snippet); full `lake build` green (8838 jobs), SDEExistence 0-warning 0-sorry.
+Committed + pushed `e949194..6521a2d`.
+
 ## 2026-07-02 — corpus 308 — SDE-existence keystone II: the drift assembled into `E` (values-upgrade pass)
 
 **Executed this session.** A three-agent upgrade pass on the drift keystone
