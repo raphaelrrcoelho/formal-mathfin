@@ -122,6 +122,8 @@ import MathFin.Foundations.ItoIntegralProcessGeneral
 import MathFin.Foundations.ItoIntegralProcessIsometry
 -- Continuous modification of the general-integrand Itô process on [0,T] (the gate)
 import MathFin.Foundations.ItoIntegralProcessContinuousModification
+-- Predictability of the assembled Itô process (the SDE-existence keystone)
+import MathFin.Foundations.ItoProcessPredictable
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- The unbounded-horizon Itô process: the L² process, horizon consistency (the [0,∞) climb)
