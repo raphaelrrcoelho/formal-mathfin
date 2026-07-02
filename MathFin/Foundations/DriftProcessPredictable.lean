@@ -125,5 +125,76 @@ theorem driftContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, 
     driftSimpleProcess_isStronglyPredictable hBmeas
       ((approxSeq T hBmeas φ).choose n).val)
 
+/-! ## Part 2 — the drift assembled into `E` (`L²`, energy bound, linearity) -/
+
+/-- **Bridge to the honest Lebesgue integral.** The elementary drift is literally the
+Lebesgue integral `∫₀ᵗ ⇑V(s,ω) ds` (against `timeMeasure`) of the step process `⇑V`: on
+`(0,t]` the `⊥`-fibre vanishes and `⇑V(s,ω) = ∑_p 𝟙_{(p.1,p.2]}(s)·V(p)(ω)`, so each interval
+contributes `V(p)(ω)·timeMeasure((0,t] ∩ (p.1,p.2])`, whose real value is the time-increment
+`(p.2 ∧ t) − (p.1 ∧ t)`. This is the identity the `L²` bound reads through Cauchy–Schwarz. -/
+theorem driftSimpleProcess_eq_setIntegral (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration hBmeas)) (t : ℝ≥0) (ω : Ω) :
+    driftSimpleProcess hBmeas V t ω = ∫ s in Set.Ioc (0 : ℝ≥0) t, ⇑V s ω ∂timeMeasure := by
+  haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
+    ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
+  have htoReal : ∀ p : ℝ≥0 × ℝ≥0, p.1 ≤ p.2 →
+      (timeMeasure (Set.Ioc (0 : ℝ≥0) t ∩ Set.Ioc p.1 p.2)).toReal
+        = ((min p.2 t : ℝ≥0) : ℝ) - ((min p.1 t : ℝ≥0) : ℝ) := by
+    intro p hp12
+    rw [Set.inter_comm, timeMeasure_Ioc_inter, NNReal.coe_zero, max_eq_left p.1.coe_nonneg,
+        NNReal.coe_min, NNReal.coe_min]
+    by_cases ht : p.1 ≤ t
+    · rw [ENNReal.toReal_ofReal (by
+            have : (p.1 : ℝ) ≤ min (p.2 : ℝ) t :=
+              le_min (by exact_mod_cast hp12) (by exact_mod_cast ht)
+            linarith), min_eq_left (by exact_mod_cast ht : (p.1 : ℝ) ≤ t)]
+    · rw [not_le] at ht
+      have htp1 : (t : ℝ) ≤ p.1 := le_of_lt (by exact_mod_cast ht)
+      have htp2 : (t : ℝ) ≤ p.2 := htp1.trans (by exact_mod_cast hp12)
+      rw [min_eq_right htp2, min_eq_right htp1, sub_self,
+          ENNReal.ofReal_eq_zero.mpr (by linarith), ENNReal.toReal_zero]
+  have hV_eq : Set.EqOn (fun s => ⇑V s ω)
+      (fun s => ∑ p ∈ V.value.support, (Set.Ioc p.1 p.2).indicator (fun _ => V.value p ω) s)
+      (Set.Ioc (0 : ℝ≥0) t) := by
+    intro s hs
+    have hs0 : s ∉ ({⊥} : Set ℝ≥0) := by
+      simp only [Set.mem_singleton_iff]
+      rintro rfl
+      exact absurd hs.1 not_lt_bot
+    simp only [SimpleProcess.apply_eq, Set.indicator_of_notMem hs0, zero_add, Finsupp.sum]
+  have hint : ∀ p ∈ V.value.support,
+      Integrable (fun s => (Set.Ioc p.1 p.2).indicator (fun _ => V.value p ω) s)
+        (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
+    fun p _ => (integrable_const (V.value p ω)).indicator measurableSet_Ioc
+  rw [driftSimpleProcess, Finsupp.sum, setIntegral_congr_fun measurableSet_Ioc hV_eq,
+      integral_finsetSum _ hint]
+  refine Finset.sum_congr rfl (fun p hp => ?_)
+  rw [setIntegral_indicator measurableSet_Ioc, setIntegral_const, smul_eq_mul,
+      measureReal_def, htoReal p (V.le_of_mem_support_value p hp), mul_comm]
+
+/-- **The elementary drift is `L²`** — indeed bounded. Each term satisfies
+`|V(p)(ω)·((p.2 ∧ t) − (p.1 ∧ t))| ≤ valueBound·p.2` (the coefficient is bounded and the
+time-increment lies in `[0, p.2]`), so the finite sum is bounded by the constant
+`∑_p valueBound·p.2`; being predictable on the finite measure `trimMeasure_T T`, it is `MemLp`. -/
+theorem memLp_uncurry_driftSimpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration hBmeas)) :
+    MemLp (Function.uncurry (driftSimpleProcess hBmeas V)) 2 (trimMeasure_T (μ := μ) T hBmeas) := by
+  refine MemLp.of_bound (driftSimpleProcess_isStronglyPredictable hBmeas V).aestronglyMeasurable
+    (∑ p ∈ V.value.support, V.valueBound * (p.2 : ℝ)) (ae_of_all _ fun z => ?_)
+  rw [Function.uncurry_apply_pair, driftSimpleProcess, Finsupp.sum, Real.norm_eq_abs]
+  refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun p hp => ?_)
+  rw [abs_mul]
+  have hval : |V.value p z.2| ≤ V.valueBound := by
+    rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p z.2
+  have hc : |((min p.2 z.1 : ℝ≥0) : ℝ) - ((min p.1 z.1 : ℝ≥0) : ℝ)| ≤ (p.2 : ℝ) := by
+    rw [abs_of_nonneg (by
+      have : ((min p.1 z.1 : ℝ≥0) : ℝ) ≤ ((min p.2 z.1 : ℝ≥0) : ℝ) := by
+        exact_mod_cast min_le_min_right z.1 (V.le_of_mem_support_value p hp)
+      linarith)]
+    have h1 : ((min p.2 z.1 : ℝ≥0) : ℝ) ≤ (p.2 : ℝ) := by exact_mod_cast min_le_left p.2 z.1
+    have h2 : (0 : ℝ) ≤ ((min p.1 z.1 : ℝ≥0) : ℝ) := (min p.1 z.1).coe_nonneg
+    linarith
+  exact mul_le_mul hval hc (abs_nonneg _) (le_trans (abs_nonneg _) hval)
+
 end ItoIntegralProcessContinuousModification
 end MathFin
