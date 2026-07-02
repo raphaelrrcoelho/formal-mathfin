@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (247 constants). Scope: proof-position MathFin names only —
+  corpus (248 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -52,6 +52,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.PoissonThinning.thinned_streams' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.PoissonThinning.thinned_streams
+
+/-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.picardMap_exists_unique_fixedPoint
 
 /-- info: 'MathFin.WienerIntegralL2.wienerIntegralLp_integral_sq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.WienerIntegralL2.wienerIntegralLp_integral_sq

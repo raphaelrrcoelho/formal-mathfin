@@ -242,6 +242,22 @@
       }
     },
     {
+      "id": "sde-picard-existence-uniqueness",
+      "name": "SDE strong solution: existence and uniqueness via the Picard fixed point (L² formulation)",
+      "domain": "stochastic_differential_equations",
+      "description": "Existence AND uniqueness of the strong solution of the SDE dX = b(X)dt + σ(X)dB in the predictable L² space E = Lp 2 (trimMeasure_T T), constructed as the unique fixed point of the Picard iterate Φ(X) = η + ∫₀ᵗ b(X)ds + ∫₀ᵗ σ(X)dB via Banach's fixed-point theorem, under a small-horizon contraction condition. The diffusion term is the actual Itô integral assembled in the MathFin Itô tower — the concrete L²/E counterpart of the abstract-operator specification sc-thm-8.2.5.",
+      "code": {
+        "lean": "import MathFin.Foundations.SDEExistence\n\nopen MeasureTheory ProbabilityTheory MathFin.SDEExistence MathFin.ItoIntegralL2 MathFin.ItoIntegralCLM\nopen scoped NNReal\n\n/-- **SDE strong solution — existence and uniqueness via Picard (L² formulation).**\nUnder Lipschitz drift `b` and diffusion `σ`, the SDE `dX = b(X)dt + σ(X)dB` (initial\ncondition carried by `η_E ∈ E`) has a *unique* strong solution in the predictable `L²`\nspace `E = Lp ℝ 2 (trimMeasure_T T)` — the unique fixed point of the Picard iterate\n`Φ(X) = η + ∫₀ᵗ b(X)ds + ∫₀ᵗ σ(X)dB` — whenever the contraction constant\n`T·L_b + √T·L_σ` is `< 1`. Re-exports `picardMap_exists_unique_fixedPoint`. -/\ntheorem sde_strong_solution_existence_uniqueness\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0)\n    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)\n    {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)\n    (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))\n    (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :\n    ∃! X, picardMap hB T hBmeas hBcont hb hσ η_E X = X :=\n  MathFin.SDEExistence.picardMap_exists_unique_fixedPoint hB T hBmeas hBcont hb hσ η_E hc\n"
+      },
+      "metadata": {
+        "chapter": 8,
+        "reference": "Saporito Thm 8.2.5 (existence and uniqueness of strong SDE solutions) — L²/E Picard formulation with the real Itô integral",
+        "difficulty": "research",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.Foundations.SDEExistence (picardMap_exists_unique_fixedPoint). The Picard map Φ(X) = η + driftProcessAssembled(b∘X) + itoProcessAssembled(σ∘X) is a genuine self-map of E = Lp 2 (trimMeasure_T T); existence+uniqueness of its fixed point follow from ContractingWith.fixedPoint given the contraction estimate ‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖. HONEST SCOPE LIMITS: (i) the L²/E formulation — the solution X is the fixed point in E, not yet realized as a pointwise ℝ-time process; (ii) conditional on the small-horizon contraction constant T·L_b + √T·L_σ < 1 (the all-t≥0 form needs a Bielecki weighted norm). The exact-shape benchmark sc-thm-8.2.5 (ℝ-time, intervalIntegral drift, opaque Iσ) remains reduced_core pending that translation."
+      }
+    },
+    {
       "id": "sc-bs-pde",
       "name": "Black-Scholes PDE",
       "description": "Chapter 10: The Black-Scholes PDE: ∂V/∂t + (1/2)σ²S²∂²V/∂S² + rS∂V/∂S - rV = 0",

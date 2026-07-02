@@ -2158,6 +2158,13 @@
       "elapsed_s": 64.6,
       "input_hash": "a38bc7855681d64104c0acf41813eb1d360da0007e3695747b7129c1da981429",
       "verified_at_commit": "141e4f5"
+    },
+    "sde-picard-existence-uniqueness": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-07-02",
+      "elapsed_s": 50.6,
+      "input_hash": "9029d2fcd199d69214243a98fb5c857f797287efbf2c00a63d44700e2ec103f2",
+      "verified_at_commit": "cf84f34"
     }
   }
 }

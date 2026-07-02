@@ -26,7 +26,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-06-30, Phase 2 — Girsanov: the EMM as an explicit change of measure):** corpus
+> **Live status (2026-07-02, SDE existence — the Picard fixed point, #44):** corpus
+> **309**, **274 full + 18 wrappers = 292/309 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **The strong solution of `dX = b(X)dt + σ(X)dB` is now constructed as a Picard fixed point.**
+> `Foundations/SDEExistence.picardMap_exists_unique_fixedPoint` (entry `sde-picard-existence-uniqueness`,
+> **`full`**) builds the Picard iterate `Φ(X) = η + ∫₀ᵗ b(X)ds + ∫₀ᵗ σ(X)dB` as a self-map of the
+> predictable `L²` space `E = Lp 2 (trimMeasure_T T)` — its diffusion term the *actual* Itô integral
+> assembled in the tower — proves the a priori contraction estimate `‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖`
+> (drift operator norm `T` × Cauchy–Schwarz, Itô operator norm `√T` × the isometry), and obtains existence
+> **and** uniqueness of the fixed point via Banach's theorem. **Honest scope:** the `L²`/`E` formulation,
+> conditional on the small-horizon contraction constant `< 1`. The abstract-operator benchmark
+> `sc-thm-8.2.5` (ℝ-time, `intervalIntegral` drift, opaque `Iσ`) stays **`reduced_core`** pending the
+> `ℝ≥0`↔`ℝ`-time translation + a Bielecki all-`T` extension.
+>
+> **Prior (2026-06-30, Phase 2 — Girsanov: the EMM as an explicit change of measure):** corpus
 > **308**, **273 full + 18 wrappers = 291/308 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The Black–Scholes risk-neutral measure is now constructed as a Girsanov density change**, not taken
 > as given. `Foundations/Girsanov.bs_discounted_isQMartingale` (entry `gir-bs-emm-girsanov`, **`full`**)

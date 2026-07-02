@@ -858,4 +858,18 @@ cadlag)` with the exit-time localizer `σ_N`. -/
 /-- info: 'MathFin.ito_formula_unrestricted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ito_formula_unrestricted
 
+/-! ## SDE existence & uniqueness — the Picard fixed point (#44)
+
+The strong solution of `dX = b(X)dt + σ(X)dB` is the unique fixed point of the Picard iterate
+`Φ(X) = η + ∫₀ᵗ b(X)ds + ∫₀ᵗ σ(X)dB` on the predictable `L²` space `E`. `picardMap_contraction` is
+the a priori contraction estimate `‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)·‖X − Y‖` (drift operator norm `T` ×
+Cauchy–Schwarz, Itô operator norm `√T` × isometry); `picardMap_exists_unique_fixedPoint` obtains
+existence and uniqueness via Banach's theorem. Both stand on the assembled Itô/drift operators. -/
+
+/-- info: 'MathFin.SDEExistence.picardMap_contraction' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.picardMap_contraction
+
+/-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.picardMap_exists_unique_fixedPoint
+
 end MathFin.AxiomAudit

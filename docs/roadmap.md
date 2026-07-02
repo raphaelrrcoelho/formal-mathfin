@@ -30,15 +30,16 @@ breadth at this stage, and what the concrete next round would look like.
 > `reduced_core`, honestly documented — an Itô-tower item to re-scout, not force. See
 > [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
 
-> **Next phase (queued + de-risked) — SDE existence via Picard
-> ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)).** `sc-thm-8.2.5`
-> `reduced_core → full`: the real Picard construction replacing the opaque `Iσ` operator. De-risked
-> 2026-07-01 — the contraction kernel is proved in Lean (`itoProcessCLM` + `LipschitzWith.compLp`), the
-> enabler is `itoIntegralProcessGen_l2_continuous` (the Itô process is continuous into `Lp μ`), and the
-> crux prerequisite is the path ↔ `Lp(trim_T)` fibration (`L²([0,T]×Ω) ≅ L²([0,T], L²(Ω))`). A
-> ~300-500-line **landmark** build (the AI4Math M2 class) — stochastic-calculus *infrastructure*, NOT a
-> finance deliverable (the repo's finance uses closed forms; the *finance*-axis backlog is the numéraire
-> bridge / exotic + American options / Vasicek bond pricing / CVaR breadth). Its own dedicated session.
+> **DELIVERED (2026-07-02) — SDE existence via Picard
+> ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)).** The strong solution of
+> `dX = b(X)dt + σ(X)dB` is now **constructed as a Picard fixed point** in the predictable `L²` space `E`,
+> its diffusion term the actual assembled Itô integral: `Foundations/SDEExistence` proves the contraction
+> estimate `‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖` and gets existence **and** uniqueness via Banach's
+> theorem (`picardMap_exists_unique_fixedPoint`), delivered as the **`full`** entry
+> `sde-picard-existence-uniqueness`. **Honest remainder:** the `L²`/`E` formulation, conditional on the
+> small-horizon contraction constant `< 1`; the abstract-operator benchmark `sc-thm-8.2.5` (ℝ-time,
+> `intervalIntegral` drift, opaque `Iσ`) stays **`reduced_core`** pending the `ℝ≥0`↔`ℝ`-time translation
+> and a Bielecki all-`T` extension — the two remaining pieces to flip that specific entry.
 
 > **Forward — two tracks (name the axis first).** The remaining work splits cleanly, and the axis
 > decides the phase:
