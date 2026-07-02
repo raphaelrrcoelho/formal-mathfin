@@ -275,6 +275,28 @@ private lemma driftSimpleProcess_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable
   exact setIntegral_mono_set ((memLp_slice T hBmeas V ω).integrable_sq)
     (ae_of_all _ fun s => sq_nonneg _) (Set.Ioc_subset_Ioc_right htT).eventuallyLE
 
+/-- **Additivity** of the elementary drift in the simple process (`Finsupp.sum_add_index'`,
+the summand being linear in the coefficient). -/
+theorem driftSimpleProcess_add (hBmeas : ∀ t, Measurable (B t))
+    (V W : SimpleProcess ℝ (natFiltration hBmeas)) (t : ℝ≥0) :
+    driftSimpleProcess hBmeas (V + W) t
+      = driftSimpleProcess hBmeas V t + driftSimpleProcess hBmeas W t := by
+  funext ω
+  simp only [driftSimpleProcess]
+  rw [show (V + W).value = V.value + W.value from rfl]
+  exact Finsupp.sum_add_index' (fun p => by simp) (fun p a b => by simp [Pi.add_apply, add_mul])
+
+/-- **Homogeneity** of the elementary drift in the simple process (through the honest-integral
+bridge + `integral_const_mul`). -/
+theorem driftSimpleProcess_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
+    (V : SimpleProcess ℝ (natFiltration hBmeas)) (t : ℝ≥0) :
+    driftSimpleProcess hBmeas (c • V) t = c • driftSimpleProcess hBmeas V t := by
+  funext ω
+  simp only [Pi.smul_apply, smul_eq_mul]
+  rw [driftSimpleProcess_eq_setIntegral, driftSimpleProcess_eq_setIntegral, ← integral_const_mul]
+  refine setIntegral_congr_fun measurableSet_Ioc (fun s _ => ?_)
+  rw [SimpleProcess.coe_smul, Pi.smul_apply, Pi.smul_apply, smul_eq_mul]
+
 /-- The elementary drift assembled as an element of `E = Lp ℝ 2 (trimMeasure_T T)`. -/
 noncomputable def driftProcessLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) :
@@ -348,6 +370,46 @@ theorem driftProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
           ring
   have h := Real.sqrt_le_sqrt hsq
   rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (mul_nonneg T.coe_nonneg (norm_nonneg _))] at h
+
+/-- **The elementary drift as a linear map** on the `T`-bounded simple processes,
+`V ↦ driftProcessLp V` (the target of the `extendOfNorm` extension). -/
+noncomputable def driftProcessLM (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    TBoundedSP T hBmeas →ₗ[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) where
+  toFun V := driftProcessLp (μ := μ) T hBmeas V.val
+  map_add' V W := by
+    show driftProcessLp (μ := μ) T hBmeas ((V + W).val) = _
+    rw [Submodule.coe_add, driftProcessLp, driftProcessLp, driftProcessLp,
+        ← MemLp.toLp_add (memLp_uncurry_driftSimpleProcess T hBmeas V.val)
+          (memLp_uncurry_driftSimpleProcess T hBmeas W.val)]
+    congr 1
+    funext z
+    exact congrFun (driftSimpleProcess_add hBmeas V.val W.val z.1) z.2
+  map_smul' c V := by
+    show driftProcessLp (μ := μ) T hBmeas ((c • V).val) = _
+    rw [Submodule.coe_smul, driftProcessLp, driftProcessLp, RingHom.id_apply,
+        ← MemLp.toLp_const_smul c (memLp_uncurry_driftSimpleProcess T hBmeas V.val)]
+    congr 1
+    funext z
+    exact congrFun (driftSimpleProcess_smul hBmeas c V.val z.1) z.2
+
+/-- **The assembled drift as a CLM on `E`.** Extends the elementary drift `driftProcessLM`
+along the dense embedding `simpleAssembly_T`, via `LinearMap.extendOfNorm` with the energy
+bound `driftProcessLp_norm_le`. For `g ∈ E`, this is `t ↦ ∫₀ᵗ g(s,·) ds` — the drift term of
+the Picard iterate — landing back in the predictable `L²` space `E`. Being a CLM it is linear,
+bounded (`‖·‖ ≤ T‖·‖`), and predictable-by-construction, all for free. -/
+noncomputable def driftProcessAssembled (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) :
+    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ] Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+  (driftProcessLM (μ := μ) T hBmeas).extendOfNorm (simpleAssembly_T (μ := μ) T hBmeas)
+
+/-- **The bridge (definitional).** On the embedding of a `T`-bounded simple process, the
+assembled drift reproduces the elementary drift `driftProcessLp V`. -/
+theorem driftProcessAssembled_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (V : TBoundedSP T hBmeas) :
+    driftProcessAssembled (μ := μ) T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
+      = driftProcessLp (μ := μ) T hBmeas V.val := by
+  rw [driftProcessAssembled, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+    ⟨(T : ℝ), fun W => driftProcessLp_norm_le T hBmeas W⟩]
+  rfl
 
 end ItoIntegralProcessContinuousModification
 end MathFin
