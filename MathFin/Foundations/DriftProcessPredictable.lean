@@ -275,5 +275,79 @@ private lemma driftSimpleProcess_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable
   exact setIntegral_mono_set ((memLp_slice T hBmeas V ω).integrable_sq)
     (ae_of_all _ fun s => sq_nonneg _) (Set.Ioc_subset_Ioc_right htT).eventuallyLE
 
+/-- The elementary drift assembled as an element of `E = Lp ℝ 2 (trimMeasure_T T)`. -/
+noncomputable def driftProcessLp (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (V : SimpleProcess ℝ (natFiltration hBmeas)) :
+    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+  (memLp_uncurry_driftSimpleProcess T hBmeas V).toLp (Function.uncurry (driftSimpleProcess hBmeas V))
+
+/-- **The drift energy bound** — the relative `L²` bound that makes the drift a bounded operator
+on `E`: `‖driftProcessLp V‖ ≤ T·‖simpleAssembly_T V‖`. Tonelli turns the `E`-norm into
+`∫₀ᵀ∫_Ω (drift)² `; the pointwise Cauchy–Schwarz bound `(drift)² ≤ T·∫₀ᵀ(⇑V)²` and Fubini
+collapse the inner double integral to `T·‖simpleAssembly_T V‖²`; the outer `∫₀ᵀ` adds the last `T`. -/
+theorem driftProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (V : TBoundedSP T hBmeas) :
+    ‖driftProcessLp (μ := μ) T hBmeas V.val‖ ≤ (T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
+  set 𝓕 := natFiltration (mΩ := mΩ) hBmeas
+  have hpredD := driftSimpleProcess_isStronglyPredictable hBmeas V.val
+  have hmemD := memLp_uncurry_driftSimpleProcess (μ := μ) T hBmeas V.val
+  have hmemV := memLp_uncurry_trim_T (μ := μ) T hBmeas V.val
+  -- both `E`-norms², via `lp_two_norm_sq` + `coeFn_toLp` + `integral_trim`, as product integrals.
+  have hnorm : ∀ (g : ℝ≥0 → Ω → ℝ) (hg : MemLp (Function.uncurry g) 2 (trimMeasure_T (μ := μ) T hBmeas)),
+      StronglyMeasurable[𝓕.predictable] (Function.uncurry g) →
+      ‖hg.toLp (Function.uncurry g)‖ ^ 2
+        = ∫ z, (Function.uncurry g z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
+    intro g hg hgp
+    rw [lp_two_norm_sq, integral_congr_ae (g := fun z => (Function.uncurry g z) ^ 2)
+      (by filter_upwards [hg.coeFn_toLp] with z hz; rw [hz]),
+      show trimMeasure_T (μ := μ) T hBmeas
+          = ((timeMeasure_T T).prod μ).trim 𝓕.predictable_le_prod from rfl,
+      ← integral_trim 𝓕.predictable_le_prod
+        (f := fun z => (Function.uncurry g z) ^ 2) (hgp.pow 2)]
+  have hsAsm : simpleAssembly_T (μ := μ) T hBmeas V = hmemV.toLp (Function.uncurry ⇑V.val) := rfl
+  have hsq : ‖driftProcessLp (μ := μ) T hBmeas V.val‖ ^ 2
+      ≤ ((T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas V‖) ^ 2 := by
+    rw [driftProcessLp, hnorm _ hmemD hpredD, mul_pow, hsAsm,
+      hnorm _ hmemV V.val.isStronglyPredictable]
+    -- ∫ (drift)² ∂prod ≤ (T:ℝ)² · ∫ (⇑V)² ∂prod
+    have hmemD_prod : MemLp (Function.uncurry (driftSimpleProcess hBmeas V.val)) 2
+        ((timeMeasure_T T).prod μ) :=
+      ⟨(hpredD.mono 𝓕.predictable_le_prod).aestronglyMeasurable, by
+        rw [← eLpNorm_trim 𝓕.predictable_le_prod hpredD]; exact hmemD.2⟩
+    have hmemV_prod : MemLp (Function.uncurry ⇑V.val) 2 ((timeMeasure_T T).prod μ) :=
+      ⟨(V.val.isStronglyPredictable.mono 𝓕.predictable_le_prod).aestronglyMeasurable, by
+        rw [← eLpNorm_trim 𝓕.predictable_le_prod V.val.isStronglyPredictable]; exact hmemV.2⟩
+    have hintD := hmemD_prod.integrable_sq
+    have hintV := hmemV_prod.integrable_sq
+    rw [integral_prod _ hintD]
+    -- Fubini: `∫_ω ∫_{Ioc 0 T}(⇑V)² dμ = ∫_prod (⇑V)²`.
+    have hW : ∫ ω, (∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑V.val s ω) ^ 2 ∂timeMeasure) ∂μ
+        = ∫ z, (Function.uncurry ⇑V.val z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
+      rw [integral_prod _ hintV]
+      exact integral_integral_swap hintV.swap
+    calc ∫ t, ∫ ω, (driftSimpleProcess hBmeas V.val t ω) ^ 2 ∂μ ∂(timeMeasure_T T)
+        ≤ ∫ _t : ℝ≥0, (T : ℝ) * ∫ z, (Function.uncurry ⇑V.val z) ^ 2 ∂((timeMeasure_T T).prod μ)
+            ∂(timeMeasure_T T) := by
+          refine integral_mono_ae hintD.integral_prod_left (integrable_const _) ?_
+          have hslice : ∀ᵐ t ∂(timeMeasure_T T),
+              Integrable (fun ω => (driftSimpleProcess hBmeas V.val t ω) ^ 2) μ :=
+            hintD.prod_right_ae
+          filter_upwards [ae_restrict_mem (μ := timeMeasure) measurableSet_Ioc, hslice]
+            with t ht hint_t
+          calc ∫ ω, (driftSimpleProcess hBmeas V.val t ω) ^ 2 ∂μ
+              ≤ ∫ ω, (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑V.val s ω) ^ 2 ∂timeMeasure ∂μ :=
+                integral_mono_ae hint_t
+                  ((hintV.integral_prod_right).const_mul _)
+                  (ae_of_all _ fun ω => driftSimpleProcess_sq_le T hBmeas V.val ht.2 ω)
+            _ = (T : ℝ) * ∫ z, (Function.uncurry ⇑V.val z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
+                rw [integral_const_mul, hW]
+      _ = (T : ℝ) ^ 2 * ∫ z, (Function.uncurry ⇑V.val z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
+          rw [integral_const, timeMeasure_T, measureReal_def, Measure.restrict_apply_univ,
+            timeMeasure_Ioc,
+            ENNReal.toReal_ofReal (by rw [NNReal.coe_zero, sub_zero]; exact T.coe_nonneg),
+            NNReal.coe_zero, sub_zero, smul_eq_mul]
+          ring
+  have h := Real.sqrt_le_sqrt hsq
+  rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_sq (mul_nonneg T.coe_nonneg (norm_nonneg _))] at h
+
 end ItoIntegralProcessContinuousModification
 end MathFin
