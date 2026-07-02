@@ -3,6 +3,7 @@
 | File | One-line | When to read |
 |---|---|---|
 | [`onboarding.md`](onboarding.md) | Step-by-step first-contribution walkthrough: environment, fast REPL loop, module anatomy, PR checklist. | **Start here** if you are making your first contribution. |
+| [`issue-labels.md`](issue-labels.md) | Suggested `area:*`, `type:*`, `difficulty:*`, and `status:*` labels plus bootstrap commands. | When triaging issues or preparing a contributor-friendly task. |
 | [`troubleshooting.md`](troubleshooting.md) | Common build/environment failures — symptom → cause → fix. | When something breaks (GHCR login, OOM, inode staleness, daemon slot contention, stale ledger). |
 | [`blueprint.md`](blueprint.md) | The deductive spine — a dependency graph from Brownian motion to Black–Scholes, each node linked to its Lean proof. | To see the BM → Black-Scholes deductive arc and what's proved vs gated. |
 | [`coverage.md`](coverage.md) | Per-theorem audit with faithfulness status and verification evidence. | Before claiming any specific theorem is "proved." Source of truth for what's `full` vs `library_wrapper` vs `reduced_core`. |
