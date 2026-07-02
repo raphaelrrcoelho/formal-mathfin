@@ -9,7 +9,9 @@ Please read and follow our [Code of Conduct](CODE_OF_CONDUCT.md).
 first-contribution walkthrough. [`docs/troubleshooting.md`](docs/troubleshooting.md)
 covers common setup failures. Issues tagged
 [`good first issue`](https://github.com/raphaelrrcoelho/formal-mathfin/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
-are the recommended entry points.
+are the recommended entry points. Maintainers can use the
+[`docs/issue-labels.md`](docs/issue-labels.md) taxonomy to classify new issues
+consistently.
 
 ## Getting set up
 
