@@ -124,6 +124,8 @@ import MathFin.Foundations.ItoIntegralProcessIsometry
 import MathFin.Foundations.ItoIntegralProcessContinuousModification
 -- Predictability of the assembled Itô process (the SDE-existence keystone)
 import MathFin.Foundations.ItoProcessPredictable
+-- Predictability of the assembled drift process (SDE-existence keystone II)
+import MathFin.Foundations.DriftProcessPredictable
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- The unbounded-horizon Itô process: the L² process, horizon consistency (the [0,∞) climb)
