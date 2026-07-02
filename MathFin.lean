@@ -126,6 +126,8 @@ import MathFin.Foundations.ItoIntegralProcessContinuousModification
 import MathFin.Foundations.ItoProcessPredictable
 -- Predictability of the assembled drift process (SDE-existence keystone II)
 import MathFin.Foundations.DriftProcessPredictable
+-- The Picard map and its contraction estimate (SDE existence, #44)
+import MathFin.Foundations.SDEExistence
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- The unbounded-horizon Itô process: the L² process, horizon consistency (the [0,∞) climb)
