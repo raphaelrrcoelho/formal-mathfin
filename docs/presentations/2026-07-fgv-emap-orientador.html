@@ -1,0 +1,533 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Matemática financeira formalizada — FGV EMAp</title>
+
+<style>
+  :root {
+    --paper: #f2f4f6;
+    --card: #ffffff;
+    --ink: #182230;
+    --ink-soft: #4a5a6e;
+    --accent: #2a4fa3;
+    --accent-soft: #e3e9f6;
+    --verified: #1e8a52;
+    --verified-soft: #e2f2e9;
+    --amber: #a3770f;
+    --amber-soft: #f6eed8;
+    --rule: #d7dde4;
+    --code-bg: #101823;
+    --code-text: #d5dde8;
+    --code-kw: #7fb0ff;
+    --code-comment: #7d8a99;
+    --code-string: #a8d5a2;
+    --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+    --sans: 'Avenir Next', 'Segoe UI', 'Helvetica Neue', system-ui, sans-serif;
+    --mono: 'Cascadia Code', 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  }
+
+  html, body { height: 100%; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--serif);
+    line-height: 1.55;
+  }
+
+  .deck { position: fixed; inset: 0; overflow: hidden; }
+
+  .slide {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: clamp(1.5rem, 5vw, 4.5rem) clamp(1.5rem, 7vw, 7rem) clamp(4rem, 8vh, 5.5rem);
+    opacity: 0; visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity .35s ease, transform .35s ease, visibility .35s;
+    overflow-y: auto;
+  }
+  .slide.active { opacity: 1; visibility: visible; transform: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .slide { transition: none; transform: none; }
+  }
+
+  .eyebrow {
+    font-family: var(--sans);
+    font-size: .72rem; font-weight: 600;
+    letter-spacing: .14em; text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 1.1rem;
+  }
+  h1 {
+    font-size: clamp(2.1rem, 4.8vw, 3.7rem);
+    line-height: 1.12; font-weight: 600;
+    letter-spacing: -.01em; text-wrap: balance;
+    margin: 0 0 1rem;
+  }
+  h2 {
+    font-size: clamp(1.5rem, 3vw, 2.3rem);
+    line-height: 1.18; font-weight: 600;
+    letter-spacing: -.008em; text-wrap: balance;
+    margin: 0 0 1.4rem;
+  }
+  .lede {
+    font-size: clamp(1.02rem, 1.7vw, 1.28rem);
+    color: var(--ink-soft);
+    max-width: 62ch;
+    margin: 0 0 1.6rem;
+  }
+  p, li { max-width: 68ch; }
+
+  ul.points { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .85rem; }
+  ul.points li { padding-left: 1.35rem; position: relative; font-size: clamp(.98rem, 1.5vw, 1.13rem); }
+  ul.points li::before {
+    content: ''; position: absolute; left: 0; top: .58em;
+    width: .5rem; height: .5rem; border-radius: 1px;
+    background: var(--accent);
+  }
+  ul.points li strong { font-weight: 600; }
+  .muted { color: var(--ink-soft); }
+  .small { font-size: .9rem; }
+
+  /* ---- capa ---- */
+  .cover-rule { width: 4.5rem; height: 3px; background: var(--accent); margin: 1.6rem 0 1.8rem; }
+  .statrow {
+    display: flex; flex-wrap: wrap; gap: 2.2rem;
+    font-family: var(--sans); margin-top: .4rem;
+  }
+  .stat .n {
+    display: block; font-size: clamp(1.6rem, 3vw, 2.3rem);
+    font-weight: 600; color: var(--ink);
+    font-variant-numeric: tabular-nums; line-height: 1.1;
+  }
+  .stat .l { display: block; font-size: .78rem; color: var(--ink-soft); letter-spacing: .05em; text-transform: uppercase; margin-top: .3rem; }
+  .cover-footer { margin-top: 2.6rem; font-family: var(--sans); font-size: .92rem; color: var(--ink-soft); }
+
+  /* ---- código ---- */
+  pre.lean {
+    background: var(--code-bg); color: var(--code-text);
+    font-family: var(--mono);
+    font-size: clamp(.72rem, 1.35vw, .95rem);
+    line-height: 1.55;
+    padding: 1.1rem 1.3rem; border-radius: 6px;
+    overflow-x: auto; margin: 0;
+    tab-size: 2;
+  }
+  pre.lean .kw { color: var(--code-kw); }
+  pre.lean .cm { color: var(--code-comment); font-style: italic; }
+  pre.lean .st { color: var(--code-string); }
+  .verified-chip {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-family: var(--sans); font-size: .8rem; font-weight: 600;
+    color: var(--verified); background: var(--verified-soft);
+    padding: .3rem .7rem; border-radius: 999px; margin-top: .8rem;
+  }
+  .error-chip {
+    display: inline-flex; align-items: center; gap: .45rem;
+    font-family: var(--sans); font-size: .8rem; font-weight: 600;
+    color: #a33030; background: #f7e4e4;
+    padding: .3rem .7rem; border-radius: 999px; margin-top: .8rem;
+  }
+
+  .twocol { display: grid; grid-template-columns: 1fr 1.15fr; gap: 2.2rem; align-items: start; }
+  @media (max-width: 900px) { .twocol { grid-template-columns: 1fr; } }
+
+  .mathbox {
+    background: var(--card); border: 1px solid var(--rule);
+    border-radius: 6px; padding: 1.1rem 1.3rem;
+    font-size: clamp(.95rem, 1.5vw, 1.1rem);
+  }
+  .mathbox .thm { font-weight: 600; }
+  .math { font-style: italic; }
+
+  /* ---- tabelas ---- */
+  .tablewrap { overflow-x: auto; }
+  table {
+    border-collapse: collapse; width: 100%;
+    font-size: clamp(.82rem, 1.4vw, .98rem);
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+  }
+  th {
+    font-family: var(--sans); font-size: .72rem; font-weight: 600;
+    letter-spacing: .08em; text-transform: uppercase;
+    color: var(--ink-soft); text-align: left;
+    padding: .6rem .9rem; border-bottom: 2px solid var(--rule);
+  }
+  td { padding: .48rem .9rem; border-bottom: 1px solid var(--rule); vertical-align: top; }
+  tr:last-child td { border-bottom: none; }
+  td.num { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--sans); }
+  tr.total td { font-weight: 600; border-top: 2px solid var(--rule); }
+
+  /* ---- chips de status ---- */
+  .chip {
+    display: inline-block; font-family: var(--sans);
+    font-size: .68rem; font-weight: 600; letter-spacing: .06em; text-transform: uppercase;
+    padding: .14rem .55rem; border-radius: 999px; white-space: nowrap;
+  }
+  .chip.ok   { color: var(--verified); background: var(--verified-soft); }
+  .chip.mid  { color: var(--amber); background: var(--amber-soft); }
+  .chip.open { color: var(--ink-soft); background: #e8ebef; }
+  .chip.code { font-family: var(--mono); text-transform: none; letter-spacing: 0; }
+
+  /* ---- pilares ---- */
+  .pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.4rem; }
+  @media (max-width: 800px) { .pillars { grid-template-columns: 1fr; } }
+  .pillar {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: .95rem 1.1rem;
+  }
+  .pillar .roman {
+    font-family: var(--sans); font-size: .7rem; font-weight: 700;
+    letter-spacing: .12em; color: var(--accent); text-transform: uppercase;
+  }
+  .pillar h3 { margin: .25rem 0 .3rem; font-size: 1.02rem; font-weight: 600; }
+  .pillar p { margin: 0; font-size: .87rem; color: var(--ink-soft); }
+
+  .seams { display: flex; flex-direction: column; gap: .45rem; font-size: clamp(.85rem, 1.4vw, .98rem); }
+  .seam { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; }
+  .seam .name { font-weight: 600; min-width: 13rem; }
+
+  /* ---- cartões genéricos ---- */
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr)); gap: 1rem; }
+  .card {
+    background: var(--card); border: 1px solid var(--rule); border-radius: 6px;
+    padding: 1rem 1.15rem;
+  }
+  .card h3 { margin: 0 0 .4rem; font-size: 1.02rem; font-weight: 600; }
+  .card p { margin: 0; font-size: .89rem; color: var(--ink-soft); }
+  .card .tag {
+    font-family: var(--sans); font-size: .68rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: var(--accent);
+    display: block; margin-bottom: .35rem;
+  }
+
+  blockquote.pull {
+    margin: 1.8rem 0 0; padding: 0 0 0 1.2rem;
+    border-left: 3px solid var(--accent);
+    font-size: clamp(1.05rem, 1.9vw, 1.35rem);
+    font-style: italic; color: var(--ink); max-width: 56ch;
+  }
+
+  /* ---- navegação ---- */
+  .hud {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .6rem clamp(1.2rem, 4vw, 3rem);
+    font-family: var(--sans); font-size: .78rem; color: var(--ink-soft);
+    z-index: 10; pointer-events: none;
+  }
+  .hud .counter { font-variant-numeric: tabular-nums; }
+  .hud .navbtns { display: flex; gap: .4rem; pointer-events: auto; }
+  .hud button {
+    font: inherit; color: var(--ink); background: var(--card);
+    border: 1px solid var(--rule); border-radius: 6px;
+    padding: .35rem .8rem; cursor: pointer;
+  }
+  .hud button:hover { border-color: var(--accent); color: var(--accent); }
+  .hud button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .progress {
+    position: fixed; left: 0; bottom: 0; height: 3px;
+    background: var(--accent); width: 0; z-index: 11;
+    transition: width .3s ease;
+  }
+  .hint { font-style: italic; }
+
+  @media print {
+    .deck { position: static; overflow: visible; }
+    .slide {
+      position: static; opacity: 1; visibility: visible; transform: none;
+      page-break-after: always; min-height: auto;
+    }
+    .hud, .progress { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="deck">
+
+  <!-- 1 · capa -->
+  <section class="slide active">
+    <p class="eyebrow">FGV EMAp · Doutorado em Matemática Aplicada · julho de 2026</p>
+    <h1>Matemática financeira,<br>formalmente verificada</h1>
+    <p class="lede">Um programa de formalização em Lean 4: dos teoremas das notas de Processos Estocásticos a uma teoria formal de finanças — cada resultado conferido, passo a passo, pelo computador.</p>
+    <div class="cover-rule"></div>
+    <div class="statrow">
+      <div class="stat"><span class="n">309</span><span class="l">teoremas no corpus</span></div>
+      <div class="stat"><span class="n">292</span><span class="l">com demonstração íntegra</span></div>
+      <div class="stat"><span class="n">0</span><span class="l">lacunas (sorry)</span></div>
+      <div class="stat"><span class="n">≈ 44&thinsp;mil</span><span class="l">linhas de Lean</span></div>
+    </div>
+    <p class="cover-footer">Raphael Coelho · orientador: Yuri Saporito &nbsp;·&nbsp; <span class="hint">use as setas → para avançar</span></p>
+  </section>
+
+  <!-- 2 · o que é um assistente de demonstração -->
+  <section class="slide">
+    <p class="eyebrow">Contexto · verificação formal</p>
+    <h2>O que é demonstrar com um assistente de demonstração?</h2>
+    <ul class="points">
+      <li><strong>Lean 4</strong> é uma linguagem em que enunciados e demonstrações são escritos de forma totalmente formal. Um núcleo lógico pequeno e auditável — o <em>kernel</em> — confere cada passo. Se o arquivo compila, a demonstração está correta; não há revisor humano no circuito.</li>
+      <li><strong>Mathlib</strong> é a biblioteca da comunidade: mais de 1,5 milhão de linhas cobrindo teoria da medida, probabilidade, análise funcional, EDPs — a infraestrutura sobre a qual construímos.</li>
+      <li>A área amadureceu rápido: o <strong>Liquid Tensor Experiment</strong> de Scholze (2022), a conjectura <strong>PFR</strong> formalizada semanas após o preprint de Gowers–Green–Manners–Tao (2023), e o <strong>Último Teorema de Fermat</strong> em formalização, liderada por Kevin Buzzard.</li>
+    </ul>
+    <blockquote class="pull">Não é o computador fazendo conta — é o computador conferindo lógica. A unidade de trabalho continua sendo o teorema.</blockquote>
+  </section>
+
+  <!-- 3 · um teorema do curso em Lean -->
+  <section class="slide">
+    <p class="eyebrow">Como funciona · um teorema das notas</p>
+    <h2>Um teorema do curso, escrito para o computador</h2>
+    <div class="twocol">
+      <div>
+        <div class="mathbox">
+          <p style="margin:0"><span class="thm">Teorema.</span> Se <span class="math">(B<sub>t</sub>)</span> é um movimento browniano adaptado à filtração <span class="math">𝓕</span>, então <span class="math">t ↦ B<sub>t</sub>² − t</span> é um 𝓕-martingale.</p>
+        </div>
+        <p class="small muted" style="margin-top:1rem">A demonstração formal faz exatamente o que se faz no quadro: decompõe <span class="math">B<sub>t</sub>² = B<sub>s</sub>² + 2B<sub>s</sub>(B<sub>t</sub>−B<sub>s</sub>) + (B<sub>t</sub>−B<sub>s</sub>)²</span>, mata o termo cruzado por independência dos incrementos e identifica a esperança condicional do quadrado do incremento com <span class="math">t − s</span>. Só que cada um desses passos — mensurabilidade, integrabilidade, <em>pull-out</em> — é conferido pelo kernel.</p>
+      </div>
+      <div>
+<pre class="lean"><span class="cm">/-- Se `X` é um movimento browniano com filtração `𝓕`,
+    então `t ↦ Xₜ² − t` é um 𝓕-martingale. -/</span>
+<span class="kw">theorem</span> squareSubTime_isMartingale :
+    Martingale (<span class="kw">fun</span> t ω ↦ (X t ω) ^ 2 - (t : ℝ)) 𝓕 P := <span class="kw">by</span>
+  refine ⟨<span class="kw">fun</span> u ↦ ?_, <span class="kw">fun</span> s t hst ↦ ?_⟩
+  <span class="cm">-- (X u)² − u é 𝓕ᵤ-mensurável…</span>
+  · <span class="kw">have</span> hB : StronglyMeasurable[𝓕 u] (X u) :=
+      hX.stronglyAdapted u
+    …
+  <span class="cm">-- …e E[Xₜ² − t ∣ 𝓕ₛ] = Xₛ² − s:</span>
+  <span class="cm">-- decompõe (Xₜ)², independência dos incrementos,</span>
+  <span class="cm">-- variância do incremento = t − s.</span>
+  …</pre>
+        <span class="verified-chip">✓ aceito pelo kernel — <code>MathFin/Foundations/BrownianMartingale.lean</code></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 · o que o computador garante -->
+  <section class="slide">
+    <p class="eyebrow">Como funciona · garantias</p>
+    <h2>O que o computador garante — e o que não garante</h2>
+    <ul class="points">
+      <li><strong>Nenhum passo pulado.</strong> Toda hipótese precisa estar explícita: não existe “esquecer” a integrabilidade ou um caso degenerado. Se falta algo, o arquivo não compila.</li>
+      <li><strong>Lacunas são visíveis.</strong> A palavra-chave <code>sorry</code> marca um buraco deliberado na demonstração — e o build acusa. Este repositório tem <strong>zero</strong>.</li>
+      <li><strong>Os axiomas são auditados.</strong> Cada teorema depende apenas dos três axiomas padrão da lógica clássica (<code>propext</code>, <code>Classical.choice</code>, <code>Quot.sound</code>) — fixado como invariante de integração contínua: qualquer axioma extra derruba o build.</li>
+      <li><strong>O que ele <em>não</em> garante:</strong> que o enunciado formal seja fiel ao teorema do livro. Essa é a parte humana — e é onde formalizações descuidadas se enganam. O projeto ataca isso com uma disciplina própria (dois slides adiante).</li>
+    </ul>
+    <blockquote class="pull">“O build é a demonstração”: um <code>lake build</code> limpo reelabora todos os 309 teoremas contra versões fixadas de Lean e Mathlib.</blockquote>
+  </section>
+
+  <!-- 5 · o corpus -->
+  <section class="slide">
+    <p class="eyebrow">O projeto · corpus</p>
+    <h2>As notas do curso como espinha dorsal</h2>
+    <p class="lede">Os teoremas de probabilidade seguem capítulo a capítulo as suas notas de Processos Estocásticos; sobre essa base se ergue o corpo de finança matemática.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Fonte</th><th>Tema</th><th style="text-align:right">Teoremas</th></tr></thead>
+        <tbody>
+          <tr><td>Cap. 1</td><td>Cadeias de Markov</td><td class="num">9</td></tr>
+          <tr><td>Cap. 2</td><td>Esperança condicional e martingales</td><td class="num">14</td></tr>
+          <tr><td>Cap. 3</td><td>Processos de Poisson</td><td class="num">5</td></tr>
+          <tr><td>Cap. 4</td><td>Martingales a tempo contínuo</td><td class="num">4</td></tr>
+          <tr><td>Cap. 5</td><td>Movimento browniano</td><td class="num">10</td></tr>
+          <tr><td>Cap. 6–10</td><td>Cálculo estocástico, EDEs, Girsanov</td><td class="num">44</td></tr>
+          <tr><td>Apêndice B</td><td>Gaussiana multivariada, exponencial</td><td class="num">6</td></tr>
+          <tr><td>Além das notas</td><td>Finança matemática: Black–Scholes estendido, binomial/CRR, renda fixa, medidas de risco, portfólio, atuária, DeFi</td><td class="num">217</td></tr>
+          <tr class="total"><td colspan="2">Corpus</td><td class="num">309</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- 6 · honestidade -->
+  <section class="slide">
+    <p class="eyebrow">O projeto · disciplina de fidelidade</p>
+    <h2>Nunca contar mais do que foi demonstrado</h2>
+    <p class="lede">O risco central da formalização é “provar” algo que não é o teorema do livro. Cada entrada do corpus declara — e a integração contínua fiscaliza — o quanto ela entrega:</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Status</th><th>Significado</th><th style="text-align:right">Hoje</th></tr></thead>
+        <tbody>
+          <tr><td><span class="chip ok code">full</span></td><td>derivação fiel do teorema a partir das suas hipóteses, com trabalho real de demonstração</td><td class="num">274</td></tr>
+          <tr><td><span class="chip ok code">library_wrapper</span></td><td>o resultado já existe em Mathlib com o enunciado certo; nós o invocamos nominalmente</td><td class="num">18</td></tr>
+          <tr><td><span class="chip mid code">reduced_core</span></td><td>honesto, porém mais estreito que o enunciado do livro — declarado como tal</td><td class="num">17</td></tr>
+          <tr><td><span class="chip open code">placeholder</span></td><td>ainda sem enunciado formal significativo</td><td class="num">0</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p style="margin-top:1.2rem">A régua acadêmica conta apenas <strong>full + library_wrapper = 292/309</strong>. Um <em>ledger</em> de verificação registra, por hash, exatamente sob quais insumos cada teorema foi conferido pela última vez.</p>
+  </section>
+
+  <!-- 7 · torre de Itô -->
+  <section class="slide">
+    <p class="eyebrow">Destaques · fundações</p>
+    <h2>A torre de Itô — construída, não assumida</h2>
+    <p class="lede">Nada disso existe no Mathlib hoje. Construímos sobre o projeto <em>BrownianMotion</em> de Rémy Degenne, e cada andar é demonstrado a partir do anterior:</p>
+    <div class="cards">
+      <div class="card"><span class="tag">Integral</span><h3>Integral de Itô em L²</h3><p>Construída de integrandos simples por densidade, com a isometria de Itô, a propriedade de martingale e modificação contínua.</p></div>
+      <div class="card"><span class="tag">Variação</span><h3>Variação quadrática</h3><p>⟨B⟩<sub>t</sub> = t em L², alimentando o termo de segunda ordem da fórmula de Itô.</p></div>
+      <div class="card"><span class="tag">Fórmula</span><h3>Fórmula de Itô sem hipótese de crescimento</h3><p>Para f de classe C³ arbitrária: o resíduo é um martingale local contínuo, com sequência localizante explícita.</p></div>
+      <div class="card"><span class="tag">EDEs</span><h3>Existência e unicidade via Picard</h3><p>A solução forte de dX = b(X)dt + σ(X)dB obtida como ponto fixo de Banach no L² previsível, com a estimativa de contração ‖ΦX − ΦY‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖.</p></div>
+    </div>
+  </section>
+
+  <!-- 8 · finança -->
+  <section class="slide">
+    <p class="eyebrow">Destaques · finança</p>
+    <h2>Da ausência de arbitragem ao Black–Scholes, com recibo</h2>
+    <div class="twocol">
+      <ul class="points">
+        <li><strong>FTAP de um período</strong> em Ω geral (Dalang–Morton–Willinger): ausência de arbitragem ⟺ existe medida martingale equivalente — a equivalência completa, nos dois sentidos.</li>
+        <li><strong>Girsanov:</strong> a medida neutra ao risco do Black–Scholes é <em>construída</em> como mudança de medida explícita, dQ/dP = exp(−θB<sub>T</sub> − ½θ²T) — não tomada como dada.</li>
+        <li><strong>Black–Scholes completo:</strong> call, put, paridade, gregas, cotas de preço, e a EDP obtida por duas rotas independentes — Feynman–Kac e o drift de Itô.</li>
+        <li><strong>Dualidade convexa:</strong> demonstramos que o FTAP e a representação de medidas coerentes de risco (ADEH) são <em>o mesmo</em> teorema de Hahn–Banach, derivados de uma raiz comum de separação de cones.</li>
+      </ul>
+      <div>
+<pre class="lean"><span class="cm">/-- FTAP de um período (Dalang–Morton–Willinger):
+    ausência de arbitragem ⟺ existe medida
+    martingale equivalente. -/</span>
+<span class="kw">theorem</span> ftap_one_period (hY : Measurable Y) :
+    NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q</pre>
+        <span class="verified-chip">✓ aceito pelo kernel — <code>Foundations/FTAPOnePeriod.lean</code></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 9 · arquitetura -->
+  <section class="slide">
+    <p class="eyebrow">Destaques · arquitetura</p>
+    <h2>Não um catálogo — uma teoria com espinha</h2>
+    <div class="pillars">
+      <div class="pillar"><span class="roman">Pilar I</span><h3>Ausência de arbitragem como dualidade convexa</h3><p>O FTAP é o hiperplano separador: o funcional que separa é a medida martingale equivalente.</p></div>
+      <div class="pillar"><span class="roman">Pilar II</span><h3>Cálculo estocástico</h3><p>A torre de Itô: integral, variação quadrática, fórmula de Itô, EDEs.</p></div>
+      <div class="pillar"><span class="roman">Pilar III</span><h3>Dualidade probabilística ↔ analítica</h3><p>O mesmo preço é esperança neutra ao risco e solução de EDP; a ponte é Feynman–Kac.</p></div>
+      <div class="pillar"><span class="roman">Pilar IV</span><h3>Intensidade e famílias exponenciais</h3><p>As formas fechadas: estrutura gaussiana/lognormal, e a exponencial da intensidade integrada unificando desconto, mortalidade e crédito.</p></div>
+    </div>
+    <div class="seams">
+      <div class="seam"><span class="name">Dualidade convexa (I↔IV)</span><span class="chip ok">demonstrada</span><span class="muted small">apreçamento e risco = o mesmo Hahn–Banach</span></div>
+      <div class="seam"><span class="name">Feynman–Kac (II↔III)</span><span class="chip ok">demonstrada</span><span class="muted small">a EDP de Black–Scholes derivada</span></div>
+      <div class="seam"><span class="name">Donsker (discreto↔contínuo)</span><span class="chip ok">demonstrada</span><span class="muted small">preço binomial → Black–Scholes</span></div>
+      <div class="seam"><span class="name">Girsanov (I↔II)</span><span class="chip mid">parcial</span><span class="muted small">lado martingale feito; o distribucional pede Itô com integrando adaptado</span></div>
+      <div class="seam"><span class="name">Numerário (IV↔I)</span><span class="chip open">aberta</span><span class="muted small">portfólio log-ótimo ⇒ EMM — próxima ponte</span></div>
+    </div>
+  </section>
+
+  <!-- 10 · pioneirismo -->
+  <section class="slide">
+    <p class="eyebrow">Por que agora · pioneirismo</p>
+    <h2>Um campo praticamente vazio — e a janela está aberta</h2>
+    <ul class="points">
+      <li><strong>Finança matemática quase não existe formalizada.</strong> O Mathlib não tem sequer a integral de Itô; o projeto BrownianMotion de Degenne está construindo essas fundações <em>agora</em>. Estamos na fronteira — e já contribuindo de volta (primeiro PR submetido ao repositório dele, com CI verde).</li>
+      <li><strong>Quem formaliza primeiro fixa as definições.</strong> As escolhas de interface — o que é um mercado, uma estratégia, uma medida de risco em Lean — tendem a se tornar canônicas, como aconteceu em outras áreas do Mathlib.</li>
+      <li><strong>Artefatos já públicos:</strong> preprint no arXiv (2606.01356), DOI no Zenodo, dataset dos teoremas no Hugging Face, repositório aberto com CI.</li>
+      <li><strong>Rotas de publicação:</strong> os veículos da área de formalização (ITP, CPP, Journal of Automated Reasoning) e, no outro eixo, o artefato q-fin — “uma teoria formal de finanças” — que não tem precedente.</li>
+    </ul>
+  </section>
+
+  <!-- 11 · IA -->
+  <section class="slide">
+    <p class="eyebrow">Por que agora · IA e matemática</p>
+    <h2>A onda IA + matemática formal</h2>
+    <ul class="points">
+      <li><strong>O kernel é um verificador perfeito.</strong> Modelos de linguagem geram demonstrações candidatas; o Lean as aceita ou rejeita sem falso positivo. Foi essa combinação que levou o AlphaProof ao nível de medalha de prata na IMO (2024).</li>
+      <li><strong>Corpora formais são o insumo escasso.</strong> Nosso corpus é, além de biblioteca, um <em>benchmark</em>: 309 enunciados com status de fidelidade declarado, num domínio — finanças — em que nenhum benchmark formal existia.</li>
+      <li><strong>Automação com régua de qualidade.</strong> Usamos táticas automáticas e busca de premissas no dia a dia, mas com um contrato: automação é <em>batedor</em>, não autor — todo fecho automático é refatorado para a demonstração conceitualmente certa antes de entrar.</li>
+      <li><strong>Para a EMAp,</strong> é exatamente a interseção matemática aplicada × computação × IA em que a escola quer estar.</li>
+    </ul>
+  </section>
+
+  <!-- 12 · engenharia -->
+  <section class="slide">
+    <p class="eyebrow">Bastidores · engenharia</p>
+    <h2>Infraestrutura para confiar no resultado</h2>
+    <div class="cards">
+      <div class="card"><span class="tag">CI</span><h3>Todo push refaz tudo</h3><p>O GitHub Actions reelabora a biblioteca inteira e fiscaliza os invariantes: zero sorry, axiomas fixados, status de fidelidade declarado para cada entrada.</p></div>
+      <div class="card"><span class="tag">Ledger</span><h3>Verificação com recibo</h3><p>Um registro por hash de insumos diz exatamente sob qual código, imports e toolchain cada teorema foi conferido — nada de “reverificar tudo por via das dúvidas”.</p></div>
+      <div class="card"><span class="tag">Blueprint</span><h3>Grafo de dependências + prosa</h3><p>O esqueleto dedutivo da biblioteca é gerado do próprio código: quais teoremas sustentam quais, com exposição honesta.</p></div>
+      <div class="card"><span class="tag">Reprodutibilidade</span><h3>Docker com versões pregadas</h3><p>Lean, Mathlib e dependências fixados; qualquer máquina reproduz o build byte a byte.</p></div>
+    </div>
+    <blockquote class="pull">Nenhuma afirmação do README que o kernel não tenha aceitado.</blockquote>
+  </section>
+
+  <!-- 13 · próximos passos -->
+  <section class="slide">
+    <p class="eyebrow">Discussão · próximos passos</p>
+    <h2>Duas trilhas — e as perguntas para esta conversa</h2>
+    <div class="twocol">
+      <div>
+        <h3 style="font-size:1.05rem; margin:0 0 .6rem">Trilha entrega (finanças)</h3>
+        <ul class="points">
+          <li>A ponte do numerário: portfólio log-ótimo ⇒ EMM</li>
+          <li>Amplitude: opções americanas e exóticas, Vasicek, CVaR robusto</li>
+        </ul>
+        <h3 style="font-size:1.05rem; margin:1.4rem 0 .6rem">Trilha profundidade (marcos)</h3>
+        <ul class="points">
+          <li>Girsanov distribucional e θ adaptado (pede Itô com integrando adaptado)</li>
+          <li>Dualidade forte de superhedging (lacuna de Farkas no Mathlib)</li>
+          <li>Gerador infinitesimal / Kolmogorov como abstração de Feynman–Kac</li>
+        </ul>
+      </div>
+      <div>
+        <h3 style="font-size:1.05rem; margin:0 0 .6rem">Para discutirmos</h3>
+        <ul class="points">
+          <li>Como isso se encaixa na tese — o artefato é a teoria formal, os marcos, ou ambos?</li>
+          <li>Onde publicar: na comunidade de métodos formais, na de finança matemática, ou nos dois eixos?</li>
+          <li>O que valeria formalizar primeiro <em>da sua agenda</em> — cálculo de Itô funcional e EDPs dependentes de trajetória seriam território inteiramente virgem.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<div class="hud">
+  <span class="counter" id="counter">1 / 13</span>
+  <span class="navbtns">
+    <button type="button" id="prev" aria-label="Slide anterior">←</button>
+    <button type="button" id="next" aria-label="Próximo slide">→</button>
+  </span>
+</div>
+<div class="progress" id="progress"></div>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+    var counter = document.getElementById('counter');
+    var progress = document.getElementById('progress');
+    var i = 0;
+    var fromHash = parseInt((location.hash || '').replace('#', ''), 10);
+    if (fromHash >= 1 && fromHash <= slides.length) i = fromHash - 1;
+
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach(function (s, k) { s.classList.toggle('active', k === i); });
+      counter.textContent = (i + 1) + ' / ' + slides.length;
+      progress.style.width = ((i + 1) / slides.length * 100) + '%';
+      if (history.replaceState) history.replaceState(null, '', '#' + (i + 1));
+    }
+
+    document.getElementById('next').addEventListener('click', function () { show(i + 1); });
+    document.getElementById('prev').addEventListener('click', function () { show(i - 1); });
+    document.addEventListener('keydown', function (e) {
+      if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); show(i + 1); }
+      else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); show(i - 1); }
+      else if (e.key === 'Home') { show(0); }
+      else if (e.key === 'End') { show(slides.length - 1); }
+    });
+
+    var touchX = null;
+    document.addEventListener('touchstart', function (e) { touchX = e.touches[0].clientX; }, { passive: true });
+    document.addEventListener('touchend', function (e) {
+      if (touchX === null) return;
+      var dx = e.changedTouches[0].clientX - touchX;
+      if (Math.abs(dx) > 60) show(dx < 0 ? i + 1 : i - 1);
+      touchX = null;
+    }, { passive: true });
+
+    show(i);
+  })();
+</script>
+</body>
+</html>
