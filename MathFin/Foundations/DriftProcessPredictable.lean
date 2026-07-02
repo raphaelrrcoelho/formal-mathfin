@@ -427,5 +427,15 @@ theorem driftProcessAssembled_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ t, Meas
     ⟨(T : ℝ), fun W => driftSimpleProcessLp_norm_le T hBmeas W⟩]
   rfl
 
+/-- **The drift operator bound** `‖driftProcessAssembled φ‖ ≤ T‖φ‖` for general `φ ∈ E` — the
+witness of the `‖·‖ ≤ T‖·‖` the CLM advertises: the `extendOfNorm` operator norm inherited from the
+elementary energy bound `driftSimpleProcessLp_norm_le`. -/
+theorem driftProcessAssembled_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ‖driftProcessAssembled (μ := μ) T hBmeas φ‖ ≤ (T : ℝ) * ‖φ‖ := by
+  rw [driftProcessAssembled]
+  exact LinearMap.norm_extendOfNorm_apply_le (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
+    (T : ℝ) (fun W => driftSimpleProcessLp_norm_le T hBmeas W) φ
+
 end ItoIntegralProcessContinuousModification
 end MathFin

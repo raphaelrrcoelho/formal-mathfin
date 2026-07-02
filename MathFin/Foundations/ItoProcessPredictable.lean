@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralProcessContinuousModification
+public import MathFin.Foundations.ItoIntegralProcessIsometry
 public import BrownianMotion.StochasticIntegral.Predictable
 
 /-! # Predictability and `L²` assembly of the Itô process (the SDE-existence keystone)
@@ -207,6 +208,34 @@ theorem itoProcessAssembled_norm_sq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   filter_upwards [itoContinuousMod_modification hB T hBmeas hBcont φ htT] with ω hω
   simp only [Function.uncurry]
   rw [hω]
+
+/-- **The Itô operator bound** `‖itoProcessAssembled φ‖ ≤ √T‖φ‖` — the norm corollary of the energy
+identity `itoProcessAssembled_norm_sq`: it turns the square norm into `∫₀ᵀ ‖itoProcessCLM t φ‖² dt`,
+and each `[0,t]`-energy is `≤` the full energy `‖φ‖²` (the Itô isometry is flat in `t`), so the
+time-integral is `≤ T‖φ‖²`. The `√T` (vs the drift's `T`) is the contraction workhorse. -/
+theorem itoProcessAssembled_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    ‖itoProcessAssembled hB T hBmeas hBcont φ‖ ≤ Real.sqrt (T : ℝ) * ‖φ‖ := by
+  have hφsq : Integrable (fun z => (φ z) ^ 2) (trimMeasure_T (μ := μ) T hBmeas) :=
+    (Lp.memLp φ).integrable_sq
+  have hsq : ‖itoProcessAssembled hB T hBmeas hBcont φ‖ ^ 2 ≤ (T : ℝ) * ‖φ‖ ^ 2 := by
+    rw [itoProcessAssembled_norm_sq]
+    have hpt : ∀ᵐ t ∂(timeMeasure_T T),
+        ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ≤ ‖φ‖ ^ 2 := by
+      filter_upwards [ae_restrict_mem (μ := timeMeasure) measurableSet_Ioc] with t ht
+      rw [itoProcessCLM_norm_sq hB ht.2 hBmeas φ, lp_two_norm_sq]
+      exact setIntegral_le_integral hφsq (ae_of_all _ fun z => sq_nonneg _)
+    calc ∫ t, ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ∂(timeMeasure_T T)
+        ≤ ∫ _t, ‖φ‖ ^ 2 ∂(timeMeasure_T T) :=
+          integral_mono_of_nonneg (ae_of_all _ fun _ => sq_nonneg _) (integrable_const _) hpt
+      _ = (T : ℝ) * ‖φ‖ ^ 2 := by
+          rw [integral_const, timeMeasure_T, measureReal_def, Measure.restrict_apply_univ,
+            timeMeasure_Ioc,
+            ENNReal.toReal_ofReal (by rw [NNReal.coe_zero, sub_zero]; exact T.coe_nonneg),
+            NNReal.coe_zero, sub_zero, smul_eq_mul]
+  have h := Real.sqrt_le_sqrt hsq
+  rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_mul T.coe_nonneg, Real.sqrt_sq (norm_nonneg _)] at h
 
 /-- **Additivity** of the assembled Itô process (as an `Lp` class). Both sides are modifications
 of the linear process `itoProcessCLM T · (φ+ψ)`, so they agree slice by slice (the modification

@@ -6,22 +6,29 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.DriftProcessPredictable
-public import MathFin.Foundations.ItoIntegralProcessIsometry
 
 /-! # SDE existence/uniqueness via Picard on `E` (build)
 
 The strong solution of `dX = b(X)dt + σ(X)dB`, `X₀ = η` is the fixed point of the
 Picard iterate `Φ(X)_t = η + ∫₀ᵗ b(X_s) ds + ∫₀ᵗ σ(X_s) dB_s`, built as a self-map of
-the predictable `L²` space `E := Lp ℝ 2 (trimMeasure_T T)`. Both analytic terms are
-already assembled into `E` as operators (`driftProcessAssembled`, `itoProcessAssembled`);
-this file wires them into the Picard map, proves the contraction estimate
-`‖Φ(X) − Φ(Y)‖ ≤ (T·L_b + √T·L_σ)·‖X − Y‖`, and — when that constant is `< 1` — obtains the
-**unique fixed point** (`picardSolution`) via Banach's theorem: existence and uniqueness of
-the strong solution in `E`.
+the predictable `L²` space `E := Lp ℝ 2 (trimMeasure_T T)`. Both analytic terms already land
+back in `E` — the drift as a genuine CLM `driftProcessAssembled : E →L[ℝ] E`, the Itô term as the
+element-valued linear map `itoProcessAssembled : E → E` (built from a continuous modification, so
+*not* a CLM — its linearity is re-established a.e.). This file wires them into the Picard map, proves
+the contraction estimate `‖Φ(X) − Φ(Y)‖ ≤ (T·L_b + √T·L_σ)·‖X − Y‖`, and — when that constant is
+`< 1` — obtains the **unique fixed point** (`picardSolution`) via Banach's theorem: existence and
+uniqueness of the strong solution in `E`.
 
-* `lipComp` — the coefficient composition `f ∘ X ∈ E`; `lipComp_sub_norm_le` — its `L`-Lipschitz bound.
+The `T` vs `√T` asymmetry is structural: both terms integrate a `[0,t]` quantity over `t ∈ [0,T]`,
+but Cauchy–Schwarz already spends a factor of time inside each drift slice (leaving the full `T`),
+whereas the Itô isometry bounds each `[0,t]` energy flatly by the total energy (so only `√T`
+survives the outer time-integral). The `driftProcessAssembled_norm_le` (`≤ T‖·‖`) and
+`itoProcessAssembled_norm_le` (`≤ √T‖·‖`) bounds live with their operators in
+`DriftProcessPredictable` / `ItoProcessPredictable`.
+
+* `lipComp` — the coefficient composition `f ∘ X ∈ E` (centered via `lipschitz_sub_const`);
+  `lipComp_sub_norm_le` — its `L`-Lipschitz bound.
 * `picardMap` — the Picard iterate `Φ : E → E`.
-* `driftProcessAssembled_norm_le` / `itoProcessAssembled_norm_le` — the `T` / `√T` operator bounds.
 * `picardMap_contraction` — the contraction estimate; `picardMap_contractingWith` — as `ContractingWith`.
 * `picardSolution` — the strong solution (the fixed point); `picardMap_exists_unique_fixedPoint` — `∃!`.
 
@@ -80,43 +87,6 @@ noncomputable def picardMap (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
   η_E + driftProcessAssembled T hBmeas (lipComp T hBmeas b Lb hb X)
       + itoProcessAssembled hB T hBmeas hBcont (lipComp T hBmeas σ Lσ hσ X)
-
-/-- **Drift operator bound** `‖driftProcessAssembled φ‖ ≤ T‖φ‖` for general `φ ∈ E`: the
-`extendOfNorm` operator-norm inherited from the elementary energy bound
-`driftSimpleProcessLp_norm_le`. -/
-theorem driftProcessAssembled_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ‖driftProcessAssembled (μ := μ) T hBmeas φ‖ ≤ (T : ℝ) * ‖φ‖ := by
-  rw [driftProcessAssembled]
-  exact LinearMap.norm_extendOfNorm_apply_le (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    (T : ℝ) (fun W => driftSimpleProcessLp_norm_le T hBmeas W) φ
-
-/-- **Itô operator bound** `‖itoProcessAssembled φ‖ ≤ √T‖φ‖`: the energy identity turns the
-square norm into `∫₀ᵀ ‖itoProcessCLM t φ‖² dt`, and each `[0,t]`-energy is `≤` the full
-energy `‖φ‖²`, so the time-integral is `≤ T‖φ‖²`. -/
-theorem itoProcessAssembled_norm_le (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
-    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ‖itoProcessAssembled hB T hBmeas hBcont φ‖ ≤ Real.sqrt (T : ℝ) * ‖φ‖ := by
-  have hφsq : Integrable (fun z => (φ z) ^ 2) (trimMeasure_T (μ := μ) T hBmeas) :=
-    (Lp.memLp φ).integrable_sq
-  have hsq : ‖itoProcessAssembled hB T hBmeas hBcont φ‖ ^ 2 ≤ (T : ℝ) * ‖φ‖ ^ 2 := by
-    rw [itoProcessAssembled_norm_sq]
-    have hpt : ∀ᵐ t ∂(timeMeasure_T T),
-        ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ≤ ‖φ‖ ^ 2 := by
-      filter_upwards [ae_restrict_mem (μ := timeMeasure) measurableSet_Ioc] with t ht
-      rw [itoProcessCLM_norm_sq hB ht.2 hBmeas φ, lp_two_norm_sq]
-      exact setIntegral_le_integral hφsq (ae_of_all _ fun z => sq_nonneg _)
-    calc ∫ t, ‖itoProcessCLM hB T t hBmeas φ‖ ^ 2 ∂(timeMeasure_T T)
-        ≤ ∫ _t, ‖φ‖ ^ 2 ∂(timeMeasure_T T) :=
-          integral_mono_of_nonneg (ae_of_all _ fun _ => sq_nonneg _) (integrable_const _) hpt
-      _ = (T : ℝ) * ‖φ‖ ^ 2 := by
-          rw [integral_const, timeMeasure_T, measureReal_def, Measure.restrict_apply_univ,
-            timeMeasure_Ioc,
-            ENNReal.toReal_ofReal (by rw [NNReal.coe_zero, sub_zero]; exact T.coe_nonneg),
-            NNReal.coe_zero, sub_zero, smul_eq_mul]
-  have h := Real.sqrt_le_sqrt hsq
-  rwa [Real.sqrt_sq (norm_nonneg _), Real.sqrt_mul T.coe_nonneg, Real.sqrt_sq (norm_nonneg _)] at h
 
 /-- **The Picard contraction estimate** `‖Φ(X) − Φ(Y)‖ ≤ (T·L_b + √T·L_σ)·‖X − Y‖`. The
 initial condition cancels in the difference; the drift term contributes `T·L_b` (operator

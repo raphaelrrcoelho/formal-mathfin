@@ -74,6 +74,52 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-02 — corpus 309 — SDE Picard: 3-agent values AUDIT + relocation upgrades
+
+**Panel**: three agents — (coherence + idiomatic), (slop + first principles + architecture), (clarity +
+inspired + elegant) — on `SDEExistence.lean` (the delivered Picard construction). Each verified findings
+against the pinned Mathlib source + the sibling files; cross-checked against the maintainer's own
+verification. The panel was genuinely **split** on the operator-bound relocation (agent 1 ranked it low,
+agent 2 `[now]`) — resolved by a *verified* fact: the drift CLM's docstring advertised a bound it did not
+witness (see below). Verdict: coherence / slop / clarity ceilings already **HIGH** — no in-session slop to
+repair (the file is a thin, honestly-derived wiring layer). The upgrades are architecture/placement + clarity.
+
+**Executed this session (all full-build-green, 0-sorry, 8838 jobs).**
+1. **Relocated `driftProcessAssembled_norm_le`** → `DriftProcessPredictable` (beside the CLM). Closes a
+   VERIFIED broken docstring promise: the drift CLM docstring (`:49`, `:415`) advertised "bounded
+   (`‖·‖ ≤ T‖·‖`), all for free" with **no witnessing lemma in the file** — now witnessed and exported.
+2. **Relocated `itoProcessAssembled_norm_le`** → `ItoProcessPredictable` (beside its energy identity
+   `itoProcessAssembled_norm_sq`), + the `ItoIntegralProcessIsometry` import + a docstring line. `SDEExistence`
+   is now pure wiring.
+3. **Clarity**: fixed the module docstring's loose "both as operators" — the drift is a genuine CLM
+   `E →L E`, the Itô term is element-valued `E → E` (a continuous modification, not a CLM), which is *why* the
+   contraction uses `map_sub` for the drift but `itoProcessAssembled_sub` for the Itô term. Surfaced the
+   **T-vs-√T asymmetry** where the reader meets it (Cauchy–Schwarz spends time inside each drift slice → full
+   `T`; the Itô isometry is flat in `t` → only `√T` survives the outer integral). Folded `lipschitz_sub_const`
+   into the decl list.
+
+**Lens reads (exemplar → next upgrade).**
+- *Coherence (high)*: consumes `LipschitzWith.compLp` / `norm_compLp_sub_le`, `LinearMap.norm_extendOfNorm_apply_le`,
+  `ContractingWith.fixedPoint`, `integral_mono_of_nonneg`, `setIntegral_le_integral` directly. Panel confirmed
+  `lipschitz_sub_const` is NOT a re-derivation (no `LipschitzWith.sub_const` at the pin).
+- *First principles / elegant (exemplar)*: the `T`/`√T` asymmetry is the a priori SDE estimate made
+  structural — each operator bound *derived* from its energy identity, not assumed.
+
+**Ranked backlog (deferred).**
+1. **`itoProcessAssembledCLM` via `extendOfNorm`** — retire the ~110 hand-proven `itoProcessAssembled_add`/`_sub`
+   lines (`ItoProcessPredictable:215-324`) and let the contraction use `map_sub` uniformly. Deferred:
+   `itoProcessAssembled` is deliberately the pathwise-continuous modification for future SDE-path-continuity; a
+   CLM's representative need not be that modification (needs an a.e.-agreement lemma). The deepest upgrade.
+2. **`timeMeasure_T_real_univ` helper** (in `ItoIntegralCLM`, beside `timeMeasure_T`) — the 7-lemma total-mass
+   `rw` chain is verified-triplicated across the Foundations cluster; collapse each site to one rewrite.
+3. **`lipComp`'s `L` → implicit** (consistency with `lipComp_sub_norm_le`); the stronger `opNorm_extendOfNorm_le`
+   form of the drift bound; `set δb/δσ` in `picardMap_contraction` (low value — the verbosity is honest).
+4. **#19** — the `ℝ≥0`↔`ℝ`-time translation to flip `sc-thm-8.2.5` + a Bielecki all-`T` extension (the mountain).
+
+**Evidence/context.** corpus 309; full `lake build` green (8838 jobs) after the relocations; AxiomAuditGen
+byte-unchanged (relocation touched no corpus-cited pin); ledger re-verified (1 restaled entry, the sole
+transitive importer).
+
 ## 2026-07-02 — corpus 308 — SDE existence: the Picard fixed point in `E` (#16–#18)
 
 **Executed this session.** `MathFin/Foundations/SDEExistence.lean` (new, 210 lines, 0-sorry, in the umbrella,
