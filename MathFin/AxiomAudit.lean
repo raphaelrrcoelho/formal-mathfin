@@ -872,6 +872,26 @@ existence and uniqueness via Banach's theorem. Both stand on the assembled Itô/
 /-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.picardMap_exists_unique_fixedPoint
 
+/-! ## SDE strong-solution uniqueness — the L²-energy Grönwall argument (#19)
+
+The uniqueness half of Theorem 8.2.5, now a genuinely *derived* theorem rather than an assumed
+field. `gronwall_zero_of_le_const_mul_integral` is the reusable integral Grönwall (`g ≥ 0`,
+`g t ≤ K·∫₀ᵗ g` on `[0,b]` ⟹ `g ≡ 0`), obtained from Mathlib's differential
+`eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right` fed the primitive `G t = ∫₀ᵗ g` (FTC).
+`sde_pathwise_uniqueness` runs the `L²`-energy method: `E t = 𝔼[(Xₜ−Yₜ)²]` satisfies
+`E t ≤ (2·Cdrift·t + 2·Cdiff)·∫₀ᵗ E` and Grönwall forces `E ≡ 0`. `IsL2SolutionPair.uniqueness`
+is the packaged Theorem 8.2.5 (uniqueness): the drift energy bound is *derived* from Lipschitz `μ`
+(via `drift_energy_le`, Cauchy–Schwarz + Tonelli), the diffusion from the Itô isometry field. -/
+
+/-- info: 'MathFin.gronwall_zero_of_le_const_mul_integral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.gronwall_zero_of_le_const_mul_integral
+
+/-- info: 'MathFin.sde_pathwise_uniqueness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.sde_pathwise_uniqueness
+
+/-- info: 'MathFin.IsL2SolutionPair.uniqueness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.IsL2SolutionPair.uniqueness
+
 /-! ## The change of numéraire — price invariance (IV↔I seam)
 
 The numéraire measure `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))` reprices every terminal claim

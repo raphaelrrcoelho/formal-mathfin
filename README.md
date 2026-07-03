@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`312` theorems · `295` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`312` theorems · `296` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -97,9 +97,9 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 | | |
 |---|---:|
 | theorems (machine-checked) | **312** |
-| delivery-ready (`full` + `library_wrapper`) | **295** |
-| full derivations | 277 |
-| reduced cores (honest special cases) | 17 |
+| delivery-ready (`full` + `library_wrapper`) | **296** |
+| full derivations | 278 |
+| reduced cores (honest special cases) | 16 |
 | placeholders / sorries | **0** |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
 | Lean / Mathlib | `v4.31.0`, pinned ([`lean-toolchain`](lean-toolchain)) |
@@ -161,10 +161,11 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 
 Honesty is the point, so the gaps are explicit:
 
-- **17 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
-  not yet formalized (the 2-D Itô formula, Lévy's characterisation, SDE existence/uniqueness, continuous
+- **16 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
+  not yet formalized (the 2-D Itô formula, Lévy's characterisation, continuous
   Girsanov, some Markov/Poisson cores). Tracked per-entry in [`docs/coverage.md`](docs/coverage.md).
-- **Girsanov (I↔II) is partially wired** — the EMM/change-of-measure martingale side is proved (constant θ); the *distributional* Girsanov and general θ remain open, as does the **numéraire (IV↔I)** bridge.
+- **SDE existence + uniqueness** — existence is the Picard fixed point in the predictable `L²` space `E` (conditional on the small-horizon contraction); **uniqueness (Theorem 8.2.5) is now `full`**, derived via the `L²`-energy Grönwall argument (`IsL2SolutionPair.uniqueness`).
+- **Girsanov (I↔II) is partially wired** — the EMM/change-of-measure martingale side is proved (constant θ); the *distributional* Girsanov and general θ remain open. The **numéraire (IV↔I)** bridge *is* wired (`changeOfNumeraire` + its BS-stock / Margrabe-`S²` / Kelly-EMM instances).
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
   ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).

@@ -26,7 +26,24 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-03, the change of numéraire — the IV↔I seam):** corpus
+> **Live status (2026-07-03, SDE strong-solution uniqueness — the L²-energy Grönwall keystone, #19):**
+> corpus **312**, **278 full + 18 wrappers = 296/312 delivery-ready**, 16 reduced cores, 0 placeholders.
+> **The uniqueness half of Theorem 8.2.5 is now a genuinely _derived_ theorem, not an assumed field.**
+> `Foundations/SDEUniqueness.IsL2SolutionPair.uniqueness` (entry `sc-thm-8.2.5`, flipped
+> **`reduced_core` → `full`**) proves two `L²` strong solutions of `dX = μ(X)dt + σ(X)dB` sharing the
+> driver agree a.s. at every time, via the classical `L²`-energy argument: `E t = 𝔼[(Xₜ−Yₜ)²]` satisfies
+> `E t ≤ (2·Cdrift·t + 2·Cdiff)·∫₀ᵗ E`, and `gronwall_zero_of_le_const_mul_integral` (a reusable integral
+> Grönwall, built from Mathlib's differential form via the FTC primitive `G t = ∫₀ᵗ E`) forces `E ≡ 0`.
+> The **drift** energy bound is _derived_ from Lipschitz `μ` (`drift_energy_le`: Cauchy–Schwarz in time +
+> Tonelli), the **diffusion** from the Itô isometry. **Honest scope:** (i) this is the _uniqueness_ half —
+> existence stays the separately-banked conditional-`L²` Picard result (`sde-picard-existence-uniqueness`);
+> (ii) the diffusion enters through an operator `Iσ` whose _sole_ assumed property is the Itô isometry
+> energy bound (the `isometry` field of `IsL2SolutionPair`) — a genuine, proven property of the Itô
+> integral (`itoProcessCLM_norm_sq`), not the conclusion in disguise; (iii) a non-vacuity guard (the zero
+> solution) certifies the `IsL2SolutionPair` field set is satisfiable. This **replaces** the prior
+> `reduced_core` encoding, whose `uniqueness` was an assumed structural field read off by projection.
+>
+> **Prior (2026-07-03, the change of numéraire — the IV↔I seam):** corpus
 > **312**, **277 full + 18 wrappers = 295/312 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The library now has a general change-of-numéraire theorem plus both of its seam directions.**
 > (1) `Foundations/Numeraire.changeOfNumeraire` (entry `mf-change-of-numeraire`, **`full`**) proves price

@@ -129,6 +129,8 @@ import MathFin.Foundations.ItoProcessPredictable
 import MathFin.Foundations.DriftProcessPredictable
 -- The Picard map and its contraction estimate (SDE existence, #44)
 import MathFin.Foundations.SDEExistence
+-- Pathwise SDE uniqueness via the L²-energy Grönwall argument (#19)
+import MathFin.Foundations.SDEUniqueness
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- The unbounded-horizon Itô process: the L² process, horizon consistency (the [0,∞) climb)

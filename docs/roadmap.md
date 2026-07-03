@@ -37,9 +37,23 @@ breadth at this stage, and what the concrete next round would look like.
 > estimate `‖Φ X − Φ Y‖ ≤ (T·L_b + √T·L_σ)‖X − Y‖` and gets existence **and** uniqueness via Banach's
 > theorem (`picardMap_exists_unique_fixedPoint`), delivered as the **`full`** entry
 > `sde-picard-existence-uniqueness`. **Honest remainder:** the `L²`/`E` formulation, conditional on the
-> small-horizon contraction constant `< 1`; the abstract-operator benchmark `sc-thm-8.2.5` (ℝ-time,
-> `intervalIntegral` drift, opaque `Iσ`) stays **`reduced_core`** pending the `ℝ≥0`↔`ℝ`-time translation
-> and a Bielecki all-`T` extension — the two remaining pieces to flip that specific entry.
+> small-horizon contraction constant `< 1`. (The abstract-operator benchmark `sc-thm-8.2.5` has since had
+> its **uniqueness** half flipped to **`full`** by a *direct* pathwise Grönwall argument — see #19 below —
+> rather than by the `ℝ≥0`↔`ℝ` E-translation.)
+
+> **DELIVERED (2026-07-03) — SDE strong-solution uniqueness via the L²-energy Grönwall argument
+> ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19)).** The **uniqueness half of Theorem
+> 8.2.5** (`sc-thm-8.2.5`) is now a genuinely *derived* theorem — flipped **`reduced_core` → `full`**.
+> `Foundations/SDEUniqueness` proves two `L²` strong solutions of `dX = μ(X)dt + σ(X)dB` sharing the driver
+> agree a.s. at every time: the state energy `E t = 𝔼[(Xₜ−Yₜ)²]` satisfies `E t ≤ (2·Cdrift·t+2·Cdiff)·∫₀ᵗE`
+> and `gronwall_zero_of_le_const_mul_integral` (a reusable integral Grönwall obtained from Mathlib's
+> differential form via the FTC primitive `G t = ∫₀ᵗ E`) forces `E ≡ 0`. The **drift** bound is *derived*
+> from Lipschitz `μ` (`drift_energy_le`: Cauchy–Schwarz in time + Tonelli); the **diffusion** rides the Itô
+> isometry. `IsL2SolutionPair.uniqueness` packages it — uniqueness is a **theorem, not an assumed field**
+> (the honest reading of "translate to the structure fields"), guarded by a non-vacuity example. **Honest
+> remainder:** the uniqueness *half* only (existence stays the conditional-`E` Picard result); the
+> diffusion's sole assumed property is the Itô isometry energy bound — a proven property of the Itô
+> integral (`itoProcessCLM_norm_sq`), cited, not the conclusion.
 
 > **DELIVERED (2026-07-03) — the change of numéraire, both seam directions (substantial advance on
 > [#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45)).** (1) `Foundations/Numeraire.changeOfNumeraire`

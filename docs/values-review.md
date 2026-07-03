@@ -74,6 +74,60 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-03 — corpus 312 — SDE strong-solution uniqueness: the L²-energy Grönwall keystone (#19)
+
+**Scope**: `Foundations/SDEUniqueness.lean` (new). Executes backlog item 4 of the numéraire review (the
+standing SDE #19). Reviewed self-critically against the green `lake build` (8841 jobs,
+`REAL_BUILD_EXIT=0`), the pinned Mathlib Grönwall API
+(`eq_zero_of_abs_deriv_le_mul_abs_self_of_eq_zero_right`), and the repo's own Itô isometry
+(`itoProcessCLM_norm_sq`) — not by a sycophantic panel. Two Explore scouts mapped the pin *before* any
+Lean was written; the scout confirming **no integral-form Grönwall exists at the pin** is why the
+reusable integral form was *built* from the differential one via the FTC primitive.
+
+**Per-lens read (exemplar → next upgrade):**
+- **First principles** — *exemplar*: uniqueness is the classical `L²`-energy argument from the ground up
+  — `E t ≤ K·∫₀ᵗE` assembled from `(a+b)²≤2a²+2b²`, Cauchy–Schwarz in time, Lipschitz, and Tonelli, then
+  closed by Grönwall; the **drift** bound is *derived* (`drift_energy_le`), not assumed. *Next*: derive
+  the diffusion isometry bound too, by instantiating `Iσ` with the codebase Itô operator (needs the
+  E↔pathwise per-`t` bridge — the same open infrastructure that blocks pathwise existence).
+- **Architectural ingenuity** — *exemplar*: the reusable split — a probability-free integral Grönwall
+  (`gronwall_zero_of_le_const_mul_integral`, built from Mathlib's differential form), a clean
+  energy-method core (`sde_pathwise_uniqueness`), and the structure `IsL2SolutionPair` bundling the
+  regularity so the headline theorem stays one hypothesis. *Next*: trim the 11-field structure —
+  `stateSqIntervalInt`/`stateSqTimeInt` are Fubini-derivable from `stateSqProdInt`.
+- **Concept clarity / idiomatic register** — *exemplar*: "translate to the structure fields" realized as
+  its honest meaning — uniqueness becomes a **theorem, not an assumed field**; the prior `reduced_core`
+  read the conclusion off a `uniqueness` field by projection (zero derivation). The `isometry` field is
+  labeled the sole assumed property of `Iσ` and cited to the proven isometry.
+- **Zero slop** — the integral Grönwall does real work (FTC primitive + differential Grönwall), not a
+  wrapper; a non-vacuity guard (the zero solution) certifies the field bundle is satisfiable. Green,
+  sorry-free, warning-free; axiom-clean `[propext, Classical.choice, Quot.sound]`.
+
+**Upgrades executed this session:** (1) `gronwall_zero_of_le_const_mul_integral` — a reusable
+integral-form Grönwall (Mathlib carries only the differential form at this pin); (2) `drift_energy_le` —
+the drift energy bound *derived* from Lipschitz `μ` (Cauchy–Schwarz in time + Tonelli), so the drift is
+proven, not assumed; (3) `sde_pathwise_uniqueness` — the energy-method Grönwall core; (4)
+`IsL2SolutionPair` + `.uniqueness` — the honest field-translation, uniqueness as a derived theorem, with
+`sc-thm-8.2.5` flipped **`reduced_core` → `full`**; (5) whole-repo reconcile
+(README / coverage / roadmap / AxiomAudit / AxiomAuditGen / ledger 312/0/0).
+
+**A note on the discipline (honest register):** flipping `sc-thm-8.2.5` to `full` was gated on a real
+scope decision — the drift is *concrete*, so it **must** be derived (else the "full" claim is a cheat);
+the diffusion `Iσ` is *opaque*, so its isometry **must** stay a labeled hypothesis (a proven property of
+the Itô integral). Deriving the drift cost a 4-field regularity bundle. That asymmetry is the honest one
+(concrete ⇒ derive; abstract-but-proven ⇒ cite), not a shortcut — and it is why this is the uniqueness
+*half* only, existence staying the separately-banked conditional-`E` Picard result.
+
+**Ranked backlog (value-aligned):**
+1. **The E↔pathwise per-`t` bridge** — the single piece of open infrastructure blocking *both* pathwise
+   SDE existence (`sc-thm-8.2.5` existence half) and a concrete, isometry-derived (hypothesis-free) `Iσ`:
+   a continuous-modification value identity for *general* `E`-elements (present only definitionally on
+   simple processes today). The genuine multi-session mountain.
+2. Trim `IsL2SolutionPair` — derive `stateSqIntervalInt`/`stateSqTimeInt` from `stateSqProdInt` via
+   Fubini, shrinking the field bundle (architectural-ingenuity / zero-slop polish).
+3. The *continuous* numéraire-portfolio benchmark (Long/Platen) — carried from the prior review.
+4. Relate `numeraireDensity` to `Measure.rnDeriv` (carried).
+
 ## 2026-07-03 — corpus 312 — The change of numéraire: the full IV↔I seam (backbone + both directions)
 
 **Scope**: `Foundations/Numeraire.lean` (new) + `BlackScholes/StockNumeraire` + `BlackScholes/ExchangeOption`

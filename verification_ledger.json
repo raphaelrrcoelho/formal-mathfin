@@ -2147,10 +2147,10 @@
     },
     "sc-thm-8.2.5": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-06-24",
-      "elapsed_s": 8.1,
-      "input_hash": "e40b723614b56108c6ecb9f4ea33a7cb2fda620123852141fa7984d17324376a",
-      "verified_at_commit": "4e921c4"
+      "date": "2026-07-03",
+      "elapsed_s": 15.5,
+      "input_hash": "abe5f2b88be0d62b5c86c77eddad96308564e124e7c074edba3fd538ca0e4248",
+      "verified_at_commit": "b873ce1"
     },
     "sc-thm-9.1.1": {
       "benchmark_file": "stochastic_calculus.json",
