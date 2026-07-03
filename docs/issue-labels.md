@@ -11,17 +11,31 @@ triaging work. Labels should answer four questions:
 Use `good first issue` and `help wanted` as public entry-point labels on top of
 the taxonomy when the task is ready for outside contributors.
 
+Colors are consistent per dimension so an issue's labels read at a glance:
+`area:*` share one hue, `type:*` another, while `difficulty:*` and `status:*`
+use a semantic scale (green → amber → red).
+
 ## Area labels
+
+The mathematical areas mirror the `MathFin/` subdirectories, so a contributor
+can filter to the part of the library they know; the last three are
+cross-cutting.
 
 | Label | Use for |
 |---|---|
-| `area:lean` | Lean theorem files under `MathFin/` and proof architecture. |
-| `area:docs` | Markdown docs, README content, onboarding, troubleshooting, and cross-links. |
-| `area:coverage` | `docs/coverage.md`, theorem status wording, and faithfulness evidence. |
-| `area:blueprint` | `docs/blueprint.md`, blueprint exports, and dependency graph documentation. |
-| `area:tooling` | Python verification tools, scripts, ledger logic, and generated audits. |
+| `area:foundations` | `MathFin/Foundations/` — Itô calculus, Brownian motion, stochastic integration, martingales, Poisson, Markov, and SDEs. |
+| `area:black-scholes` | `MathFin/BlackScholes/` — the Black-Scholes model, greeks, and the pricing PDE. |
+| `area:futures` | `MathFin/Futures/` — Black-76 futures options, caplets, and swaptions. |
+| `area:binomial` | `MathFin/Binomial/` — CRR binomial trees and convergence to Black-Scholes. |
+| `area:fixed-income` | `MathFin/FixedIncome/` — bonds, term structure, and interest-rate models. |
+| `area:portfolio` | `MathFin/Portfolio/` — portfolio choice, Kelly, and Merton problems. |
+| `area:performance` | `MathFin/Performance/` — Sharpe ratio and other performance measures. |
+| `area:risk` | `MathFin/RiskMeasures/` — VaR, CVaR, and coherent risk measures. |
+| `area:actuarial` | `MathFin/Actuarial/` — actuarial and insurance pricing. |
+| `area:defi` | `MathFin/DeFi/` — decentralized-finance models. |
+| `area:tooling` | Python verification tools, scripts, ledger logic, and generated audits under `tools/` and `scripts/`. |
+| `area:docs` | Markdown docs, README content, onboarding, coverage/blueprint prose, and cross-links. |
 | `area:ci` | GitHub Actions, Docker images, build gates, and release automation. |
-| `area:upstream` | Mathlib, BrownianMotion, Zulip, or other upstream coordination. |
 
 ## Type labels
 
@@ -61,9 +75,10 @@ the taxonomy when the task is ready for outside contributors.
 | Issue | Suggested labels |
 |---|---|
 | Add a glossary entry for no-arbitrage terms | `area:docs`, `type:docs`, `difficulty:good-first`, `status:ready`, `good first issue` |
-| Repair a stale coverage row after a theorem rename | `area:coverage`, `type:docs`, `difficulty:small`, `status:ready` |
-| Prove a new Black-Scholes Greek | `area:lean`, `type:proof`, `difficulty:medium`, `status:ready` |
-| Draft an upstream BrownianMotion issue | `area:upstream`, `type:research`, `difficulty:hard`, `status:blocked-design` |
+| Repair a stale coverage row after a theorem rename | `area:docs`, `type:docs`, `difficulty:small`, `status:ready` |
+| Prove a new Black-Scholes Greek | `area:black-scholes`, `type:proof`, `difficulty:medium`, `status:ready` |
+| Generalize an Itô-formula hypothesis | `area:foundations`, `type:proof`, `difficulty:hard`, `status:ready` |
+| Draft an upstream BrownianMotion issue | `area:foundations`, `type:research`, `difficulty:hard`, `status:blocked-upstream` |
 | Fix a failing build workflow | `area:ci`, `type:bug`, `difficulty:medium`, `status:ready` |
 
 ## Bootstrap commands
@@ -71,32 +86,42 @@ the taxonomy when the task is ready for outside contributors.
 Maintainers can create the taxonomy with `gh label create`:
 
 ```bash
-gh label create "area:lean" --color "0e8a16" --description "Lean theorem files and proof architecture"
-gh label create "area:docs" --color "0075ca" --description "Markdown docs, onboarding, troubleshooting, and cross-links"
-gh label create "area:coverage" --color "5319e7" --description "Coverage table, faithfulness status, and verification evidence"
-gh label create "area:blueprint" --color "1d76db" --description "Blueprint graph, exports, and dependency documentation"
-gh label create "area:tooling" --color "fbca04" --description "Python verification tools, scripts, ledger logic, and generated audits"
-gh label create "area:ci" --color "d4c5f9" --description "GitHub Actions, Docker images, build gates, and release automation"
-gh label create "area:upstream" --color "bfd4f2" --description "Mathlib, BrownianMotion, Zulip, or other upstream coordination"
+# area:* — one shared blue
+gh label create "area:foundations"  --color "1d76db" --description "Foundations/ — Itô, Brownian motion, stochastic integration, martingales, Poisson, Markov, SDEs"
+gh label create "area:black-scholes" --color "1d76db" --description "BlackScholes/ — the Black-Scholes model, greeks, and the pricing PDE"
+gh label create "area:futures"      --color "1d76db" --description "Futures/ — Black-76 futures options, caplets, and swaptions"
+gh label create "area:binomial"     --color "1d76db" --description "Binomial/ — CRR binomial trees and convergence to Black-Scholes"
+gh label create "area:fixed-income" --color "1d76db" --description "FixedIncome/ — bonds, term structure, and interest-rate models"
+gh label create "area:portfolio"    --color "1d76db" --description "Portfolio/ — portfolio choice, Kelly, and Merton problems"
+gh label create "area:performance"  --color "1d76db" --description "Performance/ — Sharpe ratio and other performance measures"
+gh label create "area:risk"         --color "1d76db" --description "RiskMeasures/ — VaR, CVaR, and coherent risk measures"
+gh label create "area:actuarial"    --color "1d76db" --description "Actuarial/ — actuarial and insurance pricing"
+gh label create "area:defi"         --color "1d76db" --description "DeFi/ — decentralized-finance models"
+gh label create "area:tooling"      --color "1d76db" --description "Verification tools, scripts, ledger logic, and generated audits"
+gh label create "area:docs"         --color "1d76db" --description "Markdown docs, onboarding, coverage/blueprint prose, and cross-links"
+gh label create "area:ci"           --color "1d76db" --description "GitHub Actions, Docker images, build gates, and release automation"
 
-gh label create "type:bug" --color "d73a4a" --description "Something expected to work is broken"
-gh label create "type:proof" --color "5319e7" --description "Lean theorem, proof repair, or theorem generalization"
-gh label create "type:docs" --color "0075ca" --description "Documentation-only work"
-gh label create "type:refactor" --color "c2e0c6" --description "Structure or naming change that should preserve behavior"
-gh label create "type:tooling" --color "fbca04" --description "Verification scripts, exports, or developer tooling"
-gh label create "type:research" --color "b60205" --description "Open investigation where the path is not yet clear"
-gh label create "type:maintenance" --color "fef2c0" --description "Routine cleanup, dependency updates, or housekeeping"
+# type:* — one shared purple
+gh label create "type:bug"         --color "5319e7" --description "Something expected to work is broken"
+gh label create "type:proof"       --color "5319e7" --description "Lean theorem, proof repair, or theorem generalization"
+gh label create "type:docs"        --color "5319e7" --description "Documentation-only work"
+gh label create "type:refactor"    --color "5319e7" --description "Structure or naming change that should preserve behavior"
+gh label create "type:tooling"     --color "5319e7" --description "Verification scripts, exports, or developer tooling"
+gh label create "type:research"    --color "5319e7" --description "Open investigation where the path is not yet clear"
+gh label create "type:maintenance" --color "5319e7" --description "Routine cleanup, dependency updates, or housekeeping"
 
-gh label create "difficulty:good-first" --color "7057ff" --description "Small, well-scoped task for new contributors"
-gh label create "difficulty:small" --color "c5def5" --description "Straightforward change for someone familiar with the repo"
-gh label create "difficulty:medium" --color "fbca04" --description "Requires repo context, Lean fluency, or careful validation"
-gh label create "difficulty:hard" --color "b60205" --description "Requires deep domain knowledge or upstream coordination"
+# difficulty:* — green → red scale
+gh label create "difficulty:good-first" --color "0e8a16" --description "Small, well-scoped task for new contributors"
+gh label create "difficulty:small"      --color "c2e0c6" --description "Straightforward change for someone familiar with the repo"
+gh label create "difficulty:medium"     --color "fbca04" --description "Requires repo context, Lean fluency, or careful validation"
+gh label create "difficulty:hard"       --color "d93f0b" --description "Requires deep domain knowledge or upstream coordination"
 
-gh label create "status:needs-triage" --color "ededed" --description "New issue that has not been classified yet"
-gh label create "status:needs-info" --color "d876e3" --description "Waiting on clarification before work should start"
-gh label create "status:ready" --color "0e8a16" --description "Scoped enough for a contributor to pick up"
-gh label create "status:in-progress" --color "fbca04" --description "Someone is actively working on it"
+# status:* — grey (new) → green (go) → amber (active) → red (blocked) → blue (review)
+gh label create "status:needs-triage"     --color "ededed" --description "New issue that has not been classified yet"
+gh label create "status:needs-info"       --color "fef2c0" --description "Waiting on clarification before work should start"
+gh label create "status:ready"            --color "0e8a16" --description "Scoped enough for a contributor to pick up"
+gh label create "status:in-progress"      --color "fbca04" --description "Someone is actively working on it"
 gh label create "status:blocked-upstream" --color "b60205" --description "Blocked on Mathlib, BrownianMotion, or another external project"
-gh label create "status:blocked-design" --color "d93f0b" --description "Blocked on a modeling, theorem-shape, or architecture decision"
-gh label create "status:review" --color "1d76db" --description "PR exists and maintainer review is the next step"
+gh label create "status:blocked-design"   --color "e99695" --description "Blocked on a modeling, theorem-shape, or architecture decision"
+gh label create "status:review"           --color "c5def5" --description "PR exists and maintainer review is the next step"
 ```
