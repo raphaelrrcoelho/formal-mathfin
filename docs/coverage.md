@@ -26,7 +26,22 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-02, SDE existence — the Picard fixed point, #44):** corpus
+> **Live status (2026-07-03, the change of numéraire — price invariance, IV↔I):** corpus
+> **310**, **275 full + 18 wrappers = 293/310 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **The library now has a general change-of-numéraire theorem.**
+> `Foundations/Numeraire.changeOfNumeraire` (entry `mf-change-of-numeraire`, **`full`**) proves price
+> is numéraire-invariant: with `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))`, every terminal claim `X`
+> satisfies `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` — a pure measure-transport identity plus cancellation
+> of `N_T`, needing **no integrability hypothesis**; the companion `numeraireMeasure_isProbabilityMeasure`
+> is the normalization (`N/B` a `Q`-martingale ⟹ `Q^N` a probability measure). The abstract backbone is
+> **consumed**, not orphaned: `BlackScholes.StockNumeraire.stockNumeraireMeasure_eq_numeraireMeasure`
+> exhibits the Black–Scholes stock numéraire `dQ^(S)/dQ = e^{−rT}·S_T/S₀` as the instance
+> `B_T = e^{rT}`, `B₀ = 1`, `N = S`. **Honest scope:** this wires the change-of-numéraire *formula*
+> (the IV↔I measure-change law). The *numéraire-portfolio* ↔ EMM identity (the Kelly/growth-optimal
+> portfolio as numéraire, Long/Platen benchmark approach) remains **absent** — it needs a market /
+> state-price-density model that `Performance/Kelly` does not yet carry.
+>
+> **Prior (2026-07-02, SDE existence — the Picard fixed point, #44):** corpus
 > **309**, **274 full + 18 wrappers = 292/309 delivery-ready**, 17 reduced cores, 0 placeholders.
 > **The strong solution of `dX = b(X)dt + σ(X)dB` is now constructed as a Picard fixed point.**
 > `Foundations/SDEExistence.picardMap_exists_unique_fixedPoint` (entry `sde-picard-existence-uniqueness`,

@@ -3422,6 +3422,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekSDEGaussian (vasicekShortRate_hasLaw_gaussian). DERIVES the Vasicek terminal Gaussian law (previously posited as closed-form defs in VasicekSDE.lean) from the SDE: the diffusion term sigma * (Wiener integral of e^{-kappa(T-s)}) is Gaussian by the deterministic-integrand Wiener-Gaussian theorem (sc-wiener-integral-gaussian); the variance is fixed by the FTC integral int_0^T e^{-2kappa(T-s)} ds = (1-e^{-2kappa T})/(2kappa) (vasicekKernel_integral_sq, antiderivative e^{-2kappa(T-s)}/(2kappa)); the affine map x |-> mean + sigma*x transports the law N(0, var) to N(vasicekSDEMean, vasicekSDEVariance) via gaussianReal_const_mul / gaussianReal_const_add with the NNReal variance algebra. First consumer of the deterministic-integrand Ito tower in FixedIncome -- the two-tower bridge. Axioms-clean: [propext, Classical.choice, Quot.sound]."
       }
+    },
+    {
+      "id": "mf-change-of-numeraire",
+      "name": "Change of Numéraire (Price Invariance)",
+      "description": "Given a pricing measure Q for the money-market numéraire B and a second strictly-positive numéraire N, the numéraire measure Q^N (Radon–Nikodym density dQ^N/dQ = (N_T·B₀)/(N₀·B_T)) reprices every terminal claim X consistently: N₀·E^{Q^N}[X/N_T] = B₀·E^Q[X/B_T]. This is the abstract change-of-numéraire theorem — the shared backbone of the library's concrete numéraire changes (the Black–Scholes stock numéraire, the exchange-option second-asset numéraire, the Garman forward/annuity normal form).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.Numeraire\n\nopen MeasureTheory\n\n/-- **Change of numéraire — price is numéraire-invariant.**\nGiven a pricing measure `Q` for the money-market numéraire `B` and a second\nstrictly-positive numéraire `N`, the numéraire measure\n`Q^N = numeraireMeasure Q B_T N_T B₀ N₀` (density `dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`)\nreprices every terminal claim `X` consistently:\n\n  `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]`.\n\nThe proof is a one-line density cancellation, and needs no integrability\nhypothesis. This is the abstract backbone of the library's concrete numéraire\nchanges (the BS stock numéraire, the exchange-option second-asset numéraire, the\nGarman forward/annuity numéraires). Re-exports `MathFin.changeOfNumeraire`. -/\ntheorem change_of_numeraire {Ω : Type*} [MeasurableSpace Ω] (Q : Measure Ω)\n    (X BT NT : Ω → ℝ) (B0 N0 : ℝ)\n    (hNTmeas : Measurable NT) (hBTmeas : Measurable BT)\n    (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω) (hB0 : 0 ≤ B0) (hN0 : 0 < N0) :\n    N0 * ∫ ω, X ω / NT ω ∂(MathFin.numeraireMeasure Q BT NT B0 N0)\n      = B0 * ∫ ω, X ω / BT ω ∂Q :=\n  MathFin.changeOfNumeraire X hNTmeas hBTmeas hNTpos hBTpos hB0 hN0\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Change of numéraire (Geman–El Karoui–Rochet); numéraire-invariance of arbitrage-free prices",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full re-export of MathFin.changeOfNumeraire (MathFin/Foundations/Numeraire.lean): N₀·E^{Q^N}[X/N_T] = B₀·E^Q[X/B_T] where Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T)). The identity is a pure measure-transport fact (integral_withDensity_eq_integral_toReal_smul) plus scalar cancellation of N_T — it holds for every claim X with NO integrability or square-integrability hypothesis, needing only strict positivity of the two numéraires. Companion numeraireMeasure_isProbabilityMeasure shows Q^N is a probability measure under the tradeability/normalization condition E^Q[N_T/B_T] = N₀/B₀ (N/B a Q-martingale). The abstract backbone is CONSUMED by the Black–Scholes stock numéraire: stockNumeraireMeasure_eq_numeraireMeasure (MathFin/BlackScholes/StockNumeraire.lean) exhibits dQ^(S)/dQ = e^{−rT}·S_T/S₀ as the instance B_T = e^{rT}, B₀ = 1, N = S. No axioms beyond Mathlib defaults."
+      }
     }
   ]
 }

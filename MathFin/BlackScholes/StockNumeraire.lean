@@ -8,6 +8,7 @@ module
 public import Mathlib
 public import MathFin.BlackScholes.Call
 public import MathFin.BlackScholes.Forward
+public import MathFin.Foundations.Numeraire
 
 /-!
 # Delta as stock-numeraire probability: `Φ(d_1) = Q^(S)(S_T > K)`
@@ -221,5 +222,35 @@ theorem stockNumeraire_exercise_probability
     rw [show Real.exp (-r * T) = Real.exp (-(r * T)) from by congr 1; ring]
     field_simp]
   rw [div_self hS_0.ne', mul_one, h_exp, one_mul]
+
+/-! ## Part 4: the stock numéraire as an instance of the abstract backbone -/
+
+/-- **The stock-numéraire measure is the abstract numéraire measure** at the
+money-market/stock instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`. Concretely
+
+  `stockNumeraireMeasure Q S₀ r σ T Z
+     = numeraireMeasure Q (fun _ => e^{rT}) (fun ω => S_T(Z ω)) 1 S₀`,
+
+exhibiting the Black–Scholes stock numéraire (`dQ^(S)/dQ = e^{−rT}·S_T/S₀`) as a
+special case of the general change of numéraire `Foundations.Numeraire`
+(`dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`). The two densities agree because `e^{−rT} = 1/e^{rT}`,
+and the leading `B₀ = 1` and the money-market `N₀ = S₀`, `B_T = e^{rT}` read off
+the ratio. -/
+theorem stockNumeraireMeasure_eq_numeraireMeasure
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} (Q : Measure Ω)
+    (S_0 r σ T : ℝ) (Z : Ω → ℝ) :
+    stockNumeraireMeasure Q S_0 r σ T Z
+      = numeraireMeasure Q (fun _ => Real.exp (r * T))
+          (fun ω => bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
+  have hd : stockNumeraireDensity S_0 r σ T Z
+      = numeraireDensity (fun _ => Real.exp (r * T))
+          (fun ω => bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
+    unfold stockNumeraireDensity numeraireDensity
+    funext ω
+    congr 1
+    rw [neg_mul, Real.exp_neg]
+    ring
+  unfold stockNumeraireMeasure numeraireMeasure
+  rw [hd]
 
 end MathFin

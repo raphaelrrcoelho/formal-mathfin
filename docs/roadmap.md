@@ -41,11 +41,21 @@ breadth at this stage, and what the concrete next round would look like.
 > `intervalIntegral` drift, opaque `Iσ`) stays **`reduced_core`** pending the `ℝ≥0`↔`ℝ`-time translation
 > and a Bielecki all-`T` extension — the two remaining pieces to flip that specific entry.
 
+> **DELIVERED (2026-07-03) — the change of numéraire (partial advance on
+> [#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45)).** `Foundations/Numeraire.changeOfNumeraire`
+> is the abstract price-invariance law `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` (density `dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`,
+> no integrability hypothesis), delivered as the **`full`** entry `mf-change-of-numeraire` and **consumed** by
+> the BS stock numéraire (`stockNumeraireMeasure_eq_numeraireMeasure`). This wires the change-of-numéraire
+> *formula* — the IV↔I measure-change law. **Honest remainder for #45:** the *log-optimal = numéraire ⇒ EMM*
+> core (the numéraire-portfolio ⟷ EMM identity) is **still open** — it needs a market / state-price-density
+> model `Performance/Kelly` does not yet carry; #45 stays open.
+
 > **Forward — two tracks (name the axis first).** The remaining work splits cleanly, and the axis
 > decides the phase:
 > - **Finance-delivery track** (finance theorems — the q-fin.MF / "formal theory of finance" artifact):
 >   the **numéraire bridge** IV↔I ([#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45) —
->   log-optimal = numéraire ⇒ EMM; consumes the Girsanov EMM; an OPEN architecture seam); **finance
+>   change-of-numéraire *formula* now delivered 2026-07-03; the log-optimal = numéraire ⇒ EMM core still
+>   OPEN); wire `ExchangeOption`/`Garman` as further `numeraireMeasure` instances; **finance
 >   breadth** ([#46](https://github.com/raphaelrrcoelho/formal-mathfin/issues/46) — exotic + American
 >   options, Vasicek bond pricing, coherent-risk/CVaR breadth). These ship finance results — bridges and
 >   theorems like convex-duality (I↔IV) and Feynman–Kac (II↔III).

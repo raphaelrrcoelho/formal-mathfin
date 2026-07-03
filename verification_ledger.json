@@ -983,6 +983,13 @@
       "input_hash": "dfb0a259af4b65596ebf5edc9957664f42ec33345443f2e7de97380438d665cf",
       "verified_at_commit": "4e921c4"
     },
+    "mf-change-of-numeraire": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-03",
+      "elapsed_s": 94.9,
+      "input_hash": "c20d27ffb1ff1806413becb690ab2ee745a4fdd7bb6f198d63e19e8bee119630",
+      "verified_at_commit": "8bba791"
+    },
     "mf-chooser-decompose": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-24",

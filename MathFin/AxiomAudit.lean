@@ -872,4 +872,23 @@ existence and uniqueness via Banach's theorem. Both stand on the assembled Itô/
 /-- info: 'MathFin.SDEExistence.picardMap_exists_unique_fixedPoint' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.picardMap_exists_unique_fixedPoint
 
+/-! ## The change of numéraire — price invariance (IV↔I seam)
+
+The numéraire measure `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))` reprices every terminal claim
+consistently: `changeOfNumeraire` is the invariance `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]`, a pure
+measure-transport identity plus cancellation of `N_T` — no integrability hypothesis.
+`numeraireMeasure_isProbabilityMeasure` is the companion normalization (`N/B` a `Q`-martingale ⟹
+`Q^N` a probability measure). The abstract backbone is genuinely CONSUMED:
+`stockNumeraireMeasure_eq_numeraireMeasure` exhibits the Black–Scholes stock numéraire
+`dQ^(S)/dQ = e^{−rT}·S_T/S₀` as the instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`. -/
+
+/-- info: 'MathFin.changeOfNumeraire' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.changeOfNumeraire
+
+/-- info: 'MathFin.numeraireMeasure_isProbabilityMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.numeraireMeasure_isProbabilityMeasure
+
+/-- info: 'MathFin.stockNumeraireMeasure_eq_numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.stockNumeraireMeasure_eq_numeraireMeasure
+
 end MathFin.AxiomAudit

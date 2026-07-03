@@ -74,6 +74,27 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-03 — corpus 310 — The change of numéraire: price invariance (IV↔I seam)
+
+**Scope**: `Foundations/Numeraire.lean` (new) + the `BlackScholes/StockNumeraire` wiring. Reviewed
+self-critically against the green `lake build` + the pinned Mathlib change-of-measure API (the
+`ChangeOfMeasure` engine's `setIntegral_withDensity_eq_setIntegral_toReal_smul` idiom), not by a
+sycophantic panel.
+
+**Per-lens read (exemplar → next upgrade):**
+- **Coherence (Mathlib/Degenne)** — *exemplar*: `changeOfNumeraire` consumes `integral_withDensity_eq_integral_toReal_smul` directly rather than re-deriving transport; the density idiom `ENNReal.ofReal ∘ (real)` + `toReal_ofReal` matches the repo's own `ChangeOfMeasure` engine. *Next*: state the density as an `rnDeriv` / relate to `Measure.rnDeriv` so it plugs into Mathlib's Radon–Nikodym API.
+- **Architectural ingenuity** — *exemplar (the session's #1 upgrade)*: the theorem is a **backbone that is consumed**, not an orphan — `stockNumeraireMeasure_eq_numeraireMeasure` proves the hand-rolled BS stock measure *is* the abstract instance, so `Φ(d₁) = Q^(S)(S_T>K)` now stands on the general law. This is the anti-orphan discipline (a Foundations result with a live pricing consumer on day one). *Next*: wire `ExchangeOption` (S²-numéraire) and `GarmanNormalForm` (forward/annuity) as the two further instances — they currently re-derive the change by hand.
+- **First principles** — *exemplar*: the proof is the one-line cancellation of `N_T`, with the *no-integrability-needed* observation made explicit (it is a measure-transport identity, true for every claim). *Next*: derive the numéraire-portfolio ⟷ EMM identity from first principles (the deep seam, below).
+- **Zero slop** — no wrapper: the abstract theorem does real work (density construction + cancellation) and generalizes three hand-rolled instances. Green, sorry-free, warning-free; axiom-clean `[propext, Classical.choice, Quot.sound]`.
+
+**Upgrades executed this session:** (1) the abstract `changeOfNumeraire` backbone + probability-measure companion; (2) **wired** it into `StockNumeraire` (the coherence win — a consumed backbone); (3) honest scope framing in every doc (formula wired; portfolio↔EMM still absent) rather than claiming the seam "done."
+
+**Ranked backlog (value-aligned):**
+1. **The numéraire-portfolio ⟷ EMM identity** (Kelly/growth-optimal as numéraire ⟹ deflated prices are `P`-martingales, EMM density `∝ 1/N*`) — the deep IV↔I seam; blocked on a market / state-price-density model that `Performance/Kelly` (discrete single-bet growth) does not carry. Owner: next finance phase.
+2. Wire `ExchangeOption` + `GarmanNormalForm` as further `numeraireMeasure` instances (retire the per-file hand derivations). Owner: follow-up.
+3. A forward-measure (zero-coupon-bond numéraire) instance in `FixedIncome`, under which forward rates are martingales.
+4. SDE #19 (the `sc-thm-8.2.5` ℝ-time translation + Grönwall) remains the standing formalization-axis backlog item.
+
 ## 2026-07-02 — corpus 309 — SDE Picard: 3-agent values AUDIT + relocation upgrades
 
 **Panel**: three agents — (coherence + idiomatic), (slop + first principles + architecture), (clarity +

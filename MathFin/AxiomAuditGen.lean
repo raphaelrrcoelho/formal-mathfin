@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (248 constants). Scope: proof-position MathFin names only —
+  corpus (249 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -211,6 +211,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.changeOfMeasure_setIntegral_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.changeOfMeasure_setIntegral_eq
+
+/-- info: 'MathFin.changeOfNumeraire' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.changeOfNumeraire
 
 /-- info: 'MathFin.chooser_via_pcp' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.chooser_via_pcp
