@@ -891,4 +891,18 @@ measure-transport identity plus cancellation of `N_T` — no integrability hypot
 /-- info: 'MathFin.stockNumeraireMeasure_eq_numeraireMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.stockNumeraireMeasure_eq_numeraireMeasure
 
+/-! ## Two further numéraire seams: the Kelly portfolio ⟹ EMM, and the exchange option
+
+`kellyNumeraire_isRiskNeutral` is the discrete numéraire-*portfolio* ⟹ EMM identity: the
+growth-optimal (Kelly) wealth, used as deflator, turns the physical measure into the
+risk-neutral one (`q₊·b + q₋·(−1) = 0`), the `p`-independence being the Kelly first-order
+condition. `exchangeOption_numeraire_price` exhibits Margrabe's `S²`-numéraire valuation
+as a genuine `changeOfNumeraire` instance (`X` = the exchange payoff, `N = S²`). -/
+
+/-- info: 'MathFin.kellyNumeraire_isRiskNeutral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.kellyNumeraire_isRiskNeutral
+
+/-- info: 'MathFin.exchangeOption_numeraire_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.exchangeOption_numeraire_price
+
 end MathFin.AxiomAudit

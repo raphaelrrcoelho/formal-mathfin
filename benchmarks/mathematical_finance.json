@@ -3438,6 +3438,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full re-export of MathFin.changeOfNumeraire (MathFin/Foundations/Numeraire.lean): N₀·E^{Q^N}[X/N_T] = B₀·E^Q[X/B_T] where Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T)). The identity is a pure measure-transport fact (integral_withDensity_eq_integral_toReal_smul) plus scalar cancellation of N_T — it holds for every claim X with NO integrability or square-integrability hypothesis, needing only strict positivity of the two numéraires. Companion numeraireMeasure_isProbabilityMeasure shows Q^N is a probability measure under the tradeability/normalization condition E^Q[N_T/B_T] = N₀/B₀ (N/B a Q-martingale). The abstract backbone is CONSUMED by the Black–Scholes stock numéraire: stockNumeraireMeasure_eq_numeraireMeasure (MathFin/BlackScholes/StockNumeraire.lean) exhibits dQ^(S)/dQ = e^{−rT}·S_T/S₀ as the instance B_T = e^{rT}, B₀ = 1, N = S. No axioms beyond Mathlib defaults."
       }
+    },
+    {
+      "id": "mf-kelly-numeraire-emm",
+      "name": "Kelly Numéraire Portfolio ⟹ EMM (Price Invariance, discrete)",
+      "description": "The growth-optimal (Kelly) portfolio is the numéraire portfolio: deflating the physical measure by the growth-optimal terminal wealth turns it into the equivalent martingale measure. In the two-outcome bet, the GOP-deflated probabilities q₊ = p/W*₊ = 1/(b+1), q₋ = (1-p)/W*₋ = b/(b+1) (independent of the physical p) sum to 1 and make the bet a martingale (q₊·b + q₋·(-1) = 0). The p-independence is exactly the Kelly first-order condition. The discrete numéraire-portfolio ⟹ EMM identity.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.KellyNumeraire\n\nopen MathFin\n\n/-- **The Kelly (growth-optimal) portfolio as numéraire induces the risk-neutral\nmeasure.** In the two-outcome market (bet at fraction `f` pays odds `b` with physical\nprobability `p`), deflate the physical measure by the growth-optimal terminal wealth\n`W*₊ = 1 + f*·b`, `W*₋ = 1 - f*` at the Kelly fraction `f* = kellyFraction p b`. The\nresulting probabilities `q₊ = p/W*₊`, `q₋ = (1-p)/W*₋` make the bet a martingale — zero\nexpected excess return `q₊·b + q₋·(-1) = 0` — i.e. the GOP-deflated measure is the EMM.\nThe discrete numéraire-portfolio ⟹ EMM identity. Re-exports\n`MathFin.kellyNumeraire_isRiskNeutral`. -/\ntheorem kelly_numeraire_isRiskNeutral {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :\n    p / (1 + kellyFraction p b * b) * b\n      + (1 - p) / (1 - kellyFraction p b) * (-1) = 0 :=\n  MathFin.kellyNumeraire_isRiskNeutral hp hp1 hb\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Numéraire portfolio / benchmark approach (Long 1990; Platen); Kelly growth-optimal criterion",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.kellyNumeraire_isRiskNeutral (MathFin/Performance/KellyNumeraire.lean): the growth-optimal (Kelly) portfolio, used as numéraire, deflates the physical measure into the EMM. Consumes the Kelly fraction kellyFraction and its first-order optimality (kellyGrowth_deriv_at_kelly): 1 + f*·b = p·(b+1), so the GOP-deflated win-probability p/W*₊ = 1/(b+1) is p-independent — the fair-odds risk-neutral probability. HONEST SCOPE: the discrete, two-outcome market — the fully elementary shadow of the continuous Long/Platen benchmark theorem (deflated prices are P-martingales, EMM density ∝ 1/N*), which needs a state-price-density / market model absent from the Itô tower. No axioms beyond Mathlib defaults."
+      }
+    },
+    {
+      "id": "mf-exchange-numeraire",
+      "name": "Exchange Option in the S²-Numéraire (change-of-numéraire instance)",
+      "description": "Margrabe's exchange option valued in the second-asset (S²) numéraire is a genuine instance of the general change of numéraire: S²₀·E^{Q^(S²)}[max(S¹/S²−1,0)] = E^Q[max(S¹−S²,0)], where Q^(S²) = numeraireMeasure Q 1 S²_T 1 S²₀. Composes changeOfNumeraire (X = the exchange payoff, N = S²) with the payoff reduction max(S¹−S²,0) = S²·max(S¹/S²−1,0).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.ExchangeOption\n\nopen MeasureTheory MathFin\n\n/-- **The exchange option in the S²-numéraire is a change-of-numéraire instance.** With\nthe second asset `S²` as numéraire (`numeraireMeasure Q 1 S²_T 1 S²₀`, density\n`dQ^(S²)/dQ = S²_T/S²₀`), the option's `S²`-numéraire value equals its value under the\nreference measure `Q`:\n`S²₀·𝔼^{Q^(S²)}[max(S¹_T/S²_T − 1, 0)] = 𝔼^Q[max(S¹_T − S²_T, 0)]`. This is the general\n`changeOfNumeraire` law at `X =` the exchange payoff, `N = S²`, composed with the payoff\nreduction `max(S¹−S²,0) = S²·max(S¹/S²−1,0)`; no integrability hypothesis is needed. Re-\nexports `MathFin.exchangeOption_numeraire_price`. -/\ntheorem exchange_option_numeraire_price {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (Q : Measure Ω) (S1T S2T : Ω → ℝ) (S2_0 : ℝ)\n    (hS2meas : Measurable S2T) (hS2pos : ∀ ω, 0 < S2T ω) (hS20 : 0 < S2_0) :\n    S2_0 * ∫ ω, max (S1T ω / S2T ω - 1) 0\n        ∂(MathFin.numeraireMeasure Q (fun _ => 1) S2T 1 S2_0)\n      = ∫ ω, max (S1T ω - S2T ω) 0 ∂Q :=\n  MathFin.exchangeOption_numeraire_price Q S1T S2T S2_0 hS2meas hS2pos hS20\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "Change of numéraire (Geman–El Karoui–Rochet); Margrabe (1978) exchange option in the S²-numéraire",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export of MathFin.exchangeOption_numeraire_price (MathFin/BlackScholes/ExchangeOption.lean): the exchange option's value in the S²-numéraire equals its value under the reference measure Q, as an instance of the general changeOfNumeraire law (Foundations/Numeraire.lean) at X = the exchange payoff, N = S², B ≡ 1, composed with the existing exchange_payoff_eq_ratio. Needs no integrability hypothesis, only strict positivity S²_T > 0. NOTE: ExchangeOption and GarmanNormalForm otherwise contain NO withDensity measure (their numéraire content is payoff algebra / d₁-d₂ closed form), so this is the one genuine measure-level numéraire instance they support — not a fabricated wrapper. No axioms beyond Mathlib defaults."
+      }
     }
   ]
 }

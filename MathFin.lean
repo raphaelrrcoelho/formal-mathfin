@@ -340,6 +340,7 @@ import MathFin.Portfolio.BlackLittermanND
 import MathFin.Performance.Ratios
 import MathFin.Performance.RatiosExtended
 import MathFin.Performance.Kelly
+import MathFin.Performance.KellyNumeraire
 
 -- RiskMeasures
 import MathFin.RiskMeasures.Gaussian

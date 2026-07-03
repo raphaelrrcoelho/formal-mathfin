@@ -1123,6 +1123,13 @@
       "input_hash": "e9cda32451116c086367366fa69451e9312b85482f640ef14bd737e62d2b631a",
       "verified_at_commit": "4e921c4"
     },
+    "mf-exchange-numeraire": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-03",
+      "elapsed_s": 82.3,
+      "input_hash": "a5cb07a8cdf6012b8f45406be48a4331f9cb0c248fd1c8073fb10eadbfbb6598",
+      "verified_at_commit": "eb892df"
+    },
     "mf-first-to-default-spread": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-06-24",
@@ -1416,6 +1423,13 @@
       "elapsed_s": 11.1,
       "input_hash": "fb70447a6e348962307d3e20339ad3acb3451a3617887bb26766ac50c6d9850c",
       "verified_at_commit": "4e921c4"
+    },
+    "mf-kelly-numeraire-emm": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-03",
+      "elapsed_s": 126.2,
+      "input_hash": "a33aa8e8e0d3aa8ae72f5c08dd24f7febbf9291144c93a417b1c5aa7f248cda8",
+      "verified_at_commit": "eb892df"
     },
     "mf-kmv-merton-pd": {
       "benchmark_file": "mathematical_finance.json",

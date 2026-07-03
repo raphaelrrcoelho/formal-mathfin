@@ -41,21 +41,25 @@ breadth at this stage, and what the concrete next round would look like.
 > `intervalIntegral` drift, opaque `Iσ`) stays **`reduced_core`** pending the `ℝ≥0`↔`ℝ`-time translation
 > and a Bielecki all-`T` extension — the two remaining pieces to flip that specific entry.
 
-> **DELIVERED (2026-07-03) — the change of numéraire (partial advance on
-> [#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45)).** `Foundations/Numeraire.changeOfNumeraire`
+> **DELIVERED (2026-07-03) — the change of numéraire, both seam directions (substantial advance on
+> [#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45)).** (1) `Foundations/Numeraire.changeOfNumeraire`
 > is the abstract price-invariance law `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` (density `dQ^N/dQ = (N_T·B₀)/(N₀·B_T)`,
-> no integrability hypothesis), delivered as the **`full`** entry `mf-change-of-numeraire` and **consumed** by
-> the BS stock numéraire (`stockNumeraireMeasure_eq_numeraireMeasure`). This wires the change-of-numéraire
-> *formula* — the IV↔I measure-change law. **Honest remainder for #45:** the *log-optimal = numéraire ⇒ EMM*
-> core (the numéraire-portfolio ⟷ EMM identity) is **still open** — it needs a market / state-price-density
-> model `Performance/Kelly` does not yet carry; #45 stays open.
+> no integrability hypothesis), **`full`** entry `mf-change-of-numeraire`, **consumed** by two instances — the
+> BS stock numéraire (`stockNumeraireMeasure_eq_numeraireMeasure`) and Margrabe's `S²`-numéraire
+> (`exchangeOption_numeraire_price`, entry `mf-exchange-numeraire`). (2) `Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral`
+> (entry `mf-kelly-numeraire-emm`) delivers the *log-optimal = numéraire ⇒ EMM* direction: the growth-optimal
+> (Kelly) wealth as deflator turns the physical measure into the EMM, the `p`-independence being the Kelly FOC.
+> **Honest remainder for #45:** direction (2) is the **discrete, two-outcome** shadow; the **continuous**
+> Long/Platen benchmark (deflated prices are `P`-martingales for a continuous market) still needs a
+> state-price-density model absent from the tower. #45 stays open for that continuous core.
 
 > **Forward — two tracks (name the axis first).** The remaining work splits cleanly, and the axis
 > decides the phase:
 > - **Finance-delivery track** (finance theorems — the q-fin.MF / "formal theory of finance" artifact):
 >   the **numéraire bridge** IV↔I ([#45](https://github.com/raphaelrrcoelho/formal-mathfin/issues/45) —
->   change-of-numéraire *formula* now delivered 2026-07-03; the log-optimal = numéraire ⇒ EMM core still
->   OPEN); wire `ExchangeOption`/`Garman` as further `numeraireMeasure` instances; **finance
+>   change-of-numéraire formula + `S²`-numéraire instance + the discrete Kelly numéraire-portfolio ⇒ EMM
+>   all delivered 2026-07-03; only the *continuous* Long/Platen benchmark still OPEN); the forward-measure
+>   (bond numéraire) instance is the natural next `numeraireMeasure` instance; **finance
 >   breadth** ([#46](https://github.com/raphaelrrcoelho/formal-mathfin/issues/46) — exotic + American
 >   options, Vasicek bond pricing, coherent-risk/CVaR breadth). These ship finance results — bridges and
 >   theorems like convex-duality (I↔IV) and Feynman–Kac (II↔III).

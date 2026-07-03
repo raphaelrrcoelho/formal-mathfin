@@ -74,12 +74,14 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
-## 2026-07-03 — corpus 310 — The change of numéraire: price invariance (IV↔I seam)
+## 2026-07-03 — corpus 312 — The change of numéraire: the full IV↔I seam (backbone + both directions)
 
-**Scope**: `Foundations/Numeraire.lean` (new) + the `BlackScholes/StockNumeraire` wiring. Reviewed
-self-critically against the green `lake build` + the pinned Mathlib change-of-measure API (the
-`ChangeOfMeasure` engine's `setIntegral_withDensity_eq_setIntegral_toReal_smul` idiom), not by a
-sycophantic panel.
+**Scope**: `Foundations/Numeraire.lean` (new) + `BlackScholes/StockNumeraire` + `BlackScholes/ExchangeOption`
++ `Performance/KellyNumeraire.lean` (new). Reviewed self-critically against the green `lake build` + the
+pinned Mathlib change-of-measure API (the `ChangeOfMeasure` engine's
+`setIntegral_withDensity_eq_setIntegral_toReal_smul` idiom), not by a sycophantic panel. **This entry
+covers the full day's arc**: the backbone was built first, then — executing this same review's ranked
+backlog items 1 and 2 in-session — the two seam directions were added.
 
 **Per-lens read (exemplar → next upgrade):**
 - **Coherence (Mathlib/Degenne)** — *exemplar*: `changeOfNumeraire` consumes `integral_withDensity_eq_integral_toReal_smul` directly rather than re-deriving transport; the density idiom `ENNReal.ofReal ∘ (real)` + `toReal_ofReal` matches the repo's own `ChangeOfMeasure` engine. *Next*: state the density as an `rnDeriv` / relate to `Measure.rnDeriv` so it plugs into Mathlib's Radon–Nikodym API.
@@ -87,12 +89,14 @@ sycophantic panel.
 - **First principles** — *exemplar*: the proof is the one-line cancellation of `N_T`, with the *no-integrability-needed* observation made explicit (it is a measure-transport identity, true for every claim). *Next*: derive the numéraire-portfolio ⟷ EMM identity from first principles (the deep seam, below).
 - **Zero slop** — no wrapper: the abstract theorem does real work (density construction + cancellation) and generalizes three hand-rolled instances. Green, sorry-free, warning-free; axiom-clean `[propext, Classical.choice, Quot.sound]`.
 
-**Upgrades executed this session:** (1) the abstract `changeOfNumeraire` backbone + probability-measure companion; (2) **wired** it into `StockNumeraire` (the coherence win — a consumed backbone); (3) honest scope framing in every doc (formula wired; portfolio↔EMM still absent) rather than claiming the seam "done."
+**Upgrades executed this session:** (1) the abstract `changeOfNumeraire` backbone + probability-measure companion; (2) **wired** it into `StockNumeraire` (a consumed backbone); (3) **backlog item 2 (partial)** — `ExchangeOption.exchangeOption_numeraire_price` makes Margrabe's `S²`-numéraire valuation a genuine `changeOfNumeraire` instance; on inspection **Garman is closed-form algebra with no measure**, so it is honestly *not* wireable and none was faked; (4) **backlog item 1** — `Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral` delivers the numéraire-portfolio ⟹ EMM direction in the discrete Kelly market (the `p`-independence of the GOP-deflated probabilities *is* the Kelly FOC); (5) honest scope framing in every doc (discrete Kelly shadow; continuous Long/Platen still open).
+
+**A note on the discipline (lens 2 + zero-slop):** backlog item 2 was stated this morning as "wire `ExchangeOption` **and** `GarmanNormalForm` as instances." Executing it revealed the premise was half-wrong — only `ExchangeOption` has a measure to wire; `Garman` is post-integration closed form. The honest outcome (one real instance + a documented non-instance) beats forcing a wrapper to hit a self-set target. The backlog is a hypothesis generator, not a checklist to satisfy at the cost of honesty.
 
 **Ranked backlog (value-aligned):**
-1. **The numéraire-portfolio ⟷ EMM identity** (Kelly/growth-optimal as numéraire ⟹ deflated prices are `P`-martingales, EMM density `∝ 1/N*`) — the deep IV↔I seam; blocked on a market / state-price-density model that `Performance/Kelly` (discrete single-bet growth) does not carry. Owner: next finance phase.
-2. Wire `ExchangeOption` + `GarmanNormalForm` as further `numeraireMeasure` instances (retire the per-file hand derivations). Owner: follow-up.
-3. A forward-measure (zero-coupon-bond numéraire) instance in `FixedIncome`, under which forward rates are martingales.
+1. **The *continuous* numéraire-portfolio benchmark** (Long/Platen): deflated prices are `P`-martingales, EMM density `∝ 1/N*`, for a continuous market. Needs a state-price-density / market model absent from the Itô tower — the multi-session mountain behind the discrete Kelly result now delivered.
+2. A forward-measure (zero-coupon-bond numéraire) instance in `FixedIncome`, under which forward rates are martingales — the natural third `numeraireMeasure` instance after stock and `S²`.
+3. Relate `numeraireDensity` to `Measure.rnDeriv` so the backbone plugs into Mathlib's Radon–Nikodym API (lens-1 coherence upgrade).
 4. SDE #19 (the `sc-thm-8.2.5` ℝ-time translation + Grönwall) remains the standing formalization-axis backlog item.
 
 ## 2026-07-02 — corpus 309 — SDE Picard: 3-agent values AUDIT + relocation upgrades

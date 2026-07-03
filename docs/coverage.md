@@ -26,20 +26,25 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-03, the change of numéraire — price invariance, IV↔I):** corpus
-> **310**, **275 full + 18 wrappers = 293/310 delivery-ready**, 17 reduced cores, 0 placeholders.
-> **The library now has a general change-of-numéraire theorem.**
-> `Foundations/Numeraire.changeOfNumeraire` (entry `mf-change-of-numeraire`, **`full`**) proves price
+> **Live status (2026-07-03, the change of numéraire — the IV↔I seam):** corpus
+> **312**, **277 full + 18 wrappers = 295/312 delivery-ready**, 17 reduced cores, 0 placeholders.
+> **The library now has a general change-of-numéraire theorem plus both of its seam directions.**
+> (1) `Foundations/Numeraire.changeOfNumeraire` (entry `mf-change-of-numeraire`, **`full`**) proves price
 > is numéraire-invariant: with `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))`, every terminal claim `X`
 > satisfies `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]` — a pure measure-transport identity plus cancellation
-> of `N_T`, needing **no integrability hypothesis**; the companion `numeraireMeasure_isProbabilityMeasure`
-> is the normalization (`N/B` a `Q`-martingale ⟹ `Q^N` a probability measure). The abstract backbone is
-> **consumed**, not orphaned: `BlackScholes.StockNumeraire.stockNumeraireMeasure_eq_numeraireMeasure`
-> exhibits the Black–Scholes stock numéraire `dQ^(S)/dQ = e^{−rT}·S_T/S₀` as the instance
-> `B_T = e^{rT}`, `B₀ = 1`, `N = S`. **Honest scope:** this wires the change-of-numéraire *formula*
-> (the IV↔I measure-change law). The *numéraire-portfolio* ↔ EMM identity (the Kelly/growth-optimal
-> portfolio as numéraire, Long/Platen benchmark approach) remains **absent** — it needs a market /
-> state-price-density model that `Performance/Kelly` does not yet carry.
+> of `N_T`, needing **no integrability hypothesis**. The backbone is **consumed**, not orphaned:
+> `StockNumeraire.stockNumeraireMeasure_eq_numeraireMeasure` exhibits the BS stock numéraire as the
+> instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`, and `ExchangeOption.exchangeOption_numeraire_price` (entry
+> `mf-exchange-numeraire`, **`full`**) exhibits Margrabe's `S²`-numéraire valuation as the instance
+> `X =` exchange payoff, `N = S²`. (2) `Performance/KellyNumeraire.kellyNumeraire_isRiskNeutral` (entry
+> `mf-kelly-numeraire-emm`, **`full`**) delivers the *numéraire-portfolio ⟹ EMM* direction: the
+> growth-optimal (Kelly) wealth, used as deflator, turns the physical measure into the risk-neutral one
+> (`q₊·b + q₋·(−1) = 0`), the `p`-independence being exactly the Kelly first-order condition. **Honest
+> scope:** the portfolio⟹EMM direction is the **discrete, two-outcome** market — the elementary shadow of
+> the **continuous** Long/Platen benchmark theorem (deflated prices are `P`-martingales, EMM density
+> `∝ 1/N*`), which still needs a state-price-density / market model absent from the Itô tower. Garman's
+> normal form is post-integration closed-form algebra (no measure), so it is not a `numeraireMeasure`
+> instance and none was fabricated.
 >
 > **Prior (2026-07-02, SDE existence — the Picard fixed point, #44):** corpus
 > **309**, **274 full + 18 wrappers = 292/309 delivery-ready**, 17 reduced cores, 0 placeholders.
