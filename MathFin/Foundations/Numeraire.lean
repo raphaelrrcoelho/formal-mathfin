@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.ChangeOfMeasure
 
 /-!
 # The change of numéraire
@@ -50,6 +51,11 @@ choosing `B`, `N` and reading off the density.
   measure, under the martingale/normalization condition `𝔼^Q[N_T/B_T] = N₀/B₀`.
 * `MathFin.changeOfNumeraire` — price invariance
   `N₀·𝔼^{Q^N}[X/N_T] = B₀·𝔼^Q[X/B_T]`.
+* `MathFin.changeOfNumeraire_setIntegral_eq` — the **dynamic** change of numéraire:
+  if `t ↦ (B₀/N₀)(X_t/B_t)` is a `Q`-martingale then `X/N` has the set-integral
+  martingale property under `Q^N`. Obtained by instantiating the Bayes engine
+  `changeOfMeasure_setIntegral_eq` at density process `Z_t = (N_t·B₀)/(N₀·B_t)` and
+  payoff `D_t = X_t/N_t` — wiring the numéraire seam to the Girsanov engine.
 -/
 
 @[expose] public section
@@ -138,5 +144,67 @@ theorem changeOfNumeraire (X : Ω → ℝ)
   exact hcancel
 
 end
+
+section Dynamic
+
+open scoped NNReal
+
+variable {mΩ : MeasurableSpace Ω} {Q : Measure Ω} [IsFiniteMeasure Q]
+  {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration Q 𝓕]
+  {B N X : ℝ≥0 → Ω → ℝ} {B0 N0 : ℝ}
+
+/-- **The dynamic change-of-numéraire theorem** (set-integral form). Fix a pricing
+measure `Q` for the reference numéraire `B` and a second strictly positive numéraire
+`N`, both adapted, with the normalisation process `t ↦ (B₀/N₀)(N_t/B_t)` a
+`Q`-martingale (`hNB` — the dynamic form of `𝔼^Q[N_T/B_T] = N₀/B₀`). If the discounted
+claim `t ↦ (B₀/N₀)(X_t/B_t)` is a `Q`-martingale (`hXB`), then `X/N` has the
+`Q^N`-martingale (set-integral) property under the numéraire measure
+`Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))`: for `s ≤ t ≤ T` and `A ∈ 𝓕_s`, the
+`Q^N`-integrals of `X_t/N_t` and `X_s/N_s` over `A` agree.
+
+This is the **Bayes engine** `changeOfMeasure_setIntegral_eq` instantiated at the
+density process `Z_t = (N_t·B₀)/(N₀·B_t)` and payoff process `D_t = X_t/N_t`, whose
+product `Z_t·D_t = (B₀/N₀)(X_t/B_t)` is exactly `hXB` (the `N_t` cancels). It wires the
+change-of-numéraire seam to the Girsanov change-of-measure engine. The tilted measure
+is definitionally `numeraireMeasure Q (B T) (N T) B0 N0`. -/
+theorem changeOfNumeraire_setIntegral_eq (T : ℝ≥0)
+    (hNpos : ∀ u ω, 0 < N u ω) (hBpos : ∀ u ω, 0 < B u ω)
+    (hB0 : 0 ≤ B0) (hN0 : 0 < N0)
+    (hNmeas : ∀ u, Measurable (N u)) (hBmeas : ∀ u, Measurable (B u))
+    (hDsm : ∀ u, StronglyMeasurable[𝓕 u] (fun ω => X u ω / N u ω))
+    (hNB : Martingale (fun t ω => (B0 / N0) * (N t ω / B t ω)) 𝓕 Q)
+    (hXB : Martingale (fun t ω => (B0 / N0) * (X t ω / B t ω)) 𝓕 Q)
+    (hmix : ∀ u, u ≤ T →
+      Integrable (fun ω => X u ω / N u ω * (N T ω * B0 / (N0 * B T ω))) Q)
+    {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T)
+    {A : Set Ω} (hA : MeasurableSet[𝓕 s] A) :
+    ∫ ω in A, X t ω / N t ω
+        ∂(Q.withDensity (fun ω => ENNReal.ofReal (N T ω * B0 / (N0 * B T ω))))
+      = ∫ ω in A, X s ω / N s ω
+        ∂(Q.withDensity (fun ω => ENNReal.ofReal (N T ω * B0 / (N0 * B T ω)))) := by
+  -- The density `Z_T = (N_T·B₀)/(N₀·B_T)` is measurable and nonnegative.
+  have hZmeasT : Measurable (fun ω => N T ω * B0 / (N0 * B T ω)) :=
+    ((hNmeas T).mul measurable_const).div (measurable_const.mul (hBmeas T))
+  have hZpos : ∀ ω, 0 ≤ N T ω * B0 / (N0 * B T ω) := fun ω =>
+    div_nonneg (mul_nonneg (hNpos T ω).le hB0) (mul_nonneg hN0.le (hBpos T ω).le)
+  -- `Z_t = (N_t·B₀)/(N₀·B_t) = (B₀/N₀)(N_t/B_t)` is the normalisation martingale `hNB`.
+  have hZ : Martingale (fun u ω => N u ω * B0 / (N0 * B u ω)) 𝓕 Q := by
+    have hfeq : (fun u (ω : Ω) => N u ω * B0 / (N0 * B u ω))
+        = fun u ω => (B0 / N0) * (N u ω / B u ω) := by
+      funext u ω; ring
+    rw [hfeq]; exact hNB
+  -- `Z_t·D_t = (B₀/N₀)(X_t/B_t)` — the `N_t` cancels — is the martingale `hXB`.
+  have hZD : Martingale
+      (fun t ω => N t ω * B0 / (N0 * B t ω) * (X t ω / N t ω)) 𝓕 Q := by
+    have hfeq : (fun t (ω : Ω) => N t ω * B0 / (N0 * B t ω) * (X t ω / N t ω))
+        = fun t ω => (B0 / N0) * (X t ω / B t ω) := by
+      funext u ω
+      field_simp [hN0.ne', (hNpos u ω).ne', (hBpos u ω).ne']
+    rw [hfeq]; exact hXB
+  -- Instantiate the Bayes engine at `Z_t = (N_t·B₀)/(N₀·B_t)`, `D_t = X_t/N_t`.
+  exact changeOfMeasure_setIntegral_eq (Z := fun u ω => N u ω * B0 / (N0 * B u ω))
+    (D := fun u ω => X u ω / N u ω) T hZmeasT hZpos hDsm hZ hZD hmix hst htT hA
+
+end Dynamic
 
 end MathFin

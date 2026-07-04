@@ -44,7 +44,7 @@ the second-moment integral via `integral_map` + `variance_id_gaussianReal`. -/
 structure BrownianQuadraticVariation {Ω : Type*} [MeasurableSpace Ω]
     (μ : Measure Ω) (B : ℝ → Ω → ℝ) : Prop where
   measurable : ∀ t : ℝ, Measurable (B t)
-  gaussian_increments : ∀ ⦃s t : ℝ⦄, s ≤ t →
+  gaussian_increments : ∀ ⦃s t : ℝ⦄, 0 ≤ s → s ≤ t →
     ∃ v : NNReal, (v : ℝ) = t - s ∧
       Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v
 
@@ -65,9 +65,9 @@ private lemma integrable_sq_gaussianReal_zero (v : ℝ≥0) :
 
 /-- For `s ≤ t`, the squared increment `(B t − B s)²` has expectation `t − s`. -/
 theorem integral_sq_increment (hB : BrownianQuadraticVariation μ B)
-    {s t : ℝ} (hst : s ≤ t) :
+    {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ^ 2 ∂μ = t - s := by
-  obtain ⟨v, hv, h_map⟩ := hB.gaussian_increments hst
+  obtain ⟨v, hv, h_map⟩ := hB.gaussian_increments hs hst
   have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
   have h_map_int : ∫ y : ℝ, y ^ 2 ∂(Measure.map (fun ω => B t ω - B s ω) μ)
@@ -77,9 +77,9 @@ theorem integral_sq_increment (hB : BrownianQuadraticVariation μ B)
 
 /-- The squared increment is integrable. -/
 theorem integrable_sq_increment (hB : BrownianQuadraticVariation μ B)
-    {s t : ℝ} (hst : s ≤ t) :
+    {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     Integrable (fun ω => (B t ω - B s ω) ^ 2) μ := by
-  obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hst
+  obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hs hst
   have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
   refine (show Integrable ((fun x : ℝ => x ^ 2) ∘ (fun ω => B t ω - B s ω)) μ from
@@ -91,9 +91,9 @@ theorem integrable_sq_increment (hB : BrownianQuadraticVariation μ B)
 Pushforward law is `gaussianReal 0 v` with `v = t − s`; the first moment of
 a centred Gaussian is `0`. -/
 theorem integral_increment (hB : BrownianQuadraticVariation μ B)
-    {s t : ℝ} (hst : s ≤ t) :
+    {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ∂μ = 0 := by
-  obtain ⟨v, _hv, h_map⟩ := hB.gaussian_increments hst
+  obtain ⟨v, _hv, h_map⟩ := hB.gaussian_increments hs hst
   have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
   have h_map_int : ∫ y : ℝ, y ∂(Measure.map (fun ω => B t ω - B s ω) μ)
@@ -103,9 +103,9 @@ theorem integral_increment (hB : BrownianQuadraticVariation μ B)
 
 /-- Integrability of the BM increment `B_t − B_s` under a finite measure. -/
 theorem integrable_increment [IsFiniteMeasure μ]
-    (hB : BrownianQuadraticVariation μ B) {s t : ℝ} (hst : s ≤ t) :
+    (hB : BrownianQuadraticVariation μ B) {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     Integrable (fun ω => B t ω - B s ω) μ := by
-  obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hst
+  obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hs hst
   have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
   refine (show Integrable ((fun x : ℝ => x) ∘ (fun ω => B t ω - B s ω)) μ from
@@ -121,6 +121,11 @@ private lemma equipartition_endpoint_le {t : ℝ} (ht : 0 ≤ t) (n k : ℕ) :
   rw [div_le_div_iff_of_pos_right hn]
   nlinarith
 
+/-- Left endpoint of the `k`-th equipartition cell is nonnegative when `0 ≤ t`. -/
+private lemma equipartition_start_nonneg {t : ℝ} (ht : 0 ≤ t) (n k : ℕ) :
+    (0 : ℝ) ≤ (k : ℝ) * t / (n + 1) :=
+  div_nonneg (mul_nonneg (Nat.cast_nonneg k) ht) (by positivity)
+
 /-- Expectation of the squared-increment sum along the equipartition:
 `∫ Σ_k (B_{(k+1)t/(n+1)} − B_{kt/(n+1)})² ∂μ = n t / (n + 1)`. -/
 private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ B)
@@ -129,11 +134,13 @@ private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ 
         (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
       = n * t / (n + 1) := by
   rw [integral_finsetSum _
-    (fun k _ => hB.integrable_sq_increment (equipartition_endpoint_le ht n k))]
+    (fun k _ => hB.integrable_sq_increment (equipartition_start_nonneg ht n k)
+      (equipartition_endpoint_le ht n k))]
   have hsum : ∀ k ∈ Finset.range n,
       ∫ ω, (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
         = t / (n + 1) := fun k _ => by
-    rw [hB.integral_sq_increment (equipartition_endpoint_le ht n k)]
+    rw [hB.integral_sq_increment (equipartition_start_nonneg ht n k)
+      (equipartition_endpoint_le ht n k)]
     field_simp
     ring
   rw [Finset.sum_congr rfl hsum, Finset.sum_const, Finset.card_range, nsmul_eq_mul]
@@ -176,5 +183,34 @@ theorem qv_equals_t (hB : BrownianQuadraticVariation μ B)
     (hB.integral_sum_sq_equipartition ht n).symm
 
 end BrownianQuadraticVariation
+
+/-- **Bridge: a (measurable) pre-Brownian motion is a quadratic-variation
+process.** Reparametrising a Mathlib `IsPreBrownianReal` process
+`B : ℝ≥0 → Ω → ℝ` to the real line via `Real.toNNReal` (`B' t := B t.toNNReal`),
+the result satisfies the `BrownianQuadraticVariation` hypotheses, so the whole
+variance-swap tower can be driven from a single `IsPreBrownianReal` hypothesis
+(plus evaluation-measurability — `IsPreBrownianReal` supplies only a.e.
+measurability). The increment law is read off `IsPreBrownianReal.hasLaw_sub` with
+arguments `t' s'` (subject `B t' − B s'`, no negation), mirroring
+`Foundations.WienerIntegral.hasLaw_increment`. -/
+theorem brownianQuadraticVariation_of_isPreBrownianReal
+    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
+    (hB : IsPreBrownianReal B μ) (hBmeas : ∀ u : ℝ≥0, Measurable (B u)) :
+    BrownianQuadraticVariation μ (fun t ω => B t.toNNReal ω) where
+  measurable t := hBmeas t.toNNReal
+  gaussian_increments := by
+    intro s t hs hst
+    have ht : (0 : ℝ) ≤ t := hs.trans hst
+    have hst' : s.toNNReal ≤ t.toNNReal := Real.toNNReal_mono hst
+    refine ⟨t.toNNReal - s.toNNReal, ?_, ?_⟩
+    · rw [NNReal.coe_sub hst', Real.coe_toNNReal t ht, Real.coe_toNNReal s hs]
+    · have hL := hB.hasLaw_sub t.toNNReal s.toNNReal
+      have hvar : nndist (t.toNNReal : ℝ) (s.toNNReal : ℝ)
+          = (t.toNNReal - s.toNNReal : ℝ≥0) := by
+        apply NNReal.coe_injective
+        rw [coe_nndist, Real.dist_eq, NNReal.coe_sub hst',
+          abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst'))]
+      rw [← hvar]
+      exact hL.map_eq
 
 end MathFin

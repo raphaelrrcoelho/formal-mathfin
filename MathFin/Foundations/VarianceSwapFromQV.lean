@@ -81,7 +81,7 @@ strike (deferred to a follow-up phase). -/
 theorem expected_bsLogPrice_sq_increment
     [IsProbabilityMeasure μ]
     (hB : BrownianQuadraticVariation μ B)
-    (S_0 r σ : ℝ) {s t : ℝ} (hst : s ≤ t) :
+    (S_0 r σ : ℝ) {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     ∫ ω, (bsLogPrice S_0 r σ B t ω - bsLogPrice S_0 r σ B s ω) ^ 2 ∂μ
       = σ ^ 2 * (t - s) + (r - σ ^ 2 / 2) ^ 2 * (t - s) ^ 2 := by
   -- Increment: X_t - X_s = (r-σ²/2)(t-s) + σ(B_t - B_s)
@@ -105,10 +105,10 @@ theorem expected_bsLogPrice_sq_increment
   have h_int_const : Integrable (fun _ : Ω => a ^ 2) μ := integrable_const _
   have h_int_lin : Integrable
       (fun ω => 2 * a * σ * (B t ω - B s ω)) μ :=
-    (hB.integrable_increment hst).const_mul (2 * a * σ)
+    (hB.integrable_increment hs hst).const_mul (2 * a * σ)
   have h_int_sq : Integrable
       (fun ω => σ ^ 2 * (B t ω - B s ω) ^ 2) μ :=
-    (hB.integrable_sq_increment hst).const_mul (σ ^ 2)
+    (hB.integrable_sq_increment hs hst).const_mul (σ ^ 2)
   -- Split the three-term integral via two `integral_add` extractions (avoids
   -- the syntactic-vs-definitional mismatch between `Integrable.add` Pi-form
   -- and the literal lambda in the goal).
@@ -126,9 +126,9 @@ theorem expected_bsLogPrice_sq_increment
   have h_const_int : ∫ _ω : Ω, (a : ℝ) ^ 2 ∂μ = a ^ 2 := by
     rw [integral_const]; simp
   have h_lin_int : ∫ ω, 2 * a * σ * (B t ω - B s ω) ∂μ = 0 := by
-    rw [integral_const_mul, hB.integral_increment hst, mul_zero]
+    rw [integral_const_mul, hB.integral_increment hs hst, mul_zero]
   have h_sq_int : ∫ ω, σ ^ 2 * (B t ω - B s ω) ^ 2 ∂μ = σ ^ 2 * (t - s) := by
-    rw [integral_const_mul, hB.integral_sq_increment hst]
+    rw [integral_const_mul, hB.integral_sq_increment hs hst]
   rw [h_split_outer, h_split_inner, h_const_int, h_lin_int, h_sq_int]
   rw [a_def]
   ring

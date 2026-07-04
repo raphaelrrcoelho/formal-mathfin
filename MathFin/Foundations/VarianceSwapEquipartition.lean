@@ -51,7 +51,7 @@ of `(B_t − B_s)²`. -/
 theorem integrable_bsLogPrice_sq_increment
     [IsFiniteMeasure μ]
     (hB : BrownianQuadraticVariation μ B) (S_0 r σ : ℝ)
-    {s t : ℝ} (hst : s ≤ t) :
+    {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     Integrable (fun ω => (bsLogPrice S_0 r σ B t ω -
                           bsLogPrice S_0 r σ B s ω) ^ 2) μ := by
   set a : ℝ := (r - σ ^ 2 / 2) * (t - s) with a_def
@@ -64,8 +64,8 @@ theorem integrable_bsLogPrice_sq_increment
     rw [a_def]; ring
   rw [h_eq]
   exact ((integrable_const _).add
-    ((hB.integrable_increment hst).const_mul _)).add
-    ((hB.integrable_sq_increment hst).const_mul _)
+    ((hB.integrable_increment hs hst).const_mul _)).add
+    ((hB.integrable_sq_increment hs hst).const_mul _)
 
 /-- **Variance-swap equipartition sum identity** (phase 33, main theorem).
 For BS log-price `X_t := log S_0 + (r − σ²/2)·t + σ·B_t` under
@@ -91,6 +91,8 @@ theorem expected_bsLogPrice_equipartition_sum
       = σ ^ 2 * T + (r - σ ^ 2 / 2) ^ 2 * T ^ 2 / ((n : ℝ) + 1) := by
   have hn_pos : (0 : ℝ) < (n : ℝ) + 1 := by positivity
   have hn_ne : ((n : ℝ) + 1) ≠ 0 := hn_pos.ne'
+  have h_start_nonneg : ∀ k : ℕ, (0 : ℝ) ≤ (k : ℝ) * T / ((n : ℝ) + 1) :=
+    fun k => div_nonneg (mul_nonneg (Nat.cast_nonneg k) hT) hn_pos.le
   -- subinterval endpoint inequality
   have h_endpt_le : ∀ k : ℕ,
       (((k : ℝ) * T) / ((n : ℝ) + 1)) ≤
@@ -107,7 +109,7 @@ theorem expected_bsLogPrice_equipartition_sum
     ring
   -- swap sum and integral
   rw [integral_finsetSum _ (fun k _ =>
-    integrable_bsLogPrice_sq_increment hB S_0 r σ (h_endpt_le k))]
+    integrable_bsLogPrice_sq_increment hB S_0 r σ (h_start_nonneg k) (h_endpt_le k))]
   -- per-summand QV identity
   have h_each : ∀ k ∈ Finset.range (n + 1),
       ∫ ω, (bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -
@@ -115,7 +117,7 @@ theorem expected_bsLogPrice_equipartition_sum
       = σ ^ 2 * (T / ((n : ℝ) + 1)) +
         (r - σ ^ 2 / 2) ^ 2 * (T / ((n : ℝ) + 1)) ^ 2 := by
     intro k _
-    rw [expected_bsLogPrice_sq_increment hB S_0 r σ (h_endpt_le k)]
+    rw [expected_bsLogPrice_sq_increment hB S_0 r σ (h_start_nonneg k) (h_endpt_le k)]
     rw [h_len k]
   rw [Finset.sum_congr rfl h_each, Finset.sum_const, Finset.card_range,
       nsmul_eq_mul]
