@@ -70,15 +70,10 @@ theorem hasDerivAt_modifiedNumerator
     HasDerivAt (fun y' => modifiedNumerator s t c y')
                (-convexityNumerator s t c y) y := by
   unfold modifiedNumerator convexityNumerator
-  have h_eta : (fun y' : ℝ => ∑ i ∈ s, (t i : ℝ) * c i / (1 + y') ^ (t i + 1)) =
-               ∑ i ∈ s, (fun y' : ℝ => (t i : ℝ) * c i / (1 + y') ^ (t i + 1)) := by
-    funext y'
-    simp only [Finset.sum_apply]
-  rw [h_eta]
   rw [show -∑ i ∈ s, (t i : ℝ) * ((t i : ℝ) + 1) * c i / (1 + y) ^ (t i + 2) =
       ∑ i ∈ s, (-((t i : ℝ) * ((t i : ℝ) + 1) * c i / (1 + y) ^ (t i + 2))) from by
     rw [← Finset.sum_neg_distrib]]
-  apply HasDerivAt.sum
+  apply HasDerivAt.fun_sum
   intros i _
   have h_term : HasDerivAt (fun y' : ℝ => c i / (1 + y') ^ (t i + 1))
                 (-(((t i + 1 : ℕ) : ℝ) * c i / (1 + y) ^ (t i + 1 + 1))) y :=
@@ -107,8 +102,8 @@ theorem hasDerivAt_bondPriceDisc_secondDeriv
     HasDerivAt (fun y' => -modifiedNumerator s t c y')
                (convexityNumerator s t c y) y := by
   have h := (hasDerivAt_modifiedNumerator s t c hy).neg
-  convert h using 1 <;> try rfl
-  ring
+  rw [neg_neg] at h
+  exact h
 
 /-- **Convexity-sensitivity identity**: `P''(y)/P(y) = C(y) = ConvNum/P`. The
 percentage second derivative of price equals convexity, completing the

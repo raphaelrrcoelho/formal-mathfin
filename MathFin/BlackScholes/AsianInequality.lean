@@ -93,4 +93,17 @@ lemma geom_mean_le_arith_mean_n {n : ℕ} (f : Fin n → ℝ)
   rw [h_rhs_simp] at h_mul
   exact h_mul
 
+/-- **n-date geometric vs arithmetic Asian payoff**: the geometric-mean Asian
+call payoff is bounded above by the arithmetic-mean one, for any number `n` of
+averaging dates — the `n`-date extension of `asian_payoff_geom_le_arith_two`,
+a one-line `max_le_max` over the already-proved AM-GM `geom_mean_le_arith_mean_n`. -/
+lemma asian_payoff_geom_le_arith_n {n : ℕ} (S : Fin n → ℝ)
+    (h_nn : ∀ i, 0 ≤ S i) (hn : 0 < n) (K : ℝ) :
+    max ((∏ i, S i ^ ((n : ℝ)⁻¹)) - K) 0 ≤ max ((∑ i, S i) / n - K) 0 := by
+  have hn_pos : (0 : ℝ) < n := Nat.cast_pos.mpr hn
+  have h := geom_mean_le_arith_mean_n S h_nn hn
+  have h_div : (∏ i, S i ^ ((n : ℝ)⁻¹)) ≤ (∑ i, S i) / n := by
+    rw [le_div_iff₀ hn_pos, mul_comm]; exact h
+  exact max_le_max (by linarith) le_rfl
+
 end MathFin

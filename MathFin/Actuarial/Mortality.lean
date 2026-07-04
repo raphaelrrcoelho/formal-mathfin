@@ -121,14 +121,14 @@ theorem compoundPoisson_mgf_identity (lam M : ℝ) :
   congr 1; ring
 
 /-- **Lundberg adjustment-coefficient equation**: `λ · (M(R) − 1) − c · R = 0`. -/
-def isLundbergAdjustmentCoefficient (lam c R : ℝ) (M : ℝ → ℝ) : Prop :=
+def IsLundbergAdjustmentCoefficient (lam c R : ℝ) (M : ℝ → ℝ) : Prop :=
   lam * (M R - 1) - c * R = 0
 
 /-- **Trivial root at zero**: `R = 0` always satisfies the adjustment equation
 when `M 0 = 1` (which holds for any MGF). -/
 theorem lundberg_zero_at_zero (lam c : ℝ) (M : ℝ → ℝ) (hM0 : M 0 = 1) :
-    isLundbergAdjustmentCoefficient lam c 0 M := by
-  unfold isLundbergAdjustmentCoefficient
+    IsLundbergAdjustmentCoefficient lam c 0 M := by
+  unfold IsLundbergAdjustmentCoefficient
   rw [hM0]
   ring
 

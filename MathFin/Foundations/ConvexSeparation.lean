@@ -35,7 +35,6 @@ The underlying separation is the cone root `MathFin.exists_pos_separating_of_con
 
 namespace MathFin
 
-open scoped BigOperators
 
 /-- **Separating-dual kernel.** A subspace `V` of the finite-dimensional space
 `ι → ℝ` that meets the standard simplex only outside itself admits a

@@ -158,10 +158,13 @@ noncomputable def binomialPrice (u d r : ℝ) (g : ℝ → ℝ) : ℕ → ℝ �
         (crrUpProb u d r * binomialPrice u d r g n (S * u) +
          (1 - crrUpProb u d r) * binomialPrice u d r g n (S * d))
 
+/-- At maturity (`n = 0`) the binomial price is the payoff `g S`. -/
 @[simp]
 lemma binomialPrice_zero (u d r : ℝ) (g : ℝ → ℝ) (S : ℝ) :
     binomialPrice u d r g 0 S = g S := rfl
 
+/-- One-step backward recursion: the price at `n+1` is the discounted risk-neutral
+average of the prices at the up/down successors. -/
 lemma binomialPrice_succ (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
     binomialPrice u d r g (n + 1) S =
       Real.exp (-r) *

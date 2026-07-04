@@ -30,7 +30,6 @@ the precise "ρ = sup over measures" statement without the conditionally-complet
 
 namespace MathFin
 
-open scoped BigOperators
 
 /-- The four Artzner–Delbaen–Eber–Heath axioms of a coherent risk measure on a finite state space:
 monotonicity, cash-invariance, positive homogeneity, subadditivity. -/

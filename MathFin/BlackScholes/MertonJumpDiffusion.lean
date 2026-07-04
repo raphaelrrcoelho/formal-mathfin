@@ -89,11 +89,13 @@ noncomputable def mertonSpot (S_0 k : ℝ) (Λ : ℝ≥0) (n : ℕ) : ℝ :=
 noncomputable def mertonVol (σ δ T : ℝ) (n : ℕ) : ℝ :=
   Real.sqrt (σ ^ 2 + (n : ℝ) * δ ^ 2 / T)
 
+/-- The Merton jump-conditional spot is positive (`S₀`, the drift `exp`, and `(1+k)ⁿ` all positive). -/
 lemma mertonSpot_pos {S_0 k : ℝ} (hS_0 : 0 < S_0) (hk : -1 < k)
     (Λ : ℝ≥0) (n : ℕ) : 0 < mertonSpot S_0 k Λ n := by
   have h1k : (0 : ℝ) < 1 + k := by linarith
   exact mul_pos (mul_pos hS_0 (Real.exp_pos _)) (pow_pos h1k n)
 
+/-- The Merton jump-conditional volatility is positive (`σ > 0`; the radicand is a sum of nonnegatives). -/
 lemma mertonVol_pos {σ δ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) (n : ℕ) :
     0 < mertonVol σ δ T n := by
   apply Real.sqrt_pos.mpr

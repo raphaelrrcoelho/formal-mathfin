@@ -726,21 +726,9 @@ theorem itoIntegralCLM_T_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t))
     (f : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ‖itoIntegralCLM_T hB T hBmeas f‖ = ‖f‖ := by
-  set I := itoIntegralCLM_T hB T hBmeas with hI
-  have h_dense := simpleAssembly_T_denseRange (μ := μ) T hBmeas
-  -- Norm bound `‖itoAssembly_T V‖ ≤ 1 * ‖simpleAssembly_T V‖` (i.e., the isometry).
-  have h_norm : ∀ V : TBoundedSP T hBmeas,
-      ‖itoAssembly_T hB T hBmeas V‖ ≤ 1 * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ :=
-    fun V => by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le
-  -- Equality on `range simpleAssembly_T` by `extendOfNorm_eq` + assembly isometry.
-  have h_on_range : ∀ V : TBoundedSP T hBmeas,
-      ‖I (simpleAssembly_T (μ := μ) T hBmeas V)‖ = ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
-    intro V
-    rw [hI, itoIntegralCLM_T, LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩,
-        assembly_isometry_T hB T hBmeas V]
-  -- Both sides continuous in `f`; agree on a dense set ⇒ agree everywhere.
-  exact h_dense.induction_on (p := fun y => ‖I y‖ = ‖y‖) f
-    (isClosed_eq (continuous_norm.comp I.continuous) continuous_norm) h_on_range
+  rw [itoIntegralCLM_T]
+  exact LinearMap.norm_extendOfNorm_eq_of_isometry
+    (simpleAssembly_T_denseRange (μ := μ) T hBmeas) (assembly_isometry_T hB T hBmeas) f
 
 end ItoIntegralCLM
 end MathFin

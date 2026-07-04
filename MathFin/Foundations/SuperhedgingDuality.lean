@@ -29,7 +29,6 @@ polyhedral / Farkas fact not available in Mathlib at this pin) and is recorded a
 
 namespace MathFin
 
-open scoped BigOperators
 
 variable {M N : ℕ}
 

@@ -69,6 +69,7 @@ noncomputable def clampM (M x : ℝ) : ℝ := max (-M) (min M x)
   rw [clampM, abs_le]
   exact ⟨le_max_left _ _, max_le (by linarith) (min_le_left _ _)⟩
 
+/-- The clamp map `clampM M` is measurable (a composition of continuous truncations). -/
 lemma measurable_clampM (M : ℝ) : Measurable (clampM M) := by
   unfold clampM; fun_prop
 
@@ -252,19 +253,6 @@ noncomputable def riemannFn (_hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n
   ∑ k ∈ Finset.range n, B (unifPart T n k) ω
     * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)
 
-omit mΩ [IsProbabilityMeasure μ] hB in
-/-- `‖g‖² = ∫ (g z)² ∂ν` for `g ∈ Lp 2 ν` (the real `L²` norm-square as an integral),
-for any measure `ν`. The single home for this generic `L²` fact; the
-`Riemann↔CLM` bridge re-uses it at a different measure. -/
-lemma lp_norm_sq {α : Type*} {m : MeasurableSpace α} {ν : Measure α} (g : Lp ℝ 2 ν) :
-    ‖g‖ ^ 2 = ∫ z, (g z) ^ 2 ∂ν := by
-  have h : ⟪g, g⟫_ℝ = ‖g‖ ^ 2 := real_inner_self_eq_norm_sq g
-  rw [L2.inner_def] at h
-  rw [← h]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun a => ?_)
-  show (g a) * (g a) = (g a) ^ 2
-  ring
-
 /-- `MemLp` of the truncated Riemann sum (finite sum of adapted·increment `L²` terms). -/
 lemma memLp_truncRiemannFn (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m : ℕ) :
     MemLp (truncRiemannFn hBmeas T n m) 2 μ := by
@@ -370,7 +358,7 @@ difference, for any measure `ν`. -/
 lemma lp_dist_sq {α : Type*} {m : MeasurableSpace α} {ν : Measure α} {f g : α → ℝ}
     (hf : MemLp f 2 ν) (hg : MemLp g 2 ν) :
     ‖hf.toLp f - hg.toLp g‖ ^ 2 = ∫ z, (f z - g z) ^ 2 ∂ν := by
-  rw [lp_norm_sq]
+  rw [lp_two_norm_sq]
   refine integral_congr_ae ?_
   filter_upwards [Lp.coeFn_sub (hf.toLp f) (hg.toLp g), hf.coeFn_toLp, hg.coeFn_toLp]
     with z h1 h2 h3

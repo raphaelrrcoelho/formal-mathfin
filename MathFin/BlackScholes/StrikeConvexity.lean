@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.StrikeGreeks
+public import MathFin.BlackScholes.GreekSigns
 
 /-!
 # Strike-direction convexity at every scale
@@ -152,11 +153,23 @@ theorem bsV_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ :
           (K * σ * Real.sqrt τ) :=
       (h_KK.congr_of_eventuallyEq h_ev).deriv
     rw [h_d2]
-    have h_exp_pos : 0 < Real.exp (-(r * τ)) := Real.exp_pos _
-    have h_pdf_nn : 0 ≤ gaussianPDFReal 0 1 (bsd2 S K r σ τ) :=
-      gaussianPDFReal_nonneg _ _ _
-    have h_den_pos : 0 < K * σ * Real.sqrt τ :=
-      mul_pos (mul_pos h_pos hσ) (Real.sqrt_pos.mpr hτ)
-    exact div_nonneg (mul_nonneg h_exp_pos.le h_pdf_nn) h_den_pos.le
+    -- the 2nd-`K`-derivative-nonneg step *is* the named butterfly /
+    -- Breeden-Litzenberger sign fact `bsV_partial_KK_nonneg` (`GreekSigns`).
+    exact bsV_partial_KK_nonneg h_pos hσ hτ S r
+
+/-- **Put price is convex in the strike on `(0, ∞)`** — free from the call's
+strike-convexity: `bsP = bsV + (K·e^{-rτ} − S)` differs from `bsV` by an affine
+function of `K`, and convexity is preserved by adding an affine function. The
+second-derivative apparatus of `PutStrikeConvexity` is not needed. -/
+theorem bsP_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K => bsP K r σ S τ) := by
+  have h_eq : (fun K => bsP K r σ S τ)
+      = (fun K => bsV K r σ S τ) + (fun K => K * Real.exp (-(r * τ)) - S) := by
+    funext K; simp only [Pi.add_apply]; rw [bsP_eq_bsV K r σ S τ]; ring
+  rw [h_eq]
+  refine (bsV_strike_convexOn hS hσ hτ).add ⟨convex_Ioi 0, fun K₁ _ K₂ _ s t _ _ hst => ?_⟩
+  dsimp only
+  simp only [smul_eq_mul]
+  nlinarith [show s * S + t * S = S from by linear_combination S * hst]
 
 end MathFin

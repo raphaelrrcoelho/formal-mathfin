@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Portfolio.MarkowitzNAsset
+public import MathFin.Portfolio.CAPMEquilibrium
 
 /-!
 # Covariance kernels are positive semidefinite (the self-dot variance identity)
@@ -33,6 +34,8 @@ IS a variance* — that is why covariance matrices are PSD.
 * `covariance_kernel_psd`: the covariance kernel satisfies the PSD hypothesis
   of `portfolioVarN_nonneg_of_psd` — derived, not assumed.
 * `portfolioVarN_covariance_nonneg`: the capstone non-negativity.
+* `portfolioVariance_eq_portfolioVarN`: bridge to the `marginalVariance` naming;
+  `portfolioVariance_covariance_nonneg`: the same non-negativity there.
 -/
 
 @[expose] public section
@@ -88,5 +91,28 @@ theorem portfolioVarN_covariance_nonneg
     (hR : ∀ i ∈ s, MemLp (R i) 2 μ) :
     0 ≤ portfolioVarN s w (fun i j => cov[R i, R j; μ]) :=
   portfolioVarN_nonneg_of_psd s w _ (covariance_kernel_psd s R hR)
+
+/-- **`portfolioVariance` is the Markowitz double sum**: the `marginalVariance`-
+based `portfolioVariance` (`CAPMEquilibrium`) and `portfolioVarN`
+(`MarkowitzNAsset`) are the same quadratic form, so PSD facts transfer between
+the two namings (the `w i·` factor is just pushed inside the inner sum). -/
+lemma portfolioVariance_eq_portfolioVarN {ι : Type*}
+    (s : Finset ι) (Sg : ι → ι → ℝ) (w : ι → ℝ) :
+    portfolioVariance s Sg w = portfolioVarN s w Sg := by
+  unfold portfolioVariance marginalVariance portfolioVarN
+  refine Finset.sum_congr rfl fun i _ => ?_
+  rw [Finset.mul_sum]
+  exact Finset.sum_congr rfl fun j _ => by ring
+
+/-- **`portfolioVariance` non-negativity from random returns**: the genuine
+covariance-kernel PSD fact (`covariance_kernel_psd`, a self-dot variance),
+transported to the `marginalVariance`-based `portfolioVariance` naming that the
+CAPM / Lagrangian / risk-parity files use. -/
+theorem portfolioVariance_covariance_nonneg
+    (s : Finset ι) (w : ι → ℝ) (R : ι → Ω → ℝ)
+    (hR : ∀ i ∈ s, MemLp (R i) 2 μ) :
+    0 ≤ portfolioVariance s (fun i j => cov[R i, R j; μ]) w := by
+  rw [portfolioVariance_eq_portfolioVarN]
+  exact portfolioVarN_covariance_nonneg s w R hR
 
 end MathFin

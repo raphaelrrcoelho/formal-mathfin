@@ -60,7 +60,6 @@ Results:
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Lognormal PDF of `S_T`** at strike `K`, expressed via the BS `d_2`
 parameter: `f(K) = ϕ(d_2(K)) / (K · σ · √T)`. -/
@@ -177,11 +176,9 @@ theorem lognormalTerminalPDF_nonneg_via_strike_convexity
     rw [h_d2_eq]; unfold lognormalTerminalPDF
     exact mul_nonneg h_exp_pos.le h_pdf_unfolded_nn
   -- Step 3: Breeden-Litzenberger identifies the second derivative with
-  -- exp(-rT) · PDF. Combining with step 2 and dividing through gives PDF ≥ 0.
+  -- exp(-rT) · PDF; the positive factor `e^{-rT}` cancels, leaving PDF ≥ 0.
   rw [h_d2_eq] at h_d2_nn
-  by_contra h_neg
-  have h_neg' : lognormalTerminalPDF S_0 r σ T K < 0 := not_le.mp h_neg
-  linarith [mul_neg_of_pos_of_neg h_exp_pos h_neg']
+  exact (mul_nonneg_iff_of_pos_left h_exp_pos).mp h_d2_nn
 
 /-! ## Change of variables to standard normal (folded from `LognormalCOV.lean`)
 

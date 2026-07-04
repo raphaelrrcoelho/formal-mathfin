@@ -6,7 +6,6 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
-public import MathFin.Foundations.DiscreteIto
 public import MathFin.Binomial.CRRConvergence
 public import MathFin.Binomial.DriftLimit
 
@@ -21,9 +20,13 @@ The pre-existing `Binomial/CRRConvergence.lean` ships:
 and `Binomial/DriftLimit.lean` ships:
 - `crr_drift_limit_n`: `n · (2 p_n − 1) · σ · √(T/n) → (r − σ²/2) · T`.
 
-This file **bridges** these existing limit facts to the **discrete-Itô
-framework** in `Foundations/DiscreteIto.lean` (phase 35, after Nagy 2026).
-The binomial log-price `log S_k` is a discrete-Itô process whose:
+This file states the CRR log-price's per-step **drift** and **quadratic
+variation** as closed forms in the CRR parameters and composes the existing
+CRR limit lemmas above to recover the BS values — the discrete analogue of
+the continuous drift/QV. (The general discrete-Itô scaffolding lives in
+`Foundations/DiscreteIto.lean`, phase 35, after Nagy 2026; this file states
+the CRR-specific identities rather than instantiating that general formula.)
+The binomial log-price `log S_k` has:
 
 * per-step drift `q · log u + (1 − q) · log d = (2q − 1) · σ √Δt`,
 * per-step quadratic variation `q · (log u)² + (1 − q) · (log d)² − drift²

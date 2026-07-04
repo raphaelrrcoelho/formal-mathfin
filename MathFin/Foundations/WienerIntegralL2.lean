@@ -75,6 +75,7 @@ def lo (i : StepIndex T) : ℝ := (i.1.1 : ℝ)
 /-- Upper endpoint of the interval, as a real. -/
 def hi (i : StepIndex T) : ℝ := (i.1.2 : ℝ)
 
+/-- The right endpoint `hi i` of a `StepIndex` is `≤ T`. -/
 lemma hi_le_T (i : StepIndex T) : i.hi ≤ (T : ℝ) := by
   unfold hi
   exact_mod_cast i.2.2
@@ -82,6 +83,7 @@ lemma hi_le_T (i : StepIndex T) : i.hi ≤ (T : ℝ) := by
 /-- The half-open interval `(lo, hi]` as a subset of ℝ. -/
 def interval (i : StepIndex T) : Set ℝ := Set.Ioc i.lo i.hi
 
+/-- The `StepIndex` interval `(lo, hi]` is measurable. -/
 lemma measurableSet_interval (i : StepIndex T) :
     MeasurableSet (i.interval) := measurableSet_Ioc
 
@@ -92,6 +94,7 @@ lemma interval_subset_Ioc_zero_T (i : StepIndex T) :
   exact ⟨lt_of_le_of_lt (i.1.1 : ℝ≥0).coe_nonneg hx_lo,
     hx_hi.trans i.hi_le_T⟩
 
+/-- The `StepIndex` interval has finite Lebesgue measure. -/
 lemma volume_interval_lt_top (i : StepIndex T) :
     (volume i.interval) ≠ ∞ := by
   rw [interval, Real.volume_Ioc]
@@ -415,19 +418,9 @@ noncomputable def wienerIntegralLp (B : ℝ≥0 → Ω → ℝ)
 theorem wienerIntegralLp_norm (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :
     ‖wienerIntegralLp B hB T f‖ = ‖f‖ := by
-  set W := wienerIntegralLp B hB T with hW
-  have h_dense := stepAssembly_denseRange T
-  have h_norm : ∀ x : StepIndex T →₀ ℝ,
-      ‖wienerAssembly B hB T x‖ ≤ 1 * ‖stepAssembly T x‖ := fun x => by
-    rw [one_mul]
-    exact (wiener_assembly_isometry hB T x).le
-  -- Equality holds on `range stepAssembly` by `extendOfNorm_eq` + assembly isometry.
-  have h_on_range : ∀ x, ‖W (stepAssembly T x)‖ = ‖stepAssembly T x‖ := fun x => by
-    rw [hW, wienerIntegralLp, LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩,
-        wiener_assembly_isometry hB]
-  -- Both sides continuous in `f`; agree on a dense set ⇒ agree everywhere.
-  exact h_dense.induction_on (p := fun y => ‖W y‖ = ‖y‖) f
-    (isClosed_eq (continuous_norm.comp W.continuous) continuous_norm) h_on_range
+  rw [wienerIntegralLp]
+  exact LinearMap.norm_extendOfNorm_eq_of_isometry
+    (stepAssembly_denseRange T) (wiener_assembly_isometry hB T) f
 
 /-- Helper: for any `g : Lp ℝ 2 ν`, `‖g‖² = ∫ ω, (g ω)² ∂ν`. (Public so the
 Gaussian-law companion `Foundations/WienerIntegralGaussian.lean` reuses it on

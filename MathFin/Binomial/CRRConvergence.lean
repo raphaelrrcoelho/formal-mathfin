@@ -72,8 +72,10 @@ noncomputable def crrProb (r σ T : ℝ) (n : ℕ) : ℝ :=
 
 /-! ### Positivity and basic facts -/
 
+/-- The CRR up-factor `u = exp(σ√(T/n))` is positive. -/
 lemma crrUp_pos (σ T : ℝ) (n : ℕ) : 0 < crrUp σ T n := Real.exp_pos _
 
+/-- The CRR down-factor `d = exp(-σ√(T/n))` is positive. -/
 lemma crrDown_pos (σ T : ℝ) (n : ℕ) : 0 < crrDown σ T n := Real.exp_pos _
 
 /-- Under `σ > 0, T > 0, n ≥ 1`, the up-factor exceeds the down-factor. -/

@@ -31,7 +31,6 @@ the LHS uses the actual rate `r`, not the drift `r − q`).
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Black-Scholes-Merton call** pricing formula with continuous dividend yield `q`.
 

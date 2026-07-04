@@ -45,7 +45,6 @@ argument consumes.
 
 namespace MathFin
 
-open scoped NNReal
 
 /-! ## Item 4 — the discrete 2D Itô formula -/
 

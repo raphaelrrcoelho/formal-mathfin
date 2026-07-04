@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
+public import MathFin.BlackScholes.GreekSigns
 
 /-!
 # Spot-direction convexity of the Black–Scholes call
@@ -108,9 +109,8 @@ theorem bsV_spot_convexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
         gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ) :=
       (h_SS.congr_of_eventuallyEq h_ev).deriv
     rw [h_d2]
-    have h_den_pos : 0 < S * σ * Real.sqrt τ :=
-      mul_pos (mul_pos h_pos hσ) (Real.sqrt_pos.mpr hτ)
-    exact div_nonneg (gaussianPDFReal_nonneg _ _ _) h_den_pos.le
+    -- gamma-nonneg *is* the named sign fact `bsV_gamma_pos` (`GreekSigns`).
+    exact (bsV_gamma_pos hK hσ h_pos hτ).le
 
 /-- **The price lies above its tangent at any `S₀ > 0`, with slope delta**:
 `bsV(S₀) + Φ(d₁(S₀))·(s − S₀) ≤ bsV(s)`. The supporting-hyperplane form of

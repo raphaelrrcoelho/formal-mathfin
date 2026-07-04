@@ -2535,7 +2535,7 @@
       "description": "For nested exercise sets Eur ⊆ Berm ⊆ Amer, the optimal-stopping values are sandwiched in the same order (monotonicity of Finset.sup' under subset inclusion).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Binomial.Bermudan\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bermudan_sandwich_thm {ι : Type*} {Eur Berm Amer : Finset ι}\n    (hEB : Eur ⊆ Berm) (hBA : Berm ⊆ Amer) (hEurNE : Eur.Nonempty) (v : ι → ℝ) :\n    Eur.sup' hEurNE v ≤ Berm.sup' (hEurNE.mono hEB) v ∧\n      Berm.sup' (hEurNE.mono hEB) v ≤ Amer.sup' (hEurNE.mono (hEB.trans hBA)) v :=\n  MathFin.bermudan_sandwich hEB hBA hEurNE v\n"
+        "lean": "import MathFin.Binomial.Bermudan\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem bermudan_sandwich_thm {u d r : ℝ} (h : BinomialNoArb u d r)\n    (g : ℝ → ℝ) (E : Set ℕ) (n : ℕ) (S : ℝ) :\n    binomialPrice u d r g n S ≤ bermudanPrice E u d r g n S ∧\n      bermudanPrice E u d r g n S ≤ americanPrice u d r g n S :=\n  MathFin.binomialPrice_le_bermudanPrice_le_americanPrice h g E n S\n"
       },
       "metadata": {
         "chapter": 14,

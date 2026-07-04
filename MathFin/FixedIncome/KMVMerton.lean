@@ -46,7 +46,6 @@ PD-as-probability bounds.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Distance to default** in the KMV-Merton model, expressed in Garman normal
 form: `d_2 = gbsd2 V F (e^{−rT}) σ_V T` with firm value `V` and face debt `F`.
@@ -73,15 +72,9 @@ noncomputable def kmvPD (V_0 F r σ_V T : ℝ) : ℝ :=
 lemma kmvPD_nonneg (V_0 F r σ_V T : ℝ) : 0 ≤ kmvPD V_0 F r σ_V T :=
   Phi_nonneg _
 
-/-- **PD ≤ 1** (from `Φ(x) + Φ(−x) = 1` and `Φ ≥ 0`). -/
-lemma kmvPD_le_one (V_0 F r σ_V T : ℝ) : kmvPD V_0 F r σ_V T ≤ 1 := by
-  unfold kmvPD
-  have h_sum : Phi (-(kmvDistanceToDefault V_0 F r σ_V T)) +
-               Phi (kmvDistanceToDefault V_0 F r σ_V T) = 1 := by
-    have := Phi_add_Phi_neg (kmvDistanceToDefault V_0 F r σ_V T)
-    linarith
-  have h_pos : 0 ≤ Phi (kmvDistanceToDefault V_0 F r σ_V T) := Phi_nonneg _
-  linarith
+/-- **PD ≤ 1** (`Φ` takes values in `[0,1]`; `Phi_le_one` from `StandardNormal`). -/
+lemma kmvPD_le_one (V_0 F r σ_V T : ℝ) : kmvPD V_0 F r σ_V T ≤ 1 :=
+  Phi_le_one _
 
 /-- **Survival = 1 − PD = Φ(d_2)**: the risk-neutral probability of no default. -/
 theorem kmv_survival_eq_Phi_d2 (V_0 F r σ_V T : ℝ) :

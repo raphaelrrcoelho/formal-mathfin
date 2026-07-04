@@ -23,7 +23,7 @@ open MeasureTheory ProbabilityTheory Finset
 
 variable {Ω : Type*} {n : ℕ} {rates : Fin n → ℝ} {τ : Fin n → Ω → ℝ}
 
-/-- Survival function of `expMeasure r` for `t ≥ 0` (Mathlib v4.30 API). -/
+/-- Survival function of `expMeasure r` for `t ≥ 0`. -/
 private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
     expMeasure r (Set.Ioi t) = ENNReal.ofReal (Real.exp (-(r * t))) := by
   haveI : IsProbabilityMeasure (expMeasure r) := isProbabilityMeasure_expMeasure hr

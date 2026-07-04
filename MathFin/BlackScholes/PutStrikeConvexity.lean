@@ -23,8 +23,8 @@ of put-call symmetry at the strike-convexity level.
 
 Results:
 
-* `gaussianPDFReal_zero_one_neg`: `ϕ(−x) = ϕ(x)` for the standard normal PDF.
-* `hasDerivAt_bsP_KK`: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)`.
+* `hasDerivAt_bsP_KK`: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)` (PDF evenness
+  `gaussianPDFReal_zero_one_neg` now lives in `Foundations.StandardNormal`).
 -/
 
 @[expose] public section
@@ -32,13 +32,6 @@ Results:
 namespace MathFin
 
 open Real ProbabilityTheory
-
-/-- **Standard normal PDF symmetry**: `ϕ(−x) = ϕ(x)`. -/
-lemma gaussianPDFReal_zero_one_neg (z : ℝ) :
-    gaussianPDFReal 0 1 (-z) = gaussianPDFReal 0 1 z := by
-  unfold gaussianPDFReal
-  congr 2
-  ring
 
 /-- **Put-price convexity in `K`**: `∂²_K bsP = e^{-rτ} · ϕ(d₂) / (K σ √τ)`,
 identical to the call-price convexity (`hasDerivAt_bsV_KK`). The proof goes

@@ -61,7 +61,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Feynman–Kac** | II ↔ III | ✅ **WIRED** — the Black–Scholes PDE from the risk-neutral expectation |
 | **Donsker / CLT** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes |
 | **Girsanov** | I ↔ II | ◐ **partially wired** — the EMM is now an *explicit* change of measure (constant θ); the distributional Girsanov + adapted θ stay open ([#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40)) |
-| **Numéraire** | IV ↔ I | ◻️ open |
+| **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
 

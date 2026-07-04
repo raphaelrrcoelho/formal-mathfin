@@ -37,7 +37,6 @@ constant/identity derivatives + put-call symmetry `Φ(d) + Φ(-d) = 1`.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- Black–Scholes European put price as a function of `(S, τ)`. -/
 noncomputable def bsP (K r σ : ℝ) (S τ : ℝ) : ℝ :=

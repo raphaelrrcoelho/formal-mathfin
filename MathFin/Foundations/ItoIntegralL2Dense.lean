@@ -316,18 +316,9 @@ theorem itoIntegralL2_norm (hBmeas : ∀ t, Measurable (B t))
     (f : Lp ℝ 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod)) :
     ‖itoIntegralL2 (μ := μ) hB hBmeas f‖ = ‖f‖ := by
-  set I := itoIntegralL2 (μ := μ) hB hBmeas with hI
-  have h_dense := simpleAssembly_denseRange (μ := μ) hBmeas
-  have h_norm : ∀ V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas),
-      ‖itoAssembly (μ := μ) hB hBmeas V‖ ≤ 1 * ‖simpleAssembly (μ := μ) hBmeas V‖ :=
-    fun V => by rw [one_mul]; exact (assembly_isometry (μ := μ) hB hBmeas V).le
-  have h_on_range : ∀ V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas),
-      ‖I (simpleAssembly (μ := μ) hBmeas V)‖ = ‖simpleAssembly (μ := μ) hBmeas V‖ := by
-    intro V
-    rw [hI, itoIntegralL2, LinearMap.extendOfNorm_eq h_dense ⟨1, h_norm⟩,
-        assembly_isometry hB]
-  exact h_dense.induction_on (p := fun y => ‖I y‖ = ‖y‖) f
-    (isClosed_eq (continuous_norm.comp I.continuous) continuous_norm) h_on_range
+  rw [itoIntegralL2]
+  exact LinearMap.norm_extendOfNorm_eq_of_isometry
+    (simpleAssembly_denseRange (μ := μ) hBmeas) (assembly_isometry hB hBmeas) f
 
 end ItoIntegralL2
 end MathFin

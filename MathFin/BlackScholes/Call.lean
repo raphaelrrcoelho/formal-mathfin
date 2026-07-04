@@ -114,7 +114,9 @@ lemma bsd2_eq {S_0 K r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
   have h_sqT_sq : Real.sqrt T ^ 2 = T := Real.sq_sqrt hT.le
   unfold bsd2 bsd1
   field_simp
-  nlinarith [h_sqT_sq, sq_nonneg (σ * Real.sqrt T)]
+  -- pure equality driven by one substitution `(√T)² = T` — `linear_combination`,
+  -- not `nlinarith` (the repo's "nlinarith is for inequalities" doctrine).
+  linear_combination (-2 * σ ^ 2) * h_sqT_sq
 
 /-- Exercise-region identification: `S_T(z) > K ↔ z > −d_2`. -/
 lemma bsTerminal_gt_K_iff {S_0 K r σ T : ℝ}
@@ -244,11 +246,7 @@ theorem bs_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   rw [integral_exp_mul_gaussianPDFReal_Ioi, h_shift_eq]
   have h_pdf_int_eq :
       ∫ z in Set.Ioi (-d_2), gaussianPDFReal 0 1 z = Phi d_2 := by
-    rw [show ∫ z in Set.Ioi (-d_2), gaussianPDFReal 0 1 z
-            = (gaussianReal (0 : ℝ) 1 (Set.Ioi (-d_2))).toReal by
-        rw [gaussianReal_apply_eq_integral 0 (one_ne_zero : (1 : ℝ≥0) ≠ 0) (Set.Ioi (-d_2))]
-        exact (ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi
-          (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm,
+    rw [setIntegral_gaussianPDFReal_eq_toReal measurableSet_Ioi (0 : ℝ),
         gaussianReal_Ioi_toReal, neg_neg]
   rw [h_pdf_int_eq]
   -- Step 9: final algebra

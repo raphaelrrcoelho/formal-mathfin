@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.Call
+public import MathFin.Foundations.GaussianCDFDeriv
 
 /-!
 # Bachelier model option pricing
@@ -37,48 +38,11 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Real Filter
 open scoped NNReal ENNReal Topology
 
-/-! ### Derivative of the standard normal PDF -/
+/-! ### Integrability of `z ↦ z · ϕ(0, 1, z)`
 
-/-- `(−ϕ(0,1,·))' = z · ϕ(0,1,z)`. Algebraic content: `d/dz [exp(-z²/2)] = -z · exp(-z²/2)`. -/
-lemma hasDerivAt_neg_gaussianPDFReal_zero_one (z : ℝ) :
-    HasDerivAt (fun z' : ℝ => -gaussianPDFReal 0 1 z')
-      (z * gaussianPDFReal 0 1 z) z := by
-  unfold gaussianPDFReal
-  simp only [NNReal.coe_one, mul_one, sub_zero]
-  set c := (Real.sqrt (2 * π))⁻¹
-  -- d/dz [-z²/2] = -z
-  have h_sq : HasDerivAt (fun z' : ℝ => -(z'^2)/2) (-z) z := by
-    have h_pow : HasDerivAt (fun z' : ℝ => z'^2) (2 * z) z := by
-      simpa using hasDerivAt_pow 2 z
-    have h_div : HasDerivAt (fun z' : ℝ => z'^2 / 2) z z := by
-      have := h_pow.div_const 2; simpa using this
-    have h_neg : HasDerivAt (fun z' : ℝ => -(z'^2 / 2)) (-z) z := h_div.neg
-    have h_eq : (fun z' : ℝ => -(z'^2)/2) = (fun z' : ℝ => -(z'^2 / 2)) := by
-      funext z'; ring
-    rw [h_eq]; exact h_neg
-  -- d/dz [exp(-z²/2)] = exp(-z²/2) · -z
-  have h_exp : HasDerivAt (fun z' : ℝ => Real.exp (-(z'^2)/2))
-      (Real.exp (-(z^2)/2) * -z) z := h_sq.exp
-  -- d/dz [c · exp(-z²/2)] = c · exp(-z²/2) · -z
-  have h_const : HasDerivAt (fun z' : ℝ => c * Real.exp (-(z'^2)/2))
-      (c * (Real.exp (-(z^2)/2) * -z)) z := h_exp.const_mul c
-  -- neg
-  have h_neg := h_const.neg
-  convert h_neg using 1 <;> first | rfl | ring
-
-/-- `ϕ(0,1,·)' = -z · ϕ(0,1,z)` — the standard-normal PDF derivative (the
-`.neg`-flip of `hasDerivAt_neg_gaussianPDFReal_zero_one`). The single
-standard-normal first-derivative reused across the Greeks files. -/
-theorem hasDerivAt_gaussianPDFReal_zero_one (z : ℝ) :
-    HasDerivAt (fun z' : ℝ => gaussianPDFReal 0 1 z')
-      (-(z * gaussianPDFReal 0 1 z)) z := by
-  have h := (hasDerivAt_neg_gaussianPDFReal_zero_one z).neg
-  have h_eq : ((-fun z' : ℝ => -gaussianPDFReal 0 1 z') : ℝ → ℝ)
-            = fun z' : ℝ => gaussianPDFReal 0 1 z' := by funext z'; simp
-  rw [h_eq] at h
-  exact h
-
-/-! ### Integrability of `z ↦ z · ϕ(0, 1, z)` -/
+The standard-normal PDF derivative (`hasDerivAt_neg_gaussianPDFReal_zero_one`,
+`hasDerivAt_gaussianPDFReal_zero_one`) it consumes now lives in
+`Foundations.GaussianCDFDeriv`. -/
 
 /-- The function `z ↦ z · ϕ(0, 1, z)` is integrable on `ℝ` (against Lebesgue).
 Derived by transferring `Integrable id (gaussianReal 0 1)` (the existence of the
@@ -265,18 +229,12 @@ theorem bachelier_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   rw [integral_id_mul_gaussianPDFReal_Ioi]
   have h_pdf_int_eq :
       ∫ z in Set.Ioi (-d), gaussianPDFReal 0 1 z = Phi d := by
-    rw [show ∫ z in Set.Ioi (-d), gaussianPDFReal 0 1 z
-            = (gaussianReal (0 : ℝ) 1 (Set.Ioi (-d))).toReal by
-        rw [gaussianReal_apply_eq_integral 0 (one_ne_zero : (1 : ℝ≥0) ≠ 0) (Set.Ioi (-d))]
-        exact (ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi
-          (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm,
+    rw [setIntegral_gaussianPDFReal_eq_toReal measurableSet_Ioi (0 : ℝ),
         gaussianReal_Ioi_toReal, neg_neg]
   rw [h_pdf_int_eq]
   -- Final: σ√T · pdf(0,1,-d) + (S_0 - K) · Φ(d), and pdf(0,1,-d) = pdf(0,1,d)
-  have h_pdf_neg : gaussianPDFReal 0 1 (-d) = gaussianPDFReal 0 1 d := by
-    unfold gaussianPDFReal
-    simp only [NNReal.coe_one, mul_one, sub_zero]
-    rw [show (-d)^2 = d^2 from by ring]
+  have h_pdf_neg : gaussianPDFReal 0 1 (-d) = gaussianPDFReal 0 1 d :=
+    gaussianPDFReal_zero_one_neg d
   rw [h_pdf_neg]
   ring
 

@@ -42,7 +42,6 @@ The cone is a `C : Set (ι → ℝ)` carrying `Convex ℝ C`, `IsClosed C`, and 
 
 namespace MathFin
 
-open scoped BigOperators
 
 /-- A continuous linear functional on `ι → ℝ` equals its `∑ wᵢ · f(eᵢ)` expansion on the
 standard basis. Shared atom of the two cone-separation theorems below. -/

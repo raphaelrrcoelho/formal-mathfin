@@ -25,7 +25,6 @@ representation tangible: the worst case over states equals the worst case over a
 
 namespace MathFin
 
-open scoped BigOperators
 
 variable {ι : Type*} [Fintype ι] [Nonempty ι]
 
@@ -33,9 +32,11 @@ variable {ι : Type*} [Fintype ι] [Nonempty ι]
 noncomputable def worstCase (X : ι → ℝ) : ℝ :=
   Finset.univ.sup' Finset.univ_nonempty (fun i => - X i)
 
+/-- Each `-Xᵢ` lower-bounds the worst-case loss `worstCase X`. -/
 lemma le_worstCase (X : ι → ℝ) (i : ι) : - X i ≤ worstCase X :=
   Finset.le_sup' (fun i => - X i) (Finset.mem_univ i)
 
+/-- Any uniform upper bound on the `-Xᵢ` bounds `worstCase X` above. -/
 lemma worstCase_le {X : ι → ℝ} {a : ℝ} (h : ∀ i, - X i ≤ a) : worstCase X ≤ a :=
   Finset.sup'_le Finset.univ_nonempty (fun i => - X i) (fun i _ => h i)
 

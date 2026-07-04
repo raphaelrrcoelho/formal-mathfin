@@ -78,9 +78,8 @@ private lemma condExp_func_increment {s t : ℝ≥0} (hst : s ≤ t)
     {φ : ℝ → ℝ} (hφ : Measurable φ) {c : ℝ}
     (h_int_eq : ∫ ω, φ (X t ω - X s ω) ∂P = c) :
     P[fun ω ↦ φ (X t ω - X s ω) | (𝓕 s : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ c := by
-  have h_indep : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)) (𝓕 s) P := by
-    have := hX.indep s t hst
-    exact this
+  have h_indep : Indep (MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)) (𝓕 s) P :=
+    hX.indep s t hst
   have hφ_comap :
       Measurable[MeasurableSpace.comap (fun ω ↦ X t ω - X s ω) (borel ℝ)]
         (fun ω ↦ φ (X t ω - X s ω)) :=
@@ -131,9 +130,8 @@ theorem squareSubTime_isMartingale :
   -- Integrabilities.
   have h_int_Bs_sq : Integrable (fun ω ↦ (X s ω) ^ 2) P := h_Bs_memLp.integrable_sq
   have h_int_diff_sq : Integrable (fun ω ↦ (X t ω - X s ω) ^ 2) P := h_diff_memLp.integrable_sq
-  have h_int_cross : Integrable (fun ω ↦ X s ω * (X t ω - X s ω)) P := by
-    have := h_Bs_memLp.integrable_mul h_diff_memLp
-    exact this
+  have h_int_cross : Integrable (fun ω ↦ X s ω * (X t ω - X s ω)) P :=
+    h_Bs_memLp.integrable_mul h_diff_memLp
   -- Mean of increment is 0.
   have h_int_diff_zero : ∫ ω, (X t ω - X s ω) ∂P = 0 := by
     rw [h_eq_diff, hL_diff.integral_eq, integral_id_gaussianReal]

@@ -98,9 +98,11 @@ theorem statePricePricing_convexOn
   -- Pointwise convexity at state i: g i (αK₁ + βK₂) ≤ α · g i K₁ + β · g i K₂.
   have hconv := (hg i hi).2 (Set.mem_univ K₁) (Set.mem_univ K₂) ha hb hab
   simp only [smul_eq_mul] at hconv
-  -- Multiply by q i ≥ 0.
+  -- Multiply the pointwise convexity by `q i ≥ 0` — the honest certificate.
   have hqi := hq i hi
-  nlinarith [hconv]
+  linarith [mul_le_mul_of_nonneg_left hconv hqi,
+    show q i * (a * g i K₁ + b * g i K₂)
+        = a * (q i * g i K₁) + b * (q i * g i K₂) from by ring]
 
 /-- **The state-price pricing functional preserves convexity**: stated
 in terms of `statePricePricing` from `Foundations/StatePrices`. -/

@@ -38,7 +38,6 @@ Results:
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Second moment of the terminal asset price**: under `BSCallHyp`,
 `E_Q[S_T²] = S_0² · exp(2 r T + σ² T)`.

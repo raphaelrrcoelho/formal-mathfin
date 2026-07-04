@@ -83,11 +83,7 @@ theorem spectralRisk_convex_combination_normalized
     (s : Finset ι) (φ ψ : ι → ℝ) (t : ℝ)
     (hφ : ∑ i ∈ s, φ i = 1) (hψ : ∑ i ∈ s, ψ i = 1) :
     ∑ i ∈ s, (t * φ i + (1 - t) * ψ i) = 1 := by
-  rw [Finset.sum_add_distrib]
-  rw [show (∑ i ∈ s, t * φ i) = t * ∑ i ∈ s, φ i from (Finset.mul_sum s _ _).symm]
-  rw [show (∑ i ∈ s, (1 - t) * ψ i) = (1 - t) * ∑ i ∈ s, ψ i from
-        (Finset.mul_sum s _ _).symm]
-  rw [hφ, hψ]
+  rw [Finset.sum_add_distrib, ← Finset.mul_sum, ← Finset.mul_sum, hφ, hψ]
   ring
 
 /-- **Convex combination of spectral risks**: a convex combination of

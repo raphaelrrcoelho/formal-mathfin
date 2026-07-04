@@ -26,7 +26,6 @@ Greeks evaluated at `r = 0` and post-multiplied by the discount factor `e^{-rT}`
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- Black-76 futures call price as a function of `(F, σ, T)` plus discount rate `r`.
 Specialization of `bsV` to zero drift, times an external discount `e^{-rT}`. -/

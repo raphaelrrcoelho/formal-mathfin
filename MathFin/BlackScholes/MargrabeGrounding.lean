@@ -47,7 +47,6 @@ is also what makes `Foundations/BivariateGaussian`'s machinery load-bearing.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
-open scoped ENNReal
 
 variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
 

@@ -28,7 +28,6 @@ and derive the Greeks via existing call Greeks at effective drift `r − q`.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- Dividends-adjusted BS call price. Identity: `V_q = e^{-qT} · bsV(K, r-q, σ, S, T)`. -/
 noncomputable def bsVDiv (K r q σ : ℝ) (S τ : ℝ) : ℝ :=

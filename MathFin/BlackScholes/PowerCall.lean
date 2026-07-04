@@ -61,7 +61,6 @@ additional Gaussian work.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Powered terminal asset price**: `(S_T)^a` viewed as a function of the
 standard-normal sample. -/

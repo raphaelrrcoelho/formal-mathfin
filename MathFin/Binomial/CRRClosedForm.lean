@@ -25,7 +25,7 @@ instantiated on the terminal law `N((r−σ²/2)T, σ²T)` through the standardi
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real Filter
-open scoped NNReal ENNReal Topology
+open scoped Topology
 
 /-- The discounted put expectation over the BS terminal law `N((r−σ²/2)T, σ²T)`
 equals the Black–Scholes put price `K e^{−rT} Φ(−d₂) − S₀ Φ(−d₁)`. Proved by

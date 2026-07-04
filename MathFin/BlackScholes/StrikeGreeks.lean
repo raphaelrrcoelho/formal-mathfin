@@ -85,14 +85,10 @@ is `K`-independent). -/
 lemma hasDerivAt_bsd2_K (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ)
     {K : ℝ} (hK : 0 < K) :
     HasDerivAt (fun k => bsd2 S k r σ τ) (-(1 / (K * σ * Real.sqrt τ))) K := by
-  have h_d1 := hasDerivAt_bsd1_K S r σ τ hS hσ hτ hK
-  have h_const : HasDerivAt (fun _ : ℝ => σ * Real.sqrt τ) 0 K := hasDerivAt_const K _
-  have h_diff := h_d1.sub h_const
+  have h_diff := (hasDerivAt_bsd1_K S r σ τ hS hσ hτ hK).sub_const (σ * Real.sqrt τ)
   have h_fun_eq : (fun k : ℝ => bsd1 S k r σ τ - σ * Real.sqrt τ)
         = (fun k : ℝ => bsd2 S k r σ τ) := by
     funext k; rw [bsd2]
-  rw [show -(1 / (K * σ * Real.sqrt τ)) =
-      -(1 / (K * σ * Real.sqrt τ)) - 0 from by ring]
   rw [← h_fun_eq]
   exact h_diff
 

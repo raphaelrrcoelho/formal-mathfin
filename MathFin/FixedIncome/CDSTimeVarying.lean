@@ -55,7 +55,6 @@ any deterministic hazard curve.
 namespace MathFin
 
 open Real MeasureTheory intervalIntegral Finset
-open scoped NNReal ENNReal
 
 /-- **CDS time-varying fair-spread cash-flow balance**. With time-varying
 hazard `h : ℝ → ℝ`, constant recovery `R`, and discount rate `r`, the

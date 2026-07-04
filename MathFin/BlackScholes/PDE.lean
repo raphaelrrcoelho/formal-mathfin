@@ -38,7 +38,6 @@ The proof leverages:
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-! ### Black–Scholes identity: `S · ϕ(d₁) = K · e^{-r(T-t)} · ϕ(d₂)` -/
 
@@ -138,13 +137,10 @@ lemma hasDerivAt_bsd1_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 <
 lemma hasDerivAt_bsd2_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) :
     HasDerivAt (fun s => bsd2 s K r σ τ) (1 / (S * σ * Real.sqrt τ)) S := by
-  have h_d1 := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
-  have h_const : HasDerivAt (fun _ : ℝ => σ * Real.sqrt τ) 0 S := hasDerivAt_const S _
-  have h_diff := h_d1.sub h_const
+  have h_diff := (hasDerivAt_bsd1_S (r := r) hK hσ hτ hS).sub_const (σ * Real.sqrt τ)
   have h_fun_eq : (fun s : ℝ => bsd1 s K r σ τ - σ * Real.sqrt τ)
         = (fun s : ℝ => bsd2 s K r σ τ) := by
     funext s; rw [bsd2]
-  rw [show (1 : ℝ) / (S * σ * Real.sqrt τ) = 1 / (S * σ * Real.sqrt τ) - 0 from by ring]
   rw [← h_fun_eq]
   exact h_diff
 
@@ -293,12 +289,10 @@ lemma hasDerivAt_bsd1_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
 lemma hasDerivAt_bsd2_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
     (r : ℝ) :
     HasDerivAt (fun r' => bsd2 S K r' σ τ) (Real.sqrt τ / σ) r := by
-  have h_d1 := hasDerivAt_bsd1_r S K σ τ hσ hτ r
-  have h_const : HasDerivAt (fun _ : ℝ => σ * Real.sqrt τ) 0 r := hasDerivAt_const r _
-  have h_diff := h_d1.sub h_const
+  have h_diff := (hasDerivAt_bsd1_r S K σ τ hσ hτ r).sub_const (σ * Real.sqrt τ)
   have h_fun_eq : (fun r' : ℝ => bsd1 S K r' σ τ - σ * Real.sqrt τ)
         = (fun r' : ℝ => bsd2 S K r' σ τ) := by funext r'; rw [bsd2]
-  rw [show (Real.sqrt τ / σ) = (Real.sqrt τ / σ - 0 : ℝ) from by ring, ← h_fun_eq]
+  rw [← h_fun_eq]
   exact h_diff
 
 /-! ### Partial derivatives of the Black–Scholes call price `V` -/

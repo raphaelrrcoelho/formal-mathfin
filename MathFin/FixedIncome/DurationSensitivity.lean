@@ -85,15 +85,10 @@ theorem hasDerivAt_bondPriceDisc
     HasDerivAt (bondPriceDisc s t c)
                (-modifiedNumerator s t c y) y := by
   unfold bondPriceDisc modifiedNumerator
-  have h_eta : (fun y' : ℝ => ∑ i ∈ s, c i / (1 + y') ^ (t i)) =
-               ∑ i ∈ s, (fun y' : ℝ => c i / (1 + y') ^ (t i)) := by
-    funext y'
-    simp only [Finset.sum_apply]
-  rw [h_eta]
   rw [show -∑ i ∈ s, (t i : ℝ) * c i / (1 + y) ^ (t i + 1) =
       ∑ i ∈ s, (-((t i : ℝ) * c i / (1 + y) ^ (t i + 1))) from by
     rw [← Finset.sum_neg_distrib]]
-  apply HasDerivAt.sum
+  apply HasDerivAt.fun_sum
   intros i _
   exact hasDerivAt_coupon_term (c i) (t i) hy
 

@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.FixedIncome.Immunization
+public import MathFin.FixedIncome.ZCB
 
 /-!
 # Second-order bond portfolio immunization
@@ -58,22 +59,12 @@ lemma hasDerivAt_bondPortfolioDur_r
       (fun r' => w i * (T i - t) * Real.exp (-(r' * (T i - t))))
       (-(w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))))) r := by
     intro i _
-    have h_lin : HasDerivAt (fun r' : ℝ => -(r' * (T i - t))) (-(T i - t)) r := by
-      have h := (hasDerivAt_id r).mul_const (T i - t)
-      convert h.neg using 1 <;> first | rfl | ring
-    have h_exp := h_lin.exp
-    have h_prod := h_exp.const_mul (w i * (T i - t))
-    convert h_prod using 1 <;> try rfl
-    ring
-  have h_raw := HasDerivAt.sum h_each
-  have h_fn_eq :
-      (∑ i ∈ s, fun r' : ℝ =>
-          w i * (T i - t) * Real.exp (-(r' * (T i - t)))) =
-        (fun r' : ℝ =>
-          ∑ i ∈ s, w i * (T i - t) * Real.exp (-(r' * (T i - t)))) := by
-    funext r'
-    rw [Finset.sum_apply]
-  rw [h_fn_eq] at h_raw
+    -- each summand's rate-derivative is the ZCB duration atom `ZCB.hasDerivAt_zcb_r`
+    -- scaled by the duration weight `w i · (T i − t)`.
+    have h := (hasDerivAt_zcb_r t (T i) r).const_mul (w i * (T i - t))
+    simp only [zcb] at h
+    convert h using 1 <;> first | rfl | ring
+  have h_raw := HasDerivAt.fun_sum h_each
   rw [Finset.sum_neg_distrib] at h_raw
   exact h_raw
 
@@ -84,7 +75,8 @@ lemma hasDerivAt_neg_bondPortfolioDur_r
     HasDerivAt (fun r' => -bondPortfolioDur s w T t r')
       (bondPortfolioConv s w T t r) r := by
   have h := (hasDerivAt_bondPortfolioDur_r s w T t r).neg
-  convert h using 1 <;> first | rfl | ring
+  rw [neg_neg] at h
+  exact h
 
 /-- **Single-bond convexity**: a single-bond portfolio's convexity-times-value
 equals `w · (T − t)² · exp(−r(T − t))`. -/

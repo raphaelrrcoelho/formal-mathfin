@@ -74,11 +74,8 @@ no-arbitrage, the up-probability `q` satisfies `q · u + (1 − q) · d = e^r`.
 Equivalently, the discounted asset price is a Q-martingale at every step.
 Direct algebraic consequence of `crrUpProb = (e^r − d) / (u − d)`. -/
 theorem binomial_martingale_identity {u d r : ℝ} (h : BinomialNoArb u d r) :
-    crrUpProb u d r * u + (1 - crrUpProb u d r) * d = Real.exp r := by
-  have h_ud_ne : u - d ≠ 0 := (sub_pos.mpr h.d_lt_u).ne'
-  unfold crrUpProb
-  field_simp
-  ring
+    crrUpProb u d r * u + (1 - crrUpProb u d r) * d = Real.exp r :=
+  crrUpProb_mul_up_add u d r h
 
 /-- **Convexity inequality for the positive part `max(·, 0)`**: for any
 real `a, b` and convex-combination weights `q, 1 − q` with `q ∈ [0, 1]`,
@@ -90,15 +87,10 @@ which is convex as the maximum of the affine `x` and the constant `0`. -/
 lemma weighted_max_zero_ge {q a b : ℝ} (hq : 0 ≤ q) (h1q : q ≤ 1) :
     max (q * a + (1 - q) * b) 0 ≤ q * max a 0 + (1 - q) * max b 0 := by
   have h1q_nn : 0 ≤ 1 - q := by linarith
-  by_cases hpos : 0 ≤ q * a + (1 - q) * b
-  · rw [max_eq_left hpos]
-    have ha : a ≤ max a 0 := le_max_left _ _
-    have hb : b ≤ max b 0 := le_max_left _ _
-    nlinarith
-  · rw [max_eq_right (not_le.mp hpos).le]
-    have ha_nn : 0 ≤ max a 0 := le_max_right _ _
-    have hb_nn : 0 ≤ max b 0 := le_max_right _ _
-    positivity
+  -- Jensen for the convex `x ↦ max x 0` (`= id ⊔ const 0`), evaluated at `a, b`.
+  have hconv : ConvexOn ℝ Set.univ (fun x : ℝ => max x 0) :=
+    (convexOn_id convex_univ).sup (convexOn_const 0 convex_univ)
+  simpa using hconv.2 (Set.mem_univ a) (Set.mem_univ b) hq h1q_nn (by ring)
 
 /-- **Algebraic identity**: `e^{−r} · max(S · e^r − K, 0) = max(S − K · e^{−r}, 0)`.
 

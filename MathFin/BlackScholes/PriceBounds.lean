@@ -128,14 +128,9 @@ theorem bsP_nonneg
   exact integral_nonneg fun _ =>
     mul_nonneg (Real.exp_pos _).le (le_max_right _ _)
 
-/-- Standard normal CDF upper bound `Φ(x) ≤ 1`. Symmetric: `Φ(x) + Φ(−x) = 1`
-with `Φ(−x) ≥ 0`. -/
-lemma Phi_le_one (x : ℝ) : Phi x ≤ 1 := by
-  have h_sum : Phi x + Phi (-x) = 1 := Phi_add_Phi_neg x
-  have h_neg : 0 ≤ Phi (-x) := Phi_nonneg _
-  linarith
+/-! ### The two formula-direct upper bounds (Phi-bounds path, no parity)
 
-/-! ### The two formula-direct upper bounds (Phi-bounds path, no parity) -/
+`Phi_le_one` now lives in `Foundations.StandardNormal` (pricing-free). -/
 
 /-- **Call upper bound**: `bsV ≤ S` for non-negative spot/strike. By
 `Phi ≤ 1`: the `S · Φ(d₁)` term is bounded by `S`, and the `−K · e^{−rτ} ·

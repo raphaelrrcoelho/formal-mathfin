@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.FixedIncome.ZCB
 
 /-!
 # Bond portfolio immunization under a deterministic short rate
@@ -65,21 +66,12 @@ lemma hasDerivAt_bondPortfolioValue_r
       (fun r' => w i * Real.exp (-(r' * (T i - t))))
       (-(w i * (T i - t) * Real.exp (-(r * (T i - t))))) r := by
     intro i _
-    have h_lin : HasDerivAt (fun r' : ℝ => -(r' * (T i - t))) (-(T i - t)) r := by
-      have h := (hasDerivAt_id r).mul_const (T i - t)
-      rw [one_mul] at h
-      exact h.neg
-    have h_exp := h_lin.exp
-    have h_prod := h_exp.const_mul (w i)
-    convert h_prod using 1 <;> first | rfl | ring
-  have h_raw := HasDerivAt.sum h_each
-  -- `HasDerivAt.sum` yields a Pi-typed sum; convert back to a function of a sum.
-  have h_fn_eq :
-      (∑ i ∈ s, fun r' : ℝ => w i * Real.exp (-(r' * (T i - t)))) =
-        (fun r' : ℝ => ∑ i ∈ s, w i * Real.exp (-(r' * (T i - t)))) := by
-    funext r'
-    rw [Finset.sum_apply]
-  rw [h_fn_eq] at h_raw
+    -- each summand's rate-derivative *is* the ZCB duration atom
+    -- `ZCB.hasDerivAt_zcb_r` (face value `w i`, maturity `T i`), not a fresh chase.
+    have h := (hasDerivAt_zcb_r t (T i) r).const_mul (w i)
+    simp only [zcb] at h
+    convert h using 1 <;> first | rfl | ring
+  have h_raw := HasDerivAt.fun_sum h_each
   rw [Finset.sum_neg_distrib] at h_raw
   exact h_raw
 

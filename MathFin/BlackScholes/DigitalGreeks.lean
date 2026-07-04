@@ -7,7 +7,6 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
-public import MathFin.BlackScholes.Bachelier
 
 /-!
 # Black–Scholes digital option Greeks
@@ -33,7 +32,6 @@ clean identity `σ√τ − d₁ = -d₂`.)
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- Cash-or-nothing digital call price as a function of `(S, τ)`. -/
 noncomputable def bsCashDigital (K r σ : ℝ) (S τ : ℝ) : ℝ :=

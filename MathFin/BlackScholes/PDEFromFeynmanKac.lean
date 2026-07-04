@@ -64,7 +64,6 @@ operator cancellation `−(r−σ²/2) − ½σ² + r = 0`, on top of the in-pla
 @[expose] public section
 
 open MeasureTheory ProbabilityTheory
-open scoped NNReal ENNReal
 
 namespace MathFin
 

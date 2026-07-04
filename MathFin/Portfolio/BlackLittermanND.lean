@@ -53,9 +53,11 @@ than explicit inversion).
 
 ## Connection to the 1-D module
 
-Specialising `n = 1`, `m = 1`, `P = (1)`, `Sg_inv = (1/s0sq)`, `Om_inv =
-(1/s1sq)` recovers the 1-D posterior `posteriorMean1d` from
-`Portfolio/BlackLitterman.lean`.
+At `n = 1`, `m = 1`, `P = (1)`, `Sg_inv = (1/s0sq)`, `Om_inv = (1/s1sq)` the
+normal equation below reduces to the scalar Bayesian update behind
+`posteriorMean1d` (`Portfolio/BlackLitterman.lean`); `isBLPosteriorMean_one_dim`
+makes this precise (the scalar `posteriorMean1d` is the BL posterior mean at
+`n = 1`), and the matrix form here is its N-asset generalisation.
 
 ## Results
 
@@ -156,5 +158,22 @@ theorem IsBLPosteriorMean.unique {n m : ℕ}
   rw [Matrix.mulVec_mulVec]
   rw [Matrix.inv_mul_of_invertible]
   rw [Matrix.one_mulVec]
+
+/-- **n = 1 recovers the scalar posterior**: at `n = m = 1`, `P = 1`,
+`Sg_inv = (1/s0sq)`, `Om_inv = (1/s1sq)`, the scalar `posteriorMean1d` is the
+BL posterior mean — the 1-D case of the matrix normal equation, showing the
+N-asset form specialises to `Portfolio/BlackLitterman`. -/
+theorem isBLPosteriorMean_one_dim (π₀ Q₀ s0sq s1sq : ℝ) (h₀ : 0 < s0sq) (h₁ : 0 < s1sq) :
+    IsBLPosteriorMean ![posteriorMean1d π₀ Q₀ s0sq s1sq] ![π₀] ![Q₀]
+        (!![1 / s0sq]) (1 : Matrix (Fin 1) (Fin 1) ℝ) (!![1 / s1sq]) := by
+  have h₀' : s0sq ≠ 0 := h₀.ne'
+  have h₁' : s1sq ≠ 0 := h₁.ne'
+  unfold IsBLPosteriorMean blPosteriorPrecision blPrecisionWeightedMean posteriorMean1d
+  funext i
+  fin_cases i
+  simp [Matrix.mulVec, dotProduct, Matrix.add_apply, Matrix.transpose_one,
+    Matrix.cons_val_fin_one, Matrix.of_apply]
+  field_simp
+  ring
 
 end MathFin

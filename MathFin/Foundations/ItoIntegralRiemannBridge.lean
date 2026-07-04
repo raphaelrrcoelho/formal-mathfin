@@ -175,7 +175,7 @@ omit hB in
 /-- If `∫ (Fₙ − G)² → 0` then `‖⟦Fₙ⟧ − ⟦G⟧‖ → 0`, any measure. The single-fixed-limit
 variant of `ItoIntegralBrownian.tendsto_norm_toLp_sub` (which compares two *sequences*
 `Fₙ, Gₙ`); kept as a separate lemma because the `G`-shape genuinely differs. The generic
-`L²` facts `lp_norm_sq` / `lp_dist_sq` it rests on now live once in `ItoIntegralBrownian`. -/
+`L²` facts `ItoIntegralL2.lp_two_norm_sq` / `ItoIntegralBrownian.lp_dist_sq` it rests on. -/
 lemma tendsto_norm_toLp_sub' {α : Type*} {m : MeasurableSpace α} {ν : Measure α}
     {F : ℕ → α → ℝ} {G : α → ℝ} (hF : ∀ n, MemLp (F n) 2 ν) (hG : MemLp G 2 ν)
     (h : Tendsto (fun n => ∫ z, (F n z - G z) ^ 2 ∂ν) atTop (𝓝 0)) :

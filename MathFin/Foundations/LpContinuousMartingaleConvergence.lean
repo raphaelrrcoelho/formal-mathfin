@@ -209,9 +209,6 @@ private lemma ofReal_finset_sup' {ι : Type*} {s : Finset ι} (hs : s.Nonempty) 
     ENNReal.ofReal (s.sup' hs f) = s.sup' hs (fun i => ENNReal.ofReal (f i)) :=
   Finset.apply_sup'_eq_sup'_comp hs ENNReal.ofReal ENNReal.ofReal_max
 
-private lemma ofReal_norm_eq_enorm (x : ℝ) : ENNReal.ofReal ‖x‖ = ‖x‖ₑ := by
-  rw [Real.norm_eq_abs, ← Real.enorm_eq_ofReal_abs]
-
 /-- Real-valued running max of `‖discreteSample M k ω‖` over `k ≤ n`. -/
 private noncomputable def runMaxNorm (M : ℝ → Ω → ℝ) (n : ℕ) (ω : Ω) : ℝ :=
   (Finset.range (n + 1)).sup' Finset.nonempty_range_add_one
@@ -242,10 +239,10 @@ private lemma iSup_ofReal_runMaxNorm (M : ℝ → Ω → ℝ) (ω : Ω) :
   refine le_antisymm (iSup_le fun n => ?_) (iSup_le fun k => ?_)
   · rw [runMaxNorm, ofReal_finset_sup']
     refine Finset.sup'_le _ _ fun k _ => ?_
-    rw [ofReal_norm_eq_enorm]
+    rw [ofReal_norm]
     exact le_iSup (fun j : ℕ => ‖discreteSample M j ω‖ₑ) k
   · refine le_iSup_of_le k ?_
-    rw [← ofReal_norm_eq_enorm]
+    rw [← ofReal_norm]
     exact ENNReal.ofReal_le_ofReal <|
       Finset.le_sup' (f := fun j => ‖discreteSample M j ω‖)
         (Finset.mem_range.mpr (Nat.lt_succ_self k))

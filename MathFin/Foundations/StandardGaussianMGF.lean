@@ -61,7 +61,6 @@ this identity at `β`.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Affine-shifted standard-normal MGF** (Lebesgue form):
 `∫ exp(α + β · z) · pdf(0, 1, z) dz = exp(α + β²/2)`.

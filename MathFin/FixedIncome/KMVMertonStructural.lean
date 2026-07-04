@@ -45,7 +45,6 @@ with finance-specific variable renaming.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **KMV-Merton default probability identification**: under the BS lognormal
 hypothesis for firm asset value `V_T = bsTerminal V_0 r σ_V T (Z ·)`,

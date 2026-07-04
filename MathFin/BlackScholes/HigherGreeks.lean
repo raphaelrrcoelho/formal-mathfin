@@ -7,7 +7,6 @@ module
 
 public import Mathlib
 public import MathFin.BlackScholes.PDE
-public import MathFin.BlackScholes.Bachelier
 
 /-!
 # Higher-order Black–Scholes Greeks: vanna and volga
@@ -29,7 +28,6 @@ follow from one chain rule + one product/scalar rule.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- Clean form: `∂_σ d₁ = -d₂/σ`. Algebraic shortcut for the quotient-rule
 expression in `hasDerivAt_bsd1_sigma`. Useful for higher-order Greeks. -/

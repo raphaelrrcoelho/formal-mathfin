@@ -215,6 +215,7 @@ lemma measurableEmbedding_nnrealCoe : MeasurableEmbedding ((↑) : ℝ≥0 → �
 /-- Lebesgue measure on the time axis `ℝ≥0` — the comap of `volume` along `ℝ≥0 ↪ ℝ`. -/
 noncomputable def timeMeasure : Measure ℝ≥0 := Measure.comap ((↑) : ℝ≥0 → ℝ) volume
 
+/-- `timeMeasure` of a time interval `(a, b]` is its length `b - a`. -/
 lemma timeMeasure_Ioc (a b : ℝ≥0) :
     timeMeasure (Set.Ioc a b) = ENNReal.ofReal ((b : ℝ) - a) := by
   have himg : ((↑) : ℝ≥0 → ℝ) '' Set.Ioc a b = Set.Ioc (a : ℝ) b := by

@@ -48,7 +48,6 @@ proved in full.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Chooser option closed-form price** under BS: long call (strike `K`,
 maturity `T`) + long put (strike `K · e^{−r(T − t_1)}`, maturity `t_1`).

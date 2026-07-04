@@ -34,6 +34,24 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Real
 open scoped NNReal ENNReal
 
+/-- **Indicator pushforward through `bsTerminal`.** For any payoff `f`, the payoff-on-`{S_T > K}`
+read as a function of the standard-normal driver `z` is the `Ioi (-d₂)`-indicator of `f ∘ S_T`:
+`1_{Ioi K}(S_T z) · f = 1_{Ioi (-d₂)}(z) · (f ∘ S_T)`. Both digital formulas below instantiate it
+(at `f = fun _ => 1` and `f = fun s => s`), sharing the `bsTerminal_gt_K_iff` case split. -/
+private lemma indicator_bsTerminal_Ioi_comp {S_0 K r σ T : ℝ}
+    (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (f : ℝ → ℝ) (z : ℝ) :
+    (Set.Ioi K).indicator f (bsTerminal S_0 r σ T z)
+      = (Set.Ioi (-bsd2 S_0 K r σ T)).indicator (f ∘ bsTerminal S_0 r σ T) z := by
+  by_cases hz : bsTerminal S_0 r σ T z ∈ Set.Ioi K
+  · have h_z_mem : z ∈ Set.Ioi (-bsd2 S_0 K r σ T) :=
+      (bsTerminal_gt_K_iff hS_0 hK hσ hT z).mp hz
+    rw [Set.indicator_of_mem hz, Set.indicator_of_mem h_z_mem, Function.comp_apply]
+  · have h_z_le : z ≤ -bsd2 S_0 K r σ T := by
+      by_contra hcontra
+      exact hz ((bsTerminal_gt_K_iff hS_0 hK hσ hT z).mpr (not_le.mp hcontra))
+    have h_z_not_mem : z ∉ Set.Ioi (-bsd2 S_0 K r σ T) := not_lt.mpr h_z_le
+    rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem h_z_not_mem]
+
 /-! ### Cash-or-nothing digital -/
 
 /-- **Cash-or-nothing call** pricing formula.
@@ -58,17 +76,8 @@ theorem bs_cash_or_nothing_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   -- Indicator on {S_T > K} viewed as a function of z equals indicator on Ioi(-d_2)
   have h_indic_eq : ∀ z : ℝ,
       (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T z)
-        = (Set.Ioi (-d_2)).indicator (fun _ => (1 : ℝ)) z := by
-    intro z
-    by_cases hz : bsTerminal S_0 r σ T z ∈ Set.Ioi K
-    · have h_z_mem : z ∈ Set.Ioi (-d_2) :=
-        (bsTerminal_gt_K_iff hS_0 hK hσ hT z).mp hz
-      rw [Set.indicator_of_mem hz, Set.indicator_of_mem h_z_mem]
-    · have h_z_le : z ≤ -d_2 := by
-        by_contra hcontra
-        exact hz ((bsTerminal_gt_K_iff hS_0 hK hσ hT z).mpr (not_le.mp hcontra))
-      have h_z_not_mem : z ∉ Set.Ioi (-d_2) := not_lt.mpr h_z_le
-      rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem h_z_not_mem]
+        = (Set.Ioi (-d_2)).indicator (fun _ => (1 : ℝ)) z :=
+    fun z => indicator_bsTerminal_Ioi_comp hS_0 hK hσ hT (fun _ => (1 : ℝ)) z
   -- Measurability of the payoff
   have h_payoff_meas : Measurable fun z : ℝ =>
       (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T z) := by
@@ -98,11 +107,7 @@ theorem bs_cash_or_nothing_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   -- ∫ z ∈ Ioi(-d_2), pdf = Phi(d_2) via gaussianReal_Ioi_toReal
   have h_pdf_int_eq :
       ∫ z in Set.Ioi (-d_2), gaussianPDFReal 0 1 z = Phi d_2 := by
-    rw [show ∫ z in Set.Ioi (-d_2), gaussianPDFReal 0 1 z
-            = (gaussianReal (0 : ℝ) 1 (Set.Ioi (-d_2))).toReal by
-        rw [gaussianReal_apply_eq_integral 0 (one_ne_zero : (1 : ℝ≥0) ≠ 0) (Set.Ioi (-d_2))]
-        exact (ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi
-          (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm,
+    rw [setIntegral_gaussianPDFReal_eq_toReal measurableSet_Ioi (0 : ℝ),
         gaussianReal_Ioi_toReal, neg_neg]
   rw [h_pdf_int_eq]
 
@@ -141,17 +146,8 @@ theorem bs_asset_or_nothing_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   --          = indicator(Ioi(-d_2), S_T)(z)
   have h_indic_eq : ∀ z : ℝ,
       (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T z)
-        = (Set.Ioi (-d_2)).indicator (fun z' => bsTerminal S_0 r σ T z') z := by
-    intro z
-    by_cases hz : bsTerminal S_0 r σ T z ∈ Set.Ioi K
-    · have h_z_mem : z ∈ Set.Ioi (-d_2) :=
-        (bsTerminal_gt_K_iff hS_0 hK hσ hT z).mp hz
-      rw [Set.indicator_of_mem hz, Set.indicator_of_mem h_z_mem]
-    · have h_z_le : z ≤ -d_2 := by
-        by_contra hcontra
-        exact hz ((bsTerminal_gt_K_iff hS_0 hK hσ hT z).mpr (not_le.mp hcontra))
-      have h_z_not_mem : z ∉ Set.Ioi (-d_2) := not_lt.mpr h_z_le
-      rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem h_z_not_mem]
+        = (Set.Ioi (-d_2)).indicator (fun z' => bsTerminal S_0 r σ T z') z :=
+    fun z => indicator_bsTerminal_Ioi_comp hS_0 hK hσ hT (fun s => s) z
   have h_payoff_meas : Measurable fun z : ℝ =>
       (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T z) := by
     have h_simp : (fun z : ℝ =>

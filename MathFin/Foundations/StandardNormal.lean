@@ -26,7 +26,11 @@ pricing-free base.
 ## Main results
 
 * `Phi` — the standard normal CDF `Φ(x) = P(Z ≤ x)`, with `Phi_neg`,
-  `Phi_add_Phi_neg`, `Phi_eq_integral`.
+  `Phi_add_Phi_neg`, `Phi_le_one`, `Phi_eq_integral`.
+* `setIntegral_gaussianPDFReal_eq_toReal` — the `∫ pdf = N(s).toReal` bridge
+  every closed-form Gaussian integral factors through.
+* `gaussianPDFReal_zero_one_neg` — evenness of the standard-normal density
+  `ϕ(-z) = ϕ(z)`.
 * `gaussianReal_Ioi_toReal` — the right tail `Q(Ioi a) = Φ(-a)`.
 * `exp_mul_gaussianPDFReal_zero_one` — the completing-the-square shift.
 * `integral_exp_mul_gaussianPDFReal_Ioi` — the shifted Gaussian tail integral
@@ -53,12 +57,20 @@ lemma Phi_def (x : ℝ) : Phi x = (gaussianReal 0 1 (Set.Iic x)).toReal := rfl
 
 lemma Phi_nonneg (x : ℝ) : 0 ≤ Phi x := ENNReal.toReal_nonneg
 
+/-- The set-integral of the standard-normal density over a measurable set `s`
+equals the (real) Gaussian measure of `s`: `∫_{z ∈ s} ϕ(μ,1,z) dz = N(μ,1)(s)`.
+The `.toReal`-of-`gaussianReal` bridge that every closed-form Gaussian integral
+factors through (`Phi_eq_integral`, the call/put/digital tails, the MGF shift). -/
+lemma setIntegral_gaussianPDFReal_eq_toReal {s : Set ℝ} (hs : MeasurableSet s) (μ : ℝ) :
+    ∫ z in s, gaussianPDFReal μ 1 z = (gaussianReal μ 1 s).toReal := by
+  rw [gaussianReal_apply_eq_integral μ (one_ne_zero : (1 : ℝ≥0) ≠ 0) s]
+  exact (ENNReal.toReal_ofReal (setIntegral_nonneg hs
+    (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm
+
+/-- `Φ(x)` as the Lebesgue integral of the standard-normal density over `(-∞, x]`. -/
 lemma Phi_eq_integral (x : ℝ) :
     Phi x = ∫ z in Set.Iic x, gaussianPDFReal 0 1 z := by
-  have h1 : (1 : ℝ≥0) ≠ 0 := one_ne_zero
-  rw [Phi_def, gaussianReal_apply_eq_integral _ h1]
-  exact ENNReal.toReal_ofReal <| setIntegral_nonneg measurableSet_Iic
-    (fun _ _ => gaussianPDFReal_nonneg _ _ _)
+  rw [Phi_def, setIntegral_gaussianPDFReal_eq_toReal measurableSet_Iic (0 : ℝ)]
 
 /-- `Φ(-x) = 1 − Φ(x)`. Symmetry of the standard normal around 0. -/
 lemma Phi_neg (x : ℝ) : Phi (-x) = 1 - Phi x := by
@@ -102,6 +114,23 @@ lemma Phi_neg (x : ℝ) : Phi (-x) = 1 - Phi x := by
 /-- `Φ(x) + Φ(-x) = 1`. -/
 lemma Phi_add_Phi_neg (x : ℝ) : Phi x + Phi (-x) = 1 := by
   rw [Phi_neg]; ring
+
+/-- **Standard normal CDF upper bound** `Φ(x) ≤ 1`, from `Φ(x) + Φ(-x) = 1`
+and `Φ(-x) ≥ 0`. The pricing-free home of the bound used across the BS price
+rectangle (`PriceBounds`) and the KMV-Merton default probability (`KMVMerton`). -/
+lemma Phi_le_one (x : ℝ) : Phi x ≤ 1 := by
+  have h_sum : Phi x + Phi (-x) = 1 := Phi_add_Phi_neg x
+  have h_neg : 0 ≤ Phi (-x) := Phi_nonneg _
+  linarith
+
+/-- **Standard normal PDF evenness**: `ϕ(-z) = ϕ(z)`, since the density depends
+on `z` only through `z²`. Model-agnostic — consumed by the Greeks and the
+put-strike convexity. -/
+lemma gaussianPDFReal_zero_one_neg (z : ℝ) :
+    gaussianPDFReal 0 1 (-z) = gaussianPDFReal 0 1 z := by
+  unfold gaussianPDFReal
+  congr 2
+  ring
 
 /-! ### Tail probabilities of the standard normal -/
 
@@ -147,10 +176,8 @@ lemma integral_exp_mul_gaussianPDFReal_Ioi (a c : ℝ) :
         (fun z _ => exp_mul_gaussianPDFReal_zero_one c z), integral_const_mul]
   congr 1
   have h_int_eq : ∫ z in Set.Ioi a, gaussianPDFReal c 1 z
-      = (gaussianReal c (1 : ℝ≥0) (Set.Ioi a)).toReal := by
-    rw [gaussianReal_apply_eq_integral c (one_ne_zero : (1 : ℝ≥0) ≠ 0) (Set.Ioi a)]
-    exact (ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Ioi
-      (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm
+      = (gaussianReal c (1 : ℝ≥0) (Set.Ioi a)).toReal :=
+    setIntegral_gaussianPDFReal_eq_toReal measurableSet_Ioi c
   have h_shift : gaussianReal c (1 : ℝ≥0) (Set.Ioi a) =
                  gaussianReal 0 1 (Set.Ioi (a - c)) := by
     have hmap : (gaussianReal (0 : ℝ) 1).map (fun y => y + c) = gaussianReal c 1 := by

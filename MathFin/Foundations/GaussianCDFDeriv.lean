@@ -18,9 +18,13 @@ This is a foundational identity not present in Mathlib (no `Real.erf`, no
 `gaussianReal_Iic_hasDerivAt`). Proved here via Lebesgue-`Iic` decomposition
 into an interval integral plus a constant, then `intervalIntegral.integral_hasDerivAt_right`.
 
-## Main result
+## Main results
 
 * `hasDerivAt_Phi` — `HasDerivAt Phi (gaussianPDFReal 0 1 x) x` for every `x : ℝ`.
+* `hasDerivAt_gaussianPDFReal_zero_one` — the PDF derivative `ϕ'(z) = -z·ϕ(z)`
+  (and its `.neg`-flip `hasDerivAt_neg_gaussianPDFReal_zero_one`), the
+  standard-normal first derivative reused across the Greeks and the Bachelier
+  truncated-mean identity.
 -/
 
 @[expose] public section
@@ -28,7 +32,45 @@ into an interval integral plus a constant, then `intervalIntegral.integral_hasDe
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
+
+/-- `(−ϕ(0,1,·))' = z · ϕ(0,1,z)`. Algebraic content: `d/dz [exp(-z²/2)] = -z · exp(-z²/2)`. -/
+lemma hasDerivAt_neg_gaussianPDFReal_zero_one (z : ℝ) :
+    HasDerivAt (fun z' : ℝ => -gaussianPDFReal 0 1 z')
+      (z * gaussianPDFReal 0 1 z) z := by
+  unfold gaussianPDFReal
+  simp only [NNReal.coe_one, mul_one, sub_zero]
+  set c := (Real.sqrt (2 * π))⁻¹
+  -- d/dz [-z²/2] = -z
+  have h_sq : HasDerivAt (fun z' : ℝ => -(z'^2)/2) (-z) z := by
+    have h_pow : HasDerivAt (fun z' : ℝ => z'^2) (2 * z) z := by
+      simpa using hasDerivAt_pow 2 z
+    have h_div : HasDerivAt (fun z' : ℝ => z'^2 / 2) z z := by
+      have := h_pow.div_const 2; simpa using this
+    have h_neg : HasDerivAt (fun z' : ℝ => -(z'^2 / 2)) (-z) z := h_div.neg
+    have h_eq : (fun z' : ℝ => -(z'^2)/2) = (fun z' : ℝ => -(z'^2 / 2)) := by
+      funext z'; ring
+    rw [h_eq]; exact h_neg
+  -- d/dz [exp(-z²/2)] = exp(-z²/2) · -z
+  have h_exp : HasDerivAt (fun z' : ℝ => Real.exp (-(z'^2)/2))
+      (Real.exp (-(z^2)/2) * -z) z := h_sq.exp
+  -- d/dz [c · exp(-z²/2)] = c · exp(-z²/2) · -z
+  have h_const : HasDerivAt (fun z' : ℝ => c * Real.exp (-(z'^2)/2))
+      (c * (Real.exp (-(z^2)/2) * -z)) z := h_exp.const_mul c
+  -- neg
+  have h_neg := h_const.neg
+  convert h_neg using 1 <;> first | rfl | ring
+
+/-- `ϕ(0,1,·)' = -z · ϕ(0,1,z)` — the standard-normal PDF derivative (the
+`.neg`-flip of `hasDerivAt_neg_gaussianPDFReal_zero_one`). The single
+standard-normal first-derivative reused across the Greeks files. -/
+theorem hasDerivAt_gaussianPDFReal_zero_one (z : ℝ) :
+    HasDerivAt (fun z' : ℝ => gaussianPDFReal 0 1 z')
+      (-(z * gaussianPDFReal 0 1 z)) z := by
+  have h := (hasDerivAt_neg_gaussianPDFReal_zero_one z).neg
+  have h_eq : ((-fun z' : ℝ => -gaussianPDFReal 0 1 z') : ℝ → ℝ)
+            = fun z' : ℝ => gaussianPDFReal 0 1 z' := by funext z'; simp
+  rw [h_eq] at h
+  exact h
 
 /-- **Standard normal CDF derivative**: `Phi'(x) = gaussianPDFReal 0 1 x`. -/
 theorem hasDerivAt_Phi (x : ℝ) :

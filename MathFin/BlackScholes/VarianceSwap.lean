@@ -33,8 +33,12 @@ Results:
 * `log_forward_div_bsTerminal_eq`: `log(F/S_T) = σ² T / 2 − σ √T · z`.
 * `integral_log_forward_div_bsTerminal_eq`:
   `E_Q[log(F/S_T)] = σ² T / 2`.
-* `integral_excess_return_eq_zero`: `E_Q[(S_T − F)/F] = 0`.
-* `varianceSwap_fairStrike`: the headline `(2/T) · E_Q[...] = σ²`.
+* `varianceSwap_log_contribution`: the log-payoff piece
+  `(2/T) · E_Q[log(F/S_T)] = σ²`.
+* `integral_bsTerminal_eq_forward`: `E[S_T] = F` (standard-normal-driver form).
+* `integral_excess_return_eq_zero`: `E[(S_T − F)/F] = 0`.
+* `varianceSwap_fairStrike`: the full Demeterfi-Derman-Kamal identity
+  `(2/T) · E[log(F/S_T) + (S_T − F)/F] = σ²`.
 -/
 
 @[expose] public section
@@ -98,5 +102,56 @@ theorem varianceSwap_log_contribution {S_0 : ℝ} (hS : 0 < S_0)
         ∂(gaussianReal 0 1)) = σ^2 := by
   rw [integral_log_forward_div_bsTerminal_eq hS]
   field_simp
+
+/-- **Terminal price is the forward in expectation** — the standard-normal-driver
+form of `Forward.expected_terminal_eq_forward`: `E[S_T] = F = S_0·e^{rT}`. -/
+lemma integral_bsTerminal_eq_forward (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
+    ∫ z, S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z) ∂(gaussianReal 0 1)
+      = S_0 * Real.exp (r * T) := by
+  rw [integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0),
+      show (fun z => gaussianPDFReal 0 1 z •
+            (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)))
+          = (fun z => S_0 * Real.exp ((r - σ ^ 2 / 2) * T) *
+              (Real.exp (σ * Real.sqrt T * z) * gaussianPDFReal 0 1 z)) from
+        funext fun z => by rw [smul_eq_mul, Real.exp_add]; ring,
+      integral_const_mul, integral_exp_mul_gaussianPDFReal_univ,
+      show S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp ((σ * Real.sqrt T) ^ 2 / 2)
+          = S_0 * (Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp ((σ * Real.sqrt T) ^ 2 / 2))
+        from by ring,
+      ← Real.exp_add,
+      show (r - σ ^ 2 / 2) * T + (σ * Real.sqrt T) ^ 2 / 2 = r * T from by
+        rw [mul_pow, Real.sq_sqrt hT]; ring]
+
+/-- **Zero excess-return moment**: `E[(S_T − F)/F] = 0`, immediate from
+`E[S_T] = F` (`integral_bsTerminal_eq_forward`). -/
+lemma integral_excess_return_eq_zero (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
+    ∫ z, (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+            - S_0 * Real.exp (r * T)) / (S_0 * Real.exp (r * T)) ∂(gaussianReal 0 1) = 0 := by
+  have hint : Integrable
+      (fun z => S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)) (gaussianReal 0 1) := by
+    have h1 : Integrable (fun z => Real.exp (σ * Real.sqrt T * z)) (gaussianReal 0 1) :=
+      integrable_exp_mul_gaussianReal (σ * Real.sqrt T)
+    refine (h1.const_mul (S_0 * Real.exp ((r - σ ^ 2 / 2) * T))).congr
+      (Filter.Eventually.of_forall fun z => ?_)
+    show S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
+        = S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+    rw [mul_assoc, ← Real.exp_add]
+  rw [integral_div, integral_sub hint (integrable_const _),
+      integral_bsTerminal_eq_forward S_0 r σ T hT, integral_const, measureReal_def,
+      measure_univ, ENNReal.toReal_one, one_smul, sub_self, zero_div]
+
+/-- **Variance swap fair strike** (Demeterfi-Derman-Kamal, full log-replication
+identity): `(2/T) · E[log(F/S_T) + (S_T − F)/F] = σ²`. Assembles the log
+contribution with the zero excess-return moment `E[(S_T − F)/F] = 0`. -/
+theorem varianceSwap_fairStrike {S_0 : ℝ} (hS : 0 < S_0) (r σ T : ℝ) (hT : 0 < T) :
+    (2 / T) *
+        ((∫ z, Real.log ((S_0 * Real.exp (r * T)) /
+              (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)))
+            ∂(gaussianReal 0 1))
+         + ∫ z, (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+              - S_0 * Real.exp (r * T)) / (S_0 * Real.exp (r * T)) ∂(gaussianReal 0 1))
+      = σ ^ 2 := by
+  rw [integral_excess_return_eq_zero S_0 r σ T hT.le, add_zero]
+  exact varianceSwap_log_contribution hS r σ T hT.ne'
 
 end MathFin

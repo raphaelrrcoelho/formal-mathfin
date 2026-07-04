@@ -35,7 +35,6 @@ direct algebraic specialization.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Black-76 formula** for European call options on futures.
 
@@ -106,5 +105,21 @@ theorem swaption_payer_receiver_parity (A F K σ T : ℝ) :
   have h_d1 := Phi_add_Phi_neg (bsd1 F K 0 σ T)
   have h_d2 := Phi_add_Phi_neg (bsd2 F K 0 σ T)
   linear_combination A * F * h_d1 - A * K * h_d2
+
+/-- **The payer swaption is a Garman normal form**: `blackPayerSwaption A F K σ T
+= bsVGarman (F·A) K A σ T`, the annuity `A` in the discount-factor slot and
+`F·A` the asset. Makes explicit that `GarmanNormalForm`'s docstring earmark for
+the swaption is a genuine instance (`A_annuity·F` asset, `A_annuity` discount),
+so the payer/receiver parity above is the Garman-level parity in disguise. -/
+theorem blackPayerSwaption_eq_bsVGarman (A F K σ T : ℝ) (hA : 0 < A) :
+    blackPayerSwaption A F K σ T = bsVGarman (F * A) K A σ T := by
+  have hd1 : bsd1 F K 0 σ T = gbsd1 (F * A) K A σ T := by
+    unfold bsd1 gbsd1
+    rw [mul_div_mul_right F K hA.ne']
+    ring_nf
+  have hd2 : bsd2 F K 0 σ T = gbsd2 (F * A) K A σ T := by
+    unfold bsd2 gbsd2; rw [hd1]
+  unfold blackPayerSwaption bsVGarman
+  rw [hd1, hd2]; ring
 
 end MathFin

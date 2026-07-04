@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.DoobLpMaximalInequality
+public import BrownianMotion.StochasticIntegral.UniformIntegrable
 
 /-!
 # L²-bounded discrete martingales converge in L²
@@ -183,76 +184,15 @@ private lemma exists_dominator [IsFiniteMeasure μ]
     have h2 := ENNReal.toReal_mono hω (le_iSup (fun m => ‖f m ω‖ₑ) n)
     rwa [← ofReal_norm, ENNReal.toReal_ofReal (norm_nonneg _)] at h2
 
-/-- A single L² dominator makes the family uniformly integrable in L²:
-Chebyshev shrinks the tail sets uniformly, absolute continuity of the
-indicator seminorm does the rest. -/
+/-- A single L² dominator makes the family uniformly integrable in L² — this is
+Degenne's `uniformIntegrable_of_dominated_singleton` projected to `UnifIntegrable`
+via `.unifIntegrable`, superseding a hand-rolled Chebyshev tail argument. -/
 private lemma unifIntegrable_of_dominator [IsFiniteMeasure μ]
-    (hmeas : ∀ n, Measurable (f n)) {g : Ω → ℝ} (hgm : Measurable g)
+    (hmeas : ∀ n, Measurable (f n)) {g : Ω → ℝ} (_hgm : Measurable g)
     (hg : MemLp g 2 μ) (hdom : ∀ n, ∀ᵐ ω ∂μ, ‖f n ω‖ ≤ g ω) :
-    UnifIntegrable f 2 μ := by
-  refine unifIntegrable_of one_le_two (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
-    (fun n => (hmeas n).aestronglyMeasurable) fun ε hε => ?_
-  obtain ⟨δ, hδ, hδ_bound⟩ := hg.eLpNorm_indicator_le one_le_two (by norm_num : (2 : ℝ≥0∞) ≠ ∞) hε
-  set B : ℝ≥0∞ := ∫⁻ ω, ‖g ω‖ₑ ^ (2 : ℕ) ∂μ with hB_def
-  have hB_ne : B ≠ ∞ := by
-    rw [hB_def, lintegral_enorm_sq]
-    exact (ENNReal.pow_lt_top hg.eLpNorm_lt_top).ne
-  have hδ' : ENNReal.ofReal δ ≠ 0 := by
-    simpa [ENNReal.ofReal_eq_zero, not_le] using hδ
-  -- choose `C` with `B ≤ C² · ofReal δ`
-  obtain ⟨N, hN⟩ := ENNReal.exists_nat_gt
-    (ENNReal.div_lt_top hB_ne hδ').ne
-  set C : ℝ≥0 := (N : ℝ≥0) + 1 with hC_def
-  have hC_one : (1 : ℝ≥0∞) ≤ (C : ℝ≥0∞) := by
-    rw [hC_def]; exact_mod_cast le_add_self
-  have hC_ne : (C : ℝ≥0∞) ≠ 0 := by positivity
-  have hB_le : B ≤ (C : ℝ≥0∞) ^ (2 : ℕ) * ENNReal.ofReal δ := by
-    have h1 : B < (C : ℝ≥0∞) * ENNReal.ofReal δ := by
-      rw [← ENNReal.div_lt_iff (Or.inl hδ') (Or.inl ENNReal.ofReal_ne_top)]
-      refine hN.trans_le ?_
-      rw [hC_def]
-      exact_mod_cast le_add_of_nonneg_right zero_le_one
-    exact h1.le.trans (mul_le_mul_left
-      (le_self_pow₀ hC_one two_ne_zero) _)
-  refine ⟨C, fun i => ?_⟩
-  set A : Set Ω := {x | C ≤ ‖f i x‖₊} with hA_def
-  have hA_meas : MeasurableSet A := measurableSet_le measurable_const (hmeas i).nnnorm
-  -- a.e. on `A`, the dominator is at least `C`, so `A` sits in `g`'s tail set
-  have hA_tail : ∀ᵐ x ∂μ, x ∈ A → (C : ℝ≥0∞) ^ (2 : ℕ) ≤ ‖g x‖ₑ ^ (2 : ℕ) := by
-    filter_upwards [hdom i] with x hx hxA
-    have h1 : (C : ℝ≥0∞) ≤ ‖f i x‖ₑ := ENNReal.coe_le_coe.mpr hxA
-    have h2 : ‖f i x‖ₑ ≤ ‖g x‖ₑ := by
-      rw [← ofReal_norm, ← ofReal_norm]
-      exact ENNReal.ofReal_le_ofReal (hx.trans (Real.le_norm_self _))
-    exact pow_le_pow_left' (h1.trans h2) 2
-  -- Chebyshev for the tail set of `g`
-  have hμA : μ A ≤ ENNReal.ofReal δ := by
-    have hsub : μ A ≤ μ {x | (C : ℝ≥0∞) ^ (2 : ℕ) ≤ ‖g x‖ₑ ^ (2 : ℕ)} :=
-      measure_mono_ae (by filter_upwards [hA_tail] with x hx using hx)
-    have hcheb : (C : ℝ≥0∞) ^ (2 : ℕ) *
-        μ {x | (C : ℝ≥0∞) ^ (2 : ℕ) ≤ ‖g x‖ₑ ^ (2 : ℕ)} ≤ B :=
-      hB_def ▸ mul_meas_ge_le_lintegral₀ ((hgm.enorm.pow_const 2).aemeasurable) _
-    have hC2_ne : ((C : ℝ≥0∞)) ^ (2 : ℕ) ≠ 0 := pow_ne_zero 2 hC_ne
-    have hC2_top : ((C : ℝ≥0∞)) ^ (2 : ℕ) ≠ ∞ := by finiteness
-    have h2 : μ {x | (C : ℝ≥0∞) ^ (2 : ℕ) ≤ ‖g x‖ₑ ^ (2 : ℕ)} * (C : ℝ≥0∞) ^ (2 : ℕ)
-        ≤ ENNReal.ofReal δ * (C : ℝ≥0∞) ^ (2 : ℕ) :=
-      calc μ {x | (C : ℝ≥0∞) ^ (2 : ℕ) ≤ ‖g x‖ₑ ^ (2 : ℕ)} * (C : ℝ≥0∞) ^ (2 : ℕ)
-          = (C : ℝ≥0∞) ^ (2 : ℕ) *
-            μ {x | (C : ℝ≥0∞) ^ (2 : ℕ) ≤ ‖g x‖ₑ ^ (2 : ℕ)} := mul_comm _ _
-        _ ≤ B := hcheb
-        _ ≤ (C : ℝ≥0∞) ^ (2 : ℕ) * ENNReal.ofReal δ := hB_le
-        _ = ENNReal.ofReal δ * (C : ℝ≥0∞) ^ (2 : ℕ) := mul_comm _ _
-    exact hsub.trans ((ENNReal.mul_le_mul_iff_left hC2_ne hC2_top).mp h2)
-  -- domination transfers the indicator bound from `g` to `f i`
-  calc eLpNorm (A.indicator (f i)) 2 μ
-      ≤ eLpNorm (A.indicator g) 2 μ := by
-        refine eLpNorm_mono_ae ?_
-        filter_upwards [hdom i] with x hx
-        by_cases hxA : x ∈ A
-        · rw [Set.indicator_of_mem hxA, Set.indicator_of_mem hxA]
-          exact hx.trans (le_abs_self _)
-        · simp [Set.indicator_of_notMem hxA]
-    _ ≤ ENNReal.ofReal ε := hδ_bound A hA_meas hμA
+    UnifIntegrable f 2 μ :=
+  (uniformIntegrable_of_dominated_singleton one_le_two (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
+    hg (fun n => (hmeas n).aestronglyMeasurable) hdom).unifIntegrable
 
 end L2MartingaleConvergence
 

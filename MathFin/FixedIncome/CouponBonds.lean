@@ -80,9 +80,7 @@ lemma hasDerivAt_neg_log_zcb_T (r t T : ℝ) :
   have h_lin : HasDerivAt (fun T' : ℝ => r * (T' - t)) r T := by
     have h := ((hasDerivAt_id T).sub_const t).const_mul r
     simpa using h
-  convert h_lin using 1
-  funext T'
-  exact h_eq T'
+  exact h_lin.congr_of_eventuallyEq (Filter.Eventually.of_forall h_eq)
 
 /-- **Coupon bond strict-monotonicity in `r`** at a fixed cash-flow schedule:
 if all coupons are positive and all payment times are strictly in the future,

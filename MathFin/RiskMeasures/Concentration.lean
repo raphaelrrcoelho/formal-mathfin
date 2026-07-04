@@ -58,11 +58,10 @@ lemma herfindahl_le_one_of_sum_le_one_of_nonneg
     (h_sum : ∑ i ∈ s, w i ≤ 1) :
     herfindahl s w ≤ 1 := by
   unfold herfindahl
-  have h_bound : ∀ i ∈ s, (w i)^2 ≤ w i := by
-    intro i hi
-    have h_le : w i ≤ 1 := hw_le i hi
-    have h_nn : 0 ≤ w i := hnn i hi
-    nlinarith [sq_nonneg (w i)]
+  -- `w²≤w` for `w∈[0,1]` is exactly `pow_le_of_le_one` (patterns.md flagged
+  -- this goal as needing `nlinarith`; the direct Mathlib lemma supersedes it).
+  have h_bound : ∀ i ∈ s, (w i)^2 ≤ w i := fun i hi =>
+    pow_le_of_le_one (hnn i hi) (hw_le i hi) (by norm_num)
   calc ∑ i ∈ s, (w i)^2
       ≤ ∑ i ∈ s, w i := Finset.sum_le_sum h_bound
     _ ≤ 1 := h_sum

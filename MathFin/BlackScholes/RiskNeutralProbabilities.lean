@@ -57,7 +57,6 @@ measure w.r.t. the risk-neutral measure) — is formalised in
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- **Risk-neutral exercise probability identification**: under the risk-
 neutral hypothesis `BSCallHyp`, the probability that the terminal asset

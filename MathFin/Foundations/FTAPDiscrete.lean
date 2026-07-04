@@ -44,7 +44,6 @@ and the `d`-asset generalisation are out of scope here.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
-open scoped BigOperators
 
 -- Heterogeneous use of one rich `variable` context: the algebraic transform
 -- lemmas need only `S`, and several theorems do not touch

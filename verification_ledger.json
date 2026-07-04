@@ -390,10 +390,10 @@
     },
     "mf-american-ge-european": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-24",
-      "elapsed_s": 9.7,
-      "input_hash": "c61c63f87cc9c38efb06e3210a2e6d4c43f5f2ec80481b5ed1cda57512a6a482",
-      "verified_at_commit": "4e921c4"
+      "date": "2026-07-04",
+      "elapsed_s": 156.1,
+      "input_hash": "337d8918af1bf2b6a12dac1130e709d2598c5b1b0e1cdee35ed60f6c7ceca5f7",
+      "verified_at_commit": "d7766e4"
     },
     "mf-american-intrinsic-bound": {
       "benchmark_file": "mathematical_finance.json",
@@ -838,10 +838,10 @@
     },
     "mf-bsV-forward-lower-bound": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-24",
-      "elapsed_s": 9.4,
-      "input_hash": "3d10f75a13c880a690e88efbd65785926ff1b36cc88170b76c1166db2ce81a3d",
-      "verified_at_commit": "4e921c4"
+      "date": "2026-07-04",
+      "elapsed_s": 138.1,
+      "input_hash": "53b0c910fdfe535f6f73fca2a926f6a6880212f8c489feafb15b040d7666dc61",
+      "verified_at_commit": "d7766e4"
     },
     "mf-bsV-le-S": {
       "benchmark_file": "mathematical_finance.json",
@@ -1034,10 +1034,10 @@
     },
     "mf-compound-poisson-mgf": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-24",
-      "elapsed_s": 35.5,
-      "input_hash": "28672eefa9f97ef9f4c82449a8131ecdb77aa2846529ad15e5a67cb2245d6941",
-      "verified_at_commit": "4e921c4"
+      "date": "2026-07-04",
+      "elapsed_s": 60.8,
+      "input_hash": "303735521c39b2543a85763058b9cfb981045836a429d45aac214dedbce799be",
+      "verified_at_commit": "d7766e4"
     },
     "mf-convex-duality-root": {
       "benchmark_file": "mathematical_finance.json",
@@ -1328,10 +1328,10 @@
     },
     "mf-gompertz-cumulative-force": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-06-24",
-      "elapsed_s": 10.6,
-      "input_hash": "a355d07af68d2b1810ccfe4d37ab85cee5407287a9aca97d01b9bb1aa4c3f6a1",
-      "verified_at_commit": "4e921c4"
+      "date": "2026-07-04",
+      "elapsed_s": 197.7,
+      "input_hash": "9ab035e69dc01ec8804deee1d8fa344411b4ba2ddec8b54a3c6284c8938e2cf6",
+      "verified_at_commit": "d7766e4"
     },
     "mf-hazard-survival-const": {
       "benchmark_file": "mathematical_finance.json",

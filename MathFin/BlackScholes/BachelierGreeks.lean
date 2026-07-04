@@ -30,7 +30,6 @@ These parallel the Black–Scholes Greeks but with much simpler algebra
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory Real
-open scoped NNReal ENNReal
 
 /-- The Bachelier call price as a function of `(S, σ)`:
 `V_bach = (S − K) Φ(d) + σ √T ϕ(d)` where `d = (S − K)/(σ √T)`. -/

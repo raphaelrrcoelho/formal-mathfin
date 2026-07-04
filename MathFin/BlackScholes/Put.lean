@@ -50,10 +50,8 @@ lemma integral_exp_mul_gaussianPDFReal_Iic (a c : ℝ) :
         (fun z _ => exp_mul_gaussianPDFReal_zero_one c z), integral_const_mul]
   congr 1
   have h_int_eq : ∫ z in Set.Iic a, gaussianPDFReal c 1 z
-      = (gaussianReal c (1 : ℝ≥0) (Set.Iic a)).toReal := by
-    rw [gaussianReal_apply_eq_integral c (one_ne_zero : (1 : ℝ≥0) ≠ 0) (Set.Iic a)]
-    exact (ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Iic
-      (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm
+      = (gaussianReal c (1 : ℝ≥0) (Set.Iic a)).toReal :=
+    setIntegral_gaussianPDFReal_eq_toReal measurableSet_Iic c
   have h_shift : gaussianReal c (1 : ℝ≥0) (Set.Iic a) =
                  gaussianReal 0 1 (Set.Iic (a - c)) := by
     have hmap : (gaussianReal (0 : ℝ) 1).map (fun y => y + c) = gaussianReal c 1 := by
@@ -166,11 +164,7 @@ theorem bs_put_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   -- Step 8: apply primitives
   have h_pdf_int_eq :
       ∫ z in Set.Iic (-d_2), gaussianPDFReal 0 1 z = Phi (-d_2) := by
-    rw [show ∫ z in Set.Iic (-d_2), gaussianPDFReal 0 1 z
-            = (gaussianReal (0 : ℝ) 1 (Set.Iic (-d_2))).toReal by
-        rw [gaussianReal_apply_eq_integral 0 (one_ne_zero : (1 : ℝ≥0) ≠ 0) (Set.Iic (-d_2))]
-        exact (ENNReal.toReal_ofReal (setIntegral_nonneg measurableSet_Iic
-          (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm,
+    rw [setIntegral_gaussianPDFReal_eq_toReal measurableSet_Iic (0 : ℝ),
         gaussianReal_Iic_toReal]
   rw [h_pdf_int_eq, integral_exp_mul_gaussianPDFReal_Iic, h_shift_eq]
   -- Step 9: final algebra
