@@ -42,9 +42,12 @@ breadth at this stage, and what the concrete next round would look like.
 > `driftSimpleProcessLp Vₙ` (CLM-continuity and a.e., the latter from `driftContinuousMod_tendsto` — a
 > **direct Chebyshev** maximal bound, no martingale — lifted per-slice→trim through the
 > predictable-measurable convergence set) that are unique in measure. Axiom-clean, pinned in `AxiomAudit`.
-> **Honest remainder:** the drift term is the a.e. limit of the elementary Lebesgue integrals
-> `∫₀ᵗ b(Xⁿ_s) ds`; rewriting it as the single integral `∫₀ᵗ b(X_s) ds` (per-`ω` interval Cauchy–Schwarz)
-> is a presentational refinement, the next step — not a strengthening of existence.
+> **Drift refined to the honest single integral (#33, same session):**
+> `DriftProcessModification.driftContinuousMod_eq_setIntegral` proves `driftContinuousMod g t ω =
+> ∫₀ᵗ ⇑g(s,ω) ds` a.e. for every `t ≤ T` (subsequence from the `L¹(μ)` decay of the ω-slice energies
+> `Dₙ = ‖simpleAssembly_T Vₙ − g‖²`, then interval Cauchy–Schwarz); `SDEPathwise.sde_pathwise_drift_eq_setIntegral`
+> specializes it to `b∘X`, so the strong solution's drift term is the recognizable `∫₀ᵗ b(X_s) ds`. The
+> pathwise-existence bridge is now complete on the drift side, all axiom-clean.
 
 > **DELIVERED (2026-07-02) — SDE existence via Picard
 > ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)).** The strong solution of

@@ -41,11 +41,16 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > Borel–Cantelli, the drift analog of `itoContinuousMod_tendsto`) — unique in measure on the finite trim
 > space, the a.e. convergence lifted from per-slice to the trim measure through the predictable-measurable
 > convergence set. All axiom-clean (`[propext, Classical.choice, Quot.sound]`, pinned in `AxiomAudit`).
-> **Honest scope:** the drift term is the a.e. limit of the honest elementary Lebesgue integrals
-> `∫₀ᵗ b(Xⁿ_s) ds`; rewriting `driftContinuousMod(b∘X)_t(ω)` as the single integral `∫₀ᵗ b(X_s(ω)) ds` (a
-> per-`ω` interval Cauchy–Schwarz limit) is a presentational refinement of the drift term, not a
-> strengthening of the existence statement, and remains the next step. `sc-thm-8.2.5`'s existence half
-> stays the conditional-`c < 1` `E` result; this bridge makes that solution's sample paths explicit.
+> **The drift term is now the honest single Lebesgue integral** (#33, this session):
+> `DriftProcessModification.driftContinuousMod_eq_setIntegral` proves `driftContinuousMod g t ω =
+> ∫₀ᵗ ⇑g(s,ω) ds` a.e. for every `t ≤ T` — the elementary drifts `∫₀ᵗ Vₙ ds` converge to
+> `driftContinuousMod`, and the ω-slice energies `Dₙ(ω) = ∫₀ᵀ(⇑Vₙ − ⇑g)² ds` decay in `L¹(μ)`
+> (`= ‖simpleAssembly_T Vₙ − g‖²`), so a subsequence has `Dₙₖ(ω) → 0` a.e., whence the interval
+> Cauchy–Schwarz `|∫₀ᵗ(⇑Vₙₖ − ⇑g)| ≤ √(T·Dₙₖ(ω)) → 0` matches the two limits.
+> `SDEPathwise.sde_pathwise_drift_eq_setIntegral` specializes it to `b∘X`, so the strong solution's drift
+> term is the recognizable SDE integral `∫₀ᵗ b(X_s(ω)) ds`, not merely an abstract limit. All axiom-clean.
+> `sc-thm-8.2.5`'s existence half stays the conditional-`c < 1` `E` result; this bridge makes that
+> solution's sample paths — and now its drift integral — explicit.
 >
 > **Prior (2026-07-03, SDE strong-solution uniqueness — the L²-energy Grönwall keystone, #19):**
 > corpus **312**, **278 full + 18 wrappers = 296/312 delivery-ready**, 16 reduced cores, 0 placeholders.

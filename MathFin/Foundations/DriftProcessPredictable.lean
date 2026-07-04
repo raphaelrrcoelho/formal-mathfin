@@ -219,7 +219,7 @@ theorem memLp_uncurry_driftSimpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurab
 
 /-- **The elementary-drift slice is `L²` in the time variable** (bounded step process on the
 finite measure `timeMeasure.restrict (Ioc 0 T)`). -/
-private lemma memLp_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+theorem memLp_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) :
     MemLp (fun s => ⇑V s ω) 2 (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := by
   refine MemLp.of_bound

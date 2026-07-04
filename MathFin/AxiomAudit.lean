@@ -914,6 +914,26 @@ the predictable-measurable convergence set) are unique in measure on the finite 
 /-- info: 'MathFin.SDEExistence.sde_pathwise_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.sde_pathwise_decomposition
 
+/-! ## SDE pathwise drift — the honest single Lebesgue integral (#33)
+
+The drift term of the pathwise solution, refined from the abstract `limUnder` to the recognizable
+integral. `driftContinuousMod_eq_setIntegral` proves `driftContinuousMod g t ω = ∫₀ᵗ ⇑g(s,ω) ds` a.e.
+for every `t ≤ T`: the elementary drifts `∫₀ᵗ Vₙ ds` converge to `driftContinuousMod` (Layer 2), and the
+ω-slice energies `Dₙ(ω) = ∫₀ᵀ(⇑Vₙ − ⇑g)² ds` decay in `L¹(μ)` (`= ‖simpleAssembly_T Vₙ − g‖²`,
+`drift_slice_energy_eq`, Tonelli through the trim↔product transfer), so a subsequence has `Dₙₖ(ω) → 0`
+a.e., whence the interval Cauchy–Schwarz `|∫₀ᵗ(⇑Vₙₖ − ⇑g)| ≤ √(T·Dₙₖ(ω)) → 0` matches the limits.
+`sde_pathwise_drift_eq_setIntegral` specializes it to `b∘X`, giving the strong solution's drift as
+`∫₀ᵗ b(X_s(ω)) ds`. -/
+
+/-- info: 'MathFin.ItoIntegralProcessContinuousModification.drift_slice_energy_eq' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.drift_slice_energy_eq
+
+/-- info: 'MathFin.ItoIntegralProcessContinuousModification.driftContinuousMod_eq_setIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.driftContinuousMod_eq_setIntegral
+
+/-- info: 'MathFin.SDEExistence.sde_pathwise_drift_eq_setIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.sde_pathwise_drift_eq_setIntegral
+
 /-! ## The change of numéraire — price invariance (IV↔I seam)
 
 The numéraire measure `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))` reprices every terminal claim
