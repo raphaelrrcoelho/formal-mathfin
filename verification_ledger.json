@@ -2148,9 +2148,9 @@
     "sc-thm-8.2.5": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-07-03",
-      "elapsed_s": 15.5,
-      "input_hash": "abe5f2b88be0d62b5c86c77eddad96308564e124e7c074edba3fd538ca0e4248",
-      "verified_at_commit": "b873ce1"
+      "elapsed_s": 221.1,
+      "input_hash": "b7eede1998bb5131e6d583c82b5e78f6222711d6f5d3d0c968b615754e890f5e",
+      "verified_at_commit": "2aaff2f"
     },
     "sc-thm-9.1.1": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2182,10 +2182,10 @@
     },
     "sde-picard-existence-uniqueness": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-02",
-      "elapsed_s": 8.8,
-      "input_hash": "48f97ee4cf929ca90e33f151375b55f252e7b8f0f7eabc3b3ed1d11c0518828b",
-      "verified_at_commit": "2d10b77"
+      "date": "2026-07-03",
+      "elapsed_s": 34.9,
+      "input_hash": "3fc6c707fee7bcc9981d3c4af8be40024f2b4837ae7442d0924bbb03c67de1b6",
+      "verified_at_commit": "2aaff2f"
     }
   }
 }

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import Mathlib
+public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 
 /-! # Pathwise uniqueness for SDEs via Grönwall
 
@@ -95,42 +96,6 @@ theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
   rw [hint0, mul_zero] at hlt
   exact le_antisymm hlt (hg0 t)
 
-/-- **Cauchy–Schwarz on a finite measure**: `(∫ f)² ≤ ν(univ)·∫ f²`, via Hölder with `g ≡ 1`
-at exponents `2,2`. The drift Cauchy–Schwarz in time reads through this with
-`ν = volume.restrict (Ioc 0 s)` (total mass `s`). (Same argument as the private
-`sq_integral_le_measureReal_mul` in `DriftProcessPredictable`; re-derived here to stay
-self-contained.) -/
-private lemma sq_integral_le_measureReal_mul {α : Type*} {m : MeasurableSpace α} {ν : Measure α}
-    [IsFiniteMeasure ν] {f : α → ℝ} (hf : MemLp f 2 ν) :
-    (∫ a, f a ∂ν) ^ 2 ≤ (ν Set.univ).toReal * ∫ a, (f a) ^ 2 ∂ν := by
-  have hp : (2 : ℝ).HolderConjugate 2 := Real.HolderConjugate.two_two
-  have hint_nonneg : 0 ≤ ∫ a, (f a) ^ 2 ∂ν := integral_nonneg fun a => sq_nonneg _
-  have hmeas_nonneg : 0 ≤ (ν Set.univ).toReal := ENNReal.toReal_nonneg
-  have hhold := integral_mul_le_Lp_mul_Lq_of_nonneg (μ := ν) hp
-    (f := |f|) (g := fun _ => (1 : ℝ))
-    (ae_of_all ν fun a => abs_nonneg (f a)) (ae_of_all ν fun _ => zero_le_one)
-    (by simpa [ENNReal.ofReal_ofNat] using hf.abs)
-    (by simpa [ENNReal.ofReal_ofNat] using memLp_const (1 : ℝ))
-  have hpow : ∫ a, |f| a ^ (2 : ℝ) ∂ν = ∫ a, (f a) ^ 2 ∂ν := by
-    refine integral_congr_ae (ae_of_all _ fun a => ?_)
-    show |f a| ^ (2 : ℝ) = (f a) ^ 2
-    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast, sq_abs]
-  rw [hpow, Real.one_rpow, MeasureTheory.integral_const, smul_eq_mul, mul_one, measureReal_def]
-    at hhold
-  have habs : |∫ a, f a ∂ν|
-      ≤ (∫ a, (f a) ^ 2 ∂ν) ^ (1 / 2 : ℝ) * (ν Set.univ).toReal ^ (1 / 2 : ℝ) := by
-    refine (MeasureTheory.abs_integral_le_integral_abs).trans ?_
-    simpa only [Pi.abs_apply, mul_one] using hhold
-  calc (∫ a, f a ∂ν) ^ 2 = |∫ a, f a ∂ν| ^ 2 := (sq_abs _).symm
-    _ ≤ ((∫ a, (f a) ^ 2 ∂ν) ^ (1 / 2 : ℝ) * (ν Set.univ).toReal ^ (1 / 2 : ℝ)) ^ 2 :=
-        pow_le_pow_left₀ (abs_nonneg _) habs 2
-    _ = (ν Set.univ).toReal * ∫ a, (f a) ^ 2 ∂ν := by
-        rw [mul_pow, ← Real.rpow_natCast ((∫ a, (f a) ^ 2 ∂ν) ^ (1 / 2 : ℝ)) 2,
-          ← Real.rpow_natCast ((ν Set.univ).toReal ^ (1 / 2 : ℝ)) 2, ← Real.rpow_mul hint_nonneg,
-          ← Real.rpow_mul hmeas_nonneg]
-        norm_num
-        ring
-
 /-- **Cauchy–Schwarz in time** (interval-integral form): `(∫₀ˢ f)² ≤ s·∫₀ˢ f²` for `0 ≤ s`,
 given `f ∈ L²` on `(0,s]`. -/
 private lemma sq_intervalIntegral_le {f : ℝ → ℝ} {s : ℝ} (hs : 0 ≤ s)
@@ -151,13 +116,21 @@ private lemma drift_energy_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω
     {X Y : ℝ → Ω → ℝ} {s : ℝ} (hs : 0 ≤ s)
     (hfL2 : ∀ᵐ ω ∂μ,
       MemLp (fun u => μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Set.Ioc 0 s)))
-    (hXYii : ∀ᵐ ω ∂μ, IntervalIntegrable (fun u => (X u ω - Y u ω) ^ 2) volume 0 s)
     (hLHSint : Integrable (fun ω => (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
-    (hRHSint : Integrable (fun ω => ∫ u in (0:ℝ)..s, (X u ω - Y u ω) ^ 2) μ)
     (hprodXY : Integrable (Function.uncurry fun u ω => (X u ω - Y u ω) ^ 2)
       ((volume.restrict (Set.uIoc 0 s)).prod μ)) :
     (∫ ω, (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2 ∂μ)
       ≤ (Lμ : ℝ) ^ 2 * s * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ) := by
+  -- the state-error interval- and time-integrability come from product-integrability (Fubini)
+  have hXYii : ∀ᵐ ω ∂μ, IntervalIntegrable (fun u => (X u ω - Y u ω) ^ 2) volume 0 s := by
+    filter_upwards [hprodXY.prod_left_ae] with ω hω
+    simp only [Function.uncurry] at hω
+    rw [Set.uIoc_of_le hs] at hω
+    exact (intervalIntegrable_iff_integrableOn_Ioc_of_le hs).mpr hω
+  have hRHSint : Integrable (fun ω => ∫ u in (0:ℝ)..s, (X u ω - Y u ω) ^ 2) μ := by
+    refine (hprodXY.integral_prod_right).congr (ae_of_all _ fun ω => ?_)
+    simp only [Function.uncurry]
+    rw [intervalIntegral.integral_of_le hs, Set.uIoc_of_le hs]
   -- a.e. pointwise:  (∫₀ˢ (μ(Xᵤ)−μ(Yᵤ)))² ≤ s·(Lμ²·∫₀ˢ (Xᵤ−Yᵤ)²)
   have hptw : ∀ᵐ ω ∂μ, (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2
       ≤ s * ((Lμ : ℝ) ^ 2 * ∫ u in (0:ℝ)..s, (X u ω - Y u ω) ^ 2) := by
@@ -274,19 +247,19 @@ theorem sde_pathwise_uniqueness
     intro s hs
     obtain ⟨hs0, hst⟩ := hs
     have hAs : 0 ≤ ∫ u in (0:ℝ)..s, E u := hAnn s hs0
-    have h2CdA : (0:ℝ) ≤ 2 * Cdrift * (∫ u in (0:ℝ)..s, E u) :=
-      mul_nonneg (mul_nonneg (by norm_num) hCd) hAs
     calc E s ≤ 2 * Cdrift * s * (∫ u in (0:ℝ)..s, E u) + 2 * Cdiff * (∫ u in (0:ℝ)..s, E u) :=
           hEbound s hs0
       _ ≤ (2 * Cdrift * t + 2 * Cdiff) * ∫ u in (0:ℝ)..s, E u := by
-          nlinarith [mul_le_mul_of_nonneg_left hst h2CdA]
+          have hmono : 2 * Cdrift * s ≤ 2 * Cdrift * t :=
+            mul_le_mul_of_nonneg_left hst (mul_nonneg (by norm_num) hCd)
+          rw [add_mul]
+          linarith [mul_le_mul_of_nonneg_right hmono hAs]
   -- E t = 0 with a nonnegative integrand ⇒ Xₜ = Yₜ a.s.
   have hsq0 : (fun ω => (X t ω - Y t ω) ^ 2) =ᵐ[μ] 0 :=
     (integral_eq_zero_iff_of_nonneg (fun ω => sq_nonneg _) (hXYint t ht)).mp hEt
   filter_upwards [hsq0] with ω hω
-  have : (X t ω - Y t ω) ^ 2 = 0 := hω
-  have hz : X t ω - Y t ω = 0 := by nlinarith [this, sq_nonneg (X t ω - Y t ω)]
-  linarith [hz]
+  simp only [Pi.zero_apply] at hω
+  exact sub_eq_zero.mp (sq_eq_zero_iff.mp hω)
 
 /-- **A pair of `L²` strong solutions** of `dZ = μ(Z)dt + σ(Z)dB`, `Z₀ = η`, sharing the driver,
 packaged with the regularity the `L²`-energy Grönwall uniqueness argument consumes. This is the
@@ -321,20 +294,16 @@ structure IsL2SolutionPair {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
     Integrable (fun ω => (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ
   /-- The diffusion term is square-integrable. -/
   diffSq : ∀ s, 0 ≤ s → Integrable (fun ω => ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ
-  /-- The squared state error is interval-integrable in time, a.e. `ω`. -/
-  stateSqIntervalInt : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ,
-    IntervalIntegrable (fun u => (X u ω - Y u ω) ^ 2) volume 0 s
-  /-- The time-integrated squared state error is integrable. -/
-  stateSqTimeInt : ∀ s, 0 ≤ s → Integrable (fun ω => ∫ u in (0:ℝ)..s, (X u ω - Y u ω) ^ 2) μ
-  /-- The squared state error is jointly integrable on `(0,s] × Ω` (for Tonelli). -/
+  /-- The squared state error is jointly integrable on `(0,s] × Ω` (for Tonelli). Its two
+  marginals — interval-integrability in time and integrability of the time-integral — are Fubini
+  consequences, derived inside `drift_energy_le` rather than carried as separate fields. -/
   stateSqProdInt : ∀ s, 0 ≤ s → Integrable (Function.uncurry fun u ω => (X u ω - Y u ω) ^ 2)
     ((volume.restrict (Set.uIoc 0 s)).prod μ)
 
-/-- **Theorem 8.2.5 (uniqueness), pathwise `L²` form** — the uniqueness conclusion as a genuinely
-*derived* theorem, not an assumed field. Two `L²` strong solutions sharing a driver agree almost
-surely at every time. The drift energy bound is derived from Lipschitz `μ` (`drift_energy_le`), the
-diffusion from the Itô isometry (`isometry`), and the `L²`-energy Grönwall argument
-(`sde_pathwise_uniqueness`) closes it. -/
+/-- **Theorem 8.2.5 (uniqueness), pathwise `L²` form.** Two `L²` strong solutions sharing a driver
+agree almost surely at every time. The drift energy bound is derived from Lipschitz `μ`
+(`drift_energy_le`), the diffusion from the Itô isometry (`isometry` field), and the `L²`-energy
+Grönwall argument (`sde_pathwise_uniqueness`) closes it. -/
 theorem IsL2SolutionPair.uniqueness {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}
     [IsProbabilityMeasure μ] {μ_coef : ℝ → ℝ} {Lμ : ℝ≥0} {Cdiff : ℝ}
     {X Y : ℝ → Ω → ℝ} {Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ}
@@ -342,8 +311,8 @@ theorem IsL2SolutionPair.uniqueness {Ω : Type*} [MeasurableSpace Ω] {μ : Meas
     ∀ t, 0 ≤ t → ∀ᵐ ω ∂μ, X t ω = Y t ω :=
   sde_pathwise_uniqueness (Cdrift := (Lμ : ℝ) ^ 2) (sq_nonneg _)
     h.stateSq h.driftSq h.diffSq h.energyCont h.solvesDiff
-    (fun s hs => drift_energy_le h.lipschitz hs (h.driftMemL2 s hs) (h.stateSqIntervalInt s hs)
-      (h.driftSq s hs) (h.stateSqTimeInt s hs) (h.stateSqProdInt s hs))
+    (fun s hs => drift_energy_le h.lipschitz hs (h.driftMemL2 s hs) (h.driftSq s hs)
+      (h.stateSqProdInt s hs))
     h.isometry
 
 /-- **Non-vacuity guard**: the hypothesis bundle is satisfiable — the zero solution on any
@@ -360,8 +329,6 @@ example {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasur
   driftMemL2 := fun s _ => ae_of_all _ fun ω => by simp
   driftSq := fun s _ => by simp
   diffSq := fun s _ => by simp
-  stateSqIntervalInt := fun s _ => ae_of_all _ fun ω => by simp
-  stateSqTimeInt := fun s _ => by simp
   stateSqProdInt := fun s _ => by
     simp only [sub_self, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow]
     exact integrable_zero _ _ _

@@ -111,6 +111,21 @@ proven, not assumed; (3) `sde_pathwise_uniqueness` — the energy-method Grönwa
 `sc-thm-8.2.5` flipped **`reduced_core` → `full`**; (5) whole-repo reconcile
 (README / coverage / roadmap / AxiomAudit / AxiomAuditGen / ledger 312/0/0).
 
+**Second-pass adversarial audit (same session, two critics + maintainer adjudication):** the panel found
+exactly the defects worth acting on, each verified against code before execution: (6)
+`sq_integral_le_measureReal_mul` was near-verbatim **duplicated** between `SDEUniqueness` and
+`DriftProcessPredictable` (the latter carrying a dead `hf2`) — extracted once to the Mathlib-only leaf
+`Foundations/FiniteMeasureCauchySchwarz.lean`, `public import`ed from both, ~30 duplicated lines + the dead
+hypothesis removed; (7) `IsL2SolutionPair` trimmed **11 → 9 fields** — `stateSqIntervalInt` /
+`stateSqTimeInt` are Fubini consequences of `stateSqProdInt` (`Integrable.prod_left_ae` /
+`integral_prod_right`), now derived inside `drift_energy_le`; (8) two `nlinarith` discharges replaced by
+their named certificates (`sq_eq_zero_iff` for `a²=0⇒a=0`; explicit monotonicity + `linarith` for the
+Grönwall-constant bound). **Adjudicated down**: the panel's docstring "self-advocacy" flag was only
+partly actioned (one redundant restatement trimmed) — the honest-scope notes are the repo's honesty
+instrument, not slop; and the `Ici 0` continuity hypothesis of the Grönwall lemma was kept (restricting to
+`Icc 0 b` trades a cleaner statement for FTC right-endpoint friction — a borderline call the panel itself
+declined to insist on).
+
 **A note on the discipline (honest register):** flipping `sc-thm-8.2.5` to `full` was gated on a real
 scope decision — the drift is *concrete*, so it **must** be derived (else the "full" claim is a cheat);
 the diffusion `Iσ` is *opaque*, so its isometry **must** stay a labeled hypothesis (a proven property of
@@ -123,10 +138,11 @@ the Itô integral). Deriving the drift cost a 4-field regularity bundle. That as
    SDE existence (`sc-thm-8.2.5` existence half) and a concrete, isometry-derived (hypothesis-free) `Iσ`:
    a continuous-modification value identity for *general* `E`-elements (present only definitionally on
    simple processes today). The genuine multi-session mountain.
-2. Trim `IsL2SolutionPair` — derive `stateSqIntervalInt`/`stateSqTimeInt` from `stateSqProdInt` via
-   Fubini, shrinking the field bundle (architectural-ingenuity / zero-slop polish).
-3. The *continuous* numéraire-portfolio benchmark (Long/Platen) — carried from the prior review.
-4. Relate `numeraireDensity` to `Measure.rnDeriv` (carried).
+2. The *continuous* numéraire-portfolio benchmark (Long/Platen) — carried from the prior review.
+3. Relate `numeraireDensity` to `Measure.rnDeriv` (carried).
+
+*(The prior "trim `IsL2SolutionPair`" backlog item was executed this session — see the second-pass audit
+above; the CS-lemma duplication it surfaced was also fixed.)*
 
 ## 2026-07-03 — corpus 312 — The change of numéraire: the full IV↔I seam (backbone + both directions)
 

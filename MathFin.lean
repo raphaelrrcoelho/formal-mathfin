@@ -126,6 +126,8 @@ import MathFin.Foundations.ItoIntegralProcessContinuousModification
 -- Predictability of the assembled Itô process (the SDE-existence keystone)
 import MathFin.Foundations.ItoProcessPredictable
 -- Predictability of the assembled drift process (SDE-existence keystone II)
+-- Cauchy–Schwarz on a finite measure (shared by the drift L² bound and SDE uniqueness)
+import MathFin.Foundations.FiniteMeasureCauchySchwarz
 import MathFin.Foundations.DriftProcessPredictable
 -- The Picard map and its contraction estimate (SDE existence, #44)
 import MathFin.Foundations.SDEExistence

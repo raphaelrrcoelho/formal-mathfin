@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoProcessPredictable
+public import MathFin.Foundations.FiniteMeasureCauchySchwarz
 
 /-! # Predictability and `L²` assembly of the drift process (SDE-existence keystone II)
 
@@ -215,41 +216,6 @@ theorem memLp_uncurry_driftSimpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurab
     have h2 : (0 : ℝ) ≤ ((min p.1 z.1 : ℝ≥0) : ℝ) := (min p.1 z.1).coe_nonneg
     linarith
   exact mul_le_mul hval hc (abs_nonneg _) (le_trans (abs_nonneg _) hval)
-
-/-- **Cauchy–Schwarz for a finite measure**: `(∫ f)² ≤ ν(univ)·∫ f²`. The drift's `L²` bound
-reads through this (with `ν = timeMeasure` restricted to `(0,t]`): `∫₀ᵗ` costs a factor `t`. -/
-private lemma sq_integral_le_measureReal_mul {α : Type*} {m : MeasurableSpace α} {ν : Measure α}
-    [IsFiniteMeasure ν] {f : α → ℝ} (hf : MemLp f 2 ν) :
-    (∫ a, f a ∂ν) ^ 2 ≤ (ν Set.univ).toReal * ∫ a, (f a) ^ 2 ∂ν := by
-  have hp : (2 : ℝ).HolderConjugate 2 := Real.HolderConjugate.two_two
-  have hf2 : Integrable (fun a => (f a) ^ 2) ν :=
-    (hf.integrable_mul hf).congr (ae_of_all _ fun a => by simp only [Pi.mul_apply, pow_two])
-  have hint_nonneg : 0 ≤ ∫ a, (f a) ^ 2 ∂ν := integral_nonneg fun a => sq_nonneg _
-  have hmeas_nonneg : 0 ≤ (ν Set.univ).toReal := ENNReal.toReal_nonneg
-  -- Hölder with `g = 1`: `∫|f| ≤ (∫f²)^½·(ν univ)^½` (Hölder exponents are `rpow`).
-  have hhold := integral_mul_le_Lp_mul_Lq_of_nonneg (μ := ν) hp
-    (f := |f|) (g := fun _ => (1 : ℝ))
-    (ae_of_all ν fun a => abs_nonneg (f a)) (ae_of_all ν fun _ => zero_le_one)
-    (by simpa [ENNReal.ofReal_ofNat] using hf.abs)
-    (by simpa [ENNReal.ofReal_ofNat] using memLp_const (1 : ℝ))
-  have hpow : ∫ a, |f| a ^ (2 : ℝ) ∂ν = ∫ a, (f a) ^ 2 ∂ν := by
-    refine integral_congr_ae (ae_of_all _ fun a => ?_)
-    show |f a| ^ (2 : ℝ) = (f a) ^ 2
-    rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast, sq_abs]
-  rw [hpow, Real.one_rpow, integral_const, smul_eq_mul, mul_one, measureReal_def] at hhold
-  -- `|∫ f| ≤ ∫ |f|` then square through the Hölder bound.
-  have habs : |∫ a, f a ∂ν| ≤ (∫ a, (f a) ^ 2 ∂ν) ^ (1 / 2 : ℝ) * (ν Set.univ).toReal ^ (1 / 2 : ℝ) := by
-    refine (abs_integral_le_integral_abs).trans ?_
-    simpa only [Pi.abs_apply, mul_one] using hhold
-  calc (∫ a, f a ∂ν) ^ 2 = |∫ a, f a ∂ν| ^ 2 := (sq_abs _).symm
-    _ ≤ ((∫ a, (f a) ^ 2 ∂ν) ^ (1 / 2 : ℝ) * (ν Set.univ).toReal ^ (1 / 2 : ℝ)) ^ 2 :=
-        pow_le_pow_left₀ (abs_nonneg _) habs 2
-    _ = (ν Set.univ).toReal * ∫ a, (f a) ^ 2 ∂ν := by
-        rw [mul_pow, ← Real.rpow_natCast ((∫ a, (f a) ^ 2 ∂ν) ^ (1 / 2 : ℝ)) 2,
-          ← Real.rpow_natCast ((ν Set.univ).toReal ^ (1 / 2 : ℝ)) 2, ← Real.rpow_mul hint_nonneg,
-          ← Real.rpow_mul hmeas_nonneg]
-        norm_num
-        ring
 
 /-- **The elementary-drift slice is `L²` in the time variable** (bounded step process on the
 finite measure `timeMeasure.restrict (Ioc 0 T)`). -/
