@@ -26,7 +26,28 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-03, SDE strong-solution uniqueness — the L²-energy Grönwall keystone, #19):**
+> **Live status (2026-07-03, SDE existence made pathwise — the E-fixed point as a sample-path process,
+> #19 → existence bridge):** corpus **312** (unchanged — a Foundations-level formalization advance, not a
+> new benchmark entry). The strong solution, previously banked only as the abstract `L²`-fixed point
+> `picardSolution ∈ E`, is now realized as a genuine **pathwise** process:
+> `Foundations/SDEPathwise.sde_pathwise_decomposition` slices the fixed-point equation `X = Φ(X)` (which
+> holds in `E`) into the sample-path identity
+> `X_t(ω) = η(ω) + driftContinuousMod(b∘X)_t(ω) + itoContinuousMod(σ∘X)_t(ω)` for a.e. `(t, ω)`. The
+> enabling crux is `Foundations/DriftProcessModification.driftProcessAssembled_coeFn`: the abstract
+> `extendOfNorm` drift operator's `coeFn` equals the honest pointwise-`limUnder` process
+> `driftContinuousMod` a.e. It is proved (not, as on the Itô side, true by construction) via two
+> convergences of `driftSimpleProcessLp Vₙ` — CLM-continuity to the operator and a.e. to the pathwise limit
+> (`driftContinuousMod_tendsto`, a **direct Chebyshev** maximal bound — no martingale — plus
+> Borel–Cantelli, the drift analog of `itoContinuousMod_tendsto`) — unique in measure on the finite trim
+> space, the a.e. convergence lifted from per-slice to the trim measure through the predictable-measurable
+> convergence set. All axiom-clean (`[propext, Classical.choice, Quot.sound]`, pinned in `AxiomAudit`).
+> **Honest scope:** the drift term is the a.e. limit of the honest elementary Lebesgue integrals
+> `∫₀ᵗ b(Xⁿ_s) ds`; rewriting `driftContinuousMod(b∘X)_t(ω)` as the single integral `∫₀ᵗ b(X_s(ω)) ds` (a
+> per-`ω` interval Cauchy–Schwarz limit) is a presentational refinement of the drift term, not a
+> strengthening of the existence statement, and remains the next step. `sc-thm-8.2.5`'s existence half
+> stays the conditional-`c < 1` `E` result; this bridge makes that solution's sample paths explicit.
+>
+> **Prior (2026-07-03, SDE strong-solution uniqueness — the L²-energy Grönwall keystone, #19):**
 > corpus **312**, **278 full + 18 wrappers = 296/312 delivery-ready**, 16 reduced cores, 0 placeholders.
 > **The uniqueness half of Theorem 8.2.5 is now a genuinely _derived_ theorem, not an assumed field.**
 > `Foundations/SDEUniqueness.IsL2SolutionPair.uniqueness` (entry `sc-thm-8.2.5`, flipped

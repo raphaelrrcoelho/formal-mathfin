@@ -133,6 +133,10 @@ import MathFin.Foundations.DriftProcessPredictable
 import MathFin.Foundations.SDEExistence
 -- Pathwise SDE uniqueness via the L²-energy Grönwall argument (#19)
 import MathFin.Foundations.SDEUniqueness
+-- The assembled drift's pathwise realization: convergence + coeFn = driftContinuousMod (SDE-existence bridge)
+import MathFin.Foundations.DriftProcessModification
+-- The strong solution as a pathwise process: slicing the Picard fixed point (pathwise SDE existence)
+import MathFin.Foundations.SDEPathwise
 -- The general-integrand Itô process as a continuous local martingale (null-augmented filtration)
 import MathFin.Foundations.ItoIntegralProcessLocalMartingaleGeneral
 -- The unbounded-horizon Itô process: the L² process, horizon consistency (the [0,∞) climb)

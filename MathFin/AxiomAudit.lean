@@ -892,6 +892,28 @@ is the packaged Theorem 8.2.5 (uniqueness): the drift energy bound is *derived* 
 /-- info: 'MathFin.IsL2SolutionPair.uniqueness' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.IsL2SolutionPair.uniqueness
 
+/-! ## SDE pathwise existence — the E-fixed point as a sample-path process (#19 → existence bridge)
+
+`SDEExistence` produced the strong solution as the abstract `L²` fixed point `picardSolution ∈ E`;
+this bridge realizes it as a genuine *pathwise* process. `driftContinuousMod_tendsto` is the drift
+analog of `itoContinuousMod_tendsto`: the elementary drifts `∫₀ᵗ Vₙ ds` converge a.e. — via a direct
+Chebyshev maximal bound (no martingale, unlike the Itô side's Doob inequality) plus Borel–Cantelli.
+`driftProcessAssembled_coeFn` is the crux: the abstract `extendOfNorm` drift operator's `coeFn` equals
+that pointwise `limUnder` a.e. — two convergences of `driftSimpleProcessLp Vₙ` (CLM-continuity to the
+operator, and a.e. to the pathwise limit, the latter lifted from per-slice to the trim measure through
+the predictable-measurable convergence set) are unique in measure on the finite trim space.
+`sde_pathwise_decomposition` slices the fixed-point equation `X = Φ(X)` into the sample-path identity
+`X_t(ω) = η(ω) + driftContinuousMod(b∘X)_t(ω) + itoContinuousMod(σ∘X)_t(ω)`. -/
+
+/-- info: 'MathFin.ItoIntegralProcessContinuousModification.driftContinuousMod_tendsto' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.driftContinuousMod_tendsto
+
+/-- info: 'MathFin.ItoIntegralProcessContinuousModification.driftProcessAssembled_coeFn' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ItoIntegralProcessContinuousModification.driftProcessAssembled_coeFn
+
+/-- info: 'MathFin.SDEExistence.sde_pathwise_decomposition' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.SDEExistence.sde_pathwise_decomposition
+
 /-! ## The change of numéraire — price invariance (IV↔I seam)
 
 The numéraire measure `Q^N = Q.withDensity((N_T·B₀)/(N₀·B_T))` reprices every terminal claim

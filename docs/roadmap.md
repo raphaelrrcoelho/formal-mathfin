@@ -30,6 +30,22 @@ breadth at this stage, and what the concrete next round would look like.
 > `reduced_core`, honestly documented — an Itô-tower item to re-scout, not force. See
 > [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
 
+> **DELIVERED (2026-07-03) — SDE existence made pathwise: the E-fixed point as a sample-path process
+> ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19) → existence bridge).** The Picard
+> solution, previously banked only as the abstract `L²`-fixed point `picardSolution ∈ E`, is now realized
+> as a genuine **pathwise** process. `Foundations/SDEPathwise.sde_pathwise_decomposition` slices the
+> fixed-point equation `X = Φ(X)` into the sample-path identity
+> `X_t(ω) = η(ω) + driftContinuousMod(b∘X)_t(ω) + itoContinuousMod(σ∘X)_t(ω)`. The enabling crux —
+> `Foundations/DriftProcessModification.driftProcessAssembled_coeFn` — identifies the abstract
+> `extendOfNorm` drift operator's `coeFn` with the honest pointwise-`limUnder` drift `driftContinuousMod`
+> a.e.; it is **proved** (the Itô side gets the analog for free by construction) via two convergences of
+> `driftSimpleProcessLp Vₙ` (CLM-continuity and a.e., the latter from `driftContinuousMod_tendsto` — a
+> **direct Chebyshev** maximal bound, no martingale — lifted per-slice→trim through the
+> predictable-measurable convergence set) that are unique in measure. Axiom-clean, pinned in `AxiomAudit`.
+> **Honest remainder:** the drift term is the a.e. limit of the elementary Lebesgue integrals
+> `∫₀ᵗ b(Xⁿ_s) ds`; rewriting it as the single integral `∫₀ᵗ b(X_s) ds` (per-`ω` interval Cauchy–Schwarz)
+> is a presentational refinement, the next step — not a strengthening of existence.
+
 > **DELIVERED (2026-07-02) — SDE existence via Picard
 > ([#44](https://github.com/raphaelrrcoelho/formal-mathfin/issues/44)).** The strong solution of
 > `dX = b(X)dt + σ(X)dB` is now **constructed as a Picard fixed point** in the predictable `L²` space `E`,

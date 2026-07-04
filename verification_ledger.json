@@ -2183,9 +2183,9 @@
     "sde-picard-existence-uniqueness": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-07-03",
-      "elapsed_s": 34.9,
-      "input_hash": "3fc6c707fee7bcc9981d3c4af8be40024f2b4837ae7442d0924bbb03c67de1b6",
-      "verified_at_commit": "2aaff2f"
+      "elapsed_s": 18.0,
+      "input_hash": "fd49faebcacc05e57f401c33e65b564ec10c62c4bed182d8c4be1cc8cda39d8a",
+      "verified_at_commit": "1083529"
     }
   }
 }

@@ -241,7 +241,7 @@ private lemma memLp_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 
 /-- **Pointwise `L²` bound of the elementary drift** (bridge + Cauchy–Schwarz + interval
 extension): for `t ≤ T`, `(driftSimpleProcess V t ω)² ≤ T·∫₀ᵀ (⇑V s ω)² ds`. -/
-private lemma driftSimpleProcess_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+theorem driftSimpleProcess_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) {t : ℝ≥0} (htT : t ≤ T) (ω : Ω) :
     (driftSimpleProcess hBmeas V t ω) ^ 2
       ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑V s ω) ^ 2 ∂timeMeasure := by
