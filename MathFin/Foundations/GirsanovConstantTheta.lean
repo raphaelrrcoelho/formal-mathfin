@@ -49,7 +49,7 @@ Itô formula.
 namespace MathFin
 
 open MeasureTheory ProbabilityTheory
-open scoped NNReal ENNReal
+open scoped NNReal ENNReal RealInnerProductSpace
 
 /-- **Constant-θ Girsanov: the drift-corrected exponential is a `Q`-martingale.**
 For constant `θ` and any `a : ℝ`, under `Q = P.withDensity (exp(−θ X_T − ½θ² T))`,
@@ -446,6 +446,26 @@ theorem condExp_Btheta_increment
     hgsdef, ← Real.exp_add]
   congr 1; ring
 
+/-- **Unconditional `Q`-MGF of the increment.** `𝔼_Q[exp(a·(B^θ_t − B^θ_s))] = exp(½ a²(t−s))`
+— the tower property `𝔼_Q[exp(a·incr)] = 𝔼_Q[𝔼_Q[exp(a·incr)|𝓕_s]]` (`integral_condExp`) on the
+deterministic conditional MGF `condExp_Btheta_increment`, integrated against the unit-mass `Q`. -/
+theorem Btheta_increment_mgf
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ a : ℝ) (T : ℝ≥0) {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
+    ∫ ω, Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))))
+        ∂(P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)))
+      = Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hcond := condExp_Btheta_increment (P := P) (𝓕 := 𝓕) (X := X) θ a T hst htT
+  rw [← hQdef] at hcond
+  rw [← integral_condExp (𝓕.le s), integral_congr_ae hcond, integral_const,
+      show Q.real Set.univ = 1 from by simp, one_smul]
+
 /-- **Constant-θ distributional Girsanov (increment law).** Under the Girsanov measure
 `Q`, the increment `B^θ_t − B^θ_s = (X_t + θ t) − (X_s + θ s)` has law `N(0, t−s)`. Its
 unconditional `Q`-MGF is `exp(½ (t−s) a²)` — the tower property `𝔼_Q[exp(a·incr)] =
@@ -477,10 +497,7 @@ theorem Btheta_increment_map_eq_gaussianReal
     funext a
     show ∫ ω, Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))) ∂Q
         = Real.exp (0 * a + ((t - s : ℝ≥0) : ℝ) * a ^ 2 / 2)
-    have hcond := condExp_Btheta_increment (P := P) (𝓕 := 𝓕) (X := X) θ a T hst htT
-    rw [← hQdef] at hcond
-    rw [← integral_condExp (𝓕.le s), integral_congr_ae hcond, integral_const,
-        show Q.real Set.univ = 1 from by simp, one_smul, NNReal.coe_sub hst]
+    rw [hQdef, Btheta_increment_mgf (P := P) (𝓕 := 𝓕) (X := X) θ a T hst htT, NNReal.coe_sub hst]
     congr 1; ring
   -- Integrable-exponential set is all of `ℝ` (transferred from the Gaussian).
   have hIESgauss : integrableExpSet id (gaussianReal 0 (t - s)) = Set.univ := by
@@ -501,5 +518,309 @@ theorem Btheta_increment_map_eq_gaussianReal
   have hmap := Measure.ext_of_complexMGF_eq (μ := Q) (μ' := gaussianReal 0 (t - s))
     hincmeas.aemeasurable aemeasurable_id hcomplexeq
   rwa [Measure.map_id] at hmap
+
+/-- **`Q`-integrability of the increment exponential.** For `s ≤ t ≤ T` and any `c`,
+`exp(c·(B^θ_t − B^θ_s))` is `Q`-integrable — its `Q`-law is `N(0,t−s)`
+(`Btheta_increment_map_eq_gaussianReal`) and the Gaussian MGF is finite. The increment analogue
+of `integrable_expBtheta`, feeding the AM–GM product bounds of the joint-MGF factorisation. -/
+theorem integrable_exp_Btheta_increment
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ c : ℝ) (T : ℝ≥0) {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
+    Integrable (fun ω ↦ Real.exp (c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))))
+      (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  have hincmeas : Measurable (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) :=
+    ((hmeasX t).add_const _).sub ((hmeasX s).add_const _)
+  rw [show (fun ω ↦ Real.exp (c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))))
+        = (fun x ↦ Real.exp (c * x)) ∘ (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        from rfl,
+      ← integrable_map_measure (by fun_prop) hincmeas.aemeasurable,
+      Btheta_increment_map_eq_gaussianReal (X := X) (𝓕 := 𝓕) θ T hst htT]
+  exact integrable_exp_mul_gaussianReal c
+
+/-- **Joint `Q`-MGF of two disjoint increments factorises.** For `s ≤ t ≤ u ≤ v ≤ T`,
+`𝔼_Q[exp(a·(B^θ_t − B^θ_s) + b·(B^θ_v − B^θ_u))] = exp(½a²(t−s))·exp(½b²(v−u))`. The earlier
+increment `I₁ = B^θ_t − B^θ_s` is `𝓕_u`-measurable (`t ≤ u`), so it factors out of the
+conditional expectation `𝔼_Q[·|𝓕_u]` (`condExp_mul_of_stronglyMeasurable_left`); the later
+increment's conditional MGF is the deterministic `exp(½b²(v−u))` (`condExp_Btheta_increment`),
+leaving `exp(½b²(v−u))·𝔼_Q[exp(a·I₁)] = exp(½b²(v−u))·exp(½a²(t−s))` (`Btheta_increment_mgf`).
+The product structure of the joint MGF is the analytic heart of increment independence. -/
+theorem Btheta_increments_joint_mgf
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ a b : ℝ) (T : ℝ≥0) {s t u v : ℝ≥0}
+    (hst : s ≤ t) (htu : t ≤ u) (huv : u ≤ v) (hvT : v ≤ T) :
+    ∫ ω, Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        + b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))
+        ∂(P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)))
+      = Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2)
+        * Real.exp (b ^ 2 * ((v : ℝ) - (u : ℝ)) / 2) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ w, Measurable (X w) := fun w ↦
+    ((hX.stronglyAdapted w).mono (𝓕.le w)).measurable
+  -- `e1 = exp(a·I₁)` is `𝓕_u`-measurable (`I₁` lives at time `t ≤ u`); `e2 = exp(b·I₂)`.
+  set e1 : Ω → ℝ := fun ω ↦ Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))))
+    with he1def
+  set e2 : Ω → ℝ := fun ω ↦ Real.exp (b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))
+    with he2def
+  have he1meas : Measurable e1 := by
+    rw [he1def]
+    exact Real.measurable_exp.comp
+      ((((hmeasX t).add_const _).sub ((hmeasX s).add_const _)).const_mul a)
+  have he2meas : Measurable e2 := by
+    rw [he2def]
+    exact Real.measurable_exp.comp
+      ((((hmeasX v).add_const _).sub ((hmeasX u).add_const _)).const_mul b)
+  have he1_sm : StronglyMeasurable[𝓕 u] e1 := by
+    have hpair : StronglyMeasurable[𝓕 u] (fun ω ↦ (X t ω, X s ω)) :=
+      ((hX.stronglyAdapted t).mono (𝓕.mono htu)).prodMk
+        ((hX.stronglyAdapted s).mono (𝓕.mono (hst.trans htu)))
+    have hcont : Continuous fun p : ℝ × ℝ ↦
+        Real.exp (a * ((p.1 + θ * (t : ℝ)) - (p.2 + θ * (s : ℝ)))) := by fun_prop
+    exact hcont.comp_stronglyMeasurable hpair
+  have he2_int : Integrable e2 Q := by
+    rw [he2def]
+    exact integrable_exp_Btheta_increment (X := X) (𝓕 := 𝓕) θ b T huv hvT
+  -- `e1 · e2 = exp(a·I₁ + b·I₂)` is `Q`-integrable, by AM–GM against two increment-MGF terms.
+  have hprod_int : Integrable (e1 * e2) Q := by
+    have hbnd : Integrable (fun ω ↦
+        Real.exp (2 * a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))))
+        + Real.exp (2 * b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))) Q :=
+      (integrable_exp_Btheta_increment (X := X) (𝓕 := 𝓕) θ (2 * a) T hst
+          (htu.trans (huv.trans hvT))).add
+        (integrable_exp_Btheta_increment (X := X) (𝓕 := 𝓕) θ (2 * b) T huv hvT)
+    refine Integrable.mono' hbnd (he1meas.mul he2meas).aestronglyMeasurable ?_
+    filter_upwards with ω
+    simp only [Pi.mul_apply, he1def, he2def]
+    rw [Real.norm_of_nonneg (by positivity)]
+    have ep1 : Real.exp (2 * a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))))
+        = Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))) ^ 2 := by
+      rw [pow_two, ← Real.exp_add]; congr 1; ring
+    have ep2 : Real.exp (2 * b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))
+        = Real.exp (b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) ^ 2 := by
+      rw [pow_two, ← Real.exp_add]; congr 1; ring
+    rw [ep1, ep2]
+    nlinarith [sq_nonneg (Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))))
+        - Real.exp (b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))),
+      (Real.exp_pos (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))))).le,
+      (Real.exp_pos (b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))).le]
+  -- Pull `e1` out of `𝔼_Q[e1·e2|𝓕_u]` and collapse `𝔼_Q[e2|𝓕_u] = exp(½b²(v−u))`.
+  have hpull := condExp_mul_of_stronglyMeasurable_left (m := (𝓕 u : MeasurableSpace Ω))
+    he1_sm hprod_int he2_int
+  have hcond2 := condExp_Btheta_increment (P := P) (𝓕 := 𝓕) (X := X) θ b T huv hvT
+  rw [← hQdef, ← he2def] at hcond2
+  have hsum_eq : (fun ω ↦ Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+      + b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))) = e1 * e2 := by
+    funext ω
+    simp only [he1def, he2def, Pi.mul_apply]
+    rw [← Real.exp_add]
+  calc ∫ ω, Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        + b * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) ∂Q
+      = ∫ ω, (e1 * e2) ω ∂Q := by rw [hsum_eq]
+    _ = ∫ ω, (Q[e1 * e2 | 𝓕 u]) ω ∂Q := (integral_condExp (𝓕.le u)).symm
+    _ = ∫ ω, e1 ω * Real.exp (b ^ 2 * ((v : ℝ) - (u : ℝ)) / 2) ∂Q := by
+        refine integral_congr_ae ?_
+        filter_upwards [hpull, hcond2] with ω hp hc
+        rw [hp, Pi.mul_apply, hc]
+    _ = (∫ ω, e1 ω ∂Q) * Real.exp (b ^ 2 * ((v : ℝ) - (u : ℝ)) / 2) := integral_mul_const _ _
+    _ = Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2)
+          * Real.exp (b ^ 2 * ((v : ℝ) - (u : ℝ)) / 2) := by
+        have he1int : ∫ ω, e1 ω ∂Q = Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) := by
+          simp only [he1def]
+          rw [hQdef, Btheta_increment_mgf (P := P) (𝓕 := 𝓕) (X := X) θ a T hst
+            (htu.trans (huv.trans hvT))]
+        rw [he1int]
+
+/-- **Any linear combination of two disjoint increments is Gaussian under `Q`.** For
+`s ≤ t ≤ u ≤ v ≤ T` and reals `c, d`, the combination `c·(B^θ_t − B^θ_s) + d·(B^θ_v − B^θ_u)`
+has law `N(0, c²(t−s) + d²(v−u))` under the Girsanov measure `Q`. Its `Q`-MGF at `r` is
+`𝔼_Q[exp((rc)·I₁ + (rd)·I₂)] = exp(½(rc)²(t−s))·exp(½(rd)²(v−u)) = exp(½r²·(c²(t−s)+d²(v−u)))`
+(`Btheta_increments_joint_mgf`), the `N(0,·)` MGF; Mathlib's complex-MGF machinery reads off the
+Gaussian law. This packages the diagonal-covariance structure that makes the two increments
+independent — the joint characteristic function factorises through every 1-D projection. -/
+theorem Btheta_linComb_map_eq_gaussianReal
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ c d : ℝ) (T : ℝ≥0) {s t u v : ℝ≥0}
+    (hst : s ≤ t) (htu : t ≤ u) (huv : u ≤ v) (hvT : v ≤ T) :
+    (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
+        (fun ω ↦ c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+              + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))
+      = gaussianReal 0 (Real.toNNReal
+          (c ^ 2 * ((t : ℝ) - (s : ℝ)) + d ^ 2 * ((v : ℝ) - (u : ℝ)))) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ w, Measurable (X w) := fun w ↦
+    ((hX.stronglyAdapted w).mono (𝓕.le w)).measurable
+  set σ2 : ℝ := c ^ 2 * ((t : ℝ) - (s : ℝ)) + d ^ 2 * ((v : ℝ) - (u : ℝ)) with hσ2def
+  have hσ2nonneg : 0 ≤ σ2 :=
+    add_nonneg (mul_nonneg (sq_nonneg c) (sub_nonneg.mpr (by exact_mod_cast hst)))
+      (mul_nonneg (sq_nonneg d) (sub_nonneg.mpr (by exact_mod_cast huv)))
+  have hlcmeas : Measurable (fun ω ↦ c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+      + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) :=
+    ((((hmeasX t).add_const _).sub ((hmeasX s).add_const _)).const_mul c).add
+      ((((hmeasX v).add_const _).sub ((hmeasX u).add_const _)).const_mul d)
+  -- The `Q`-MGF of the combination equals the `N(0, σ²)` MGF.
+  have hmgf : mgf (fun ω ↦ c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) Q
+      = mgf id (gaussianReal 0 σ2.toNNReal) := by
+    rw [mgf_id_gaussianReal]
+    funext r
+    show ∫ ω, Real.exp (r * (c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+          + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))) ∂Q
+        = Real.exp (0 * r + (σ2.toNNReal : ℝ) * r ^ 2 / 2)
+    have hjoint := Btheta_increments_joint_mgf (P := P) (𝓕 := 𝓕) (X := X)
+      θ (r * c) (r * d) T hst htu huv hvT
+    rw [← hQdef] at hjoint
+    rw [show (∫ ω, Real.exp (r * (c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+              + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ))))) ∂Q)
+          = ∫ ω, Real.exp ((r * c) * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+              + (r * d) * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) ∂Q from by
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_); ring_nf,
+      hjoint, Real.coe_toNNReal σ2 hσ2nonneg, ← Real.exp_add]
+    congr 1
+    rw [hσ2def]; ring
+  -- Integrable-exponential set is all of `ℝ` (transferred from the Gaussian).
+  have hIESgauss : integrableExpSet id (gaussianReal 0 σ2.toNNReal) = Set.univ := by
+    rw [Set.eq_univ_iff_forall]
+    intro r
+    show Integrable (fun x ↦ Real.exp (r * x)) (gaussianReal 0 σ2.toNNReal)
+    exact integrable_exp_mul_gaussianReal r
+  have hIES : integrableExpSet (fun ω ↦ c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) Q = Set.univ := by
+    rw [integrableExpSet_eq_of_mgf hmgf, hIESgauss]
+  have hset : {z : ℂ | z.re ∈ interior (integrableExpSet
+      (fun ω ↦ c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) Q)} = Set.univ := by
+    rw [hIES, interior_univ]; ext z; simp
+  have hcomplexeq : complexMGF (fun ω ↦ c * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        + d * ((X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))) Q
+      = complexMGF id (gaussianReal 0 σ2.toNNReal) := by
+    funext z
+    exact eqOn_complexMGF_of_mgf hmgf (hset ▸ Set.mem_univ z)
+  have hmap := Measure.ext_of_complexMGF_eq (μ := Q) (μ' := gaussianReal 0 σ2.toNNReal)
+    hlcmeas.aemeasurable aemeasurable_id hcomplexeq
+  rwa [Measure.map_id] at hmap
+
+/-- **Constant-θ distributional Girsanov: increments are `Q`-independent.** For
+`s ≤ t ≤ u ≤ v ≤ T`, the disjoint increments `B^θ_t − B^θ_s` and `B^θ_v − B^θ_u` of the
+drift-corrected process are independent under the Girsanov measure `Q`. By
+`indepFun_iff_charFun_prod`, independence is equivalent to the joint characteristic function
+factorising; the joint charFun at `w = (w₁, w₂)` is the characteristic function at `1` of the
+linear combination `w₁·I₁ + w₂·I₂`, which is Gaussian `N(0, w₁²(t−s) + w₂²(v−u))`
+(`Btheta_linComb_map_eq_gaussianReal`), so it equals `exp(−½(w₁²(t−s) + w₂²(v−u)))` — exactly the
+product of the two marginal Gaussian characteristic functions
+(`Btheta_increment_map_eq_gaussianReal` + `charFun_gaussianReal`). Together with the Gaussian
+increment law, this completes "`B^θ` is a `Q`-Brownian motion" (`gir-thm-9.1.8`) for constant `θ`,
+reached on the existing tower — no adapted-integrand Itô formula. -/
+theorem Btheta_increments_indepFun
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ : ℝ) (T : ℝ≥0) {s t u v : ℝ≥0}
+    (hst : s ≤ t) (htu : t ≤ u) (huv : u ≤ v) (hvT : v ≤ T) :
+    IndepFun (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+        (fun ω ↦ (X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))
+      (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ w, Measurable (X w) := fun w ↦
+    ((hX.stronglyAdapted w).mono (𝓕.le w)).measurable
+  set I₁ : Ω → ℝ := fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)) with hI₁def
+  set I₂ : Ω → ℝ := fun ω ↦ (X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)) with hI₂def
+  have hI₁meas : Measurable I₁ := ((hmeasX t).add_const _).sub ((hmeasX s).add_const _)
+  have hI₂meas : Measurable I₂ := ((hmeasX v).add_const _).sub ((hmeasX u).add_const _)
+  -- The two marginal increment laws.
+  have hlaw1 : Q.map I₁ = gaussianReal 0 (t - s) :=
+    Btheta_increment_map_eq_gaussianReal (X := X) (𝓕 := 𝓕) θ T hst (htu.trans (huv.trans hvT))
+  have hlaw2 : Q.map I₂ = gaussianReal 0 (v - u) :=
+    Btheta_increment_map_eq_gaussianReal (X := X) (𝓕 := 𝓕) θ T huv hvT
+  -- Reduce independence to the factorisation of the joint characteristic function.
+  rw [indepFun_iff_charFun_prod hI₁meas.aemeasurable hI₂meas.aemeasurable]
+  intro w
+  have hlin_meas : Measurable (fun ω ↦ w.ofLp.1 * I₁ ω + w.ofLp.2 * I₂ ω) :=
+    (hI₁meas.const_mul _).add (hI₂meas.const_mul _)
+  have hpair_meas : Measurable (fun ω ↦ (WithLp.toLp 2 (I₁ ω, I₂ ω) : WithLp 2 (ℝ × ℝ))) := by
+    fun_prop
+  -- LHS: the joint charFun is the charFun-at-1 of the Gaussian linear combination.
+  have hLHS : charFun (Q.map (fun ω ↦ (WithLp.toLp 2 (I₁ ω, I₂ ω) : WithLp 2 (ℝ × ℝ)))) w
+      = charFun (gaussianReal 0 (Real.toNNReal
+          (w.ofLp.1 ^ 2 * ((t : ℝ) - (s : ℝ)) + w.ofLp.2 ^ 2 * ((v : ℝ) - (u : ℝ))))) 1 := by
+    rw [← Btheta_linComb_map_eq_gaussianReal (P := P) (𝓕 := 𝓕) (X := X)
+        θ w.ofLp.1 w.ofLp.2 T hst htu huv hvT]
+    rw [charFun_apply, charFun_apply_real,
+        integral_map hpair_meas.aemeasurable (by fun_prop),
+        integral_map hlin_meas.aemeasurable (by fun_prop)]
+    refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
+    simp only [WithLp.prod_inner_apply, RCLike.inner_apply, conj_trivial]
+    congr 1
+    push_cast
+    ring
+  have hσ2nn : (0 : ℝ) ≤ w.ofLp.1 ^ 2 * ((t : ℝ) - (s : ℝ)) + w.ofLp.2 ^ 2 * ((v : ℝ) - (u : ℝ)) :=
+    add_nonneg (mul_nonneg (sq_nonneg _) (sub_nonneg.mpr (by exact_mod_cast hst)))
+      (mul_nonneg (sq_nonneg _) (sub_nonneg.mpr (by exact_mod_cast huv)))
+  rw [hlaw1, hlaw2, charFun_gaussianReal, charFun_gaussianReal, hLHS, charFun_gaussianReal,
+      Real.coe_toNNReal _ hσ2nn, NNReal.coe_sub hst, NNReal.coe_sub huv, ← Complex.exp_add]
+  congr 1
+  push_cast
+  ring
+
+/-- **Constant-θ distributional Girsanov: `B^θ` is a `Q`-Brownian motion.** Packaging the three
+defining properties under the Girsanov measure `Q = P.withDensity(exp(−θ X_T − ½θ² T))`:
+
+* **zero start** — `B^θ_0 = X_0 + θ·0 = 0` a.e. `Q` (`X_0 ~ N(0,0) = δ₀` under `P`, and `Q ≪ P`);
+* **Gaussian increments** — `B^θ_t − B^θ_s ~ N(0, t−s)` (`Btheta_increment_map_eq_gaussianReal`);
+* **independent increments** — disjoint increments are `Q`-independent (`Btheta_increments_indepFun`).
+
+This is the constant-θ half of Girsanov (`gir-thm-9.1.8`) in full — including the increment
+independence that the marginal/increment laws alone do not give — reached on the existing tower
+(Bayes engine + Wald exponentials + Mathlib's characteristic-function machinery), with no
+adapted-integrand Itô formula. The general bounded-*adapted*-θ statement remains open (it needs
+the adapted Itô formula, Route β). -/
+theorem Btheta_isQBrownianMotion
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ : ℝ) (T : ℝ≥0) :
+    (∀ᵐ ω ∂(P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))),
+        X 0 ω + θ * ((0 : ℝ≥0) : ℝ) = 0)
+      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
+          (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
+              (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) = gaussianReal 0 (t - s))
+      ∧ (∀ ⦃s t u v : ℝ≥0⦄, s ≤ t → t ≤ u → u ≤ v → v ≤ T →
+          IndepFun (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+              (fun ω ↦ (X v ω + θ * (v : ℝ)) - (X u ω + θ * (u : ℝ)))
+            (P.withDensity fun ω ↦ ENNReal.ofReal
+              (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)))) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  have hmeasX : ∀ w, Measurable (X w) := fun w ↦
+    ((hX.stronglyAdapted w).mono (𝓕.le w)).measurable
+  refine ⟨?_, fun s t hst htT ↦ Btheta_increment_map_eq_gaussianReal (X := X) (𝓕 := 𝓕) θ T hst htT,
+    fun s t u v hst htu huv hvT ↦
+      Btheta_increments_indepFun (X := X) (𝓕 := 𝓕) θ T hst htu huv hvT⟩
+  -- Zero start: `X_0 = 0` a.e. `P` (its law is `N(0,0) = δ₀`), transported to `Q ≪ P`.
+  have hX0P : P {ω | X 0 ω ≠ 0} = 0 := by
+    have hmap := Measure.map_apply (μ := P) (hmeasX 0) (measurableSet_singleton (0 : ℝ)).compl
+    rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
+        Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
+    have hpre : X 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | X 0 ω ≠ 0} := by ext ω; simp [Set.mem_preimage]
+    rw [hpre] at hmap
+    simpa using hmap.symm
+  have hQP : Q ≪ P := by rw [hQdef]; exact withDensity_absolutelyContinuous _ _
+  filter_upwards [hQP.ae_le (ae_iff.mpr hX0P)] with ω hω
+  simp [hω]
 
 end MathFin

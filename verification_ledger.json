@@ -223,9 +223,16 @@
     "gir-const-theta-marginal": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-05",
-      "elapsed_s": 61.4,
-      "input_hash": "fcd75ddff5b6410a0b5c661facbab49d51f32d4337cc0130aff3cce41c077ba5",
-      "verified_at_commit": "19d0755"
+      "elapsed_s": 130.1,
+      "input_hash": "28896b7e8a9de6d263b32faa0eaf5f612576c9b70fac2f23eb314bb2ea9b1138",
+      "verified_at_commit": "b031232"
+    },
+    "gir-const-theta-qbm": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-05",
+      "elapsed_s": 68.1,
+      "input_hash": "b79f8024c88b5fe3e110fc81922b506d159220193db52cb0d42233d6d479c2a5",
+      "verified_at_commit": "b031232"
     },
     "gir-continuous-ftap": {
       "benchmark_file": "girsanov_finance.json",

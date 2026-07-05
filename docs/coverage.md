@@ -115,9 +115,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > a martingale set-integral). The one new estimate is the mixed-time integrability of `D_u·Z_T`, via
 > AM–GM (`exp(σX_u)exp(−θX_T) ≤ exp(2σX_u)+exp(−2θX_T)`, each Gaussian-MGF-integrable). This partially
 > wires the architecture doc's Girsanov seam (I↔II, the martingale side; see `mathematical-architecture.md`).
-> **Open (still `reduced_core`):** the *distributional* Girsanov (`gir-thm-9.1.8`, the drift-corrected
-> `B^θ = B − ∫θ ds` is a `Q`-Brownian motion) and general adapted `θ` — both blocked on an
-> adapted-integrand Itô formula / pathwise quadratic variation absent from the Itô tower.
+> **The distributional side is now fully closed for constant `θ` (2026-07-05):**
+> `Foundations/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected
+> `B^θ_t = X_t + θ t` is a genuine `Q`-Brownian motion — zero start, Gaussian increments
+> `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independence of disjoint increments (corpus
+> `gir-const-theta-qbm`, `full`; the marginal law is `gir-const-theta-marginal`, `full`). The
+> increment *independence*, previously flagged as a Mathlib gap ("conditional-MGF ⟹ independence"
+> is absent — only the reverse `condExp_indep_eq` exists), is reached WITHOUT that lemma: via
+> Mathlib's `indepFun_iff_charFun_prod`, the joint characteristic function at `w = (w₁, w₂)` is the
+> charFun-at-`1` of the Gaussian linear combination `w₁·I₁ + w₂·I₂` (`Btheta_linComb_map_eq_gaussianReal`,
+> whose `N(0, w₁²Δ₁+w₂²Δ₂)` law comes from the joint-MGF factorisation `Btheta_increments_joint_mgf`),
+> so it factors into the two marginal Gaussian characteristic functions (`charFun_gaussianReal`) — no
+> adapted-integrand Itô formula. **Open (still `reduced_core`):** the *general bounded-adapted*-`θ`
+> Girsanov (`gir-thm-9.1.8`, the drift-corrected `B^θ = B − ∫θ ds` for adapted `θ`) — its adapted
+> drift needs an adapted-integrand Itô formula / pathwise quadratic variation absent from the Itô tower.
 
 > **Prior round (2026-06-29, Phase 1 — the convex-duality unification: pricing = risk):** corpus
 > **306**, **271 full + 18 wrappers = 289/306 delivery-ready**, 17 reduced cores, 0 placeholders.

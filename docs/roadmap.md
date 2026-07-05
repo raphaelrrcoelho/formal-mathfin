@@ -30,6 +30,22 @@ breadth at this stage, and what the concrete next round would look like.
 > `reduced_core`, honestly documented — an Itô-tower item to re-scout, not force. See
 > [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
 
+> **Update (2026-07-05) — Phase 2 distributional Girsanov, CONSTANT θ FULLY CLOSED (corpus 314).** The
+> re-scout paid off: for *constant* `θ` the distributional Girsanov is now complete —
+> `Foundations/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected
+> `B^θ_t = X_t + θ t` is a genuine `Q`-Brownian motion: zero start, Gaussian increments
+> `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independence of disjoint increments (corpus `gir-const-theta-qbm`,
+> `full`; marginal `gir-const-theta-marginal`, `full`). Crucially this needs **no** adapted-integrand Itô
+> formula and **no** "conditional-MGF ⟹ independence" lemma (a presumed Mathlib gap — only the reverse
+> `condExp_indep_eq` exists): the independence is reached via `indepFun_iff_charFun_prod`, factorising the
+> Gaussian joint characteristic function through the linear-combination law
+> `Btheta_linComb_map_eq_gaussianReal` (whose `N(0, w₁²Δ₁+w₂²Δ₂)` law comes from the joint-MGF
+> factorisation `Btheta_increments_joint_mgf`, a `condExp_mul` pull-out on `condExp_Btheta_increment`). All
+> on the existing Bayes engine + Wald exponentials + Mathlib's characteristic-function machinery. What
+> stays `reduced_core` is only the general bounded-*adapted*-θ case (`gir-thm-9.1.8`), whose path-dependent
+> drift `θ_s` still needs the adapted-integrand Itô formula. See
+> [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
+
 > **DELIVERED (2026-07-03) — SDE existence made pathwise: the E-fixed point as a sample-path process
 > ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19) → existence bridge).** The Picard
 > solution, previously banked only as the abstract `L²`-fixed point `picardSolution ∈ E`, is now realized
@@ -137,7 +153,7 @@ adapted-coefficient Itô, blocked on Degenne's continuous-modification π-system
 | # | Conversion (reduced_core → full) | Value | Difficulty | Unlocks |
 |---|---|---|---|---|
 | 1 | **Novikov** (gir-thm-9.1.7) | 9 | MEDIUM (~150-200 ln) | the gateway: the adapted Doléans-Dade exponential `Z_t=exp(∫θdB−½∫θ²ds)` as a martingale |
-| 2 | **Girsanov** — martingale side ✅ (2026-06-30) | 9 | DONE (const θ): `bs_discounted_isQMartingale` = the EMM as an explicit measure change + a reusable Bayes engine. Distributional Girsanov (gir-thm-9.1.8) + adapted θ blocked on adapted-integrand Itô | risk-neutral pricing under measure change |
+| 2 | **Girsanov** — martingale + distributional (const θ) ✅ (2026-06-30 / 2026-07-05) | 9 | DONE (const θ): `bs_discounted_isQMartingale` = the EMM as an explicit measure change + a reusable Bayes engine; **and `Btheta_isQBrownianMotion` = the full distributional Girsanov for constant θ** (Gaussian *and independent* increments, via `indepFun_iff_charFun_prod` on the Gaussian joint law — no adapted Itô, no conditional-MGF⟹indep lemma). Only general adapted-θ (gir-thm-9.1.8) still blocked on adapted-integrand Itô | risk-neutral pricing under measure change |
 | 3 | **SDE existence/uniqueness** (sc-thm-8.2.5) | 9 | HIGH (~300-400) | the SDE model zoo (Vasicek/CIR/Heston/jump-diffusion) — Picard on the Itô isometry |
 | 4 | **Martingale representation** (gir-thm-9.3.4) | 9 | HIGH (Clark-Hida; may need upstream) | hedging / replication / market completeness |
 | 5 | **2D Itô formula** (sc-thm-7.5.2) | 7 | LOW-MED | multi-asset derivatives (the 1-D TD formula is already built) |
