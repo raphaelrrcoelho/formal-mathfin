@@ -7,6 +7,7 @@ module
 
 public import MathFin.Foundations.ChangeOfMeasure
 public import MathFin.Foundations.BrownianMartingale
+public import MathFin.Foundations.EquivMeasure
 
 /-!
 # Constant-θ distributional Girsanov — the drift-corrected exponential is a Q-martingale
@@ -134,5 +135,62 @@ theorem expBtheta_isQMartingale
       ring
     rw [hrw]; exact hcore.const_mul _
   exact changeOfMeasure_setIntegral_eq T hZmeasT hZpos hDsm hZ hZD hmix hst htT hA
+
+/-- **The constant-θ Girsanov measure is a probability measure.** `Q = P.withDensity Z_T`
+with the Wald density `Z_T = exp(−θ X_T − ½θ² T)`: the density is measurable, strictly
+positive, `P`-integrable (Gaussian MGF), and has unit `P`-mean — the Wald exponential is a
+`P`-martingale started at `Z_0 = exp(−θ X_0) = 1` (since `X_0 = 0` a.s.), so `∫ Z_T dP =
+∫ Z_0 dP = 1`. -/
+theorem girsanovMeasure_isProbabilityMeasure
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ : ℝ) (T : ℝ≥0) :
+    IsProbabilityMeasure
+      (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  set g : Ω → ℝ := fun ω ↦ Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2) with hgdef
+  have hgmeas : Measurable g := Real.measurable_exp.comp (((hmeasX T).const_mul (-θ)).sub_const _)
+  have hgpos : ∀ ω, 0 < g ω := fun ω ↦ Real.exp_pos _
+  have hgfactor : g = fun ω ↦ Real.exp (-(θ ^ 2 * (T : ℝ) / 2)) * Real.exp (-θ * X T ω) := by
+    funext ω
+    show Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)
+        = Real.exp (-(θ ^ 2 * (T : ℝ) / 2)) * Real.exp (-θ * X T ω)
+    rw [show -θ * X T ω - θ ^ 2 * (T : ℝ) / 2
+          = -(θ ^ 2 * (T : ℝ) / 2) + -θ * X T ω from by ring, Real.exp_add]
+  have hgint : Integrable g P := by
+    rw [hgfactor]; exact (integrable_exp_mul_of_hasLaw (hX.hasLaw_eval T) (-θ)).const_mul _
+  -- The Wald exponential `Z_u = exp(−θ X_u − ½θ² u)` is a `P`-martingale.
+  have hZmart : Martingale (fun u ω ↦ Real.exp (-θ * X u ω - θ ^ 2 * (u : ℝ) / 2)) 𝓕 P := by
+    have key : (fun u ω ↦ Real.exp (-θ * X u ω - θ ^ 2 * (u : ℝ) / 2))
+        = fun u ω ↦ Real.exp (-θ * X u ω - (-θ) ^ 2 * (u : ℝ) / 2) := by
+      funext u ω; rw [neg_sq]
+    rw [key]; exact IsFilteredPreBrownian.waldExponential_isMartingale (-θ)
+  -- `X_0 = 0` a.s. (its law is `gaussianReal 0 0 = dirac 0`).
+  have hX0 : P {ω | X 0 ω ≠ 0} = 0 := by
+    have hmap := Measure.map_apply (μ := P) (hmeasX 0) (measurableSet_singleton (0 : ℝ)).compl
+    rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
+        Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
+    have hpre : X 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | X 0 ω ≠ 0} := by
+      ext ω; simp [Set.mem_preimage]
+    rw [hpre] at hmap
+    simpa using hmap.symm
+  -- `∫ Z_0 dP = 1`, hence `∫ g dP = ∫ Z_T dP = ∫ Z_0 dP = 1`.
+  have hgsum : ∫ ω, g ω ∂P = 1 := by
+    have hmean := hZmart.setIntegral_eq (i := 0) (j := T) zero_le (s := Set.univ)
+      MeasurableSet.univ
+    simp only [Measure.restrict_univ] at hmean
+    have hZ0 : ∫ ω, Real.exp (-θ * X 0 ω - θ ^ 2 * ((0 : ℝ≥0) : ℝ) / 2) ∂P = 1 := by
+      have hae : (fun ω ↦ Real.exp (-θ * X 0 ω - θ ^ 2 * ((0 : ℝ≥0) : ℝ) / 2))
+          =ᵐ[P] fun _ ↦ (1 : ℝ) := by
+        filter_upwards [ae_iff.mpr hX0] with ω hω
+        simp [hω]
+      rw [integral_congr_ae hae]; simp
+    calc ∫ ω, g ω ∂P
+        = ∫ ω, Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2) ∂P := rfl
+      _ = ∫ ω, Real.exp (-θ * X 0 ω - θ ^ 2 * ((0 : ℝ≥0) : ℝ) / 2) ∂P := hmean.symm
+      _ = 1 := hZ0
+  exact (isEquivProbMeasure_withDensity P hgmeas hgpos hgint hgsum).1
 
 end MathFin
