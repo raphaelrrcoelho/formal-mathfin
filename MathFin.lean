@@ -61,6 +61,7 @@ import MathFin.Foundations.ContinuousFTAP
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
 import MathFin.Foundations.ChangeOfMeasure
 import MathFin.Foundations.Girsanov
+import MathFin.Foundations.GirsanovConstantTheta
 import MathFin.Foundations.Numeraire
 import MathFin.Foundations.BrownianQuadraticVariation
 import MathFin.Foundations.QuadraticVariationL2
