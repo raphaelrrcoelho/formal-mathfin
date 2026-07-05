@@ -98,6 +98,45 @@ The Summit-B follow-ons already built most of the analytic engine, aimed at the
 - **`itoIntegralCLM_T`** — the continuous `[0,T]` Itô integral carrying the
   stochastic term.
 
+### Correction (2026-07-05, discovered at execution) — the missing infrastructure (SP0)
+
+The claim above that the engine "generalizes for free" was over-optimistic. It
+holds for the *weight* in the second-order term, but **not** for the diffusion
+increment itself. Two pieces the tower does **not** have, confirmed by grep at
+execution time:
+
+1. **Raw-process → `Lp`-class realization.** The Itô integral takes its integrand
+   as an `Lp` class `φ : Lp ℝ 2 (trimMeasure_T T hBmeas)`, not a raw
+   `σ : ℝ≥0 → Ω → ℝ`. Realizing a bounded adapted continuous `σ` as `φ` is a real
+   lemma (σ predictable-measurable + L² + `.toLp`) — `ItoIntegralRiemannBridge`
+   did exactly this for `φ∘B` and it was substantial (predictability as an a.e.
+   limit of simple processes).
+2. **No sub-interval increment API.** `itoProcessCLM … t …` is the integral up to
+   `t`; there is **no** lemma tower-wide giving
+   `M_{t₂} − M_{t₁} = ∫_{(t₁,t₂]} σ dB` (only the `[0,∞)` `restrictToBand` gluing).
+   B1a must build the CLM's time-additivity from the `extendOfNorm` construction.
+
+**Consequence:** SP1's B1a is not a "fiddly step" but a prerequisite milestone
+**SP0 — the concrete adapted stochastic integral**: (i) `σ`-realization
+(`processToLp_of_bdd_adapted_cont`), (ii) the sub-interval increment identity.
+The Route-β plan is re-sequenced **SP0 → SP1 → SP2**.
+
+### Route decision update (2026-07-05) — two tracks
+
+Given SP0's real cost, the program runs **two tracks in parallel**:
+- **Track β (this spec):** SP0 → SP1 → SP2, the general adapted-coefficient Itô
+  formula (the foundational tool). Longer; infrastructure-first.
+- **Track α (the Girsanov path, faster):** the simple-process route to
+  bounded-adapted-θ Girsanov, which needs **none** of SP0 — its stochastic
+  exponential factorizes into concrete per-cell increments. Bricks: **α1**
+  conditional Wald with adapted multiplier (`E[exp(θᵢΔBᵢ − ½θᵢ²Δtᵢ)|𝓕_{tᵢ}]=1`,
+  mirroring `condExp_adapted_mul_increment` + the Gaussian MGF of
+  `waldExponential_isMartingale`) → **α2** simple stochastic exponential is a
+  martingale (product/telescoping) → **α3** bounded-adapted-θ by L²-bounded
+  approximation → **α4** `B^θ` is `Q`-Brownian (via `Z·exp(aB^θ−½a²t)=Z^{θ+a}`
+  ∀a + exponential characterization) → wire, flip `gir-thm-9.1.8`. Track α reaches
+  the actual Girsanov deliverable without SP0; Track β delivers the general tool.
+
 ## 4. The design — bricks
 
 The linchpin is the **freezing lemma (B1)**: it appears twice — in the QV
