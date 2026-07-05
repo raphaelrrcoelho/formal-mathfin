@@ -210,6 +210,79 @@ UI predicate with a downstream consumer), R4 (portfolioVariance PSD bridge), R1
 missed reductions. L3 and `bsd2_eq` deferred (fiddly, low value; current proofs clean
 and correct).
 
+## Backlog closure — 2026-07-05 (verified against committed source)
+
+The carried backlog above has since **landed** (across `293acf1` "math-quality-review
+upgrades" and `eb0aee9` "three greenfield developments"); each item re-verified against
+the current tree today, working tree clean:
+
+| item | status | evidence |
+|---|---|---|
+| R1 isometry-extension package ×3 | ✅ landed | `LinearMap.norm_extendOfNorm_eq_of_isometry` defined `WienerIntegral.lean:147`; consumed `ItoIntegralCLM:730`, `WienerIntegralL2:422`, `ItoIntegralL2Dense:320` |
+| R4 portfolioVariance PSD bridge | ✅ landed | `portfolioVariance_eq_portfolioVarN` + `portfolioVariance_covariance_nonneg` `CovariancePSD.lean:99-116` |
+| R5 Brownian-increment law preamble | ✅ landed | `hasLaw_increment` helper in `WienerIntegral.lean` |
+| R6 `ito_formula_expBrownian` = b=0 case | ✅ landed | `ItoFormulaGBM.lean:104,122` (specialization of `ito_formula_itoProcess`) |
+| R10 Gaussian even moments | ✅ landed | `GaussianMoments.lean:53,73` via `Nat.doubleFactorial` |
+| L1 Degenne UI | ✅ landed | `L2MartingaleConvergence.lean:194` consumes `uniformIntegrable_of_dominated_singleton` |
+| L3 Merton Jensen via `ConvexOn.sup` | ✅ landed | `MertonAmericanCallTree.lean:91-92` |
+| `bsd2_eq` `linear_combination` | ✅ landed | `Call.lean:119` |
+| RiskParityFOC honesty (log-barrier FOC) | ✅ landed | `logBarrierObj` + its `HasDerivAt` `RiskParityFOC.lean:161-178` |
+| Bermudan honesty (`bermudanPrice`) | ✅ landed | `Bermudan.lean:29`, genuine tree sandwich |
+| missed reductions: variance-swap L², dynamic numéraire | ✅ landed | `eb0aee9` |
+
+### Second-pass audit (2026-07-05) — tail re-checked item-by-item against source
+
+Correcting this doc's own earlier "still open" list after a deeper dig; several were
+already done and one was mine to reject:
+
+- **`bsP_strike_convexOn`** — **already done** (`StrikeConvexity.lean:164`), together with
+  `blackPayerSwaption_eq_bsVGarman` (`Black76:114`) and `asian_payoff_geom_le_arith_n`
+  (`AsianInequality:100`). The earlier note calling PutStrikeConvexity "still open" was wrong.
+- **TangentPortfolio 2-vs-N bridge** — **done 2026-07-05**: `tangentTwo_isTangentPortfolioN`
+  (`TangentPortfolio.lean`) proves the bespoke two-asset FOC IS `IsTangentPortfolioN` at the
+  `Fin 2` data (`fin_cases … ring`) — the coherence the module docstring only narrated.
+  Genuine "this IS that", lean-check green; staled/re-verified 3 ledger entries.
+- **Already-honest (no fix)**: `ExpMin.minimum_survival` docstring explicitly qualifies
+  "(at the survival-function / CDF level)" and is named `…_survival` not `…_law`;
+  `PoissonThinning` explicitly takes "that marking law as the hypothesis and **derives**".
+  The review's honesty flags here are optional *extensions* (the full law), not corrections.
+
+**Genuinely open, deliberately deferred** (all the review's own "fold opportunistically"
+bucket — real dedups, but each edits load-bearing Itô-tower infra and re-stales a
+transitive ledger closure larger + less predictable than a leaf edit's ~3 entries, for
+≤0.83 cosmetic value; poor risk/reward as a standalone campaign on a box that OOMs at
+corpus-scale re-verify):
+
+- **R9** `itoProcessAssembled_add`/`_sub` dedup (`ItoProcessPredictable.lean:244,301`, ~55 lines).
+- **band-overlap** 16-case `nlinarith` → the repo's own 2-case `band_overlap_real` pattern
+  (`WienerIntegralL2:165` + `ItoIntegralProcessMartingale:117`, 0.74).
+- **E-norm²=product-double-integral ×3** (`DriftProcessModification`/`Predictable`, 0.72).
+- **Lipschitz→L² domination ×4** (`ItoFormulaCLM`/`TD`/`Localized`/`GBM`, 0.70).
+- **Taylor-remainder ×2** (`ItoFormulaRemainder`/`TDRemainder`, 0.72).
+- **DoobLp untruncated chain** ~160-line mirror of the truncated one (take to the `K→∞` sup).
+- **Phi_neg** verbose complementation (`StandardNormal:76`, 0.68) — `StandardNormal` is
+  imported by every pricing file → largest blast radius of all, for a cosmetic trim.
+
+**Skipped as non-upgrades** (not deferral — these would make the repo worse or are noise):
+
+- **L4** `MarkowitzNAsset` PSD → `Matrix.PosSemidef` — a design call; `CovariancePSD`
+  already discharges the genuine covariance PSD.
+- **BivariateGaussian `Xhat`** — **rejected on re-read**: `Xhat := μ_X + β(Y−μ_Y)` names
+  the regression part; the split `X = Xhat + centered-residual` is the correct
+  regression/orthogonal-residual decomposition; the review's `X = βY + (X−βY)` alternative
+  drops the mean-centering that pins the constant. (The "reviewers over-escalate — verify
+  against code" rule.)
+- **Credit iff / CAPM `beta_linearity_two` cosmetic shaves**, **Immunization order-match
+  micro-helper**, **ConvexDuality `functional_eq_sum_single`→`basisFun` (0.45)** — lateral
+  edits on already-correct, already-clean proofs; the immunization/ConvexDuality ones risk
+  becoming exactly the wrapper lemmas `feedback_avoid_wrapper_lemmas` forbids. Cosmetic
+  line-count, not conceptual gain.
+- **`gbm_solves_sde`** — review says keep its `HasDerivAt.unique` "can't-fake-the-partials" device.
+
+**Net:** the review's high/medium backlog is closed; the one genuine still-open coherence
+win (TangentPortfolio bridge) is landed; the rest is deep-infra dedup best folded when
+those files are next touched for a real reason. Corpus green (312, ledger fresh).
+
 ## Relationship to the other reviews & non-findings
 
 - **Overlap with the idiomatic review** (`docs/idiomatic-review-2026-07-04.md`): the

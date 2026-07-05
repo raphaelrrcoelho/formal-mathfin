@@ -1503,10 +1503,10 @@
     },
     "mf-markowitz-n-psd": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-07-04",
-      "elapsed_s": 56.8,
-      "input_hash": "054f3a53cd9ac7f240c8c09456ac6ba409e2e0bb13773974dcd98240c6f8ab4f",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-05",
+      "elapsed_s": 112.4,
+      "input_hash": "5c4b4337b8aae3405d217a15360a4adcf3eeecc500af9fa3ca073db7de1fbb04",
+      "verified_at_commit": "c247481"
     },
     "mf-markowitz-n-scaling": {
       "benchmark_file": "mathematical_finance.json",
@@ -1762,17 +1762,17 @@
     },
     "mf-tangent-portfolio-N-sufficient": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-07-04",
-      "elapsed_s": 73.0,
-      "input_hash": "baf6e6c7fa36462e8fb9f642f1fc8562db0b54a2842063ac327ad52862df68f6",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-05",
+      "elapsed_s": 100.6,
+      "input_hash": "fc946c0afcdbd40e18136048c44fcef9847188d29d14a973467f0cdd59f423db",
+      "verified_at_commit": "c247481"
     },
     "mf-tangent-portfolio-foc": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-07-04",
-      "elapsed_s": 50.5,
-      "input_hash": "ae501786f005e38ce4568a96742e0b2b2875a8a873a3b745251104e70f291a93",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-05",
+      "elapsed_s": 68.4,
+      "input_hash": "38e09832e900247961d43169a8e98f733183036829d70f1efd5b4f2bb10e2aa8",
+      "verified_at_commit": "c247481"
     },
     "mf-tracking-error-cauchy-bound": {
       "benchmark_file": "mathematical_finance.json",

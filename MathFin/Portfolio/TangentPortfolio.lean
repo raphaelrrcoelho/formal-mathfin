@@ -83,4 +83,20 @@ theorem isTangent_of_proportional {ι : Type*} (s : Finset ι) (μ_excess : ι �
   rw [h i hi, h j hj]
   ring
 
+/-- **The two-asset FOC is the `N = 2` instance of `IsTangentPortfolioN`** — the
+coherence the module docstring asserts, now proved rather than narrated. Feeding
+the excess returns `![r₁, r₂]`, the covariance kernel `!![σ₁², ρσ₁σ₂; ρσ₁σ₂, σ₂²]`,
+and the (denominator-scaled, since the predicate is homogeneous in `w`) tangent
+weights `![Dw, D(1−w)]` into the general cross-product FOC recovers exactly
+`tangentTwo_satisfies_FOC`. So the bespoke two-asset result is not a parallel
+tower: it is `IsTangentPortfolioN` written out. -/
+theorem tangentTwo_isTangentPortfolioN (r₁ r₂ σ₁ σ₂ ρ : ℝ) :
+    IsTangentPortfolioN (Finset.univ : Finset (Fin 2))
+      ![r₁, r₂]
+      (fun i j => ![![σ₁ ^ 2, ρ * σ₁ * σ₂], ![ρ * σ₁ * σ₂, σ₂ ^ 2]] i j)
+      ![σ₂ ^ 2 * r₁ - ρ * σ₁ * σ₂ * r₂, σ₁ ^ 2 * r₂ - ρ * σ₁ * σ₂ * r₁] := by
+  intro i _ j _
+  fin_cases i <;> fin_cases j <;>
+    simp [Fin.sum_univ_two, Matrix.cons_val_zero, Matrix.cons_val_one] <;> ring
+
 end MathFin
