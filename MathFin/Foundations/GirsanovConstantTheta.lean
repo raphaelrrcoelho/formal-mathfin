@@ -303,4 +303,65 @@ theorem Btheta_map_eq_gaussianReal
     hbθmeas.aemeasurable aemeasurable_id hcomplexeq
   rwa [Measure.map_id] at hmap
 
+/-- **`Q`-integrability of the drift-corrected exponential.** For `u ≤ T` and any `a`,
+`exp(a·(X_u + θ u))` is `Q`-integrable — its `Q`-law is `N(0,u)` (`Btheta_map_eq_gaussianReal`)
+and the Gaussian MGF is finite. -/
+theorem integrable_expBtheta
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ a : ℝ) (T : ℝ≥0) {u : ℝ≥0} (huT : u ≤ T) :
+    Integrable (fun ω ↦ Real.exp (a * (X u ω + θ * (u : ℝ))))
+      (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  have hbθmeas : Measurable (fun ω ↦ X u ω + θ * (u : ℝ)) := (hmeasX u).add_const _
+  rw [show (fun ω ↦ Real.exp (a * (X u ω + θ * (u : ℝ))))
+        = (fun x ↦ Real.exp (a * x)) ∘ (fun ω ↦ X u ω + θ * (u : ℝ)) from rfl,
+      ← integrable_map_measure (by fun_prop) hbθmeas.aemeasurable,
+      Btheta_map_eq_gaussianReal (X := X) (𝓕 := 𝓕) θ T huT]
+  exact integrable_exp_mul_gaussianReal a
+
+/-- **Conditional constant-θ Girsanov martingale.** `𝔼_Q[exp(a·B^θ_t − ½a² t) | 𝓕_s] =
+exp(a·B^θ_s − ½a² s)` a.e., the conditional form of `expBtheta_isQMartingale` (its set-integral
+identity over `𝓕_s` sets, converted via `ae_eq_condExp_of_forall_setIntegral_eq`). Rearranged,
+this is the conditional `Q`-MGF `𝔼_Q[exp(a·(B^θ_t − B^θ_s)) | 𝓕_s] = exp(½a²(t−s))` — the
+increment law and independence engine for `B^θ` being `Q`-Brownian. -/
+theorem condExp_expBtheta
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ a : ℝ) (T : ℝ≥0) {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
+    (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)))[
+        fun ω ↦ Real.exp (a * (X t ω + θ * (t : ℝ)) - a ^ 2 * (t : ℝ) / 2) | 𝓕 s]
+      =ᵐ[P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))]
+        fun ω ↦ Real.exp (a * (X s ω + θ * (s : ℝ)) - a ^ 2 * (s : ℝ) / 2) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  -- `f_u := exp(a·B^θ_u − ½a² u)` is `Q`-integrable and (at `s`) `𝓕_s`-measurable.
+  have hfint : ∀ u : ℝ≥0, u ≤ T →
+      Integrable (fun ω ↦ Real.exp (a * (X u ω + θ * (u : ℝ)) - a ^ 2 * (u : ℝ) / 2)) Q := by
+    intro u huT
+    have hfac : (fun ω ↦ Real.exp (a * (X u ω + θ * (u : ℝ)) - a ^ 2 * (u : ℝ) / 2))
+        = fun ω ↦ Real.exp (-(a ^ 2 * (u : ℝ) / 2)) * Real.exp (a * (X u ω + θ * (u : ℝ))) := by
+      funext ω
+      rw [show a * (X u ω + θ * (u : ℝ)) - a ^ 2 * (u : ℝ) / 2
+            = -(a ^ 2 * (u : ℝ) / 2) + a * (X u ω + θ * (u : ℝ)) from by ring, Real.exp_add]
+    rw [hfac]
+    exact (integrable_expBtheta (X := X) (𝓕 := 𝓕) θ a T huT).const_mul _
+  have hsm : StronglyMeasurable[𝓕 s]
+      (fun ω ↦ Real.exp (a * (X s ω + θ * (s : ℝ)) - a ^ 2 * (s : ℝ) / 2)) := by
+    have hcont : Continuous fun x : ℝ ↦ a * (x + θ * (s : ℝ)) - a ^ 2 * (s : ℝ) / 2 := by fun_prop
+    exact Real.continuous_exp.comp_stronglyMeasurable
+      (hcont.comp_stronglyMeasurable (hX.stronglyAdapted s))
+  -- Convert the set-integral martingale identity to a conditional expectation.
+  refine (ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le s) (hfint t htT)
+    (fun A _ _ ↦ (hfint s (hst.trans htT)).integrableOn) (fun A hA _ ↦ ?_)
+    hsm.aestronglyMeasurable).symm
+  exact (expBtheta_isQMartingale (P := P) (𝓕 := 𝓕) (X := X) θ a T hst htT hA).symm
+
 end MathFin
