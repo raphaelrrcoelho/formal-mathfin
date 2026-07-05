@@ -364,4 +364,142 @@ theorem condExp_expBtheta
     hsm.aestronglyMeasurable).symm
   exact (expBtheta_isQMartingale (P := P) (𝓕 := 𝓕) (X := X) θ a T hst htT hA).symm
 
+/-- **Conditional `Q`-MGF of the increment.** `𝔼_Q[exp(a·(B^θ_t − B^θ_s)) | 𝓕_s] =
+exp(½a²(t−s))` a.e. — deterministic. Rearranges `condExp_expBtheta` by pulling the
+`𝓕_s`-measurable factor `exp(½a² t − a·B^θ_s)` out of the conditional expectation
+(`condExp_mul_of_stronglyMeasurable_left`), so `exp(a·(B^θ_t−B^θ_s)) =
+exp(½a² t − a·B^θ_s)·exp(a·B^θ_t − ½a² t)` collapses to `exp(½a²(t−s))`. Taking `𝔼_Q`
+gives the increment `N(0,t−s)` MGF; the *deterministic* conditional value is the
+increment-independence witness (once a conditional-MGF ⟹ independence result is available). -/
+theorem condExp_Btheta_increment
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ a : ℝ) (T : ℝ≥0) {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
+    (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)))[
+        fun ω ↦ Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))) | 𝓕 s]
+      =ᵐ[P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))]
+        fun _ ↦ Real.exp (a ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  -- `f_t := exp(a·B^θ_t − ½a² t)` and the `𝓕_s`-measurable factor `g := exp(½a² t − a·B^θ_s)`.
+  set ft : Ω → ℝ := fun ω ↦ Real.exp (a * (X t ω + θ * (t : ℝ)) - a ^ 2 * (t : ℝ) / 2) with hftdef
+  set gs : Ω → ℝ := fun ω ↦ Real.exp (a ^ 2 * (t : ℝ) / 2 - a * (X s ω + θ * (s : ℝ))) with hgsdef
+  have hgs_sm : StronglyMeasurable[𝓕 s] gs := by
+    have hcont : Continuous fun x : ℝ ↦ a ^ 2 * (t : ℝ) / 2 - a * (x + θ * (s : ℝ)) := by fun_prop
+    exact Real.continuous_exp.comp_stronglyMeasurable
+      (hcont.comp_stronglyMeasurable (hX.stronglyAdapted s))
+  have hft_int : Integrable ft Q := by
+    have hfac : ft = fun ω ↦ Real.exp (-(a ^ 2 * (t : ℝ) / 2)) *
+        Real.exp (a * (X t ω + θ * (t : ℝ))) := by
+      funext ω
+      show Real.exp (a * (X t ω + θ * (t : ℝ)) - a ^ 2 * (t : ℝ) / 2)
+          = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * (X t ω + θ * (t : ℝ)))
+      rw [show a * (X t ω + θ * (t : ℝ)) - a ^ 2 * (t : ℝ) / 2
+            = -(a ^ 2 * (t : ℝ) / 2) + a * (X t ω + θ * (t : ℝ)) from by ring, Real.exp_add]
+    rw [hfac]; exact (integrable_expBtheta (X := X) (𝓕 := 𝓕) θ a T htT).const_mul _
+  -- `gs · ft = exp(a·(B^θ_t − B^θ_s))` pointwise.
+  have hprod : (fun ω ↦ gs ω * ft ω)
+      = fun ω ↦ Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))) := by
+    funext ω
+    rw [hgsdef, hftdef, ← Real.exp_add]
+    congr 1; ring
+  -- Integrability of the increment exponential, by AM–GM against two Gaussian-MGF terms.
+  have hprod_int : Integrable (fun ω ↦ gs ω * ft ω) Q := by
+    rw [hprod]
+    have hbnd : Integrable (fun ω ↦ Real.exp (2 * a * (X t ω + θ * (t : ℝ)))
+        + Real.exp (-2 * a * (X s ω + θ * (s : ℝ)))) Q :=
+      (integrable_expBtheta (X := X) (𝓕 := 𝓕) θ (2 * a) T htT).add
+        (integrable_expBtheta (X := X) (𝓕 := 𝓕) θ (-2 * a) T (hst.trans htT))
+    refine Integrable.mono' hbnd (by fun_prop) ?_
+    filter_upwards with ω
+    rw [Real.norm_of_nonneg (Real.exp_nonneg _)]
+    have ep : Real.exp (2 * a * (X t ω + θ * (t : ℝ)))
+        = Real.exp (a * (X t ω + θ * (t : ℝ))) ^ 2 := by
+      rw [pow_two, ← Real.exp_add]; congr 1; ring
+    have eq' : Real.exp (-2 * a * (X s ω + θ * (s : ℝ)))
+        = Real.exp (-a * (X s ω + θ * (s : ℝ))) ^ 2 := by
+      rw [pow_two, ← Real.exp_add]; congr 1; ring
+    have eprod : Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))))
+        = Real.exp (a * (X t ω + θ * (t : ℝ))) * Real.exp (-a * (X s ω + θ * (s : ℝ))) := by
+      rw [← Real.exp_add]; congr 1; ring
+    rw [ep, eq', eprod]
+    nlinarith [sq_nonneg (Real.exp (a * (X t ω + θ * (t : ℝ)))
+        - Real.exp (-a * (X s ω + θ * (s : ℝ)))),
+      (Real.exp_pos (a * (X t ω + θ * (t : ℝ)))).le,
+      (Real.exp_pos (-a * (X s ω + θ * (s : ℝ)))).le]
+  -- Pull the `𝓕_s`-measurable `gs` out and apply the conditional martingale.
+  have hpull := condExp_mul_of_stronglyMeasurable_left (m := (𝓕 s : MeasurableSpace Ω))
+    hgs_sm hprod_int hft_int
+  have hcond := condExp_expBtheta (P := P) (𝓕 := 𝓕) (X := X) θ a T hst htT
+  rw [← hQdef] at hcond
+  have hint_eq : (fun ω ↦ Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))))
+      = gs * ft := hprod.symm
+  rw [hint_eq]
+  filter_upwards [hpull, hcond] with ω hp hc
+  rw [hp, Pi.mul_apply,
+    show (Q[ft | 𝓕 s]) ω = Real.exp (a * (X s ω + θ * (s : ℝ)) - a ^ 2 * (s : ℝ) / 2) from hc,
+    hgsdef, ← Real.exp_add]
+  congr 1; ring
+
+/-- **Constant-θ distributional Girsanov (increment law).** Under the Girsanov measure
+`Q`, the increment `B^θ_t − B^θ_s = (X_t + θ t) − (X_s + θ s)` has law `N(0, t−s)`. Its
+unconditional `Q`-MGF is `exp(½ (t−s) a²)` — the tower property `𝔼_Q[exp(a·incr)] =
+𝔼_Q[𝔼_Q[exp(a·incr)|𝓕_s]] = exp(½ a²(t−s))` on the deterministic conditional MGF
+(`condExp_Btheta_increment`, via `integral_condExp`) — and Mathlib's complex-MGF machinery
+reads off the Gaussian law. Together with `Btheta_map_eq_gaussianReal` this gives the
+Gaussian-increments half of "`B^θ` is a `Q`-Brownian motion"; increment *independence*
+still needs a conditional-MGF ⟹ independence result absent from Mathlib. -/
+theorem Btheta_increment_map_eq_gaussianReal
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ : ℝ) (T : ℝ≥0) {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T) :
+    (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
+        (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))
+      = gaussianReal 0 (t - s) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  have hincmeas : Measurable (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) :=
+    ((hmeasX t).add_const _).sub ((hmeasX s).add_const _)
+  -- Unconditional increment MGF `= exp(½ (t−s) a²)`, from the deterministic conditional MGF.
+  have hmgf : mgf (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) Q
+      = mgf id (gaussianReal 0 (t - s)) := by
+    rw [mgf_id_gaussianReal]
+    funext a
+    show ∫ ω, Real.exp (a * ((X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ)))) ∂Q
+        = Real.exp (0 * a + ((t - s : ℝ≥0) : ℝ) * a ^ 2 / 2)
+    have hcond := condExp_Btheta_increment (P := P) (𝓕 := 𝓕) (X := X) θ a T hst htT
+    rw [← hQdef] at hcond
+    rw [← integral_condExp (𝓕.le s), integral_congr_ae hcond, integral_const,
+        show Q.real Set.univ = 1 from by simp, one_smul, NNReal.coe_sub hst]
+    congr 1; ring
+  -- Integrable-exponential set is all of `ℝ` (transferred from the Gaussian).
+  have hIESgauss : integrableExpSet id (gaussianReal 0 (t - s)) = Set.univ := by
+    rw [Set.eq_univ_iff_forall]
+    intro a
+    show Integrable (fun x ↦ Real.exp (a * x)) (gaussianReal 0 (t - s))
+    exact integrable_exp_mul_gaussianReal a
+  have hIES : integrableExpSet (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) Q
+      = Set.univ := by rw [integrableExpSet_eq_of_mgf hmgf, hIESgauss]
+  have hset : {z : ℂ | z.re ∈
+      interior (integrableExpSet (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) Q)}
+      = Set.univ := by rw [hIES, interior_univ]; ext z; simp
+  have hcomplexeq :
+      complexMGF (fun ω ↦ (X t ω + θ * (t : ℝ)) - (X s ω + θ * (s : ℝ))) Q
+        = complexMGF id (gaussianReal 0 (t - s)) := by
+    funext z
+    exact eqOn_complexMGF_of_mgf hmgf (hset ▸ Set.mem_univ z)
+  have hmap := Measure.ext_of_complexMGF_eq (μ := Q) (μ' := gaussianReal 0 (t - s))
+    hincmeas.aemeasurable aemeasurable_id hcomplexeq
+  rwa [Measure.map_id] at hmap
+
 end MathFin
