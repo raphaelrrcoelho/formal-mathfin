@@ -253,4 +253,54 @@ theorem mgf_Btheta_eq
   congr 1
   ring
 
+/-- **Constant-θ distributional Girsanov (marginal law).** Under the Girsanov measure
+`Q = P.withDensity(exp(−θ X_T − ½θ² T))`, the drift-corrected marginal `B^θ_t = X_t + θ t`
+has law `N(0, t)`:
+`Q.map (X_· + θ t) = gaussianReal 0 t`. The `Q`-MGF is the `N(0,t)` MGF (`mgf_Btheta_eq`);
+`integrableExpSet_eq_of_mgf` transfers the (full-line) integrable-exponential set from the
+Gaussian, so `eqOn_complexMGF_of_mgf` upgrades the MGF match to a full complex-MGF match on
+all of `ℂ`, and `Measure.ext_of_complexMGF_eq` reads off the law. This is the constant-θ
+half of the distributional Girsanov (`gir-thm-9.1.8`), at the marginal level, reached with
+the existing tower — no adapted-integrand Itô formula. -/
+theorem Btheta_map_eq_gaussianReal
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ : ℝ) (T : ℝ≥0) {t : ℝ≥0} (htT : t ≤ T) :
+    (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map
+        (fun ω ↦ X t ω + θ * (t : ℝ))
+      = gaussianReal 0 t := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  have hbθmeas : Measurable (fun ω ↦ X t ω + θ * (t : ℝ)) := (hmeasX t).add_const _
+  -- The `Q`-MGF equals the `N(0,t)` MGF.
+  have hmgf : mgf (fun ω ↦ X t ω + θ * (t : ℝ)) Q = mgf id (gaussianReal 0 t) := by
+    rw [mgf_id_gaussianReal]
+    funext a
+    show ∫ ω, Real.exp (a * (X t ω + θ * (t : ℝ))) ∂Q = Real.exp (0 * a + (t : ℝ) * a ^ 2 / 2)
+    rw [mgf_Btheta_eq (P := P) (𝓕 := 𝓕) (X := X) θ T htT a, zero_mul, zero_add]
+  -- The integrable-exponential set is all of `ℝ` (transferred from the Gaussian).
+  have hIESgauss : integrableExpSet id (gaussianReal 0 t) = Set.univ := by
+    rw [Set.eq_univ_iff_forall]
+    intro a
+    show Integrable (fun x ↦ Real.exp (a * x)) (gaussianReal 0 t)
+    exact integrable_exp_mul_gaussianReal a
+  have hIES : integrableExpSet (fun ω ↦ X t ω + θ * (t : ℝ)) Q = Set.univ := by
+    rw [integrableExpSet_eq_of_mgf hmgf, hIESgauss]
+  -- Upgrade the MGF match to a full complex-MGF match on all of `ℂ`.
+  have hset : {z : ℂ | z.re ∈ interior (integrableExpSet (fun ω ↦ X t ω + θ * (t : ℝ)) Q)}
+      = Set.univ := by
+    rw [hIES, interior_univ]; ext z; simp
+  have hcomplexeq :
+      complexMGF (fun ω ↦ X t ω + θ * (t : ℝ)) Q = complexMGF id (gaussianReal 0 t) := by
+    funext z
+    exact eqOn_complexMGF_of_mgf hmgf (hset ▸ Set.mem_univ z)
+  have hmap := Measure.ext_of_complexMGF_eq (μ := Q) (μ' := gaussianReal 0 t)
+    hbθmeas.aemeasurable aemeasurable_id hcomplexeq
+  rwa [Measure.map_id] at hmap
+
 end MathFin
