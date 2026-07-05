@@ -112,6 +112,22 @@
         "formalization_status": "reduced_core",
         "formalization_scope": "Lean specification: the structure encodes the textbook hypotheses and the textbook conclusion as fields, so any inhabitant satisfies the textbook statement by construction; the theorem reads off the conclusion via a structural projection. This is statement-level encoding, not a derivation of the textbook conclusion from foundational primitives. Marked `reduced_core` to remain honest: a real proof requires the underlying process / measure-theoretic infrastructure currently outside Mathlib at the pinned toolchain."
       }
+    },
+    {
+      "id": "gir-const-theta-marginal",
+      "name": "Constant-θ Distributional Girsanov: Marginal Law",
+      "description": "Under the constant market-price-of-risk Girsanov measure Q = P.withDensity(exp(−θ X_T − ½θ² T)), the drift-corrected process B^θ_t = X_t + θ t has marginal law N(0, t) — the distributional side of the I↔II Girsanov seam, at the marginal level, for constant θ, derived from the existing tower without an adapted-integrand Itô formula.",
+      "domain": "stochastic_calculus",
+      "code": {
+        "lean": "import MathFin.Foundations.GirsanovConstantTheta\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal ENNReal\nopen MathFin\n\n/-- Constant-θ distributional Girsanov (marginal law). Under the Girsanov measure\n    `Q = P.withDensity(exp(−θ X_T − ½θ² T))`, the drift-corrected process\n    `B^θ_t = X_t + θ t` has law `gaussianReal 0 t = N(0, t)`. Re-exports\n    `MathFin.Btheta_map_eq_gaussianReal`, derived from primitives: the Bayes\n    change-of-measure engine plus two Wald exponentials give the `Q`-MGF `exp(½ t a²)`,\n    and Mathlib's complex-MGF machinery (`integrableExpSet_eq_of_mgf`,\n    `eqOn_complexMGF_of_mgf`, `Measure.ext_of_complexMGF_eq`) reads off the Gaussian law.\n    No adapted-integrand Itô formula required. -/\ntheorem girsanov_const_theta_marginal_law\n    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]\n    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]\n    {X : ℝ≥0 → Ω → ℝ} [IsFilteredPreBrownian X 𝓕 P]\n    (θ : ℝ) (T : ℝ≥0) {t : ℝ≥0} (htT : t ≤ T) :\n    (P.withDensity fun ω => ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))).map\n        (fun ω => X t ω + θ * (t : ℝ))\n      = gaussianReal 0 t :=\n  MathFin.Btheta_map_eq_gaussianReal (𝓕 := 𝓕) θ T htT\n"
+      },
+      "metadata": {
+        "chapter": 9,
+        "reference": "Girsanov, distributional side (constant θ, marginal law)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof (constant θ, marginal level). Re-exports MathFin.Btheta_map_eq_gaussianReal (MathFin/Foundations/GirsanovConstantTheta.lean): under Q = P.withDensity(exp(−θ X_T − ½θ² T)) the drift-corrected marginal B^θ_t = X_t + θ t has law N(0, t). Derived from primitives — the Bayes change-of-measure engine (changeOfMeasure_setIntegral_eq) fed two Wald exponentials Wald(−θ), Wald(a−θ) gives the Q-MGF exp(½ t a²); Mathlib's complex-MGF machinery (integrableExpSet_eq_of_mgf transfers the full-line integrable-exponential set from the Gaussian, eqOn_complexMGF_of_mgf upgrades the real-MGF match to a complex-MGF match on ℂ, Measure.ext_of_complexMGF_eq reads off the law). No adapted-integrand Itô formula required. This is the constant-θ, marginal half of the distributional Girsanov theorem — the general bounded-θ full Q-Brownian (gir-thm-9.1.8) remains reduced_core: its increment independence needs a conditional-MGF ⟹ independence result absent from Mathlib at the pin. Axioms-clean."
+      }
     }
   ]
 }

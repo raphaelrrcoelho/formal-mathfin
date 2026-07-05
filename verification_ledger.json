@@ -220,6 +220,13 @@
       "input_hash": "11c08d0ca89aa9039401411fa946c968e67f313383cd406a8b46947c5d37a713",
       "verified_at_commit": "eb0aee9"
     },
+    "gir-const-theta-marginal": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-05",
+      "elapsed_s": 61.4,
+      "input_hash": "fcd75ddff5b6410a0b5c661facbab49d51f32d4337cc0130aff3cce41c077ba5",
+      "verified_at_commit": "19d0755"
+    },
     "gir-continuous-ftap": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-04",
