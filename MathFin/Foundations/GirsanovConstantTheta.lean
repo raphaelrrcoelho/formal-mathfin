@@ -193,4 +193,64 @@ theorem girsanovMeasure_isProbabilityMeasure
       _ = 1 := hZ0
   exact (isEquivProbMeasure_withDensity P hgmeas hgpos hgint hgsum).1
 
+/-- **The `Q`-moment-generating function of the drift-corrected process is the standard
+Brownian one.** `𝔼_Q[exp(a·(X_t + θ t))] = exp(½ t a²)` for every `a`, i.e. `B^θ_t = X_t +
+θ t` has the MGF of `N(0, t)` under the constant-θ Girsanov measure `Q`. Read off from
+`expBtheta_isQMartingale` at `s = 0`: the `Q`-integral of `exp(a·B^θ_t − ½a² t)` equals its
+value at `t = 0`, which is `exp(a·X_0) = 1` a.s. (since `X_0 = 0`), so
+`𝔼_Q[exp(a·B^θ_t)] = exp(½a² t)`. -/
+theorem mgf_Btheta_eq
+    {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
+    {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]
+    {X : ℝ≥0 → Ω → ℝ} [hX : IsFilteredPreBrownian X 𝓕 P]
+    (θ : ℝ) (T : ℝ≥0) {t : ℝ≥0} (htT : t ≤ T) (a : ℝ) :
+    ∫ ω, Real.exp (a * (X t ω + θ * (t : ℝ)))
+        ∂(P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)))
+      = Real.exp ((t : ℝ) * a ^ 2 / 2) := by
+  set Q := P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))
+    with hQdef
+  haveI hQprob : IsProbabilityMeasure Q :=
+    girsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) θ T
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦
+    ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  -- `X_0 = 0` a.s. `P`, hence a.s. `Q` (`Q ≪ P`).
+  have hX0P : P {ω | X 0 ω ≠ 0} = 0 := by
+    have hmap := Measure.map_apply (μ := P) (hmeasX 0) (measurableSet_singleton (0 : ℝ)).compl
+    rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
+        Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
+    have hpre : X 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | X 0 ω ≠ 0} := by ext ω; simp [Set.mem_preimage]
+    rw [hpre] at hmap
+    simpa using hmap.symm
+  have hQP : Q ≪ P := by rw [hQdef]; exact withDensity_absolutelyContinuous _ _
+  have hX0Q : ∀ᵐ ω ∂Q, X 0 ω = 0 := hQP.ae_le (ae_iff.mpr hX0P)
+  -- The martingale identity at `s = 0`, `A = univ`.
+  have hbrick := expBtheta_isQMartingale (P := P) (𝓕 := 𝓕) (X := X) θ a T (s := 0) zero_le htT
+    (A := Set.univ) MeasurableSet.univ
+  simp only [Measure.restrict_univ] at hbrick
+  rw [← hQdef] at hbrick
+  -- RHS collapses: `exp(a(X_0 + 0) − 0) = 1` a.s. `Q`, so `∫ = 1`.
+  have hRHS : ∫ ω, Real.exp (a * (X 0 ω + θ * ((0 : ℝ≥0) : ℝ)) - a ^ 2 * ((0 : ℝ≥0) : ℝ) / 2) ∂Q
+      = 1 := by
+    have hae : (fun ω ↦ Real.exp (a * (X 0 ω + θ * ((0 : ℝ≥0) : ℝ)) - a ^ 2 * ((0 : ℝ≥0) : ℝ) / 2))
+        =ᵐ[Q] fun _ ↦ (1 : ℝ) := by
+      filter_upwards [hX0Q] with ω hω; simp [hω]
+    rw [integral_congr_ae hae]; simp
+  rw [hRHS] at hbrick
+  -- LHS: pull out the deterministic `exp(−½a² t)` factor.
+  have hLHS : ∫ ω, Real.exp (a * (X t ω + θ * (t : ℝ)) - a ^ 2 * (t : ℝ) / 2) ∂Q
+      = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) *
+        ∫ ω, Real.exp (a * (X t ω + θ * (t : ℝ))) ∂Q := by
+    rw [← integral_const_mul]
+    refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
+    show Real.exp (a * (X t ω + θ * (t : ℝ)) - a ^ 2 * (t : ℝ) / 2)
+        = Real.exp (-(a ^ 2 * (t : ℝ) / 2)) * Real.exp (a * (X t ω + θ * (t : ℝ)))
+    rw [show a * (X t ω + θ * (t : ℝ)) - a ^ 2 * (t : ℝ) / 2
+          = -(a ^ 2 * (t : ℝ) / 2) + a * (X t ω + θ * (t : ℝ)) from by ring, Real.exp_add]
+  rw [hLHS, mul_comm] at hbrick
+  -- Solve for the target MGF.
+  have hfac : Real.exp (-(a ^ 2 * (t : ℝ) / 2)) ≠ 0 := (Real.exp_pos _).ne'
+  rw [(mul_eq_one_iff_eq_inv₀ hfac).mp hbrick, ← Real.exp_neg]
+  congr 1
+  ring
+
 end MathFin
