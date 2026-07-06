@@ -23,8 +23,12 @@ i.e. `Z·D` is *another* simple Doléans exponential — **exactly** the trick p
 
 ## Brick sequence (one coherent green milestone per session)
 
-### Brick α1 — conditional single-cell Wald with a **random adapted multiplier** (THIS SESSION)
+### Brick α1 — conditional single-cell Wald with a **random adapted multiplier** ✅ DONE (2026-07-06)
 `MathFin/Foundations/SimpleDoleansExponential.lean` (new). The one genuinely new estimate.
+**Status: LANDED green + axioms-clean** (`condExp_exp_adapted_mul_increment`, commit `55242cf`). The
+freezing went through the joint-law factorization of `(c, 𝟙_A)` against the independent increment
+(`indep_of_indep_of_le_right` + `indepFun_iff_map_prod_eq_prod_map_map`) then `integral_prod`. Reusable
+private helper `condExp_exp_adapted_freeze_setIntegral` (general in `Δ, v`).
 **Statement.** For `c : Ω → ℝ` with `StronglyMeasurable[𝓕 r] c`, `∀ ω, |c ω| ≤ K`, and `r ≤ t`:
 `P[fun ω ↦ exp(c ω · (X t ω − X r ω)) | 𝓕 r] =ᵐ[P] fun ω ↦ exp(½·(c ω)²·(t − r))`
 (equivalently the normalized `exp(cΔ − ½c²(t−r))` has `condExp = 1`).
