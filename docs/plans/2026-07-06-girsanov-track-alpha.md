@@ -86,14 +86,33 @@ duplicated chain deleted; both corpus benchmarks (`gir-const-theta-marginal`, `g
 re-verified green; AxiomAuditGen byte-fresh (proof-heads unchanged); gates 19/19; `lake build` 8848
 green. This validates the abstraction against a known-good instance before simple-θ is built on it.
 
-**Remaining α3 (the simple-θ instance):** in `GirsanovSimpleTheta.lean`, define
-`B^θ_t = X_t + Σ c_i (s_{i+1}∧t − s_i∧t)`; the **spine identity** `E^{−c}_t · exp(a·B^θ_t − ½a²t) =
-E^{a−c}_t` (per-cell exponent `(a−c_i)ΔX_i − ½(a−c_i)²Δτ_i`; telescoping `a·X_t = Σ a·ΔX_i`,
-`t = Σ Δτ_i` needs partition-cover `s_0 = 0`, `s_N ≥ t`, `X_0 = 0`); then `exp(a·B^θ − ½a²t)` is a
-`Q`-martingale via `changeOfMeasure_setIntegral_eq` (Bayes) fed the two α2 simple-Doléans martingales;
-package as `IsExpQMartingale` and apply `isQBrownianMotion_of_expMartingale` (**no charFun chain to
-re-derive** — that is the whole payoff of the abstraction). Deliverable: `Btheta_simple_isQBrownianMotion`
-+ **`full` benchmark** `gir-simple-adapted`.
+**α3 P-side spine ✅ DONE (2026-07-06).** In `GirsanovSimpleTheta.lean`:
+- ✅ `simpleDrift s c N t = Σ_i c_i·(s_{i+1}∧t − s_i∧t)` (so `B^θ_t = X_t + simpleDrift_t`) +
+  `stronglyMeasurable_simpleDrift` (`𝓕`-adaptedness: per cell, either `s_i ≤ u` so `c_i` is
+  `𝓕_u`-measurable, or `u ≤ s_i` so the clamped interval is `0`).
+- ✅ `simpleDoleansExp_eq_exp_sum` — log-form `E^d_t = exp(Σ_i [d_i·ΔX_i − ½d_i²·Δτ_i])`, so the
+  spine is one exponent identity (`Real.exp_add` + `Finset.sum_range_succ`).
+- ✅ **`simple_spine`** — the tilted-density identity `E^{−c}_t · exp(a·B^θ_t − ½a²t) =
+  exp(a·X_0)·E^{a−c}_t` (per-cell `(−c_i)ΔX_i − ½c_i²Δτ_i` and `a·ΔX_i + a·c_i·Δτ_i − ½a²Δτ_i`
+  combine to `(a−c_i)ΔX_i − ½(a−c_i)²Δτ_i`). Telescoping via `Finset.sum_range_sub` under the cover
+  `s_0 = 0`, `t ≤ T ≤ s_N`; the algebra closes by `linear_combination`. The genuinely intricate
+  brick, now verified.
+- ✅ **`simple_spine_ae`** — the a.e. form `E^{−c}·exp(a·B^θ − ½a²·) =ᵐ[P] E^{a−c}` (since
+  `X_0 = 0` a.e.), the exact analogue of `Wald(−θ)·Wald(a) = Wald(a−θ)` in the constant-θ file.
+
+**Remaining α3 (the Q-side assembly):** feed the spine to `changeOfMeasure_setIntegral_eq` (Bayes) so
+`exp(a·B^θ − ½a²·)` is a `Q`-martingale; package `IsExpQMartingale` and apply
+`isQBrownianMotion_of_expMartingale` (**no charFun chain** — the abstraction's payoff). The engine
+needs two things not yet built, both genuinely harder than the constant-θ analogues:
+(1) **`hmix`** — `Integrable (exp(a·B^θ_u − ½a²u) · Z_T)`, i.e. an *N-fold* product of correlated
+Gaussian exponentials (const-θ had a clean 2-term AM–GM; here it needs a multi-time exponential
+integrability, e.g. dominate each random `c_i`-cell by two fixed-`±K` Gaussian-MGF cells and induct
+with pairwise independence, or a nonneg martingale pull-out `∫ D_u Z_T = ∫ D_u Z_u` via simple-function
+approximation);
+(2) a **full `Z·D` martingale** — `Z·D =ᵐ E^{a−c}` only on `[0,T]` (beyond `s_N` they diverge by a
+forward Wald factor `exp(a(X_u − X_{s_N}) − ½a²(u − s_N))`), so the engine's full-martingale hypothesis
+needs the beyond-`s_N` Wald handling (or a `[0,T]`-restricted engine variant).
+Deliverable: `Btheta_simple_isQBrownianMotion` + **`full` benchmark** `gir-simple-adapted`.
 
 ### Brick α4 — continuous bounded adapted θ (the hard analytic brick; may be several sessions)
 Approximate continuous bounded adapted `θ` by simple `θ⁽ⁿ⁾` in `L²(dt×dP)`; `E^{−c⁽ⁿ⁾}_T → Z_T` in `L¹(P)` (bounded θ ⟹ uniform `L²` control); the charFun identity for `B^θ` increments under `Q⁽ⁿ⁾` passes to the limit. Needs the stochastic-integral density `∫θdB` as the `L²` limit of `Σ c⁽ⁿ⁾ᵢΔXᵢ` (the tower's `itoIntegralCLM_T`, with the σ-realization half of SP0 — the sub-interval increment API is **not** needed). Deliverable: `Btheta_isQBrownianMotion_adapted`.
