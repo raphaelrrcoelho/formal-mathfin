@@ -37,7 +37,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {X : ℝ≥0 → Ω → ℝ}
 
 /-- Every cell factor is `1` at time `0` (both clamped endpoints collapse to `0`). -/
 lemma cellExp_zero (a b : ℝ≥0) (c : Ω → ℝ) (ω : Ω) : cellExp (X := X) a b c 0 ω = 1 := by
-  rw [cellExp, min_eq_right (zero_le' : (0:ℝ≥0) ≤ b), min_eq_right (zero_le' : (0:ℝ≥0) ≤ a)]; simp
+  rw [cellExp, min_eq_right (zero_le : (0:ℝ≥0) ≤ b), min_eq_right (zero_le : (0:ℝ≥0) ≤ a)]; simp
 
 /-- The simple Doléans exponential is `1` at time `0`. -/
 lemma simpleDoleansExp_zero (s : ℕ → ℝ≥0) (d : ℕ → Ω → ℝ) (N : ℕ) (ω : Ω) :
@@ -68,7 +68,7 @@ theorem simpleDoleansExp_integral_eq_one (s : ℕ → ℝ≥0) (hs : Monotone s)
     (hd_bdd : ∀ i ω, |d i ω| ≤ K) (N : ℕ) (T : ℝ≥0) :
     ∫ ω, simpleDoleansExp (X := X) s d N T ω ∂P = 1 := by
   have hmart := simpleDoleansExp_isMartingale (X := X) (P := P) s hs d hd hd_bdd N
-  have hmean := hmart.setIntegral_eq (i := 0) (j := T) (zero_le' : (0:ℝ≥0) ≤ T) (s := Set.univ) MeasurableSet.univ
+  have hmean := hmart.setIntegral_eq (i := 0) (j := T) (zero_le : (0:ℝ≥0) ≤ T) (s := Set.univ) MeasurableSet.univ
   simp only [Measure.restrict_univ] at hmean
   calc ∫ ω, simpleDoleansExp (X := X) s d N T ω ∂P
       = ∫ ω, simpleDoleansExp (X := X) s d N 0 ω ∂P := hmean.symm

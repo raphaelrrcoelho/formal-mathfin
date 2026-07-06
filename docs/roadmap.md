@@ -38,10 +38,13 @@ breadth at this stage, and what the concrete next round would look like.
 > `full`; marginal `gir-const-theta-marginal`, `full`). Crucially this needs **no** adapted-integrand Itô
 > formula and **no** "conditional-MGF ⟹ independence" lemma (a presumed Mathlib gap — only the reverse
 > `condExp_indep_eq` exists): the independence is reached via `indepFun_iff_charFun_prod`, factorising the
-> Gaussian joint characteristic function through the linear-combination law
-> `Btheta_linComb_map_eq_gaussianReal` (whose `N(0, w₁²Δ₁+w₂²Δ₂)` law comes from the joint-MGF
-> factorisation `Btheta_increments_joint_mgf`, a `condExp_mul` pull-out on `condExp_Btheta_increment`). All
-> on the existing Bayes engine + Wald exponentials + Mathlib's characteristic-function machinery. What
+> Gaussian joint characteristic function through the Gaussian law of every linear combination of the
+> increments (from the joint-MGF factorisation, a `condExp_mul` pull-out). All
+> on the existing Bayes engine + Wald exponentials + Mathlib's characteristic-function machinery.
+> **Refactored 2026-07-06:** this ten-lemma characteristic-function chain is now the reusable,
+> process-agnostic `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` — const-θ
+> supplies only its exponential martingale (`expBtheta_isQMartingale`, as `IsExpQMartingale`) and
+> instantiates it; the simple-/continuous-θ Route-α bricks reuse the same seam. What
 > stays `reduced_core` is only the general bounded-*adapted*-θ case (`gir-thm-9.1.8`), whose path-dependent
 > drift `θ_s` still needs the adapted-integrand Itô formula. See
 > [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).

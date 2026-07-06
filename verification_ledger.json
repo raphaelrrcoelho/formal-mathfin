@@ -222,17 +222,17 @@
     },
     "gir-const-theta-marginal": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-07-05",
-      "elapsed_s": 130.1,
-      "input_hash": "28896b7e8a9de6d263b32faa0eaf5f612576c9b70fac2f23eb314bb2ea9b1138",
-      "verified_at_commit": "b031232"
+      "date": "2026-07-06",
+      "elapsed_s": 143.2,
+      "input_hash": "68894943f5aae7e5cd6a21acc44718d0328fa1a6d019e0e48eece8a56d1b2d25",
+      "verified_at_commit": "d1380bc"
     },
     "gir-const-theta-qbm": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-07-05",
-      "elapsed_s": 68.1,
-      "input_hash": "b79f8024c88b5fe3e110fc81922b506d159220193db52cb0d42233d6d479c2a5",
-      "verified_at_commit": "b031232"
+      "date": "2026-07-06",
+      "elapsed_s": 76.2,
+      "input_hash": "a297bb92fade303c05e6dfd414336a1c7bc2e14c75d86587e157e7b5c947cc9d",
+      "verified_at_commit": "d1380bc"
     },
     "gir-continuous-ftap": {
       "benchmark_file": "girsanov_finance.json",

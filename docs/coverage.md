@@ -119,14 +119,19 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > `Foundations/GirsanovConstantTheta.Btheta_isQBrownianMotion` proves the drift-corrected
 > `B^θ_t = X_t + θ t` is a genuine `Q`-Brownian motion — zero start, Gaussian increments
 > `B^θ_t − B^θ_s ~ N(0, t−s)`, **and** independence of disjoint increments (corpus
-> `gir-const-theta-qbm`, `full`; the marginal law is `gir-const-theta-marginal`, `full`). The
-> increment *independence*, previously flagged as a Mathlib gap ("conditional-MGF ⟹ independence"
-> is absent — only the reverse `condExp_indep_eq` exists), is reached WITHOUT that lemma: via
-> Mathlib's `indepFun_iff_charFun_prod`, the joint characteristic function at `w = (w₁, w₂)` is the
-> charFun-at-`1` of the Gaussian linear combination `w₁·I₁ + w₂·I₂` (`Btheta_linComb_map_eq_gaussianReal`,
-> whose `N(0, w₁²Δ₁+w₂²Δ₂)` law comes from the joint-MGF factorisation `Btheta_increments_joint_mgf`),
-> so it factors into the two marginal Gaussian characteristic functions (`charFun_gaussianReal`) — no
-> adapted-integrand Itô formula. **Open (still `reduced_core`):** the *general bounded-adapted*-`θ`
+> `gir-const-theta-qbm`, `full`; the marginal law is `gir-const-theta-marginal`, `full`). All three
+> properties are now read off in **one** application of the process-agnostic exponential
+> characterization `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` (2026-07-06):
+> the const-θ exponential martingale `exp(a·B^θ − ½a²·)` (`expBtheta_isQMartingale`, from the Bayes
+> engine + two Wald exponentials) is packaged as `IsExpQMartingale`, and the characterization derives
+> the marginal law, the increment law, and independence — the same reusable module now scheduled to
+> power the simple-/continuous-θ cases (Route α). The increment *independence*, previously flagged as
+> a Mathlib gap ("conditional-MGF ⟹ independence" is absent — only the reverse `condExp_indep_eq`
+> exists), is reached WITHOUT that lemma: via Mathlib's `indepFun_iff_charFun_prod`, the joint
+> characteristic function at `w = (w₁, w₂)` is the charFun-at-`1` of the Gaussian law of the linear
+> combination `w₁·I₁ + w₂·I₂` (from the joint-MGF factorisation — a
+> `condExp_mul_of_stronglyMeasurable_left` pull-out), so it factors into the two marginal Gaussian
+> characteristic functions (`charFun_gaussianReal`) — no adapted-integrand Itô formula. **Open (still `reduced_core`):** the *general bounded-adapted*-`θ`
 > Girsanov (`gir-thm-9.1.8`, the drift-corrected `B^θ = B − ∫θ ds` for adapted `θ`) — its adapted
 > drift needs an adapted-integrand Itô formula / pathwise quadratic variation absent from the Itô tower.
 

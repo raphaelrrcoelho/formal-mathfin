@@ -64,15 +64,36 @@ as martingales.
 - ✅ `simpleGirsanovMeasure_isProbabilityMeasure` — `Q = P.withDensity Z_T` is a probability measure
   (via `isEquivProbMeasure_withDensity`, mirroring `girsanovMeasure_isProbabilityMeasure`).
 
-**Remaining α3 (the large part):** define `B^θ_t = X_t + Σ c_i (s_{i+1}∧t − s_i∧t)`; the **spine
-identity** `E^{−c}_t · exp(a·B^θ_t − ½a²t) = E^{a−c}_t` (per-cell exponent `(a−c_i)ΔX_i −
-½(a−c_i)²Δτ_i`; telescoping `a·X_t = Σ a·ΔX_i`, `t = Σ Δτ_i` needs partition-cover `s_0 = 0`,
-`s_N ≥ t`, `X_0 = 0`); then `exp(a·B^θ − ½a²t)` is a `Q`-martingale via `changeOfMeasure_setIntegral_eq`
-(Bayes) fed the two α2 martingales; then **re-derive the constant-θ charFun chain** (`condExp_expBtheta`
-→ `condExp_Btheta_increment` → `Btheta_increment_mgf` → `joint_mgf` → `linComb_gaussian` →
-`indepFun` → `isQBrownianMotion`, ~10 theorems) for simple θ. Deliverable: `Btheta_simple_isQBrownianMotion`
-+ **`full` benchmark** `gir-simple-adapted`. Consider abstracting "∀a `exp(aY−½a²t)` is a Q-mtg ⟹ Y is
-a Q-BM" to reuse the chain for both constant-θ and simple-θ.
+### Brick α3-abstraction — the reusable exponential characterization ✅ DONE (2026-07-06)
+`MathFin/Foundations/ExpMartingaleQBrownian.lean` (new). The ~10-theorem constant-θ charFun chain
+was **not** re-derived for simple θ; instead it was **abstracted once, process-agnostically**. The
+route decision (the plan's "Consider abstracting …" made concrete): factor steps 3–14 of the
+constant-θ file into a single module keyed only on `(Q, 𝓕, Y, T)` + the hypothesis bundle.
+- ✅ `IsExpQMartingale Q 𝓕 Y T` (structure): `Y` adapted, `Y 0 =ᵐ[Q] 0`, and for every `a`
+  `exp(a·Y − ½a²·)` is a `Q`-martingale on `[0,T]` (as the set-integral identity over `𝓕_s`-sets).
+- ✅ `map_eq_gaussianReal_of_expMartingale` (marginal law `N(0,t)`), `increment_map_eq_gaussianReal_of_expMartingale`
+  (increment law `N(0,t−s)`), `increments_indepFun_of_expMartingale` (disjoint increments `Q`-independent,
+  via `indepFun_iff_charFun_prod`), and the packaging `isQBrownianMotion_of_expMartingale` (the triple).
+  The ten intermediate MGF/condExp/joint-MGF/linComb lemmas are `private`. Green, axioms-clean.
+
+**Const-θ refactored onto the abstraction ✅ DONE (2026-07-06).** `GirsanovConstantTheta.lean` keeps
+only the two process-specific results — `expBtheta_isQMartingale` (the exponential martingale, from
+the Bayes engine + two Wald exponentials) and `girsanovMeasure_isProbabilityMeasure` — plus a new
+`isExpQMartingale_Btheta` packaging `B^θ_u = X_u + θ u`; its four public deliverables
+(`Btheta_map_eq_gaussianReal`, `Btheta_increment_map_eq_gaussianReal`, `Btheta_increments_indepFun`,
+`Btheta_isQBrownianMotion`) are now **one-line instances** of the abstraction. ~450 lines of
+duplicated chain deleted; both corpus benchmarks (`gir-const-theta-marginal`, `gir-const-theta-qbm`)
+re-verified green; AxiomAuditGen byte-fresh (proof-heads unchanged); gates 19/19; `lake build` 8848
+green. This validates the abstraction against a known-good instance before simple-θ is built on it.
+
+**Remaining α3 (the simple-θ instance):** in `GirsanovSimpleTheta.lean`, define
+`B^θ_t = X_t + Σ c_i (s_{i+1}∧t − s_i∧t)`; the **spine identity** `E^{−c}_t · exp(a·B^θ_t − ½a²t) =
+E^{a−c}_t` (per-cell exponent `(a−c_i)ΔX_i − ½(a−c_i)²Δτ_i`; telescoping `a·X_t = Σ a·ΔX_i`,
+`t = Σ Δτ_i` needs partition-cover `s_0 = 0`, `s_N ≥ t`, `X_0 = 0`); then `exp(a·B^θ − ½a²t)` is a
+`Q`-martingale via `changeOfMeasure_setIntegral_eq` (Bayes) fed the two α2 simple-Doléans martingales;
+package as `IsExpQMartingale` and apply `isQBrownianMotion_of_expMartingale` (**no charFun chain to
+re-derive** — that is the whole payoff of the abstraction). Deliverable: `Btheta_simple_isQBrownianMotion`
++ **`full` benchmark** `gir-simple-adapted`.
 
 ### Brick α4 — continuous bounded adapted θ (the hard analytic brick; may be several sessions)
 Approximate continuous bounded adapted `θ` by simple `θ⁽ⁿ⁾` in `L²(dt×dP)`; `E^{−c⁽ⁿ⁾}_T → Z_T` in `L¹(P)` (bounded θ ⟹ uniform `L²` control); the charFun identity for `B^θ` increments under `Q⁽ⁿ⁾` passes to the limit. Needs the stochastic-integral density `∫θdB` as the `L²` limit of `Σ c⁽ⁿ⁾ᵢΔXᵢ` (the tower's `itoIntegralCLM_T`, with the σ-realization half of SP0 — the sub-interval increment API is **not** needed). Deliverable: `Btheta_isQBrownianMotion_adapted`.
