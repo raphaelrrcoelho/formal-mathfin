@@ -128,7 +128,8 @@ private lemma condExp_exp_adapted_freeze_setIntegral
   exact integral_congr_ae (Filter.Eventually.of_forall hinner)
 
 variable [SigmaFiniteFiltration P 𝓕] {X : ℝ≥0 → Ω → ℝ}
-  [hX : IsFilteredPreBrownian X 𝓕 P] in
+  [hX : IsFilteredPreBrownian X 𝓕 P]
+
 /-- **Conditional MGF of a Brownian increment against a random adapted multiplier.**
 For `c` `𝓕_r`-measurable and bounded, and `r ≤ t`,
 `𝔼[exp(c·(X_t − X_r)) | 𝓕_r] = exp(½ c² (t − r))` a.e.
@@ -188,5 +189,202 @@ theorem condExp_exp_adapted_mul_increment
     h_meas_diff hΔlaw hindep0 hA
   rw [hv] at hfreeze
   exact hfreeze.symm
+
+/-- **The normalized cell factor conditionally integrates to `1`.** For `c` `𝓕_r`-measurable
+bounded and `r ≤ t`, `𝔼[exp(c·(X_t − X_r) − ½ c² (t − r)) | 𝓕_r] = 1` a.e. — the
+martingale-difference form of `condExp_exp_adapted_mul_increment`, obtained by pulling the
+`𝓕_r`-measurable factor `exp(−½ c² (t − r))` out and collapsing with the conditional MGF. -/
+theorem condExp_expCell_eq_one {c : Ω → ℝ} {r : ℝ≥0}
+    (hc : StronglyMeasurable[(𝓕 r : MeasurableSpace Ω)] c)
+    {K : ℝ} (hK : ∀ ω, |c ω| ≤ K) {t : ℝ≥0} (hrt : r ≤ t) :
+    P[fun ω ↦ Real.exp (c ω * (X t ω - X r ω) - (c ω) ^ 2 * ((t : ℝ) - (r : ℝ)) / 2) |
+        (𝓕 r : MeasurableSpace Ω)] =ᵐ[P] fun _ ↦ (1 : ℝ) := by
+  have hc_meas : Measurable c := (hc.mono (𝓕.le r)).measurable
+  have hXt : Measurable (X t) := ((hX.stronglyAdapted t).mono (𝓕.le t)).measurable
+  have hXr : Measurable (X r) := ((hX.stronglyAdapted r).mono (𝓕.le r)).measurable
+  have h_meas_diff : Measurable (fun ω ↦ X t ω - X r ω) := hXt.sub hXr
+  have hΔlaw : HasLaw (fun ω ↦ X t ω - X r ω) (gaussianReal 0 (nndist (t : ℝ) (r : ℝ))) P :=
+    hX.hasLaw_sub t r
+  have htr : (0 : ℝ) ≤ (t : ℝ) - (r : ℝ) := sub_nonneg.mpr (NNReal.coe_le_coe.mpr hrt)
+  set ft : Ω → ℝ := fun ω ↦ Real.exp (c ω * (X t ω - X r ω)) with hftdef
+  set gr : Ω → ℝ := fun ω ↦ Real.exp (-((c ω) ^ 2 * ((t : ℝ) - (r : ℝ)) / 2)) with hgrdef
+  have hgr_sm : StronglyMeasurable[(𝓕 r : MeasurableSpace Ω)] gr :=
+    Real.continuous_exp.comp_stronglyMeasurable
+      ((by fun_prop : Continuous fun x : ℝ ↦ -(x ^ 2 * ((t : ℝ) - (r : ℝ)) / 2)).comp_stronglyMeasurable
+        hc)
+  -- Domination bound reused for both `ft` and `gr·ft`.
+  have hbnd_int : Integrable (fun ω ↦ Real.exp (K * (X t ω - X r ω))
+      + Real.exp (-K * (X t ω - X r ω))) P :=
+    (integrable_exp_mul_of_hasLaw hΔlaw K).add (integrable_exp_mul_of_hasLaw hΔlaw (-K))
+  have hft_int : Integrable ft P := by
+    refine Integrable.mono' hbnd_int (by fun_prop) (Filter.Eventually.of_forall fun ω ↦ ?_)
+    rw [hftdef, Real.norm_of_nonneg (Real.exp_nonneg _)]
+    obtain ⟨hlo, hhi⟩ := abs_le.mp (hK ω)
+    rcases le_total 0 (X t ω - X r ω) with hΔ | hΔ
+    · exact le_add_of_le_of_nonneg (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right hhi hΔ))
+        (Real.exp_nonneg _)
+    · exact le_add_of_nonneg_of_le (Real.exp_nonneg _)
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonpos_right hlo hΔ))
+  have hprod : (fun ω ↦ Real.exp (c ω * (X t ω - X r ω) - (c ω) ^ 2 * ((t : ℝ) - (r : ℝ)) / 2))
+      = gr * ft := by
+    funext ω; show _ = (gr * ft) ω
+    rw [Pi.mul_apply, hgrdef, hftdef, ← Real.exp_add]; congr 1; ring
+  have hprod_int : Integrable (gr * ft) P := by
+    rw [← hprod]
+    refine Integrable.mono' hbnd_int (by fun_prop) (Filter.Eventually.of_forall fun ω ↦ ?_)
+    rw [Real.norm_of_nonneg (Real.exp_nonneg _)]
+    have hstep : Real.exp (c ω * (X t ω - X r ω) - (c ω) ^ 2 * ((t : ℝ) - (r : ℝ)) / 2)
+        ≤ Real.exp (c ω * (X t ω - X r ω)) :=
+      Real.exp_le_exp.mpr (by nlinarith [sq_nonneg (c ω), htr])
+    refine hstep.trans ?_
+    obtain ⟨hlo, hhi⟩ := abs_le.mp (hK ω)
+    rcases le_total 0 (X t ω - X r ω) with hΔ | hΔ
+    · exact le_add_of_le_of_nonneg (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right hhi hΔ))
+        (Real.exp_nonneg _)
+    · exact le_add_of_nonneg_of_le (Real.exp_nonneg _)
+        (Real.exp_le_exp.mpr (mul_le_mul_of_nonpos_right hlo hΔ))
+  rw [hprod]
+  have hpull := condExp_mul_of_stronglyMeasurable_left (m := (𝓕 r : MeasurableSpace Ω))
+    hgr_sm hprod_int hft_int
+  have hcond := condExp_exp_adapted_mul_increment (P := P) (𝓕 := 𝓕) (X := X) hc hK hrt
+  filter_upwards [hpull, hcond] with ω hp hc'
+  rw [hp, Pi.mul_apply,
+    show (P[ft | (𝓕 r : MeasurableSpace Ω)]) ω = Real.exp ((c ω) ^ 2 * ((t : ℝ) - (r : ℝ)) / 2)
+      from hc', hgrdef, ← Real.exp_add, neg_add_cancel, Real.exp_zero]
+
+/-- **The single-cell Doléans exponential over `(a,b]`, clamped to `[0,t]`.** For a multiplier
+`c`, `cellExp a b c t = exp(c·(X_{b∧t} − X_{a∧t}) − ½ c² (b∧t − a∧t))`: it is `1` before `a`,
+the running Wald exponential `exp(c(X_t − X_a) − ½c²(t−a))` inside `[a,b]`, and frozen at its
+`b`-value after `b`. -/
+noncomputable def cellExp (a b : ℝ≥0) (c : Ω → ℝ) (t : ℝ≥0) (ω : Ω) : ℝ :=
+  Real.exp (c ω * (X (min b t) ω - X (min a t) ω)
+    - (c ω) ^ 2 * (NNReal.toReal (min b t) - NNReal.toReal (min a t)) / 2)
+
+lemma cellExp_of_le_left {a b : ℝ≥0} (hab : a ≤ b) {c : Ω → ℝ} {t : ℝ≥0}
+    (ht : t ≤ a) (ω : Ω) : cellExp (X := X) a b c t ω = 1 := by
+  rw [cellExp, min_eq_right (ht.trans hab), min_eq_right ht]; simp
+
+lemma cellExp_of_mem {a b : ℝ≥0} {c : Ω → ℝ} {t : ℝ≥0} (hat : a ≤ t) (htb : t ≤ b) (ω : Ω) :
+    cellExp (X := X) a b c t ω
+      = Real.exp (c ω * (X t ω - X a ω) - (c ω) ^ 2 * ((t : ℝ) - (a : ℝ)) / 2) := by
+  rw [cellExp, min_eq_right htb, min_eq_left hat]
+
+lemma cellExp_of_ge_right {a b : ℝ≥0} (hab : a ≤ b) {c : Ω → ℝ} {t : ℝ≥0} (hbt : b ≤ t) (ω : Ω) :
+    cellExp (X := X) a b c t ω
+      = Real.exp (c ω * (X b ω - X a ω) - (c ω) ^ 2 * ((b : ℝ) - (a : ℝ)) / 2) := by
+  rw [cellExp, min_eq_left hbt, min_eq_left (hab.trans hbt)]
+
+include hX in
+/-- Integrability of an increment cell factor `exp(c·(X_q − X_p) − ½c²(q−p))` for a bounded
+multiplier and `p ≤ q` — the increment `X_q − X_p` is Gaussian, dominated by two Gaussian MGFs. -/
+private lemma integrable_cellIncrement {c : Ω → ℝ} (hc_meas : Measurable c) {K : ℝ}
+    (hK : ∀ ω, |c ω| ≤ K) (p q : ℝ≥0) (hpq : p ≤ q) :
+    Integrable (fun ω ↦ Real.exp (c ω * (X q ω - X p ω)
+      - (c ω) ^ 2 * (NNReal.toReal q - NNReal.toReal p) / 2)) P := by
+  have hXq : Measurable (X q) := ((hX.stronglyAdapted q).mono (𝓕.le q)).measurable
+  have hXp : Measurable (X p) := ((hX.stronglyAdapted p).mono (𝓕.le p)).measurable
+  have hΔlaw : HasLaw (fun ω ↦ X q ω - X p ω) (gaussianReal 0 (nndist (q : ℝ) (p : ℝ))) P :=
+    hX.hasLaw_sub q p
+  have hpqr : (0 : ℝ) ≤ NNReal.toReal q - NNReal.toReal p := sub_nonneg.mpr (NNReal.coe_le_coe.mpr hpq)
+  refine Integrable.mono'
+    ((integrable_exp_mul_of_hasLaw hΔlaw K).add (integrable_exp_mul_of_hasLaw hΔlaw (-K)))
+    (by fun_prop) (Filter.Eventually.of_forall fun ω ↦ ?_)
+  rw [Real.norm_of_nonneg (Real.exp_nonneg _)]
+  have hstep : Real.exp (c ω * (X q ω - X p ω) - (c ω) ^ 2 * (NNReal.toReal q - NNReal.toReal p) / 2)
+      ≤ Real.exp (c ω * (X q ω - X p ω)) :=
+    Real.exp_le_exp.mpr (by nlinarith [sq_nonneg (c ω), hpqr])
+  refine hstep.trans ?_
+  obtain ⟨hlo, hhi⟩ := abs_le.mp (hK ω)
+  rcases le_total 0 (X q ω - X p ω) with hΔ | hΔ
+  · exact le_add_of_le_of_nonneg (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right hhi hΔ))
+      (Real.exp_nonneg _)
+  · exact le_add_of_nonneg_of_le (Real.exp_nonneg _)
+      (Real.exp_le_exp.mpr (mul_le_mul_of_nonpos_right hlo hΔ))
+
+include hX in
+/-- **The single-cell Doléans exponential over `(a,b]` is a `P`-martingale.** For `a ≤ b` and a
+bounded `𝓕_a`-measurable multiplier `c`, `t ↦ cellExp a b c t` is a martingale w.r.t. `𝓕`.
+
+`cellExp` is `1` before `a`, the running Wald exponential inside `[a,b]`, and frozen after `b`.
+The conditional expectation splits into four regions of `(s,t)` relative to `[a,b]`, each closing
+by `condExp_expCell_eq_one` (the random-multiplier freezing) — through the tower `𝓕_s ⊆ 𝓕_a`
+when `s ≤ a ≤ t`, and by pulling the `𝓕_s`-measurable `cellExp_s` out when `a ≤ s`. -/
+theorem cellExp_isMartingale {a b : ℝ≥0} (hab : a ≤ b) {c : Ω → ℝ}
+    (hc : StronglyMeasurable[(𝓕 a : MeasurableSpace Ω)] c) {K : ℝ} (hK : ∀ ω, |c ω| ≤ K) :
+    Martingale (fun t ω ↦ cellExp (X := X) a b c t ω) 𝓕 P := by
+  have hc_meas : Measurable c := (hc.mono (𝓕.le a)).measurable
+  -- Integrability at every time, from the increment cell helper.
+  have hcell_int : ∀ u : ℝ≥0, Integrable (fun ω ↦ cellExp (X := X) a b c u ω) P := fun u ↦
+    integrable_cellIncrement (𝓕 := 𝓕) hc_meas hK (min a u) (min b u) (min_le_min_right u hab)
+  -- Adaptedness.
+  have hadapt : ∀ u : ℝ≥0, StronglyMeasurable[(𝓕 u : MeasurableSpace Ω)]
+      (fun ω ↦ cellExp (X := X) a b c u ω) := by
+    intro u
+    rcases le_total a u with hau | hua
+    · have hcu : StronglyMeasurable[(𝓕 u : MeasurableSpace Ω)] c := hc.mono (𝓕.mono hau)
+      have hXbu : StronglyMeasurable[(𝓕 u : MeasurableSpace Ω)] (X (min b u)) :=
+        (hX.stronglyAdapted (min b u)).mono (𝓕.mono (min_le_right b u))
+      have hXau : StronglyMeasurable[(𝓕 u : MeasurableSpace Ω)] (X (min a u)) :=
+        (hX.stronglyAdapted (min a u)).mono (𝓕.mono (min_le_right a u))
+      exact Real.continuous_exp.comp_stronglyMeasurable ((hcu.mul (hXbu.sub hXau)).sub
+        ((((continuous_pow 2).comp_stronglyMeasurable hcu).mul stronglyMeasurable_const).div
+          stronglyMeasurable_const))
+    · rw [funext fun ω ↦ cellExp_of_le_left hab hua ω]; exact stronglyMeasurable_const
+  refine ⟨hadapt, fun s t hst ↦ ?_⟩
+  show P[fun ω ↦ cellExp (X := X) a b c t ω | (𝓕 s : MeasurableSpace Ω)]
+    =ᵐ[P] fun ω ↦ cellExp (X := X) a b c s ω
+  rcases le_total t a with hta | hta
+  · -- (A) `t ≤ a`: both `1`.
+    rw [funext fun ω ↦ cellExp_of_le_left hab hta ω,
+      funext fun ω ↦ cellExp_of_le_left hab (hst.trans hta) ω]
+    exact (condExp_const (𝓕.le s) (1 : ℝ)).eventuallyEq
+  rcases le_total b s with hbs | hbs
+  · -- (B) `b ≤ s`: both frozen at the `b`-value.
+    have hsm : StronglyMeasurable[(𝓕 s : MeasurableSpace Ω)]
+        (fun ω ↦ Real.exp (c ω * (X b ω - X a ω) - (c ω) ^ 2 * ((b : ℝ) - (a : ℝ)) / 2)) := by
+      have hcs : StronglyMeasurable[(𝓕 s : MeasurableSpace Ω)] c := hc.mono (𝓕.mono (hab.trans hbs))
+      have hXbs : StronglyMeasurable[(𝓕 s : MeasurableSpace Ω)] (X b) :=
+        (hX.stronglyAdapted b).mono (𝓕.mono hbs)
+      have hXas : StronglyMeasurable[(𝓕 s : MeasurableSpace Ω)] (X a) :=
+        (hX.stronglyAdapted a).mono (𝓕.mono (hab.trans hbs))
+      exact Real.continuous_exp.comp_stronglyMeasurable ((hcs.mul (hXbs.sub hXas)).sub
+        ((((continuous_pow 2).comp_stronglyMeasurable hcs).mul stronglyMeasurable_const).div
+          stronglyMeasurable_const))
+    have hfr : (fun ω ↦ cellExp (X := X) a b c t ω)
+        = fun ω ↦ Real.exp (c ω * (X b ω - X a ω) - (c ω) ^ 2 * ((b : ℝ) - (a : ℝ)) / 2) :=
+      funext fun ω ↦ cellExp_of_ge_right hab (hbs.trans hst) ω
+    rw [hfr, funext fun ω ↦ cellExp_of_ge_right hab hbs ω]
+    exact (condExp_of_stronglyMeasurable (𝓕.le s) hsm (hfr ▸ hcell_int t)).eventuallyEq
+  rcases le_total s a with hsa | hsa
+  · -- (C) `s ≤ a ≤ t`: `cellExp_s = 1`, tower through `𝓕_a`.
+    have hEa : P[(fun ω ↦ cellExp (X := X) a b c t ω) | (𝓕 a : MeasurableSpace Ω)]
+        =ᵐ[P] fun _ ↦ (1 : ℝ) := by
+      rw [funext fun ω ↦ show cellExp (X := X) a b c t ω
+          = Real.exp (c ω * (X (min b t) ω - X a ω)
+            - (c ω) ^ 2 * (NNReal.toReal (min b t) - NNReal.toReal a) / 2) by
+        rw [cellExp, min_eq_left hta]]
+      exact condExp_expCell_eq_one hc hK (le_min hab hta)
+    rw [funext fun ω ↦ cellExp_of_le_left hab hsa ω]
+    refine (condExp_condExp_of_le (𝓕.mono hsa) (𝓕.le a)).symm.trans ?_
+    exact (condExp_congr_ae hEa).trans (condExp_const (𝓕.le s) (1 : ℝ)).eventuallyEq
+  · -- (D) `a ≤ s ≤ b`: pull out the `𝓕_s`-measurable `cellExp_s`, freeze the `(s, b∧t]` increment.
+    have hcs : StronglyMeasurable[(𝓕 s : MeasurableSpace Ω)] c := hc.mono (𝓕.mono hsa)
+    have hsβ : s ≤ min b t := le_min hbs hst
+    have hfactor : (fun ω ↦ cellExp (X := X) a b c t ω)
+        = (fun ω ↦ cellExp (X := X) a b c s ω)
+          * fun ω ↦ Real.exp (c ω * (X (min b t) ω - X s ω)
+            - (c ω) ^ 2 * (NNReal.toReal (min b t) - NNReal.toReal s) / 2) := by
+      funext ω
+      simp only [Pi.mul_apply]
+      rw [cellExp, min_eq_left hta, cellExp_of_mem hsa hbs ω, ← Real.exp_add]
+      congr 1; ring
+    rw [hfactor]
+    have hpull := condExp_mul_of_stronglyMeasurable_left (m := (𝓕 s : MeasurableSpace Ω))
+      (hadapt s) (hfactor ▸ hcell_int t) (integrable_cellIncrement (𝓕 := 𝓕) hc_meas hK s (min b t) hsβ)
+    refine hpull.trans ?_
+    filter_upwards [condExp_expCell_eq_one (P := P) (𝓕 := 𝓕) (X := X) hcs hK hsβ] with ω hg
+    rw [Pi.mul_apply, show (P[(fun ω ↦ Real.exp (c ω * (X (min b t) ω - X s ω)
+        - (c ω) ^ 2 * (NNReal.toReal (min b t) - NNReal.toReal s) / 2)) |
+        (𝓕 s : MeasurableSpace Ω)]) ω = 1 from hg, mul_one]
 
 end MathFin
