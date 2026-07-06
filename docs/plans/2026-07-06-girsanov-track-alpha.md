@@ -35,8 +35,23 @@ private helper `condExp_exp_adapted_freeze_setIntegral` (general in `Δ, v`).
 **Proof.** `ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le r)`: RHS is `𝓕_r`-measurable (✓, `c` is); LHS integrable (bounded `c` + increment Gaussian-MGF, AM–GM domination as in `condExp_Btheta_increment`); for `A ∈ 𝓕_r`, `∫_A exp(cΔ) = ∫_A exp(½c²(t−r))`. The set-integral equality is the **freezing**: `Δ = X_t − X_r ⊥ 𝓕_r` (`hX.indep`), so the joint law of `Y := (A.indicator 1, c) ⊔`… factorizes — `P.map (fun ω ↦ (c ω, Δ ω)) = (P.map c).prod (P.map Δ)` (`IndepFun.map_prod_eq_prod` / `indepFun_iff_measure_inter_preimage_eq_mul`), then `integral_prod` (Fubini) freezes `c` and the inner `∫ exp(c·z) dN(0,t−r) = exp(½c²(t−r))` is `integral_exp_mul_gaussianReal_zero`. Alternative if Fubini plumbing fights back: approximate `c` by `𝓕_r`-simple functions, apply the constant-multiplier `condExp_func_increment` (via `exp(aⱼ·)`) cellwise, pass to the L¹ limit.
 **Deliverable.** `condExp_exp_adapted_mul_increment` green (0 sorries). Foundations infra — no benchmark entry yet.
 
-### Brick α2 — `E^d` is a P-martingale (next session)
-Same file. Define `simpleDoleansExp` (the running `E^d_t`) as a clean function of the partition + `d`. Telescope: `E[E^d_{s_{i+1}} | 𝓕_{s_i}] = E^d_{s_i}` from α1 (the `(s_i,s_{i+1}]` factor conditionally integrates to 1, the rest is `𝓕_{s_i}`-measurable, pulled out by `condExp_mul_of_stronglyMeasurable_left`). Handle the partial last cell for continuous `t`. Deliverable: `simpleDoleansExp_isMartingale`.
+### Brick α2 — `E^d` is a P-martingale
+Same file (`SimpleDoleansExponential.lean`). **CORE DONE (2026-07-06, commit `082e677`).**
+- ✅ `condExp_expCell_eq_one` — normalized freezing corollary `E[exp(cΔ − ½c²(t−r))|𝓕_r] = 1`.
+- ✅ `cellExp a b c t = exp(c(X_{b∧t} − X_{a∧t}) − ½c²(b∧t − a∧t))` + region lemmas (`_of_le_left`,
+  `_of_mem`, `_of_ge_right`) + `integrable_cellIncrement`.
+- ✅ **`cellExp_isMartingale`** — the single-cell random-multiplier Wald martingale, via a
+  4-region conditional-expectation argument (tower `𝓕_s ⊆ 𝓕_a` when `s ≤ a ≤ t`; pull-out of the
+  `𝓕_s`-measurable `cellExp_s` when `a ≤ s`). axioms-clean.
+
+**Remaining α2b — the N-cell product assembly** (next session): define `simpleDoleansExp` = the
+running product `∏_i cellExp (s i) (s (i+1)) (d i) t`; prove `simpleDoleansExp_isMartingale` by
+induction on the number of cells with the invariant "martingale **frozen after** `s_N`", each step
+appending one cell via a `mul_cellExp_isMartingale` lemma (M frozen after `p` × `cellExp p q c` is a
+martingale frozen after `q`). Cross-cell integrability: `iIndepFun.integrable_exp_mul_sum`
+(Moments/Basic.lean:346) / `IndepFun.integrable_mul` (Independence/Integration.lean:358) — needs
+**mutual** independence of increments over disjoint cells (verify the BM package exposes it; else build
+from `hX.indep`). This is the last piece before α3 can consume `E^{−c}`/`E^{a−c}` as martingales.
 
 ### Brick α3 — simple-θ Girsanov: `B^θ` is Q-Brownian (mirror the constant-θ file)
 `MathFin/Foundations/GirsanovSimpleTheta.lean` (new). Feed `E^{−c}` and `E^{a−c}` (both α2 martingales) into `changeOfMeasure_setIntegral_eq`; re-run the constant-θ chain verbatim (charFun independence via `indepFun_iff_charFun_prod`). Deliverable: `Btheta_simple_isQBrownianMotion` + **new `full` benchmark entry** `gir-simple-adapted` (strict generalization of `gir-const-theta-qbm`).
