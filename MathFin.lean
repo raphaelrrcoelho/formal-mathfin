@@ -62,6 +62,7 @@ import MathFin.Foundations.ContinuousFTAP
 import MathFin.Foundations.ChangeOfMeasure
 import MathFin.Foundations.Girsanov
 import MathFin.Foundations.GirsanovConstantTheta
+import MathFin.Foundations.SimpleDoleansExponential
 import MathFin.Foundations.Numeraire
 import MathFin.Foundations.BrownianQuadraticVariation
 import MathFin.Foundations.QuadraticVariationL2
