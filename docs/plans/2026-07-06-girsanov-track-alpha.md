@@ -44,14 +44,18 @@ Same file (`SimpleDoleansExponential.lean`). **CORE DONE (2026-07-06, commit `08
   4-region conditional-expectation argument (tower `𝓕_s ⊆ 𝓕_a` when `s ≤ a ≤ t`; pull-out of the
   `𝓕_s`-measurable `cellExp_s` when `a ≤ s`). axioms-clean.
 
-**Remaining α2b — the N-cell product assembly** (next session): define `simpleDoleansExp` = the
-running product `∏_i cellExp (s i) (s (i+1)) (d i) t`; prove `simpleDoleansExp_isMartingale` by
-induction on the number of cells with the invariant "martingale **frozen after** `s_N`", each step
-appending one cell via a `mul_cellExp_isMartingale` lemma (M frozen after `p` × `cellExp p q c` is a
-martingale frozen after `q`). Cross-cell integrability: `iIndepFun.integrable_exp_mul_sum`
-(Moments/Basic.lean:346) / `IndepFun.integrable_mul` (Independence/Integration.lean:358) — needs
-**mutual** independence of increments over disjoint cells (verify the BM package exposes it; else build
-from `hX.indep`). This is the last piece before α3 can consume `E^{−c}`/`E^{a−c}` as martingales.
+**α2b — the N-cell product assembly. ✅ DONE (2026-07-06, commits `92da5ef`+`<α2>`).**
+- ✅ `mul_cellExp_isMartingale` — M (martingale, frozen after `p`) × `cellExp p q c` is a martingale.
+  Cross-cell integrability used only **pairwise** `hX.indep` (`M_p` is `𝓕_p`-measurable, so
+  `IndepFun.integrable_mul` after dominating the cell by two Gaussian MGFs) — no mutual independence
+  needed. 3-case conditional expectation (pull out `M_p` when `p ≤ s`; tower through `𝓕_p` when
+  `s ≤ p ≤ t`; M-martingale when `t ≤ p`).
+- ✅ `simpleDoleansExp` (recursive product) + `simpleDoleansExp_frozen` (frozen after `s N`) +
+  **`simpleDoleansExp_isMartingale`** (induction on N via `mul_cellExp_isMartingale`). The density
+  process `E^d`. axioms-clean, `lake build` green.
+
+**α2 is COMPLETE.** α3 can now consume `E^{−c}` / `E^{a−c}` (= `simpleDoleansExp s (−c)` / `s (a−c)`)
+as martingales.
 
 ### Brick α3 — simple-θ Girsanov: `B^θ` is Q-Brownian (mirror the constant-θ file)
 `MathFin/Foundations/GirsanovSimpleTheta.lean` (new). Feed `E^{−c}` and `E^{a−c}` (both α2 martingales) into `changeOfMeasure_setIntegral_eq`; re-run the constant-θ chain verbatim (charFun independence via `indepFun_iff_charFun_prod`). Deliverable: `Btheta_simple_isQBrownianMotion` + **new `full` benchmark entry** `gir-simple-adapted` (strict generalization of `gir-const-theta-qbm`).
