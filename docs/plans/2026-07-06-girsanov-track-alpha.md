@@ -58,7 +58,21 @@ Same file (`SimpleDoleansExponential.lean`). **CORE DONE (2026-07-06, commit `08
 as martingales.
 
 ### Brick α3 — simple-θ Girsanov: `B^θ` is Q-Brownian (mirror the constant-θ file)
-`MathFin/Foundations/GirsanovSimpleTheta.lean` (new). Feed `E^{−c}` and `E^{a−c}` (both α2 martingales) into `changeOfMeasure_setIntegral_eq`; re-run the constant-θ chain verbatim (charFun independence via `indepFun_iff_charFun_prod`). Deliverable: `Btheta_simple_isQBrownianMotion` + **new `full` benchmark entry** `gir-simple-adapted` (strict generalization of `gir-const-theta-qbm`).
+`MathFin/Foundations/GirsanovSimpleTheta.lean` (new). **FOUNDATION DONE (2026-07-06, commit `38f2bdc`).**
+- ✅ `cellExp_zero`, `simpleDoleansExp_zero` (density `= 1` at `t = 0`), `simpleDoleansExp_pos`.
+- ✅ `simpleDoleansExp_integral_eq_one` — unit `P`-mean from the α2 martingale (`E[Z_T] = E[Z_0] = 1`).
+- ✅ `simpleGirsanovMeasure_isProbabilityMeasure` — `Q = P.withDensity Z_T` is a probability measure
+  (via `isEquivProbMeasure_withDensity`, mirroring `girsanovMeasure_isProbabilityMeasure`).
+
+**Remaining α3 (the large part):** define `B^θ_t = X_t + Σ c_i (s_{i+1}∧t − s_i∧t)`; the **spine
+identity** `E^{−c}_t · exp(a·B^θ_t − ½a²t) = E^{a−c}_t` (per-cell exponent `(a−c_i)ΔX_i −
+½(a−c_i)²Δτ_i`; telescoping `a·X_t = Σ a·ΔX_i`, `t = Σ Δτ_i` needs partition-cover `s_0 = 0`,
+`s_N ≥ t`, `X_0 = 0`); then `exp(a·B^θ − ½a²t)` is a `Q`-martingale via `changeOfMeasure_setIntegral_eq`
+(Bayes) fed the two α2 martingales; then **re-derive the constant-θ charFun chain** (`condExp_expBtheta`
+→ `condExp_Btheta_increment` → `Btheta_increment_mgf` → `joint_mgf` → `linComb_gaussian` →
+`indepFun` → `isQBrownianMotion`, ~10 theorems) for simple θ. Deliverable: `Btheta_simple_isQBrownianMotion`
++ **`full` benchmark** `gir-simple-adapted`. Consider abstracting "∀a `exp(aY−½a²t)` is a Q-mtg ⟹ Y is
+a Q-BM" to reuse the chain for both constant-θ and simple-θ.
 
 ### Brick α4 — continuous bounded adapted θ (the hard analytic brick; may be several sessions)
 Approximate continuous bounded adapted `θ` by simple `θ⁽ⁿ⁾` in `L²(dt×dP)`; `E^{−c⁽ⁿ⁾}_T → Z_T` in `L¹(P)` (bounded θ ⟹ uniform `L²` control); the charFun identity for `B^θ` increments under `Q⁽ⁿ⁾` passes to the limit. Needs the stochastic-integral density `∫θdB` as the `L²` limit of `Σ c⁽ⁿ⁾ᵢΔXᵢ` (the tower's `itoIntegralCLM_T`, with the σ-realization half of SP0 — the sub-interval increment API is **not** needed). Deliverable: `Btheta_isQBrownianMotion_adapted`.
