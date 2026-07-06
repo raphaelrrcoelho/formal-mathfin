@@ -498,4 +498,46 @@ theorem mul_cellExp_isMartingale {M : ℝ≥0 → Ω → ℝ} (hM : Martingale M
         _ =ᵐ[P] P[M p | (𝓕 s : MeasurableSpace Ω)] := condExp_congr_ae hinner
         _ =ᵐ[P] M s := hM.2 s p hsp
 
+/-- **The running simple Doléans exponential** over the first `N` cells of a partition
+`s : ℕ → ℝ≥0` with multipliers `d : ℕ → Ω → ℝ`: the product `∏_{i<N} cellExp (s i) (s (i+1))
+(d i)`. This is the density process of the discrete/simple Girsanov change of measure. -/
+noncomputable def simpleDoleansExp (s : ℕ → ℝ≥0) (d : ℕ → Ω → ℝ) : ℕ → ℝ≥0 → Ω → ℝ
+  | 0, _, _ => 1
+  | (n + 1), t, ω =>
+    simpleDoleansExp s d n t ω * cellExp (X := X) (s n) (s (n + 1)) (d n) t ω
+
+/-- The simple Doléans exponential over the first `N` cells is **frozen after `s N`**: past the
+last partition point every cell factor is constant in time. -/
+lemma simpleDoleansExp_frozen (s : ℕ → ℝ≥0) (hs : Monotone s) (d : ℕ → Ω → ℝ) :
+    ∀ (N : ℕ) (u : ℝ≥0) (ω : Ω), s N ≤ u →
+      simpleDoleansExp (X := X) s d N u ω = simpleDoleansExp (X := X) s d N (s N) ω := by
+  intro N
+  induction N with
+  | zero => intro u ω _; rfl
+  | succ n ih =>
+    intro u ω hu
+    have hsn : s n ≤ s (n + 1) := hs (Nat.le_succ n)
+    show simpleDoleansExp (X := X) s d n u ω * cellExp (X := X) (s n) (s (n + 1)) (d n) u ω
+        = simpleDoleansExp (X := X) s d n (s (n + 1)) ω
+          * cellExp (X := X) (s n) (s (n + 1)) (d n) (s (n + 1)) ω
+    rw [ih u ω (hsn.trans hu), ih (s (n + 1)) ω hsn,
+      cellExp_of_ge_right hsn hu, cellExp_of_ge_right hsn (le_refl _)]
+
+include hX in
+/-- **The simple Doléans exponential is a `P`-martingale.** For a monotone partition
+`s : ℕ → ℝ≥0` and uniformly bounded adapted multipliers `d` (`d i` is `𝓕_{s i}`-measurable),
+the running product `simpleDoleansExp s d N` is a martingale w.r.t. `𝓕` — the density process of
+the simple (piecewise-constant-adapted) Girsanov change of measure. Induction on `N` via
+`mul_cellExp_isMartingale`, with the `simpleDoleansExp_frozen` invariant feeding each new cell. -/
+theorem simpleDoleansExp_isMartingale (s : ℕ → ℝ≥0) (hs : Monotone s) (d : ℕ → Ω → ℝ)
+    (hd : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (d i)) {K : ℝ}
+    (hd_bdd : ∀ i ω, |d i ω| ≤ K) (N : ℕ) :
+    Martingale (fun t ω ↦ simpleDoleansExp (X := X) s d N t ω) 𝓕 P := by
+  induction N with
+  | zero => exact martingale_const 𝓕 P 1
+  | succ n ih =>
+    exact mul_cellExp_isMartingale (X := X) ih
+      (fun u ω hu ↦ simpleDoleansExp_frozen (X := X) s hs d n u ω hu)
+      (hs (Nat.le_succ n)) (hd n) (hd_bdd n)
+
 end MathFin
