@@ -387,4 +387,115 @@ theorem cellExp_isMartingale {a b : ℝ≥0} (hab : a ≤ b) {c : Ω → ℝ}
         - (c ω) ^ 2 * (NNReal.toReal (min b t) - NNReal.toReal s) / 2)) |
         (𝓕 s : MeasurableSpace Ω)]) ω = 1 from hg, mul_one]
 
+include hX in
+/-- **Appending one cell preserves the martingale.** If `M` is a `P`-martingale that is *frozen
+after* `p` (constant in time past `p`), then multiplying by a fresh cell `cellExp p q c`
+(`c` bounded `𝓕_p`-measurable, `p ≤ q`) is again a `P`-martingale. Cross-cell integrability uses
+only the pairwise independence of the `(p, b∧t]` increment from `𝓕_p` (`IndepFun.integrable_mul`);
+the conditional expectation splits on `s`, `t` versus `p`, closing by `cellExp_isMartingale`. -/
+theorem mul_cellExp_isMartingale {M : ℝ≥0 → Ω → ℝ} (hM : Martingale M 𝓕 P)
+    {p : ℝ≥0} (hMfroz : ∀ u ω, p ≤ u → M u ω = M p ω)
+    {q : ℝ≥0} (hpq : p ≤ q) {c : Ω → ℝ} (hc : StronglyMeasurable[(𝓕 p : MeasurableSpace Ω)] c)
+    {K : ℝ} (hK : ∀ ω, |c ω| ≤ K) :
+    Martingale (fun t ω ↦ M t ω * cellExp (X := X) p q c t ω) 𝓕 P := by
+  have hc_meas : Measurable c := (hc.mono (𝓕.le p)).measurable
+  have hMp_meas : Measurable (M p) := ((hM.1 p).mono (𝓕.le p)).measurable
+  have hG_mart := cellExp_isMartingale (X := X) (P := P) hpq hc hK
+  -- Integrability at each time, in the frozen `M_p` form used by every case.
+  have hMpG_int : ∀ t : ℝ≥0, Integrable (fun ω ↦ M p ω * cellExp (X := X) p q c t ω) P := by
+    intro t
+    rcases le_total t p with htp | hpt
+    · rw [show (fun ω ↦ M p ω * cellExp (X := X) p q c t ω) = M p from
+        funext fun ω ↦ by rw [cellExp_of_le_left hpq htp ω, mul_one]]
+      exact hM.integrable p
+    · have hpqt : p ≤ min q t := le_min hpq hpt
+      have hXqt : Measurable (X (min q t)) :=
+        ((hX.stronglyAdapted (min q t)).mono (𝓕.le _)).measurable
+      have hXp : Measurable (X p) := ((hX.stronglyAdapted p).mono (𝓕.le p)).measurable
+      have hcellval : (fun ω ↦ M p ω * cellExp (X := X) p q c t ω)
+          = fun ω ↦ M p ω * Real.exp (c ω * (X (min q t) ω - X p ω)
+            - (c ω) ^ 2 * (NNReal.toReal (min q t) - NNReal.toReal p) / 2) := by
+        funext ω; rw [cellExp, min_eq_left hpt]
+      have hΔlaw : HasLaw (fun ω ↦ X (min q t) ω - X p ω)
+          (gaussianReal 0 (nndist ((min q t : ℝ≥0) : ℝ) ((p : ℝ≥0) : ℝ))) P :=
+        hX.hasLaw_sub (min q t) p
+      have hindepΔ : IndepFun (M p) (fun ω ↦ X (min q t) ω - X p ω) P :=
+        Indep.symm (indep_of_indep_of_le_right (hX.indep p (min q t) hpqt)
+          (hM.1 p).measurable.comap_le)
+      have hindepK : IndepFun (fun ω ↦ |M p ω|)
+          (fun ω ↦ Real.exp (K * (X (min q t) ω - X p ω))) P :=
+        hindepΔ.comp (ψ := fun x ↦ Real.exp (K * x)) measurable_abs (by fun_prop)
+      have hindepnK : IndepFun (fun ω ↦ |M p ω|)
+          (fun ω ↦ Real.exp (-K * (X (min q t) ω - X p ω))) P :=
+        hindepΔ.comp (ψ := fun x ↦ Real.exp (-K * x)) measurable_abs (by fun_prop)
+      have hMabs_int : Integrable (fun ω ↦ |M p ω|) P := (hM.integrable p).abs
+      have hbnd : Integrable (fun ω ↦ |M p ω| * Real.exp (K * (X (min q t) ω - X p ω))
+          + |M p ω| * Real.exp (-K * (X (min q t) ω - X p ω))) P :=
+        (hindepK.integrable_mul hMabs_int (integrable_exp_mul_of_hasLaw hΔlaw K)).add
+          (hindepnK.integrable_mul hMabs_int (integrable_exp_mul_of_hasLaw hΔlaw (-K)))
+      rw [hcellval]
+      have hpqr : (0 : ℝ) ≤ NNReal.toReal (min q t) - NNReal.toReal p :=
+        sub_nonneg.mpr (NNReal.coe_le_coe.mpr hpqt)
+      refine Integrable.mono' hbnd (by fun_prop) (Filter.Eventually.of_forall fun ω ↦ ?_)
+      rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (Real.exp_nonneg _)]
+      have hle1 : c ω * (X (min q t) ω - X p ω)
+          - (c ω) ^ 2 * (NNReal.toReal (min q t) - NNReal.toReal p) / 2
+          ≤ c ω * (X (min q t) ω - X p ω) := by nlinarith [sq_nonneg (c ω), hpqr]
+      have hGle : Real.exp (c ω * (X (min q t) ω - X p ω)
+          - (c ω) ^ 2 * (NNReal.toReal (min q t) - NNReal.toReal p) / 2)
+          ≤ Real.exp (K * (X (min q t) ω - X p ω)) + Real.exp (-K * (X (min q t) ω - X p ω)) := by
+        refine (Real.exp_le_exp.mpr hle1).trans ?_
+        obtain ⟨hlo, hhi⟩ := abs_le.mp (hK ω)
+        rcases le_total 0 (X (min q t) ω - X p ω) with hΔ | hΔ
+        · exact le_add_of_le_of_nonneg (Real.exp_le_exp.mpr (mul_le_mul_of_nonneg_right hhi hΔ))
+            (Real.exp_nonneg _)
+        · exact le_add_of_nonneg_of_le (Real.exp_nonneg _)
+            (Real.exp_le_exp.mpr (mul_le_mul_of_nonpos_right hlo hΔ))
+      calc |M p ω| * Real.exp (c ω * (X (min q t) ω - X p ω)
+              - (c ω) ^ 2 * (NNReal.toReal (min q t) - NNReal.toReal p) / 2)
+          ≤ |M p ω| * (Real.exp (K * (X (min q t) ω - X p ω))
+              + Real.exp (-K * (X (min q t) ω - X p ω))) :=
+            mul_le_mul_of_nonneg_left hGle (abs_nonneg _)
+        _ = _ := by ring
+  refine ⟨fun t ↦ (hM.1 t).mul (hG_mart.1 t), fun s t hst ↦ ?_⟩
+  show P[fun ω ↦ M t ω * cellExp (X := X) p q c t ω | (𝓕 s : MeasurableSpace Ω)]
+    =ᵐ[P] fun ω ↦ M s ω * cellExp (X := X) p q c s ω
+  rcases le_total p s with hps | hsp
+  · -- (I) `p ≤ s`: `M` frozen, pull out the `𝓕_s`-measurable `M_p`, `cellExp` martingale.
+    rw [show (fun ω ↦ M t ω * cellExp (X := X) p q c t ω)
+          = fun ω ↦ M p ω * cellExp (X := X) p q c t ω from
+        funext fun ω ↦ by rw [hMfroz t ω (hps.trans hst)],
+      show (fun ω ↦ M s ω * cellExp (X := X) p q c s ω)
+          = fun ω ↦ M p ω * cellExp (X := X) p q c s ω from
+        funext fun ω ↦ by rw [hMfroz s ω hps]]
+    refine (condExp_mul_of_stronglyMeasurable_left (m := (𝓕 s : MeasurableSpace Ω))
+      ((hM.1 p).mono (𝓕.mono hps)) (hMpG_int t) (hG_mart.integrable t)).trans ?_
+    filter_upwards [hG_mart.2 s t hst] with ω hgw
+    rw [Pi.mul_apply, hgw]
+  · rcases le_total t p with htp | hpt
+    · -- (II) `t ≤ p`: both cells are `1`, `M` martingale.
+      rw [show (fun ω ↦ M t ω * cellExp (X := X) p q c t ω) = M t from
+          funext fun ω ↦ by rw [cellExp_of_le_left hpq htp ω, mul_one],
+        show (fun ω ↦ M s ω * cellExp (X := X) p q c s ω) = M s from
+          funext fun ω ↦ by rw [cellExp_of_le_left hpq (hst.trans htp) ω, mul_one]]
+      exact hM.2 s t hst
+    · -- (III) `s ≤ p ≤ t`: tower through `𝓕_p`; inner pull-out gives `M_p` (cell at `p` is `1`).
+      rw [show (fun ω ↦ M s ω * cellExp (X := X) p q c s ω) = M s from
+          funext fun ω ↦ by rw [cellExp_of_le_left hpq hsp ω, mul_one],
+        show (fun ω ↦ M t ω * cellExp (X := X) p q c t ω)
+            = fun ω ↦ M p ω * cellExp (X := X) p q c t ω from
+          funext fun ω ↦ by rw [hMfroz t ω hpt]]
+      have hinner : P[(fun ω ↦ M p ω * cellExp (X := X) p q c t ω) |
+          (𝓕 p : MeasurableSpace Ω)] =ᵐ[P] M p := by
+        refine (condExp_mul_of_stronglyMeasurable_left (m := (𝓕 p : MeasurableSpace Ω)) (hM.1 p)
+          (hMpG_int t) (hG_mart.integrable t)).trans ?_
+        filter_upwards [hG_mart.2 p t hpt] with ω hgw
+        rw [Pi.mul_apply, hgw, cellExp_of_le_left hpq (le_refl p) ω, mul_one]
+      calc P[(fun ω ↦ M p ω * cellExp (X := X) p q c t ω) | (𝓕 s : MeasurableSpace Ω)]
+          =ᵐ[P] P[P[(fun ω ↦ M p ω * cellExp (X := X) p q c t ω) |
+              (𝓕 p : MeasurableSpace Ω)] | (𝓕 s : MeasurableSpace Ω)] :=
+            (condExp_condExp_of_le (𝓕.mono hsp) (𝓕.le p)).symm
+        _ =ᵐ[P] P[M p | (𝓕 s : MeasurableSpace Ω)] := condExp_congr_ae hinner
+        _ =ᵐ[P] M s := hM.2 s p hsp
+
 end MathFin
