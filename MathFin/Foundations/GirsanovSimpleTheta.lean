@@ -379,9 +379,9 @@ theorem isExpQMartingale_BthetaSimple (s : ℕ → ℝ≥0) (hs : Monotone s) (h
       withDensity_absolutelyContinuous _ _
     filter_upwards [hQP.ae_le (X0_ae_eq_zero (X := X) (𝓕 := 𝓕))] with ω hω
     simp [hω, simpleDrift_zero]
-  · -- martingale field via the inlined Bayes change-of-measure engine
+  · -- martingale field via the Bayes `[0,T]` change-of-measure engine: `Z = E^{−c}`, the drift-
+    -- corrected exponential `D`, and `M = E^{a−c}` with `Z·D =ᵐ M` on `[0,T]` (`simple_spine_ae`).
     intro a s' t' hst' ht'T A hA
-    have hAmΩ : MeasurableSet A := 𝓕.le s' A hA
     have hEsm : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ a - c i ω) :=
       fun i ↦ stronglyMeasurable_const.sub (hc i)
     have hEb : ∀ i ω, |a - c i ω| ≤ |a| + K := fun i ω ↦ by
@@ -396,41 +396,10 @@ theorem isExpQMartingale_BthetaSimple (s : ℕ → ℝ≥0) (hs : Monotone s) (h
       have hcont : Continuous fun x : ℝ ↦ a * x - a ^ 2 * (u : ℝ) / 2 := by fun_prop
       exact Real.continuous_exp.comp_stronglyMeasurable (hcont.comp_stronglyMeasurable
         ((hX.stronglyAdapted u).add (stronglyMeasurable_simpleDrift hs hc N u)))
-    have helper : ∀ u, MeasurableSet[(𝓕 u : MeasurableSpace Ω)] A → u ≤ T →
-        ∫ ω in A, Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
-            ∂(P.withDensity fun ω ↦
-              ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω))
-          = ∫ ω in A, simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N u ω
-              * Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2) ∂P := by
-      intro u hAu huT
-      rw [setIntegral_withDensity_eq_setIntegral_toReal_smul hZmeasT.ennreal_ofReal
-            (ae_of_all (P.restrict A) fun _ ↦ ENNReal.ofReal_lt_top) _ hAmΩ]
-      have hconv : ∀ ω,
-          (ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)).toReal
-            • Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
-          = Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
-            * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω := fun ω ↦ by
-        rw [ENNReal.toReal_ofReal (hZpos ω), smul_eq_mul, mul_comm]
-      simp_rw [hconv]
-      rw [← setIntegral_condExp (𝓕.le u)
-        (integrable_expBthetaSimple_mul_density s hs hs0 c hc hc_bdd a N huT hNT) hAu]
-      have hae : P[fun ω ↦ Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
-              * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω | 𝓕 u]
-          =ᵐ[P] fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N u ω
-            * Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2) := by
-        refine (condExp_mul_of_stronglyMeasurable_left (m := (𝓕 u : MeasurableSpace Ω)) (hDsm u)
-          (integrable_expBthetaSimple_mul_density s hs hs0 c hc hc_bdd a N huT hNT)
-          (hZmart.integrable T)).trans ?_
-        filter_upwards [hZmart.condExp_ae_eq huT] with ω hh2
-        simp only [Pi.mul_apply, hh2]; ring
-      exact setIntegral_congr_ae hAmΩ (hae.mono fun ω h _ ↦ h)
-    have hAt' : MeasurableSet[(𝓕 t' : MeasurableSpace Ω)] A := 𝓕.mono hst' A hA
-    rw [helper t' hAt' ht'T, helper s' hA (hst'.trans ht'T),
-      setIntegral_congr_ae hAmΩ
-        ((simple_spine_ae (𝓕 := 𝓕) s hs0 c a N ht'T hNT).mono fun ω h _ ↦ h),
-      setIntegral_congr_ae hAmΩ
-        ((simple_spine_ae (𝓕 := 𝓕) s hs0 c a N (hst'.trans ht'T) hNT).mono fun ω h _ ↦ h)]
-    exact (hEmart.setIntegral_eq hst' hA).symm
+    exact changeOfMeasure_setIntegral_eq_of_ae_martingale T hZmeasT hZpos hDsm hZmart hEmart
+      (fun u huT ↦ simple_spine_ae (𝓕 := 𝓕) s hs0 c a N huT hNT)
+      (fun u huT ↦ integrable_expBthetaSimple_mul_density s hs hs0 c hc hc_bdd a N huT hNT)
+      hst' ht'T hA
 
 include hX in
 /-- **Simple (piecewise-constant adapted) distributional Girsanov: `B^θ` is a `Q`-Brownian motion.**
