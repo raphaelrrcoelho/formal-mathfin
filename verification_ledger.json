@@ -241,6 +241,13 @@
       "input_hash": "fd2f1e4b9dfa15a3ec6f9cf68d063f2ae5fca728cbe27db25d9a50a235536648",
       "verified_at_commit": "eb0aee9"
     },
+    "gir-simple-adapted": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-06",
+      "elapsed_s": 30.0,
+      "input_hash": "5343e485eb1d112ce4ea7e848f4cb370405029fdd2e0808a6df555aef2bcb7e9",
+      "verified_at_commit": "7d2b537"
+    },
     "gir-thm-9.1.7": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-04",

@@ -7,6 +7,8 @@ module
 
 public import MathFin.Foundations.SimpleDoleansExponential
 public import MathFin.Foundations.EquivMeasure
+public import MathFin.Foundations.ChangeOfMeasure
+public import MathFin.Foundations.ExpMartingaleQBrownian
 
 /-!
 # Simple (piecewise-constant adapted) Girsanov — the density measure
@@ -63,6 +65,41 @@ Each cell contributes `c_i` times the length of its clamped time-interval. -/
 noncomputable def simpleDrift (s : ℕ → ℝ≥0) (c : ℕ → Ω → ℝ) (N : ℕ) (t : ℝ≥0) (ω : Ω) : ℝ :=
   ∑ i ∈ Finset.range N,
     c i ω * (NNReal.toReal (min (s (i + 1)) t) - NNReal.toReal (min (s i) t))
+
+/-- Each clamped cell-length `s_{i+1}∧t − s_i∧t` is nonnegative (the clamped endpoints are
+monotone in the cell index). -/
+lemma simpleTau_nonneg {s : ℕ → ℝ≥0} (hs : Monotone s) (i : ℕ) (t : ℝ≥0) :
+    0 ≤ NNReal.toReal (min (s (i + 1)) t) - NNReal.toReal (min (s i) t) :=
+  sub_nonneg.mpr (NNReal.coe_le_coe.mpr (min_le_min (hs (Nat.le_succ i)) le_rfl))
+
+/-- The clamped cell-lengths sum to `t` when the partition covers `[0,t]` (`s_0 = 0`, `t ≤ s_N`). -/
+lemma simpleTau_sum {s : ℕ → ℝ≥0} (hs0 : s 0 = 0) (N : ℕ) {t : ℝ≥0} (htN : t ≤ s N) :
+    ∑ i ∈ Finset.range N,
+        (NNReal.toReal (min (s (i + 1)) t) - NNReal.toReal (min (s i) t)) = (t : ℝ) := by
+  rw [Finset.sum_range_sub (fun i ↦ NNReal.toReal (min (s i) t)) N, min_eq_right htN, hs0,
+    min_eq_left (zero_le : (0 : ℝ≥0) ≤ t)]
+  simp
+
+/-- The simple drift is bounded: `|simpleDrift s c N u| ≤ K·u` when `|c_i| ≤ K` and the partition
+covers `[0,u]` (`s_0 = 0`, `u ≤ s_N`) — each cell contributes at most `K` times its length, and the
+lengths sum to `u`. -/
+lemma simpleDrift_abs_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ} {K : ℝ}
+    (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {u : ℝ≥0} (huN : u ≤ s N) (ω : Ω) :
+    |simpleDrift s c N u ω| ≤ K * (u : ℝ) := by
+  rw [simpleDrift]
+  refine (Finset.abs_sum_le_sum_abs _ _).trans ?_
+  rw [← simpleTau_sum hs0 N huN, Finset.mul_sum]
+  refine Finset.sum_le_sum fun i _ ↦ ?_
+  rw [abs_mul, abs_of_nonneg (simpleTau_nonneg hs i u)]
+  exact mul_le_mul_of_nonneg_right (hc_bdd i ω) (simpleTau_nonneg hs i u)
+
+/-- The simple drift vanishes at time `0` (every clamped cell has zero length). -/
+lemma simpleDrift_zero (s : ℕ → ℝ≥0) (c : ℕ → Ω → ℝ) (N : ℕ) (ω : Ω) :
+    simpleDrift s c N 0 ω = 0 := by
+  rw [simpleDrift]
+  refine Finset.sum_eq_zero fun i _ ↦ ?_
+  rw [min_eq_right (zero_le : (0 : ℝ≥0) ≤ s (i + 1)), min_eq_right (zero_le : (0 : ℝ≥0) ≤ s i)]
+  simp
 
 /-- **Log-form of the simple Doléans exponential.** `simpleDoleansExp s d N t = exp(∑_{i<N}
 [d_i·(X_{s_{i+1}∧t} − X_{s_i∧t}) − ½ d_i²·(s_{i+1}∧t − s_i∧t)])`: the product of cell exponentials
@@ -206,5 +243,219 @@ theorem simple_spine_ae (s : ℕ → ℝ≥0) (hs0 : s 0 = 0) (c : ℕ → Ω �
     exact ae_iff.mpr (by simpa using hmap.symm)
   filter_upwards [hX0] with ω hω
   rw [simple_spine s hs0 c a N htT hNT ω, hω, mul_zero, Real.exp_zero, one_mul]
+
+include hX in
+/-- **Mixed-time integrability for the Bayes engine.** For `u ≤ T ≤ s_N`, the product
+`exp(a·B^θ_u − ½a²u) · Z_T` (with density `Z = E^{−c}`) is `P`-integrable. Both factors are in
+`L²(P)`: the drift-corrected exponential by the Gaussian MGF of `X_u` (the drift is bounded by
+`K·u`), and the density because `Z_T² = E^{−2c}_T · exp(∑ c_i²Δτ_i)` with `∑ c_i²Δτ_i ≤ K²T`, an
+integrable martingale times a bounded factor. Hölder (`MemLp.mul`, `L²·L² ⊆ L¹`) closes it. -/
+theorem integrable_expBthetaSimple_mul_density (s : ℕ → ℝ≥0) (hs : Monotone s) (hs0 : s 0 = 0)
+    (c : ℕ → Ω → ℝ) (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i))
+    {K : ℝ} (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T)
+    (hNT : T ≤ s N) :
+    Integrable (fun ω ↦
+        Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
+          * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) P := by
+  have hmeasX : ∀ v, Measurable (X v) := fun v ↦ ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
+  have hDsm : StronglyMeasurable[(𝓕 u : MeasurableSpace Ω)]
+      (fun ω ↦ Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) := by
+    have hcont : Continuous fun x : ℝ ↦ a * x - a ^ 2 * (u : ℝ) / 2 := by fun_prop
+    exact Real.continuous_exp.comp_stronglyMeasurable (hcont.comp_stronglyMeasurable
+      ((hX.stronglyAdapted u).add (stronglyMeasurable_simpleDrift hs hc N u)))
+  have hDmeas : Measurable
+      (fun ω ↦ Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) :=
+    (hDsm.mono (𝓕.le u)).measurable
+  -- density multipliers `−c` and `−2c` are adapted and bounded
+  have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=
+    fun i ↦ (hc i).neg
+  have hbneg : ∀ i ω, |(-(c i ω))| ≤ K := fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω
+  have hd2 : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(2 * c i ω)) :=
+    fun i ↦ ((hc i).const_mul 2).neg
+  have hb2 : ∀ i ω, |(-(2 * c i ω))| ≤ 2 * K := fun i ω ↦ by
+    rw [abs_neg, abs_mul, abs_of_nonneg (by norm_num : (0 : ℝ) ≤ 2)]
+    exact mul_le_mul_of_nonneg_left (hc_bdd i ω) (by norm_num)
+  have hZmeasT : Measurable (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) :=
+    (((simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ hdneg hbneg N).1 T).mono
+      (𝓕.le T)).measurable
+  -- `D_u ∈ L²`: Gaussian MGF of `X_u`, drift bounded
+  have hDu2 : MemLp (fun ω ↦
+      Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) 2 P := by
+    rw [memLp_two_iff_integrable_sq hDmeas.aestronglyMeasurable]
+    refine Integrable.mono'
+      (g := fun ω ↦ Real.exp (2 * |a| * K * (T : ℝ)) * Real.exp (2 * a * X u ω))
+      ((integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (2 * a)).const_mul _)
+      (hDmeas.pow_const 2).aestronglyMeasurable (Filter.Eventually.of_forall fun ω ↦ ?_)
+    have hK0 : (0 : ℝ) ≤ K := (abs_nonneg (c 0 ω)).trans (hc_bdd 0 ω)
+    have hdrift := simpleDrift_abs_le hs hs0 hc_bdd N (huT.trans hNT) ω
+    rw [Real.norm_of_nonneg (sq_nonneg _), pow_two, ← Real.exp_add, ← Real.exp_add]
+    refine Real.exp_le_exp.mpr ?_
+    have h1 : a * simpleDrift s c N u ω ≤ |a| * (K * (u : ℝ)) :=
+      (le_abs_self _).trans (by rw [abs_mul]; exact mul_le_mul_of_nonneg_left hdrift (abs_nonneg a))
+    have h2 : |a| * (K * (u : ℝ)) ≤ |a| * (K * (T : ℝ)) :=
+      mul_le_mul_of_nonneg_left
+        (mul_le_mul_of_nonneg_left (by exact_mod_cast huT) hK0) (abs_nonneg a)
+    simp only [mul_add]
+    nlinarith [h1, h2, mul_nonneg (sq_nonneg a) (NNReal.coe_nonneg u)]
+  -- `Z_T ∈ L²`: `Z_T² = E^{−2c}_T · exp(∑ c²Δτ) ≤ exp(K²T)·E^{−2c}_T`
+  have hZT2 : MemLp (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) 2 P := by
+    rw [memLp_two_iff_integrable_sq hZmeasT.aestronglyMeasurable]
+    have hZ2c_int : Integrable
+        (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(2 * c i ω)) N T ω) P :=
+      (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ hd2 hb2 N).integrable T
+    refine Integrable.mono'
+      (g := fun ω ↦ Real.exp (K ^ 2 * (T : ℝ))
+        * simpleDoleansExp (X := X) s (fun i ω ↦ -(2 * c i ω)) N T ω)
+      (hZ2c_int.const_mul _) (hZmeasT.pow_const 2).aestronglyMeasurable
+      (Filter.Eventually.of_forall fun ω ↦ ?_)
+    rw [Real.norm_of_nonneg (sq_nonneg _)]
+    have hZsq_eq : (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2
+        = simpleDoleansExp (X := X) s (fun i ω ↦ -(2 * c i ω)) N T ω
+          * Real.exp (∑ i ∈ Finset.range N, (c i ω) ^ 2
+              * (NNReal.toReal (min (s (i + 1)) T) - NNReal.toReal (min (s i) T))) := by
+      rw [simpleDoleansExp_eq_exp_sum, simpleDoleansExp_eq_exp_sum, pow_two, ← Real.exp_add,
+        ← Real.exp_add]
+      congr 1
+      rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+      exact Finset.sum_congr rfl (fun i _ ↦ by ring)
+    rw [hZsq_eq]
+    have hSumBnd : ∑ i ∈ Finset.range N, (c i ω) ^ 2
+        * (NNReal.toReal (min (s (i + 1)) T) - NNReal.toReal (min (s i) T)) ≤ K ^ 2 * (T : ℝ) := by
+      rw [← simpleTau_sum hs0 N hNT, Finset.mul_sum]
+      refine Finset.sum_le_sum fun i _ ↦ mul_le_mul_of_nonneg_right ?_ (simpleTau_nonneg hs i T)
+      nlinarith [(abs_le.mp (hc_bdd i ω)).1, (abs_le.mp (hc_bdd i ω)).2]
+    rw [mul_comm (Real.exp (K ^ 2 * (T : ℝ)))]
+    exact mul_le_mul_of_nonneg_left (Real.exp_le_exp.mpr hSumBnd)
+      (simpleDoleansExp_pos s _ N T ω).le
+  exact (memLp_one_iff_integrable.mp (hDu2.mul hZT2)).congr
+    (Filter.Eventually.of_forall fun ω ↦ mul_comm _ _)
+
+include hX in
+/-- **The simple-θ drift-corrected process, packaged as exponential-martingale data.** For a
+partition covering `[0,T]` (`s_0 = 0`, `T ≤ s_N`) with bounded adapted multipliers `c`, the
+drift-corrected process `B^θ_u = X_u + simpleDrift_u` is `𝓕`-adapted, starts at `0` a.e. under
+`Q = P.withDensity(E^{−c}_T)`, and for every `a` the exponential `exp(a·B^θ − ½a²·)` is a
+`Q`-martingale on `[0,T]`. The martingale field feeds the Bayes engine (`Z = E^{−c}` and
+`Z·D =ᵐ E^{a−c}`, the α2 martingale): `∫_A D_u dQ = ∫_A Z_u D_u dP` (mixed-time integrability from
+`integrable_expBthetaSimple_mul_density`), then `Z_u D_u =ᵐ E^{a−c}_u` (`simple_spine_ae`) turns the
+`Q`-martingale identity into the `P`-martingale identity of `E^{a−c}`. -/
+theorem isExpQMartingale_BthetaSimple (s : ℕ → ℝ≥0) (hs : Monotone s) (hs0 : s 0 = 0)
+    (c : ℕ → Ω → ℝ) (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
+    (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
+    IsExpQMartingale
+      (P.withDensity fun ω ↦
+        ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω))
+      𝓕 (fun u ω ↦ X u ω + simpleDrift s c N u ω) T := by
+  have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=
+    fun i ↦ (hc i).neg
+  have hbneg : ∀ i ω, |(-(c i ω))| ≤ K := fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω
+  have hZmart : Martingale (fun u ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N u ω) 𝓕 P :=
+    simpleDoleansExp_isMartingale (X := X) s hs _ hdneg hbneg N
+  have hZmeasT : Measurable (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) :=
+    ((hZmart.1 T).mono (𝓕.le T)).measurable
+  have hZpos : ∀ ω, 0 ≤ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω :=
+    fun ω ↦ (simpleDoleansExp_pos s _ N T ω).le
+  refine ⟨fun u ↦ (hX.stronglyAdapted u).add (stronglyMeasurable_simpleDrift hs hc N u), ?_, ?_⟩
+  · -- zero start: `X_0 = 0` a.e. `Q` (`Q ≪ P`), `simpleDrift_0 = 0`
+    have hQP : (P.withDensity fun ω ↦
+        ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) ≪ P :=
+      withDensity_absolutelyContinuous _ _
+    have hX0 : ∀ᵐ ω ∂P, X 0 ω = 0 := by
+      have hmeasX0 : Measurable (X 0) := ((hX.stronglyAdapted 0).mono (𝓕.le 0)).measurable
+      have hmap := Measure.map_apply (μ := P) hmeasX0 (measurableSet_singleton (0 : ℝ)).compl
+      rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
+          Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
+      have hpre : X 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | X 0 ω ≠ 0} := by ext ω; simp [Set.mem_preimage]
+      rw [hpre] at hmap
+      exact ae_iff.mpr (by simpa using hmap.symm)
+    filter_upwards [hQP.ae_le hX0] with ω hω
+    simp [hω, simpleDrift_zero]
+  · -- martingale field via the inlined Bayes change-of-measure engine
+    intro a s' t' hst' ht'T A hA
+    have hAmΩ : MeasurableSet A := 𝓕.le s' A hA
+    have hEsm : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ a - c i ω) :=
+      fun i ↦ stronglyMeasurable_const.sub (hc i)
+    have hEb : ∀ i ω, |a - c i ω| ≤ |a| + K := fun i ω ↦ by
+      rw [abs_le]; obtain ⟨h1, h2⟩ := abs_le.mp (hc_bdd i ω)
+      refine ⟨?_, ?_⟩ <;> nlinarith [neg_abs_le a, le_abs_self a]
+    have hEmart :
+        Martingale (fun u ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ a - c i ω) N u ω) 𝓕 P :=
+      simpleDoleansExp_isMartingale (X := X) s hs _ hEsm hEb N
+    have hDsm : ∀ u, StronglyMeasurable[(𝓕 u : MeasurableSpace Ω)]
+        (fun ω ↦ Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) := by
+      intro u
+      have hcont : Continuous fun x : ℝ ↦ a * x - a ^ 2 * (u : ℝ) / 2 := by fun_prop
+      exact Real.continuous_exp.comp_stronglyMeasurable (hcont.comp_stronglyMeasurable
+        ((hX.stronglyAdapted u).add (stronglyMeasurable_simpleDrift hs hc N u)))
+    have helper : ∀ u, MeasurableSet[(𝓕 u : MeasurableSpace Ω)] A → u ≤ T →
+        ∫ ω in A, Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
+            ∂(P.withDensity fun ω ↦
+              ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω))
+          = ∫ ω in A, simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N u ω
+              * Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2) ∂P := by
+      intro u hAu huT
+      rw [setIntegral_withDensity_eq_setIntegral_toReal_smul hZmeasT.ennreal_ofReal
+            (ae_of_all (P.restrict A) fun _ ↦ ENNReal.ofReal_lt_top) _ hAmΩ]
+      have hconv : ∀ ω,
+          (ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)).toReal
+            • Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
+          = Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
+            * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω := fun ω ↦ by
+        rw [ENNReal.toReal_ofReal (hZpos ω), smul_eq_mul, mul_comm]
+      simp_rw [hconv]
+      rw [← setIntegral_condExp (𝓕.le u)
+        (integrable_expBthetaSimple_mul_density s hs hs0 c hc hc_bdd a N huT hNT) hAu]
+      have hae : P[fun ω ↦ Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
+              * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω | 𝓕 u]
+          =ᵐ[P] fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N u ω
+            * Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2) := by
+        refine (condExp_mul_of_stronglyMeasurable_left (m := (𝓕 u : MeasurableSpace Ω)) (hDsm u)
+          (integrable_expBthetaSimple_mul_density s hs hs0 c hc hc_bdd a N huT hNT)
+          (hZmart.integrable T)).trans ?_
+        filter_upwards [hZmart.condExp_ae_eq huT] with ω hh2
+        simp only [Pi.mul_apply, hh2]; ring
+      exact setIntegral_congr_ae hAmΩ (hae.mono fun ω h _ ↦ h)
+    have hAt' : MeasurableSet[(𝓕 t' : MeasurableSpace Ω)] A := 𝓕.mono hst' A hA
+    rw [helper t' hAt' ht'T, helper s' hA (hst'.trans ht'T),
+      setIntegral_congr_ae hAmΩ
+        ((simple_spine_ae (𝓕 := 𝓕) s hs0 c a N ht'T hNT).mono fun ω h _ ↦ h),
+      setIntegral_congr_ae hAmΩ
+        ((simple_spine_ae (𝓕 := 𝓕) s hs0 c a N (hst'.trans ht'T) hNT).mono fun ω h _ ↦ h)]
+    exact (hEmart.setIntegral_eq hst' hA).symm
+
+include hX in
+/-- **Simple (piecewise-constant adapted) distributional Girsanov: `B^θ` is a `Q`-Brownian motion.**
+For a partition covering `[0,T]` (`s_0 = 0`, `T ≤ s_N`) and bounded adapted multipliers `c`, under
+`Q = P.withDensity(E^{−c}_T)` the drift-corrected process `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)`
+is a `Q`-Brownian motion on `[0,T]`: zero start, Gaussian increments `N(0,t−s)`, and independence of
+disjoint increments. One application of the exponential characterization
+`isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaSimple` — no characteristic-function
+chain re-derived (the whole payoff of the abstraction). This is the general bounded-*adapted*-θ
+Girsanov for the simple case, strictly beyond constant θ, on the existing tower — no adapted-integrand
+Itô formula. -/
+theorem Btheta_simple_isQBrownianMotion (s : ℕ → ℝ≥0) (hs : Monotone s) (hs0 : s 0 = 0)
+    (c : ℕ → Ω → ℝ) (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
+    (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
+    (∀ᵐ ω ∂(P.withDensity fun ω ↦
+        ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)),
+        X 0 ω + simpleDrift s c N 0 ω = 0)
+      ∧ (∀ ⦃s' t' : ℝ≥0⦄, s' ≤ t' → t' ≤ T →
+          (P.withDensity fun ω ↦
+              ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)).map
+            (fun ω ↦ (X t' ω + simpleDrift s c N t' ω) - (X s' ω + simpleDrift s c N s' ω))
+            = gaussianReal 0 (t' - s'))
+      ∧ (∀ ⦃s' t' u' v' : ℝ≥0⦄, s' ≤ t' → t' ≤ u' → u' ≤ v' → v' ≤ T →
+          IndepFun (fun ω ↦ (X t' ω + simpleDrift s c N t' ω) - (X s' ω + simpleDrift s c N s' ω))
+              (fun ω ↦ (X v' ω + simpleDrift s c N v' ω) - (X u' ω + simpleDrift s c N u' ω))
+            (P.withDensity fun ω ↦
+              ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω))) := by
+  have hdneg : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ -(c i ω)) :=
+    fun i ↦ (hc i).neg
+  have hbneg : ∀ i ω, |(-(c i ω))| ≤ K := fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω
+  haveI : IsProbabilityMeasure (P.withDensity fun ω ↦
+      ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) :=
+    simpleGirsanovMeasure_isProbabilityMeasure (X := X) (𝓕 := 𝓕) s hs _ hdneg hbneg N T
+  exact isQBrownianMotion_of_expMartingale
+    (isExpQMartingale_BthetaSimple (X := X) (𝓕 := 𝓕) s hs hs0 c hc hc_bdd N hNT)
 
 end MathFin

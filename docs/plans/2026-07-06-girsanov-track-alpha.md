@@ -100,19 +100,24 @@ green. This validates the abstraction against a known-good instance before simpl
 - ✅ **`simple_spine_ae`** — the a.e. form `E^{−c}·exp(a·B^θ − ½a²·) =ᵐ[P] E^{a−c}` (since
   `X_0 = 0` a.e.), the exact analogue of `Wald(−θ)·Wald(a) = Wald(a−θ)` in the constant-θ file.
 
-**Remaining α3 (the Q-side assembly):** feed the spine to `changeOfMeasure_setIntegral_eq` (Bayes) so
-`exp(a·B^θ − ½a²·)` is a `Q`-martingale; package `IsExpQMartingale` and apply
-`isQBrownianMotion_of_expMartingale` (**no charFun chain** — the abstraction's payoff). The engine
-needs two things not yet built, both genuinely harder than the constant-θ analogues:
-(1) **`hmix`** — `Integrable (exp(a·B^θ_u − ½a²u) · Z_T)`, i.e. an *N-fold* product of correlated
-Gaussian exponentials (const-θ had a clean 2-term AM–GM; here it needs a multi-time exponential
-integrability, e.g. dominate each random `c_i`-cell by two fixed-`±K` Gaussian-MGF cells and induct
-with pairwise independence, or a nonneg martingale pull-out `∫ D_u Z_T = ∫ D_u Z_u` via simple-function
-approximation);
-(2) a **full `Z·D` martingale** — `Z·D =ᵐ E^{a−c}` only on `[0,T]` (beyond `s_N` they diverge by a
-forward Wald factor `exp(a(X_u − X_{s_N}) − ½a²(u − s_N))`), so the engine's full-martingale hypothesis
-needs the beyond-`s_N` Wald handling (or a `[0,T]`-restricted engine variant).
-Deliverable: `Btheta_simple_isQBrownianMotion` + **`full` benchmark** `gir-simple-adapted`.
+**α3 Q-SIDE ✅ COMPLETE (2026-07-06).** `Btheta_simple_isQBrownianMotion` — `B^θ` is a `Q`-Brownian
+motion for simple (piecewise-constant adapted) θ, strictly beyond constant θ, on the existing tower
+with **no** adapted-integrand Itô formula. The two pieces that were genuinely harder than the
+constant-θ analogues, both solved:
+- **`integrable_expBthetaSimple_mul_density`** (the mixed-time `hmix`, `D_u·Z_T ∈ L¹`) — NOT the feared
+  N-fold induction, but a clean **L² Hölder** (`MemLp.mul`, `L²·L² ⊆ L¹`): `D_u ∈ L²` by the Gaussian
+  MGF of `X_u` with the drift bounded (`simpleDrift_abs_le`, `|drift_u| ≤ K·u`), and `Z_T ∈ L²`
+  because `Z_T² = E^{−2c}_T · exp(∑ c_i²Δτ_i)` with `∑ c_i²Δτ_i ≤ K²T` — an integrable density times a
+  bounded factor.
+- **the full `Z·D` martingale, sidestepped** — instead of proving `Z·D` a martingale on all of `ℝ≥0`
+  (which diverges beyond `s_N`), the engine's helper `∫_A D_u dQ = ∫_A Z_u D_u dP` was **inlined** and
+  the final step done with `simple_spine_ae` (`Z·D =ᵐ E^{a−c}` on `[0,T]`) + the `E^{a−c}` martingale's
+  `setIntegral_eq` — so only the `[0,T]` spine is needed, never the beyond-`s_N` behaviour.
+
+`isExpQMartingale_BthetaSimple` packages the three `IsExpQMartingale` fields; `Btheta_simple_isQBrownianMotion`
+is one application of `isQBrownianMotion_of_expMartingale` (the abstraction's payoff — no charFun chain).
+Deliverable **shipped**: `full` benchmark `gir-simple-adapted`, AxiomAuditGen guard, axioms-clean.
+**Brick α3 is DONE.** Only α4 (continuous adapted θ) and α5 (flip `gir-thm-9.1.8`) remain.
 
 ### Brick α4 — continuous bounded adapted θ (the hard analytic brick; may be several sessions)
 Approximate continuous bounded adapted `θ` by simple `θ⁽ⁿ⁾` in `L²(dt×dP)`; `E^{−c⁽ⁿ⁾}_T → Z_T` in `L¹(P)` (bounded θ ⟹ uniform `L²` control); the charFun identity for `B^θ` increments under `Q⁽ⁿ⁾` passes to the limit. Needs the stochastic-integral density `∫θdB` as the `L²` limit of `Σ c⁽ⁿ⁾ᵢΔXᵢ` (the tower's `itoIntegralCLM_T`, with the σ-realization half of SP0 — the sub-interval increment API is **not** needed). Deliverable: `Btheta_isQBrownianMotion_adapted`.
