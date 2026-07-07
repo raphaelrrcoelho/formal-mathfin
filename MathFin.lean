@@ -135,6 +135,8 @@ import MathFin.Foundations.FiniteMeasureCauchySchwarz
 import MathFin.Foundations.DriftProcessPredictable
 -- σ-realization: a bounded adapted continuous process as an Itô-integrand L² class (α4 gap)
 import MathFin.Foundations.AdaptedProcessToLp
+-- Bounded-in-L² ⟹ uniformly-integrable-in-L¹ (Chebyshev truncation; the α4 Vitali producer)
+import MathFin.Foundations.UnifIntegrableL2
 -- The Picard map and its contraction estimate (SDE existence, #44)
 import MathFin.Foundations.SDEExistence
 -- Pathwise SDE uniqueness via the L²-energy Grönwall argument (#19)
