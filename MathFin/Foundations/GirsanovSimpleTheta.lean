@@ -11,21 +11,34 @@ public import MathFin.Foundations.ChangeOfMeasure
 public import MathFin.Foundations.ExpMartingaleQBrownian
 
 /-!
-# Simple (piecewise-constant adapted) Girsanov — the density measure
+# Simple (piecewise-constant adapted) Girsanov — `B^θ` is a `Q`-Brownian motion
 
 Route-α, brick α3 (`docs/plans/2026-07-06-girsanov-track-alpha.md`). For a market price of risk
-`θ` that is **simple** (piecewise-constant adapted) over a partition `s : ℕ → ℝ≥0`, the Girsanov
-density is the simple Doléans exponential `Z_T = simpleDoleansExp s d N T` (`d = −c` the drift
-multipliers). Since `Z` is a `P`-martingale (`simpleDoleansExp_isMartingale`, α2), positive, and
-starts at `1`, its `P`-mean is `1`, so `Q = P.withDensity Z_T` is a probability measure — the
-foundation on which the drift-corrected process `B^θ` is shown to be a `Q`-Brownian motion.
+`θ` that is **simple** (piecewise-constant adapted) over a partition `s : ℕ → ℝ≥0` with bounded,
+`𝓕_{s i}`-measurable multipliers `c`, the Girsanov density is the simple Doléans exponential
+`Z_T = E^{−c}_T` (`simpleDoleansExp s (fun i ↦ −c i) N T`). Under `Q = P.withDensity Z_T`, the
+drift-corrected process `B^θ_t = X_t + ∑_i c_i (s_{i+1}∧t − s_i∧t)` is a genuine `Q`-Brownian
+motion — the general bounded-**adapted**-θ Girsanov for the simple case, strictly beyond constant
+θ, on the existing tower with no adapted-integrand Itô formula.
 
-This file lands the measure-side foundation:
-* `MathFin.simpleDoleansExp_zero`, `simpleDoleansExp_pos` — the density is `1` at `t = 0` and
-  strictly positive;
-* `MathFin.simpleDoleansExp_integral_eq_one` — unit `P`-mean, from the martingale property;
+The route is the process-agnostic exponential characterization
+`Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale`: supply the exponential
+martingale `exp(a·B^θ − ½a²·)` and read off the `Q`-Brownian properties, with no
+characteristic-function chain re-derived. The two ingredients specific to simple θ are:
+* the **spine** (`simple_spine`, `simple_spine_ae`): `E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}`, i.e.
+  `Z·D` is again a simple Doléans density (the "tilted density" trick);
+* the **mixed-time integrability** (`integrable_expBthetaSimple_mul_density`): `D_u·Z_T ∈ L¹` by an
+  `L²` Hölder — `D_u ∈ L²` by the Gaussian MGF of `X_u` with the drift bounded, and `Z_T ∈ L²`
+  because `Z_T² = E^{−2c}_T · exp(∑ c_i²Δτ_i)` with `∑ c_i²Δτ_i ≤ K²T`.
+
+## Main results
+
 * `MathFin.simpleGirsanovMeasure_isProbabilityMeasure` — `Q = P.withDensity Z_T` is a probability
-  measure.
+  measure;
+* `MathFin.isExpQMartingale_BthetaSimple` — `B^θ` packaged as exponential-martingale data over
+  `[0,T]`;
+* `MathFin.Btheta_simple_isQBrownianMotion` — `B^θ` is a `Q`-Brownian motion (zero start, `N(0,t−s)`
+  increments, independent disjoint increments).
 -/
 
 @[expose] public section
@@ -222,6 +235,18 @@ lemma stronglyMeasurable_simpleDrift {s : ℕ → ℝ≥0} (hs : Monotone s) {c 
 
 omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
 include hX in
+/-- The pre-Brownian motion starts at `0` a.e.: `X_0` has law `𝒩(0,0) = δ_0`. -/
+private theorem X0_ae_eq_zero : ∀ᵐ ω ∂P, X 0 ω = 0 := by
+  have hmeasX0 : Measurable (X 0) := ((hX.stronglyAdapted 0).mono (𝓕.le 0)).measurable
+  have hmap := Measure.map_apply (μ := P) hmeasX0 (measurableSet_singleton (0 : ℝ)).compl
+  rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
+      Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
+  have hpre : X 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | X 0 ω ≠ 0} := by ext ω; simp [Set.mem_preimage]
+  rw [hpre] at hmap
+  exact ae_iff.mpr (by simpa using hmap.symm)
+
+omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
+include hX in
 /-- **The simple Girsanov spine, a.e. form.** For a partition covering `[0,t]` (`s_0 = 0`,
 `t ≤ T ≤ s_N`), the product of the density `Z = E^{−c}` and the drift-corrected exponential
 `exp(a·B^θ_t − ½a²t)` is a.e. equal to the tilted simple Doléans exponential `E^{a−c}_t` — because
@@ -233,15 +258,7 @@ theorem simple_spine_ae (s : ℕ → ℝ≥0) (hs0 : s 0 = 0) (c : ℕ → Ω �
     (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N t ω
         * Real.exp (a * (X t ω + simpleDrift s c N t ω) - a ^ 2 * (t : ℝ) / 2))
       =ᵐ[P] fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ a - c i ω) N t ω := by
-  have hX0 : ∀ᵐ ω ∂P, X 0 ω = 0 := by
-    have hmeasX0 : Measurable (X 0) := ((hX.stronglyAdapted 0).mono (𝓕.le 0)).measurable
-    have hmap := Measure.map_apply (μ := P) hmeasX0 (measurableSet_singleton (0 : ℝ)).compl
-    rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
-        Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
-    have hpre : X 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | X 0 ω ≠ 0} := by ext ω; simp [Set.mem_preimage]
-    rw [hpre] at hmap
-    exact ae_iff.mpr (by simpa using hmap.symm)
-  filter_upwards [hX0] with ω hω
+  filter_upwards [X0_ae_eq_zero (X := X) (𝓕 := 𝓕)] with ω hω
   rw [simple_spine s hs0 c a N htT hNT ω, hω, mul_zero, Real.exp_zero, one_mul]
 
 include hX in
@@ -360,15 +377,7 @@ theorem isExpQMartingale_BthetaSimple (s : ℕ → ℝ≥0) (hs : Monotone s) (h
     have hQP : (P.withDensity fun ω ↦
         ENNReal.ofReal (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω)) ≪ P :=
       withDensity_absolutelyContinuous _ _
-    have hX0 : ∀ᵐ ω ∂P, X 0 ω = 0 := by
-      have hmeasX0 : Measurable (X 0) := ((hX.stronglyAdapted 0).mono (𝓕.le 0)).measurable
-      have hmap := Measure.map_apply (μ := P) hmeasX0 (measurableSet_singleton (0 : ℝ)).compl
-      rw [(hX.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
-          Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
-      have hpre : X 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | X 0 ω ≠ 0} := by ext ω; simp [Set.mem_preimage]
-      rw [hpre] at hmap
-      exact ae_iff.mpr (by simpa using hmap.symm)
-    filter_upwards [hQP.ae_le hX0] with ω hω
+    filter_upwards [hQP.ae_le (X0_ae_eq_zero (X := X) (𝓕 := 𝓕))] with ω hω
     simp [hω, simpleDrift_zero]
   · -- martingale field via the inlined Bayes change-of-measure engine
     intro a s' t' hst' ht'T A hA

@@ -131,9 +131,19 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > characteristic function at `w = (w₁, w₂)` is the charFun-at-`1` of the Gaussian law of the linear
 > combination `w₁·I₁ + w₂·I₂` (from the joint-MGF factorisation — a
 > `condExp_mul_of_stronglyMeasurable_left` pull-out), so it factors into the two marginal Gaussian
-> characteristic functions (`charFun_gaussianReal`) — no adapted-integrand Itô formula. **Open (still `reduced_core`):** the *general bounded-adapted*-`θ`
-> Girsanov (`gir-thm-9.1.8`, the drift-corrected `B^θ = B − ∫θ ds` for adapted `θ`) — its adapted
-> drift needs an adapted-integrand Itô formula / pathwise quadratic variation absent from the Itô tower.
+> characteristic functions (`charFun_gaussianReal`) — no adapted-integrand Itô formula.
+>
+> **Simple (piecewise-constant) adapted θ — now `full` (2026-07-06):** `gir-simple-adapted`
+> (`Foundations/GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion`) proves `B^θ_t = X_t + ∑_i c_i
+> (s_{i+1}∧t − s_i∧t)` is a `Q`-Brownian motion under `Q = P.withDensity(E^{−c}_T)` for bounded
+> `𝓕_{s i}`-measurable multipliers — the general bounded-**adapted**-θ Girsanov for the simple case,
+> strictly beyond constant θ, via one application of `isQBrownianMotion_of_expMartingale` (no charFun
+> chain re-derived). The two simple-θ-specific ingredients: the spine `simple_spine_ae`
+> (`E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}`) and the mixed-time integrability
+> `integrable_expBthetaSimple_mul_density` (an `L²` Hölder: `Z_T² = E^{−2c}_T·exp(∑ c_i²Δτ_i)` with
+> `∑ c_i²Δτ_i ≤ K²T`). **Open (still `reduced_core`):** only the *fully general continuous-adapted*-`θ`
+> Girsanov (`gir-thm-9.1.8`, the drift-corrected `B^θ = B − ∫θ ds` for continuous adapted `θ`) — it
+> needs an `L²` approximation of continuous θ by the simple case (or an adapted-integrand Itô formula).
 
 > **Prior round (2026-06-29, Phase 1 — the convex-duality unification: pricing = risk):** corpus
 > **306**, **271 full + 18 wrappers = 289/306 delivery-ready**, 17 reduced cores, 0 placeholders.
