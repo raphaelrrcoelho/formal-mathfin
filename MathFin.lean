@@ -133,6 +133,8 @@ import MathFin.Foundations.ItoProcessPredictable
 -- Cauchy–Schwarz on a finite measure (shared by the drift L² bound and SDE uniqueness)
 import MathFin.Foundations.FiniteMeasureCauchySchwarz
 import MathFin.Foundations.DriftProcessPredictable
+-- σ-realization: a bounded adapted continuous process as an Itô-integrand L² class (α4 gap)
+import MathFin.Foundations.AdaptedProcessToLp
 -- The Picard map and its contraction estimate (SDE existence, #44)
 import MathFin.Foundations.SDEExistence
 -- Pathwise SDE uniqueness via the L²-energy Grönwall argument (#19)

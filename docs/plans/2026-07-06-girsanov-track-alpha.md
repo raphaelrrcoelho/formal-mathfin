@@ -133,18 +133,25 @@ Deliverable **shipped**: `full` benchmark `gir-simple-adapted`, AxiomAuditGen gu
   sums for a bounded *continuous* integrand `φ∘B`).
 - `Btheta_simple_isQBrownianMotion` (the α3 target to pass to the limit) + the `IsExpQMartingale` abstraction.
 
-**The two pieces that must be WRITTEN (the α4 work):**
-1. **`processToLp_of_bdd_adapted_cont`** — the **σ-realization** (half (i) of SP0): realize a bounded adapted
-   *continuous* raw `σ : ℝ≥0 → Ω → ℝ` as an integrand class `φ ∈ Lp 2 (trimMeasure_T)` (predictable-measurability
-   as an a.e. limit of simple processes + L² membership + `.toLp`). **This is the load-bearing gap** — no
-   shortcut lemma in Degenne (`isStronglyPredictable` is only for `SimpleProcess`; `predictableConvexStep` /
-   `predictablePartLim` are the tools but connecting a continuous adapted process to them is the substantial
-   work). Design doc (`docs/specs/2026-07-05-adapted-ito-formula-design.md:101`) rates it "substantial." The
-   sub-interval increment API (half (ii)) is **not** needed for α4.
-2. **L²-exponent → L¹-density**: turn `∫θⁿdB − ½∫(θⁿ)²ds → ∫θdB − ½∫θ²ds` in L² into `E^{−c⁽ⁿ⁾}_T → Z_T` in
-   L¹(P) (uniform-integrability control from bounded θ), then pass the α3 charFun/increment identity to the limit.
-Deliverable: `Btheta_isQBrownianMotion_adapted`. **Status: NOT started — its own focused effort; α3 (simple) is
-already an honest `full` deliverable strictly beyond constant θ, so the program ships value regardless.**
+**The two pieces of the α4 work:**
+1. **σ-realization ✅ DONE (2026-07-06)** — `MathFin/Foundations/AdaptedProcessToLp.lean`:
+   `isStronglyPredictable_of_bdd_adapted_cont` + `memLp_uncurry_of_bdd_adapted_cont` + **`processToLp`**
+   (+ `processToLp_coeFn`). Realizes a bounded, adapted, every-`ω`-continuous `σ : ℝ≥0 → Ω → ℝ` as an integrand
+   class in `Lp 2 (trimMeasure_T T)` (the domain of `itoIntegralCLM_T`). **The feared "load-bearing gap" was NOT
+   substantial:** the deep recon (superseding the earlier "predictability as an a.e. limit of simple processes"
+   scare) found Degenne's `StronglyAdapted.isStronglyPredictable_of_leftContinuous` (every-`ω` continuity gives
+   the left-continuity it wants) and the tower's own `DriftProcessPredictable.driftSimpleProcessLp` recipe. My
+   lemma is that recipe with the concrete drift replaced by a general hypothesized `σ` — a ~30-line assembly
+   (`isStronglyPredictable_of_leftContinuous` → `.aestronglyMeasurable` → `MemLp.of_bound` on the finite
+   `trimMeasure_T` → `.toLp`), green + axioms-clean on the first pass. (For an *only-a.e.*-continuous `σ` one
+   would route through the `limUnder` pattern of `ItoProcessPredictable`; not needed — bounded adapted continuous
+   θ is every-`ω`-continuous.)
+2. **L²-exponent → L¹-density** (remaining): with `processToLp`, form `∫θdB` (`itoIntegralCLM_T (processToLp …)`)
+   and the Doléans density `Z_T = exp(−∫θdB − ½∫θ²ds)`; approximate θ by simple θ⁽ⁿ⁾ (density
+   `simpleAssembly_T_denseRange` + CLM-continuity gives `∫θⁿdB → ∫θdB` in L²), turn `∫θⁿdB − ½∫(θⁿ)²ds → …` in L²
+   into `E^{−c⁽ⁿ⁾}_T → Z_T` in L¹(P) (uniform-integrability from bounded θ), then pass the α3 charFun/increment
+   identity to the limit. Deliverable: `Btheta_isQBrownianMotion_adapted`.
+**Status: σ-realization landed; the L²→L¹ density-convergence analysis is the remaining α4 work.**
 
 ### Brick α5 — flip `gir-thm-9.1.8` → full + wire
 **Gated on α4** (the `full` flip re-exports `Btheta_isQBrownianMotion_adapted`, which α4 must first build).
