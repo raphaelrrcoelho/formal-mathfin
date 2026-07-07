@@ -330,6 +330,10 @@ import MathFin.FixedIncome.CDSTimeVarying
 import MathFin.FixedIncome.VasicekSDE
 -- Itô→pricing bridge: Vasicek terminal law derived (Wiener integral is Gaussian)
 import MathFin.FixedIncome.VasicekSDEGaussian
+-- Vasicek zero-coupon bond price: the affine term structure (Gaussian Laplace transform)
+import MathFin.FixedIncome.VasicekBondPrice
+-- The T-forward measure: the zero-coupon bond as numéraire (change-of-numéraire instance)
+import MathFin.FixedIncome.ForwardMeasure
 
 -- Portfolio
 import MathFin.Portfolio.Markowitz

@@ -60,6 +60,25 @@ breadth at this stage, and what the concrete next round would look like.
 > predictable class) plus an `L²→L¹` density-convergence step — its own focused effort (brick α4, see
 > `docs/plans/2026-07-06-girsanov-track-alpha.md`).
 
+> **Update (2026-07-07) — finance-delivery breadth: the Vasicek affine bond price + the T-forward measure
+> (corpus 315 → 317, [#46](https://github.com/raphaelrrcoelho/formal-mathfin/issues/46)).** A pause on the
+> Girsanov-α4 depth track to cash in two finance-delivery items off machinery already load-bearing — no new
+> frontier. (1) **Vasicek zero-coupon bond price** (`FixedIncome/VasicekBondPrice`, entry
+> `mf-vasicek-bond-price`, **`full`**): `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` as the Gaussian Laplace transform of the
+> integrated short rate, collapsing to the **affine term structure** `P = A(T)·exp(−B(T)·r₀)`,
+> `B(T) = (1−e^{−κT})/κ`. Fubini-free by carrying `∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB` in its Wiener representation
+> (integrated OU kernel `g(u) = (1−e^{−κ(T−u)})/κ`, exactly one integration up from the OU-solution model
+> `mf-vasicek-sde-terminal-gaussian` already `full`); law from `wienerIntegralLp_hasLaw_gaussian` + the FTC
+> `∫₀ᵀ g² = V(T)`; price from the centred Gaussian MGF. The `vasicekShortRate_hasLaw_gaussian` derivation is now
+> load-bearing for pricing, not an orphan. (2) **T-forward measure** (`FixedIncome/ForwardMeasure`, entry
+> `mf-forward-measure-spot`, **`full`**): the ZCB-as-numéraire measure `Q^T` with `𝔼^{Q^T}[S_T] = S_0/P(0,T) =
+> F(0,T)` — the natural next `changeOfNumeraire` instance the finance-delivery track wanted, honestly scoped
+> (degenerate `Q^T = Q` under the constant-rate ZCB; construction carries to stochastic rates). **Not built,
+> honestly:** CVaR's Rockafellar–Uryasev variational theorem was found **already complete**
+> (`gaussianCVaR_isLeast_ruObjective`), as was the coherence quartet; the geometric-Asian *closed-form price*
+> (only the AM-GM payoff bound `mf-asian-geom-le-arith-two` exists) stays open — it needs the BM joint-Gaussian
+> covariance `(1/n²)∑∑min(tᵢ,tⱼ)`, a focused effort not to be rushed. Depth track (Girsanov-α4) resumes next.
+
 > **DELIVERED (2026-07-03) — SDE existence made pathwise: the E-fixed point as a sample-path process
 > ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19) → existence bridge).** The Picard
 > solution, previously banked only as the abstract `L²`-fixed point `picardSolution ∈ E`, is now realized

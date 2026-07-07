@@ -3470,6 +3470,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export of MathFin.exchangeOption_numeraire_price (MathFin/BlackScholes/ExchangeOption.lean): the exchange option's value in the S²-numéraire equals its value under the reference measure Q, as an instance of the general changeOfNumeraire law (Foundations/Numeraire.lean) at X = the exchange payoff, N = S², B ≡ 1, composed with the existing exchange_payoff_eq_ratio. Needs no integrability hypothesis, only strict positivity S²_T > 0. NOTE: ExchangeOption and GarmanNormalForm otherwise contain NO withDensity measure (their numéraire content is payoff algebra / d₁-d₂ closed form), so this is the one genuine measure-level numéraire instance they support — not a fabricated wrapper. No axioms beyond Mathlib defaults."
       }
+    },
+    {
+      "id": "mf-vasicek-bond-price",
+      "name": "Vasicek Zero-Coupon Bond Price (Affine Term Structure)",
+      "domain": "mathematical_finance",
+      "description": "The Vasicek short-rate model prices the zero-coupon bond as P(0,T) = E[exp(-∫₀ᵀ r_s ds)], the risk-neutral present value of one unit at T. Under Vasicek the integrated short rate ∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB is again Gaussian (integrated OU kernel g(u) = (1-e^{-κ(T-u)})/κ), so the bond price is a Gaussian Laplace transform and collapses to the classical AFFINE TERM STRUCTURE P(0,T) = A(T)·exp(-B(T)·r₀) with B(T) = (1-e^{-κT})/κ. The exponential-affine dependence on the initial short rate r₀ is the defining property of an affine term-structure model.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.VasicekBondPrice\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Vasicek zero-coupon bond price — the affine term structure.**\nThe risk-neutral present value `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` of one unit paid\nat `T` under the Vasicek short-rate model separates the initial rate into the\nexponential-affine form `P(0,T) = A(T)·exp(−B(T)·r₀)`, `B(T) = (1−e^{−κT})/κ`.\nRe-exports `MathFin.vasicekBondPrice_affine`. -/\ntheorem vasicek_bond_price_affine\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)\n    (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :\n    ∫ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω)) ∂μ\n      = vasicekBondA θ σ κ (T : ℝ) * Real.exp (-(vasicekBondB κ (T : ℝ) * r₀)) :=\n  MathFin.vasicekBondPrice_affine hB r₀ θ σ hκ T\n"
+      },
+      "metadata": {
+        "chapter": 12,
+        "reference": "Vasicek 1977 short-rate model; the affine zero-coupon bond price P(0,T) = A(T)·exp(-B(T)·r₀)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.VasicekBondPrice (vasicekBondPrice_affine). The Vasicek zero-coupon bond price P(0,T) = E[exp(-int_0^T r_s ds)] as the Gaussian Laplace transform of the integrated short rate, collapsing to the affine term structure P = A(T)*exp(-B(T)*r0), B(T) = (1-e^{-kappa T})/kappa. The integrated rate int_0^T r_s ds = M(T) + sigma*int_0^T g dB is carried in its Wiener representation (integrated OU kernel g(u) = (1-e^{-kappa(T-u)})/kappa; the deterministic time-order swap is the modelling bridge, cited not proven -- parity with the OU-solution model of mf-vasicek-sde-terminal-gaussian). Its Gaussian law N(M, sigma^2 V) follows from wienerIntegralLp_hasLaw_gaussian + the FTC variance integral int_0^T g^2 = V(T) (vasicekIntegratedKernel_integral_sq, antiderivative u/kappa^2 - 2e^{-kappa(T-u)}/kappa^3 + e^{-2kappa(T-u)}/(2kappa^3)); the bond price factors exp(-M)*E[exp(-sigma*int g dB)] = exp(-M + sigma^2 V/2) via the centred Gaussian MGF integral_exp_mul_gaussianReal_zero at -sigma. Second consumer of the deterministic-integrand Wiener tower in FixedIncome. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
+    },
+    {
+      "id": "mf-forward-measure-spot",
+      "name": "Forward Price under the T-Forward Measure",
+      "domain": "mathematical_finance",
+      "description": "The T-forward measure Q^T is the pricing measure with the zero-coupon bond P(·,T) as numéraire. Its defining property is that the forward price is the Q^T-expectation of the spot: E^{Q^T}[S_T] = S_0/P(0,T) = S_0·e^{rT} = F(0,T), the no-arbitrage forward price. Built as a change-of-numéraire instance (bond slots N_T = P(T,T) = 1, N_0 = P(0,T) = e^{-rT}, money-market reference B_T = e^{rT}, B_0 = 1), the natural next numéraire instance after the stock and exchange-option S²-numéraires.",
+      "code": {
+        "lean": "import MathFin.FixedIncome.ForwardMeasure\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin\n\n/-- **Black–Scholes forward price under the T-forward measure.**\nWith the zero-coupon bond `P(·,T)` as numéraire, the forward price of the spot is\nits `Q^T`-expectation: `𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T) = F(0,T)`, the\nno-arbitrage forward price. Re-exports `MathFin.forwardMeasure_bs_expected_terminal`. -/\ntheorem forward_measure_bs_expected_terminal\n    {Ω : Type*} [MeasurableSpace Ω] {Q : Measure Ω} [IsProbabilityMeasure Q]\n    {S_0 K r σ T : ℝ} {Z : Ω → ℝ} (h : BSCallHyp Q S_0 K r σ T Z) :\n    ∫ ω, bsTerminal S_0 r σ T (Z ω) ∂(forwardMeasure Q r T) = S_0 * Real.exp (r * T) :=\n  MathFin.forwardMeasure_bs_expected_terminal h\n"
+      },
+      "metadata": {
+        "chapter": 10,
+        "reference": "The T-forward measure (Geman-El Karoui-Rochet); the forward price as the bond-numeraire expectation of the spot",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.ForwardMeasure (forwardMeasure_bs_expected_terminal). The T-forward measure Q^T (zero-coupon bond P(.,T) as numeraire) satisfies E^{Q^T}[S_T] = S_0*e^{rT} = S_0/P(0,T) = F(0,T), the no-arbitrage forward price. Built as a numeraireMeasure instance (N_T = P(T,T) = 1, N_0 = P(0,T) = e^{-rT}, reference B_T = e^{rT}, B_0 = 1) on the change-of-numeraire engine (MathFin.changeOfNumeraire, no integrability hypothesis): forwardMeasure_price gives e^{-rT}*E^{Q^T}[X] = E^Q[e^{-rT}X] for any claim, and combined with the discounted-terminal EMM property discounted_terminal_eq_S0 yields the forward price of the BS terminal. HONEST SCOPE: in the constant-rate ZCB the density dQ^T/dQ = 1 so Q^T = Q coincides with the risk-neutral measure (the construction generalizes verbatim to a stochastic short rate where Q^T != Q). Natural next numeraire instance after the stock and S^2-numeraires. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
     }
   ]
 }

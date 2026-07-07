@@ -26,7 +26,29 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-03, SDE existence made pathwise — the E-fixed point as a sample-path process,
+> **Live status (2026-07-07, finance breadth — the Vasicek affine bond price + the T-forward measure):**
+> corpus **317**, **283 full + 18 wrappers = 301/317 delivery-ready**, 16 reduced cores, 0 placeholders.
+> Two new `full` fixed-income entries, both consuming machinery already load-bearing (no new frontier;
+> `lake build` 8852 green, all 19 gates + ledger 317 fresh, both axioms-clean).
+> (1) `mf-vasicek-bond-price` (`FixedIncome/VasicekBondPrice.vasicekBondPrice_affine`): the Vasicek
+> zero-coupon bond price `P(0,T) = 𝔼[exp(−∫₀ᵀ r_s ds)]` as the Gaussian Laplace transform of the integrated
+> short rate, collapsing to the **affine term structure** `P(0,T) = A(T)·exp(−B(T)·r₀)`, `B(T) = (1−e^{−κT})/κ`.
+> The integrated rate `∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB` is carried in its Wiener representation (integrated OU
+> kernel `g(u) = (1−e^{−κ(T−u)})/κ`; the deterministic time-order swap is the modelling bridge, cited — parity
+> with the OU-solution model of `mf-vasicek-sde-terminal-gaussian`), its Gaussian law `N(M, σ²V)` from
+> `wienerIntegralLp_hasLaw_gaussian` + the FTC variance integral `∫₀ᵀ g² = V(T)`, and the price factors
+> `exp(−M)·𝔼[exp(−σ∫g dB)] = exp(−M + σ²V/2)` by the centred Gaussian MGF `integral_exp_mul_gaussianReal_zero`
+> at `−σ`. Second deterministic-integrand-Wiener consumer in FixedIncome. (2) `mf-forward-measure-spot`
+> (`FixedIncome/ForwardMeasure.forwardMeasure_bs_expected_terminal`): the **T-forward measure** `Q^T`
+> (zero-coupon bond as numéraire) with `𝔼^{Q^T}[S_T] = S_0·e^{rT} = S_0/P(0,T) = F(0,T)` — the forward price —
+> as a `changeOfNumeraire` instance (bond slots `N_T = P(T,T) = 1`, `N_0 = P(0,T) = e^{−rT}`), the natural next
+> numéraire instance after the stock and `S²`-numéraires. Honest scope: under the constant-rate ZCB the density
+> `dQ^T/dQ = 1` so `Q^T = Q` coincides with the risk-neutral measure; the construction carries verbatim to a
+> stochastic short rate. CVaR's Rockafellar–Uryasev variational theorem + the coherence quartet were found
+> **already complete** (`RockafellarUryasev`, `CoherentAxioms`); the geometric-Asian *closed-form price*
+> (only the AM-GM inequality bound exists) remains a genuine open item (needs the BM joint-Gaussian covariance).
+>
+> **Prior (2026-07-03, SDE existence made pathwise — the E-fixed point as a sample-path process,
 > #19 → existence bridge):** corpus **312** (unchanged — a Foundations-level formalization advance, not a
 > new benchmark entry). The strong solution, previously banked only as the abstract `L²`-fixed point
 > `picardSolution ∈ E`, is now realized as a genuine **pathwise** process:

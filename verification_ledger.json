@@ -1158,6 +1158,13 @@
       "input_hash": "e972b81a2dca5c7a9911e49a84272306a3eba921442ad7847ad040506ddfd735",
       "verified_at_commit": "eb0aee9"
     },
+    "mf-forward-measure-spot": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-07",
+      "elapsed_s": 33.9,
+      "input_hash": "60392d6d266b80e47322f707f41734192ba8beea799708db6dac5141d5b749a8",
+      "verified_at_commit": "7ccd7e1"
+    },
     "mf-forward-price": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-04",
@@ -1850,6 +1857,13 @@
       "elapsed_s": 68.3,
       "input_hash": "29673edbd2404be310c18d9f3ea1dff721b04ebd5dac90aea5ae51d3f941b28e",
       "verified_at_commit": "eb0aee9"
+    },
+    "mf-vasicek-bond-price": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-07",
+      "elapsed_s": 55.0,
+      "input_hash": "8f35f26b0abd91acfa2850673dcc7d563ed4599883b8c235d6ed7f9cb5198720",
+      "verified_at_commit": "7ccd7e1"
     },
     "mf-vasicek-deterministic-ode": {
       "benchmark_file": "mathematical_finance.json",
