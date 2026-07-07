@@ -275,6 +275,7 @@ lemma cellExp_of_ge_right {a b : ℝ≥0} (hab : a ≤ b) {c : Ω → ℝ} {t : 
   rw [cellExp, min_eq_left hbt, min_eq_left (hab.trans hbt)]
 
 include hX in
+omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
 /-- Integrability of an increment cell factor `exp(c·(X_q − X_p) − ½c²(q−p))` for a bounded
 multiplier and `p ≤ q` — the increment `X_q − X_p` is Gaussian, dominated by two Gaussian MGFs. -/
 private lemma integrable_cellIncrement {c : Ω → ℝ} (hc_meas : Measurable c) {K : ℝ}

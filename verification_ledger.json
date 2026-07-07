@@ -244,9 +244,9 @@
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-07",
-      "elapsed_s": 87.6,
-      "input_hash": "79be5a0392369b960dbea5419372a0b1218977422c7cca6eb8fc8c80d46bfb39",
-      "verified_at_commit": "48f6b6f"
+      "elapsed_s": 108.0,
+      "input_hash": "aa903a6f484b34d505b1979c96b4445e469960d7221934e13b586eb041a5f9be",
+      "verified_at_commit": "6e301c8"
     },
     "gir-thm-9.1.7": {
       "benchmark_file": "girsanov_finance.json",
@@ -1867,10 +1867,10 @@
     },
     "mf-vasicek-sde-terminal-gaussian": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-07-04",
-      "elapsed_s": 52.2,
-      "input_hash": "8f2fc71328794b5a58e449e464a244211e8ee92fc9f4107d93b41dc130b1110e",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 15.8,
+      "input_hash": "b35246b8d5b252bb84891a5a230ef0af87329ba67f7c25120efa2544419d0d2a",
+      "verified_at_commit": "6e301c8"
     },
     "mf-vega": {
       "benchmark_file": "mathematical_finance.json",
@@ -1965,10 +1965,10 @@
     },
     "sc-discounted-gbm-ito": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 105.8,
-      "input_hash": "2842a8ac84bcac98d0417cfb423daed1bb0df9dca254ccdc6d510e3510bde410",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 56.7,
+      "input_hash": "2b723eacad775bbcd7c3bb4b024126dc171d2cfffd9829754054f0eee035b775",
+      "verified_at_commit": "6e301c8"
     },
     "sc-discrete-cubing-identity": {
       "benchmark_file": "stochastic_calculus.json",
@@ -1993,24 +1993,24 @@
     },
     "sc-ito-formula-gbm": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 77.2,
-      "input_hash": "ca5a3ed569064950ffa17fabbd8ac6d1121660e4fa574f13ffc6be889b52bd04",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 101.6,
+      "input_hash": "9baa2cb2a131e2f2484e9bd2f3066781e50e6ec1334a169dc91b80c894858f9e",
+      "verified_at_commit": "6e301c8"
     },
     "sc-ito-formula-ito-process": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 123.4,
-      "input_hash": "8091fd2d4cce9d53225f8e84f6f464cc8388ad4506ceac2bebdfb0f066a13d5b",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 50.1,
+      "input_hash": "ec7daca5672e18b96a01de216b000c484e938bb206cd35d1c3d0f4548cea5f8c",
+      "verified_at_commit": "6e301c8"
     },
     "sc-ito-formula-localized": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 86.1,
-      "input_hash": "14d0b9e07e585991d7f3f4a59e391f8680cc5bed0a5b85c7f914b0f73b8818ec",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 110.7,
+      "input_hash": "54e68b6a290addd31420c1a9cd8a731cb2878238e48ae7eb2ac022cb594b3584",
+      "verified_at_commit": "6e301c8"
     },
     "sc-ito-formula-td-process": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2021,17 +2021,17 @@
     },
     "sc-ito-formula-unrestricted-islocalmartingale": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 84.6,
-      "input_hash": "89fe4eb03392b26a8e0afcd99dd2e543d15278e69dc4d65f609fcb574108a4e1",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 98.1,
+      "input_hash": "606978c155f7e058f2ed3eb7e8472ddcf0ac276d1f592c1a0f95136a21aa4fb4",
+      "verified_at_commit": "6e301c8"
     },
     "sc-ito-formula-unrestricted-local": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 110.2,
-      "input_hash": "f761f33458863fca70c9698cb84a30a8c939745e63b7975f7f17fce45825495b",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 44.3,
+      "input_hash": "2c3d8272b2639d8617d34e9e8695361c9092ea12e5f2495a2ce81e29fdf716f0",
+      "verified_at_commit": "6e301c8"
     },
     "sc-ito-general-continuous-modification": {
       "benchmark_file": "stochastic_calculus.json",
@@ -2196,10 +2196,10 @@
     },
     "sc-wiener-integral-gaussian": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 57.4,
-      "input_hash": "e0303f25af682ba82aa6974cf3acbd1a72a61a5205ea781566329e3f2aad98f6",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-07",
+      "elapsed_s": 45.2,
+      "input_hash": "bf3f46a5d597244d4ed4304f672797d3babd68ef8dc993f3326ea98de499f4a9",
+      "verified_at_commit": "6e301c8"
     },
     "sde-picard-existence-uniqueness": {
       "benchmark_file": "stochastic_calculus.json",

@@ -84,6 +84,7 @@ lemma wienerIntegralLp_stepAssembly (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
 
 /-! ### Simple processes are Gaussian -/
 
+omit [IsProbabilityMeasure μ] in
 /-- Explicit a.e. form of the elementary integral: `wienerAssembly B hB T x`
 agrees a.e. with the finite sum of scaled Brownian increments. -/
 lemma wienerAssembly_coeFn (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
@@ -108,6 +109,7 @@ lemma wienerAssembly_coeFn (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   rw [Finset.sum_apply]
   exact Finset.sum_congr rfl (fun i hi => hω i hi)
 
+omit [IsProbabilityMeasure μ] in
 /-- The scaled-increment family `i ↦ xᵢ (B_{hiᵢ} − B_{loᵢ})` is a Gaussian
 process: each value is a (continuous-linear) combination of finitely many
 values of the Gaussian process `B`. -/
@@ -122,6 +124,7 @@ lemma isGaussianProcess_scaledIncrement (hB : IsPreBrownianReal B μ) (T : ℝ�
   intro ω
   simp [Finset.restrict]
 
+omit [IsProbabilityMeasure μ] in
 /-- A simple (step-process) Wiener integral has a Gaussian law. -/
 lemma wienerAssembly_hasGaussianLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (x : StepIndex T →₀ ℝ) :

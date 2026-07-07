@@ -442,6 +442,7 @@ theorem cutoff_bddDeriv (hBmeas : ∀ t, Measurable (B t))
       exact mul_le_mul_of_nonneg_left hb (by norm_num)
     · rw [abs_mul]; exact mul_le_mul (hcb f_x hg_x t x) (S.cutD3_bdd n x) (abs_nonneg _) hEn0
 
+omit [IsProbabilityMeasure μ] in
 /-- **The path integral of an exponential-growth integrand lies in `L²(μ)`.** For a weight
 `w : ℝ≥0 → ℝ → ℝ`, measurable in space, with `|w s x| ≤ K·exp(c|x|)`, the pathwise integral
 `ω ↦ ∫₀ᵀ w_s(B_s ω) ds` is square-integrable. This is the exponential-growth generalization
@@ -454,7 +455,7 @@ Cauchy–Schwarz `(∑ w·Δ)² ≤ (∑Δ)(∑ w²·Δ)` plus the Brownian marg
 `∫ exp(2c|B_{tₖ}|) ≤ 2·exp(2c²·tₖ)` bound `∫ (Riemannₙ)² ≤ 2K²T²·exp(2c²T)` uniformly in `n`;
 `lintegral_liminf_le` lifts that to `∫ (path integral)²`. -/
 theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
-    {w : ℝ≥0 → ℝ → ℝ} (hw_meas : ∀ s, Measurable (w s)) {K : ℝ} (hK : 0 ≤ K) {c : ℝ}
+    {w : ℝ≥0 → ℝ → ℝ} (hw_meas : ∀ s, Measurable (w s)) {K : ℝ} (_hK : 0 ≤ K) {c : ℝ}
     (hw_bdd : ∀ s x, |w s x| ≤ K * Real.exp (c * |x|))
     (hw_cont : ∀ ω, Continuous fun s : ℝ≥0 => w s (B s ω)) :
     MemLp (fun ω => ∫ s in Set.Ioc 0 T, w s (B s ω) ∂ItoIntegralL2.timeMeasure) 2 μ := by
@@ -511,7 +512,9 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
   have hgap_nonneg : ∀ n k, (0 : ℝ) ≤ (unifPart T n (k + 1) : ℝ) - unifPart T n k := by
     intro n k
     have : unifPart T n k ≤ unifPart T n (k + 1) := by
-      simp only [unifPart]; gcongr <;> simp
+      simp only [unifPart]
+      gcongr
+      simp
     exact sub_nonneg.mpr (by exact_mod_cast this)
   have hle_T : ∀ n k, k ≤ n → unifPart T n k ≤ T := by
     intro n k hk
@@ -711,6 +714,7 @@ theorem boundary_tendsto_L2 (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (S 
     (ae_of_all _ fun ω => hlim ω)
   simpa using key
 
+omit [IsProbabilityMeasure μ] in
 /-- **Drift `L²` convergence.** The cutoff drift integrand converges to the genuine drift
 `f_t(s,B_s) + ½f_xx(s,B_s)` in `L²(μ)`. For each path, the inner `ds`-integrand converges
 pointwise (`φₙ → id`, `φₙ' → 1`, `φₙ'' /(n+1) → 0`) and is uniformly bounded on the compact
