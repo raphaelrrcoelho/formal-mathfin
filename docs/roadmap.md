@@ -44,10 +44,21 @@ breadth at this stage, and what the concrete next round would look like.
 > **Refactored 2026-07-06:** this ten-lemma characteristic-function chain is now the reusable,
 > process-agnostic `Foundations/ExpMartingaleQBrownian.isQBrownianMotion_of_expMartingale` — const-θ
 > supplies only its exponential martingale (`expBtheta_isQMartingale`, as `IsExpQMartingale`) and
-> instantiates it; the simple-/continuous-θ Route-α bricks reuse the same seam. What
-> stays `reduced_core` is only the general bounded-*adapted*-θ case (`gir-thm-9.1.8`), whose path-dependent
-> drift `θ_s` still needs the adapted-integrand Itô formula. See
+> instantiates it; the simple-/continuous-θ Route-α bricks reuse the same seam. See
 > [#40](https://github.com/raphaelrrcoelho/formal-mathfin/issues/40).
+>
+> **Update (2026-07-06) — SIMPLE (piecewise-constant) adapted θ FULLY CLOSED (corpus 315).** The
+> abstraction paid off: `Foundations/GirsanovSimpleTheta.Btheta_simple_isQBrownianMotion` (corpus
+> `gir-simple-adapted`, `full`) proves `B^θ_t = X_t + ∑_i c_i(s_{i+1}∧t − s_i∧t)` is a `Q`-Brownian
+> motion for bounded `𝓕_{s i}`-measurable multipliers — the general bounded-**adapted**-θ Girsanov for
+> the simple case, strictly beyond constant θ, via the spine `simple_spine_ae` fed to the Bayes engine
+> with an `L²`-Hölder mixed-time integrability, and one application of `isQBrownianMotion_of_expMartingale`
+> (no charFun chain re-derived). What now stays `reduced_core` is only the **fully general
+> continuous-adapted** θ (`gir-thm-9.1.8`) — it is infrastructure-gated, not sorry-blocked: the tower has
+> the Itô-integral CLM isometry (`itoIntegralCLM_T`) and simple-integrand density, so what remains is the
+> **σ-realization** `processToLp_of_bdd_adapted_cont` (a bounded adapted *continuous* integrand as an `L²`
+> predictable class) plus an `L²→L¹` density-convergence step — its own focused effort (brick α4, see
+> `docs/plans/2026-07-06-girsanov-track-alpha.md`).
 
 > **DELIVERED (2026-07-03) — SDE existence made pathwise: the E-fixed point as a sample-path process
 > ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19) → existence bridge).** The Picard

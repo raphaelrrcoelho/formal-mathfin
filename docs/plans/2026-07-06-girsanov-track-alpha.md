@@ -119,11 +119,48 @@ is one application of `isQBrownianMotion_of_expMartingale` (the abstraction's pa
 Deliverable **shipped**: `full` benchmark `gir-simple-adapted`, AxiomAuditGen guard, axioms-clean.
 **Brick α3 is DONE.** Only α4 (continuous adapted θ) and α5 (flip `gir-thm-9.1.8`) remain.
 
-### Brick α4 — continuous bounded adapted θ (the hard analytic brick; may be several sessions)
-Approximate continuous bounded adapted `θ` by simple `θ⁽ⁿ⁾` in `L²(dt×dP)`; `E^{−c⁽ⁿ⁾}_T → Z_T` in `L¹(P)` (bounded θ ⟹ uniform `L²` control); the charFun identity for `B^θ` increments under `Q⁽ⁿ⁾` passes to the limit. Needs the stochastic-integral density `∫θdB` as the `L²` limit of `Σ c⁽ⁿ⁾ᵢΔXᵢ` (the tower's `itoIntegralCLM_T`, with the σ-realization half of SP0 — the sub-interval increment API is **not** needed). Deliverable: `Btheta_isQBrownianMotion_adapted`.
+### Brick α4 — continuous bounded adapted θ (the hard analytic brick; multi-session, infrastructure-gated)
+**Reconnaissance done (2026-07-06):** α4 is *buildable* but gated on ONE genuinely-missing (unwritten, not
+`sorry`'d) infrastructure lemma. Everything else is present and sorry-free.
+
+**Already built + reusable (verified):**
+- `ItoIntegralCLM.itoIntegralCLM_T` (`ItoIntegralCLM.lean:718`) — the `∫₀ᵀ θ dB` machine, a CLM isometry
+  `Lp ℝ 2 (trimMeasure_T μ T) →L[ℝ] Lp ℝ 2 μ`, with `itoIntegralCLM_T_norm` (Itô isometry `:725`).
+  Domain = L² *predictable* integrand classes over the trim product measure.
+- `ItoIntegralCLM.simpleAssembly_T_denseRange` (`:649`) — simple step processes are dense in the integrand
+  L²; `itoAssembly_T` / `itoIntegralRiemannBridge.itoSimple_stepφ` give the finite-sum `∑ cᵢ(B_{tᵢ₊₁}−B_{tᵢ})`.
+- CLM-continuity ⟹ `∫θⁿdB → ∫θdB` in L² for free; worked template `itoIntegralCLM_T_of_bdd_cont` (Riemann-Itô
+  sums for a bounded *continuous* integrand `φ∘B`).
+- `Btheta_simple_isQBrownianMotion` (the α3 target to pass to the limit) + the `IsExpQMartingale` abstraction.
+
+**The two pieces that must be WRITTEN (the α4 work):**
+1. **`processToLp_of_bdd_adapted_cont`** — the **σ-realization** (half (i) of SP0): realize a bounded adapted
+   *continuous* raw `σ : ℝ≥0 → Ω → ℝ` as an integrand class `φ ∈ Lp 2 (trimMeasure_T)` (predictable-measurability
+   as an a.e. limit of simple processes + L² membership + `.toLp`). **This is the load-bearing gap** — no
+   shortcut lemma in Degenne (`isStronglyPredictable` is only for `SimpleProcess`; `predictableConvexStep` /
+   `predictablePartLim` are the tools but connecting a continuous adapted process to them is the substantial
+   work). Design doc (`docs/specs/2026-07-05-adapted-ito-formula-design.md:101`) rates it "substantial." The
+   sub-interval increment API (half (ii)) is **not** needed for α4.
+2. **L²-exponent → L¹-density**: turn `∫θⁿdB − ½∫(θⁿ)²ds → ∫θdB − ½∫θ²ds` in L² into `E^{−c⁽ⁿ⁾}_T → Z_T` in
+   L¹(P) (uniform-integrability control from bounded θ), then pass the α3 charFun/increment identity to the limit.
+Deliverable: `Btheta_isQBrownianMotion_adapted`. **Status: NOT started — its own focused effort; α3 (simple) is
+already an honest `full` deliverable strictly beyond constant θ, so the program ships value regardless.**
 
 ### Brick α5 — flip `gir-thm-9.1.8` → full + wire
-Restate `gir-thm-9.1.8` with the honest Doléans density (reconcile sign `θ ↔ −θ`), re-export `Btheta_isQBrownianMotion_adapted`; `metadata.formalization_status: "full"`. Regenerate `AxiomAuditGen.lean`, extend `AxiomAudit.lean`, ledger re-verify, gates 19/19. Update `docs/coverage.md`, `docs/bridges.md`, `docs/mathematical-architecture.md` (Girsanov row ◐→✅ bounded case), `docs/roadmap.md`.
+**Gated on α4** (the `full` flip re-exports `Btheta_isQBrownianMotion_adapted`, which α4 must first build).
+The honest flip cannot happen before α4: `gir-thm-9.1.8` / `sc-thm-9.1.8` are `reduced_core` **structure
+specs** for the *general continuous adapted* case, and narrowing them to the simple case (already shipped as
+`gir-simple-adapted`, `full`) would change the claim — not honest.
+
+**Interim wiring DONE (2026-07-06, docs-only, ledger-neutral):** `gir-thm-9.1.8` and `sc-thm-9.1.8`
+`formalization_scope` prose now cross-references the real `gir-simple-adapted` derivation and names the exact
+remaining gap (the σ-realization `processToLp_of_bdd_adapted_cont`); `docs/roadmap.md`, `docs/coverage.md`,
+`docs/bridges.md`, `docs/mathematical-architecture.md` record the frontier (simple-adapted `full`;
+continuous-adapted infrastructure-gated).
+
+**When α4 lands:** restate `gir-thm-9.1.8` with the honest Doléans density (reconcile sign `θ ↔ −θ`), re-export
+`Btheta_isQBrownianMotion_adapted`, `metadata.formalization_status: "full"`; regenerate `AxiomAuditGen.lean`,
+extend `AxiomAudit.lean`, ledger re-verify, gates 19/19; Girsanov row ◐→✅ (bounded case).
 
 ## Verification (each brick)
 `./scripts/lean-check.sh <file>` → `sorry_count 0`; final `lake build` daemon-down before relying on oleans; `#print axioms` clean on headliners; ledger fresh; pytest 19/19.
