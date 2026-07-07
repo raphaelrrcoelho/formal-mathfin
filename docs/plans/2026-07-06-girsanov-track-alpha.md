@@ -146,12 +146,43 @@ Deliverable **shipped**: `full` benchmark `gir-simple-adapted`, AxiomAuditGen gu
    `trimMeasure_T` → `.toLp`), green + axioms-clean on the first pass. (For an *only-a.e.*-continuous `σ` one
    would route through the `limUnder` pattern of `ItoProcessPredictable`; not needed — bounded adapted continuous
    θ is every-`ω`-continuous.)
-2. **L²-exponent → L¹-density** (remaining): with `processToLp`, form `∫θdB` (`itoIntegralCLM_T (processToLp …)`)
-   and the Doléans density `Z_T = exp(−∫θdB − ½∫θ²ds)`; approximate θ by simple θ⁽ⁿ⁾ (density
-   `simpleAssembly_T_denseRange` + CLM-continuity gives `∫θⁿdB → ∫θdB` in L²), turn `∫θⁿdB − ½∫(θⁿ)²ds → …` in L²
-   into `E^{−c⁽ⁿ⁾}_T → Z_T` in L¹(P) (uniform-integrability from bounded θ), then pass the α3 charFun/increment
-   identity to the limit. Deliverable: `Btheta_isQBrownianMotion_adapted`.
-**Status: σ-realization landed; the L²→L¹ density-convergence analysis is the remaining α4 work.**
+2. **L²-exponent → L¹-density** (remaining; a genuine multi-lemma build, fully scoped by two deep recons).
+
+**★ Key enabler (verified 2026-07-06):** the two Brownian notions reconcile for free —
+`IsPreBrownianReal.isFilteredPreBrownian hBmeas : IsFilteredPreBrownian B (natFiltration hBmeas) μ`
+(`.lake/.../Gaussian/BrownianMotion.lean:289`; `natFiltration hBmeas = Filtration.natural B …`, `ItoIntegralL2.lean:64`).
+So `IsPreBrownianReal B μ` gives BOTH the Itô integral (natFiltration) AND the α3 machinery
+(IsFilteredPreBrownian) on the same `B` — the continuous theorem can take `IsPreBrownianReal B μ` + `hBmeas` and use both halves.
+
+**Architecture:** prove `IsExpQMartingale Q 𝓕 (fun t ω ↦ B t ω + ∫₀ᵗθds) T` by LIMIT of the simple case and apply
+`isQBrownianMotion_of_expMartingale` ONCE (reuse the abstraction; pass only the exp-martingale field, not the
+charFun/independence chain). Q = `μ.withDensity(Z_T)`, `Z_T = exp(−∫θdB − ½∫θ²ds)` (pointwise-positive `exp` form
+required by `isEquivProbMeasure_withDensity`, `EquivMeasure.lean:33`).
+
+**PRESENT (no gap), with file:line:** CLM convergence `(itoIntegralCLM_T …).continuous.tendsto` (idiom already at
+`ItoIntegralRiemannBridge.lean:288`) + `simpleAssembly_T_denseRange` (`ItoIntegralCLM.lean:649`); Lp→a.e.-subseq
+`tendstoInMeasure_of_tendsto_Lp` (`ConvergenceInMeasure.lean:474`) + `TendstoInMeasure.exists_seq_tendsto_ae` (`:277`);
+Vitali ENDPOINT `tendsto_Lp_finite_of_tendstoInMeasure` (`UniformIntegrable.lean:566`); L¹→integral
+`tendsto_integral_of_L1'` (`Bochner/Basic.lean:390`); withDensity transport `setIntegral_withDensity_eq_setIntegral_toReal_smul`
+(used `GirsanovSimpleTheta.lean:406`); unit-mean `simpleDoleansExp_integral_eq_one`; prob-measure
+`isEquivProbMeasure_withDensity`; law injectivity `Measure.ext_of_complexMGF_eq` (`ComplexMGF.lean:319`, reused in
+ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_charFun` (`LevyConvergence.lean:214`).
+
+**MUST BUILD (the α4 work, in order):**
+- (a) **`unifIntegrable_one_of_sq_integral_le`** — THE linchpin, the ONE genuine Mathlib absence (no "bounded in Lᵖ,
+  p>1 ⟹ UnifIntegrable"): from `MemLp (fⁿ) 2` + `sup_n ∫(fⁿ)² ≤ M` conclude `UnifIntegrable fⁿ 1 μ`, via
+  `unifIntegrable_of` (`UniformIntegrable.lean:653`) + a Chebyshev truncation (`C·1_{‖f‖≥C}‖f‖ ≤ ‖f‖²`). General,
+  reusable, ~60-line ENNReal proof. Unlocks the Vitali endpoint. The uniform L² bound `∫(Z⁽ⁿ⁾)² ≤ exp(K²T)` reuses the
+  `Z² = E^{−2c}·exp(∑c²Δτ)` identity already in `integrable_expBthetaSimple_mul_density`.
+- (b) **`itoIntegralCLM_T_of_bdd_adapted_cont`** — the uniformly-`K`-bounded simple-θ approximation for a GENERAL
+  adapted continuous θ (generalize the φ∘B `itoIntegralCLM_T_of_bdd_cont`, `ItoIntegralRiemannBridge.lean:195`, to
+  left-endpoint `stepφ`-style simple processes of a raw σ). + pathwise drift Riemann-convergence `∑(θⁿ)²Δτ → ∫θ²ds`.
+- (c) **the joint measure+integrand charFun limit** — `charFun_Q(incr)(w) = ∫ e^{iw·incr} Z_T dμ = lim ∫ e^{iw·incrⁿ} Zⁿ dμ
+  = charFun(N(0,t−s))(w)` (DCT/L¹ glue: `|e^{iw·}|=1`, `Zⁿ→Z` L¹, `incrⁿ→incr` a.e.), then `ext_of_complexMGF_eq`.
+  (Or, in the exp-martingale-field architecture, the analogous limit of `∫_A exp(a·B^θⁿ−½a²·)dQⁿ`.)
+Deliverable: `Btheta_isQBrownianMotion_adapted`.
+**Status: σ-realization landed (`AdaptedProcessToLp.lean`); the (a)/(b)/(c) convergence assembly is ~20% done — its own
+focused multi-session effort, now fully mapped so it executes without re-recon. NOT to be rushed as a tail-of-session partial.**
 
 ### Brick α5 — flip `gir-thm-9.1.8` → full + wire
 **Gated on α4** (the `full` flip re-exports `Btheta_isQBrownianMotion_adapted`, which α4 must first build).
