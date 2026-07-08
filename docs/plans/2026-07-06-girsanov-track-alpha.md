@@ -174,9 +174,19 @@ ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_
   `unifIntegrable_of` (`UniformIntegrable.lean:653`) + a Chebyshev truncation (`C·1_{‖f‖≥C}‖f‖ ≤ ‖f‖²`). General,
   reusable, ~60-line ENNReal proof. Unlocks the Vitali endpoint. The uniform L² bound `∫(Z⁽ⁿ⁾)² ≤ exp(K²T)` reuses the
   `Z² = E^{−2c}·exp(∑c²Δτ)` identity already in `integrable_expBthetaSimple_mul_density`.
-- (b) **`itoIntegralCLM_T_of_bdd_adapted_cont`** — the uniformly-`K`-bounded simple-θ approximation for a GENERAL
-  adapted continuous θ (generalize the φ∘B `itoIntegralCLM_T_of_bdd_cont`, `ItoIntegralRiemannBridge.lean:195`, to
-  left-endpoint `stepφ`-style simple processes of a raw σ). + pathwise drift Riemann-convergence `∑(θⁿ)²Δτ → ∫θ²ds`.
+- (a) **`unifIntegrable_one_of_sq_integral_le`** ✅ DONE (`UnifIntegrableL2.lean`, commit `6e301c8`).
+- (b) **`itoIntegralCLM_T_of_bdd_adapted_cont`** ✅ DONE (2026-07-08, `ItoIntegralRiemannBridgeAdapted.lean`).
+  The `∫θdB` CLM for a GENERAL bounded adapted continuous θ: the uniform-partition Riemann–Itô sums
+  `∑ θ(tₖ)·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM_T (processToLp θ)`. Mirrors the φ∘B template
+  (`itoIntegralCLM_T_of_bdd_cont`) line-for-line — new defs `riemannσ`/`stepσ` + lemmas
+  `memLp_riemannσ`/`itoSimple_stepσ`/`itoIntegralCLM_T_stepσ`/`uncurry_stepσ`, reusing `cell_collapse`
+  (partition-only, `omit hB`), `processToLp` as the target, and the same DCT L²-convergence.
+  ★KEY simplification: **no `AdaptedAt`↔`natFiltration` bridge needed** — `memLp_riemannσ` proves the
+  Riemann sum `L²` by plain **domination** (`‖θ·Δ‖ ≤ ‖C·Δ‖`, `MemLp.mono` on `hΔ.const_mul C`) instead of
+  `memLp_adapted_mul_increment` (which wants `AdaptedAt`), so the hypotheses match `processToLp` exactly
+  (`natFiltration`-strongly-measurable + continuous + bounded). Green, axioms-clean, no benchmark (Foundations infra).
+  **STILL TODO for the full Doléans exponent:** the deterministic **drift Riemann-convergence**
+  `∑ θ(tₖ)²·Δτ → ∫₀ᵀ θ²ds` (per-ω, from `θ(·,ω)²` continuity — easy, unlike the stochastic half above).
 - (c) **the joint measure+integrand charFun limit** — `charFun_Q(incr)(w) = ∫ e^{iw·incr} Z_T dμ = lim ∫ e^{iw·incrⁿ} Zⁿ dμ
   = charFun(N(0,t−s))(w)` (DCT/L¹ glue: `|e^{iw·}|=1`, `Zⁿ→Z` L¹, `incrⁿ→incr` a.e.), then `ext_of_complexMGF_eq`.
   (Or, in the exp-martingale-field architecture, the analogous limit of `∫_A exp(a·B^θⁿ−½a²·)dQⁿ`.)
