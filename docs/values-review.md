@@ -74,6 +74,65 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-08 — corpus 318 — finance breadth: Vasicek bond, T-forward measure, geometric-Asian lognormality
+
+**Scope**: the finance-delivery push — `FixedIncome/VasicekBondPrice.lean`,
+`FixedIncome/ForwardMeasure.lean`, `Foundations/WienerIntegralIndicator.lean`,
+`BlackScholes/AsianGeometric.lean` (corpus `mf-vasicek-bond-price`, `mf-forward-measure-spot`,
+`mf-asian-geom-driver-gaussian`; 315→318, all `full`). Reviewed self-critically against the green
+`lake build` (8854 jobs) and `grep`-confirmed usage — not a sycophantic panel. **Recon-first paid off
+twice**: CVaR's Rockafellar–Uryasev variational theorem + the coherence quartet were found ALREADY COMPLETE
+(`gaussianCVaR_isLeast_ruObjective`), so not rebuilt; and `FeynmanKacHeatEquation` only *assumes* `B 0 = 0`
+(never derives it), confirming this session's `brownian_start_zero` (zero-start from `IsPreBrownianReal` via
+`∫ B_0² = 0`) is a genuine addition, not a re-derivation.
+
+**Upgrade executed this session (lens 3, zero slop — de-duplication):** `VasicekBondPrice.lean` had the
+kernel-integral derivation (`∫ g² = V(T)`) and the centred-Wiener-law step duplicated *verbatim* across
+`vasicekIntegratedRate_hasLaw_gaussian` and `vasicekBondPrice_eq`. Extracted three single-source private
+lemmas — `vasicekIntegratedKernelLp_integral_sq`, `vasicekBondV_nonneg`, `vasicekWienerLaw` — consumed by
+both. ~20 lines of duplicated sub-derivation removed; the Vasicek Gaussian law now has one home.
+
+**Per-lens read (exemplar → next upgrade):**
+1. **Inspired math** — exemplar: the "sum/integral of Brownian values = one Wiener integral of a
+   deterministic step kernel" mechanism, shared by the Vasicek integrated rate (smooth kernel) and the
+   geometric-Asian driver (indicator kernel). Upgrade: the n-date geometric-Asian (Finset covariance sum).
+2. **Mathlib/Degenne coherence** — exemplar: `wienerIntegralLp_stepIndicator` consumes
+   `LinearMap.extendOfNorm_eq` (extension-agrees-on-generators) rather than re-proving agreement. The
+   HasLaw a.e.-transfer is hand-rolled `⟨aemeasurable.congr, (map_congr).symm.trans map_eq⟩`; a named
+   `HasLaw.congr` pays off only at ≥2 consumers (currently 1) — deferred, not slop.
+3. **Zero slop** — exemplar: the de-duplication above. Nothing else outstanding (the `integral_add`
+   lambda-form boilerplate and `Pi.zero_apply` massaging are Mathlib friction, not slop).
+4. **Architectural ingenuity** — exemplar: the crux `wienerIntegralLp_stepIndicator` as a one-idea
+   foundational brick that makes n-date basket laws cheap. Upgrade: hoist `brownian_start_zero` from
+   private-in-a-finance-file to the crux module (a foundational BM fact currently mislocated) — small.
+5. **First principles** — exemplar: the Vasicek bond price is DERIVED from the Gaussian law (the
+   hypothesis — the Wiener representation of the integrated rate — does not contain the conclusion). Honest
+   gap: the stochastic-Fubini bridge `∫ r = M + σ∫g dB` is CITED, not proved (parity with the OU-solution
+   model of `mf-vasicek-sde-terminal-gaussian`). Upgrade: derive it.
+6. **Idiomatic register** — exemplar: `vasicekBondB/V/A`, `asianGeom_driver_hasLaw`, naming + `variable`
+   discipline. No upgrade outstanding.
+7. **Concept clarity** — exemplar: the docstrings state the modelling bridge (Vasicek), the constant-rate
+   degeneracy (forward measure: `Q^T = Q`), and the two-date scope (Asian) HONESTLY. No upgrade outstanding.
+8. **Beautiful math** — exemplar: reading `(B_s + B_t)/2` as `∫ ½(𝟙_{(0,s]} + 𝟙_{(0,t]}) dB` — the
+   obviously-right argument once seen, sidestepping the joint-Gaussian-process apparatus. Nothing outstanding.
+
+**Ranked backlog:**
+1. **n-date geometric-Asian price** — extend `asianGeom_driver_hasLaw` to a `Finset` of dates (variance
+   `(1/n²)∑∑min(tᵢ,tⱼ)`), then the closed-form geometric-Asian call via `bs_call_formula` at the effective
+   vol. Unblocked by the crux; mechanical. *(Owner: next finance session's opening move.)*
+2. **Non-degenerate T-forward measure** — the constant-rate ZCB gives `Q^T = Q`; a genuine `Q^T ≠ Q` needs
+   a stochastic bond-price *process* as a `Q`-martingale numéraire (bond dynamics absent). Depth item.
+3. **Vasicek stochastic-Fubini bridge** — derive `∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB` (currently the cited
+   modelling input), promoting the bond-price derivation from "from-the-Wiener-representation" to
+   "from-the-OU-SDE".
+4. **Hoist `brownian_start_zero`** — relocate to `WienerIntegralIndicator` (public), the reusable *derived*
+   zero-start the repo elsewhere only assumes.
+
+**Evidence/context.** corpus 318; full `lake build` green (8854 jobs); gates 19/19; ledger 318 fresh (the
+de-duplication restaled + reverified `mf-vasicek-bond-price`); AxiomAuditGen byte-fresh (all four new
+constants axioms-clean `[propext, Classical.choice, Quot.sound]`). Panel over-escalation avoided twice (the
+assumed-vs-derived `B_0 = 0`; the 1-consumer `HasLaw.congr` wrapper temptation).
+
 ## 2026-07-03 — corpus 312 — SDE strong-solution uniqueness: the L²-energy Grönwall keystone (#19)
 
 **Scope**: `Foundations/SDEUniqueness.lean` (new). Executes backlog item 4 of the numéraire review (the

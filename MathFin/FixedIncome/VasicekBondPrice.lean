@@ -173,6 +173,32 @@ noncomputable def vasicekIntegratedRate (hB : IsPreBrownianReal B μ) (r₀ θ �
   vasicekIntegratedMean r₀ θ κ (T : ℝ)
     + σ * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
 
+/-- `∫₀ᵀ g² = V(T)` for the `L²`-representative kernel (a.e. equal to the honest kernel). -/
+private lemma vasicekIntegratedKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
+    (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
+      = vasicekBondV κ (T : ℝ) := by
+  rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
+        = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume by
+      refine integral_congr_ae ?_
+      filter_upwards [(vasicekIntegratedKernel_memLp hκ T).coeFn_toLp] with u hu
+      rw [vasicekIntegratedKernelLp, hu]]
+  exact vasicekIntegratedKernel_integral_sq hκ.ne' T
+
+/-- `V(T) ≥ 0` (it is an integral of a square). -/
+private lemma vasicekBondV_nonneg {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
+    (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := by
+  rw [← vasicekIntegratedKernelLp_integral_sq hκ T]
+  exact integral_nonneg fun u => sq_nonneg _
+
+/-- **The centred diffusion law.** `σ∫₀ᵀ g dB`'s core — the Wiener integral of the integrated
+kernel — is centred Gaussian with variance `V(T)`. The single source of the Vasicek Gaussian
+law, consumed by both `vasicekIntegratedRate_hasLaw_gaussian` and `vasicekBondPrice_eq`. -/
+private lemma vasicekWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
+    HasLaw (fun ω => wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
+      (gaussianReal 0 (vasicekBondV κ (T : ℝ)).toNNReal) μ := by
+  have h0 := wienerIntegralLp_hasLaw_gaussian hB T (vasicekIntegratedKernelLp hκ T)
+  rwa [vasicekIntegratedKernelLp_integral_sq hκ T] at h0
+
 /-- **Integrated Vasicek short rate is Gaussian.** The integrated rate
 `∫₀ᵀ r_s ds = M(T) + σ∫₀ᵀ g dB` has law `N(M(T), σ²V(T))` — the affine map
 `x ↦ M(T) + σx` applied to the centred Wiener integral of the integrated
@@ -182,22 +208,8 @@ theorem vasicekIntegratedRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     HasLaw (vasicekIntegratedRate hB r₀ θ σ hκ T)
       (gaussianReal (vasicekIntegratedMean r₀ θ κ (T : ℝ))
         (σ ^ 2 * vasicekBondV κ (T : ℝ)).toNNReal) μ := by
-  have hW : HasLaw (fun ω => wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 (∫ u in Set.Ioc (0 : ℝ) (T : ℝ),
-        (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume).toNNReal) μ :=
-    wienerIntegralLp_hasLaw_gaussian hB T _
-  have hInt : (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-      = vasicekBondV κ (T : ℝ) := by
-    rw [show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-          = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume by
-        refine integral_congr_ae ?_
-        filter_upwards [(vasicekIntegratedKernel_memLp hκ T).coeFn_toLp] with u hu
-        rw [vasicekIntegratedKernelLp, hu]]
-    exact vasicekIntegratedKernel_integral_sq hκ.ne' T
-  rw [hInt] at hW
-  have hV_nonneg : (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := by
-    rw [← hInt]
-    exact integral_nonneg fun u => sq_nonneg _
+  have hW := vasicekWienerLaw hB hκ T
+  have hV_nonneg : (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := vasicekBondV_nonneg hκ T
   have hShift := gaussianReal_const_add (gaussianReal_const_mul hW σ)
     (vasicekIntegratedMean r₀ θ κ (T : ℝ))
   convert hShift using 2
@@ -221,21 +233,9 @@ theorem vasicekBondPrice_eq (hB : IsPreBrownianReal B μ)
       = Real.exp (-(vasicekIntegratedMean r₀ θ κ (T : ℝ)) + σ ^ 2 * vasicekBondV κ (T : ℝ) / 2) := by
   set M : ℝ := vasicekIntegratedMean r₀ θ κ (T : ℝ) with hM
   set V : ℝ := vasicekBondV κ (T : ℝ) with hV
-  have hV_nonneg : (0 : ℝ) ≤ V := by
-    rw [hV, ← vasicekIntegratedKernel_integral_sq hκ.ne' T]
-    exact integral_nonneg fun u => sq_nonneg _
-  have hInt : (∫ u in Set.Ioc (0 : ℝ) (T : ℝ),
-      (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume) = V := by
-    rw [hV, show (∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernelLp hκ T u) ^ 2 ∂volume)
-          = ∫ u in Set.Ioc (0 : ℝ) (T : ℝ), (vasicekIntegratedKernel κ T u) ^ 2 ∂volume by
-        refine integral_congr_ae ?_
-        filter_upwards [(vasicekIntegratedKernel_memLp hκ T).coeFn_toLp] with u hu
-        rw [vasicekIntegratedKernelLp, hu]]
-    exact vasicekIntegratedKernel_integral_sq hκ.ne' T
+  have hV_nonneg : (0 : ℝ) ≤ V := hV ▸ vasicekBondV_nonneg hκ T
   have hW : HasLaw (fun ω => wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
-      (gaussianReal 0 V.toNNReal) μ := by
-    have h0 := wienerIntegralLp_hasLaw_gaussian hB T (vasicekIntegratedKernelLp hκ T)
-    rwa [hInt] at h0
+      (gaussianReal 0 V.toNNReal) μ := hV ▸ vasicekWienerLaw hB hκ T
   -- Factor the integrand: exp(−(M + σW)) = exp(−M)·exp((−σ)·W).
   have hfactor : ∀ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω))
       = Real.exp (-M) * Real.exp ((-σ) *

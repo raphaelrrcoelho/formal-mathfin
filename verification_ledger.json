@@ -1867,10 +1867,10 @@
     },
     "mf-vasicek-bond-price": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-07-07",
-      "elapsed_s": 55.0,
-      "input_hash": "8f35f26b0abd91acfa2850673dcc7d563ed4599883b8c235d6ed7f9cb5198720",
-      "verified_at_commit": "7ccd7e1"
+      "date": "2026-07-08",
+      "elapsed_s": 10.9,
+      "input_hash": "e44733342210741221aca94160a64b9376bdfa39c7caca84969586a6eaef5edc",
+      "verified_at_commit": "f6fa875"
     },
     "mf-vasicek-deterministic-ode": {
       "benchmark_file": "mathematical_finance.json",
