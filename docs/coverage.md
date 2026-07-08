@@ -26,6 +26,22 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
+> **Live status (2026-07-08, geometric-Asian lognormality + the Wiener-indicator identity):** corpus
+> **318**, **284 full + 18 wrappers = 302/318 delivery-ready**, 16 reduced cores, 0 placeholders. One new
+> `full` entry plus a reusable foundational brick, both axioms-clean (`lake build` green, gates + ledger
+> fresh). `mf-asian-geom-driver-gaussian` (`BlackScholes/AsianGeometric.asianGeom_driver_hasLaw`): the
+> two-date geometric-Asian **log-driver** `(B_s + B_t)/2` — the Gaussian part of `log √(S_s·S_t)` under GBM —
+> is Gaussian `N(0, (3s+t)/4)`, the variance the Brownian covariance sum `(s + 2·min(s,t) + t)/4`. This turns
+> the geometric average into a priceable lognormal, complementing the AM-GM payoff bound
+> `mf-asian-geom-le-arith-two`. The enabling brick is `Foundations/WienerIntegralIndicator.wienerIntegralLp_stepIndicator`
+> (`∫ 𝟙_{(s,t]} dB = B_t − B_s`, from `LinearMap.extendOfNorm_eq` on the single-basis coefficient), which lets
+> a sum of Brownian values be read as a single Wiener integral of a deterministic step kernel — the same route
+> the Vasicek bond price takes for the *integrated* rate; here the kernel is a sum of indicators. The law then
+> comes from `wienerIntegralLp_hasLaw_gaussian`, its variance the kernel `L²`-norm evaluated on the Ω-side
+> through `integral_mul_eval` (`∫ B_u·B_v = min(u,v)`) and zero start `B_0 = 0` a.s. Honest scope: two dates
+> (matching the AM-GM entry); the n-date extension is the Finset covariance sum `(1/n²)∑∑min(tᵢ,tⱼ)`, unblocked
+> by the same crux. This closes the geometric-Asian item flagged open by the 2026-07-07 note below.
+>
 > **Live status (2026-07-07, finance breadth — the Vasicek affine bond price + the T-forward measure):**
 > corpus **317**, **283 full + 18 wrappers = 301/317 delivery-ready**, 16 reduced cores, 0 placeholders.
 > Two new `full` fixed-income entries, both consuming machinery already load-bearing (no new frontier;

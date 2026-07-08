@@ -79,6 +79,16 @@ breadth at this stage, and what the concrete next round would look like.
 > (only the AM-GM payoff bound `mf-asian-geom-le-arith-two` exists) stays open — it needs the BM joint-Gaussian
 > covariance `(1/n²)∑∑min(tᵢ,tⱼ)`, a focused effort not to be rushed. Depth track (Girsanov-α4) resumes next.
 
+> **Update (2026-07-08) — geometric-Asian lognormality, the two-date crux (corpus 317 → 318).** The
+> geometric-Asian item the note above flagged open is now **partially closed**: `mf-asian-geom-driver-gaussian`
+> (`BlackScholes/AsianGeometric.asianGeom_driver_hasLaw`, **`full`**) proves the two-date log-driver
+> `(B_s + B_t)/2 ~ N(0, (3s+t)/4)`, turning `√(S_s·S_t)` into a priceable lognormal. The joint-Gaussian
+> `∑∑min` obstacle dissolved via the Vasicek trick — read the sum of Brownian values as a single Wiener
+> integral of a deterministic step kernel — enabled by a new **foundational brick**,
+> `Foundations/WienerIntegralIndicator.wienerIntegralLp_stepIndicator` (`∫ 𝟙_{(s,t]} dB = B_t − B_s`, from
+> `LinearMap.extendOfNorm_eq`). The n-date extension (Finset covariance sum) is now unblocked — a mechanical
+> follow-on. Depth track (Girsanov-α4) resumes next.
+
 > **DELIVERED (2026-07-03) — SDE existence made pathwise: the E-fixed point as a sample-path process
 > ([#19](https://github.com/raphaelrrcoelho/formal-mathfin/issues/19) → existence bridge).** The Picard
 > solution, previously banked only as the abstract `L²`-fixed point `picardSolution ∈ E`, is now realized

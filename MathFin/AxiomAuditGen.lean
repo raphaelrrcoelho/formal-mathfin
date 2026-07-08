@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (257 constants). Scope: proof-position MathFin names only —
+  corpus (258 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -85,6 +85,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.annuityValue_closed_form' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.annuityValue_closed_form
+
+/-- info: 'MathFin.asianGeom_driver_hasLaw' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.asianGeom_driver_hasLaw
 
 /-- info: 'MathFin.asian_payoff_geom_le_arith_two' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.asian_payoff_geom_le_arith_two

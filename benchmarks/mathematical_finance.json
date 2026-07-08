@@ -3502,6 +3502,22 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.FixedIncome.ForwardMeasure (forwardMeasure_bs_expected_terminal). The T-forward measure Q^T (zero-coupon bond P(.,T) as numeraire) satisfies E^{Q^T}[S_T] = S_0*e^{rT} = S_0/P(0,T) = F(0,T), the no-arbitrage forward price. Built as a numeraireMeasure instance (N_T = P(T,T) = 1, N_0 = P(0,T) = e^{-rT}, reference B_T = e^{rT}, B_0 = 1) on the change-of-numeraire engine (MathFin.changeOfNumeraire, no integrability hypothesis): forwardMeasure_price gives e^{-rT}*E^{Q^T}[X] = E^Q[e^{-rT}X] for any claim, and combined with the discounted-terminal EMM property discounted_terminal_eq_S0 yields the forward price of the BS terminal. HONEST SCOPE: in the constant-rate ZCB the density dQ^T/dQ = 1 so Q^T = Q coincides with the risk-neutral measure (the construction generalizes verbatim to a stochastic short rate where Q^T != Q). Natural next numeraire instance after the stock and S^2-numeraires. Axioms-clean: [propext, Classical.choice, Quot.sound]."
       }
+    },
+    {
+      "id": "mf-asian-geom-driver-gaussian",
+      "name": "Two-Date Geometric-Asian Log-Driver is Gaussian",
+      "domain": "mathematical_finance",
+      "description": "The geometric-average Asian option's log-driver at two sampling dates s <= t is Gaussian: the average of the Brownian values (B_s + B_t)/2 -- the Gaussian part of log sqrt(S_s * S_t) under GBM -- has the centred Gaussian law N(0, (3s+t)/4), the variance being the covariance sum (s + 2*min(s,t) + t)/4. Turns the geometric average into a priceable lognormal, complementing the AM-GM payoff bound (mf-asian-geom-le-arith-two). The derivation reads the sum of Brownian values as a single Wiener integral of the deterministic step kernel 1/2*(1_{(0,s]} + 1_{(0,t]}) via the new identity int 1_{(0,u]} dB = B_u, so wienerIntegralLp_hasLaw_gaussian gives the Gaussian law and the variance is the kernel L2-norm evaluated through the Brownian covariance int B_s * B_t = min(s,t).",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianGeometric\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **Two-date geometric-Asian log-driver is Gaussian.**\nFor a Black–Scholes GBM `S_u = S₀·exp((r−σ²/2)u + σ B_u)` sampled at two dates\n`s ≤ t`, the geometric average `√(S_s·S_t)` is lognormal because its log-driver —\nthe average of the Brownian values `(B_s + B_t)/2` — is Gaussian with the\ncovariance-sum variance `(s + 2·min(s,t) + t)/4 = (3s+t)/4`.\nRe-exports `MathFin.asianGeom_driver_hasLaw`. -/\ntheorem asian_geom_driver_gaussian\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0)\n    {s t : ℝ≥0} (hst : s ≤ t) (hsT : s ≤ T) (htT : t ≤ T) :\n    HasLaw (fun ω => (B s ω + B t ω) / 2)\n      (gaussianReal 0 ((3 * (s : ℝ) + t) / 4).toNNReal) μ :=\n  MathFin.asianGeom_driver_hasLaw hB T hst hsT htT\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Geometric-average Asian option; the log geometric average is Gaussian with the Brownian covariance-sum variance",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin.BlackScholes.AsianGeometric (asianGeom_driver_hasLaw). The two-date geometric-Asian log-driver (B_s + B_t)/2 has law N(0, (3s+t)/4). Route: (B_s + B_t)/2 = int 1/2*(1_{(0,s]} + 1_{(0,t]}) dB is a single Wiener integral of a deterministic step kernel, using the new foundational identity wienerIntegralLp_stepIndicator (MathFin.Foundations.WienerIntegralIndicator: int 1_{(s,t]} dB = B_t - B_s, from LinearMap.extendOfNorm_eq on the single-basis coefficient); so wienerIntegralLp_hasLaw_gaussian gives the centred Gaussian law, its variance the kernel L2-norm computed on the Omega-side through the Brownian covariance integral_mul_eval (int B_u * B_v = min(u,v)) plus zero-start B_0 = 0 a.s. (from int B_0^2 = 0). Same 'sum of Brownian values as a Wiener integral of a step kernel' route as the Vasicek bond price for the integrated rate; here the kernel is a sum of indicators. Honest scope: two dates (matching the AM-GM entry mf-asian-geom-le-arith-two); the n-date extension is the Finset covariance sum (1/n^2) sum sum min(t_i, t_j), unblocked by the same crux. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
     }
   ]
 }

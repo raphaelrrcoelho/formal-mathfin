@@ -444,6 +444,13 @@
       "input_hash": "24ae590ced28d23f3c4c14246d46b6ac27d445f58a46bdad8b019da419dfebb7",
       "verified_at_commit": "eb0aee9"
     },
+    "mf-asian-geom-driver-gaussian": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-08",
+      "elapsed_s": 97.5,
+      "input_hash": "1671ddc22f896366d3c576142e3c107b42f8ccf612c408551bce5bebb180c761",
+      "verified_at_commit": "1bf1bfe"
+    },
     "mf-asian-geom-le-arith-two": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-04",

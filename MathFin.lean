@@ -77,6 +77,8 @@ import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.WienerIntegral
 import MathFin.Foundations.WienerIntegralL2
 import MathFin.Foundations.WienerIntegralGaussian
+-- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
+import MathFin.Foundations.WienerIntegralIndicator
 -- Structural / principle modules:
 import MathFin.Foundations.StandardGaussianMGF
 import MathFin.Foundations.ExponentialDiscount
@@ -216,6 +218,8 @@ import MathFin.BlackScholes.StrikeGreeks
 import MathFin.BlackScholes.PutStrikeConvexity
 import MathFin.BlackScholes.StaticBounds
 import MathFin.BlackScholes.AsianInequality
+-- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
+import MathFin.BlackScholes.AsianGeometric
 import MathFin.BlackScholes.ImpliedVolatility
 import MathFin.BlackScholes.LognormalMoments
 import MathFin.BlackScholes.VarianceSwap
