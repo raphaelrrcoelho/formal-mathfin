@@ -60,6 +60,21 @@ breadth at this stage, and what the concrete next round would look like.
 > predictable class) plus an `L²→L¹` density-convergence step — its own focused effort (brick α4, see
 > `docs/plans/2026-07-06-girsanov-track-alpha.md`).
 
+> **Update (2026-07-09) — CONTINUOUS bounded-adapted θ FULLY CLOSED; Track-α COMPLETE (corpus 318).** Both
+> gating pieces named above landed, and `gir-thm-9.1.8` flips `reduced_core → full`:
+> `Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted` proves `B^θ_u = B_u + ∫₀ᵘθ ds` is a
+> `Q`-Brownian motion for a bounded (`|θ| ≤ C`), `𝓕`-adapted, path-continuous `θ`, under
+> `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`. The route is **spine-free**: rather than build a
+> continuous Doléans stochastic exponential and prove it a martingale (a Novikov crux), the simple-θ
+> exponential-martingale identity (on the `unifPart` approximants `c⁽ⁿ⁾_i = θ(tᵢ)`) is passed to the limit —
+> the stochastic exponent `Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θ dB` in `L²` (`itoIntegralCLM_T_of_bdd_adapted_cont`), the
+> drift parts converge everywhere, and the mixed-time set-integral limit goes through the a.e.-subsequence
+> engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound` (route-A L⁴/AM-GM uniform `L²` bound), then one
+> application of `isQBrownianMotion_of_expMartingale`. This is the culmination of the constant → simple →
+> continuous-adapted arc. **What now stays `reduced_core` is only the strictly more general `L²`/progressive-θ
+> under Novikov (unbounded, merely progressively measurable), at `sc-thm-9.1.8`.** See
+> `docs/plans/2026-07-06-girsanov-track-alpha.md` (Track-α COMPLETE).
+
 > **Update (2026-07-07) — finance-delivery breadth: the Vasicek affine bond price + the T-forward measure
 > (corpus 315 → 317, [#46](https://github.com/raphaelrrcoelho/formal-mathfin/issues/46)).** A pause on the
 > Girsanov-α4 depth track to cash in two finance-delivery items off machinery already load-bearing — no new
@@ -196,7 +211,7 @@ adapted-coefficient Itô, blocked on Degenne's continuous-modification π-system
 | # | Conversion (reduced_core → full) | Value | Difficulty | Unlocks |
 |---|---|---|---|---|
 | 1 | **Novikov** (gir-thm-9.1.7) | 9 | MEDIUM (~150-200 ln) | the gateway: the adapted Doléans-Dade exponential `Z_t=exp(∫θdB−½∫θ²ds)` as a martingale |
-| 2 | **Girsanov** — martingale + distributional (const θ) ✅ (2026-06-30 / 2026-07-05) | 9 | DONE (const θ): `bs_discounted_isQMartingale` = the EMM as an explicit measure change + a reusable Bayes engine; **and `Btheta_isQBrownianMotion` = the full distributional Girsanov for constant θ** (Gaussian *and independent* increments, via `indepFun_iff_charFun_prod` on the Gaussian joint law — no adapted Itô, no conditional-MGF⟹indep lemma). Only general adapted-θ (gir-thm-9.1.8) still blocked on adapted-integrand Itô | risk-neutral pricing under measure change |
+| 2 | **Girsanov** — martingale + distributional (const → simple → continuous adapted) ✅ (2026-06-30 → 2026-07-09) | 9 | DONE (bounded adapted continuous θ): `bs_discounted_isQMartingale` = the EMM as an explicit measure change + a reusable Bayes engine; the distributional Girsanov `Btheta_isQBrownianMotion` (const) → `Btheta_simple_isQBrownianMotion` (simple) → **`Btheta_isQBrownianMotion_adapted` (bounded adapted continuous, `gir-thm-9.1.8` `full`)**, all one application of the process-agnostic `isQBrownianMotion_of_expMartingale` — spine-free, no adapted-integrand Itô formula, no Novikov crux. Only the strictly more general `L²`/progressive-θ under Novikov (`sc-thm-9.1.8`) stays open | risk-neutral pricing under measure change |
 | 3 | **SDE existence/uniqueness** (sc-thm-8.2.5) | 9 | HIGH (~300-400) | the SDE model zoo (Vasicek/CIR/Heston/jump-diffusion) — Picard on the Itô isometry |
 | 4 | **Martingale representation** (gir-thm-9.3.4) | 9 | HIGH (Clark-Hida; may need upstream) | hedging / replication / market completeness |
 | 5 | **2D Itô formula** (sc-thm-7.5.2) | 7 | LOW-MED | multi-asset derivatives (the 1-D TD formula is already built) |
