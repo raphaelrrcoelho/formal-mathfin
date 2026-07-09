@@ -206,7 +206,12 @@ ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_
     (`riemannσ → ∫θdB` in measure from brick b, via a `tendstoInMeasure_congr_left` helper + `MemLp.coeFn_toLp`);
     `simpleDoleansExp_neg_eq` (`Zⁿ_T = exp(−Wⁿ − ½·driftSqSumⁿ)`, clamps drop as all `tₖ ≤ T`);
     `exists_subseq_riemannσ_ae` (every subseq has an a.e.-convergent sub-subseq). All green, 0 warnings.
-  - **★ REMAINING FORK — the uniform `L²` bound for the martingale field.** The transported simple field is
+  - **DENSITY SIDE ✅ DONE (2026-07-09, `8ca308b`, route A's clean half).** Q is a probability measure.
+    `driftSqSum_le` + `simpleDoleansExp_scaled_eq` (`E^{rθ}=exp(rW−½r²driftSq)`); `sq_integral_Zn_le`
+    (`∫(Zⁿ)²≤exp(C²T)` via `(Zⁿ)²=E^{−2c}·exp(E)`) + `memLp_Zn_two`; `tendsto_Zn_ae_subseq`
+    (`Zⁿ→Z_T` a.e. along subseqs); `memLp_ZT_one` (`Z_T∈L¹` by Fatou: `∫⁻‖Z_T‖ₑ≤liminf ∫Zⁿ=1`);
+    `integral_ZT_eq_one` (`∫Z_T=1` via the engine at `A=univ`) → `isProbabilityMeasure_contGirsanov`.
+  - **★ REMAINING — the martingale field (the harder half).** The transported simple field is
     `∫_A exp(a·Yⁿ_u−½a²u)·Zⁿ_T dμ` — a **mixed-time** product (drift-exp at `u`, density at `T`). The engine
     needs `fⁿ ∈ L²` uniformly, i.e. `∫(exp(a·Yⁿ_u)·Zⁿ_T)² ≤ M`. Two routes: **(A) 4th moments** — `Dⁿ∈L⁴`
     (Gaussian MGF, drift-bounded) and `Zⁿ∈L⁴` (`(E^{−c})⁴=E^{−4c}·exp(3∑c²Δτ)≤exp(3C²T)`), Hölder `L⁴·L⁴⊆L²`;
