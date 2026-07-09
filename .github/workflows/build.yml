@@ -42,6 +42,7 @@ jobs:
           pip install --quiet pytest
           python3 -m pytest tests/ -q
           python3 -m tools.verify.ledger status
+          python3 -m tools.formalization_yaml --check
 
       - name: Build (elan + Mathlib cache + lake build)
         uses: leanprover/lean-action@v1

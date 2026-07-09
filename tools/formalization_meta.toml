@@ -1,0 +1,47 @@
+# Editorial side-car for formalization.yaml (mathlib-initiative v0.3 standard).
+#
+# `tools/formalization_yaml.py` generates the MECHANICAL truth (counts, axioms,
+# sorry=0, the divergence taxonomy, per-domain alignment) from the repo, and
+# merges the EDITORIAL fields below — the ones no tool can honestly derive
+# (source bibliography, chosen headline results, human reviewers). Keep this
+# file truthful and current; the generator will not invent these.
+
+[project]
+name = "formal-mathfin"
+authors = ["Raphael Coelho"]
+license = "Apache-2.0"
+
+# Informal sources the corpus formalizes. Complete the bibliographic fields;
+# `author_contacted` is one of: yes | no | n/a.
+[[sources]]
+id = "saporito-stochastic-processes"
+title = "Stochastic Processes (lecture notes / textbook)"
+authors = ["Yuri F. Saporito"]
+type = "textbook"
+license = ""
+author_contacted = "n/a"
+prior_work = ""
+
+[[sources]]
+id = "standard-mathematical-finance-literature"
+title = "Standard mathematical-finance literature (Black–Scholes, CRR, Vasicek, Margrabe, FTAP, …)"
+authors = []
+type = "canonical results"
+license = ""
+author_contacted = "n/a"
+prior_work = ""
+
+# Headline results to surface under status.main_results. Each: the Lean
+# declaration, its file, and (optionally) the informal statement it tracks.
+# Left for R to curate — the generator emits [] until populated, never guesses.
+# Example row (uncomment + verify):
+# [[main_results]]
+# declaration = "MathFin.discountedGBM_isMartingale"
+# file = "MathFin/BlackScholes/RiskNeutral.lean"
+# literature = "First fundamental theorem of asset pricing (continuous GBM)"
+
+[review]
+# Human/agent reviewers of record for the values-review panel.
+reviewers = ["Raphael Coelho"]
+
+acknowledgements = "Built on Mathlib and Rémy Degenne's BrownianMotion package."
