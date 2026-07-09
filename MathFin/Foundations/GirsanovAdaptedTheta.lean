@@ -125,12 +125,248 @@ lemma exists_subseq_riemannσ_ae (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 => θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0)
     (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
-    ∃ ms : ℕ → ℕ, ∀ᵐ ω ∂μ, Tendsto (fun k => riemannσ (B := B) θ T (ns (ms k)) ω) atTop
-      (𝓝 (itoIntCont hB hBmeas hadap hcont hbdd T ω)) := by
+    ∃ ms : ℕ → ℕ, StrictMono ms ∧ ∀ᵐ ω ∂μ, Tendsto (fun k => riemannσ (B := B) θ T (ns (ms k)) ω)
+      atTop (𝓝 (itoIntCont hB hBmeas hadap hcont hbdd T ω)) := by
   have hconv : TendstoInMeasure μ (fun k => riemannσ (B := B) θ T (ns k)) atTop
       (itoIntCont hB hBmeas hadap hcont hbdd T) :=
     fun ε hε => (tendstoInMeasure_riemannσ hB hBmeas hadap hcont hbdd T ε hε).comp hns
-  obtain ⟨ms, _, hae⟩ := hconv.exists_seq_tendsto_ae
-  exact ⟨ms, hae⟩
+  obtain ⟨ms, hms, hae⟩ := hconv.exists_seq_tendsto_ae
+  exact ⟨ms, hms, hae⟩
+
+omit hB mΩ in
+/-- The quadratic drift is bounded by `C²·T`: each `θ(tₖ)² ≤ C²` and the cell lengths telescope to
+`unifPart T n n ≤ T`. -/
+lemma driftSqSum_le {θ : ℝ≥0 → Ω → ℝ} {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ)
+    (ω : Ω) : driftSqSum θ T n ω ≤ C ^ 2 * (T : ℝ) := by
+  have hC0 : (0 : ℝ) ≤ C := (abs_nonneg _).trans (hbdd 0 ω)
+  rw [driftSqSum]
+  calc ∑ k ∈ Finset.range n,
+          (θ (unifPart T n k) ω) ^ 2 * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ))
+      ≤ ∑ k ∈ Finset.range n, C ^ 2 * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ)) := by
+        refine Finset.sum_le_sum fun k _ => mul_le_mul_of_nonneg_right ?_
+          (sub_nonneg.mpr (by exact_mod_cast unifPart_mono T n (Nat.le_succ k)))
+        rw [← sq_abs (θ (unifPart T n k) ω)]
+        exact pow_le_pow_left₀ (abs_nonneg _) (hbdd _ ω) 2
+    _ = C ^ 2 * ((unifPart T n n : ℝ) - (unifPart T n 0 : ℝ)) := by
+        rw [← Finset.mul_sum, Finset.sum_range_sub (fun k => (unifPart T n k : ℝ))]
+    _ ≤ C ^ 2 * (T : ℝ) := by
+        rw [show unifPart T n 0 = 0 by simp [unifPart], NNReal.coe_zero, sub_zero]
+        exact mul_le_mul_of_nonneg_left (by exact_mod_cast unifPart_le_T (le_refl n)) (sq_nonneg C)
+
+omit hB mΩ in
+/-- **Scaled Doléans exponent.** For a scalar `r`, `E^{rθ⁽ⁿ⁾}_T = exp(r·Wⁿ − ½r²·driftSqSumⁿ)` — the
+generalization of `simpleDoleansExp_neg_eq` (which is the `r = −1` case). Powers the `Lᵖ`-bounds:
+`(Zⁿ)^p = E^{−pθ}·exp(½p(p−1)·driftSqSumⁿ)`. -/
+lemma simpleDoleansExp_scaled_eq {θ : ℝ≥0 → Ω → ℝ} (r : ℝ) (T : ℝ≥0) (n : ℕ) (ω : Ω) :
+    simpleDoleansExp (X := B) (unifPart T n) (fun i ω => r * θ (unifPart T n i) ω) n T ω
+      = Real.exp (r * riemannσ (B := B) θ T n ω - 2⁻¹ * r ^ 2 * driftSqSum θ T n ω) := by
+  rw [simpleDoleansExp_eq_exp_sum]
+  congr 1
+  rw [riemannσ, driftSqSum, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
+  refine Finset.sum_congr rfl fun k hk => ?_
+  have hk1 : k + 1 ≤ n := Finset.mem_range.mp hk
+  rw [min_eq_left (unifPart_le_T hk1), min_eq_left (unifPart_le_T (le_of_lt (Finset.mem_range.mp hk)))]
+  ring
+
+include hB in
+/-- **Uniform `L²` bound on the approximant densities.** `∫ (Zⁿ_T)² ≤ exp(C²T)`, uniform in `n`.
+Pointwise `(Zⁿ_T)² = E^{−2c⁽ⁿ⁾}_T · exp(driftSqSumⁿ) ≤ exp(C²T)·E^{−2c⁽ⁿ⁾}_T` (from the scaled
+identity + `driftSqSum_le`), and `E^{−2c⁽ⁿ⁾}` is a positive density with `∫ = 1`
+(`simpleDoleansExp_integral_eq_one`). This feeds the a.e.-subsequence engine (the `L²` bound the
+linchpin needs) for the density limit `Zⁿ → Z`. -/
+lemma sq_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
+    ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω => -(θ (unifPart T n i) ω)) n T ω) ^ 2 ∂μ
+      ≤ Real.exp (C ^ 2 * (T : ℝ)) := by
+  haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hd2m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
+      (fun ω => (-2 : ℝ) * θ (unifPart T n i) ω) := fun i => (hadap (unifPart T n i)).const_mul (-2)
+  have hd2b : ∀ i ω, |(-2 : ℝ) * θ (unifPart T n i) ω| ≤ 2 * C := fun i ω => by
+    rw [abs_mul, show |(-2 : ℝ)| = 2 by norm_num]
+    exact mul_le_mul_of_nonneg_left (hbdd _ ω) (by norm_num)
+  have hmean : ∫ ω, simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => (-2 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ = 1 :=
+    simpleDoleansExp_integral_eq_one (X := B) (𝓕 := natFiltration hBmeas) (unifPart T n)
+      (unifPart_mono T n) _ hd2m hd2b n T
+  have hint2 : Integrable (fun ω => simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => (-2 : ℝ) * θ (unifPart T n i) ω) n T ω) μ :=
+    (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
+      (unifPart_mono T n) _ hd2m hd2b n).integrable T
+  have hpt : ∀ ω,
+      (simpleDoleansExp (X := B) (unifPart T n) (fun i ω => -(θ (unifPart T n i) ω)) n T ω) ^ 2
+        ≤ Real.exp (C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
+            (fun i ω => (-2 : ℝ) * θ (unifPart T n i) ω) n T ω := by
+    intro ω
+    rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two, ← Real.exp_add,
+      ← Real.exp_add]
+    refine Real.exp_le_exp.mpr ?_
+    have := driftSqSum_le hbdd T n ω
+    nlinarith [this]
+  calc ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω => -(θ (unifPart T n i) ω)) n T ω) ^ 2 ∂μ
+      ≤ ∫ ω, Real.exp (C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
+          (fun i ω => (-2 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ :=
+        integral_mono_of_nonneg (ae_of_all _ fun ω => sq_nonneg _) (hint2.const_mul _)
+          (ae_of_all _ hpt)
+    _ = Real.exp (C ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
+
+include hB in
+/-- **The density's a.e.-subsequence convergence.** Every subsequence `ns` has a further one `ms`
+along which `Zⁿ_T → Z_T` a.e., where `Z_T = contDoleansExp (∫θdB)`. Composes `exp` over the a.e.
+convergence of `Wⁿ = riemannσ` (`exists_subseq_riemannσ_ae`) and the everywhere convergence of the
+quadratic drift (`tendsto_driftSq_riemannSum`). -/
+lemma tendsto_Zn_ae_subseq (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 => θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0)
+    (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
+    ∃ ms : ℕ → ℕ, ∀ᵐ ω ∂μ, Tendsto (fun k =>
+        simpleDoleansExp (X := B) (unifPart T (ns (ms k)))
+          (fun i ω => -(θ (unifPart T (ns (ms k)) i) ω)) (ns (ms k)) T ω) atTop
+      (𝓝 (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) := by
+  obtain ⟨ms, hms, hae⟩ := exists_subseq_riemannσ_ae hB hBmeas hadap hcont hbdd T ns hns
+  refine ⟨ms, ?_⟩
+  filter_upwards [hae] with ω hω
+  have hnsms : Tendsto (fun k => ns (ms k)) atTop atTop := hns.comp hms.tendsto_atTop
+  have hdrift : Tendsto (fun k => driftSqSum θ T (ns (ms k)) ω) atTop
+      (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T, (θ s ω) ^ 2 ∂timeMeasure)) :=
+    (tendsto_driftSq_riemannSum hcont hbdd T ω).comp hnsms
+  have hexp := (Real.continuous_exp.tendsto _).comp ((hω.neg).sub (hdrift.const_mul 2⁻¹))
+  exact hexp.congr fun k => (simpleDoleansExp_neg_eq T (ns (ms k)) ω).symm
+
+include hB in
+/-- The approximant density is in `L²` (the same `E^{−2c}` domination as `sq_integral_Zn_le`). -/
+lemma memLp_Zn_two (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
+    MemLp (fun ω => simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => -(θ (unifPart T n i) ω)) n T ω) 2 μ := by
+  haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hd1m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
+      (fun ω => -(θ (unifPart T n i) ω)) := fun i => (hadap (unifPart T n i)).neg
+  have hd1b : ∀ i ω, |(-(θ (unifPart T n i) ω))| ≤ C := fun i ω => by simpa using hbdd (unifPart T n i) ω
+  have hZmeas : Measurable (fun ω => simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => -(θ (unifPart T n i) ω)) n T ω) :=
+    (((simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
+      (unifPart_mono T n) _ hd1m hd1b n).1 T).mono ((natFiltration hBmeas).le T)).measurable
+  have hd2m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
+      (fun ω => (-2 : ℝ) * θ (unifPart T n i) ω) := fun i => (hadap (unifPart T n i)).const_mul (-2)
+  have hd2b : ∀ i ω, |(-2 : ℝ) * θ (unifPart T n i) ω| ≤ 2 * C := fun i ω => by
+    rw [abs_mul, show |(-2 : ℝ)| = 2 by norm_num]
+    exact mul_le_mul_of_nonneg_left (hbdd _ ω) (by norm_num)
+  have hint2 : Integrable (fun ω => simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => (-2 : ℝ) * θ (unifPart T n i) ω) n T ω) μ :=
+    (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
+      (unifPart_mono T n) _ hd2m hd2b n).integrable T
+  rw [memLp_two_iff_integrable_sq hZmeas.aestronglyMeasurable]
+  refine (hint2.const_mul (Real.exp (C ^ 2 * (T : ℝ)))).mono'
+    (hZmeas.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω => ?_)
+  rw [Real.norm_of_nonneg (sq_nonneg _), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two,
+    ← Real.exp_add, ← Real.exp_add]
+  exact Real.exp_le_exp.mpr (by nlinarith [driftSqSum_le hbdd T n ω])
+
+include hB in
+/-- Unit `P`-mean of the approximant density: `∫ Zⁿ_T = 1`. -/
+lemma integral_Zn_eq_one (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
+    ∫ ω, simpleDoleansExp (X := B) (unifPart T n) (fun i ω => -(θ (unifPart T n i) ω)) n T ω ∂μ = 1 := by
+  haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  exact simpleDoleansExp_integral_eq_one (X := B) (𝓕 := natFiltration hBmeas) (unifPart T n)
+    (unifPart_mono T n) _ (fun i => (hadap _).neg) (fun i ω => by simpa using hbdd (unifPart T n i) ω) n T
+
+include hB in
+/-- Measurability of the approximant density. -/
+lemma measurable_Zn (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
+    Measurable (fun ω => simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => -(θ (unifPart T n i) ω)) n T ω) := by
+  haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  exact (((simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
+    (unifPart_mono T n) _ (fun i => (hadap _).neg) (fun i ω => by simpa using hbdd (unifPart T n i) ω)
+    n).1 T).mono ((natFiltration hBmeas).le T)).measurable
+
+include hB in
+/-- Integrability of the approximant density (it is a martingale). -/
+lemma integrable_Zn (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
+    Integrable (fun ω => simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => -(θ (unifPart T n i) ω)) n T ω) μ := by
+  haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  exact (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
+    (unifPart_mono T n) _ (fun i => (hadap _).neg) (fun i ω => by simpa using hbdd (unifPart T n i) ω)
+    n).integrable T
+
+include hB in
+/-- **The continuous density is in `L¹`.** By Fatou on an a.e.-convergent approximant subsequence:
+`∫⁻ ‖Z_T‖ₑ ≤ liminf ∫⁻ ‖Zⁿ‖ₑ = liminf (∫ Zⁿ) = 1 < ∞`. -/
+lemma memLp_ZT_one (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 => θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
+    MemLp (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T) 1 μ := by
+  obtain ⟨ms, hae⟩ := tendsto_Zn_ae_subseq hB hBmeas hadap hcont hbdd T id tendsto_id
+  have hZTmeas : AEStronglyMeasurable
+      (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T) μ :=
+    aestronglyMeasurable_of_tendsto_ae atTop
+      (fun k => (measurable_Zn hB hBmeas hadap hbdd T (ms k)).aestronglyMeasurable) hae
+  refine ⟨hZTmeas, ?_⟩
+  rw [eLpNorm_one_eq_lintegral_enorm]
+  have hone : ∀ k, ∫⁻ ω, ‖simpleDoleansExp (X := B) (unifPart T (ms k))
+      (fun i ω => -(θ (unifPart T (ms k) i) ω)) (ms k) T ω‖ₑ ∂μ = 1 := by
+    intro k
+    have hpos := fun ω => (simpleDoleansExp_pos (X := B) (unifPart T (ms k))
+      (fun i ω => -(θ (unifPart T (ms k) i) ω)) (ms k) T ω).le
+    calc ∫⁻ ω, ‖_‖ₑ ∂μ
+        = ∫⁻ ω, ENNReal.ofReal (simpleDoleansExp (X := B) (unifPart T (ms k))
+            (fun i ω => -(θ (unifPart T (ms k) i) ω)) (ms k) T ω) ∂μ := by
+          refine lintegral_congr fun ω => ?_
+          rw [Real.enorm_eq_ofReal (hpos ω)]
+      _ = ENNReal.ofReal (∫ ω, simpleDoleansExp (X := B) (unifPart T (ms k))
+            (fun i ω => -(θ (unifPart T (ms k) i) ω)) (ms k) T ω ∂μ) :=
+          (ofReal_integral_eq_lintegral_ofReal
+            (integrable_Zn hB hBmeas hadap hbdd T (ms k)) (ae_of_all _ hpos)).symm
+      _ = 1 := by rw [integral_Zn_eq_one hB hBmeas hadap hbdd T (ms k)]; simp
+  have hfatou : ∫⁻ ω, ‖contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω‖ₑ ∂μ ≤ 1 := by
+    have hlim : (fun ω => ‖contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω‖ₑ)
+        =ᵐ[μ] fun ω => Filter.liminf (fun k => ‖simpleDoleansExp (X := B) (unifPart T (ms k))
+          (fun i ω => -(θ (unifPart T (ms k) i) ω)) (ms k) T ω‖ₑ) atTop := by
+      filter_upwards [hae] with ω hω
+      exact (hω.enorm.liminf_eq).symm
+    rw [lintegral_congr_ae hlim]
+    refine (lintegral_liminf_le
+      (fun k => (measurable_Zn hB hBmeas hadap hbdd T (ms k)).enorm)).trans ?_
+    simp only [hone, liminf_const, le_refl]
+  exact lt_of_le_of_lt hfatou one_lt_top
+
+include hB in
+/-- **Unit mean of the continuous density: `∫ Z_T = 1`.** The a.e.-subsequence engine gives
+`∫ Zⁿ → ∫ Z_T`, and `∫ Zⁿ = 1` (`integral_Zn_eq_one`), so the limit is `1`. -/
+lemma integral_ZT_eq_one (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 => θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
+    ∫ ω, contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω ∂μ = 1 := by
+  have hlim := tendsto_setIntegral_of_subseq_ae_of_sq_bound
+    (fun n => memLp_Zn_two hB hBmeas hadap hbdd T n)
+    (M := Real.exp (C ^ 2 * (T : ℝ))) (fun n => sq_integral_Zn_le hB hBmeas hadap hbdd T n)
+    (memLp_ZT_one hB hBmeas hadap hcont hbdd T)
+    (fun ns hns => tendsto_Zn_ae_subseq hB hBmeas hadap hcont hbdd T ns hns) Set.univ
+  simp only [setIntegral_univ, integral_Zn_eq_one hB hBmeas hadap hbdd T] at hlim
+  exact tendsto_nhds_unique hlim tendsto_const_nhds
+
+include hB in
+/-- **The continuous Girsanov measure is a probability measure.** `Q = μ.withDensity(Z_T)` with the
+positive, unit-mean, `L¹` density `Z_T`. -/
+lemma isProbabilityMeasure_contGirsanov (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 => θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
+    IsProbabilityMeasure (μ.withDensity fun ω =>
+      ENNReal.ofReal (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω)) := by
+  refine ⟨?_⟩
+  rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
+    ← ofReal_integral_eq_lintegral_ofReal
+      ((memLp_ZT_one hB hBmeas hadap hcont hbdd T).integrable le_rfl)
+      (ae_of_all _ fun ω => (contDoleansExp_pos _ _ _ _).le),
+    integral_ZT_eq_one hB hBmeas hadap hcont hbdd T, ENNReal.ofReal_one]
 
 end MathFin
