@@ -113,4 +113,30 @@ theorem tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound [IsFiniteMeasure μ]
   simp_rw [eLpNorm_one_eq_lintegral_enorm, Pi.sub_apply] at hL1
   exact hL1
 
+/-- **Set-integral limit from the a.e.-subsequence principle + an `L²` bound.** On a finite measure,
+a family `f : ℕ → α → ℝ` with `f n ∈ L²`, a uniform second-moment bound `∫ (f n)² ≤ M`, a limit
+`g ∈ L¹`, and the hypothesis that **every subsequence has a further subsequence converging to `g`
+a.e.** satisfies `∫_A f n → ∫_A g`. This routes the composition of convergences (exp, sums,
+products) through the a.e. level — where continuity is free — instead of through a `TendstoInMeasure`
+algebra that Mathlib does not provide. The real sequence `∫_A f n` converges by the subsequence
+principle (`tendsto_of_subseq_tendsto`): each subsequence's a.e.-sub-subsequence gives convergence in
+measure (`tendstoInMeasure_of_tendsto_ae`), which `tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound`
+turns into the set-integral limit. This is the endpoint the continuous-Girsanov Doléans limit consumes:
+`f n = exp(a·B^θⁿ)·Z⁽ⁿ⁾`, whose stochastic part converges in measure (brick b) so every subsequence
+has an a.e.-convergent one, while the drift parts converge everywhere. -/
+theorem tendsto_setIntegral_of_subseq_ae_of_sq_bound [IsFiniteMeasure μ]
+    {f : ℕ → α → ℝ} {g : α → ℝ} (hf : ∀ n, MemLp (f n) 2 μ)
+    {M : ℝ} (hM : ∀ n, ∫ x, (f n x) ^ 2 ∂μ ≤ M) (hg : MemLp g 1 μ)
+    (hsub : ∀ ns : ℕ → ℕ, Tendsto ns atTop atTop →
+      ∃ ms : ℕ → ℕ, ∀ᵐ x ∂μ, Tendsto (fun k => f (ns (ms k)) x) atTop (𝓝 (g x)))
+    (A : Set α) :
+    Tendsto (fun n => ∫ x in A, f n x ∂μ) atTop (𝓝 (∫ x in A, g x ∂μ)) := by
+  refine tendsto_of_subseq_tendsto (fun ns hns => ?_)
+  obtain ⟨ms, hae⟩ := hsub ns hns
+  refine ⟨ms, ?_⟩
+  have hconv : TendstoInMeasure μ (fun k => f (ns (ms k))) atTop g :=
+    tendstoInMeasure_of_tendsto_ae (fun k => (hf _).aestronglyMeasurable) hae
+  exact tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound
+    (fun k => hf (ns (ms k))) (fun k => hM (ns (ms k))) hg hconv A
+
 end MathFin

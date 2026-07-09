@@ -198,7 +198,24 @@ ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_
     `tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound` — on a finite measure, `fⁿ∈L²` + `sup ∫(fⁿ)²≤M` +
     `fⁿ→g` in measure ⟹ `∫_A fⁿ → ∫_A g` (linchpin ⟹ UnifIntegrable ⟹ Vitali `tendsto_Lp_finite…` ⟹
     `tendsto_setIntegral_of_L1`). This is the density-limit endpoint (`Zⁿ→Z` in measure, `∫(Zⁿ)²≤exp(K²T)`).
-  - **STILL TODO (the irreversible core, own focused session):** (i) define the continuous density
+  - **CONVERGENCE CORE ✅ DONE (2026-07-09, `GirsanovAdaptedTheta.lean` + `UnifIntegrableL2.lean`):** the
+    novel/risky pieces are green. `tendsto_setIntegral_of_subseq_ae_of_sq_bound` (the a.e.-subsequence engine:
+    `tendsto_of_subseq_tendsto` on the real sequence `∫_A fⁿ`, each subseq discharged by `exists_seq_tendsto_ae`
+    + the landed L¹ endpoint — routes exp/product composition through the a.e. level, no in-measure algebra);
+    defs `contDrift`/`BthetaCont`/`contDoleansExp`/`itoIntCont`/`driftSqSum`; `tendstoInMeasure_riemannσ`
+    (`riemannσ → ∫θdB` in measure from brick b, via a `tendstoInMeasure_congr_left` helper + `MemLp.coeFn_toLp`);
+    `simpleDoleansExp_neg_eq` (`Zⁿ_T = exp(−Wⁿ − ½·driftSqSumⁿ)`, clamps drop as all `tₖ ≤ T`);
+    `exists_subseq_riemannσ_ae` (every subseq has an a.e.-convergent sub-subseq). All green, 0 warnings.
+  - **★ REMAINING FORK — the uniform `L²` bound for the martingale field.** The transported simple field is
+    `∫_A exp(a·Yⁿ_u−½a²u)·Zⁿ_T dμ` — a **mixed-time** product (drift-exp at `u`, density at `T`). The engine
+    needs `fⁿ ∈ L²` uniformly, i.e. `∫(exp(a·Yⁿ_u)·Zⁿ_T)² ≤ M`. Two routes: **(A) 4th moments** — `Dⁿ∈L⁴`
+    (Gaussian MGF, drift-bounded) and `Zⁿ∈L⁴` (`(E^{−c})⁴=E^{−4c}·exp(3∑c²Δτ)≤exp(3C²T)`), Hölder `L⁴·L⁴⊆L²`;
+    mechanical, ~2× the existing `hZT2`/`hDu2`. **(B) Doléans-density reformulation** — reduce each side to
+    `∫_A E^{a−c}ⁿ_u dμ` (tower `E[Zⁿ_T|𝓕_u]=Zⁿ_u` + spine `Zⁿ_u·Dⁿ_u=ᵐE^{a−c}ⁿ_u`), a genuine Doléans density
+    with the *direct* `L²` bound `∫(E^{a−c}ⁿ)²≤exp((|a|+C)²T)` — no 4th moments, but re-derives
+    `changeOfMeasure_setIntegral_eq_of_ae_martingale`'s internals (the reduction isn't exposed). The `Q`-prob-measure
+    side is cleaner (Scheffé or the engine at `a=0` on `Zⁿ`, whose `L²` bound `∫(Zⁿ)²≤exp(C²T)` is the plain `hZT2`).
+  - **STILL TODO after the fork:** (i) define the continuous density
     `Z_T = exp(−∫θdB − ½∫θ²ds)` via an Itô-CLM representative + the drift integral, and `Y_u = B_u + ∫₀ᵘθds`;
     (ii) `Zⁿ_T → Z_T` and `exp(a·Yⁿ−½)·Zⁿ_T → exp(a·Y−½)·Z_T` **in measure** (stochastic part L² brick b ⟹
     in-measure; drift part everywhere via the drift lemma; `exp`/product continuity). The **clamped horizon-`u`
