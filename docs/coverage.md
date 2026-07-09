@@ -26,7 +26,24 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-08, geometric-Asian lognormality + the Wiener-indicator identity):** corpus
+> **Live status (2026-07-09, continuous-adapted Girsanov closes `gir-thm-9.1.8`):** corpus **318**,
+> **285 full + 18 wrappers = 303/318 delivery-ready**, 15 reduced cores, 0 placeholders. `gir-thm-9.1.8`
+> flips `reduced_core → full`: `girsanov_adapted_continuous_qbm`
+> (`Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) derives the complete Q-Brownian
+> motion — zero start, Gaussian `𝒩(0,t−s)` increments, independence of disjoint increments — for a
+> bounded (`|θ| ≤ C`), `𝓕`-adapted, path-continuous `θ`, under `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`
+> with `B^θ_u = B_u + ∫₀ᵘθ ds`. **Spine-free:** rather than a continuous Doléans stochastic exponential
+> proved to be a martingale (a Novikov crux), the simple-θ exponential-martingale identity
+> `isExpQMartingale_BthetaSimple` (uniform-partition approximants `c⁽ⁿ⁾_i = θ(tᵢ)`) is passed to the
+> limit — the stochastic exponent `Wⁿ = ∑θ(tᵢ)ΔBᵢ → ∫θ dB` in `L²`, the drift parts converge everywhere,
+> and the **mixed-time** set-integral limit `∫_A exp(a·Yⁿ−½)·Zⁿ_T → ∫_A exp(a·Y−½)·Z_T` goes through the
+> a.e.-subsequence engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound` with a route-A L⁴/AM-GM uniform
+> `L²` bound, then `isQBrownianMotion_of_expMartingale` reads off the three properties (no adapted-integrand
+> Itô formula). Axioms-clean, `lake build` green, gates + ledger fresh. This is the culmination of the
+> Girsanov Track-α arc (constant → simple → continuous adapted). **Only the strictly more general
+> `L²`/progressive-`θ` under Novikov (unbounded) remains `reduced_core`, at `sc-thm-9.1.8`.**
+>
+> **Prior (2026-07-08, geometric-Asian lognormality + the Wiener-indicator identity):** corpus
 > **318**, **284 full + 18 wrappers = 302/318 delivery-ready**, 16 reduced cores, 0 placeholders. One new
 > `full` entry plus a reusable foundational brick, both axioms-clean (`lake build` green, gates + ledger
 > fresh). `mf-asian-geom-driver-gaussian` (`BlackScholes/AsianGeometric.asianGeom_driver_hasLaw`): the
@@ -179,9 +196,18 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 > chain re-derived). The two simple-θ-specific ingredients: the spine `simple_spine_ae`
 > (`E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}`) and the mixed-time integrability
 > `integrable_expBthetaSimple_mul_density` (an `L²` Hölder: `Z_T² = E^{−2c}_T·exp(∑ c_i²Δτ_i)` with
-> `∑ c_i²Δτ_i ≤ K²T`). **Open (still `reduced_core`):** only the *fully general continuous-adapted*-`θ`
-> Girsanov (`gir-thm-9.1.8`, the drift-corrected `B^θ = B − ∫θ ds` for continuous adapted `θ`) — it
-> needs an `L²` approximation of continuous θ by the simple case (or an adapted-integrand Itô formula).
+> `∑ c_i²Δτ_i ≤ K²T`).
+>
+> **Continuous adapted θ — now `full` (2026-07-09):** `gir-thm-9.1.8`
+> (`Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) closes the bounded adapted
+> **continuous** case by exactly the `L²`-approximation route anticipated here: the simple-θ identity
+> `isExpQMartingale_BthetaSimple` (on the uniform-partition approximants `c⁽ⁿ⁾_i = θ(tᵢ)`) passed to the
+> limit through the a.e.-subsequence set-integral engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound`
+> (route-A L⁴/AM-GM uniform `L²` bound on the mixed-time product `exp(a·Yⁿ−½)·Zⁿ_T`), then one
+> application of `isQBrownianMotion_of_expMartingale` — no adapted-integrand Itô formula, no continuous
+> stochastic-exponential-is-a-martingale (Novikov) crux. **Open (still `reduced_core`):** only the
+> strictly more general `L²`/**progressive**-`θ` under Novikov (unbounded, merely progressively
+> measurable), at `sc-thm-9.1.8`.
 
 > **Prior round (2026-06-29, Phase 1 — the convex-duality unification: pricing = risk):** corpus
 > **306**, **271 full + 18 wrappers = 289/306 delivery-ready**, 17 reduced cores, 0 placeholders.

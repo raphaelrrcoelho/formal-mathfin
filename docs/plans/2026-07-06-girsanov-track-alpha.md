@@ -211,7 +211,18 @@ ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_
     (`∫(Zⁿ)²≤exp(C²T)` via `(Zⁿ)²=E^{−2c}·exp(E)`) + `memLp_Zn_two`; `tendsto_Zn_ae_subseq`
     (`Zⁿ→Z_T` a.e. along subseqs); `memLp_ZT_one` (`Z_T∈L¹` by Fatou: `∫⁻‖Z_T‖ₑ≤liminf ∫Zⁿ=1`);
     `integral_ZT_eq_one` (`∫Z_T=1` via the engine at `A=univ`) → `isProbabilityMeasure_contGirsanov`.
-  - **★ REMAINING — the martingale field (the harder half).** The transported simple field is
+  - **★ MARTINGALE FIELD ✅ DONE (2026-07-09) — the whole (c) assembly landed as
+    `Btheta_isQBrownianMotion_adapted`.** Route A (4th moments) was chosen: `quad_integral_Dn_le`/
+    `quad_integral_Zn_le` (`Dⁿ,Zⁿ ∈ L⁴`) + the pointwise AM-GM `2·D²Z² ≤ D⁴+Z⁴` → `memLp_fn_two` + the
+    `n`-independent `sq_integral_fn_le`; the limit `g = Dᵤ·Z_T ∈ L¹` via `memLp_ZT_two` (Fatou on squares)
+    × `memLp_contD_two` (Gaussian MGF) through `MemLp.mul`; `tendsto_fn_ae_subseq` the engine's `hsub`.
+    The field: transport both horizons to `μ`, run the engine at `t'` and `s'`, and the transported simple
+    identity (`isExpQMartingale_BthetaSimple`, `unifPart` partition, `n ≥ 1`) forces the limits equal.
+    `contDrift` `𝓕_u`-adaptedness (all `u`, `[0,u]` Riemann sums) + zero-start complete
+    `isExpQMartingale_BthetaCont`; `isQBrownianMotion_of_expMartingale` reads off the Q-Brownian triple.
+    The CLM spine `∫(a−θ)dB` reduction (route B) was NOT needed — route A works on the mixed-time product
+    directly. Green, axioms-clean, warning-free; `lake build` 8614.
+    _Historical scoping (superseded by the DONE above):_ The transported simple field is
     `∫_A exp(a·Yⁿ_u−½a²u)·Zⁿ_T dμ` — a **mixed-time** product (drift-exp at `u`, density at `T`). The engine
     needs `fⁿ ∈ L²` uniformly, i.e. `∫(exp(a·Yⁿ_u)·Zⁿ_T)² ≤ M`. Two routes: **(A) 4th moments** — `Dⁿ∈L⁴`
     (Gaussian MGF, drift-bounded) and `Zⁿ∈L⁴` (`(E^{−c})⁴=E^{−4c}·exp(3∑c²Δτ)≤exp(3C²T)`), Hölder `L⁴·L⁴⊆L²`;
@@ -238,11 +249,10 @@ ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_
     identity at the representative level (CLM linearity `∫(a−θ)dB = a·B − ∫θdB`); (iv) integrability; (v) assemble
     `isExpQMartingale_Btheta_adapted` + apply the abstraction. Deliverable: `Btheta_isQBrownianMotion_adapted`.
 Deliverable: `Btheta_isQBrownianMotion_adapted`.
-**Status: brick (a) + (b) + drift-convergence + `L²→L¹` endpoint all landed green. The remaining (c) core (i)–(v)
-is the irreversible assembly — its own focused session, now fully mapped so it executes without re-recon. NOT to be
-rushed as a tail-of-session partial.**
+**Status: brick α4 COMPLETE ✅ (2026-07-09). `Btheta_isQBrownianMotion_adapted` landed green, axioms-clean,
+`lake build` 8614; every (a)/(b)/drift/endpoint/martingale-field piece is in `GirsanovAdaptedTheta.lean`.**
 
-### Brick α5 — flip `gir-thm-9.1.8` → full + wire
+### Brick α5 — flip `gir-thm-9.1.8` → full + wire ✅ DONE (2026-07-09)
 **Gated on α4** (the `full` flip re-exports `Btheta_isQBrownianMotion_adapted`, which α4 must first build).
 The honest flip cannot happen before α4: `gir-thm-9.1.8` / `sc-thm-9.1.8` are `reduced_core` **structure
 specs** for the *general continuous adapted* case, and narrowing them to the simple case (already shipped as
@@ -254,9 +264,15 @@ remaining gap (the σ-realization `processToLp_of_bdd_adapted_cont`); `docs/road
 `docs/bridges.md`, `docs/mathematical-architecture.md` record the frontier (simple-adapted `full`;
 continuous-adapted infrastructure-gated).
 
-**When α4 lands:** restate `gir-thm-9.1.8` with the honest Doléans density (reconcile sign `θ ↔ −θ`), re-export
-`Btheta_isQBrownianMotion_adapted`, `metadata.formalization_status: "full"`; regenerate `AxiomAuditGen.lean`,
-extend `AxiomAudit.lean`, ledger re-verify, gates 19/19; Girsanov row ◐→✅ (bounded case).
+**DONE (2026-07-09):** `gir-thm-9.1.8` restated in the native ℝ≥0/timeMeasure form (`girsanov_adapted_
+continuous_qbm`, re-exporting `Btheta_isQBrownianMotion_adapted`, sign in the native `B^θ = B + ∫θds`
+convention with density `exp(−∫θdB − ½∫θ²ds)` — the same convention as the shipped `gir-simple-adapted`),
+`metadata.formalization_status: "full"`; bench-check green; AxiomAuditGen regenerated (byte-fresh, the new
+constant pinned axioms-clean); ledger re-verified (318 fresh); gates 19/19; coverage row ◐→✅. The curated
+`AxiomAudit.lean` was intentionally NOT touched — the whole distributional-Girsanov Btheta track (constant,
+simple, continuous) lives in the generated exhaustive audit only, so adding just the continuous one would be
+incoherent. `sc-thm-9.1.8` stays `reduced_core` (the strictly more general L²/progressive-θ under Novikov)
+with a cross-referencing scope note. **Track-α is COMPLETE.**
 
 ## Verification (each brick)
 `./scripts/lean-check.sh <file>` → `sorry_count 0`; final `lake build` daemon-down before relying on oleans; `#print axioms` clean on headliners; ledger fresh; pytest 19/19.
