@@ -967,4 +967,39 @@ as a genuine `changeOfNumeraire` instance (`X` = the exchange payoff, `N = S²`)
 /-- info: 'MathFin.exchangeOption_numeraire_price' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.exchangeOption_numeraire_price
 
+/-! ## Distributional Girsanov (Track-α): `B^θ` is a `Q`-Brownian motion — constant → simple → continuous adapted (2026-07-09)
+
+The three defining Brownian properties of the drift-corrected process — zero start, Gaussian
+`𝒩(0,t−s)` increments, and independence of disjoint increments — are read off, under the Girsanov
+measure `Q = P.withDensity(Z_T)`, from a *single* structural hypothesis: that every
+`exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. That reduction is
+`isQBrownianMotion_of_expMartingale`, which runs the characteristic-function chain (marginal MGF →
+increment MGF → joint MGF → linear-combination Gaussian law → independence via `charFun`) exactly
+ONCE, process-agnostically. Each θ regime then supplies only its own exponential-martingale identity
+and lands as a one-line application:
+
+* `Btheta_isQBrownianMotion` — CONSTANT θ, `Z·D = Wald(a−θ)` a genuine martingale everywhere (the
+  instance that first validated the abstraction against a known-good result).
+* `Btheta_simple_isQBrownianMotion` — SIMPLE (piecewise-constant adapted) θ, via the spine
+  `E^{−c}·exp(a·B^θ − ½a²·) =ᵐ E^{a−c}` fed to the Bayes change-of-measure engine with an `L²`-Hölder
+  mixed-time integrability. Strictly beyond constant θ, on the existing tower.
+* `Btheta_isQBrownianMotion_adapted` — the culmination, bounded adapted CONTINUOUS θ under
+  `Z_T = exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds)`. **Spine-free**: instead of proving a continuous Doléans
+  stochastic exponential to be a martingale (the Novikov crux), the simple-θ identity is passed to
+  the limit — the mixed-time set-integral `∫_A exp(a·Yⁿ−½)·Zⁿ_T dμ` converges through the
+  a.e.-subsequence engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound` with a route-A L⁴/AM-GM
+  uniform `L²` bound, and no adapted-integrand Itô formula is used anywhere. -/
+
+/-- info: 'MathFin.isQBrownianMotion_of_expMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.isQBrownianMotion_of_expMartingale
+
+/-- info: 'MathFin.Btheta_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_isQBrownianMotion
+
+/-- info: 'MathFin.Btheta_simple_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_simple_isQBrownianMotion
+
+/-- info: 'MathFin.Btheta_isQBrownianMotion_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_isQBrownianMotion_adapted
+
 end MathFin.AxiomAudit

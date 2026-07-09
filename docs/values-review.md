@@ -74,6 +74,89 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-09 — corpus 318 — continuous bounded-adapted-θ Girsanov: `B^θ` is a `Q`-Brownian motion (Track-α closes)
+
+**Scope**: `Foundations/GirsanovAdaptedTheta.lean` (the α4 assembly, `Btheta_isQBrownianMotion_adapted`)
+and the α5 flip of `gir-thm-9.1.8` `reduced_core → full` (corpus 318 unchanged — an entry flipped, not
+added: 284→285 full, 16→15 reduced). Reviewed by **two independent panel agents** (slop/idiom/coherence;
+architecture/clarity/first-principles), read-only, then maintainer-adjudicated against `grep`-confirmed
+usage and the green `lake build`. The panel was **not sycophantic** — both enumerated the clean dimensions
+explicitly, and their findings **converged** on the same structural slop (the strongest signal that it is
+real). Over-escalation was filtered: the two nlinarith clusters were checked individually (three are
+genuinely linear, three genuinely nonlinear), and the biggest refactor was scoped to the backlog rather
+than rushed before merge.
+
+**Upgrades executed this session:**
+- **(lens 2/3) `memLp_ZT_one` deleted a full Fatou proof.** It re-proved `Z_T ∈ L¹` by the same
+  `lintegral`-`liminf` argument as `memLp_ZT_two` (`Z_T ∈ L²`). On the probability measure `μ`, `L² ⊆ L¹`:
+  moved `memLp_ZT_two` above it and replaced the ~35-line body with
+  `(memLp_ZT_two …).mono_exponent (by norm_num)` — the canonical upstream `MemLp.mono_exponent` (the repo's
+  own `Bachelier.lean` idiom), consumed instead of a hand-rolled second Fatou.
+- **(lens 3/8) linarith for the three linear density discharges.** The `Zⁿ`-side `p`-moment bounds
+  (`sq_integral_Zn_le`, `memLp_Zn_two`, `quad_integral_Zn_le`, `integrable_Zn_four`) reduce — after the
+  stochastic exponent `riemannσ` cancels — to a linear multiple of `driftSqSum ≤ C²T`; switched
+  `nlinarith [driftSqSum_le …] → linarith`. This makes "which step is nonlinear" self-documenting: the
+  `Dⁿ`-side bounds keep `nlinarith` because they genuinely form the product `a²·u ≥ 0`.
+- **(lens 3/4) shared per-path Doléans convergence.** `tendsto_fn_ae_subseq` re-inlined the exact
+  `exp ∘ (−riemannσ − ½·driftSqSum)` reconstruction already in `tendsto_Zn_ae_subseq`. Extracted
+  `tendsto_simpleDoleansExp_of_tendsto_riemannσ` (one per-`ω` lemma); both consumers apply it.
+- **(lens 4/7) the curated `AxiomAudit.lean` now tells the whole arc.** Added a Track-α section pinning the
+  reusable abstraction `isQBrownianMotion_of_expMartingale` plus all three regimes
+  (`Btheta_isQBrownianMotion` const → `Btheta_simple_isQBrownianMotion` simple →
+  `Btheta_isQBrownianMotion_adapted` continuous), with the const→simple→continuous narrative — the storied
+  headliner file now records the marquee arc, not just the generated exhaustive audit.
+
+**Per-lens read (exemplar → next upgrade):**
+1. **Inspired math** — exemplar: the **spine-free** route — pass the *simple* exponential-martingale
+   identity to the limit rather than build a continuous Doléans stochastic exponential and prove it a
+   martingale (the Novikov crux the tower cannot yet reach). Upgrade: the fully-general L²/progressive-θ
+   under Novikov (`sc-thm-9.1.8`).
+2. **Mathlib/Degenne coherence** — exemplar: consuming `isQBrownianMotion_of_expMartingale` (charFun chain
+   ONCE), `MemLp.mul`, `tendsto_of_subseq_tendsto`, and now `MemLp.mono_exponent`. Upgrade: two Mathlib-shaped
+   lemmas (`tendstoInMeasure_congr_left`, `sq_mul_le_half_add_pow4`) are parked in the Girsanov file and want
+   their honest homes (`UnifIntegrableL2` / a general-inequalities spot; check Mathlib first).
+3. **Zero slop** — exemplar: the three deduplications executed above. Outstanding: the simple-Doléans
+   `p`th-moment bound is written ~4× in this file (and a 5th time in `GirsanovSimpleTheta`) — backlog #1.
+4. **Architectural ingenuity** — exemplar: the a.e.-subsequence engine keeps exp/product composition at the
+   a.e. level (where `Continuous.comp`/`·` are free), sidestepping the `TendstoInMeasure` algebra Mathlib
+   lacks. Upgrade: hoist the `p`-moment Novikov brick and the `contDrift` basics to shared modules so future
+   Girsanov/SDE/Feynman–Kac work consumes rather than rebuilds them (backlog #1, #2).
+5. **First principles** — exemplar: the `reduced_core` structure spec is *replaced* by a real derivation
+   from bounded-adapted-continuous hypotheses; no hypothesis contains the conclusion. Nothing outstanding
+   beyond the Novikov generalization.
+6. **Idiomatic register** — exemplar: `contDoleansExp`/`contDrift`/`BthetaCont` mirror the simple-θ
+   `simpleDoleansExp`/`simpleDrift`; `riemannσ`/`driftSqSum` lowercase (no capital Σ); `variable`/`omit`
+   discipline. No upgrade outstanding.
+7. **Concept clarity** — exemplar: docstrings state the spine-free strategy and name what is *not* used (no
+   adapted-integrand Itô formula, no Novikov); both panel agents found zero overclaims. No upgrade outstanding.
+8. **Beautiful math** — exemplar: reading the martingale field as a mixed-time product and passing it through
+   the engine, with the AM–GM `2D²Z² ≤ D⁴+Z⁴` (`sq_mul_le_half_add_pow4`) as the clean route-A combiner — no
+   `rpow`/Cauchy–Schwarz square roots. Nothing outstanding.
+
+**Ranked backlog:**
+1. **The `p`th-moment Novikov brick.** State once in `SimpleDoleansExponential.lean`:
+   `∫ (E^{−c})^p ≤ Real.exp ((p²−p)/2·K²·T)` (+ a `MemLp … p` corollary), off `simpleDoleansExp_scaled_eq`.
+   Collapses `sq_integral_Zn_le`/`quad_integral_Zn_le`/`memLp_Zn_two`/`integrable_Zn_four` here and the `hZT2`
+   block in `GirsanovSimpleTheta.integrable_expBthetaSimple_mul_density` to one-liners — the reusable moment
+   bound any future Novikov regime needs. Medium-large. *(Owner: next Girsanov/Novikov session's opening move.)*
+2. **Relocate the `contDrift` API.** `contDrift` + `contDrift_zero`/`_abs_le`/`stronglyMeasurable_contDrift`
+   are process-agnostic facts about `∫₀ᵘθ ds`; move to `DriftRiemannConvergence` (or a `ContinuousDrift`
+   module) so SDE existence/uniqueness and Feynman–Kac get a ready bounded-adapted-drift API.
+3. **Hoist the withDensity transport + generic lemmas.** `setIntegral_withDensity_ofReal` (the AEMeasurable
+   variant) belongs beside its measurable twin in `ChangeOfMeasure.lean`, consumed by both engines;
+   relocate `tendstoInMeasure_congr_left` and `sq_mul_le_half_add_pow4` to their Mathlib-shaped homes.
+4. **`martingale_Zn` extraction.** The `_Zn` cluster (`measurable_Zn`/`integrable_Zn`/`integral_Zn_eq_one`)
+   re-instantiates the `E^{−c}` martingale ~6×; extract one `martingale_Zn` and derive the three off it
+   (fold with backlog #1, which reshapes these signatures anyway).
+5. **`sc-thm-9.1.8`** — the strictly-more-general L²/progressive-θ under Novikov (unbounded), still
+   `reduced_core`; needs Novikov + a progressively-measurable integrand realization.
+
+**Evidence/context.** corpus 318 (gir-thm-9.1.8 flipped `reduced_core → full`); full `lake build` green
+(8857 jobs pre-upgrade; the three in-file upgrades re-verified on the warm daemon, 0 sorries, 0 warnings);
+gates green; ledger 318 fresh; AxiomAuditGen byte-fresh + the curated `AxiomAudit` Track-α section builds
+(all four pins axioms-clean `[propext, Classical.choice, Quot.sound]`). Panel convergence on the `p`-moment
+duplication (both agents, independently) is the session's clearest signal; it is backlogged, not rushed.
+
 ## 2026-07-08 — corpus 318 — finance breadth: Vasicek bond, T-forward measure, geometric-Asian lognormality
 
 **Scope**: the finance-delivery push — `FixedIncome/VasicekBondPrice.lean`,

@@ -258,9 +258,9 @@
     "gir-thm-9.1.8": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-09",
-      "elapsed_s": 79.2,
-      "input_hash": "ca5ecd9819d813559a934be25d43a7099839ba29bad755208fac73dddd7c3997",
-      "verified_at_commit": "5eca1eb"
+      "elapsed_s": 618.7,
+      "input_hash": "7f860d9b13547f6879fefe0105c09367b5f288a3a618e8f7345c755c4abd614d",
+      "verified_at_commit": "1ecffe8"
     },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
