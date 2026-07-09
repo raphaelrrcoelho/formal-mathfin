@@ -169,6 +169,8 @@ import MathFin.Foundations.ItoFormulaC2
 import MathFin.Foundations.ItoIntegralRiemannBridge
 -- Riemann↔CLM bridge for a bounded adapted continuous integrand θ (α4 brick b): ∫θdB CLM
 import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
+-- Deterministic drift Riemann-convergence (α4 brick b-tail): ∑θ(tₖ)²·Δτ → ∫₀ᵀθ²ds
+import MathFin.Foundations.DriftRiemannConvergence
 import MathFin.Foundations.ItoFormulaCLM
 -- Summit A′: time-dependent Itô formula in L² — TD Taylor remainder vanishes,
 -- TD Riemann↔CLM bridge, and the assembly f(T,B_T) = f(0,B₀) + ∫f_x dB + ∫(f_t+½f_xx)ds

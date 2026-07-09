@@ -185,14 +185,29 @@ ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_
   Riemann sum `L²` by plain **domination** (`‖θ·Δ‖ ≤ ‖C·Δ‖`, `MemLp.mono` on `hΔ.const_mul C`) instead of
   `memLp_adapted_mul_increment` (which wants `AdaptedAt`), so the hypotheses match `processToLp` exactly
   (`natFiltration`-strongly-measurable + continuous + bounded). Green, axioms-clean, no benchmark (Foundations infra).
-  **STILL TODO for the full Doléans exponent:** the deterministic **drift Riemann-convergence**
-  `∑ θ(tₖ)²·Δτ → ∫₀ᵀ θ²ds` (per-ω, from `θ(·,ω)²` continuity — easy, unlike the stochastic half above).
-- (c) **the joint measure+integrand charFun limit** — `charFun_Q(incr)(w) = ∫ e^{iw·incr} Z_T dμ = lim ∫ e^{iw·incrⁿ} Zⁿ dμ
-  = charFun(N(0,t−s))(w)` (DCT/L¹ glue: `|e^{iw·}|=1`, `Zⁿ→Z` L¹, `incrⁿ→incr` a.e.), then `ext_of_complexMGF_eq`.
-  (Or, in the exp-martingale-field architecture, the analogous limit of `∫_A exp(a·B^θⁿ−½a²·)dQⁿ`.)
+  **drift Riemann-convergence ✅ DONE (2026-07-09, `DriftRiemannConvergence.lean`).** The deterministic
+  half of the continuous Doléans exponent: `tendsto_riemannSum_setIntegral` (bounded-continuous `g`:
+  `∑ g(tₖ)·(t_{k+1}−tₖ) → ∫ s in (0,T], g s ∂timeMeasure`) + the `θ²` specialization
+  `tendsto_driftSq_riemannSum` (`∑ θ(tₖ)²·Δτ → ∫₀ᵀ θ²ds`, per path). Same `cell_collapse` + DCT as brick b,
+  now on the finite time measure `timeMeasure.restrict (0,T]`. Green, no benchmark (Foundations infra).
+- (c) **the exp-martingale limit assembly** — build `IsExpQMartingale Q 𝓕 (fun u ω ↦ B_u + ∫₀ᵘθds) T` by
+  passing the simple-θ identity to the limit (`isExpQMartingale_BthetaSimple` for the `unifPart`-partition
+  approximants `c⁽ⁿ⁾ = θ(tₖ)`), then apply `isQBrownianMotion_of_expMartingale` ONCE. The martingale field,
+  transported to P, is `∫_A exp(a·Yⁿ−½)·Zⁿ_T dμ → ∫_A exp(a·Y−½)·Z_T dμ` — set-integral `L¹`-convergence.
+  - **`L²→L¹` set-integral endpoint ✅ DONE (2026-07-09, `UnifIntegrableL2.lean`):**
+    `tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound` — on a finite measure, `fⁿ∈L²` + `sup ∫(fⁿ)²≤M` +
+    `fⁿ→g` in measure ⟹ `∫_A fⁿ → ∫_A g` (linchpin ⟹ UnifIntegrable ⟹ Vitali `tendsto_Lp_finite…` ⟹
+    `tendsto_setIntegral_of_L1`). This is the density-limit endpoint (`Zⁿ→Z` in measure, `∫(Zⁿ)²≤exp(K²T)`).
+  - **STILL TODO (the irreversible core, own focused session):** (i) define the continuous density
+    `Z_T = exp(−∫θdB − ½∫θ²ds)` via an Itô-CLM representative + the drift integral, and `Y_u = B_u + ∫₀ᵘθds`;
+    (ii) `Zⁿ_T → Z_T` and `exp(a·Yⁿ−½)·Zⁿ_T → exp(a·Y−½)·Z_T` **in measure** (stochastic part L² brick b ⟹
+    in-measure; drift part everywhere via the drift lemma; `exp`/product continuity); (iii) the continuous spine
+    identity at the representative level (CLM linearity `∫(a−θ)dB = a·B − ∫θdB`); (iv) integrability; (v) assemble
+    `isExpQMartingale_Btheta_adapted` + apply the abstraction. Deliverable: `Btheta_isQBrownianMotion_adapted`.
 Deliverable: `Btheta_isQBrownianMotion_adapted`.
-**Status: σ-realization landed (`AdaptedProcessToLp.lean`); the (a)/(b)/(c) convergence assembly is ~20% done — its own
-focused multi-session effort, now fully mapped so it executes without re-recon. NOT to be rushed as a tail-of-session partial.**
+**Status: brick (a) + (b) + drift-convergence + `L²→L¹` endpoint all landed green. The remaining (c) core (i)–(v)
+is the irreversible assembly — its own focused session, now fully mapped so it executes without re-recon. NOT to be
+rushed as a tail-of-session partial.**
 
 ### Brick α5 — flip `gir-thm-9.1.8` → full + wire
 **Gated on α4** (the `full` flip re-exports `Btheta_isQBrownianMotion_adapted`, which α4 must first build).

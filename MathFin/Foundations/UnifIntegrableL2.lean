@@ -29,7 +29,7 @@ that lets convergence in measure upgrade to `L¹` (hence `∫ Z⁽ⁿ⁾ → ∫
 
 @[expose] public section
 
-open MeasureTheory
+open MeasureTheory Filter Topology
 open scoped ENNReal NNReal
 
 namespace MathFin
@@ -89,5 +89,28 @@ theorem unifIntegrable_one_of_sq_integral_le (hf : ∀ i, MemLp (f i) 2 μ)
   have hcancel := hchain.trans hMCε
   rw [mul_comm (C : ℝ≥0∞), mul_comm (C : ℝ≥0∞)] at hcancel
   exact (ENNReal.mul_le_mul_iff_left hCpos.ne' ENNReal.coe_ne_top).mp hcancel
+
+/-- **Set-integral `L¹`-convergence from an `L²` bound + convergence in measure.** On a finite
+measure, a family `f : ℕ → α → ℝ` with `f n ∈ L²`, a **uniform** second-moment bound
+`∫ (f n)² ≤ M`, and convergence in measure `f n → g` (with `g ∈ L¹`) satisfies
+`∫_A f n → ∫_A g` on every set `A`. The `L²` bound produces uniform integrability
+(`unifIntegrable_one_of_sq_integral_le`), which upgrades convergence in measure to `L¹`
+(the Vitali consumer `tendsto_Lp_finite_of_tendstoInMeasure`), and `L¹` convergence transfers
+to (set-)integrals (`tendsto_setIntegral_of_L1`). This is the endpoint the Girsanov continuous
+Doléans limit consumes: `Z⁽ⁿ⁾ → Z` in measure with `∫ (Z⁽ⁿ⁾)² ≤ exp(K²T)` gives
+`∫_A f(B^θⁿ) Z⁽ⁿ⁾ → ∫_A f(B^θ) Z` for every `𝓕`-set `A`. -/
+theorem tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound [IsFiniteMeasure μ]
+    {f : ℕ → α → ℝ} {g : α → ℝ} (hf : ∀ n, MemLp (f n) 2 μ)
+    {M : ℝ} (hM : ∀ n, ∫ x, (f n x) ^ 2 ∂μ ≤ M) (hg : MemLp g 1 μ)
+    (hconv : TendstoInMeasure μ f atTop g) (A : Set α) :
+    Tendsto (fun n => ∫ x in A, f n x ∂μ) atTop (𝓝 (∫ x in A, g x ∂μ)) := by
+  have hui : UnifIntegrable f 1 μ := unifIntegrable_one_of_sq_integral_le hf hM
+  have hL1 : Tendsto (fun n => eLpNorm (f n - g) 1 μ) atTop (𝓝 0) :=
+    tendsto_Lp_finite_of_tendstoInMeasure le_rfl ENNReal.one_ne_top
+      (fun n => (hf n).aestronglyMeasurable) hg hui hconv
+  refine tendsto_setIntegral_of_L1 g hg.aestronglyMeasurable
+    (Filter.Eventually.of_forall fun n => (hf n).integrable (by norm_num)) ?_ A
+  simp_rw [eLpNorm_one_eq_lintegral_enorm, Pi.sub_apply] at hL1
+  exact hL1
 
 end MathFin
