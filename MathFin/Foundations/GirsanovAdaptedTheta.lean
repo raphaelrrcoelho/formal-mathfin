@@ -369,4 +369,103 @@ lemma isProbabilityMeasure_contGirsanov (hBmeas : ∀ t, Measurable (B t)) {θ :
       (ae_of_all _ fun ω => (contDoleansExp_pos _ _ _ _).le),
     integral_ZT_eq_one hB hBmeas hadap hcont hbdd T, ENNReal.ofReal_one]
 
+include hB in
+/-- **Uniform `L⁴` bound on the approximant densities.** `∫ (Zⁿ_T)⁴ ≤ exp(6C²T)`, uniform in `n`
+(the 4th-moment analogue of `sq_integral_Zn_le`): `(Zⁿ)⁴ = E^{−4c}·exp(6·driftSqSumⁿ)`. Needed for
+the Hölder step of the mixed-time product `L²` bound. -/
+lemma quad_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
+    ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω => -(θ (unifPart T n i) ω)) n T ω) ^ 4 ∂μ
+      ≤ Real.exp (6 * C ^ 2 * (T : ℝ)) := by
+  haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hd4m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
+      (fun ω => (-4 : ℝ) * θ (unifPart T n i) ω) := fun i => (hadap (unifPart T n i)).const_mul (-4)
+  have hd4b : ∀ i ω, |(-4 : ℝ) * θ (unifPart T n i) ω| ≤ 4 * C := fun i ω => by
+    rw [abs_mul, show |(-4 : ℝ)| = 4 by norm_num]
+    exact mul_le_mul_of_nonneg_left (hbdd _ ω) (by norm_num)
+  have hmean : ∫ ω, simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => (-4 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ = 1 :=
+    simpleDoleansExp_integral_eq_one (X := B) (𝓕 := natFiltration hBmeas) (unifPart T n)
+      (unifPart_mono T n) _ hd4m hd4b n T
+  have hint4 : Integrable (fun ω => simpleDoleansExp (X := B) (unifPart T n)
+      (fun i ω => (-4 : ℝ) * θ (unifPart T n i) ω) n T ω) μ :=
+    (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
+      (unifPart_mono T n) _ hd4m hd4b n).integrable T
+  have hpt : ∀ ω,
+      (simpleDoleansExp (X := B) (unifPart T n) (fun i ω => -(θ (unifPart T n i) ω)) n T ω) ^ 4
+        ≤ Real.exp (6 * C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
+            (fun i ω => (-4 : ℝ) * θ (unifPart T n i) ω) n T ω := by
+    intro ω
+    rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, ← Real.exp_nat_mul, ← Real.exp_add]
+    exact Real.exp_le_exp.mpr (by push_cast; nlinarith [driftSqSum_le hbdd T n ω])
+  calc ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω => -(θ (unifPart T n i) ω)) n T ω) ^ 4 ∂μ
+      ≤ ∫ ω, Real.exp (6 * C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
+          (fun i ω => (-4 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ :=
+        integral_mono_of_nonneg (ae_of_all _ fun ω => by positivity) (hint4.const_mul _)
+          (ae_of_all _ hpt)
+    _ = Real.exp (6 * C ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
+
+omit hB mΩ in
+/-- The `unifPart` simple drift is bounded by `C·u` for `u ≤ T` (all `n`; `n = 0` is the empty sum). -/
+lemma simpleDriftUnif_abs_le {θ : ℝ≥0 → Ω → ℝ} {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0)
+    {u : ℝ≥0} (huT : u ≤ T) (n : ℕ) (ω : Ω) :
+    |simpleDrift (unifPart T n) (fun i ω => θ (unifPart T n i) ω) n u ω| ≤ C * (u : ℝ) := by
+  have hC0 : (0 : ℝ) ≤ C := (abs_nonneg _).trans (hbdd 0 ω)
+  rcases Nat.eq_zero_or_pos n with hn0 | hn
+  · subst hn0
+    simp only [simpleDrift, Finset.range_zero, Finset.sum_empty, abs_zero]
+    exact mul_nonneg hC0 u.coe_nonneg
+  · have hlast : unifPart T n n = T := by
+      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+    exact simpleDrift_abs_le (unifPart_mono T n) (by simp [unifPart]) (fun i ω => hbdd _ ω) n
+      (huT.trans_eq hlast.symm) ω
+
+include hB in
+omit [IsProbabilityMeasure μ] in
+/-- **Uniform `L⁴` bound on the drift-corrected exponentials `Dⁿ_u`.** `∫ (Dⁿ_u)⁴ ≤ exp(4|a|CT)·M₄`
+with `M₄ = ∫ exp(4a·B_u)` (the Gaussian 4·`a`-MGF, `n`-independent): `(Dⁿ_u)⁴ = exp(4a·Yⁿ_u − 2a²u) ≤
+exp(4|a|CT)·exp(4a·B_u)` since the drift is bounded and `−2a²u ≤ 0`. -/
+lemma quad_integral_Dn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
+    {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (a : ℝ) (T : ℝ≥0) {u : ℝ≥0} (huT : u ≤ T) (n : ℕ) :
+    ∫ ω, (Real.exp (a * (B u ω + simpleDrift (unifPart T n)
+        (fun i ω => θ (unifPart T n i) ω) n u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4 ∂μ
+      ≤ Real.exp (4 * |a| * C * (T : ℝ)) * ∫ ω, Real.exp (4 * a * B u ω) ∂μ := by
+  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hMGF : Integrable (fun ω => Real.exp (4 * a * B u ω)) μ :=
+    integrable_exp_mul_of_hasLaw (hFB.hasLaw_eval u) (4 * a)
+  have hmeasD : Measurable fun ω => Real.exp (a * (B u ω + simpleDrift (unifPart T n)
+      (fun i ω => θ (unifPart T n i) ω) n u ω) - a ^ 2 * (u : ℝ) / 2) := by
+    have : Measurable fun ω => simpleDrift (unifPart T n)
+        (fun i ω => θ (unifPart T n i) ω) n u ω := by
+      unfold simpleDrift
+      exact Finset.measurable_sum _ fun i _ =>
+        ((hadap (unifPart T n i)).mono ((natFiltration hBmeas).le _)).measurable.mul_const _
+    fun_prop (disch := exact this)
+  have hpt : ∀ ω, (Real.exp (a * (B u ω + simpleDrift (unifPart T n)
+      (fun i ω => θ (unifPart T n i) ω) n u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4
+        ≤ Real.exp (4 * |a| * C * (T : ℝ)) * Real.exp (4 * a * B u ω) := by
+    intro ω
+    rw [← Real.exp_nat_mul, ← Real.exp_add]
+    refine Real.exp_le_exp.mpr ?_
+    have h4 : a * simpleDrift (unifPart T n) (fun i ω => θ (unifPart T n i) ω) n u ω
+        ≤ |a| * (C * (T : ℝ)) :=
+      calc a * simpleDrift (unifPart T n) (fun i ω => θ (unifPart T n i) ω) n u ω
+          ≤ |a * simpleDrift (unifPart T n) (fun i ω => θ (unifPart T n i) ω) n u ω| := le_abs_self _
+        _ = |a| * |simpleDrift (unifPart T n) (fun i ω => θ (unifPart T n i) ω) n u ω| := abs_mul _ _
+        _ ≤ |a| * (C * (u : ℝ)) :=
+            mul_le_mul_of_nonneg_left (simpleDriftUnif_abs_le hbdd T huT n ω) (abs_nonneg a)
+        _ ≤ |a| * (C * (T : ℝ)) := mul_le_mul_of_nonneg_left
+            (mul_le_mul_of_nonneg_left (by exact_mod_cast huT)
+              ((abs_nonneg _).trans (hbdd 0 ω))) (abs_nonneg a)
+    push_cast
+    nlinarith [h4, sq_nonneg a, u.coe_nonneg]
+  calc ∫ ω, (Real.exp (a * (B u ω + simpleDrift (unifPart T n)
+        (fun i ω => θ (unifPart T n i) ω) n u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4 ∂μ
+      ≤ ∫ ω, Real.exp (4 * |a| * C * (T : ℝ)) * Real.exp (4 * a * B u ω) ∂μ :=
+        integral_mono_of_nonneg (ae_of_all _ fun ω => by positivity) (hMGF.const_mul _)
+          (ae_of_all _ hpt)
+    _ = Real.exp (4 * |a| * C * (T : ℝ)) * ∫ ω, Real.exp (4 * a * B u ω) ∂μ := integral_const_mul _ _
+
 end MathFin
