@@ -201,11 +201,18 @@ ExpMartingaleQBrownian); Lévy fallback `ProbabilityMeasure.tendsto_iff_tendsto_
   - **STILL TODO (the irreversible core, own focused session):** (i) define the continuous density
     `Z_T = exp(−∫θdB − ½∫θ²ds)` via an Itô-CLM representative + the drift integral, and `Y_u = B_u + ∫₀ᵘθds`;
     (ii) `Zⁿ_T → Z_T` and `exp(a·Yⁿ−½)·Zⁿ_T → exp(a·Y−½)·Z_T` **in measure** (stochastic part L² brick b ⟹
-    in-measure; drift part everywhere via the drift lemma; `exp`/product continuity). ★NOTE the martingale
-    identity is at intermediate `s'≤t'≤T`, so `Yⁿ_u = X_u + simpleDriftⁿ_u` needs `simpleDriftⁿ_u → ∫₀ᵘθds`
-    at horizon `u≤T` — a small **clamped** variant of `tendsto_riemannSum_setIntegral` (currently stated at
-    horizon `T`): the step function's cells are `(tᵢ,tᵢ₊₁]∩(0,u]`, same DCT over `(0,u]`. Cheap to add;
-    the T-horizon core (`tendsto_riemannSum_setIntegral`) is the reusable engine. (iii) the continuous spine
+    in-measure; drift part everywhere via the drift lemma; `exp`/product continuity). The **clamped horizon-`u`
+    drift** `simpleDriftⁿ_u → ∫₀ᵘθds` (needed since the martingale identity is at intermediate `s'≤t'≤T`) is
+    ✅ DONE (`tendsto_riemannSum_setIntegral_clamp`, 2026-07-09, `DriftRiemannConvergence.lean`).
+    ★★**NEWLY-IDENTIFIED INFRA GAP:** Mathlib has NO `TendstoInMeasure` algebra (no `add`/`mul`/continuous-comp;
+    only `tendstoInMeasure_of_tendsto_Lp` :474 and `_of_tendsto_ae` :223). So (ii) must build a **minimal
+    in-measure toolkit** — either the direct closure lemmas, or (cleaner) route the *set-integral* limit through
+    the **a.e.-subsequence principle**: to prove `∫_A hⁿ → ∫_A h` (a real sequence), show every subsequence has a
+    further one along which `Wⁿ→W` a.e. (`TendstoInMeasure.exists_seq_tendsto_ae` on the L²-conv stochastic part),
+    where the products/`exp` compose trivially a.e., then a.e.+uniform-L² ⟹ `∫_A→` (a.e. ⟹ in-measure on finite
+    μ, feed `tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound`), and lift via `tendsto_of_subseq_tendsto`.
+    This subsequence route keeps the composition at the a.e. level (where `Continuous.comp`/`+`/`·` are free) and
+    reuses the landed L¹ endpoint — no bespoke in-measure algebra. It IS its own ~2–3-lemma sub-effort. (iii) the continuous spine
     identity at the representative level (CLM linearity `∫(a−θ)dB = a·B − ∫θdB`); (iv) integrability; (v) assemble
     `isExpQMartingale_Btheta_adapted` + apply the abstraction. Deliverable: `Btheta_isQBrownianMotion_adapted`.
 Deliverable: `Btheta_isQBrownianMotion_adapted`.
