@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`318` theorems · `303` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`319` theorems · `304` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -60,7 +60,7 @@ Mathematical finance is a few deep principles whose consequences are the models.
 | **Convex duality** | I ↔ IV (pricing ↔ risk) | ✅ **WIRED** — the FTAP and the coherent-risk representation are proved to be the *same* Hahn–Banach theorem |
 | **Feynman–Kac** | II ↔ III | ✅ **WIRED** — the Black–Scholes PDE from the risk-neutral expectation |
 | **Donsker / CLT** | discrete ↔ continuous | ✅ **WIRED** — CRR binomial → Black–Scholes |
-| **Girsanov** | I ↔ II | ◐ **wired — bounded case closed** — the EMM is an *explicit* change of measure, and the distributional Girsanov is now **fully closed for bounded adapted continuous θ**: `B^θ = B + ∫θ ds` is a `Q`-Brownian motion (Gaussian *and independent* increments) under `Q = withDensity(exp(−∫θ dB − ½∫θ² ds))`; only the general `L²`/progressive-θ (Novikov) case stays open |
+| **Girsanov** | I ↔ II | ◐ **wired — bounded case closed** — the EMM is an *explicit* change of measure, and the distributional Girsanov is now **fully closed for bounded predictable θ** (the honest Itô-`L²` domain): `B^θ = B + ∫θ ds` is a `Q`-Brownian motion (Gaussian *and independent* increments) under `Q = withDensity(exp(−∫θ dB − ½∫θ² ds))`; only the general `L²`/progressive-θ (Novikov, unbounded) case stays open |
 | **Numéraire** | IV ↔ I | ✅ **WIRED** — the price-invariance seam `N₀·𝔼^{Qᴺ}[X/N_T] = B₀·𝔼^Q[X/B_T]` (`changeOfNumeraire`), with BS-stock / Margrabe-`S²` / Kelly-EMM instances |
 
 → The full spine, seam by seam: **[`docs/mathematical-architecture.md`](docs/mathematical-architecture.md)**.
@@ -96,9 +96,9 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 
 | | |
 |---|---:|
-| theorems (machine-checked) | **318** |
-| delivery-ready (`full` + `library_wrapper`) | **303** |
-| full derivations | 285 |
+| theorems (machine-checked) | **319** |
+| delivery-ready (`full` + `library_wrapper`) | **304** |
+| full derivations | 286 |
 | reduced cores (honest special cases) | 15 |
 | placeholders / sorries | **0** |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
@@ -165,7 +165,7 @@ Honesty is the point, so the gaps are explicit:
   not yet formalized (the 2-D Itô formula, Lévy's characterisation, the fully-general
   `L²`/progressive Girsanov under Novikov, some Markov/Poisson cores). Tracked per-entry in [`docs/coverage.md`](docs/coverage.md).
 - **SDE existence + uniqueness** — existence is the Picard fixed point in the predictable `L²` space `E` (conditional on the small-horizon contraction); **uniqueness (Theorem 8.2.5) is now `full`**, derived via the `L²`-energy Grönwall argument (`IsL2SolutionPair.uniqueness`).
-- **Girsanov (I↔II) — the bounded case is closed** — the EMM/change-of-measure martingale side is proved, and the distributional Girsanov is now **fully closed for bounded adapted continuous θ**: `Btheta_isQBrownianMotion_adapted` shows `B^θ_u = B_u + ∫₀ᵘθ ds` is a `Q`-Brownian motion (zero start, Gaussian increments `N(0, t−s)`, *and* independent disjoint increments) under `Q = withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`. The route is **spine-free**: the simple-θ exponential-martingale identity is passed to the limit through an a.e.-subsequence set-integral engine — no continuous stochastic-exponential-is-a-martingale (Novikov) crux and no adapted-integrand Itô formula. This is the culmination of the constant → simple → continuous-adapted arc; only the fully-general `L²`/progressive-θ (Novikov, unbounded) case remains open. The **numéraire (IV↔I)** bridge *is* wired (`changeOfNumeraire` + its BS-stock / Margrabe-`S²` / Kelly-EMM instances).
+- **Girsanov (I↔II) — the bounded case is closed** — the EMM/change-of-measure martingale side is proved, and the distributional Girsanov is now **fully closed for bounded predictable θ** — the honest domain of the Itô `L²` integral: `Btheta_isQBrownianMotion_predictable` shows `B^θ_u = B_u + ∫₀ᵘθ ds` is a `Q`-Brownian motion (zero start, Gaussian increments `N(0, t−s)`, *and* independent disjoint increments) under `Q = withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`, dropping the path-continuity of the earlier bounded-adapted-continuous case (`Btheta_isQBrownianMotion_adapted`). The route is **spine-free**: the simple-θ exponential-martingale identity is passed to the limit through an a.e.-subsequence set-integral engine — no continuous stochastic-exponential-is-a-martingale (Novikov) crux and no adapted-integrand Itô formula. This is the culmination of the constant → simple → continuous-adapted → **predictable** arc; only the fully-general `L²`/progressive-θ (Novikov, unbounded) case remains open. The **numéraire (IV↔I)** bridge *is* wired (`changeOfNumeraire` + its BS-stock / Margrabe-`S²` / Kelly-EMM instances).
 - **Known upstream/limit gaps** — e.g. the superhedging strong-duality *equality* needs a
   finite-dimensional Farkas / polyhedral-cone closedness absent from Mathlib at this pin
   ([#39](https://github.com/raphaelrrcoelho/formal-mathfin/issues/39)).
