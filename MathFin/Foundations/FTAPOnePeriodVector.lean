@@ -320,7 +320,6 @@ and positively homogeneous; its minimum `c` over the unit sphere of `Nᗮ` is po
 lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
     (hNbot : (gainsKernel P Y)ᗮ ≠ ⊥) :
     ∃ c > 0, ∀ θ ∈ (gainsKernel P Y)ᗮ, c * ‖θ‖ ≤ potential P Y θ := by
-  classical
   set N := gainsKernel P Y
   set g : F → ℝ := fun θ ↦ ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P with hg
   have hg_nonneg : ∀ θ, 0 ≤ g θ := fun θ ↦ integral_nonneg fun ω ↦ le_max_right _ _
@@ -475,7 +474,6 @@ EMM. -/
 theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Integrable Y P)
     (hNA : NoArbitrage P Y) :
     ∃ Q, IsEMM P Y Q := by
-  classical
   by_cases hY0 : (gainsKernel P Y)ᗮ = ⊥
   · -- `Nᗮ = ⊥ ⟹ N = ⊤`: `Y` is a.e. orthogonal to every `θ`, so `E[Y] = 0` and `Q = P`
     refine ⟨P, inferInstance, Measure.AbsolutelyContinuous.refl P,
@@ -555,7 +553,6 @@ an a.e. notion preserved by `P̃ ~ P`, so the integrable backward direction appl
 `Q ~ P̃ ~ P` by transitivity. -/
 theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) :
     ∃ Q, IsEMM P Y Q := by
-  classical
   set w : Ω → ℝ := fun ω ↦ (1 + ‖Y ω‖)⁻¹ with hwdef
   have hw_meas : Measurable w := (measurable_const.add hY.norm).inv
   have hden_pos : ∀ ω, (0 : ℝ) < 1 + ‖Y ω‖ := fun ω ↦ by positivity

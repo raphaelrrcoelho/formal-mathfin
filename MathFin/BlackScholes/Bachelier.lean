@@ -189,7 +189,7 @@ theorem bachelier_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
       = (S_0 - K) * Phi (bachelierD S_0 K σ T) +
         σ * Real.sqrt T * gaussianPDFReal 0 1 (bachelierD S_0 K σ T) := by
   obtain ⟨hK, hσ, hT, hZ⟩ := h
-  set d : ℝ := bachelierD S_0 K σ T with d_def
+  set d : ℝ := bachelierD S_0 K σ T
   have hsqrT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
   have h_σsqT_pos : 0 < σ * Real.sqrt T := mul_pos hσ hsqrT_pos
   have h_σsqT_ne : σ * Real.sqrt T ≠ 0 := h_σsqT_pos.ne'

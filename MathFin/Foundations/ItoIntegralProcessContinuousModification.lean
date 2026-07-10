@@ -90,8 +90,8 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
     (T : ℝ≥0) (V : TBoundedSP T hBmeas) {ε : ℝ} (hε : 0 < ε) :
     μ.real {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖}
       ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
-  set f := itoSimpleProcess hBmeas V.val T with hf_def
-  set S := {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖} with hS
+  set f := itoSimpleProcess hBmeas V.val T
+  set S := {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖}
   have hf : MemLp f 2 μ := memLp_itoSimpleProcess hB hBmeas V.val T
   have hfi : Integrable f μ := hf.integrable (by norm_num)
   have hweak := itoSimpleProcess_maximal_weak hB hBmeas hBcont V.val T ε
@@ -283,7 +283,7 @@ theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     (fun ω ↦ itoContinuousMod T hBmeas φ t ω) =ᵐ[μ] itoProcessCLM hB T t hBmeas φ := by
   set V := (approxSeq T hBmeas φ).choose with hVdef
   have hV := (approxSeq T hBmeas φ).choose_spec
-  set F : ℕ → Ω → ℝ := fun n ω ↦ itoSimpleProcess hBmeas (V n).val t ω with hF
+  set F : ℕ → Ω → ℝ := fun n ω ↦ itoSimpleProcess hBmeas (V n).val t ω
   have hFmeas : ∀ n, AEStronglyMeasurable (F n) μ :=
     fun n ↦ (memLp_itoSimpleProcess hB hBmeas (V n).val t).1
   -- (a) F → itoContinuousMod a.e. ⟹ in measure

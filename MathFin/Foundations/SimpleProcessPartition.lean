@@ -218,7 +218,6 @@ lemma telescope_cover (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       (if p.1 ≤ marshalPart hBmeas T V i ∧ marshalPart hBmeas T V (i + 1) ≤ p.2
         then F (marshalPart hBmeas T V (i + 1)) - F (marshalPart hBmeas T V i) else 0)
       = F p.2 - F p.1 := by
-  classical
   obtain ⟨a, ha, ha_eq⟩ := exists_marshalPart_eq hBmeas T V (fst_mem_marshalEndpoints hBmeas T V hp)
   obtain ⟨b, hb, hb_eq⟩ := exists_marshalPart_eq hBmeas T V (snd_mem_marshalEndpoints hBmeas T V hp)
   have hab : a ≤ b := by
@@ -589,10 +588,9 @@ theorem tendsto_itoAssembly_marshalStepSP (hB : IsPreBrownianReal B μ) (T : ℝ
           ((marshalEndpoints hBmeas T (V n).val).card - 1)))
       atTop (𝓝 (itoIntegralCLM_T hB T hBmeas
         (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) := by
-  have hCLM := ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp
-    (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
-  simp_rw [Function.comp_def, itoIntegralCLM_T_simpleAssembly_T] at hCLM
-  exact hCLM
+  simpa only [Function.comp_def, itoIntegralCLM_T_simpleAssembly_T] using
+    ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp
+      (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
 
 omit [IsProbabilityMeasure μ] in
 /-- Replacing each `f n` by an a.e.-equal `f' n` preserves convergence in measure. -/

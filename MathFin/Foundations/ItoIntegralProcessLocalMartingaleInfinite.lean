@@ -146,7 +146,7 @@ theorem exists_continuous_martingale_modification_infinite :
     intro ω
     by_cases hω : ω ∈ G
     · refine continuous_iff_continuousAt.mpr fun t₀ ↦ ?_
-      set K : ℕ := ⌈t₀⌉₊ + 1 with hKdef
+      set K : ℕ := ⌈t₀⌉₊ + 1
       have ht₀K : t₀ < (K : ℝ≥0) := hceil t₀
       refine (horizonProc_cont hB hBmeas hBcont f K ω).continuousAt.congr ?_
       refine (Filter.eventuallyEq_of_mem (Iio_mem_nhds ht₀K) fun t ht ↦ ?_).symm

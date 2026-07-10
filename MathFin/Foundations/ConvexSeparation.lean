@@ -43,7 +43,6 @@ theorem exists_pos_dual_of_disjoint_stdSimplex
     {ι : Type*} [Fintype ι] [Nonempty ι]
     (V : Submodule ℝ (ι → ℝ)) (hV : ∀ v ∈ V, v ∉ stdSimplex ℝ ι) :
     ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ V, ∑ i, q i * v i = 0 := by
-  classical
   -- A subspace is a two-sided cone: apply the cone-separation root to `V`, then
   -- use neg-closure to promote the one-sided `≤ 0` to the two-sided `= 0`.
   obtain ⟨q, hpos, hle⟩ :=

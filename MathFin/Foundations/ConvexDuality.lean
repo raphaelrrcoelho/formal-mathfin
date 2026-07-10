@@ -48,7 +48,6 @@ standard basis. Shared atom of the two cone-separation theorems below. -/
 private lemma functional_eq_sum_single {ι : Type*} [Fintype ι] [DecidableEq ι]
     (f : StrongDual ℝ (ι → ℝ)) (w : ι → ℝ) :
     f w = ∑ i, w i * f (Pi.single i 1) := by
-  classical
   have hwsum : w = ∑ i, w i • Pi.single i (1 : ℝ) := by
     funext j; rw [Finset.sum_apply]
     simp only [Pi.smul_apply, smul_eq_mul]

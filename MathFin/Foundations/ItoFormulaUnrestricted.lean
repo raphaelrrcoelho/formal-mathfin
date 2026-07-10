@@ -239,7 +239,7 @@ maps into the compact square `[−M₀(N+1), M₀(N+1)]²`). -/
 lemma exists_bound_cut (S : SmoothTrunc) (N : ℕ) {g : ℝ → ℝ → ℝ}
     (hg : Continuous fun p : ℝ × ℝ ↦ g p.1 p.2) :
     ∃ C : ℝ, ∀ t x, |g (S.cut N t) (S.cut N x)| ≤ C := by
-  set r : ℝ := S.M₀ * ((N : ℝ) + 1) with hr
+  set r : ℝ := S.M₀ * ((N : ℝ) + 1)
   obtain ⟨C, hC⟩ := ((isCompact_Icc (a := -r) (b := r)).prod
     (isCompact_Icc (a := -r) (b := r))).exists_bound_of_continuousOn hg.continuousOn
   refine ⟨C, fun t x ↦ ?_⟩
@@ -451,7 +451,6 @@ theorem ito_formula_unrestricted_local [IsProbabilityMeasure μ] (hB : IsPreBrow
           Martingale Mₙ (augFiltration (μ := μ) hBmeas) μ ∧
           (∀ ω, Continuous fun t ↦ Mₙ t ω) ∧
           ∀ t : ℝ≥0, ∀ᵐ ω ∂μ, (t : WithTop ℝ≥0) ≤ σ N ω → M t ω = Mₙ t ω := by
-  classical
   obtain ⟨S⟩ := smoothTrunc_exists
   set M : ℝ≥0 → Ω → ℝ := fun t ω ↦
     f (t : ℝ) (B t ω) - f 0 (B 0 ω)

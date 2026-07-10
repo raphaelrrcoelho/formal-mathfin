@@ -80,9 +80,8 @@ private theorem weighted_fluctuation_integral_le
       ≤ ∑ k ∈ Finset.range n,
           C ^ 2 * (2 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 2) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  classical
   have hmono : Monotone (unifPart T n) := fun i j hij ↦ by simp only [unifPart]; gcongr
-  set t : ℕ → ℝ≥0 := unifPart T n with ht_def
+  set t : ℕ → ℝ≥0 := unifPart T n
   set Y : ℕ → Ω → ℝ := fun k ω ↦ (B (t (k + 1)) ω - B (t k) ω) ^ 2 - ((t (k + 1) : ℝ) - t k)
     with hY_def
   set a : ℕ → Ω → ℝ := fun k ω ↦ w (t k) ω * Y k ω with ha_def
@@ -199,7 +198,6 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
     Tendsto (fun n : ℕ ↦ ∑ k ∈ Finset.range n,
         h (unifPart T n k) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
       atTop (𝓝 (∫ s in Set.Ioc 0 T, h s ∂ItoIntegralL2.timeMeasure)) := by
-  classical
   have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hbdd 0 (by positivity))
   set ν := ItoIntegralL2.timeMeasure with hν
   haveI hfin : IsFiniteMeasure (ν.restrict (Set.Ioc 0 T)) :=
@@ -230,7 +228,7 @@ theorem tendsto_riemann_continuous {h : ℝ≥0 → ℝ} (hcont : Continuous h)
     intro n hn s hs
     have hex : ∃ k, s ≤ unifPart T n (k + 1) :=
       ⟨n - 1, by rw [Nat.sub_add_cancel hn, hlast n hn]; exact hs.2⟩
-    set K := Nat.find hex with hK
+    set K := Nat.find hex
     have hKspec : s ≤ unifPart T n (K + 1) := Nat.find_spec hex
     have hKle : K ≤ n - 1 := Nat.find_le (by rw [Nat.sub_add_cancel hn, hlast n hn]; exact hs.2)
     have hKlt : K < n := lt_of_le_of_lt hKle (Nat.sub_lt hn one_pos)
@@ -472,7 +470,6 @@ theorem tendsto_weighted_qv_process
               - ∫ s in Set.Ioc 0 T, w s ω ∂ItoIntegralL2.timeMeasure) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  classical
   have hw_meas : ∀ s, Measurable (w s) := fun s ↦ (hw_adapt s).measurable hBmeas
   set Ssum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       w (unifPart T n k) ω * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hSsum

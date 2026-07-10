@@ -149,7 +149,6 @@ private lemma band_integral_uncurry_sq {t T : ℝ≥0} (htT : t ≤ T)
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - max (p.1 : ℝ) q.1) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  classical
   -- (A) collapse band+trim to the horizon-`t` measure, then drop the trim.
   rw [trimMeasure_T_restrict_band htT]
   simp only [pow_two]

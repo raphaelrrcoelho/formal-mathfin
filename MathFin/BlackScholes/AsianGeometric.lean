@@ -67,8 +67,8 @@ theorem asianGeom_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     HasLaw (fun ω ↦ (B s ω + B t ω) / 2)
       (gaussianReal 0 ((3 * (s : ℝ) + t) / 4).toNNReal) μ := by
   -- The two step indices `(0, s]` and `(0, t]`, and the kernel `f = ½·𝟙_{(0,s]} + ½·𝟙_{(0,t]}`.
-  set is : StepIndex T := ⟨(0, s), ⟨zero_le, hsT⟩⟩ with his
-  set it : StepIndex T := ⟨(0, t), ⟨zero_le, htT⟩⟩ with hit
+  set is : StepIndex T := ⟨(0, s), ⟨zero_le, hsT⟩⟩
+  set it : StepIndex T := ⟨(0, t), ⟨zero_le, htT⟩⟩
   set f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
     (1 / 2 : ℝ) • stepIndicatorLp T is + (1 / 2 : ℝ) • stepIndicatorLp T it with hf
   -- Its Wiener integral is `½·wInc(0,s] + ½·wInc(0,t]`.

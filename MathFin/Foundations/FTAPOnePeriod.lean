@@ -84,7 +84,6 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
     (ha : 0 < ∫ ω in {ω | 0 ≤ Y ω}, Y ω ∂P)
     (hb : ∫ ω in {ω | 0 ≤ Y ω}ᶜ, Y ω ∂P < 0) :
     ∃ Q, IsEMM P Y Q := by
-  classical
   set s : Set Ω := {ω | 0 ≤ Y ω}
   have hs : MeasurableSet s := measurableSet_le measurable_const hY
   set a : ℝ := ∫ ω in s, Y ω ∂P with hadef
@@ -172,7 +171,6 @@ positive on a set of positive measure and strictly negative on another — whenc
 degenerate `Y =ᵐ 0` case takes `Q = P`. -/
 theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Integrable Y P)
     (hNA : NoArbitrage P Y) : ∃ Q, IsEMM P Y Q := by
-  classical
   -- the two halves of the no-arbitrage dichotomy: a one-signed `Y` is null
   have hpos_kills : 0 ≤ᵐ[P] Y → Y =ᵐ[P] 0 := fun h ↦ by
     have hk := hNA 1 (by filter_upwards [h] with ω hh; simpa using hh)
@@ -232,7 +230,6 @@ preserved by the equivalence `P̃ ~ P`. The integrable backward direction yields
 EMM `Q ~ P̃`, and `Q ~ P` by transitivity. -/
 theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) :
     ∃ Q, IsEMM P Y Q := by
-  classical
   -- bounded strictly-positive weight `w = (1 + |Y|)⁻¹ ∈ (0, 1]`
   set w : Ω → ℝ := fun ω ↦ (1 + |Y ω|)⁻¹ with hwdef
   have hw_meas : Measurable w := (measurable_const.add hY.abs).inv

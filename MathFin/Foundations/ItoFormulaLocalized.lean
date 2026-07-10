@@ -77,9 +77,8 @@ structure SmoothTrunc where
 give `φ' = ρ` and `|φ x| ≤ |x|`; `ρ.one_of_mem_closedBall` gives `φ = id` near `0`. No
 explicit derivative formula is ever written. -/
 theorem smoothTrunc_exists : Nonempty SmoothTrunc := by
-  classical
   let ρ : ContDiffBump (0 : ℝ) := ⟨1, 2, one_pos, one_lt_two⟩
-  set r : ℝ → ℝ := (ρ : ℝ → ℝ) with hr
+  set r : ℝ → ℝ := (ρ : ℝ → ℝ)
   -- smoothness ⇒ the iterated derivatives exist, are continuous, and (via compact support)
   -- are bounded — all from Mathlib, no explicit formulas
   have hsmooth : ContDiff ℝ (⊤ : ℕ∞) r := ρ.contDiff
@@ -350,12 +349,11 @@ theorem cutoff_bddDeriv (hBmeas : ∀ t, Measurable (B t))
                 + (1 / 2) * (f_xx s (S.cut n (B s ω)) * S.cutD1 n (B s ω) ^ 2
                     + f_x s (S.cut n (B s ω)) * S.cutD2 n (B s ω)))
               ∂ItoIntegralL2.timeMeasure) := by
-  classical
   have hC0 : 0 ≤ C := by
     have h := hg_t 0 0
     simp only [abs_zero, mul_zero, Real.exp_zero, mul_one] at h
     exact le_trans (abs_nonneg _) h
-  set En : ℝ := C * Real.exp (lam * (S.M₀ * ((n : ℝ) + 1))) with hEn
+  set En : ℝ := C * Real.exp (lam * (S.M₀ * ((n : ℝ) + 1)))
   have hEn0 : 0 ≤ En := mul_nonneg hC0 (Real.exp_nonneg _)
   -- the growth bound becomes a constant once the argument is confined by the truncation
   have hcb : ∀ (g : ℝ → ℝ → ℝ), (∀ t x, |g t x| ≤ C * Real.exp (lam * |x|)) →
@@ -459,8 +457,7 @@ theorem pathIntegral_expGrowth_memLp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
     (hw_bdd : ∀ s x, |w s x| ≤ K * Real.exp (c * |x|))
     (hw_cont : ∀ ω, Continuous fun s : ℝ≥0 ↦ w s (B s ω)) :
     MemLp (fun ω ↦ ∫ s in Set.Ioc 0 T, w s (B s ω) ∂ItoIntegralL2.timeMeasure) 2 μ := by
-  classical
-  set P : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, w s (B s ω) ∂ItoIntegralL2.timeMeasure with hP
+  set P : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, w s (B s ω) ∂ItoIntegralL2.timeMeasure
   set Rsum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
     w (unifPart T n k) (B (unifPart T n k) ω)
       * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) with hRsum
@@ -649,7 +646,6 @@ theorem boundary_tendsto_L2 (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (S 
     Tendsto (fun n ↦ ∫ ω,
         ((fCut f S n T (B T ω) - fCut f S n 0 (B 0 ω)) - (f T (B T ω) - f 0 (B 0 ω))) ^ 2 ∂μ)
       atTop (𝓝 0) := by
-  classical
   have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (by simpa using hg_x 0 0)
   have hcont_f : ∀ t : ℝ, Continuous (fun x ↦ f t x) := fun t ↦
     Differentiable.continuous fun x ↦ (hf_x t x).differentiableAt
@@ -737,7 +733,6 @@ theorem drift_tendsto_L2 (hBmeas : ∀ t, Measurable (B t))
                   + f_x s (S.cut n (B s ω)) * S.cutD2 n (B s ω))) ∂ItoIntegralL2.timeMeasure)
           - (∫ s in Set.Ioc 0 T, (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω))
               ∂ItoIntegralL2.timeMeasure)) ^ 2 ∂μ) atTop (𝓝 0) := by
-  classical
   haveI hνT : IsFiniteMeasure (ItoIntegralL2.timeMeasure.restrict (Set.Ioc 0 T)) :=
     ⟨by rw [Measure.restrict_apply MeasurableSet.univ, Set.univ_inter,
         ItoIntegralL2.timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
@@ -1001,7 +996,6 @@ theorem ito_formula_td_localized
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
               (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure) := by
-  classical
   have hcont_f : ∀ t : ℝ, Continuous (fun x ↦ f t x) := fun t ↦
     Differentiable.continuous fun x ↦ (hf_x t x).differentiableAt
   have hC0 : 0 ≤ C := le_trans (abs_nonneg _) (by simpa using hg_x 0 0)

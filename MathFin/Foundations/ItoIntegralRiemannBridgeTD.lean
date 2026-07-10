@@ -138,7 +138,6 @@ theorem itoIntegralCLM_T_of_bdd_cont_td (hBmeas : ∀ t, Measurable (B t))
           (fun _c ↦ (hφ_cont.comp (continuous_const.prodMk continuous_id)).measurable)
           hφ_bdd T n).toLp (riemannφTD hBmeas φ T n))
         atTop (𝓝 (itoIntegralCLM_T hB T hBmeas gφ)) := by
-  classical
   have hφ_meas : ∀ c : ℝ, Measurable (φ c) := fun c ↦
     (hφ_cont.comp (continuous_const.prodMk continuous_id)).measurable
   have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hφ_bdd 0 0)

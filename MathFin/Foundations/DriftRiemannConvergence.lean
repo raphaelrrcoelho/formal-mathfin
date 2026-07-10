@@ -47,7 +47,6 @@ theorem tendsto_riemannSum_setIntegral {g : ℝ≥0 → ℝ} (hg : Continuous g)
     Tendsto (fun n ↦ ∑ k ∈ Finset.range n,
         g (unifPart T n k) * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ)))
       atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T, g s ∂timeMeasure)) := by
-  classical
   haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   have hC0 : (0 : ℝ) ≤ C := (abs_nonneg (g 0)).trans (hbdd 0)
@@ -148,7 +147,6 @@ theorem tendsto_riemannSum_setIntegral_clamp {g : ℝ≥0 → ℝ} (hg : Continu
     Tendsto (fun n ↦ ∑ k ∈ Finset.range n, g (unifPart T n k)
         * (NNReal.toReal (min (unifPart T n (k + 1)) u) - NNReal.toReal (min (unifPart T n k) u)))
       atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) u, g s ∂timeMeasure)) := by
-  classical
   haveI : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) :=
     ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
   have hC0 : (0 : ℝ) ≤ C := (abs_nonneg (g 0)).trans (hbdd 0)

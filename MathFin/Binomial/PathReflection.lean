@@ -403,7 +403,6 @@ step is `±1`, `walkPos τ = walkPos (τ−1) ± 1`; the `-1` case would give
 `walkPos τ = walkPos (τ−1) + 1 ≤ a`, combined with `≥ a` gives `= a`. -/
 theorem HitsLevel_of_walkPos_endpoint_ge (ω : Fin n → Bool) (a : ℤ)
     (ha : 0 ≤ a) (h_end : a ≤ walkPos ω n) : HitsLevel a ω := by
-  classical
   -- Use Finset.min' on the set of k ≤ n with walkPos ω k ≥ a.
   let S : Finset ℕ :=
     (Finset.range (n + 1)).filter (fun k ↦ a ≤ walkPos ω k)

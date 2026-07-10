@@ -206,7 +206,6 @@ theorem itoSimpleProcess_isometry_time (hBmeas : ∀ t, Measurable (B t))
             * max 0 ((min ((min p.2 t : ℝ≥0) : ℝ) ((min q.2 t : ℝ≥0) : ℝ))
                 - (max ((min p.1 t : ℝ≥0) : ℝ) ((min q.1 t : ℝ≥0) : ℝ))) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  classical
   set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ :=
     fun p ω ↦ V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω) with ha_def
   have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ :=

@@ -73,7 +73,7 @@ lemma geom_mean_le_arith_mean_n {n : ℕ} (f : Fin n → ℝ)
   have hn_pos : 0 < (n : ℝ) := Nat.cast_pos.mpr hn
   have hn_ne : (n : ℝ) ≠ 0 := hn_pos.ne'
   have hn_inv_nn : 0 ≤ ((n : ℝ))⁻¹ := inv_nonneg.mpr hn_pos.le
-  set w : Fin n → ℝ := fun _ ↦ ((n : ℝ))⁻¹ with hw
+  set w : Fin n → ℝ := fun _ ↦ ((n : ℝ))⁻¹
   have h_w_nn : ∀ i ∈ Finset.univ, 0 ≤ w i := fun _ _ ↦ hn_inv_nn
   have h_f_nn : ∀ i ∈ Finset.univ, 0 ≤ f i := fun i _ ↦ h_nn i
   have h_sum_w : ∑ i ∈ Finset.univ, w i = 1 := by

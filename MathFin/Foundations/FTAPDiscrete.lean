@@ -115,7 +115,6 @@ vector-space operations.) -/
 theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace 𝓕 S T) :
     ∃ φ : ℕ → Ω → ℝ,
       StronglyAdapted 𝓕 (fun n ↦ φ (n + 1)) ∧ martingaleTransform φ S T = g := by
-  classical
   induction hg using Submodule.span_induction with
   | mem x hx =>
     obtain ⟨t, htT, A, hA, rfl⟩ := hx

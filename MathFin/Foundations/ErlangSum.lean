@@ -225,7 +225,6 @@ theorem map_sum_iidExp [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r)
     (hindep : iIndepFun X μ)
     (s : Finset ι) (hs : s.Nonempty) :
     Measure.map (∑ i ∈ s, X i) μ = gammaMeasure s.card r := by
-  classical
   induction s using Finset.cons_induction with
   | empty => exact absurd hs (by simp)
   | cons i t hi ih =>

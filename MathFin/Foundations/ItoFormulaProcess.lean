@@ -66,7 +66,6 @@ lemma exists_fullHorizon_extension (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
     ∃ F : Lp ℝ 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod),
       (⇑F : ℝ≥0 × Ω → ℝ) =ᵐ[trimMeasure_T (μ := μ) T hBmeas] ⇑g := by
-  classical
   set m := (natFiltration (mΩ := mΩ) hBmeas).predictable
   have hSpred : MeasurableSet[m] (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) :=
     MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
@@ -139,7 +138,6 @@ theorem ito_formula_td_process
         (∀ t, X t =ᵐ[μ] (itoProcessL2Inf hB t hBmeas F : Ω → ℝ)) ∧
         (∀ ω, Continuous fun t ↦ X t ω) ∧
         IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ) := by
-  classical
   -- the explicit horizon-`T` witness `gfx_T = [f_x(·, B)]`
   obtain ⟨gfxT, hgfxT_eq, -⟩ := ito_formula_td_L2_bddDeriv_explicit hB hBmeas hBcont T
     hf_t hf_tt hf_tx hf_x hf_xx hf_xxx hf_x_cont hf_xx_cont hbd_t hbd_x hbd_xx hbd_tt hbd_tx hbd_xxx

@@ -60,7 +60,7 @@ theorem unifIntegrable_one_of_sq_integral_le (hf : ∀ i, MemLp (f i) 2 μ)
       _ ≤ ENNReal.ofReal M := ENNReal.ofReal_le_ofReal (hM i)
   -- `eLpNorm (indicator …) 1 = ∫⁻ over the truncation set of `‖f i‖ₑ`.
   rw [eLpNorm_one_eq_lintegral_enorm]
-  set S : Set α := {x | C ≤ ‖f i x‖₊} with hSdef
+  set S : Set α := {x | C ≤ ‖f i x‖₊}
   have henorm_ind : ∀ x, ‖S.indicator (f i) x‖ₑ = S.indicator (fun x ↦ ‖f i x‖ₑ) x := fun x ↦ by
     by_cases hx : x ∈ S <;> simp [hx]
   simp_rw [henorm_ind]
@@ -110,8 +110,7 @@ theorem tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound [IsFiniteMeasure μ]
       (fun n ↦ (hf n).aestronglyMeasurable) hg hui hconv
   refine tendsto_setIntegral_of_L1 g hg.aestronglyMeasurable
     (Filter.Eventually.of_forall fun n ↦ (hf n).integrable (by norm_num)) ?_ A
-  simp_rw [eLpNorm_one_eq_lintegral_enorm, Pi.sub_apply] at hL1
-  exact hL1
+  simpa only [eLpNorm_one_eq_lintegral_enorm, Pi.sub_apply] using hL1
 
 /-- **Set-integral limit from the a.e.-subsequence principle + an `L²` bound.** On a finite measure,
 a family `f : ℕ → α → ℝ` with `f n ∈ L²`, a uniform second-moment bound `∫ (f n)² ≤ M`, a limit

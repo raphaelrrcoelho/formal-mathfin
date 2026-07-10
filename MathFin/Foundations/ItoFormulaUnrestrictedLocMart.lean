@@ -44,7 +44,6 @@ lemma driftPrimitive_stronglyMeasurable (hBmeas : ∀ t, Measurable (B t))
     StronglyMeasurable[natFiltration hBmeas t]
       (fun ω ↦ ∫ s in Set.Ioc 0 t,
         (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)) ∂timeMeasure) := by
-  classical
   -- the time-clamped integrand `g s ω = drift (min s t) ω`
   set g : ℝ≥0 → Ω → ℝ := fun s ω ↦
     f_t (↑(min s t)) (B (min s t) ω) + (1 / 2) * f_xx (↑(min s t)) (B (min s t) ω) with hg
@@ -151,7 +150,6 @@ theorem ito_formula_unrestricted (hB : IsPreBrownianReal B μ)
       (∀ t : ℝ≥0, (fun ω ↦ f (t : ℝ) (B t ω) - f 0 (B 0 ω)) =ᵐ[μ]
         (fun ω ↦ M t ω + ∫ s in Set.Ioc 0 t,
           (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω)) ∂timeMeasure)) := by
-  classical
   set M : ℝ≥0 → Ω → ℝ := fun t ω ↦
     f (t : ℝ) (B t ω) - f 0 (B 0 ω)
       - ∫ s in Set.Ioc 0 t, (f_t (s : ℝ) (B s ω) + (1 / 2) * f_xx (s : ℝ) (B s ω))

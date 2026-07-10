@@ -539,7 +539,6 @@ noncomputable def iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t))
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
     TBoundedSP T hBmeas :=
   ⟨(ElementaryPredictableSet.IocProd a b hF).indicator (1 : ℝ), fun p hp ↦ by
-    classical
     -- The value is `Finsupp.onFinset I (...)` so its support is contained in I.
     have h_I_eq : (ElementaryPredictableSet.IocProd a b hF).I = {(a, b)} := by
       show (if a ≤ b then ({(a, b)} : Finset _) else ∅) = _

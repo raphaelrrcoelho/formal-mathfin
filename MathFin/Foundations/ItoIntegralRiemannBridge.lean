@@ -133,7 +133,6 @@ lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s �
     ∃ k, k < n ∧ (∑ j ∈ Finset.range n,
         (Set.Ioc (unifPart T n j) (unifPart T n (j + 1))).indicator (fun _ ↦ v j) s) = v k
       ∧ |(unifPart T n k : ℝ) - s| ≤ (T : ℝ) / n := by
-  classical
   have hmono : Monotone (unifPart T n) := unifPart_mono T n
   have hlast : unifPart T n n = T := by
     have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
@@ -143,7 +142,7 @@ lemma cell_collapse (T : ℝ≥0) (n : ℕ) (hn : 0 < n) (s : ℝ≥0) (hs : s �
     simp only [unifPart]; push_cast; field_simp; ring
   have hex : ∃ k, s ≤ unifPart T n (k + 1) :=
     ⟨n - 1, by rw [Nat.sub_add_cancel hn, hlast]; exact hs.2⟩
-  set K := Nat.find hex with hK
+  set K := Nat.find hex
   have hKspec : s ≤ unifPart T n (K + 1) := Nat.find_spec hex
   have hKle : K ≤ n - 1 := Nat.find_le (by rw [Nat.sub_add_cancel hn, hlast]; exact hs.2)
   have hKlt : K < n := lt_of_le_of_lt hKle (Nat.sub_lt hn one_pos)
@@ -184,9 +183,7 @@ lemma tendsto_norm_toLp_sub' {α : Type*} {m : MeasurableSpace α} {ν : Measure
       = fun n ↦ Real.sqrt (∫ z, (F n z - G z) ^ 2 ∂ν) := by
     funext n; rw [← lp_dist_sq (hF n) hG, Real.sqrt_sq (norm_nonneg _)]
   rw [heq]
-  have h2 := (Real.continuous_sqrt.tendsto 0).comp h
-  simp only [Function.comp_def, Real.sqrt_zero] at h2
-  exact h2
+  simpa only [Function.comp_def, Real.sqrt_zero] using (Real.continuous_sqrt.tendsto 0).comp h
 
 /-- **Riemann ↔ CLM bridge.** For bounded continuous `φ`, the uniform-partition
 Riemann–Itô sums `∑ φ(B_{tₖ})·ΔBₖ` converge in `L²(μ)` to `itoIntegralCLM_T gφ`, where
@@ -199,7 +196,6 @@ theorem itoIntegralCLM_T_of_bdd_cont (hBmeas : ∀ t, Measurable (B t))
       Tendsto (fun n ↦ (memLp_riemannφ hB hBmeas hφ_cont.measurable hφ_bdd T n).toLp
           (riemannφ hBmeas φ T n))
         atTop (𝓝 (itoIntegralCLM_T hB T hBmeas gφ)) := by
-  classical
   have hφ_meas : Measurable φ := hφ_cont.measurable
   have hC0 : (0 : ℝ) ≤ C := le_trans (abs_nonneg _) (hφ_bdd 0)
   set f : ℕ → ℝ≥0 × Ω → ℝ := fun n ↦ Function.uncurry ⇑(stepφ hBmeas hφ_meas hφ_bdd T n).val with hf

@@ -141,8 +141,7 @@ theorem itoSimple_sq_integral (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  classical
-  set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω ↦ V.value p ω * (B p.2 ω - B p.1 ω) with ha_def
+  set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω ↦ V.value p ω * (B p.2 ω - B p.1 ω)
   have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp ↦
     ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (V.le_of_mem_support_value p hp)
       (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
@@ -371,7 +370,6 @@ theorem simpleProcessL2_norm_sq (hBmeas : ∀ t, Measurable (B t))
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  classical
   -- Step A: ‖simpleProcessL2 V‖² = ∫ (uncurry V)² in the product measure (via `eLpNorm_trim`).
   have hStepA : ‖simpleProcessL2 (μ := μ) hBmeas V‖ ^ 2
       = ∫ z, (Function.uncurry ⇑V z) ^ 2 ∂(timeMeasure.prod μ) := by

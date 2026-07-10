@@ -210,7 +210,7 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
         exact edist_ne_top _ _
       rw [hset]; exact measure_empty
     exact tendsto_const_nhds.congr fun n ↦ (hz n).symm
-  · set r : ℝ := ε.toReal with hr
+  · set r : ℝ := ε.toReal
     have hrpos : 0 < r := ENNReal.toReal_pos hε.ne' hεtop
     have hεr : ε = ENNReal.ofReal r := (ENNReal.ofReal_toReal hεtop).symm
     rcases eq_or_lt_of_le hK with hK0 | hKpos
@@ -660,7 +660,7 @@ lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
           ((marshalEndpoints hBmeas T (V (ns (ms k))).val).card - 1) T ω) atTop
       (𝓝 (ZTpred hB T hBmeas hpred hbdd ω)) := by
   set θhat := processToLpPredictable (μ := μ) T hBmeas hpred hbdd with hθhat
-  set N : ℕ → ℕ := fun n ↦ (marshalEndpoints hBmeas T (V n).val).card - 1 with hN
+  set N : ℕ → ℕ := fun n ↦ (marshalEndpoints hBmeas T (V n).val).card - 1
   have hmpN : ∀ n, marshalPart hBmeas T (V n).val (N n) = T :=
     fun n ↦ marshalPart_card_sub_one hBmeas T (V n).val (V n).property
   -- stochastic exponent → `∫θdB` in measure (bridged from `itoSimple`)

@@ -183,7 +183,6 @@ theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
     ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
       = ∑ k ∈ Finset.range n, 2 * ((s (k + 1) : ℝ) - s k) ^ 2 := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  classical
   set Y : ℕ → Ω → ℝ :=
     fun k ω ↦ (B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k) with hY
   have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k ↦ memLp_increment_sq_centered_two hB _ _ _

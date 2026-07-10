@@ -53,7 +53,6 @@ theorem ito_formula_L2
                   - (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure)) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  classical
   have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt
   have hf'm : Measurable f' :=
     (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
@@ -67,7 +66,7 @@ theorem ito_formula_L2
       f'' (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hQVdef
   set Rem : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω) with hRemdef
-  set I2 : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure with hI2def
+  set I2 : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure
   show Tendsto (fun n ↦ ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ)
     atTop (𝓝 0)
   -- `L²` membership of the second-order integral and the two discrete sums
@@ -128,9 +127,7 @@ theorem ito_formula_L2
   -- the upper bound `½∫(QVₙ−∫f″ds)² + 2∫Remₙ² → 0` (A1 + A2)
   have hupper : Tendsto (fun n ↦ (1 / 2) * ∫ ω, (QV n ω - I2 ω) ^ 2 ∂μ
       + 2 * ∫ ω, Rem n ω ^ 2 ∂μ) atTop (𝓝 0) := by
-    have h := (hA1.const_mul (1 / 2)).add (hA2.const_mul 2)
-    simp only [mul_zero, add_zero] at h
-    exact h
+    simpa only [mul_zero, add_zero] using (hA1.const_mul (1 / 2)).add (hA2.const_mul 2)
   refine squeeze_zero' (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_ hupper
   filter_upwards [eventually_gt_atTop 0] with n hn
   -- discrete Itô formula: `Isumₙ − I = −½(QVₙ − ∫f″ds) − Remₙ` (`n > 0`)

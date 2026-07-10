@@ -109,7 +109,6 @@ theorem ito_formula_td_L2
                   - (1 / 2) * ∫ s in Set.Ioc 0 T,
                       f_xx s (B s ω) ∂ItoIntegralL2.timeMeasure)) ^ 2 ∂μ)
       atTop (𝓝 0) := by
-  classical
   have hCt0 : 0 ≤ Ct := le_trans (abs_nonneg _) (hbd_t 0 0)
   have hC20 : 0 ≤ C2 := le_trans (abs_nonneg _) (hbd_xx 0 0)
   -- section measurability (each section is differentiable, hence continuous)
@@ -207,9 +206,7 @@ theorem ito_formula_td_L2
   -- the upper bound `3∫(Tsumₙ−∫f_t)² + ¾∫(QVₙ−∫f_xx)² + 3∫Remₙ² → 0` (A2′ + A1′ + A3′)
   have hupper : Tendsto (fun n ↦ 3 * ∫ ω, (Tsum n ω - It ω) ^ 2 ∂μ
       + (3 / 4) * ∫ ω, (QVw n ω - Ixx ω) ^ 2 ∂μ + 3 * ∫ ω, Rem n ω ^ 2 ∂μ) atTop (𝓝 0) := by
-    have h := ((hA2.const_mul 3).add (hA1.const_mul (3 / 4))).add (hA3.const_mul 3)
-    simp only [mul_zero, add_zero] at h
-    exact h
+    simpa only [mul_zero, add_zero] using ((hA2.const_mul 3).add (hA1.const_mul (3 / 4))).add (hA3.const_mul 3)
   refine squeeze_zero' (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _)
     ?_ hupper
   filter_upwards [eventually_gt_atTop 0] with n hn
@@ -278,7 +275,6 @@ theorem ito_formula_td_L2_bddDeriv_explicit
         (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
               (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure) := by
-  classical
   have hCt0 : 0 ≤ Ct := le_trans (abs_nonneg _) (hbd_t 0 0)
   have hC20 : 0 ≤ C2 := le_trans (abs_nonneg _) (hbd_xx 0 0)
   have hf_tm : ∀ c : ℝ, Measurable (f_t c) := fun c ↦

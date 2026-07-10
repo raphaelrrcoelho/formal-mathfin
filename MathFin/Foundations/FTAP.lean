@@ -45,7 +45,7 @@ theorem emm_implies_no_arbitrage
     (hV_nonneg : ∀ᵐ ω ∂P,
       0 ≤ ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)) :
     P {ω | 0 < ∑ t ∈ Finset.range T, φ (t + 1) ω * (S (t + 1) ω - S t ω)} = 0 := by
-  set V : ℕ → Ω → ℝ := martingaleTransform φ S with hV_def
+  set V : ℕ → Ω → ℝ := martingaleTransform φ S
   have hV_mart : Martingale V 𝓕 Q := by
     obtain ⟨K, hK⟩ := hφ_bdd
     -- `martingaleTransform_isMartingale` now takes an a.e. boundedness

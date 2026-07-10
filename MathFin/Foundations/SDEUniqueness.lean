@@ -199,7 +199,7 @@ theorem sde_pathwise_uniqueness
         ≤ Cdiff * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)) :
     ∀ t, 0 ≤ t → ∀ᵐ ω ∂μ, X t ω = Y t ω := by
   -- the L² energy of the state error
-  set E : ℝ → ℝ := fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ with hEdef
+  set E : ℝ → ℝ := fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ
   have hE0 : ∀ s, 0 ≤ E s := fun s ↦ integral_nonneg fun ω ↦ sq_nonneg _
   have hAnn : ∀ s, 0 ≤ s → 0 ≤ ∫ u in (0:ℝ)..s, E u := fun s hs ↦
     intervalIntegral.integral_nonneg hs fun u _ ↦ hE0 u

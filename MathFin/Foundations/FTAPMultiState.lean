@@ -127,7 +127,6 @@ normalising `q` to a probability is the equivalent martingale measure. -/
 theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
     (z : Fin M → Fin N → ℝ) (h : ¬ HasArbitrage_multi_state z) :
     HasEMM_multi_state z := by
-  classical
   -- The attainable-payoff subspace.
   set V : Submodule ℝ (Fin N → ℝ) := Submodule.span ℝ (Set.range z) with hVdef
   -- No arbitrage ⇒ `V` misses the standard simplex.

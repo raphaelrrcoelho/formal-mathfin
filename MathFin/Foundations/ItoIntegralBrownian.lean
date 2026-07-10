@@ -374,9 +374,7 @@ lemma tendsto_norm_toLp_sub {F G : ℕ → Ω → ℝ} (hF : ∀ n, MemLp (F n) 
       = fun n ↦ Real.sqrt (∫ ω, (F n ω - G n ω) ^ 2 ∂μ) := by
     funext n; rw [← lp_dist_sq (hF n) (hG n), Real.sqrt_sq (norm_nonneg _)]
   rw [heq]
-  have := (Real.continuous_sqrt.tendsto 0).comp h
-  simp only [Function.comp_def, Real.sqrt_zero] at this
-  exact this
+  simpa only [Function.comp_def, Real.sqrt_zero] using (Real.continuous_sqrt.tendsto 0).comp h
 
 /-- **Keystone: `∫₀ᵀ B dB = ½(B_T² − B₀² − T)` through the CLM.** There is an Itô-`L²`
 integrand `gB` — the `trim_T`-limit of the truncated left-endpoint approximations of `s ↦ Bₛ`
@@ -389,7 +387,6 @@ theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥
     ∃ gB : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
       itoIntegralCLM_T hB T hBmeas gB
         = (memLp_halfD hB hBmeas T).toLp (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) := by
-  classical
   set c := (memLp_halfD hB hBmeas T).toLp
     (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) with hc
   -- Diagonal truncation level `M n` making the truncation error `< 1/(n+1)`.

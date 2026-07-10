@@ -68,7 +68,7 @@ theorem sde_pathwise_decomposition (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
             (lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc))) z
         + Function.uncurry (itoContinuousMod T hBmeas
             (lipComp T hBmeas σ Lσ hσ (picardSolution hB T hBmeas hBcont hb hσ η_E hc))) z := by
-  set X := picardSolution hB T hBmeas hBcont hb hσ η_E hc with hXdef
+  set X := picardSolution hB T hBmeas hBcont hb hσ η_E hc
   -- X is a fixed point of the Picard map, which is definitionally the sum of the three terms
   have hfix : picardMap hB T hBmeas hBcont hb hσ η_E X = X :=
     (picardMap_contractingWith hB T hBmeas hBcont hb hσ η_E hc).fixedPoint_isFixedPt

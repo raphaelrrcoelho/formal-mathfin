@@ -94,7 +94,7 @@ lemma drift_iSup_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W (i : ℝ≥0) ω|) ^ 2
       ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W s ω) ^ 2 ∂timeMeasure := by
   haveI : Nonempty (Set.Iic T) := ⟨⟨0, by simp⟩⟩
-  set R := (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W s ω) ^ 2 ∂timeMeasure with hR
+  set R := (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W s ω) ^ 2 ∂timeMeasure
   have hR0 : 0 ≤ R := mul_nonneg T.coe_nonneg (integral_nonneg fun s ↦ sq_nonneg _)
   have hbound : (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W (i : ℝ≥0) ω|) ≤ Real.sqrt R :=
     ciSup_le fun i ↦ by

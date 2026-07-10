@@ -143,7 +143,6 @@ theorem itoIntegralCLM_T_of_bdd_adapted_cont (hBmeas : ∀ t, Measurable (B t))
     Tendsto (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).toLp (riemannσ (B := B) θ T n))
       atTop (𝓝 (itoIntegralCLM_T hB T hBmeas
         (processToLp (μ := μ) T hBmeas hadap hcont hbdd))) := by
-  classical
   set f : ℕ → ℝ≥0 × Ω → ℝ := fun n ↦ Function.uncurry ⇑(stepσ hBmeas hadap hbdd T n).val with hf
   set gθ_fn : ℝ≥0 × Ω → ℝ := Function.uncurry θ with hgθ
   have hf_memLp : ∀ n, MemLp (f n) 2 (trimMeasure_T (μ := μ) T hBmeas) :=

@@ -847,7 +847,7 @@ private lemma runMax_pow_lintegral_lt_top
     (hB_lt_top : ∫⁻ ω, ENNReal.ofReal ((f n ω) ^ p) ∂μ < ⊤) :
     ∫⁻ ω, ENNReal.ofReal ((runMax f n ω) ^ p) ∂μ < ⊤ := by
   set A : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((runMax f n ω) ^ p) ∂μ with hA_def
-  set B : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((f n ω) ^ p) ∂μ with hB_def
+  set B : ℝ≥0∞ := ∫⁻ ω, ENNReal.ofReal ((f n ω) ^ p) ∂μ
   set C : ℝ≥0∞ := ENNReal.ofReal (p / (p - 1)) with hC_def
   have hp_pos : 0 < p := lt_trans zero_lt_one hp
   have hpm1_pos : 0 < p - 1 := by linarith

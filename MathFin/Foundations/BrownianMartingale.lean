@@ -299,7 +299,7 @@ theorem waldExponential_isMartingale (α : ℝ) :
     rw [h_lhs, integral_exp_mul_gaussianReal_zero] at h
     exact h
   -- Define `M_s` (𝓕_s-measurable factor) and the increment exponential `D_{st}`.
-  set Ms : Ω → ℝ := fun ω ↦ Real.exp (α * X s ω - α ^ 2 * (s : ℝ) / 2) with hMs_def
+  set Ms : Ω → ℝ := fun ω ↦ Real.exp (α * X s ω - α ^ 2 * (s : ℝ) / 2)
   set Dst : Ω → ℝ := fun ω ↦
     Real.exp (α * (X t ω - X s ω) - α ^ 2 * ((t : ℝ) - (s : ℝ)) / 2) with hDst_def
   have hMs_meas : StronglyMeasurable[𝓕 s] Ms := by

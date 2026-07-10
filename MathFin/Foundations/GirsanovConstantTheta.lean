@@ -151,7 +151,7 @@ theorem girsanovMeasure_isProbabilityMeasure
       (P.withDensity fun ω ↦ ENNReal.ofReal (Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2))) := by
   have hmeasX : ∀ v, Measurable (X v) := fun v ↦
     ((hX.stronglyAdapted v).mono (𝓕.le v)).measurable
-  set g : Ω → ℝ := fun ω ↦ Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2) with hgdef
+  set g : Ω → ℝ := fun ω ↦ Real.exp (-θ * X T ω - θ ^ 2 * (T : ℝ) / 2)
   have hgmeas : Measurable g := Real.measurable_exp.comp (((hmeasX T).const_mul (-θ)).sub_const _)
   have hgpos : ∀ ω, 0 < g ω := fun ω ↦ Real.exp_pos _
   have hgfactor : g = fun ω ↦ Real.exp (-(θ ^ 2 * (T : ℝ) / 2)) * Real.exp (-θ * X T ω) := by

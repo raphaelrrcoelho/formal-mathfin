@@ -72,8 +72,7 @@ private lemma exists_rat_time_below {i s : ℝ≥0} (hsi : s ≤ i) {δ : ℝ} (
 `exitTime N ω ≤ i ↔ ∃ s ∈ [0,i], N ≤ |B_s ω|`. -/
 lemma exitTime_le_iff (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (N : ℕ) (i : ℝ≥0) (ω : Ω) :
     exitTime B N ω ≤ (i : WithTop ℝ≥0) ↔ ∃ s ∈ Set.Icc (0 : ℝ≥0) i, (N : ℝ) ≤ |B s ω| := by
-  classical
-  set A : Set ℝ≥0 := (fun s : ℝ≥0 ↦ B s ω) ⁻¹' {x : ℝ | (N : ℝ) ≤ |x|} with hA
+  set A : Set ℝ≥0 := (fun s : ℝ≥0 ↦ B s ω) ⁻¹' {x : ℝ | (N : ℝ) ≤ |x|}
   have hAcl : IsClosed A :=
     (isClosed_le continuous_const continuous_abs).preimage (hBcont ω)
   constructor

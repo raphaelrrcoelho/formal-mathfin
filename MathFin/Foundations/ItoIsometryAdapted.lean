@@ -271,7 +271,6 @@ theorem ito_isometry_discrete_bilinear
     ∫ ω, (∑ k ∈ Finset.range N, φ k ω * (B (t (k + 1)) ω - B (t k) ω)) *
           (∑ k ∈ Finset.range N, ψ k ω * (B (t (k + 1)) ω - B (t k) ω)) ∂μ =
       ∑ k ∈ Finset.range N, (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) := by
-  classical
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   set a : ℕ → Ω → ℝ := fun k ω ↦ φ k ω * (B (t (k + 1)) ω - B (t k) ω) with ha_def
   set b : ℕ → Ω → ℝ := fun k ω ↦ ψ k ω * (B (t (k + 1)) ω - B (t k) ω) with hb_def
