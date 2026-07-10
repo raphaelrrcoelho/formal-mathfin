@@ -67,7 +67,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 /-- The past process up to time `t₀`: `ω ↦ (fun t : Iic t₀ ↦ B t ω)`.
 This is the random variable generating the natural filtration `𝓕_{t₀}`. -/
 def pastProcess (B : ℝ≥0 → Ω → ℝ) (t₀ : ℝ≥0) : Ω → (Set.Iic t₀ → ℝ) :=
-  fun ω t => B t ω
+  fun ω t ↦ B t ω
 
 /-- A function `φ : Ω → ℝ` is **adapted at `t₀`** if it factors through the
 past process via a measurable map — i.e. it is `𝓕_{t₀}`-measurable in the
@@ -80,7 +80,7 @@ past process). -/
 theorem AdaptedAt.measurable (hBmeas : ∀ t, Measurable (B t)) {t₀ : ℝ≥0}
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) : Measurable φ := by
   obtain ⟨g, hg, rfl⟩ := hφ
-  exact hg.comp (measurable_pi_lambda _ fun _ => hBmeas _)
+  exact hg.comp (measurable_pi_lambda _ fun _ ↦ hBmeas _)
 
 /-! ### Adaptedness algebra (the natural Brownian filtration `𝓕_{t₀}`)
 
@@ -91,37 +91,37 @@ cross-term factor `φⱼ · ΔBⱼ · φₖ` is `𝓕_{tₖ}`-measurable. -/
 
 /-- `B u` is adapted at any later time `t₀ ≥ u`. -/
 theorem adaptedAt_eval {t₀ u : ℝ≥0} (hu : u ≤ t₀) : AdaptedAt B t₀ (B u) :=
-  ⟨fun p => p ⟨u, hu⟩, measurable_pi_apply _, rfl⟩
+  ⟨fun p ↦ p ⟨u, hu⟩, measurable_pi_apply _, rfl⟩
 
 /-- `g (B u)` is adapted at any later time `t₀ ≥ u`, for measurable `g` (it factors
-through the past process as `(fun p => g (p ⟨u,_⟩)) ∘ pastProcess`). Generalizes
+through the past process as `(fun p ↦ g (p ⟨u,_⟩)) ∘ pastProcess`). Generalizes
 `adaptedAt_eval` (the `g = id` case). -/
 theorem adaptedAt_comp_eval {t₀ u : ℝ≥0} (hu : u ≤ t₀) {g : ℝ → ℝ} (hg : Measurable g) :
-    AdaptedAt B t₀ (fun ω => g (B u ω)) :=
-  ⟨fun p => g (p ⟨u, hu⟩), hg.comp (measurable_pi_apply _), rfl⟩
+    AdaptedAt B t₀ (fun ω ↦ g (B u ω)) :=
+  ⟨fun p ↦ g (p ⟨u, hu⟩), hg.comp (measurable_pi_apply _), rfl⟩
 
 /-- Adaptedness is monotone in the time index. -/
 theorem AdaptedAt.mono {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) {φ : Ω → ℝ}
     (hφ : AdaptedAt B t₀ φ) : AdaptedAt B t₁ φ := by
   obtain ⟨g, hg, rfl⟩ := hφ
-  exact ⟨g ∘ fun p : Set.Iic t₁ → ℝ => fun s : Set.Iic t₀ => p ⟨(s : ℝ≥0), le_trans s.2 ht⟩,
-    hg.comp (measurable_pi_lambda _ fun _ => measurable_pi_apply _), rfl⟩
+  exact ⟨g ∘ fun p : Set.Iic t₁ → ℝ ↦ fun s : Set.Iic t₀ ↦ p ⟨(s : ℝ≥0), le_trans s.2 ht⟩,
+    hg.comp (measurable_pi_lambda _ fun _ ↦ measurable_pi_apply _), rfl⟩
 
 /-- Products of adapted integrands are adapted. -/
 theorem AdaptedAt.mul {t₀ : ℝ≥0} {φ ψ : Ω → ℝ}
     (hφ : AdaptedAt B t₀ φ) (hψ : AdaptedAt B t₀ ψ) :
-    AdaptedAt B t₀ (fun ω => φ ω * ψ ω) := by
+    AdaptedAt B t₀ (fun ω ↦ φ ω * ψ ω) := by
   obtain ⟨g, hg, rfl⟩ := hφ
   obtain ⟨h, hh, rfl⟩ := hψ
-  exact ⟨fun p => g p * h p, hg.mul hh, rfl⟩
+  exact ⟨fun p ↦ g p * h p, hg.mul hh, rfl⟩
 
 /-- Differences of adapted integrands are adapted. -/
 theorem AdaptedAt.sub {t₀ : ℝ≥0} {φ ψ : Ω → ℝ}
     (hφ : AdaptedAt B t₀ φ) (hψ : AdaptedAt B t₀ ψ) :
-    AdaptedAt B t₀ (fun ω => φ ω - ψ ω) := by
+    AdaptedAt B t₀ (fun ω ↦ φ ω - ψ ω) := by
   obtain ⟨g, hg, rfl⟩ := hφ
   obtain ⟨h, hh, rfl⟩ := hψ
-  exact ⟨fun p => g p - h p, hg.sub hh, rfl⟩
+  exact ⟨fun p ↦ g p - h p, hg.sub hh, rfl⟩
 
 include hB
 
@@ -131,14 +131,14 @@ content: `B_{t₁} - B_{t₀}` is independent of `𝓕_{t₀}` (weak Markov,
 theorem adapted_indepFun_increment
     (_hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) :
-    IndepFun φ (fun ω => B t₁ ω - B t₀ ω) μ := by
+    IndepFun φ (fun ω ↦ B t₁ ω - B t₀ ω) μ := by
   obtain ⟨g, hg, rfl⟩ := hφ
   -- Forward increment process is independent of the past process.
   have hshift := hB.indepFun_shift t₀
   -- `B t₁ - B t₀ = eval_(t₁-t₀) ∘ fwd`, with `t₀ + (t₁-t₀) = t₁`.
   have hΔ : t₀ + (t₁ - t₀) = t₁ := add_tsub_cancel_of_le ht
-  have hfun : (fun ω => B t₁ ω - B t₀ ω) =
-      (fun p : ℝ≥0 → ℝ => p (t₁ - t₀)) ∘ (fun ω t => B (t₀ + t) ω - B t₀ ω) := by
+  have hfun : (fun ω ↦ B t₁ ω - B t₀ ω) =
+      (fun p : ℝ≥0 → ℝ ↦ p (t₁ - t₀)) ∘ (fun ω t ↦ B (t₀ + t) ω - B t₀ ω) := by
     funext ω
     simp only [Function.comp_apply, hΔ]
   rw [hfun]
@@ -155,7 +155,7 @@ theorem integral_adapted_mul_increment
     ∫ ω, φ ω * (B t₁ ω - B t₀ ω) ∂μ = 0 := by
   have hindep := adapted_indepFun_increment hB hBmeas ht hφ
   have hφm : Measurable φ := hφ.measurable hBmeas
-  have hΔm : Measurable (fun ω => B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
   rw [hindep.integral_fun_mul_eq_mul_integral hφm.aestronglyMeasurable
         hΔm.aestronglyMeasurable]
   have hmean : ∫ ω, (B t₁ ω - B t₀ ω) ∂μ = 0 := by
@@ -174,7 +174,7 @@ theorem integral_increment_sq
   simp only [min_self, max_self] at h
   rw [max_eq_right (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))] at h
   rw [← h]
-  exact integral_congr_ae (Filter.Eventually.of_forall fun ω => pow_two (B t₁ ω - B t₀ ω))
+  exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ pow_two (B t₁ ω - B t₀ ω))
 
 /-- **General isometry kernel**: for `χ` adapted to `𝓕_{t₀}`,
 `E[χ · (B_{t₁} - B_{t₀})²] = E[χ] · (t₁ - t₀)`. The increment's square is
@@ -186,9 +186,9 @@ theorem integral_adapted_mul_increment_sq
     {χ : Ω → ℝ} (hχ : AdaptedAt B t₀ χ) :
     ∫ ω, χ ω * (B t₁ ω - B t₀ ω) ^ 2 ∂μ = (∫ ω, χ ω ∂μ) * ((t₁ : ℝ) - t₀) := by
   have hχm : Measurable χ := hχ.measurable hBmeas
-  have hΔm : Measurable (fun ω => B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
   have hindep := adapted_indepFun_increment hB hBmeas ht hχ
-  have hindep2 := hindep.comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ => x ^ 2)
+  have hindep2 := hindep.comp (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ ↦ x ^ 2)
     measurable_id (by fun_prop)
   have key := hindep2.integral_fun_mul_eq_mul_integral
     hχm.aestronglyMeasurable (hΔm.pow_const 2).aestronglyMeasurable
@@ -203,9 +203,9 @@ theorem integral_adapted_sq_mul_increment_sq
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) :
     ∫ ω, (φ ω) ^ 2 * (B t₁ ω - B t₀ ω) ^ 2 ∂μ =
       (∫ ω, (φ ω) ^ 2 ∂μ) * ((t₁ : ℝ) - t₀) := by
-  have hχ : AdaptedAt B t₀ (fun ω => (φ ω) ^ 2) := by
+  have hχ : AdaptedAt B t₀ (fun ω ↦ (φ ω) ^ 2) := by
     obtain ⟨g, hg, rfl⟩ := hφ
-    exact ⟨fun p => (g p) ^ 2, hg.pow_const 2, rfl⟩
+    exact ⟨fun p ↦ (g p) ^ 2, hg.pow_const 2, rfl⟩
   exact integral_adapted_mul_increment_sq hB hBmeas ht hχ
 
 /-- If `φ` is adapted to `𝓕_{t₀}` and in `L²`, then `φ · (B_{t₁} - B_{t₀})` is
@@ -215,17 +215,17 @@ adapted simple integral. -/
 theorem memLp_adapted_mul_increment
     (hBmeas : ∀ t, Measurable (B t)) {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁)
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ) (hφL2 : MemLp φ 2 μ) :
-    MemLp (fun ω => φ ω * (B t₁ ω - B t₀ ω)) 2 μ := by
+    MemLp (fun ω ↦ φ ω * (B t₁ ω - B t₀ ω)) 2 μ := by
   have hindep := adapted_indepFun_increment hB hBmeas ht hφ
   have hφm : Measurable φ := hφ.measurable hBmeas
-  have hΔm : Measurable (fun ω => B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
-  have hφsq : Integrable (fun ω => (φ ω) ^ 2) μ := hφL2.integrable_sq
-  have hΔsq : Integrable (fun ω => (B t₁ ω - B t₀ ω) ^ 2) μ :=
+  have hΔm : Measurable (fun ω ↦ B t₁ ω - B t₀ ω) := (hBmeas t₁).sub (hBmeas t₀)
+  have hφsq : Integrable (fun ω ↦ (φ ω) ^ 2) μ := hφL2.integrable_sq
+  have hΔsq : Integrable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2) μ :=
     (hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two).integrable_sq
-  have hindep2 := hindep.comp (φ := fun x : ℝ => x ^ 2) (ψ := fun x : ℝ => x ^ 2)
+  have hindep2 := hindep.comp (φ := fun x : ℝ ↦ x ^ 2) (ψ := fun x : ℝ ↦ x ^ 2)
     (by fun_prop) (by fun_prop)
   have hprod : Integrable
-      (fun ω => (φ ω) ^ 2 * (B t₁ ω - B t₀ ω) ^ 2) μ := by
+      (fun ω ↦ (φ ω) ^ 2 * (B t₁ ω - B t₀ ω) ^ 2) μ := by
     have h := hindep2.integrable_mul hφsq hΔsq
     exact h
   refine (memLp_two_iff_integrable_sq (hφm.mul hΔm).aestronglyMeasurable).mpr ?_
@@ -243,14 +243,14 @@ theorem integral_cross_increment_bilinear_eq_zero
     ∫ ω, (φ j ω * (B (t (j + 1)) ω - B (t j) ω)) *
           (ψ k ω * (B (t (k + 1)) ω - B (t k) ω)) ∂μ = 0 := by
   have hΦ : AdaptedAt B (t k)
-      (fun ω => φ j ω * (B (t (j + 1)) ω - B (t j) ω) * ψ k ω) :=
+      (fun ω ↦ φ j ω * (B (t (j + 1)) ω - B (t j) ω) * ψ k ω) :=
     (((hφ j).mono (hmono hjk.le)).mul
       ((adaptedAt_eval (hmono hjk)).sub (adaptedAt_eval (hmono hjk.le)))).mul (hψ k)
   have hstep : t k ≤ t (k + 1) := hmono (Nat.le_succ k)
   have h0 := integral_adapted_mul_increment hB hBmeas hstep hΦ
-  rw [show (fun ω => (φ j ω * (B (t (j + 1)) ω - B (t j) ω)) *
+  rw [show (fun ω ↦ (φ j ω * (B (t (j + 1)) ω - B (t j) ω)) *
         (ψ k ω * (B (t (k + 1)) ω - B (t k) ω)))
-      = (fun ω => (φ j ω * (B (t (j + 1)) ω - B (t j) ω) * ψ k ω) *
+      = (fun ω ↦ (φ j ω * (B (t (j + 1)) ω - B (t j) ω) * ψ k ω) *
         (B (t (k + 1)) ω - B (t k) ω)) from by funext ω; ring]
   exact h0
 
@@ -273,22 +273,22 @@ theorem ito_isometry_discrete_bilinear
       ∑ k ∈ Finset.range N, (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) := by
   classical
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  set a : ℕ → Ω → ℝ := fun k ω => φ k ω * (B (t (k + 1)) ω - B (t k) ω) with ha_def
-  set b : ℕ → Ω → ℝ := fun k ω => ψ k ω * (B (t (k + 1)) ω - B (t k) ω) with hb_def
-  have ha_L2 : ∀ k, MemLp (a k) 2 μ := fun k =>
+  set a : ℕ → Ω → ℝ := fun k ω ↦ φ k ω * (B (t (k + 1)) ω - B (t k) ω) with ha_def
+  set b : ℕ → Ω → ℝ := fun k ω ↦ ψ k ω * (B (t (k + 1)) ω - B (t k) ω) with hb_def
+  have ha_L2 : ∀ k, MemLp (a k) 2 μ := fun k ↦
     memLp_adapted_mul_increment hB hBmeas (hmono (Nat.le_succ k)) (hφ k) (hφL2 k)
-  have hb_L2 : ∀ k, MemLp (b k) 2 μ := fun k =>
+  have hb_L2 : ∀ k, MemLp (b k) 2 μ := fun k ↦
     memLp_adapted_mul_increment hB hBmeas (hmono (Nat.le_succ k)) (hψ k) (hψL2 k)
-  have hint : ∀ j k, Integrable (fun ω => a j ω * b k ω) μ := fun j k =>
+  have hint : ∀ j k, Integrable (fun ω ↦ a j ω * b k ω) μ := fun j k ↦
     (ha_L2 j).integrable_mul (hb_L2 k)
   -- Diagonal term = mixed variance kernel.
   have hdiag : ∀ k, ∫ ω, a k ω * b k ω ∂μ =
       (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) := by
     intro k
     have hstep : t k ≤ t (k + 1) := hmono (Nat.le_succ k)
-    have hχ : AdaptedAt B (t k) (fun ω => φ k ω * ψ k ω) := (hφ k).mul (hψ k)
-    rw [show (fun ω => a k ω * b k ω)
-          = (fun ω => (φ k ω * ψ k ω) * (B (t (k + 1)) ω - B (t k) ω) ^ 2) from by
+    have hχ : AdaptedAt B (t k) (fun ω ↦ φ k ω * ψ k ω) := (hφ k).mul (hψ k)
+    rw [show (fun ω ↦ a k ω * b k ω)
+          = (fun ω ↦ (φ k ω * ψ k ω) * (B (t (k + 1)) ω - B (t k) ω) ^ 2) from by
             funext ω; simp only [ha_def, hb_def]; ring]
     exact integral_adapted_mul_increment_sq hB hBmeas hstep hχ
   -- Off-diagonal terms vanish.
@@ -297,24 +297,24 @@ theorem ito_isometry_discrete_bilinear
     intro j _ k _ hjk
     rcases lt_or_gt_of_ne hjk with h | h
     · exact integral_cross_increment_bilinear_eq_zero hB hBmeas hmono hφ hψ h
-    · rw [show (fun ω => a j ω * b k ω) = (fun ω => b k ω * a j ω) from by funext ω; ring]
+    · rw [show (fun ω ↦ a j ω * b k ω) = (fun ω ↦ b k ω * a j ω) from by funext ω; ring]
       exact integral_cross_increment_bilinear_eq_zero hB hBmeas hmono hψ hφ h
   calc ∫ ω, (∑ k ∈ Finset.range N, a k ω) * (∑ k ∈ Finset.range N, b k ω) ∂μ
       = ∫ ω, ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, a j ω * b k ω ∂μ := by
-        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
         show (∑ k ∈ Finset.range N, a k ω) * (∑ k ∈ Finset.range N, b k ω)
           = ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, a j ω * b k ω
         rw [Finset.sum_mul_sum]
     _ = ∑ j ∈ Finset.range N, ∑ k ∈ Finset.range N, ∫ ω, a j ω * b k ω ∂μ := by
-        rw [integral_finsetSum _ (fun j _ => integrable_finsetSum _ (fun k _ => hint j k))]
+        rw [integral_finsetSum _ (fun j _ ↦ integrable_finsetSum _ (fun k _ ↦ hint j k))]
         exact Finset.sum_congr rfl
-          (fun j _ => integral_finsetSum _ (fun k _ => hint j k))
+          (fun j _ ↦ integral_finsetSum _ (fun k _ ↦ hint j k))
     _ = ∑ j ∈ Finset.range N, ∫ ω, a j ω * b j ω ∂μ := by
-        refine Finset.sum_congr rfl (fun j hj => ?_)
-        exact Finset.sum_eq_single j (fun k hk hkj => hcross j hj k hk (Ne.symm hkj))
-          (fun hj' => absurd hj hj')
+        refine Finset.sum_congr rfl (fun j hj ↦ ?_)
+        exact Finset.sum_eq_single j (fun k hk hkj ↦ hcross j hj k hk (Ne.symm hkj))
+          (fun hj' ↦ absurd hj hj')
     _ = ∑ k ∈ Finset.range N, (∫ ω, φ k ω * ψ k ω ∂μ) * ((t (k + 1) : ℝ) - t k) :=
-        Finset.sum_congr rfl (fun k _ => hdiag k)
+        Finset.sum_congr rfl (fun k _ ↦ hdiag k)
 
 /-- **The discrete Itô isometry** (adapted simple integrands):
 `E[(Σₖ φₖ·(B_{t_{k+1}} − B_{t_k}))²] = Σₖ E[φₖ²]·(t_{k+1} − t_k)`. The genuine
@@ -347,10 +347,10 @@ theorem ito_isometry_brownian_self
     (hBmeas : ∀ s, Measurable (B s)) {N : ℕ} {t : ℕ → ℝ≥0} (hmono : Monotone t) :
     ∫ ω, (∑ k ∈ Finset.range N, B (t k) ω * (B (t (k + 1)) ω - B (t k) ω)) ^ 2 ∂μ =
       ∑ k ∈ Finset.range N, (t k : ℝ) * ((t (k + 1) : ℝ) - t k) := by
-  rw [ito_isometry_discrete hB hBmeas hmono (φ := fun k => B (t k))
-    (fun n => adaptedAt_eval le_rfl)
-    (fun n => (hB.isGaussianProcess.hasGaussianLaw_eval (t n)).memLp_two)]
-  exact Finset.sum_congr rfl (fun k _ => by rw [integral_eval_sq hB hBmeas])
+  rw [ito_isometry_discrete hB hBmeas hmono (φ := fun k ↦ B (t k))
+    (fun n ↦ adaptedAt_eval le_rfl)
+    (fun n ↦ (hB.isGaussianProcess.hasGaussianLaw_eval (t n)).memLp_two)]
+  exact Finset.sum_congr rfl (fun k _ ↦ by rw [integral_eval_sq hB hBmeas])
 
 /-! ### Pairing identity for predictable rectangles
 
@@ -375,7 +375,7 @@ theorem adapted_indepFun_forward
     (_hBmeas : ∀ t, Measurable (B t)) {t₀ : ℝ≥0}
     {φ : Ω → ℝ} (hφ : AdaptedAt B t₀ φ)
     {H : (ℝ≥0 → ℝ) → ℝ} (hH : Measurable H) :
-    IndepFun φ (fun ω => H (fun u => B (t₀ + u) ω - B t₀ ω)) μ := by
+    IndepFun φ (fun ω ↦ H (fun u ↦ B (t₀ + u) ω - B t₀ ω)) μ := by
   obtain ⟨g, hg, rfl⟩ := hφ
   exact (hB.indepFun_shift t₀).symm.comp hg hH
 
@@ -398,12 +398,12 @@ when splitting the rectangle pairing). -/
 private lemma integrable_bdd_two_increment
     {h : Ω → ℝ} (hhm : Measurable h)
     {C : ℝ} (hhb : ∀ ω, |h ω| ≤ C) (a b c d : ℝ≥0) :
-    Integrable (fun ω => h ω * ((B b ω - B a ω) * (B d ω - B c ω))) μ := by
-  have hprod : Integrable (fun ω => (B b ω - B a ω) * (B d ω - B c ω)) μ :=
+    Integrable (fun ω ↦ h ω * ((B b ω - B a ω) * (B d ω - B c ω))) μ := by
+  have hprod : Integrable (fun ω ↦ (B b ω - B a ω) * (B d ω - B c ω)) μ :=
     (hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two).integrable_mul
       (hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two)
   exact hprod.bdd_mul hhm.aestronglyMeasurable
-    (Filter.Eventually.of_forall fun ω => by rw [Real.norm_eq_abs]; exact hhb ω)
+    (Filter.Eventually.of_forall fun ω ↦ by rw [Real.norm_eq_abs]; exact hhb ω)
 
 /-- Pairing identity, oriented case `s ≤ s'`. -/
 private lemma rect_increment_pairing_aux
@@ -415,16 +415,16 @@ private lemma rect_increment_pairing_aux
       (∫ ω, f ω * g ω ∂μ) * max 0 ((min (t : ℝ) t') - max (s : ℝ) s') := by
   have hfm : Measurable f := hf.measurable hBmeas
   have hgm : Measurable g := hg.measurable hBmeas
-  have hfg : AdaptedAt B s' (fun ω => f ω * g ω) := (hf.mono hss').mul hg
-  have hfgm : Measurable (fun ω => f ω * g ω) := hfm.mul hgm
-  have hfgb : ∀ ω, |f ω * g ω| ≤ Cf * Cg := fun ω => by
+  have hfg : AdaptedAt B s' (fun ω ↦ f ω * g ω) := (hf.mono hss').mul hg
+  have hfgm : Measurable (fun ω ↦ f ω * g ω) := hfm.mul hgm
+  have hfgb : ∀ ω, |f ω * g ω| ≤ Cf * Cg := fun ω ↦ by
     rw [abs_mul]
     exact mul_le_mul (hfb ω) (hgb ω) (abs_nonneg _) (le_trans (abs_nonneg _) (hfb ω))
   have hmaxss' : max (s : ℝ) s' = (s' : ℝ) := max_eq_right (by exact_mod_cast hss')
   rw [hmaxss']
   by_cases htle : t ≤ s'
   · -- Disjoint intervals: the whole pairing is a forward increment with mean zero.
-    have hχ : AdaptedAt B s' (fun ω => f ω * (B t ω - B s ω) * g ω) :=
+    have hχ : AdaptedAt B s' (fun ω ↦ f ω * (B t ω - B s ω) * g ω) :=
       ((hf.mono hss').mul ((adaptedAt_eval htle).sub (adaptedAt_eval hss'))).mul hg
     have h0 := integral_adapted_mul_increment hB hBmeas hst' hχ
     have hzero : max (0 : ℝ) ((min (t : ℝ) t') - s') = 0 := by
@@ -433,26 +433,26 @@ private lemma rect_increment_pairing_aux
         le_trans (min_le_left _ _) (by exact_mod_cast htle)
       linarith
     rw [hzero, mul_zero, ← h0]
-    exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
+    exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
   · -- Overlapping intervals: split the first increment at the later start `s'`.
     replace htle := not_le.mp htle
     have hT1 : ∫ ω, f ω * g ω * ((B s' ω - B s ω) * (B t' ω - B s' ω)) ∂μ = 0 := by
-      have hχ : AdaptedAt B s' (fun ω => f ω * g ω * (B s' ω - B s ω)) :=
+      have hχ : AdaptedAt B s' (fun ω ↦ f ω * g ω * (B s' ω - B s ω)) :=
         hfg.mul ((adaptedAt_eval le_rfl).sub (adaptedAt_eval hss'))
       have h0 := integral_adapted_mul_increment hB hBmeas hst' hχ
       rw [← h0]
-      exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
-    have hindep : IndepFun (fun ω => f ω * g ω)
-        (fun ω => (B t ω - B s' ω) * (B t' ω - B s' ω)) μ := by
-      have hH : Measurable (fun p : ℝ≥0 → ℝ => p (t - s') * p (t' - s')) := by fun_prop
+      exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
+    have hindep : IndepFun (fun ω ↦ f ω * g ω)
+        (fun ω ↦ (B t ω - B s' ω) * (B t' ω - B s' ω)) μ := by
+      have hH : Measurable (fun p : ℝ≥0 → ℝ ↦ p (t - s') * p (t' - s')) := by fun_prop
       have hi := adapted_indepFun_forward hB hBmeas hfg hH
-      have heq : (fun ω => (fun p : ℝ≥0 → ℝ => p (t - s') * p (t' - s'))
-            (fun u => B (s' + u) ω - B s' ω))
-          = (fun ω => (B t ω - B s' ω) * (B t' ω - B s' ω)) := by
+      have heq : (fun ω ↦ (fun p : ℝ≥0 → ℝ ↦ p (t - s') * p (t' - s'))
+            (fun u ↦ B (s' + u) ω - B s' ω))
+          = (fun ω ↦ (B t ω - B s' ω) * (B t' ω - B s' ω)) := by
         funext ω
         simp only [add_tsub_cancel_of_le htle.le, add_tsub_cancel_of_le hst']
       rwa [heq] at hi
-    have hXm : Measurable (fun ω => (B t ω - B s' ω) * (B t' ω - B s' ω)) :=
+    have hXm : Measurable (fun ω ↦ (B t ω - B s' ω) * (B t' ω - B s' ω)) :=
       ((hBmeas t).sub (hBmeas s')).mul ((hBmeas t').sub (hBmeas s'))
     have hT2 : ∫ ω, f ω * g ω * ((B t ω - B s' ω) * (B t' ω - B s' ω)) ∂μ
         = (∫ ω, f ω * g ω ∂μ) * (((min t t' : ℝ≥0) : ℝ) - s') := by
@@ -464,7 +464,7 @@ private lemma rect_increment_pairing_aux
           + ∫ ω, f ω * g ω * ((B t ω - B s' ω) * (B t' ω - B s' ω)) ∂μ := by
       rw [← integral_add (integrable_bdd_two_increment hB hfgm hfgb s s' s' t')
                          (integrable_bdd_two_increment hB hfgm hfgb s' t s' t')]
-      exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
+      exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
     have hcoe : ((min t t' : ℝ≥0) : ℝ) = min (t : ℝ) t' := by
       rcases le_total t t' with h | h
       · rw [min_eq_left h, min_eq_left (by exact_mod_cast h)]
@@ -494,10 +494,10 @@ theorem rect_increment_pairing
   · exact rect_increment_pairing_aux hB hBmeas hf hg hfb hgb hst hst' h
   · rw [show (∫ ω, (f ω * (B t ω - B s ω)) * (g ω * (B t' ω - B s' ω)) ∂μ)
           = ∫ ω, (g ω * (B t' ω - B s' ω)) * (f ω * (B t ω - B s ω)) ∂μ from
-        integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring),
+        integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring),
         rect_increment_pairing_aux hB hBmeas hg hf hgb hfb hst' hst h]
     congr 1
-    · exact integral_congr_ae (Filter.Eventually.of_forall fun ω => by ring)
+    · exact integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ by ring)
     · rw [min_comm (t' : ℝ) t, max_comm (s' : ℝ) s]
 
 end ItoIsometryAdapted

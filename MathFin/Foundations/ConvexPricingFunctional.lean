@@ -86,8 +86,8 @@ multiplied by `q i ≥ 0`). Summing preserves the inequality. -/
 theorem statePricePricing_convexOn
     (s : Finset ι) (q : ι → ℝ) (hq : ∀ i ∈ s, 0 ≤ q i)
     (g : ι → ℝ → ℝ) (hg : ∀ i ∈ s, ConvexOn ℝ (Set.univ : Set ℝ) (g i)) :
-    ConvexOn ℝ (Set.univ : Set ℝ) (fun K => ∑ i ∈ s, q i * g i K) := by
-  refine ⟨convex_univ, fun K₁ _ K₂ _ a b ha hb hab => ?_⟩
+    ConvexOn ℝ (Set.univ : Set ℝ) (fun K ↦ ∑ i ∈ s, q i * g i K) := by
+  refine ⟨convex_univ, fun K₁ _ K₂ _ a b ha hb hab ↦ ?_⟩
   -- Goal: Σ q i · g i (a • K₁ + b • K₂) ≤ a • (Σ q i · g i K₁) + b • (Σ q i · g i K₂).
   show ∑ i ∈ s, q i * g i (a • K₁ + b • K₂)
         ≤ a • (∑ i ∈ s, q i * g i K₁) + b • (∑ i ∈ s, q i * g i K₂)
@@ -110,7 +110,7 @@ theorem statePricePricing_convexOn_inK
     (s : Finset ι) (q : ι → ℝ) (hq : ∀ i ∈ s, 0 ≤ q i)
     (g : ι → ℝ → ℝ) (hg : ∀ i ∈ s, ConvexOn ℝ (Set.univ : Set ℝ) (g i)) :
     ConvexOn ℝ (Set.univ : Set ℝ)
-      (fun K => statePricePricing s q (fun i => g i K)) := by
+      (fun K ↦ statePricePricing s q (fun i ↦ g i K)) := by
   unfold statePricePricing
   exact statePricePricing_convexOn s q hq g hg
 
@@ -126,8 +126,8 @@ convexity (`statePricePricing_convexOn` above). -/
 theorem callPrice_finiteState_convexOn_K (s : Finset ι)
     (S : ι → ℝ) (q : ι → ℝ) (hq : ∀ i ∈ s, 0 ≤ q i) :
     ConvexOn ℝ (Set.univ : Set ℝ)
-      (fun K => ∑ i ∈ s, q i * max (S i - K) 0) := by
-  refine statePricePricing_convexOn s q hq (fun i K => max (S i - K) 0) ?_
+      (fun K ↦ ∑ i ∈ s, q i * max (S i - K) 0) := by
+  refine statePricePricing_convexOn s q hq (fun i K ↦ max (S i - K) 0) ?_
   intro i _
   exact convexOn_call_payoff (S i)
 

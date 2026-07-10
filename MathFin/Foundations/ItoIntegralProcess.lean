@@ -62,7 +62,7 @@ noncomputable def itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
 `B (· ∧ u)`: `stoppedProcess B (fun _ ↦ ↑u) s = B (min s u)` (the `WithTop`
 `min`/`untopA` coercions). -/
 private lemma stoppedProcess_const_coe (u s : ℝ≥0) (ω : Ω) :
-    stoppedProcess B (fun _ : Ω => (u : WithTop ℝ≥0)) s ω = B (min s u) ω := by
+    stoppedProcess B (fun _ : Ω ↦ (u : WithTop ℝ≥0)) s ω = B (min s u) ω := by
   show B (min (s : WithTop ℝ≥0) (u : WithTop ℝ≥0)).untopA ω = B (min s u) ω
   rw [← WithTop.coe_min, WithTop.untopA_eq_untop WithTop.coe_ne_top, WithTop.untop_coe]
 
@@ -72,9 +72,9 @@ lemma itoSimpleProcess_apply (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
     (t : ℝ≥0) (ω : Ω) :
     itoSimpleProcess hBmeas V t ω
-      = V.value.sum fun p v => v ω * (B (min p.2 t) ω - B (min p.1 t) ω) := by
+      = V.value.sum fun p v ↦ v ω * (B (min p.2 t) ω - B (min p.1 t) ω) := by
   simp only [itoSimpleProcess, SimpleProcess.integral, ContinuousLinearMap.mul_apply']
-  refine Finsupp.sum_congr fun p _ => ?_
+  refine Finsupp.sum_congr fun p _ ↦ ?_
   rw [stoppedProcess_const_coe, stoppedProcess_const_coe]
 
 /-- The elementary process Itô integral is **additive** in the simple process. -/
@@ -107,7 +107,7 @@ collapses, so each term `V(p)·(B_0 − B_0) = 0`. -/
     itoSimpleProcess hBmeas V 0 = 0 := by
   funext ω
   rw [itoSimpleProcess_apply, Finsupp.sum]
-  refine Finset.sum_eq_zero fun p _ => ?_
+  refine Finset.sum_eq_zero fun p _ ↦ ?_
   have e1 : min p.1 (0 : ℝ≥0) = 0 := min_eq_right zero_le
   have e2 : min p.2 (0 : ℝ≥0) = 0 := min_eq_right zero_le
   rw [e1, e2, sub_self, mul_zero]
@@ -121,7 +121,7 @@ lemma itoSimpleProcess_eq_itoSimple (hBmeas : ∀ t, Measurable (B t))
     itoSimpleProcess hBmeas V t = ItoIntegralL2.itoSimple hBmeas V := by
   funext ω
   rw [itoSimpleProcess_apply, ItoIntegralL2.itoSimple_apply]
-  refine Finsupp.sum_congr fun p hp => ?_
+  refine Finsupp.sum_congr fun p hp ↦ ?_
   have h2 : min p.2 t = p.2 := min_eq_left (ht p hp)
   have h1 : min p.1 t = p.1 := min_eq_left ((V.le_of_mem_support_value p hp).trans (ht p hp))
   rw [h1, h2]
@@ -147,7 +147,7 @@ function. The per-term content of `memLp_itoSimpleProcess`. -/
 theorem memLp_truncated_term (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas))
     (t : ℝ≥0) {p : ℝ≥0 × ℝ≥0} (hp : p ∈ V.value.support) :
-    MemLp (fun ω => V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)) 2 μ := by
+    MemLp (fun ω ↦ V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)) 2 μ := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   by_cases ht : p.1 ≤ t
   · -- active interval: adapted coefficient × increment over `[p.1, p.2 ∧ t]`
@@ -172,9 +172,9 @@ theorem memLp_itoSimpleProcess (hBmeas : ∀ t, Measurable (B t))
     (t : ℝ≥0) :
     MemLp (itoSimpleProcess hBmeas V t) 2 μ := by
   rw [show itoSimpleProcess hBmeas V t
-        = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)
-      from funext fun ω => by rw [itoSimpleProcess_apply]; rfl]
-  exact memLp_finsetSum _ fun p hp => memLp_truncated_term hB hBmeas V t hp
+        = fun ω ↦ ∑ p ∈ V.value.support, V.value p ω * (B (min p.2 t) ω - B (min p.1 t) ω)
+      from funext fun ω ↦ by rw [itoSimpleProcess_apply]; rfl]
+  exact memLp_finsetSum _ fun p hp ↦ memLp_truncated_term hB hBmeas V t hp
 
 /-- The process Itô integral at time `t` as an element of `Lp ℝ 2 μ`. -/
 noncomputable def itoSimpleProcessLp (hBmeas : ∀ t, Measurable (B t))

@@ -58,19 +58,19 @@ bilinearity (`margrabe_effective_variance`); gaussianity is preserved under the
 linear map. -/
 theorem normalizedSpread_hasLaw_std
     {W₁ W₂ : Ω → ℝ} {σ₁ σ₂ ρ σeff : ℝ}
-    (hjoint : HasGaussianLaw (fun ω => (W₁ ω, W₂ ω)) P)
+    (hjoint : HasGaussianLaw (fun ω ↦ (W₁ ω, W₂ ω)) P)
     (hW₁meas : Measurable W₁) (hW₂meas : Measurable W₂)
     (hW₁ : HasLaw W₁ (gaussianReal 0 1) P) (hW₂ : HasLaw W₂ (gaussianReal 0 1) P)
     (hcov : cov[W₁, W₂; P] = ρ) (hσeff : 0 < σeff)
     (hσeff_sq : σeff ^ 2 = σ₁ ^ 2 + σ₂ ^ 2 - 2 * ρ * σ₁ * σ₂) :
-    HasLaw (fun ω => (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff) (gaussianReal 0 1) P := by
-  set W : Ω → ℝ := fun ω => (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff with hW_def
+    HasLaw (fun ω ↦ (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff) (gaussianReal 0 1) P := by
+  set W : Ω → ℝ := fun ω ↦ (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff with hW_def
   have hWmeas : Measurable W := ((hW₁meas.const_mul σ₁).sub (hW₂meas.const_mul σ₂)).div_const _
   -- `W` is a continuous-linear image of the gaussian vector, hence gaussian.
   have hWgl : HasGaussianLaw W P := by
     let L : ℝ × ℝ →L[ℝ] ℝ :=
       (σeff⁻¹ • (σ₁ • ContinuousLinearMap.fst ℝ ℝ ℝ - σ₂ • ContinuousLinearMap.snd ℝ ℝ ℝ))
-    have hcomp : W = L ∘ (fun ω => (W₁ ω, W₂ ω)) := by
+    have hcomp : W = L ∘ (fun ω ↦ (W₁ ω, W₂ ω)) := by
       funext ω
       simp only [hW_def, L, FunLike.coe_smul, FunLike.coe_sub,
         ContinuousLinearMap.coe_fst', ContinuousLinearMap.coe_snd', Function.comp_apply,
@@ -93,19 +93,19 @@ theorem normalizedSpread_hasLaw_std
         integral_const_mul, integral_const_mul, hmean₁, hmean₂]
     simp
   -- Var[W] = (1/σeff²)·Var[σ₁W₁ − σ₂W₂] = (1/σeff²)·σeff² = 1.
-  have hmemL₁ : MemLp (fun ω => σ₁ * W₁ ω) 2 P := hmem₁.const_mul σ₁
-  have hmemL₂ : MemLp (fun ω => σ₂ * W₂ ω) 2 P := hmem₂.const_mul σ₂
-  have hvarspread : Var[fun ω => σ₁ * W₁ ω - σ₂ * W₂ ω; P] = σeff ^ 2 := by
-    have hV₁ : Var[fun ω => σ₁ * W₁ ω; P] = σ₁ ^ 2 * 1 := by rw [variance_const_mul, hvar₁]
-    have hV₂ : Var[fun ω => σ₂ * W₂ ω; P] = σ₂ ^ 2 * 1 := by rw [variance_const_mul, hvar₂]
-    have hC : cov[fun ω => σ₁ * W₁ ω, fun ω => σ₂ * W₂ ω; P] = ρ * σ₁ * σ₂ * 1 := by
+  have hmemL₁ : MemLp (fun ω ↦ σ₁ * W₁ ω) 2 P := hmem₁.const_mul σ₁
+  have hmemL₂ : MemLp (fun ω ↦ σ₂ * W₂ ω) 2 P := hmem₂.const_mul σ₂
+  have hvarspread : Var[fun ω ↦ σ₁ * W₁ ω - σ₂ * W₂ ω; P] = σeff ^ 2 := by
+    have hV₁ : Var[fun ω ↦ σ₁ * W₁ ω; P] = σ₁ ^ 2 * 1 := by rw [variance_const_mul, hvar₁]
+    have hV₂ : Var[fun ω ↦ σ₂ * W₂ ω; P] = σ₂ ^ 2 * 1 := by rw [variance_const_mul, hvar₂]
+    have hC : cov[fun ω ↦ σ₁ * W₁ ω, fun ω ↦ σ₂ * W₂ ω; P] = ρ * σ₁ * σ₂ * 1 := by
       rw [covariance_const_mul_left, covariance_const_mul_right, hcov]; ring
     have hv := margrabe_effective_variance (T := 1) hmemL₁ hmemL₂ hV₁ hV₂ hC
     rw [mul_one] at hv
     rw [hσeff_sq]
     exact hv
   have hWvar : Var[W; P] = 1 := by
-    have hWeq : W = fun ω => σeff⁻¹ * (σ₁ * W₁ ω - σ₂ * W₂ ω) := by
+    have hWeq : W = fun ω ↦ σeff⁻¹ * (σ₁ * W₁ ω - σ₂ * W₂ ω) := by
       funext ω; simp only [hW_def]; rw [div_eq_inv_mul]
     rw [hWeq, variance_const_mul, hvarspread]
     field_simp
@@ -130,7 +130,7 @@ and the effective volatility `σ_eff = √(σ₁² + σ₂² − 2ρσ₁σ₂)`
 to price the exchange option with no assumed risk-neutral hypothesis. -/
 theorem margrabe_bsCallHyp_of_gaussian
     {W₁ W₂ : Ω → ℝ} {σ₁ σ₂ ρ σeff S1 S2 T c : ℝ}
-    (hjoint : HasGaussianLaw (fun ω => (W₁ ω, W₂ ω)) P)
+    (hjoint : HasGaussianLaw (fun ω ↦ (W₁ ω, W₂ ω)) P)
     (hW₁meas : Measurable W₁) (hW₂meas : Measurable W₂)
     (hW₁ : HasLaw W₁ (gaussianReal 0 1) P) (hW₂ : HasLaw W₂ (gaussianReal 0 1) P)
     (hcov : cov[W₁, W₂; P] = ρ)
@@ -138,9 +138,9 @@ theorem margrabe_bsCallHyp_of_gaussian
     (hσeff_sq : σeff ^ 2 = σ₁ ^ 2 + σ₂ ^ 2 - 2 * ρ * σ₁ * σ₂) :
     ∃ (Q : Measure Ω) (hQ : IsProbabilityMeasure Q) (Z : Ω → ℝ),
       @BSCallHyp _ _ Q hQ (S1 / S2) 1 0 σeff T Z := by
-  have hW : HasLaw (fun ω => (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff) (gaussianReal 0 1) P :=
+  have hW : HasLaw (fun ω ↦ (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff) (gaussianReal 0 1) P :=
     normalizedSpread_hasLaw_std hjoint hW₁meas hW₂meas hW₁ hW₂ hcov hσeff hσeff_sq
-  have hWmeas : Measurable (fun ω => (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff) :=
+  have hWmeas : Measurable (fun ω ↦ (σ₁ * W₁ ω - σ₂ * W₂ ω) / σeff) :=
     ((hW₁meas.const_mul σ₁).sub (hW₂meas.const_mul σ₂)).div_const _
   obtain ⟨Q, hQ, _, hbs⟩ :=
     BSCallHyp.exists_of_physical c (div_pos hS1 hS2) one_pos hσeff hT hWmeas hW
@@ -151,7 +151,7 @@ risk-neutral hypothesis). Composes `margrabe_bsCallHyp_of_gaussian` (which
 *derives* the ratio's `BSCallHyp`) with `margrabe_price_via_call`. -/
 theorem margrabe_price_of_gaussian
     {W₁ W₂ : Ω → ℝ} {σ₁ σ₂ ρ σeff S1 S2 T c : ℝ}
-    (hjoint : HasGaussianLaw (fun ω => (W₁ ω, W₂ ω)) P)
+    (hjoint : HasGaussianLaw (fun ω ↦ (W₁ ω, W₂ ω)) P)
     (hW₁meas : Measurable W₁) (hW₂meas : Measurable W₂)
     (hW₁ : HasLaw W₁ (gaussianReal 0 1) P) (hW₂ : HasLaw W₂ (gaussianReal 0 1) P)
     (hcov : cov[W₁, W₂; P] = ρ)

@@ -56,7 +56,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω}
 /-! ### The Vasicek diffusion kernel `e^{−κ(T−s)}` as an `L²` integrand -/
 
 /-- The Vasicek diffusion kernel `s ↦ e^{−κ(T−s)}`. -/
-noncomputable def vasicekKernel (κ T : ℝ) : ℝ → ℝ := fun s => Real.exp (-(κ * (T - s)))
+noncomputable def vasicekKernel (κ T : ℝ) : ℝ → ℝ := fun s ↦ Real.exp (-(κ * (T - s)))
 
 /-- The restricted volume measure on `(0, T]` is finite. -/
 private instance vasicek_finite_restrict (T : ℝ≥0) :
@@ -95,15 +95,15 @@ lemma vasicekKernel_integral_sq (κ : ℝ) (hκ : κ ≠ 0) (T : ℝ≥0) :
     congr 1
     ring
   rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (T : ℝ))]
-  rw [show (fun s => (vasicekKernel κ T s) ^ 2)
-        = (fun s => Real.exp (-(2 * κ * ((T : ℝ) - s)))) from funext hsq]
+  rw [show (fun s ↦ (vasicekKernel κ T s) ^ 2)
+        = (fun s ↦ Real.exp (-(2 * κ * ((T : ℝ) - s)))) from funext hsq]
   have hderiv : ∀ s ∈ Set.uIcc (0 : ℝ) (T : ℝ),
-      HasDerivAt (fun s => Real.exp (-(2 * κ * ((T : ℝ) - s))) / (2 * κ))
+      HasDerivAt (fun s ↦ Real.exp (-(2 * κ * ((T : ℝ) - s))) / (2 * κ))
         (Real.exp (-(2 * κ * ((T : ℝ) - s)))) s := by
     intro s _
-    have h1 : HasDerivAt (fun s => -(2 * κ * ((T : ℝ) - s)))
+    have h1 : HasDerivAt (fun s ↦ -(2 * κ * ((T : ℝ) - s)))
         (2 * κ) s := by
-      have : HasDerivAt (fun s => -(2 * κ * ((T : ℝ) - s)))
+      have : HasDerivAt (fun s ↦ -(2 * κ * ((T : ℝ) - s)))
           (-(2 * κ * (-1))) s := by
         apply HasDerivAt.neg
         apply HasDerivAt.const_mul
@@ -131,11 +131,11 @@ Gaussian law `N(vasicekSDEMean, vasicekSDEVariance)` — the closed form `Vasice
 posited is now a theorem. -/
 theorem vasicekShortRate_hasLaw_gaussian (hB : IsPreBrownianReal B μ)
     (r₀ θ σ : ℝ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
-    HasLaw (fun ω => vasicekSDEMean r₀ θ κ (T : ℝ)
+    HasLaw (fun ω ↦ vasicekSDEMean r₀ θ κ (T : ℝ)
         + σ * (wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω))
       (gaussianReal (vasicekSDEMean r₀ θ κ (T : ℝ)) (vasicekSDEVariance σ κ (T : ℝ)).toNNReal) μ := by
   -- The Wiener integral of the kernel is Gaussian, centred, variance = ∫ kernel².
-  have hW : HasLaw (fun ω => wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)
+  have hW : HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekKernelLp κ hκ.le T) ω)
       (gaussianReal 0 (∫ s in Set.Ioc (0 : ℝ) (T : ℝ),
         (vasicekKernelLp κ hκ.le T s) ^ 2 ∂volume).toNNReal) μ :=
     wienerIntegralLp_hasLaw_gaussian hB T _

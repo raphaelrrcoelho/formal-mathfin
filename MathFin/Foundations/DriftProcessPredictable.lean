@@ -78,7 +78,7 @@ increment `(p.2 ∧ t) − (p.1 ∧ t)` is the Lebesgue length of `(p.1, p.2] �
 `timeMeasure_Ioc_inter`'s `ℝ≥0`-valued endpoints definitionally in the bridge below.) -/
 noncomputable def driftSimpleProcess (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) (t : ℝ≥0) (ω : Ω) : ℝ :=
-  V.value.sum fun p v => v ω * (((min p.2 t : ℝ≥0) : ℝ) - ((min p.1 t : ℝ≥0) : ℝ))
+  V.value.sum fun p v ↦ v ω * (((min p.2 t : ℝ≥0) : ℝ) - ((min p.1 t : ℝ≥0) : ℝ))
 
 /-- **Path continuity of the elementary drift.** For every `ω`, `t ↦ driftSimpleProcess V t ω`
 is continuous: a finite sum of `V(p)(ω)` (constant in `t`) times the continuous
@@ -86,7 +86,7 @@ time-increment `(p.2 ∧ t) − (p.1 ∧ t)` (continuous clamp `t ↦ min c t`, 
 coercion `ℝ≥0 → ℝ`). -/
 theorem driftSimpleProcess_continuous (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) :
-    Continuous (fun t : ℝ≥0 => driftSimpleProcess hBmeas V t ω) := by
+    Continuous (fun t : ℝ≥0 ↦ driftSimpleProcess hBmeas V t ω) := by
   simp only [driftSimpleProcess, Finsupp.sum]
   fun_prop
 
@@ -99,7 +99,7 @@ theorem driftSimpleProcess_stronglyAdapted (hBmeas : ∀ t, Measurable (B t))
     StronglyAdapted (natFiltration hBmeas) (driftSimpleProcess hBmeas V) := by
   intro t
   have hsm : ∀ p ∈ V.value.support, StronglyMeasurable[natFiltration hBmeas t]
-      (fun ω => V.value p ω * (((min p.2 t : ℝ≥0) : ℝ) - ((min p.1 t : ℝ≥0) : ℝ))) := by
+      (fun ω ↦ V.value p ω * (((min p.2 t : ℝ≥0) : ℝ) - ((min p.1 t : ℝ≥0) : ℝ))) := by
     intro p hp
     by_cases ht : p.1 ≤ t
     · exact (((V.measurable_value p).mono ((natFiltration hBmeas).mono ht) le_rfl).stronglyMeasurable).mul
@@ -120,14 +120,14 @@ theorem driftSimpleProcess_isStronglyPredictable (hBmeas : ∀ t, Measurable (B 
     IsStronglyPredictable (natFiltration hBmeas) (driftSimpleProcess hBmeas V) := by
   apply MeasureTheory.StronglyAdapted.isStronglyPredictable_of_leftContinuous
   · exact driftSimpleProcess_stronglyAdapted hBmeas V
-  · exact fun ω a => (driftSimpleProcess_continuous hBmeas V ω).continuousWithinAt
+  · exact fun ω a ↦ (driftSimpleProcess_continuous hBmeas V ω).continuousWithinAt
 
 /-- The pathwise drift-limit process: for each `t, ω` the limit (junk off the
 convergence set) of the elementary drifts of a fixed approximating sequence `Vₙ`
 (`approxSeq`'s choice for `φ`). -/
 noncomputable def driftContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) (ω : Ω) : ℝ :=
-  limUnder atTop fun n => driftSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω
+  limUnder atTop fun n ↦ driftSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω
 
 /-- **The assembled drift is predictable** (general integrand). By construction
 `driftContinuousMod` is the pointwise `limUnder` of the elementary drifts of a fixed
@@ -138,13 +138,13 @@ theorem driftContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, 
     IsStronglyPredictable (natFiltration hBmeas) (driftContinuousMod T hBmeas φ) := by
   rw [IsStronglyPredictable]
   have hrw : (Function.uncurry (driftContinuousMod T hBmeas φ))
-      = fun z : ℝ≥0 × Ω => limUnder atTop (fun n =>
+      = fun z : ℝ≥0 × Ω ↦ limUnder atTop (fun n ↦
           Function.uncurry (driftSimpleProcess hBmeas
             ((approxSeq T hBmeas φ).choose n).val) z) := by
     funext z; rfl
   rw [hrw]
   letI : MeasurableSpace (ℝ≥0 × Ω) := (natFiltration hBmeas).predictable
-  exact StronglyMeasurable.limUnder (fun n =>
+  exact StronglyMeasurable.limUnder (fun n ↦
     driftSimpleProcess_isStronglyPredictable hBmeas
       ((approxSeq T hBmeas φ).choose n).val)
 
@@ -159,7 +159,7 @@ theorem driftContinuousMod_stronglyAdapted (T : ℝ≥0) (hBmeas : ∀ t, Measur
     StronglyAdapted (natFiltration hBmeas) (driftContinuousMod T hBmeas φ) := by
   intro t
   letI : MeasurableSpace Ω := (natFiltration hBmeas t : MeasurableSpace Ω)
-  exact StronglyMeasurable.limUnder fun n =>
+  exact StronglyMeasurable.limUnder fun n ↦
     driftSimpleProcess_stronglyAdapted hBmeas ((approxSeq T hBmeas φ).choose n).val t
 
 /-! ## Part 2 — the drift assembled into `E` (`L²`, energy bound, linearity) -/
@@ -188,8 +188,8 @@ theorem driftSimpleProcess_eq_setIntegral (hBmeas : ∀ t, Measurable (B t))
       have htp2 : (t : ℝ) ≤ p.2 := htp1.trans (by exact_mod_cast hp12)
       rw [min_eq_right htp2, min_eq_right htp1, sub_self,
           ENNReal.ofReal_eq_zero.mpr (by linarith), ENNReal.toReal_zero]
-  have hV_eq : Set.EqOn (fun s => ⇑V s ω)
-      (fun s => ∑ p ∈ V.value.support, (Set.Ioc p.1 p.2).indicator (fun _ => V.value p ω) s)
+  have hV_eq : Set.EqOn (fun s ↦ ⇑V s ω)
+      (fun s ↦ ∑ p ∈ V.value.support, (Set.Ioc p.1 p.2).indicator (fun _ ↦ V.value p ω) s)
       (Set.Ioc (0 : ℝ≥0) t) := by
     intro s hs
     have hs0 : s ∉ ({⊥} : Set ℝ≥0) := by
@@ -198,12 +198,12 @@ theorem driftSimpleProcess_eq_setIntegral (hBmeas : ∀ t, Measurable (B t))
       exact absurd hs.1 not_lt_bot
     simp only [SimpleProcess.apply_eq, Set.indicator_of_notMem hs0, zero_add, Finsupp.sum]
   have hint : ∀ p ∈ V.value.support,
-      Integrable (fun s => (Set.Ioc p.1 p.2).indicator (fun _ => V.value p ω) s)
+      Integrable (fun s ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ V.value p ω) s)
         (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t)) :=
-    fun p _ => (integrable_const (V.value p ω)).indicator measurableSet_Ioc
+    fun p _ ↦ (integrable_const (V.value p ω)).indicator measurableSet_Ioc
   rw [driftSimpleProcess, Finsupp.sum, setIntegral_congr_fun measurableSet_Ioc hV_eq,
       integral_finsetSum _ hint]
-  refine Finset.sum_congr rfl (fun p hp => ?_)
+  refine Finset.sum_congr rfl (fun p hp ↦ ?_)
   rw [setIntegral_indicator measurableSet_Ioc, setIntegral_const, smul_eq_mul,
       measureReal_def, htoReal p (V.le_of_mem_support_value p hp), mul_comm]
 
@@ -215,9 +215,9 @@ theorem memLp_uncurry_driftSimpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurab
     (V : SimpleProcess ℝ (natFiltration hBmeas)) :
     MemLp (Function.uncurry (driftSimpleProcess hBmeas V)) 2 (trimMeasure_T (μ := μ) T hBmeas) := by
   refine MemLp.of_bound (driftSimpleProcess_isStronglyPredictable hBmeas V).aestronglyMeasurable
-    (∑ p ∈ V.value.support, V.valueBound * (p.2 : ℝ)) (ae_of_all _ fun z => ?_)
+    (∑ p ∈ V.value.support, V.valueBound * (p.2 : ℝ)) (ae_of_all _ fun z ↦ ?_)
   rw [Function.uncurry_apply_pair, driftSimpleProcess, Finsupp.sum, Real.norm_eq_abs]
-  refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun p hp => ?_)
+  refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun p hp ↦ ?_)
   rw [abs_mul]
   have hval : |V.value p z.2| ≤ V.valueBound := by
     rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p z.2
@@ -235,11 +235,11 @@ theorem memLp_uncurry_driftSimpleProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurab
 finite measure `timeMeasure.restrict (Ioc 0 T)`). -/
 theorem memLp_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) :
-    MemLp (fun s => ⇑V s ω) 2 (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := by
+    MemLp (fun s ↦ ⇑V s ω) 2 (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := by
   refine MemLp.of_bound
     (((V.isStronglyPredictable.mono (natFiltration hBmeas).predictable_le_prod).comp_measurable
         (measurable_id.prodMk measurable_const)).aestronglyMeasurable)
-    (V.valueBotBound + ∑ p ∈ V.value.support, V.valueBound) (ae_of_all _ fun s => ?_)
+    (V.valueBotBound + ∑ p ∈ V.value.support, V.valueBound) (ae_of_all _ fun s ↦ ?_)
   rw [SimpleProcess.apply_eq, Real.norm_eq_abs]
   refine (abs_add_le _ _).trans (add_le_add ?_ ?_)
   · rw [Set.indicator]
@@ -247,7 +247,7 @@ theorem memLp_slice (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     · exact V.valueBot_le_valueBotBound ω
     · rw [abs_zero]; exact V.valueBotBound_nonneg
   · rw [Finsupp.sum]
-    refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun p _ => ?_)
+    refine (Finset.abs_sum_le_sum_abs _ _).trans (Finset.sum_le_sum fun p _ ↦ ?_)
     rw [Set.indicator]
     split_ifs with h
     · rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω
@@ -261,15 +261,15 @@ theorem driftSimpleProcess_sq_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)
       ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑V s ω) ^ 2 ∂timeMeasure := by
   rw [driftSimpleProcess_eq_setIntegral]
   have hCS := sq_integral_le_measureReal_mul (ν := timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) t))
-    (f := fun s => ⇑V s ω) ((memLp_slice T hBmeas V ω).mono_measure (Measure.restrict_mono
+    (f := fun s ↦ ⇑V s ω) ((memLp_slice T hBmeas V ω).mono_measure (Measure.restrict_mono
       (Set.Ioc_subset_Ioc_right htT) le_rfl))
   rw [Measure.restrict_apply_univ, timeMeasure_Ioc,
     ENNReal.toReal_ofReal (by rw [NNReal.coe_zero, sub_zero]; exact t.coe_nonneg),
     NNReal.coe_zero, sub_zero] at hCS
-  refine hCS.trans (mul_le_mul (by exact_mod_cast htT) ?_ (integral_nonneg fun s => sq_nonneg _)
+  refine hCS.trans (mul_le_mul (by exact_mod_cast htT) ?_ (integral_nonneg fun s ↦ sq_nonneg _)
     T.coe_nonneg)
   exact setIntegral_mono_set ((memLp_slice T hBmeas V ω).integrable_sq)
-    (ae_of_all _ fun s => sq_nonneg _) (Set.Ioc_subset_Ioc_right htT).eventuallyLE
+    (ae_of_all _ fun s ↦ sq_nonneg _) (Set.Ioc_subset_Ioc_right htT).eventuallyLE
 
 /-- **Additivity** of the elementary drift in the simple process (`Finsupp.sum_add_index'`,
 the summand being linear in the coefficient). -/
@@ -280,7 +280,7 @@ theorem driftSimpleProcess_add (hBmeas : ∀ t, Measurable (B t))
   funext ω
   simp only [driftSimpleProcess]
   rw [show (V + W).value = V.value + W.value from rfl]
-  exact Finsupp.sum_add_index' (fun p => by simp) (fun p a b => by simp [Pi.add_apply, add_mul])
+  exact Finsupp.sum_add_index' (fun p ↦ by simp) (fun p a b ↦ by simp [Pi.add_apply, add_mul])
 
 /-- **Homogeneity** of the elementary drift in the simple process (through the honest-integral
 bridge + `integral_const_mul`). -/
@@ -290,7 +290,7 @@ theorem driftSimpleProcess_smul (hBmeas : ∀ t, Measurable (B t)) (c : ℝ)
   funext ω
   simp only [Pi.smul_apply, smul_eq_mul]
   rw [driftSimpleProcess_eq_setIntegral, driftSimpleProcess_eq_setIntegral, ← integral_const_mul]
-  refine setIntegral_congr_fun measurableSet_Ioc (fun s _ => ?_)
+  refine setIntegral_congr_fun measurableSet_Ioc (fun s _ ↦ ?_)
   rw [SimpleProcess.coe_smul, Pi.smul_apply, Pi.smul_apply, smul_eq_mul]
 
 /-- The elementary drift assembled as an element of `E = Lp ℝ 2 (trimMeasure_T T)`. -/
@@ -315,12 +315,12 @@ theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
       ‖hg.toLp (Function.uncurry g)‖ ^ 2
         = ∫ z, (Function.uncurry g z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
     intro g hg hgp
-    rw [lp_two_norm_sq, integral_congr_ae (g := fun z => (Function.uncurry g z) ^ 2)
+    rw [lp_two_norm_sq, integral_congr_ae (g := fun z ↦ (Function.uncurry g z) ^ 2)
       (by filter_upwards [hg.coeFn_toLp] with z hz; rw [hz]),
       show trimMeasure_T (μ := μ) T hBmeas
           = ((timeMeasure_T T).prod μ).trim 𝓕.predictable_le_prod from rfl,
       ← integral_trim 𝓕.predictable_le_prod
-        (f := fun z => (Function.uncurry g z) ^ 2) (hgp.pow 2)]
+        (f := fun z ↦ (Function.uncurry g z) ^ 2) (hgp.pow 2)]
   have hsAsm : simpleAssembly_T (μ := μ) T hBmeas V = hmemV.toLp (Function.uncurry ⇑V.val) := rfl
   have hsq : ‖driftSimpleProcessLp (μ := μ) T hBmeas V.val‖ ^ 2
       ≤ ((T : ℝ) * ‖simpleAssembly_T (μ := μ) T hBmeas V‖) ^ 2 := by
@@ -347,7 +347,7 @@ theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
             ∂(timeMeasure_T T) := by
           refine integral_mono_ae hintD.integral_prod_left (integrable_const _) ?_
           have hslice : ∀ᵐ t ∂(timeMeasure_T T),
-              Integrable (fun ω => (driftSimpleProcess hBmeas V.val t ω) ^ 2) μ :=
+              Integrable (fun ω ↦ (driftSimpleProcess hBmeas V.val t ω) ^ 2) μ :=
             hintD.prod_right_ae
           filter_upwards [ae_restrict_mem (μ := timeMeasure) measurableSet_Ioc, hslice]
             with t ht hint_t
@@ -355,7 +355,7 @@ theorem driftSimpleProcessLp_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (
               ≤ ∫ ω, (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑V.val s ω) ^ 2 ∂timeMeasure ∂μ :=
                 integral_mono_ae hint_t
                   ((hintV.integral_prod_right).const_mul _)
-                  (ae_of_all _ fun ω => driftSimpleProcess_sq_le T hBmeas V.val ht.2 ω)
+                  (ae_of_all _ fun ω ↦ driftSimpleProcess_sq_le T hBmeas V.val ht.2 ω)
             _ = (T : ℝ) * ∫ z, (Function.uncurry ⇑V.val z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
                 rw [integral_const_mul, hW]
       _ = (T : ℝ) ^ 2 * ∫ z, (Function.uncurry ⇑V.val z) ^ 2 ∂((timeMeasure_T T).prod μ) := by
@@ -404,7 +404,7 @@ theorem driftProcessAssembled_simpleAssembly (T : ℝ≥0) (hBmeas : ∀ t, Meas
     driftProcessAssembled (μ := μ) T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
       = driftSimpleProcessLp (μ := μ) T hBmeas V.val := by
   rw [driftProcessAssembled, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    ⟨(T : ℝ), fun W => driftSimpleProcessLp_norm_le T hBmeas W⟩]
+    ⟨(T : ℝ), fun W ↦ driftSimpleProcessLp_norm_le T hBmeas W⟩]
   rfl
 
 /-- **The drift operator bound** `‖driftProcessAssembled φ‖ ≤ T‖φ‖` for general `φ ∈ E` — the
@@ -415,7 +415,7 @@ theorem driftProcessAssembled_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     ‖driftProcessAssembled (μ := μ) T hBmeas φ‖ ≤ (T : ℝ) * ‖φ‖ := by
   rw [driftProcessAssembled]
   exact LinearMap.norm_extendOfNorm_apply_le (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    (T : ℝ) (fun W => driftSimpleProcessLp_norm_le T hBmeas W) φ
+    (T : ℝ) (fun W ↦ driftSimpleProcessLp_norm_le T hBmeas W) φ
 
 end ItoIntegralProcessContinuousModification
 end MathFin

@@ -71,17 +71,17 @@ private lemma heatKernel_eq_gaussianPDFReal {t : ℝ} (ht : 0 < t) (y : ℝ) :
 
 /-- First `y`-derivative of the heat kernel: `∂_y K = -(y/t) K`. -/
 private lemma hasDerivAt_heatKernel_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
-    HasDerivAt (fun z => heatKernel t z) (-(y / t) * heatKernel t y) y := by
-  have h_neg_y_sq : HasDerivAt (fun z : ℝ => -(z ^ 2)) (-(2 * y)) y := by
+    HasDerivAt (fun z ↦ heatKernel t z) (-(y / t) * heatKernel t y) y := by
+  have h_neg_y_sq : HasDerivAt (fun z : ℝ ↦ -(z ^ 2)) (-(2 * y)) y := by
     convert (hasDerivAt_pow 2 y).neg using 1 <;> first | rfl | (push_cast; ring)
-  have h_inner : HasDerivAt (fun z : ℝ => -(z ^ 2) / (2 * t)) (-(y / t)) y := by
+  have h_inner : HasDerivAt (fun z : ℝ ↦ -(z ^ 2) / (2 * t)) (-(y / t)) y := by
     have := h_neg_y_sq.div_const (2 * t)
     have ht_ne : (2 * t) ≠ 0 := by positivity
     convert this using 1 <;> first | rfl | field_simp
-  have h_exp : HasDerivAt (fun z : ℝ => Real.exp (-(z ^ 2) / (2 * t)))
+  have h_exp : HasDerivAt (fun z : ℝ ↦ Real.exp (-(z ^ 2) / (2 * t)))
       (Real.exp (-(y ^ 2) / (2 * t)) * -(y / t)) y := h_inner.exp
   have h_mul := h_exp.const_mul ((Real.sqrt (2 * Real.pi * t))⁻¹)
-  -- h_mul : HasDerivAt (fun z => K(t, z)) ((√(2πt))⁻¹ * (exp(-y²/(2t)) * -(y/t))) y
+  -- h_mul : HasDerivAt (fun z ↦ K(t, z)) ((√(2πt))⁻¹ * (exp(-y²/(2t)) * -(y/t))) y
   have h_val :
       (Real.sqrt (2 * Real.pi * t))⁻¹ * (Real.exp (-(y ^ 2) / (2 * t)) * -(y / t))
         = -(y / t) * heatKernel t y := by
@@ -90,7 +90,7 @@ private lemma hasDerivAt_heatKernel_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
 
 /-- First `t`-derivative of the heat kernel: `∂_t K = K · (y² − t) / (2 t²)`. -/
 private lemma hasDerivAt_heatKernel_t {y : ℝ} {t : ℝ} (ht : 0 < t) :
-    HasDerivAt (fun s => heatKernel s y) (heatKernel t y * (y ^ 2 - t) / (2 * t ^ 2)) t := by
+    HasDerivAt (fun s ↦ heatKernel s y) (heatKernel t y * (y ^ 2 - t) / (2 * t ^ 2)) t := by
   -- Write K(s, y) = f(s) * g(s, y) where f(s) = (√(2πs))⁻¹ and g(s) = exp(-y²/(2s)).
   -- f'(s) = -(1/2) * f(s) / s
   -- g'(s) = g(s) * y² / (2 s²)
@@ -100,30 +100,30 @@ private lemma hasDerivAt_heatKernel_t {y : ℝ} {t : ℝ} (ht : 0 < t) :
   have h_2pis_pos : 0 < 2 * Real.pi * t := by positivity
   have h_sqrt_pos : 0 < Real.sqrt (2 * Real.pi * t) := Real.sqrt_pos.mpr h_2pis_pos
   have h_sqrt_ne : Real.sqrt (2 * Real.pi * t) ≠ 0 := h_sqrt_pos.ne'
-  have h_2pis_id : HasDerivAt (fun s : ℝ => 2 * Real.pi * s) (2 * Real.pi) t := by
+  have h_2pis_id : HasDerivAt (fun s : ℝ ↦ 2 * Real.pi * s) (2 * Real.pi) t := by
     have := (hasDerivAt_id t).const_mul (2 * Real.pi)
     simpa using this
-  have h_sqrt_inner : HasDerivAt (fun s : ℝ => Real.sqrt (2 * Real.pi * s))
+  have h_sqrt_inner : HasDerivAt (fun s : ℝ ↦ Real.sqrt (2 * Real.pi * s))
       (1 / (2 * Real.sqrt (2 * Real.pi * t)) * (2 * Real.pi)) t :=
     (Real.hasDerivAt_sqrt h_2pis_pos.ne').comp t h_2pis_id
-  have h_f : HasDerivAt (fun s : ℝ => (Real.sqrt (2 * Real.pi * s))⁻¹)
+  have h_f : HasDerivAt (fun s : ℝ ↦ (Real.sqrt (2 * Real.pi * s))⁻¹)
       (-(1 / (2 * Real.sqrt (2 * Real.pi * t)) * (2 * Real.pi)) /
         (Real.sqrt (2 * Real.pi * t)) ^ 2) t :=
     h_sqrt_inner.inv h_sqrt_ne
   -- g(s) = exp(-y²/(2s)): derivative computation
-  have h_2s : HasDerivAt (fun s : ℝ => 2 * s) 2 t := by
+  have h_2s : HasDerivAt (fun s : ℝ ↦ 2 * s) 2 t := by
     simpa using (hasDerivAt_id t).const_mul 2
   have ht_ne : t ≠ 0 := ht.ne'
   have h_2t_ne : (2 * t) ≠ 0 := by positivity
-  have h_inv_2s : HasDerivAt (fun s : ℝ => (2 * s)⁻¹) (-2 / (2 * t) ^ 2) t :=
+  have h_inv_2s : HasDerivAt (fun s : ℝ ↦ (2 * s)⁻¹) (-2 / (2 * t) ^ 2) t :=
     h_2s.inv h_2t_ne
-  have h_inner : HasDerivAt (fun s : ℝ => -(y ^ 2) / (2 * s))
+  have h_inner : HasDerivAt (fun s : ℝ ↦ -(y ^ 2) / (2 * s))
       (-(y ^ 2) * (-2 / (2 * t) ^ 2)) t := by
-    have h_eq : (fun s : ℝ => -(y ^ 2) / (2 * s)) = (fun s : ℝ => -(y ^ 2) * (2 * s)⁻¹) := by
+    have h_eq : (fun s : ℝ ↦ -(y ^ 2) / (2 * s)) = (fun s : ℝ ↦ -(y ^ 2) * (2 * s)⁻¹) := by
       funext s; rw [div_eq_mul_inv]
     rw [h_eq]
     exact h_inv_2s.const_mul (-(y ^ 2))
-  have h_g : HasDerivAt (fun s : ℝ => Real.exp (-(y ^ 2) / (2 * s)))
+  have h_g : HasDerivAt (fun s : ℝ ↦ Real.exp (-(y ^ 2) / (2 * s)))
       (Real.exp (-(y ^ 2) / (2 * t)) * (-(y ^ 2) * (-2 / (2 * t) ^ 2))) t := h_inner.exp
   -- Combine via product rule
   have h_K := h_f.mul h_g
@@ -154,14 +154,14 @@ private lemma hasDerivAt_heatKernel_t {y : ℝ} {t : ℝ} (ht : 0 < t) :
 /-- Second `y`-derivative of the heat kernel: `∂²_y K = K · (y² − t) / t²`.
 The first-derivative function being `z ↦ -(z/t) · K(t, z)`. -/
 private lemma hasDerivAt_heatKernel_y_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
-    HasDerivAt (fun z => -(z / t) * heatKernel t z) (heatKernel t y * (y ^ 2 - t) / t ^ 2) y := by
+    HasDerivAt (fun z ↦ -(z / t) * heatKernel t z) (heatKernel t y * (y ^ 2 - t) / t ^ 2) y := by
   have ht_ne : t ≠ 0 := ht.ne'
-  have h_a : HasDerivAt (fun z : ℝ => -(z / t)) (-(1 / t)) y := by
-    have h1 : HasDerivAt (fun z : ℝ => z / t) (1 / t) y := by
+  have h_a : HasDerivAt (fun z : ℝ ↦ -(z / t)) (-(1 / t)) y := by
+    have h1 : HasDerivAt (fun z : ℝ ↦ z / t) (1 / t) y := by
       have := (hasDerivAt_id y).div_const t
       simpa using this
     exact h1.neg
-  have h_b : HasDerivAt (fun z : ℝ => heatKernel t z) (-(y / t) * heatKernel t y) y :=
+  have h_b : HasDerivAt (fun z : ℝ ↦ heatKernel t z) (-(y / t) * heatKernel t y) y :=
     hasDerivAt_heatKernel_y ht y
   have h_prod := h_a.mul h_b
   have h_val :
@@ -175,7 +175,7 @@ private lemma hasDerivAt_heatKernel_y_y {t : ℝ} (ht : 0 < t) (y : ℝ) :
 through the inner map `x ↦ z − x`. Building block for the shifted-integral heat
 equation `∂_t u = ½ ∂_xx u` (benchmark `sc-thm-9.2.1`). -/
 private lemma hasDerivAt_heatKernel_x {t : ℝ} (ht : 0 < t) (z x : ℝ) :
-    HasDerivAt (fun x' => heatKernel t (z - x'))
+    HasDerivAt (fun x' ↦ heatKernel t (z - x'))
       ((z - x) / t * heatKernel t (z - x)) x := by
   have h := (hasDerivAt_heatKernel_y ht (z - x)).comp x ((hasDerivAt_id x).const_sub z)
   convert h using 1 <;> first | rfl | ring
@@ -185,10 +185,10 @@ private lemma hasDerivAt_heatKernel_x {t : ℝ} (ht : 0 < t) (z x : ℝ) :
 Chain rule on `hasDerivAt_heatKernel_y_y` through `x ↦ z − x`, then a sign flip
 (`(z − x)/t · K = −(−(z − x)/t · K)`). Building block for `sc-thm-9.2.1`. -/
 private lemma hasDerivAt_heatKernel_x_x {t : ℝ} (ht : 0 < t) (z x : ℝ) :
-    HasDerivAt (fun x' => (z - x') / t * heatKernel t (z - x'))
+    HasDerivAt (fun x' ↦ (z - x') / t * heatKernel t (z - x'))
       (heatKernel t (z - x) * ((z - x) ^ 2 - t) / t ^ 2) x := by
-  have hfun : (fun x' => (z - x') / t * heatKernel t (z - x'))
-      = (fun x' => -(-((z - x') / t) * heatKernel t (z - x'))) := by funext x'; ring
+  have hfun : (fun x' ↦ (z - x') / t * heatKernel t (z - x'))
+      = (fun x' ↦ -(-((z - x') / t) * heatKernel t (z - x'))) := by funext x'; ring
   rw [hfun]
   have h := ((hasDerivAt_heatKernel_y_y ht (z - x)).comp x
     ((hasDerivAt_id x).const_sub z)).neg
@@ -201,19 +201,19 @@ columns read off against the basis. This upgrades the two separately-proved part
 derivative — the one genuinely-2D ingredient that lets the price, differentiated along a curve
 `τ ↦ (v τ, w τ)` with both kernel arguments moving, collapse to a single chain rule. -/
 lemma hasFDerivAt_heatKernel {t₀ : ℝ} (ht₀ : 0 < t₀) (y₀ : ℝ) :
-    HasFDerivAt (fun p : ℝ × ℝ => heatKernel p.1 p.2)
+    HasFDerivAt (fun p : ℝ × ℝ ↦ heatKernel p.1 p.2)
       ((heatKernel t₀ y₀ * (y₀ ^ 2 - t₀) / (2 * t₀ ^ 2)) • ContinuousLinearMap.fst ℝ ℝ ℝ
         + (-(y₀ / t₀) * heatKernel t₀ y₀) • ContinuousLinearMap.snd ℝ ℝ ℝ) (t₀, y₀) := by
   have h2pit : (0:ℝ) < 2 * Real.pi * t₀ := by positivity
   have hsqrt_ne : Real.sqrt (2 * Real.pi * t₀) ≠ 0 := (Real.sqrt_pos.mpr h2pit).ne'
   have h2t0_ne : (2 * t₀) ≠ 0 := by positivity
-  have hlin1 : HasFDerivAt (fun p : ℝ × ℝ => 2 * Real.pi * p.1)
+  have hlin1 : HasFDerivAt (fun p : ℝ × ℝ ↦ 2 * Real.pi * p.1)
       ((2 * Real.pi) • ContinuousLinearMap.fst ℝ ℝ ℝ) (t₀, y₀) := by
     exact ((2 * Real.pi) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
-  have hlin2 : HasFDerivAt (fun p : ℝ × ℝ => 2 * p.1)
+  have hlin2 : HasFDerivAt (fun p : ℝ × ℝ ↦ 2 * p.1)
       ((2 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ) (t₀, y₀) := by
     exact ((2 : ℝ) • ContinuousLinearMap.fst ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
-  have hsnd : HasFDerivAt (fun p : ℝ × ℝ => p.2) (ContinuousLinearMap.snd ℝ ℝ ℝ) (t₀, y₀) := by
+  have hsnd : HasFDerivAt (fun p : ℝ × ℝ ↦ p.2) (ContinuousLinearMap.snd ℝ ℝ ℝ) (t₀, y₀) := by
     exact (ContinuousLinearMap.snd ℝ ℝ ℝ).hasFDerivAt (x := (t₀, y₀))
   have hA := (hasDerivAt_inv hsqrt_ne).comp_hasFDerivAt (t₀, y₀)
       ((Real.hasDerivAt_sqrt h2pit.ne').comp_hasFDerivAt (t₀, y₀) hlin1)
@@ -221,7 +221,7 @@ lemma hasFDerivAt_heatKernel {t₀ : ℝ} (ht₀ : 0 < t₀) (y₀ : ℝ) :
   have hden := (hasDerivAt_inv h2t0_ne).comp_hasFDerivAt (t₀, y₀) hlin2
   have hB := (hnum.mul hden).exp
   convert hA.mul hB using 1 <;> try rfl
-  refine ContinuousLinearMap.ext fun v => ?_
+  refine ContinuousLinearMap.ext fun v ↦ ?_
   simp only [add_apply, smul_apply,
     neg_apply, ContinuousLinearMap.coe_fst',
     ContinuousLinearMap.coe_snd', smul_eq_mul,
@@ -237,10 +237,10 @@ lemma hasFDerivAt_heatKernel {t₀ : ℝ} (ht₀ : 0 < t₀) (y₀ : ℝ) :
 `v τ = σ²τ` and `w τ = log S + (r − σ²/2)τ` move together. -/
 lemma hasDerivAt_heatKernel_comp {v w : ℝ → ℝ} {τ₀ vd wd : ℝ}
     (hv : HasDerivAt v vd τ₀) (hw : HasDerivAt w wd τ₀) (hvpos : 0 < v τ₀) (z : ℝ) :
-    HasDerivAt (fun s => heatKernel (v s) (z - w s))
+    HasDerivAt (fun s ↦ heatKernel (v s) (z - w s))
       (vd * (heatKernel (v τ₀) (z - w τ₀) * ((z - w τ₀) ^ 2 - v τ₀) / (2 * (v τ₀) ^ 2))
         + wd * ((z - w τ₀) / (v τ₀) * heatKernel (v τ₀) (z - w τ₀))) τ₀ := by
-  have hcurve : HasDerivAt (fun s => (v s, z - w s)) (vd, -wd) τ₀ :=
+  have hcurve : HasDerivAt (fun s ↦ (v s, z - w s)) (vd, -wd) τ₀ :=
     hv.prodMk (hw.const_sub z)
   have hcomp := (hasFDerivAt_heatKernel hvpos (z - w τ₀)).comp_hasDerivAt τ₀ hcurve
   convert hcomp using 1 <;> try rfl
@@ -271,9 +271,9 @@ lemma heatKernel_nonneg {t : ℝ} (ht : 0 < t) (y : ℝ) : 0 ≤ heatKernel t y 
 
 /-- For `t > 0`, the heat kernel is integrable in `y` over Lebesgue. -/
 lemma integrable_heatKernel {t : ℝ} (ht : 0 < t) :
-    Integrable (fun y => heatKernel t y) volume := by
+    Integrable (fun y ↦ heatKernel t y) volume := by
   have := integrable_gaussianPDFReal (0 : ℝ) t.toNNReal
-  refine this.congr (Filter.Eventually.of_forall fun y => ?_)
+  refine this.congr (Filter.Eventually.of_forall fun y ↦ ?_)
   exact (heatKernel_eq_gaussianPDFReal ht y).symm
 
 /-- **Transfer integrability from the Gaussian law to the heat kernel.** If `g ∈ L¹(N(0,t))`,
@@ -282,12 +282,12 @@ turns Gaussian moments (`memLp_id_gaussianReal`) into integrability of polynomia
 needed for the integration-by-parts in the expectation-form Itô formula. -/
 private lemma integrable_mul_heatKernel_of_gaussian {t : ℝ} (ht : 0 < t) {g : ℝ → ℝ}
     (hg : Integrable g (gaussianReal 0 t.toNNReal)) :
-    Integrable (fun y => g y * heatKernel t y) volume := by
+    Integrable (fun y ↦ g y * heatKernel t y) volume := by
   have hv : (t.toNNReal : ℝ≥0) ≠ 0 := (Real.toNNReal_pos.mpr ht).ne'
   rw [gaussianReal_of_var_ne_zero 0 hv,
     integrable_withDensity_iff_integrable_smul' (by fun_prop)
-      (ae_of_all _ fun y => gaussianPDF_lt_top)] at hg
-  refine hg.congr (Filter.Eventually.of_forall fun y => ?_)
+      (ae_of_all _ fun y ↦ gaussianPDF_lt_top)] at hg
+  refine hg.congr (Filter.Eventually.of_forall fun y ↦ ?_)
   show (gaussianPDF 0 t.toNNReal y).toReal • g y = g y * heatKernel t y
   have hpdf : (gaussianPDF 0 t.toNNReal y).toReal = heatKernel t y := by
     rw [heatKernel_eq_gaussianPDFReal ht]
@@ -297,30 +297,30 @@ private lemma integrable_mul_heatKernel_of_gaussian {t : ℝ} (ht : 0 < t) {g : 
 
 /-- First moment: `y · K(t, ·)` is integrable. -/
 lemma integrable_id_mul_heatKernel {t : ℝ} (ht : 0 < t) :
-    Integrable (fun y => y * heatKernel t y) volume :=
+    Integrable (fun y ↦ y * heatKernel t y) volume :=
   integrable_mul_heatKernel_of_gaussian ht
     ((memLp_id_gaussianReal (μ := 0) (v := t.toNNReal) 1).integrable (by norm_num))
 
 /-- Second moment: `y² · K(t, ·)` is integrable. -/
 lemma integrable_sq_mul_heatKernel {t : ℝ} (ht : 0 < t) :
-    Integrable (fun y => y ^ 2 * heatKernel t y) volume :=
+    Integrable (fun y ↦ y ^ 2 * heatKernel t y) volume :=
   integrable_mul_heatKernel_of_gaussian ht
     (memLp_id_gaussianReal (μ := 0) (v := t.toNNReal) 2).integrable_sq
 
 /-- `∂_y K = -(y/t)·K` is integrable. -/
 private lemma integrable_dK {t : ℝ} (ht : 0 < t) :
-    Integrable (fun y => -(y / t) * heatKernel t y) volume := by
+    Integrable (fun y ↦ -(y / t) * heatKernel t y) volume := by
   refine ((integrable_id_mul_heatKernel ht).const_mul (-(1 / t))).congr
-    (Filter.Eventually.of_forall fun y => ?_)
+    (Filter.Eventually.of_forall fun y ↦ ?_)
   show -(1 / t) * (y * heatKernel t y) = -(y / t) * heatKernel t y
   ring
 
 /-- `∂²_y K = K·(y²−t)/t²` is integrable. -/
 private lemma integrable_ddK {t : ℝ} (ht : 0 < t) :
-    Integrable (fun y => heatKernel t y * (y ^ 2 - t) / t ^ 2) volume := by
+    Integrable (fun y ↦ heatKernel t y * (y ^ 2 - t) / t ^ 2) volume := by
   have ht_ne : t ≠ 0 := ht.ne'
   refine (((integrable_sq_mul_heatKernel ht).const_mul (1 / t ^ 2)).sub
-    ((integrable_heatKernel ht).const_mul (1 / t))).congr (Filter.Eventually.of_forall fun y => ?_)
+    ((integrable_heatKernel ht).const_mul (1 / t))).congr (Filter.Eventually.of_forall fun y ↦ ?_)
   show 1 / t ^ 2 * (y ^ 2 * heatKernel t y) - 1 / t * heatKernel t y
       = heatKernel t y * (y ^ 2 - t) / t ^ 2
   field_simp
@@ -336,35 +336,35 @@ private lemma ibp_heatKernel {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
     (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
     ∫ y, f y * (heatKernel t y * (y ^ 2 - t) / t ^ 2) ∂volume
       = ∫ y, f'' y * heatKernel t y ∂volume := by
-  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
-  have hf'c : Continuous f' := continuous_iff_continuousAt.mpr fun x => (hf' x).continuousAt
-  have hi_f_ddK : Integrable (fun y => f y * (heatKernel t y * (y ^ 2 - t) / t ^ 2)) volume :=
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
+  have hf'c : Continuous f' := continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt
+  have hi_f_ddK : Integrable (fun y ↦ f y * (heatKernel t y * (y ^ 2 - t) / t ^ 2)) volume :=
     (integrable_ddK ht).bdd_mul hfc.aestronglyMeasurable
-      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf y)
-  have hi_f'_dK : Integrable (fun y => f' y * (-(y / t) * heatKernel t y)) volume :=
+      (ae_of_all _ fun y ↦ by rw [Real.norm_eq_abs]; exact hCf y)
+  have hi_f'_dK : Integrable (fun y ↦ f' y * (-(y / t) * heatKernel t y)) volume :=
     (integrable_dK ht).bdd_mul hf'c.aestronglyMeasurable
-      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf' y)
-  have hi_f_dK : Integrable (fun y => f y * (-(y / t) * heatKernel t y)) volume :=
+      (ae_of_all _ fun y ↦ by rw [Real.norm_eq_abs]; exact hCf' y)
+  have hi_f_dK : Integrable (fun y ↦ f y * (-(y / t) * heatKernel t y)) volume :=
     (integrable_dK ht).bdd_mul hfc.aestronglyMeasurable
-      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf y)
-  have hi_f''_K : Integrable (fun y => f'' y * heatKernel t y) volume :=
+      (ae_of_all _ fun y ↦ by rw [Real.norm_eq_abs]; exact hCf y)
+  have hi_f''_K : Integrable (fun y ↦ f'' y * heatKernel t y) volume :=
     (integrable_heatKernel ht).bdd_mul hf''c.aestronglyMeasurable
-      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf'' y)
-  have hi_f'_K : Integrable (fun y => f' y * heatKernel t y) volume :=
+      (ae_of_all _ fun y ↦ by rw [Real.norm_eq_abs]; exact hCf'' y)
+  have hi_f'_K : Integrable (fun y ↦ f' y * heatKernel t y) volume :=
     (integrable_heatKernel ht).bdd_mul hf'c.aestronglyMeasurable
-      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf' y)
+      (ae_of_all _ fun y ↦ by rw [Real.norm_eq_abs]; exact hCf' y)
   have ibp1 := integral_mul_deriv_eq_deriv_mul_of_integrable
-    (u := f) (v := fun z => -(z / t) * heatKernel t z)
-    (v' := fun z => heatKernel t z * (z ^ 2 - t) / t ^ 2)
-    (fun x _ => hf x) (fun x _ => hasDerivAt_heatKernel_y_y ht x) hi_f_ddK hi_f'_dK hi_f_dK
+    (u := f) (v := fun z ↦ -(z / t) * heatKernel t z)
+    (v' := fun z ↦ heatKernel t z * (z ^ 2 - t) / t ^ 2)
+    (fun x _ ↦ hf x) (fun x _ ↦ hasDerivAt_heatKernel_y_y ht x) hi_f_ddK hi_f'_dK hi_f_dK
   have ibp2 := integral_mul_deriv_eq_deriv_mul_of_integrable
-    (u := f') (v := fun z => heatKernel t z)
-    (v' := fun z => -(z / t) * heatKernel t z)
-    (fun x _ => hf' x) (fun x _ => hasDerivAt_heatKernel_y ht x) hi_f'_dK hi_f''_K hi_f'_K
+    (u := f') (v := fun z ↦ heatKernel t z)
+    (v' := fun z ↦ -(z / t) * heatKernel t z)
+    (fun x _ ↦ hf' x) (fun x _ ↦ hasDerivAt_heatKernel_y ht x) hi_f'_dK hi_f''_K hi_f'_K
   rw [ibp1, ibp2, neg_neg]
 
 /-- The heat kernel is continuous in the space variable (for any fixed time). -/
-lemma continuous_heatKernel (s : ℝ) : Continuous (fun y => heatKernel s y) := by
+lemma continuous_heatKernel (s : ℝ) : Continuous (fun y ↦ heatKernel s y) := by
   unfold heatKernel; fun_prop
 
 /-- The polynomial-times-heat-kernel function `(y² + c)·K(s, y)` is integrable (`s > 0`). This
@@ -372,9 +372,9 @@ is the integrable majorant used to dominate `∂_t K(·, y)` over a time-neighbo
 (instantiated at `s = 3t/2`); built directly from the moment integrabilities
 `integrable_sq_mul_heatKernel` / `integrable_heatKernel`, avoiding raw-`rpow` Gaussians. -/
 private lemma integrable_poly_heatKernel {s : ℝ} (hs : 0 < s) (c : ℝ) :
-    Integrable (fun y => (y ^ 2 + c) * heatKernel s y) volume := by
+    Integrable (fun y ↦ (y ^ 2 + c) * heatKernel s y) volume := by
   refine ((integrable_sq_mul_heatKernel hs).add
-    ((integrable_heatKernel hs).const_mul c)).congr (Filter.Eventually.of_forall fun y => ?_)
+    ((integrable_heatKernel hs).const_mul c)).congr (Filter.Eventually.of_forall fun y ↦ ?_)
   simp only [Pi.add_apply]; ring
 
 /-- **Completing-the-square mean shift at the kernel level.** Multiplying the heat kernel by the
@@ -405,8 +405,8 @@ turns it into a finite combination of heat-kernel moments (`integrable_sq_mul_he
 `(eᶻ − K)⁺ ≤ eᶻ` pass under the integral sign — the one genuinely new analytic ingredient for the
 kernel-side heat equation. -/
 lemma integrable_exp_mul_poly_heatKernel {σ : ℝ} (hσ : 0 < σ) (c d : ℝ) :
-    Integrable (fun z => Real.exp z * (((z - c) ^ 2 + d) * heatKernel σ (z - c))) volume := by
-  have hbase : Integrable (fun w : ℝ =>
+    Integrable (fun z ↦ Real.exp z * (((z - c) ^ 2 + d) * heatKernel σ (z - c))) volume := by
+  have hbase : Integrable (fun w : ℝ ↦
       w ^ 2 * heatKernel σ w + 2 * σ * (w * heatKernel σ w) + (σ ^ 2 + d) * heatKernel σ w)
       volume := by
     have h1 := integrable_sq_mul_heatKernel hσ
@@ -414,7 +414,7 @@ lemma integrable_exp_mul_poly_heatKernel {σ : ℝ} (hσ : 0 < σ) (c d : ℝ) :
     have h3 := (integrable_heatKernel hσ).const_mul (σ ^ 2 + d)
     exact (h1.add h2).add h3
   have htrans := (hbase.comp_sub_right (c + σ)).const_mul (Real.exp (c + σ / 2))
-  refine htrans.congr (Filter.Eventually.of_forall fun z => ?_)
+  refine htrans.congr (Filter.Eventually.of_forall fun z ↦ ?_)
   dsimp only
   rw [show Real.exp z * (((z - c) ^ 2 + d) * heatKernel σ (z - c))
         = ((z - c) ^ 2 + d) * (Real.exp z * heatKernel σ (z - c)) from by ring,
@@ -428,10 +428,10 @@ dominated by the envelope `eᶻ·((z−x)²+1)·K(t, z−x)` of `integrable_exp_
 `hasDerivAt_feynmanU_t` / `hasDerivAt_feynmanU_x` below. -/
 lemma integrable_payoff_mul_heatKernel {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : Continuous h)
     (hh : ∀ z, |h z| ≤ Real.exp z) (x : ℝ) :
-    Integrable (fun z => h z * heatKernel t (z - x)) volume := by
+    Integrable (fun z ↦ h z * heatKernel t (z - x)) volume := by
   refine (integrable_exp_mul_poly_heatKernel ht x 1).mono'
     (hhc.mul ((continuous_heatKernel t).comp
-      (continuous_id.sub continuous_const))).aestronglyMeasurable (ae_of_all _ fun z => ?_)
+      (continuous_id.sub continuous_const))).aestronglyMeasurable (ae_of_all _ fun z ↦ ?_)
   show ‖h z * heatKernel t (z - x)‖ ≤ Real.exp z * (((z - x) ^ 2 + 1) * heatKernel t (z - x))
   rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (heatKernel_nonneg ht (z - x))]
   have hKnn := heatKernel_nonneg ht (z - x)
@@ -594,17 +594,17 @@ genuinely-distinct domination. The `h z`-factor is pulled through `HasDerivAt.co
 hand over the bare kernel-family derivative. -/
 theorem hasDerivAt_integral_mul_kernelFamily {h : ℝ → ℝ} (hhc : Continuous h)
     {φ φ' : ℝ → ℝ → ℝ} {p₀ r : ℝ} (hr : 0 < r)
-    (hφc : ∀ p, Continuous (fun z => φ p z)) (hφ'c : Continuous (fun z => φ' p₀ z))
-    (hpt : Integrable (fun z => h z * φ p₀ z) volume)
+    (hφc : ∀ p, Continuous (fun z ↦ φ p z)) (hφ'c : Continuous (fun z ↦ φ' p₀ z))
+    (hpt : Integrable (fun z ↦ h z * φ p₀ z) volume)
     {bound : ℝ → ℝ} (hbi : Integrable bound volume)
     (hb : ∀ᵐ z ∂volume, ∀ p ∈ Metric.ball p₀ r, ‖h z * φ' p z‖ ≤ bound z)
-    (hderiv : ∀ z, ∀ p ∈ Metric.ball p₀ r, HasDerivAt (fun p => φ p z) (φ' p z) p) :
-    HasDerivAt (fun p => ∫ z, h z * φ p z ∂volume) (∫ z, h z * φ' p₀ z ∂volume) p₀ :=
-  (hasDerivAt_integral_of_dominated_loc_of_deriv_le (F := fun p z => h z * φ p z)
-    (F' := fun p z => h z * φ' p z) (Metric.ball_mem_nhds p₀ hr)
-    (Filter.Eventually.of_forall fun p => (hhc.mul (hφc p)).aestronglyMeasurable)
+    (hderiv : ∀ z, ∀ p ∈ Metric.ball p₀ r, HasDerivAt (fun p ↦ φ p z) (φ' p z) p) :
+    HasDerivAt (fun p ↦ ∫ z, h z * φ p z ∂volume) (∫ z, h z * φ' p₀ z ∂volume) p₀ :=
+  (hasDerivAt_integral_of_dominated_loc_of_deriv_le (F := fun p z ↦ h z * φ p z)
+    (F' := fun p z ↦ h z * φ' p z) (Metric.ball_mem_nhds p₀ hr)
+    (Filter.Eventually.of_forall fun p ↦ (hhc.mul (hφc p)).aestronglyMeasurable)
     hpt (hhc.mul hφ'c).aestronglyMeasurable hb hbi
-    (ae_of_all _ fun z p hp => (hderiv z p hp).const_mul (h z))).2
+    (ae_of_all _ fun z p hp ↦ (hderiv z p hp).const_mul (h z))).2
 
 /-- **Differentiation under the integral for the Gaussian convolution.** For `t > 0` and `f`
 continuous and bounded (`|f| ≤ Cf`), `φ(s) = ∫ f(y)·K(s, y) dy` is differentiable at `t` with
@@ -613,23 +613,23 @@ uniformly over `s ∈ (t/2, 3t/2)`, by `Cf·(2√3/t²)·(y²+3t/2)·K(3t/2, y)`
 heat-kernel monotonicity `K(s, y) ≤ √3·K(3t/2, y)` on that interval. -/
 private lemma hasDerivAt_phi {t : ℝ} (ht : 0 < t) {f : ℝ → ℝ} (hfc : Continuous f)
     {Cf : ℝ} (hCf : ∀ x, |f x| ≤ Cf) :
-    HasDerivAt (fun s => ∫ y, f y * heatKernel s y ∂volume)
+    HasDerivAt (fun s ↦ ∫ y, f y * heatKernel s y ∂volume)
       (∫ y, f y * (heatKernel t y * (y ^ 2 - t) / (2 * t ^ 2)) ∂volume) t := by
   have h32 : (0 : ℝ) < 3 * t / 2 := by positivity
   have hCf0 : 0 ≤ Cf := le_trans (abs_nonneg _) (hCf 0)
   have hf_gauss : Integrable f (gaussianReal 0 t.toNNReal) :=
     (integrable_const Cf).mono' hfc.aestronglyMeasurable
-      (ae_of_all _ fun y => by rw [Real.norm_eq_abs]; exact hCf y)
-  refine hasDerivAt_integral_mul_kernelFamily (φ := fun s y => heatKernel s y)
-    (φ' := fun s y => heatKernel s y * (y ^ 2 - s) / (2 * s ^ 2))
+      (ae_of_all _ fun y ↦ by rw [Real.norm_eq_abs]; exact hCf y)
+  refine hasDerivAt_integral_mul_kernelFamily (φ := fun s y ↦ heatKernel s y)
+    (φ' := fun s y ↦ heatKernel s y * (y ^ 2 - s) / (2 * s ^ 2))
     (p₀ := t) (r := t / 2) hfc (by positivity)
-    (fun s => continuous_heatKernel s)
+    (fun s ↦ continuous_heatKernel s)
     (((continuous_heatKernel t).mul ((continuous_pow 2).sub continuous_const)).div_const _)
     (integrable_mul_heatKernel_of_gaussian ht hf_gauss)
     ((integrable_poly_heatKernel h32 (3 * t / 2)).const_mul (Cf * (2 * Real.sqrt 3 / t ^ 2)))
-    ?_ (fun y s hs => ?_)
+    ?_ (fun y s hs ↦ ?_)
   · -- uniform domination on `(t/2, 3t/2)`, via temporal monotonicity `heatKernel_temporal_le`
-    refine ae_of_all _ fun y s hs => ?_
+    refine ae_of_all _ fun y s hs ↦ ?_
     rw [Metric.mem_ball, Real.dist_eq, abs_lt] at hs
     have hs_lo : t / 2 < s := by linarith [hs.1]
     have hs_hi : s < 3 * t / 2 := by linarith [hs.2]
@@ -663,12 +663,12 @@ private lemma hasDerivAt_phi_heatEq {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → �
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
     (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
-    HasDerivAt (fun s => ∫ y, f y * heatKernel s y ∂volume)
+    HasDerivAt (fun s ↦ ∫ y, f y * heatKernel s y ∂volume)
       (1 / 2 * ∫ y, f'' y * heatKernel t y ∂volume) t := by
-  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
   convert hasDerivAt_phi ht hfc hCf using 1
   rw [← ibp_heatKernel ht hf hf' hf''c hCf hCf' hCf'', ← integral_const_mul]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun y => ?_)
+  refine integral_congr_ae (Filter.Eventually.of_forall fun y ↦ ?_)
   ring
 
 /-- **The heat kernel is an approximate identity** (`ε → 0⁺`): for `f` continuous and bounded
@@ -678,11 +678,11 @@ integral into `∫ f(√ε·u)·φ(u) du` against the *fixed* standard-normal de
 dominated by the integrable `Cf·φ`). This supplies the `ε → 0` boundary value for the FTC. -/
 private lemma tendsto_integral_heatKernel_zero {f : ℝ → ℝ} (hfc : Continuous f)
     {Cf : ℝ} (hCf : ∀ x, |f x| ≤ Cf) :
-    Tendsto (fun ε => ∫ y, f y * heatKernel ε y ∂volume) (nhdsWithin 0 (Set.Ioi 0))
+    Tendsto (fun ε ↦ ∫ y, f y * heatKernel ε y ∂volume) (nhdsWithin 0 (Set.Ioi 0))
       (nhds (f 0)) := by
-  set g : ℝ → ℝ := fun u => (Real.sqrt (2 * Real.pi))⁻¹ * Real.exp (-(1 / 2) * u ^ 2) with hg
+  set g : ℝ → ℝ := fun u ↦ (Real.sqrt (2 * Real.pi))⁻¹ * Real.exp (-(1 / 2) * u ^ 2) with hg
   have hgc : Continuous g := by rw [hg]; fun_prop
-  have hgnn : ∀ u, 0 ≤ g u := fun u => by rw [hg]; positivity
+  have hgnn : ∀ u, 0 ≤ g u := fun u ↦ by rw [hg]; positivity
   have hg_int : Integrable g volume :=
     (integrable_exp_neg_mul_sq (by norm_num : (0:ℝ) < 1 / 2)).const_mul (Real.sqrt (2 * Real.pi))⁻¹
   have hg_int1 : ∫ u, g u ∂volume = 1 := by
@@ -703,7 +703,7 @@ private lemma tendsto_integral_heatKernel_zero {f : ℝ → ℝ} (hfc : Continuo
         rw [mul_pow, hse2]; field_simp
       rw [hexp, Real.sqrt_mul (by positivity : (0:ℝ) ≤ 2 * Real.pi) ε, mul_inv]
       field_simp
-    have hcomp := Measure.integral_comp_mul_left (fun y => f y * heatKernel ε y) (Real.sqrt ε)
+    have hcomp := Measure.integral_comp_mul_left (fun y ↦ f y * heatKernel ε y) (Real.sqrt ε)
     rw [abs_of_pos (by positivity : (0:ℝ) < (Real.sqrt ε)⁻¹), smul_eq_mul] at hcomp
     have hkey : ∀ u, f (Real.sqrt ε * u) * g u
         = Real.sqrt ε * (f (Real.sqrt ε * u) * heatKernel ε (Real.sqrt ε * u)) := by
@@ -713,23 +713,23 @@ private lemma tendsto_integral_heatKernel_zero {f : ℝ → ℝ} (hfc : Continuo
   -- dominated convergence on the rescaled integrand
   have hlimeq : f 0 = ∫ u, f 0 * g u ∂volume := by rw [integral_const_mul, hg_int1, mul_one]
   rw [hlimeq]
-  refine Tendsto.congr' (f₁ := fun ε => ∫ u, f (Real.sqrt ε * u) * g u ∂volume)
+  refine Tendsto.congr' (f₁ := fun ε ↦ ∫ u, f (Real.sqrt ε * u) * g u ∂volume)
     (by filter_upwards [self_mem_nhdsWithin] with ε hε using (hrw ε hε).symm) ?_
-  refine tendsto_integral_filter_of_dominated_convergence (fun u => Cf * g u) ?_ ?_
+  refine tendsto_integral_filter_of_dominated_convergence (fun u ↦ Cf * g u) ?_ ?_
     (hg_int.const_mul Cf) ?_
   · filter_upwards [self_mem_nhdsWithin] with ε _hε
     exact ((hfc.comp (continuous_const.mul continuous_id)).mul hgc).aestronglyMeasurable
   · filter_upwards [self_mem_nhdsWithin] with ε _hε
-    refine Filter.Eventually.of_forall fun u => ?_
+    refine Filter.Eventually.of_forall fun u ↦ ?_
     rw [Real.norm_eq_abs, abs_mul, abs_of_nonneg (hgnn u)]
     exact mul_le_mul_of_nonneg_right (hCf _) (hgnn u)
-  · refine Filter.Eventually.of_forall fun u => ?_
+  · refine Filter.Eventually.of_forall fun u ↦ ?_
     apply Tendsto.mul_const
     have hsqrt0 : Tendsto Real.sqrt (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
       have h := (Real.continuous_sqrt.tendsto 0).mono_left
         (nhdsWithin_le_nhds (a := (0:ℝ)) (s := Set.Ioi 0))
       rwa [Real.sqrt_zero] at h
-    have h_inner : Tendsto (fun ε : ℝ => Real.sqrt ε * u) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
+    have h_inner : Tendsto (fun ε : ℝ ↦ Real.sqrt ε * u) (nhdsWithin 0 (Set.Ioi 0)) (nhds 0) := by
       have := hsqrt0.mul_const u; rwa [zero_mul] at this
     exact (hfc.tendsto 0).comp h_inner
 
@@ -749,8 +749,8 @@ private lemma abs_half_integral_ddf_heatKernel_le {s : ℝ} (hs : 0 < s) {f'' : 
   calc |∫ y, f'' y * heatKernel s y ∂volume|
       ≤ ∫ y, |f'' y * heatKernel s y| ∂volume := abs_integral_le_integral_abs
     _ ≤ ∫ y, Cf'' * heatKernel s y ∂volume := by
-        refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun y => abs_nonneg _)
-          ((integrable_heatKernel hs).const_mul Cf'') (Filter.Eventually.of_forall fun y => ?_)
+        refine integral_mono_of_nonneg (Filter.Eventually.of_forall fun y ↦ abs_nonneg _)
+          ((integrable_heatKernel hs).const_mul Cf'') (Filter.Eventually.of_forall fun y ↦ ?_)
         show |f'' y * heatKernel s y| ≤ Cf'' * heatKernel s y
         rw [abs_mul, abs_of_nonneg (heatKernel_nonneg hs y)]
         exact mul_le_mul_of_nonneg_right (hCf'' y) (heatKernel_nonneg hs y)
@@ -771,20 +771,20 @@ theorem heatConvolution_eq_add_integral_deriv {t : ℝ} (ht : 0 < t) {f f' f'' :
     (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
     (∫ y, f y * heatKernel t y ∂volume)
       = f 0 + ∫ s in (0:ℝ)..t, (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume := by
-  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
-  set φ : ℝ → ℝ := fun s => ∫ y, f y * heatKernel s y ∂volume with hφdef
-  set ψ : ℝ → ℝ := fun s => (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume with hψdef
-  set Φ : ℝ → ℝ := fun s => if 0 < s then φ s else f 0 with hΦdef
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
+  set φ : ℝ → ℝ := fun s ↦ ∫ y, f y * heatKernel s y ∂volume with hφdef
+  set ψ : ℝ → ℝ := fun s ↦ (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume with hψdef
+  set Φ : ℝ → ℝ := fun s ↦ if 0 < s then φ s else f 0 with hΦdef
   -- (a) `ψ = φ′` is interval-integrable on `[0, t]` (continuous on `(0,t]`, bounded by `½Cf″`)
-  have hψ_cont : ∀ s : ℝ, 0 < s → ContinuousAt ψ s := fun s hs =>
+  have hψ_cont : ∀ s : ℝ, 0 < s → ContinuousAt ψ s := fun s hs ↦
     (hasDerivAt_phi hs hf''c hCf'').continuousAt.const_mul (1 / 2)
   have hψ_int : IntervalIntegrable ψ volume 0 t := by
     rw [intervalIntegrable_iff_integrableOn_Ioc_of_le ht.le]
-    refine Integrable.mono' (g := fun _ : ℝ => (1 / 2) * Cf'')
+    refine Integrable.mono' (g := fun _ : ℝ ↦ (1 / 2) * Cf'')
       (integrableOn_const (hs := measure_Ioc_lt_top.ne))
-      (ContinuousOn.aestronglyMeasurable (fun s hs => (hψ_cont s hs.1).continuousWithinAt)
+      (ContinuousOn.aestronglyMeasurable (fun s hs ↦ (hψ_cont s hs.1).continuousWithinAt)
         measurableSet_Ioc)
-      (ae_restrict_of_forall_mem measurableSet_Ioc fun s hs => ?_)
+      (ae_restrict_of_forall_mem measurableSet_Ioc fun s hs ↦ ?_)
     show ‖(1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume‖ ≤ (1 / 2) * Cf''
     rw [Real.norm_eq_abs]
     exact abs_half_integral_ddf_heatKernel_le hs.1 hf''c hCf''
@@ -834,12 +834,12 @@ noncomputable def feynmanU (g : ℝ → ℝ) (t x : ℝ) : ℝ :=
 private lemma integral_shift_eq_feynmanU (g : ℝ → ℝ) (t x : ℝ) :
     ∫ y, g (x + y) * heatKernel t y ∂volume = feynmanU g t x := by
   rw [feynmanU]
-  have h_fun_eq : (fun z => g z * heatKernel t (z - x))
-        = (fun z => g (x + (z - x)) * heatKernel t (z - x)) := by
+  have h_fun_eq : (fun z ↦ g z * heatKernel t (z - x))
+        = (fun z ↦ g (x + (z - x)) * heatKernel t (z - x)) := by
     funext z; congr 2; ring
   rw [h_fun_eq]
   exact (MeasureTheory.integral_sub_right_eq_self
-    (fun z => g (x + z) * heatKernel t z) x).symm
+    (fun z ↦ g (x + z) * heatKernel t z) x).symm
 
 /-! ### Identification of `feynmanU` with `E[g(x + B_t)]` -/
 
@@ -855,9 +855,9 @@ theorem feynmanU_eq_integral_of_map
     (h_map : Measure.map (B t) μ = gaussianReal 0 t.toNNReal)
     (hg_cont : Continuous g) (ht : 0 < t) (x : ℝ) :
     feynmanU g t x = ∫ ω, g (x + B t ω) ∂μ := by
-  have h_eg_cont : Continuous (fun y => g (x + y)) :=
+  have h_eg_cont : Continuous (fun y ↦ g (x + y)) :=
     hg_cont.comp (continuous_const.add continuous_id)
-  have h_eg_smeas_map : AEStronglyMeasurable (fun y => g (x + y)) (Measure.map (B t) μ) :=
+  have h_eg_smeas_map : AEStronglyMeasurable (fun y ↦ g (x + y)) (Measure.map (B t) μ) :=
     h_eg_cont.aestronglyMeasurable
   have h_expect_eq_gauss :
       ∫ ω, g (x + B t ω) ∂μ = ∫ y, g (x + y) ∂(gaussianReal 0 t.toNNReal) := by
@@ -869,14 +869,14 @@ theorem feynmanU_eq_integral_of_map
       ∫ y, g (x + y) ∂(gaussianReal 0 t.toNNReal) =
         ∫ y, gaussianPDFReal 0 t.toNNReal y • g (x + y) ∂volume :=
     integral_gaussianReal_eq_integral_smul (μ := 0) (v := t.toNNReal)
-      (f := fun y => g (x + y)) h_tN_ne
+      (f := fun y ↦ g (x + y)) h_tN_ne
   have h_pdf_eq_heat : ∀ y,
       gaussianPDFReal 0 t.toNNReal y • g (x + y) = g (x + y) * heatKernel t y := by
     intro y
     rw [← heatKernel_eq_gaussianPDFReal ht y, smul_eq_mul, mul_comm]
   rw [h_expect_eq_gauss, h_gauss_eq_pdf,
-    show (fun y => gaussianPDFReal 0 t.toNNReal y • g (x + y))
-        = (fun y => g (x + y) * heatKernel t y) from funext h_pdf_eq_heat]
+    show (fun y ↦ gaussianPDFReal 0 t.toNNReal y • g (x + y))
+        = (fun y ↦ g (x + y) * heatKernel t y) from funext h_pdf_eq_heat]
   exact (integral_shift_eq_feynmanU g t x).symm
 
 /-- For `t > 0`, the heat-kernel form `feynmanU g t x` equals the Feynman–Kac
@@ -891,7 +891,7 @@ theorem feynmanU_eq_expectation
     (hB_zero : ∀ᵐ ω ∂μ, B 0 ω = 0)
     (hB_gauss : ∀ ⦃s t : ℝ⦄, s ≤ t →
       ∃ v : NNReal, (v : ℝ) = t - s ∧
-        Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v)
+        Measure.map (fun ω ↦ B t ω - B s ω) μ = gaussianReal 0 v)
     (hg_cont : Continuous g)
     {t : ℝ} (ht : 0 < t) (x : ℝ) :
     feynmanU g t x = ∫ ω, g (x + B t ω) ∂μ := by
@@ -902,7 +902,7 @@ theorem feynmanU_eq_expectation
   have hv_t : v = t.toNNReal := by
     apply NNReal.coe_inj.mp
     rw [hv_eq_t, Real.coe_toNNReal _ ht.le]
-  have h_diff_eq : (fun ω => B t ω - B 0 ω) =ᵐ[μ] (fun ω => B t ω) := by
+  have h_diff_eq : (fun ω ↦ B t ω - B 0 ω) =ᵐ[μ] (fun ω ↦ B t ω) := by
     filter_upwards [hB_zero] with ω hω
     rw [hω, sub_zero]
   have h_map_Bt : Measure.map (B t) μ = gaussianReal 0 t.toNNReal := by
@@ -934,13 +934,13 @@ theorem expectation_ito
     (hB_zero : ∀ᵐ ω ∂μ, B 0 ω = 0)
     (hB_gauss : ∀ ⦃s t : ℝ⦄, s ≤ t →
       ∃ v : NNReal, (v : ℝ) = t - s ∧
-        Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v)
+        Measure.map (fun ω ↦ B t ω - B s ω) μ = gaussianReal 0 v)
     {t : ℝ} (ht : 0 < t) {f f' f'' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf''c : Continuous f'') {Cf Cf' Cf'' : ℝ}
     (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
     (∫ ω, f (B t ω) ∂μ) = f 0 + ∫ s in (0:ℝ)..t, (1 / 2) * ∫ ω, f'' (B s ω) ∂μ := by
-  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
   -- the heat-kernel ↔ expectation bridge, for any continuous `g` and time `r > 0`
   have hbridge : ∀ (g : ℝ → ℝ), Continuous g → ∀ {r : ℝ}, 0 < r →
       (∫ y, g y * heatKernel r y ∂volume) = ∫ ω, g (B r ω) ∂μ := by
@@ -951,7 +951,7 @@ theorem expectation_ito
     simp only [zero_add]
   rw [← hbridge f hfc ht, heatConvolution_eq_add_integral_deriv ht hf hf' hf''c hCf hCf' hCf'']
   congr 1
-  refine intervalIntegral.integral_congr_ae (ae_of_all _ fun s hs => ?_)
+  refine intervalIntegral.integral_congr_ae (ae_of_all _ fun s hs ↦ ?_)
   rw [Set.uIoc_of_le ht.le] at hs
   show (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume = (1 / 2) * ∫ ω, f'' (B s ω) ∂μ
   rw [hbridge f'' hf''c hs.1]
@@ -968,19 +968,19 @@ theorem expectation_ito_isPreBrownian {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBr
     (hCf : ∀ x, |f x| ≤ Cf) (hCf' : ∀ x, |f' x| ≤ Cf') (hCf'' : ∀ x, |f'' x| ≤ Cf'') :
     (∫ ω, f (X t.toNNReal ω) ∂μ)
       = f 0 + ∫ s in (0:ℝ)..t, (1 / 2) * ∫ ω, f'' (X s.toNNReal ω) ∂μ := by
-  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  have hfc : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
   have hbridge : ∀ (g : ℝ → ℝ), Continuous g → ∀ {r : ℝ}, 0 < r →
       (∫ y, g y * heatKernel r y ∂volume) = ∫ ω, g (X r.toNNReal ω) ∂μ := by
     intro g hgc r hr
     have h1 := integral_shift_eq_feynmanU g r 0
     simp only [zero_add] at h1
-    rw [h1, feynmanU_eq_integral_of_map (B := fun s => X s.toNNReal) (t := r)
+    rw [h1, feynmanU_eq_integral_of_map (B := fun s ↦ X s.toNNReal) (t := r)
       (hX.aemeasurable r.toNNReal)
       (hX.hasLaw_eval r.toNNReal).map_eq hgc hr 0]
     simp only [zero_add]
   rw [← hbridge f hfc ht, heatConvolution_eq_add_integral_deriv ht hf hf' hf''c hCf hCf' hCf'']
   congr 1
-  refine intervalIntegral.integral_congr_ae (ae_of_all _ fun s hs => ?_)
+  refine intervalIntegral.integral_congr_ae (ae_of_all _ fun s hs ↦ ?_)
   rw [Set.uIoc_of_le ht.le] at hs
   show (1 / 2) * ∫ y, f'' y * heatKernel s y ∂volume = (1 / 2) * ∫ ω, f'' (X s.toNNReal ω) ∂μ
   rw [hbridge f'' hf''c hs.1]
@@ -1005,22 +1005,22 @@ integrable envelope `(2√3/t²)·eᶻ·((z−x)²+3t/2)·K(3t/2, z−x)`, via t
 regularity beyond exponential growth — the call payoff's kink is irrelevant. -/
 theorem hasDerivAt_feynmanU_t {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : Continuous h)
     (hh : ∀ z, |h z| ≤ Real.exp z) (x : ℝ) :
-    HasDerivAt (fun s => feynmanU h s x)
+    HasDerivAt (fun s ↦ feynmanU h s x)
       (∫ z, h z * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2)) ∂volume) t := by
-  show HasDerivAt (fun s => ∫ z, h z * heatKernel s (z - x) ∂volume)
+  show HasDerivAt (fun s ↦ ∫ z, h z * heatKernel s (z - x) ∂volume)
       (∫ z, h z * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2)) ∂volume) t
   have h32 : (0 : ℝ) < 3 * t / 2 := by positivity
-  refine hasDerivAt_integral_mul_kernelFamily (φ := fun s z => heatKernel s (z - x))
-    (φ' := fun s z => heatKernel s (z - x) * ((z - x) ^ 2 - s) / (2 * s ^ 2))
+  refine hasDerivAt_integral_mul_kernelFamily (φ := fun s z ↦ heatKernel s (z - x))
+    (φ' := fun s z ↦ heatKernel s (z - x) * ((z - x) ^ 2 - s) / (2 * s ^ 2))
     (p₀ := t) (r := t / 2) hhc (by positivity)
-    (fun s => (continuous_heatKernel s).comp (continuous_id.sub continuous_const))
+    (fun s ↦ (continuous_heatKernel s).comp (continuous_id.sub continuous_const))
     (((continuous_heatKernel t).comp (continuous_id.sub continuous_const)).mul
         (((continuous_id.sub continuous_const).pow 2).sub continuous_const) |>.div_const _)
     (integrable_payoff_mul_heatKernel ht hhc hh x)
     ((integrable_exp_mul_poly_heatKernel h32 x (3 * t / 2)).const_mul (2 * Real.sqrt 3 / t ^ 2))
-    ?_ (fun z s hs => ?_)
+    ?_ (fun z s hs ↦ ?_)
   · -- uniform domination on `(t/2, 3t/2)`, via temporal monotonicity `heatKernel_temporal_le`
-    refine ae_of_all _ fun z s hs => ?_
+    refine ae_of_all _ fun z s hs ↦ ?_
     rw [Metric.mem_ball, Real.dist_eq, abs_lt] at hs
     have hs_lo : t / 2 < s := by linarith [hs.1]
     have hs_hi : s < 3 * t / 2 := by linarith [hs.2]
@@ -1056,23 +1056,23 @@ envelope `(√2·e^{1/2t}/t)·eᶻ·((z−x)²+2)·K(2t, z−x)` (`integrable_ex
 via the spatial monotonicity `heatKernel_shift_le`. -/
 theorem hasDerivAt_feynmanU_x {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : Continuous h)
     (hh : ∀ z, |h z| ≤ Real.exp z) (x : ℝ) :
-    HasDerivAt (fun x' => feynmanU h t x')
+    HasDerivAt (fun x' ↦ feynmanU h t x')
       (∫ z, h z * ((z - x) / t * heatKernel t (z - x)) ∂volume) x := by
-  show HasDerivAt (fun x' => ∫ z, h z * heatKernel t (z - x') ∂volume)
+  show HasDerivAt (fun x' ↦ ∫ z, h z * heatKernel t (z - x') ∂volume)
       (∫ z, h z * ((z - x) / t * heatKernel t (z - x)) ∂volume) x
   have h2t : (0 : ℝ) < 2 * t := by positivity
-  refine hasDerivAt_integral_mul_kernelFamily (φ := fun x' z => heatKernel t (z - x'))
-    (φ' := fun x' z => (z - x') / t * heatKernel t (z - x'))
+  refine hasDerivAt_integral_mul_kernelFamily (φ := fun x' z ↦ heatKernel t (z - x'))
+    (φ' := fun x' z ↦ (z - x') / t * heatKernel t (z - x'))
     (p₀ := x) (r := 1) hhc (by norm_num)
-    (fun c => (continuous_heatKernel t).comp (continuous_id.sub continuous_const))
+    (fun c ↦ (continuous_heatKernel t).comp (continuous_id.sub continuous_const))
     (((continuous_id.sub continuous_const).div_const t).mul
       ((continuous_heatKernel t).comp (continuous_id.sub continuous_const)))
     (integrable_payoff_mul_heatKernel ht hhc hh x)
     ((integrable_exp_mul_poly_heatKernel h2t x 2).const_mul
       (Real.sqrt 2 * Real.exp (1 / (2 * t)) / t))
-    ?_ (fun z x' _ => hasDerivAt_heatKernel_x ht z x')
+    ?_ (fun z x' _ ↦ hasDerivAt_heatKernel_x ht z x')
   · -- uniform domination on `ball x 1`, via spatial monotonicity `heatKernel_shift_le`
-    refine ae_of_all _ fun z x' hx' => ?_
+    refine ae_of_all _ fun z x' hx' ↦ ?_
     rw [Metric.mem_ball, Real.dist_eq] at hx'
     have hKsnn : 0 ≤ heatKernel t (z - x') := heatKernel_nonneg ht (z - x')
     have hKshift : heatKernel t (z - x')
@@ -1112,26 +1112,26 @@ derivative integral is `∫ z, h z · K(t, z−x)·((z−x)²−t)/t² dz`. Same
 (using `|(z−x')²−t| ≤ 3((z−x)²+(3+t))`). -/
 theorem hasDerivAt_feynmanU_xx {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : Continuous h)
     (hh : ∀ z, |h z| ≤ Real.exp z) (x : ℝ) :
-    HasDerivAt (fun x' => ∫ z, h z * ((z - x') / t * heatKernel t (z - x')) ∂volume)
+    HasDerivAt (fun x' ↦ ∫ z, h z * ((z - x') / t * heatKernel t (z - x')) ∂volume)
       (∫ z, h z * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / t ^ 2) ∂volume) x := by
   have h2t : (0 : ℝ) < 2 * t := by positivity
   refine hasDerivAt_integral_mul_kernelFamily
-    (φ := fun x' z => (z - x') / t * heatKernel t (z - x'))
-    (φ' := fun x' z => heatKernel t (z - x') * ((z - x') ^ 2 - t) / t ^ 2)
+    (φ := fun x' z ↦ (z - x') / t * heatKernel t (z - x'))
+    (φ' := fun x' z ↦ heatKernel t (z - x') * ((z - x') ^ 2 - t) / t ^ 2)
     (p₀ := x) (r := 1) hhc (by norm_num)
-    (fun c => ((continuous_id.sub continuous_const).div_const t).mul
+    (fun c ↦ ((continuous_id.sub continuous_const).div_const t).mul
       ((continuous_heatKernel t).comp (continuous_id.sub continuous_const)))
     (((continuous_heatKernel t).comp (continuous_id.sub continuous_const)).mul
         (((continuous_id.sub continuous_const).pow 2).sub continuous_const) |>.div_const _)
     ?_
     ((integrable_exp_mul_poly_heatKernel h2t x (3 + t)).const_mul
       (3 * Real.sqrt 2 * Real.exp (1 / (2 * t)) / t ^ 2))
-    ?_ (fun z x' _ => hasDerivAt_heatKernel_x_x ht z x')
+    ?_ (fun z x' _ ↦ hasDerivAt_heatKernel_x_x ht z x')
   · -- the first-derivative integrand is integrable at the base point
     apply ((integrable_exp_mul_poly_heatKernel ht x 1).const_mul (1 / t)).mono'
     · exact (hhc.mul (((continuous_id.sub continuous_const).div_const t).mul
         ((continuous_heatKernel t).comp (continuous_id.sub continuous_const)))).aestronglyMeasurable
-    · refine ae_of_all _ fun z => ?_
+    · refine ae_of_all _ fun z ↦ ?_
       have hKnn := heatKernel_nonneg ht (z - x)
       have hnorm : ‖h z * ((z - x) / t * heatKernel t (z - x))‖
           = 1 / t * (|h z| * (|z - x| * heatKernel t (z - x))) := by
@@ -1143,7 +1143,7 @@ theorem hasDerivAt_feynmanU_xx {t : ℝ} (ht : 0 < t) {h : ℝ → ℝ} (hhc : C
       refine mul_le_mul (hh z) ?_ (mul_nonneg (abs_nonneg _) hKnn) (Real.exp_nonneg z)
       exact mul_le_mul_of_nonneg_right habs1 hKnn
   · -- uniform domination on `ball x 1`, via spatial monotonicity `heatKernel_shift_le`
-    refine ae_of_all _ fun z x' hx' => ?_
+    refine ae_of_all _ fun z x' hx' ↦ ?_
     rw [Metric.mem_ball, Real.dist_eq] at hx'
     have hKsnn : 0 ≤ heatKernel t (z - x') := heatKernel_nonneg ht (z - x')
     have hKshift : heatKernel t (z - x')
@@ -1193,12 +1193,12 @@ envelopes (`integrable_exp_mul_poly_heatKernel`) via `heatKernel_loc_le` + `curv
 `curve_abs_ratio_le` — no single mega-constant — fed to `hasDerivAt_integral_mul_kernelFamily`. -/
 theorem hasDerivAt_feynmanU_comp {h : ℝ → ℝ} (hhc : Continuous h) (hh : ∀ z, |h z| ≤ Real.exp z)
     {α β x₀ τ : ℝ} (hα : 0 < α) (hτ : 0 < τ) :
-    HasDerivAt (fun s => feynmanU h (α * s) (x₀ + β * s))
+    HasDerivAt (fun s ↦ feynmanU h (α * s) (x₀ + β * s))
       (∫ z, h z * (α * (heatKernel (α * τ) (z - (x₀ + β * τ))
               * ((z - (x₀ + β * τ)) ^ 2 - α * τ) / (2 * (α * τ) ^ 2))
           + β * ((z - (x₀ + β * τ)) / (α * τ)
               * heatKernel (α * τ) (z - (x₀ + β * τ)))) ∂volume) τ := by
-  show HasDerivAt (fun s => ∫ z, h z * heatKernel (α * s) (z - (x₀ + β * s)) ∂volume) _ τ
+  show HasDerivAt (fun s ↦ ∫ z, h z * heatKernel (α * s) (z - (x₀ + β * s)) ∂volume) _ τ
   have hατ : (0 : ℝ) < α * τ := by positivity
   have h3ατ : (0 : ℝ) < 3 * (α * τ) := by positivity
   have hd_nn : (0 : ℝ) ≤ |β| * (τ / 2) := by positivity
@@ -1206,12 +1206,12 @@ theorem hasDerivAt_feynmanU_comp {h : ℝ → ℝ} (hhc : Continuous h) (hh : �
     Real.sqrt 3 * (Real.sqrt 2 * Real.exp ((|β| * (τ / 2) + 1) ^ 2 / (3 * (α * τ)))) with hCexp
   have hCexp_nn : 0 ≤ Cexp := by rw [hCexp]; positivity
   refine hasDerivAt_integral_mul_kernelFamily
-    (φ := fun s z => heatKernel (α * s) (z - (x₀ + β * s)))
-    (φ' := fun s z => α * (heatKernel (α * s) (z - (x₀ + β * s))
+    (φ := fun s z ↦ heatKernel (α * s) (z - (x₀ + β * s)))
+    (φ' := fun s z ↦ α * (heatKernel (α * s) (z - (x₀ + β * s))
           * ((z - (x₀ + β * s)) ^ 2 - α * s) / (2 * (α * s) ^ 2))
         + β * ((z - (x₀ + β * s)) / (α * s) * heatKernel (α * s) (z - (x₀ + β * s))))
     (p₀ := τ) (r := τ / 2) hhc (by positivity)
-    (fun s => (continuous_heatKernel (α * s)).comp (continuous_id.sub continuous_const))
+    (fun s ↦ (continuous_heatKernel (α * s)).comp (continuous_id.sub continuous_const))
     ((((((continuous_heatKernel (α * τ)).comp (continuous_id.sub continuous_const)).mul
           (((continuous_id.sub continuous_const).pow 2).sub continuous_const)).div_const
           _).const_mul α).add
@@ -1224,7 +1224,7 @@ theorem hasDerivAt_feynmanU_comp {h : ℝ → ℝ} (hhc : Continuous h) (hh : �
           (1 + |β| * (τ / 2))).const_mul (2 * |β| * Cexp / (α * τ))))
     ?_ ?_
   · -- uniform domination: bound the two terms separately by Gaussian-moment envelopes
-    refine ae_of_all _ fun z s hs => ?_
+    refine ae_of_all _ fun z s hs ↦ ?_
     rw [Metric.mem_ball, Real.dist_eq, abs_lt] at hs
     have hs_pos : 0 < s := by linarith [hs.1]
     have hvpos : 0 < α * s := by positivity
@@ -1289,10 +1289,10 @@ theorem hasDerivAt_feynmanU_comp {h : ℝ → ℝ} (hhc : Continuous h) (hh : �
               * (Real.exp z * ((W₀ ^ 2 + (1 + |β| * (τ / 2)))
                 * heatKernel (3 * (α * τ)) W₀)) := by ring
   · -- pointwise curve derivative
-    refine fun z s hs => ?_
+    refine fun z s hs ↦ ?_
     rw [Metric.mem_ball, Real.dist_eq, abs_lt] at hs
     have hs_pos : 0 < s := by linarith [hs.1]
-    exact hasDerivAt_heatKernel_comp (v := fun s => α * s) (w := fun s => x₀ + β * s)
+    exact hasDerivAt_heatKernel_comp (v := fun s ↦ α * s) (w := fun s ↦ x₀ + β * s)
       (by simpa using (hasDerivAt_id s).const_mul α)
       (by simpa using ((hasDerivAt_id s).const_mul β).const_add x₀) (by positivity) z
 

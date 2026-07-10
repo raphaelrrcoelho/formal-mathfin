@@ -92,7 +92,7 @@ theorem discrete_ito_formula_2d
   -- Telescoping.
   have h_tele : f (t N) (X N) - f (t 0) (X 0) =
       ∑ k ∈ Finset.range N, (f (t (k + 1)) (X (k + 1)) - f (t k) (X k)) :=
-    (Finset.sum_range_sub (fun n => f (t n) (X n)) N).symm
+    (Finset.sum_range_sub (fun n ↦ f (t n) (X n)) N).symm
   rw [h_tele]
   -- Per-summand 2D Taylor decomposition (definitional).
   have h_summand : ∀ k,
@@ -104,7 +104,7 @@ theorem discrete_ito_formula_2d
     intro k
     unfold discreteTaylorRemainder2D
     ring
-  rw [Finset.sum_congr rfl (fun k _ => h_summand k)]
+  rw [Finset.sum_congr rfl (fun k _ ↦ h_summand k)]
   -- Distribute the four-term sum and pull the (1/2) constant out.
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib, Finset.sum_add_distrib,
       ← Finset.mul_sum]
@@ -141,21 +141,21 @@ noncomputable def gbmValue (S₀ μ σ t x : ℝ) : ℝ :=
 /-- **Space partial** `∂_x S = σ · S` — genuine `HasDerivAt`, via the
 `Real.exp` chain rule on the affine exponent. -/
 lemma hasDerivAt_gbmValue_space (S₀ μ σ t x : ℝ) :
-    HasDerivAt (fun y => gbmValue S₀ μ σ t y) (σ * gbmValue S₀ μ σ t x) x := by
+    HasDerivAt (fun y ↦ gbmValue S₀ μ σ t y) (σ * gbmValue S₀ μ σ t x) x := by
   -- inner exponent `y ↦ (μ − ½σ²) t + σ y` has derivative `σ`
-  have h_lin : HasDerivAt (fun y => (μ - σ ^ 2 / 2) * t + σ * y) σ x := by
+  have h_lin : HasDerivAt (fun y ↦ (μ - σ ^ 2 / 2) * t + σ * y) σ x := by
     simpa using ((hasDerivAt_id x).const_mul σ).const_add ((μ - σ ^ 2 / 2) * t)
   have h_exp := h_lin.exp
   have h := h_exp.const_mul S₀
-  -- `h : HasDerivAt (fun y => S₀ * exp(...)) (S₀ * (exp(...) * σ)) x`
+  -- `h : HasDerivAt (fun y ↦ S₀ * exp(...)) (S₀ * (exp(...) * σ)) x`
   unfold gbmValue
   convert h using 1 <;> first | rfl | ring
 
 /-- **Time partial** `∂_t S = (μ − ½σ²) · S` — genuine `HasDerivAt`. -/
 lemma hasDerivAt_gbmValue_time (S₀ μ σ t x : ℝ) :
-    HasDerivAt (fun s => gbmValue S₀ μ σ s x)
+    HasDerivAt (fun s ↦ gbmValue S₀ μ σ s x)
       ((μ - σ ^ 2 / 2) * gbmValue S₀ μ σ t x) t := by
-  have h_lin : HasDerivAt (fun s => (μ - σ ^ 2 / 2) * s + σ * x) (μ - σ ^ 2 / 2) t := by
+  have h_lin : HasDerivAt (fun s ↦ (μ - σ ^ 2 / 2) * s + σ * x) (μ - σ ^ 2 / 2) t := by
     simpa using ((hasDerivAt_id t).const_mul (μ - σ ^ 2 / 2)).add_const (σ * x)
   have h := (h_lin.exp).const_mul S₀
   unfold gbmValue
@@ -164,7 +164,7 @@ lemma hasDerivAt_gbmValue_time (S₀ μ σ t x : ℝ) :
 /-- **Second space partial** `∂_xx S = σ² · S` — the derivative of
 `∂_x S = σ · S` is `σ · (σ · S) = σ² · S`. -/
 lemma hasDerivAt_gbmValue_space_space (S₀ μ σ t x : ℝ) :
-    HasDerivAt (fun y => σ * gbmValue S₀ μ σ t y)
+    HasDerivAt (fun y ↦ σ * gbmValue S₀ μ σ t y)
       (σ ^ 2 * gbmValue S₀ μ σ t x) x := by
   have h := (hasDerivAt_gbmValue_space S₀ μ σ t x).const_mul σ
   convert h using 1 <;> first | rfl | ring
@@ -186,9 +186,9 @@ The `−½σ²` carried in the exponent cancels the `+½σ²` of the Itô second
 term — this cancellation *is* the Itô correction, and the reason a GBM with
 exponent drift `μ − ½σ²` has physical drift rate `μ`. -/
 theorem gbm_solves_sde (S₀ μ σ t x : ℝ) {f_t f_x f_xx : ℝ}
-    (h_t : HasDerivAt (fun s => gbmValue S₀ μ σ s x) f_t t)
-    (h_x : HasDerivAt (fun y => gbmValue S₀ μ σ t y) f_x x)
-    (h_xx : HasDerivAt (fun y => σ * gbmValue S₀ μ σ t y) f_xx x) :
+    (h_t : HasDerivAt (fun s ↦ gbmValue S₀ μ σ s x) f_t t)
+    (h_x : HasDerivAt (fun y ↦ gbmValue S₀ μ σ t y) f_x x)
+    (h_xx : HasDerivAt (fun y ↦ σ * gbmValue S₀ μ σ t y) f_xx x) :
     itoDrift2D f_t f_x f_xx 0 1 = μ * gbmValue S₀ μ σ t x
       ∧ (1 : ℝ) * f_x = σ * gbmValue S₀ μ σ t x := by
   -- The `HasDerivAt` hypotheses pin the partials to their computed values.

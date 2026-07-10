@@ -79,19 +79,19 @@ theorem nthMoment_terminal
     congr 2
     rw [α_def, β_def]; ring
   -- HasLaw transfer + change to `pdf`-against-Lebesgue form.
-  have h_meas : Measurable fun z : ℝ => (bsTerminal S_0 r σ T z)^n := by
+  have h_meas : Measurable fun z : ℝ ↦ (bsTerminal S_0 r σ T z)^n := by
     unfold bsTerminal; fun_prop
-  rw [show (fun ω => (bsTerminal S_0 r σ T (Z ω))^n) =
-        (fun z => (bsTerminal S_0 r σ T z)^n) ∘ Z from rfl,
+  rw [show (fun ω ↦ (bsTerminal S_0 r σ T (Z ω))^n) =
+        (fun z ↦ (bsTerminal S_0 r σ T z)^n) ∘ Z from rfl,
       hZ.integral_comp h_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Substitute the pointwise factorisation and reorder.
   simp_rw [smul_eq_mul, h_pow]
   rw [show
-        (fun z : ℝ => gaussianPDFReal 0 1 z * (S_0^n * Real.exp (α + β * z)))
+        (fun z : ℝ ↦ gaussianPDFReal 0 1 z * (S_0^n * Real.exp (α + β * z)))
         =
-        (fun z => S_0^n * (Real.exp (α + β * z) * gaussianPDFReal 0 1 z))
-      from funext (fun z => by ring)]
+        (fun z ↦ S_0^n * (Real.exp (α + β * z) * gaussianPDFReal 0 1 z))
+      from funext (fun z ↦ by ring)]
   -- Apply the affine MGF master directly: the heart of the proof.
   rw [integral_const_mul, integral_exp_affine_gaussianPDFReal_univ]
   rw [h_algebra]

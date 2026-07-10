@@ -37,7 +37,7 @@ theorem survivalFromForce_eq_hazardSurvival (μ : ℝ → ℝ) (t : ℝ) :
 `h(u) = B · e^{c u}` has cumulative hazard `(B/c) · (e^{c t} − 1)` — the actuarial
 Gompertz cumulative force, reused as a reduced-form credit term structure. -/
 theorem gompertz_cumHazard (B c t : ℝ) (hc : c ≠ 0) :
-    cumHazard (fun u => B * Real.exp (c * u)) t = (B / c) * (Real.exp (c * t) - 1) := by
+    cumHazard (fun u ↦ B * Real.exp (c * u)) t = (B / c) * (Real.exp (c * t) - 1) := by
   unfold cumHazard
   exact gompertz_cumulative_force B c t hc
 

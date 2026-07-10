@@ -57,7 +57,7 @@ noncomputable def markedWeight (r p : ℝ≥0) (jk : ℕ × ℕ) : ℝ :=
 
 /-- The joint law of the two thinned counts, as a measure on `ℕ × ℕ`. -/
 noncomputable def markedPoissonMeasure (r p : ℝ≥0) : Measure (ℕ × ℕ) :=
-  Measure.sum fun jk => ENNReal.ofReal (markedWeight r p jk) • Measure.dirac jk
+  Measure.sum fun jk ↦ ENNReal.ofReal (markedWeight r p jk) • Measure.dirac jk
 
 lemma markedPoissonMeasure_singleton (r p : ℝ≥0) (jk : ℕ × ℕ) :
     markedPoissonMeasure r p {jk} = ENNReal.ofReal (markedWeight r p jk) := by
@@ -103,7 +103,7 @@ at the thinned rates. -/
 theorem markedPoissonMeasure_eq_prod (r : ℝ≥0) {p : ℝ≥0} (hp : p ≤ 1) :
     markedPoissonMeasure r p
       = (poissonMeasure (p * r)).prod (poissonMeasure ((1 - p) * r)) := by
-  refine Measure.ext_of_singleton fun jk => ?_
+  refine Measure.ext_of_singleton fun jk ↦ ?_
   obtain ⟨j, k⟩ := jk
   rw [markedPoissonMeasure_singleton, markedWeight_eq hp,
     show ({(j, k)} : Set (ℕ × ℕ)) = {j} ×ˢ {k} from
@@ -120,12 +120,12 @@ theorem map_pair_eq_marked {M K : Ω → ℕ} (hM : Measurable M) (hK : Measurab
     {r p : ℝ≥0}
     (hjoint : ∀ j k : ℕ, μ {ω | M ω = j ∧ K ω = k}
         = ENNReal.ofReal (markedWeight r p (j, k))) :
-    μ.map (fun ω => (M ω, K ω)) = markedPoissonMeasure r p := by
-  refine Measure.ext_of_singleton fun jk => ?_
+    μ.map (fun ω ↦ (M ω, K ω)) = markedPoissonMeasure r p := by
+  refine Measure.ext_of_singleton fun jk ↦ ?_
   obtain ⟨j, k⟩ := jk
   rw [Measure.map_apply (hM.prodMk hK) (measurableSet_singleton _),
     markedPoissonMeasure_singleton,
-    show (fun ω => (M ω, K ω)) ⁻¹' {(j, k)} = {ω | M ω = j ∧ K ω = k} by
+    show (fun ω ↦ (M ω, K ω)) ⁻¹' {(j, k)} = {ω | M ω = j ∧ K ω = k} by
       ext ω; simp [Prod.ext_iff]]
   exact hjoint j k
 
@@ -140,7 +140,7 @@ theorem thinned_streams {M K : Ω → ℕ} (hM : Measurable M) (hK : Measurable 
     μ.map M = poissonMeasure (p * r) ∧
       μ.map K = poissonMeasure ((1 - p) * r) ∧
       IndepFun M K μ := by
-  have hpair : μ.map (fun ω => (M ω, K ω))
+  have hpair : μ.map (fun ω ↦ (M ω, K ω))
       = (poissonMeasure (p * r)).prod (poissonMeasure ((1 - p) * r)) := by
     rw [map_pair_eq_marked hM hK hjoint, markedPoissonMeasure_eq_prod r hp]
   have hMlaw : μ.map M = poissonMeasure (p * r) := by

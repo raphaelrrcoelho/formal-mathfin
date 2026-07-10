@@ -66,7 +66,7 @@ open scoped Topology
 /-- `sin u / u → 1` as `u → 0` (`u ≠ 0`): the value at `0` of Mathlib's continuous
 `Real.sinc` (`sinc u = sin u / u` off `0`, `sinc 0 = 1`). -/
 lemma tendsto_sin_div_one :
-    Tendsto (fun u : ℝ => Real.sin u / u) (𝓝[≠] 0) (𝓝 1) := by
+    Tendsto (fun u : ℝ ↦ Real.sin u / u) (𝓝[≠] 0) (𝓝 1) := by
   have h : Tendsto Real.sinc (𝓝[≠] (0 : ℝ)) (𝓝 (Real.sinc 0)) :=
     (Real.continuous_sinc.tendsto 0).mono_left nhdsWithin_le_nhds
   rw [Real.sinc_zero] at h
@@ -77,17 +77,17 @@ lemma tendsto_sin_div_one :
 /-- `(1 − cos u)/u² → 1/2` as `u → 0` (`u ≠ 0`), via the half-angle identity
 `1 − cos u = 2 sin²(u/2)` and `sin v / v → 1`. -/
 lemma tendsto_one_sub_cos_div_sq :
-    Tendsto (fun u : ℝ => (1 - Real.cos u) / u ^ 2) (𝓝[≠] 0) (𝓝 (1 / 2)) := by
-  have h_half : Tendsto (fun u : ℝ => u / 2) (𝓝[≠] 0) (𝓝[≠] 0) := by
+    Tendsto (fun u : ℝ ↦ (1 - Real.cos u) / u ^ 2) (𝓝[≠] 0) (𝓝 (1 / 2)) := by
+  have h_half : Tendsto (fun u : ℝ ↦ u / 2) (𝓝[≠] 0) (𝓝[≠] 0) := by
     refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
-    · have h0 : Tendsto (fun u : ℝ => u / 2) (𝓝 0) (𝓝 0) := by
+    · have h0 : Tendsto (fun u : ℝ ↦ u / 2) (𝓝 0) (𝓝 0) := by
         simpa using (continuous_id.div_const (2 : ℝ)).tendsto 0
       exact h0.mono_left nhdsWithin_le_nhds
     · filter_upwards [self_mem_nhdsWithin] with u hu
       exact div_ne_zero hu (by norm_num)
-  have h_s : Tendsto (fun u : ℝ => Real.sin (u / 2) / (u / 2)) (𝓝[≠] 0) (𝓝 1) :=
+  have h_s : Tendsto (fun u : ℝ ↦ Real.sin (u / 2) / (u / 2)) (𝓝[≠] 0) (𝓝 1) :=
     tendsto_sin_div_one.comp h_half
-  have h_sq : Tendsto (fun u : ℝ => (1 / 2) * (Real.sin (u / 2) / (u / 2)) ^ 2)
+  have h_sq : Tendsto (fun u : ℝ ↦ (1 / 2) * (Real.sin (u / 2) / (u / 2)) ^ 2)
       (𝓝[≠] 0) (𝓝 ((1 / 2) * 1 ^ 2)) := (h_s.pow 2).const_mul (1 / 2)
   rw [show ((1 : ℝ) / 2 * 1 ^ 2) = 1 / 2 from by norm_num] at h_sq
   refine h_sq.congr' ?_
@@ -140,11 +140,11 @@ variable {σ T r : ℝ}
 /-- For `t ≠ 0`, the rescaled angle `θₙ = σ √(T/n) · t` tends to `0` through
 nonzero values — so it can feed the punctured-neighbourhood trig limits. -/
 private lemma tendsto_crrAngle_punctured (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (ht : t ≠ 0) :
-    Tendsto (fun n : ℕ => σ * Real.sqrt (T / n) * t) atTop (𝓝[≠] 0) := by
+    Tendsto (fun n : ℕ ↦ σ * Real.sqrt (T / n) * t) atTop (𝓝[≠] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
-  · have h0 : Tendsto (fun n : ℕ => Real.sqrt (T / n)) atTop (𝓝 0) := by
+  · have h0 : Tendsto (fun n : ℕ ↦ Real.sqrt (T / n)) atTop (𝓝 0) := by
       simpa [crrStep] using tendsto_sqrt_crrStep_zero T
-    have h1 : Tendsto (fun n : ℕ => σ * Real.sqrt (T / n) * t) atTop (𝓝 (σ * 0 * t)) :=
+    have h1 : Tendsto (fun n : ℕ ↦ σ * Real.sqrt (T / n) * t) atTop (𝓝 (σ * 0 * t)) :=
       (h0.const_mul σ).mul_const t
     simpa using h1
   · filter_upwards [Filter.eventually_ge_atTop 1] with n hn
@@ -155,13 +155,13 @@ private lemma tendsto_crrAngle_punctured (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (
 /-- **Real part of `n(φₙ−1)`**: `n (cos θₙ − 1) → −½ σ² t² T`, with
 `θₙ = σ√(T/n) t`. Uses `n θₙ² = σ² t² T` (exact, `n ≥ 1`) and `(1−cos u)/u² → ½`. -/
 private lemma tendsto_n_mul_cos_sub_one (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (ht : t ≠ 0) :
-    Tendsto (fun n : ℕ => (n : ℝ) * (Real.cos (σ * Real.sqrt (T / n) * t) - 1))
+    Tendsto (fun n : ℕ ↦ (n : ℝ) * (Real.cos (σ * Real.sqrt (T / n) * t) - 1))
       atTop (𝓝 (-(σ ^ 2 * t ^ 2 * T) / 2)) := by
   have hθ := tendsto_crrAngle_punctured hσ hT ht
-  have h_cos : Tendsto (fun n : ℕ =>
+  have h_cos : Tendsto (fun n : ℕ ↦
       (1 - Real.cos (σ * Real.sqrt (T / n) * t)) / (σ * Real.sqrt (T / n) * t) ^ 2)
       atTop (𝓝 (1 / 2)) := tendsto_one_sub_cos_div_sq.comp hθ
-  have h_main : Tendsto (fun n : ℕ =>
+  have h_main : Tendsto (fun n : ℕ ↦
       -((1 - Real.cos (σ * Real.sqrt (T / n) * t)) / (σ * Real.sqrt (T / n) * t) ^ 2
         * (σ ^ 2 * t ^ 2 * T)))
       atTop (𝓝 (-(1 / 2 * (σ ^ 2 * t ^ 2 * T)))) := (h_cos.mul_const (σ ^ 2 * t ^ 2 * T)).neg
@@ -182,14 +182,14 @@ private lemma tendsto_n_mul_cos_sub_one (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (h
 `θₙ = σ√(T/n) t`. Feeds `crr_drift_limit_n` and `sin u/u → 1`. -/
 private lemma tendsto_n_mul_two_p_sub_one_mul_sin
     (hσ : 0 < σ) (hT : 0 < T) {t : ℝ} (ht : t ≠ 0) :
-    Tendsto (fun n : ℕ =>
+    Tendsto (fun n : ℕ ↦
       (n : ℝ) * (2 * crrProb r σ T n - 1) * Real.sin (σ * Real.sqrt (T / n) * t))
       atTop (𝓝 ((r - σ ^ 2 / 2) * T * t)) := by
   have hθ := tendsto_crrAngle_punctured hσ hT ht
-  have h_sin : Tendsto (fun n : ℕ =>
+  have h_sin : Tendsto (fun n : ℕ ↦
       Real.sin (σ * Real.sqrt (T / n) * t) / (σ * Real.sqrt (T / n) * t))
       atTop (𝓝 1) := tendsto_sin_div_one.comp hθ
-  have h_dt : Tendsto (fun n : ℕ =>
+  have h_dt : Tendsto (fun n : ℕ ↦
       (n : ℝ) * (2 * crrProb r σ T n - 1) * σ * Real.sqrt (T / n) * t)
       atTop (𝓝 ((r - σ ^ 2 / 2) * T * t)) := (crr_drift_limit_n (r := r) hσ hT).mul_const t
   have h_prod := h_dt.mul h_sin
@@ -216,7 +216,7 @@ The increment is real-valued (`±σ√Δt`), so `φₙ = cos θₙ + i (2pₙ−
 two scalar limits above), and `φₙⁿ = (1 + (φₙ−1))ⁿ → exp L` by Mathlib's
 `Complex.tendsto_one_add_pow_exp_of_tendsto`. -/
 theorem crr_charFun_pow_tendsto (hσ : 0 < σ) (hT : 0 < T) (t : ℝ) :
-    Tendsto (fun n : ℕ => crrStepCharFun r σ T n t ^ n) atTop
+    Tendsto (fun n : ℕ ↦ crrStepCharFun r σ T n t ^ n) atTop
       (𝓝 (Complex.exp (I * Complex.ofReal ((r - σ ^ 2 / 2) * T) * Complex.ofReal t
         - Complex.ofReal (σ ^ 2 * T) * Complex.ofReal t ^ 2 / 2))) := by
   rcases eq_or_ne t 0 with rfl | ht
@@ -230,7 +230,7 @@ theorem crr_charFun_pow_tendsto (hσ : 0 < σ) (hT : 0 < T) (t : ℝ) :
   · -- `t ≠ 0`: `n (φₙ − 1) → L := i t (r−σ²/2)T − ½ t²σ²T`, then `(1 + (φₙ−1))ⁿ → exp L`.
     have hA := tendsto_n_mul_cos_sub_one hσ hT ht
     have hB := tendsto_n_mul_two_p_sub_one_mul_sin (r := r) hσ hT ht
-    have h_ng : Tendsto (fun n : ℕ => (n : ℂ) * (crrStepCharFun r σ T n t - 1)) atTop
+    have h_ng : Tendsto (fun n : ℕ ↦ (n : ℂ) * (crrStepCharFun r σ T n t - 1)) atTop
         (𝓝 (I * Complex.ofReal ((r - σ ^ 2 / 2) * T) * Complex.ofReal t
           - Complex.ofReal (σ ^ 2 * T) * Complex.ofReal t ^ 2 / 2)) := by
       have h_sum := ((Complex.continuous_ofReal.tendsto _).comp hA).add
@@ -240,13 +240,13 @@ theorem crr_charFun_pow_tendsto (hσ : 0 < σ) (hT : 0 < T) (t : ℝ) :
           = I * Complex.ofReal ((r - σ ^ 2 / 2) * T) * Complex.ofReal t
             - Complex.ofReal (σ ^ 2 * T) * Complex.ofReal t ^ 2 / 2
         from by push_cast; ring] at h_sum
-      refine h_sum.congr' (Eventually.of_forall fun n => ?_)
+      refine h_sum.congr' (Eventually.of_forall fun n ↦ ?_)
       simp only [Function.comp_apply, crrStepCharFun_eq]
       push_cast [-Complex.ofReal_cos, -Complex.ofReal_sin]
       ring
     have h_pow := Complex.tendsto_one_add_pow_exp_of_tendsto
-      (g := fun n => crrStepCharFun r σ T n t - 1) h_ng
-    refine h_pow.congr (fun n => ?_)
+      (g := fun n ↦ crrStepCharFun r σ T n t - 1) h_ng
+    refine h_pow.congr (fun n ↦ ?_)
     show (1 + (crrStepCharFun r σ T n t - 1)) ^ n = crrStepCharFun r σ T n t ^ n
     rw [show (1 : ℂ) + (crrStepCharFun r σ T n t - 1) = crrStepCharFun r σ T n t from by ring]
 
@@ -262,7 +262,7 @@ characteristic function is `crrStepCharFun`, so the convolution's is `crrStepCha
 upgrades this pointwise charFun convergence to convergence in distribution, i.e. the
 CRR risk-neutral log-return converges in law to the Black–Scholes normal. -/
 theorem crr_charFun_pow_tendsto_gaussian (hσ : 0 < σ) (hT : 0 < T) (t : ℝ) :
-    Tendsto (fun n : ℕ => crrStepCharFun r σ T n t ^ n) atTop
+    Tendsto (fun n : ℕ ↦ crrStepCharFun r σ T n t ^ n) atTop
       (𝓝 (MeasureTheory.charFun
         (ProbabilityTheory.gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) t)) := by
   have hgauss : MeasureTheory.charFun
@@ -368,15 +368,15 @@ probability measures by Lévy's continuity theorem
 `charFun (convPow ν n) = (charFun ν)ⁿ` and `charFun (crrStepMeasure) = crrStepCharFun`. -/
 theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 0 < T)
     (hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1) :
-    Tendsto (fun n : ℕ => crrRowProbMeasure r σ T n (hp n).1 (hp n).2) atTop
+    Tendsto (fun n : ℕ ↦ crrRowProbMeasure r σ T n (hp n).1 (hp n).2) atTop
       (𝓝 (bsLimitProbMeasure r σ T)) := by
-  refine ProbabilityMeasure.tendsto_of_tendsto_charFun (fun t => ?_)
-  have heq : (fun n : ℕ => charFun (convPow (crrStepMeasure r σ T n) n) t)
-      = (fun n => crrStepCharFun r σ T n t ^ n) := by
+  refine ProbabilityMeasure.tendsto_of_tendsto_charFun (fun t ↦ ?_)
+  have heq : (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t)
+      = (fun n ↦ crrStepCharFun r σ T n t ^ n) := by
     funext n
     haveI := isProbabilityMeasure_crrStepMeasure (hp n).1 (hp n).2
     rw [charFun_convPow, charFun_crrStepMeasure t (hp n).1 (hp n).2]
-  show Tendsto (fun n : ℕ => charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
+  show Tendsto (fun n : ℕ ↦ charFun (convPow (crrStepMeasure r σ T n) n) t) atTop
     (𝓝 (charFun (gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal) t))
   rw [heq]
   exact crr_charFun_pow_tendsto_gaussian hσ hT t
@@ -387,9 +387,9 @@ theorem crr_tendsto_gaussian_inDistribution {r σ T : ℝ} (hσ : 0 < σ) (hT : 
 (so the argument stays positive), is integrable against any finite measure. -/
 lemma integrable_comp_exp_of_bdd {μ : Measure ℝ} [IsFiniteMeasure μ] {g : ℝ → ℝ}
     (hg : Measurable g) {C : ℝ} {a : ℝ} (ha : 0 < a) (hC : ∀ y, 0 < y → |g y| ≤ C) :
-    Integrable (fun x => g (a * Real.exp x)) μ :=
+    Integrable (fun x ↦ g (a * Real.exp x)) μ :=
   Integrable.of_bound ((hg.comp (by fun_prop)).aestronglyMeasurable) C
-    (ae_of_all _ fun x => by rw [Real.norm_eq_abs]; exact hC _ (mul_pos ha (Real.exp_pos x)))
+    (ae_of_all _ fun x ↦ by rw [Real.norm_eq_abs]; exact hC _ (mul_pos ha (Real.exp_pos x)))
 
 /-- **Two-point integral against the CRR step law** (real-valued): for any `h`,
 `∫ h ∂(crrStepMeasure) = pₙ·h(σ√Δt) + (1−pₙ)·h(−σ√Δt)` under no-arbitrage `0 ≤ pₙ ≤ 1`. -/
@@ -438,7 +438,7 @@ lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
         = crrProb r σ T n * g (S * crrUp σ T n * Real.exp x)
           + (1 - crrProb r σ T n) * g (S * crrDown σ T n * Real.exp x) := by
       intro x
-      rw [integral_crrStepMeasure hp0 hp1 (fun z => g (S * Real.exp (x + z))),
+      rw [integral_crrStepMeasure hp0 hp1 (fun z ↦ g (S * Real.exp (x + z))),
           show S * Real.exp (x + σ * Real.sqrt (T / n)) = S * crrUp σ T n * Real.exp x from by
             rw [Real.exp_add, crrUp, crrStep]; ring,
           show S * Real.exp (x + -(σ * Real.sqrt (T / n))) = S * crrDown σ T n * Real.exp x from by
@@ -460,19 +460,19 @@ lemma binomialPrice_eq_integral_convPow {r σ T : ℝ} {n : ℕ}
 linearity of `binomialPrice` plus the stock-price (`binomialPrice_id`) and constant
 (`binomialPrice_const`) values. -/
 lemma binomialPrice_callPut_parity {u d r K : ℝ} (h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
-    binomialPrice u d r (fun x => max (x - K) 0) n S
-      = binomialPrice u d r (fun x => max (K - x) 0) n S
+    binomialPrice u d r (fun x ↦ max (x - K) 0) n S
+      = binomialPrice u d r (fun x ↦ max (K - x) 0) n S
         + (S - K * Real.exp (-(n : ℝ) * r)) := by
-  have hpay : (fun x : ℝ => max (x - K) 0) = (fun x => max (K - x) 0 + (x - K)) := by
+  have hpay : (fun x : ℝ ↦ max (x - K) 0) = (fun x ↦ max (K - x) 0 + (x - K)) := by
     funext x
     rcases le_total x K with hx | hx
     · rw [max_eq_right (by linarith), max_eq_left (by linarith)]; ring
     · rw [max_eq_left (by linarith), max_eq_right (by linarith)]; ring
   rw [hpay,
-      show (fun x : ℝ => max (K - x) 0 + (x - K))
-        = (fun x => (fun y => max (K - y) 0) x + (fun y => y - K) x) from rfl,
+      show (fun x : ℝ ↦ max (K - x) 0 + (x - K))
+        = (fun x ↦ (fun y ↦ max (K - y) 0) x + (fun y ↦ y - K) x) from rfl,
       binomialPrice_add,
-      show (fun y : ℝ => y - K) = (fun x => (fun y : ℝ => y) x + (fun _ => -K) x) from by
+      show (fun y : ℝ ↦ y - K) = (fun x ↦ (fun y : ℝ ↦ y) x + (fun _ ↦ -K) x) from by
         funext x; ring,
       binomialPrice_add, binomialPrice_id u d r h, binomialPrice_const u d r (-K) h]
   ring
@@ -497,14 +497,14 @@ put payoff `x ↦ max(K − S₀eˣ, 0)` is bounded and continuous, this is imme
 the convergence in distribution `crr_tendsto_gaussian_inDistribution`. -/
 lemma tendsto_integral_put {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
     (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
-    Tendsto (fun n : ℕ => ∫ x, max (K - S₀ * Real.exp x) 0
+    Tendsto (fun n : ℕ ↦ ∫ x, max (K - S₀ * Real.exp x) 0
         ∂(convPow (crrStepMeasure r σ T n) n)) atTop
       (𝓝 (∫ x, max (K - S₀ * Real.exp x) 0
         ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n =>
+  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦
     ⟨(crrUpProb_mem_Ioo (hna n)).1.le, (crrUpProb_mem_Ioo (hna n)).2.le⟩
-  have hcont : Continuous (fun x : ℝ => max (K - S₀ * Real.exp x) 0) := by fun_prop
-  have hbound : ∀ x : ℝ, ‖max (K - S₀ * Real.exp x) 0‖ ≤ |K| := fun x => by
+  have hcont : Continuous (fun x : ℝ ↦ max (K - S₀ * Real.exp x) 0) := by fun_prop
+  have hbound : ∀ x : ℝ, ‖max (K - S₀ * Real.exp x) 0‖ ≤ |K| := fun x ↦ by
     rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _)]
     calc max (K - S₀ * Real.exp x) 0
         ≤ max K 0 := max_le_max (by nlinarith [mul_pos hS₀ (Real.exp_pos x)]) le_rfl
@@ -527,43 +527,43 @@ converges weakly (`tendsto_integral_put`); binomial put-call parity
 (`binomialPrice_callPut_parity`) lifts this to the (unbounded) call. -/
 theorem binomialPrice_call_tendsto_bs {r σ T S₀ K : ℝ} (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀)
     (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
-    Tendsto (fun n : ℕ => binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-        (fun x => max (x - K) 0) n S₀) atTop
+    Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x ↦ max (x - K) 0) n S₀) atTop
       (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
           ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal)
         + (S₀ - K * Real.exp (-(r * T))))) := by
-  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n =>
+  have hp : ∀ n, 0 ≤ crrProb r σ T n ∧ crrProb r σ T n ≤ 1 := fun n ↦
     ⟨(crrUpProb_mem_Ioo (hna n)).1.le, (crrUpProb_mem_Ioo (hna n)).2.le⟩
   -- Put payoff: measurable, and bounded on `(0,∞)` by `|K|` (since `S₀eˣ > 0`).
-  have hmeas : Measurable (fun y : ℝ => max (K - y) 0) := by fun_prop
-  have hbd : ∀ y : ℝ, 0 < y → |max (K - y) 0| ≤ |K| := fun y hy => by
+  have hmeas : Measurable (fun y : ℝ ↦ max (K - y) 0) := by fun_prop
+  have hbd : ∀ y : ℝ, 0 < y → |max (K - y) 0| ≤ |K| := fun y hy ↦ by
     rw [abs_of_nonneg (le_max_right _ _)]
     exact (max_le_max (by linarith) le_rfl).trans (max_le (le_abs_self K) (abs_nonneg K))
   -- Eventually (`n ≥ 1`) the total discount `n · crrPerStepRate = rT`.
-  have hdisc : ∀ n : ℕ, 1 ≤ n → (n : ℝ) * crrPerStepRate r T n = r * T := fun n hn => by
+  have hdisc : ∀ n : ℕ, 1 ≤ n → (n : ℝ) * crrPerStepRate r T n = r * T := fun n hn ↦ by
     have hn0 : (n : ℝ) ≠ 0 := by positivity
     unfold crrPerStepRate crrStep; field_simp
   -- The binomial put price converges to `e^{−rT}·∫ put` over the BS gaussian.
-  have hput : Tendsto (fun n : ℕ =>
+  have hput : Tendsto (fun n : ℕ ↦
       binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-        (fun x => max (K - x) 0) n S₀) atTop
+        (fun x ↦ max (K - x) 0) n S₀) atTop
       (𝓝 (Real.exp (-(r * T)) * ∫ x, max (K - S₀ * Real.exp x) 0
         ∂(gaussianReal ((r - σ ^ 2 / 2) * T) (σ ^ 2 * T).toNNReal))) := by
     refine ((tendsto_integral_put hσ hT hS₀ hna).const_mul (Real.exp (-(r * T)))).congr'
-      (Filter.eventually_atTop.mpr ⟨1, fun n hn => ?_⟩)
+      (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
     show Real.exp (-(r * T)) * (∫ x, max (K - S₀ * Real.exp x) 0
           ∂(convPow (crrStepMeasure r σ T n) n))
         = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-          (fun x => max (K - x) 0) n S₀
+          (fun x ↦ max (K - x) 0) n S₀
     rw [binomialPrice_eq_integral_convPow (hp n).1 (hp n).2 hmeas hbd n S₀ hS₀,
         neg_mul, mul_comm (crrPerStepRate r T n) (n : ℝ), hdisc n hn]
   -- Binomial put-call parity (eventually) lifts the convergence to the call.
   refine (hput.add_const (S₀ - K * Real.exp (-(r * T)))).congr'
-    (Filter.eventually_atTop.mpr ⟨1, fun n hn => ?_⟩)
+    (Filter.eventually_atTop.mpr ⟨1, fun n hn ↦ ?_⟩)
   show binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-        (fun x => max (K - x) 0) n S₀ + (S₀ - K * Real.exp (-(r * T)))
+        (fun x ↦ max (K - x) 0) n S₀ + (S₀ - K * Real.exp (-(r * T)))
       = binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-        (fun x => max (x - K) 0) n S₀
+        (fun x ↦ max (x - K) 0) n S₀
   rw [binomialPrice_callPut_parity (hna n) n S₀, neg_mul, hdisc n hn]
 
 end Distributional

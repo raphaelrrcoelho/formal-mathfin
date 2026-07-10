@@ -58,8 +58,8 @@ candidate. Specialises to measure restriction (`ν = μ.restrict s`, via
 `Measure.restrict_le_self`). -/
 noncomputable def monoMeasureLp (h : ν ≤ μ) : Lp ℝ 2 μ →L[ℝ] Lp ℝ 2 ν :=
   LinearMap.mkContinuous
-    { toFun := fun f => ((Lp.memLp f).mono_measure h).toLp
-      map_add' := fun f g => by
+    { toFun := fun f ↦ ((Lp.memLp f).mono_measure h).toLp
+      map_add' := fun f g ↦ by
         refine Lp.ext ?_
         filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (f + g)).mono_measure h),
           Lp.coeFn_add (((Lp.memLp f).mono_measure h).toLp) (((Lp.memLp g).mono_measure h).toLp),
@@ -67,14 +67,14 @@ noncomputable def monoMeasureLp (h : ν ≤ μ) : Lp ℝ 2 μ →L[ℝ] Lp ℝ 2
           MemLp.coeFn_toLp ((Lp.memLp g).mono_measure h),
           (Lp.coeFn_add f g).filter_mono (ae_mono h)] with x h1 h2 h3 h4 h5
         simp only [h1, h2, h3, h4, h5, Pi.add_apply]
-      map_smul' := fun c f => by
+      map_smul' := fun c f ↦ by
         refine Lp.ext ?_
         filter_upwards [MemLp.coeFn_toLp ((Lp.memLp (c • f)).mono_measure h),
           Lp.coeFn_smul c (((Lp.memLp f).mono_measure h).toLp),
           MemLp.coeFn_toLp ((Lp.memLp f).mono_measure h),
           (Lp.coeFn_smul c f).filter_mono (ae_mono h)] with x h1 h2 h3 h4
         simp only [h1, h2, h3, h4, Pi.smul_apply, RingHom.id_apply] }
-    1 (fun f => by
+    1 (fun f ↦ by
       simp only [LinearMap.coe_mk, AddHom.coe_mk, one_mul, Lp.norm_def]
       refine ENNReal.toReal_mono (Lp.memLp f).2.ne ?_
       rw [eLpNorm_congr_ae (MemLp.coeFn_toLp ((Lp.memLp f).mono_measure h))]
@@ -143,15 +143,15 @@ clamp-preimage of `p`. The contributors all share `p`'s left endpoint, which kee
 value `𝓕_{p.1}`-measurable. -/
 private lemma clamp_value_apply (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) (ω : Ω) :
-    ((V.value.filter (fun q => q.1 ≤ T)).mapDomain (fun q => (q.1, q.2 ⊓ T))) p ω
-      = ∑ a ∈ (V.value.filter (fun q => q.1 ≤ T)).support,
+    ((V.value.filter (fun q ↦ q.1 ≤ T)).mapDomain (fun q ↦ (q.1, q.2 ⊓ T))) p ω
+      = ∑ a ∈ (V.value.filter (fun q ↦ q.1 ≤ T)).support,
           (if (a.1, a.2 ⊓ T) = p then V.value a ω else 0) := by
   rw [Finsupp.mapDomain, Finsupp.sum_apply, Finsupp.sum, Finset.sum_apply]
-  refine Finset.sum_congr rfl fun a ha => ?_
+  refine Finset.sum_congr rfl fun a ha ↦ ?_
   rw [Finsupp.support_filter, Finset.mem_filter] at ha
   rw [Finsupp.single_apply]
   by_cases h : (a.1, a.2 ⊓ T) = p
-  · simp only [if_pos h, Finsupp.filter_apply_pos (fun q => q.1 ≤ T) V.value ha.2]
+  · simp only [if_pos h, Finsupp.filter_apply_pos (fun q ↦ q.1 ≤ T) V.value ha.2]
   · simp only [if_neg h, Pi.zero_apply]
 
 /-- **The `[0,T]` clamp of a simple process.** -/
@@ -159,18 +159,18 @@ noncomputable def clampSP (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas) where
   valueBot := V.valueBot
-  value := (V.value.filter (fun q => q.1 ≤ T)).mapDomain (fun q => (q.1, q.2 ⊓ T))
-  le_of_mem_support_value := fun p hp => by
+  value := (V.value.filter (fun q ↦ q.1 ≤ T)).mapDomain (fun q ↦ (q.1, q.2 ⊓ T))
+  le_of_mem_support_value := fun p hp ↦ by
     obtain ⟨a, ha, rfl⟩ := Finset.mem_image.mp (Finsupp.mapDomain_support hp)
     rw [Finsupp.support_filter, Finset.mem_filter] at ha
     exact le_inf (V.le_of_mem_support_value a ha.1) ha.2
   measurable_valueBot := V.measurable_valueBot
-  measurable_value' := fun p hp => by
-    rw [show ((V.value.filter (fun q => q.1 ≤ T)).mapDomain (fun q => (q.1, q.2 ⊓ T))) p
-          = fun ω => ∑ a ∈ (V.value.filter (fun q => q.1 ≤ T)).support,
+  measurable_value' := fun p hp ↦ by
+    rw [show ((V.value.filter (fun q ↦ q.1 ≤ T)).mapDomain (fun q ↦ (q.1, q.2 ⊓ T))) p
+          = fun ω ↦ ∑ a ∈ (V.value.filter (fun q ↦ q.1 ≤ T)).support,
               (if (a.1, a.2 ⊓ T) = p then V.value a ω else 0)
-        from funext fun ω => clamp_value_apply T hBmeas V p ω]
-    refine Finset.measurable_sum _ fun a ha => ?_
+        from funext fun ω ↦ clamp_value_apply T hBmeas V p ω]
+    refine Finset.measurable_sum _ fun a ha ↦ ?_
     by_cases h : (a.1, a.2 ⊓ T) = p
     · simp only [if_pos h]
       rw [Finsupp.support_filter, Finset.mem_filter] at ha
@@ -179,19 +179,19 @@ noncomputable def clampSP (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     · simp only [if_neg h]; exact measurable_const
   bounded_valueBot := V.bounded_valueBot
   bounded_value := by
-    refine ⟨(V.value.filter (fun q => q.1 ≤ T)).support.card • |V.valueBound|, fun p hp ω => ?_⟩
+    refine ⟨(V.value.filter (fun q ↦ q.1 ≤ T)).support.card • |V.valueBound|, fun p hp ω ↦ ?_⟩
     rw [clamp_value_apply]
-    calc ‖∑ a ∈ (V.value.filter (fun q => q.1 ≤ T)).support,
+    calc ‖∑ a ∈ (V.value.filter (fun q ↦ q.1 ≤ T)).support,
               (if (a.1, a.2 ⊓ T) = p then V.value a ω else 0)‖
-        ≤ ∑ a ∈ (V.value.filter (fun q => q.1 ≤ T)).support,
+        ≤ ∑ a ∈ (V.value.filter (fun q ↦ q.1 ≤ T)).support,
             ‖(if (a.1, a.2 ⊓ T) = p then V.value a ω else 0)‖ := norm_sum_le _ _
-      _ ≤ ∑ _a ∈ (V.value.filter (fun q => q.1 ≤ T)).support, |V.valueBound| := by
-          refine Finset.sum_le_sum fun a ha => ?_
+      _ ≤ ∑ _a ∈ (V.value.filter (fun q ↦ q.1 ≤ T)).support, |V.valueBound| := by
+          refine Finset.sum_le_sum fun a ha ↦ ?_
           by_cases h : (a.1, a.2 ⊓ T) = p
           · simp only [if_pos h]
             exact (V.value_le_valueBound a ω).trans (le_abs_self _)
           · simp only [if_neg h, norm_zero]; exact abs_nonneg _
-      _ = (V.value.filter (fun q => q.1 ≤ T)).support.card • |V.valueBound| := by
+      _ = (V.value.filter (fun q ↦ q.1 ≤ T)).support.card • |V.valueBound| := by
           rw [Finset.sum_const]
 
 /-- **Master `Finsupp.sum` identity for the clamp.** Any additive-in-the-value statistic
@@ -206,14 +206,14 @@ private lemma clampSP_value_sum {N : Type*} [AddCommMonoid N] (T : ℝ≥0)
     (hclamp : ∀ a ∈ V.value.support, a.1 ≤ T → φ (a.1, a.2 ⊓ T) (V.value a) = φ a (V.value a))
     (hdrop : ∀ a ∈ V.value.support, T < a.1 → φ a (V.value a) = 0) :
     (clampSP T hBmeas V).value.sum φ = V.value.sum φ := by
-  show ((V.value.filter (fun q => q.1 ≤ T)).mapDomain (fun q => (q.1, q.2 ⊓ T))).sum φ
+  show ((V.value.filter (fun q ↦ q.1 ≤ T)).mapDomain (fun q ↦ (q.1, q.2 ⊓ T))).sum φ
       = V.value.sum φ
   rw [Finsupp.sum_mapDomain_index hφ0 hφadd, Finsupp.sum, Finsupp.support_filter,
       Finset.sum_filter]
   conv_rhs => rw [Finsupp.sum]
-  refine Finset.sum_congr rfl fun a ha => ?_
+  refine Finset.sum_congr rfl fun a ha ↦ ?_
   by_cases hP : a.1 ≤ T
-  · rw [if_pos hP, Finsupp.filter_apply_pos (fun q => q.1 ≤ T) V.value hP]
+  · rw [if_pos hP, Finsupp.filter_apply_pos (fun q ↦ q.1 ≤ T) V.value hP]
     exact hclamp a ha hP
   · rw [if_neg hP]
     exact (hdrop a ha (not_le.mp hP)).symm
@@ -224,9 +224,9 @@ lemma clampSP_itoSimpleProcess (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u)
     itoSimpleProcess hBmeas (clampSP T hBmeas V) t = itoSimpleProcess hBmeas V t := by
   funext ω
   rw [itoSimpleProcess_apply, itoSimpleProcess_apply]
-  refine clampSP_value_sum T hBmeas V (fun p v => v ω * (B (min p.2 t) ω - B (min p.1 t) ω))
-    (fun p => by simp) (fun p u v => by simp only [Pi.add_apply]; ring)
-    (fun a ha hP => ?_) (fun a ha hP => ?_)
+  refine clampSP_value_sum T hBmeas V (fun p v ↦ v ω * (B (min p.2 t) ω - B (min p.1 t) ω))
+    (fun p ↦ by simp) (fun p u v ↦ by simp only [Pi.add_apply]; ring)
+    (fun a ha hP ↦ ?_) (fun a ha hP ↦ ?_)
   · rw [show min (a.2 ⊓ T) t = min a.2 t from by rw [min_assoc, min_eq_right ht]]
   · have h1 : min a.1 t = t := min_eq_right (le_of_lt (lt_of_le_of_lt ht hP))
     have h2 : min a.2 t = t :=
@@ -239,16 +239,16 @@ lemma clampSP_apply (T s : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (clampSP T hBmeas V) s ω = V s ω := by
   rw [SimpleProcess.apply_eq, SimpleProcess.apply_eq]
   congr 1
-  exact clampSP_value_sum T hBmeas V (fun p v => (Set.Ioc p.1 p.2).indicator (fun _ => v ω) s)
-    (fun p => by simp)
-    (fun p u v => by
+  exact clampSP_value_sum T hBmeas V (fun p v ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ v ω) s)
+    (fun p ↦ by simp)
+    (fun p u v ↦ by
       simp only [Set.indicator_apply, Pi.add_apply]
       split_ifs <;> simp)
-    (fun a ha hP => by
+    (fun a ha hP ↦ by
       simp only [Set.indicator_apply]
-      refine if_congr (Iff.intro (fun h => ⟨h.1, h.2.trans inf_le_left⟩)
-        (fun h => ⟨h.1, le_inf h.2 hsT⟩)) rfl rfl)
-    (fun a ha hP => by
+      refine if_congr (Iff.intro (fun h ↦ ⟨h.1, h.2.trans inf_le_left⟩)
+        (fun h ↦ ⟨h.1, le_inf h.2 hsT⟩)) rfl rfl)
+    (fun a ha hP ↦ by
       rw [Set.indicator_of_notMem]
       rintro ⟨h1, _⟩
       exact absurd (lt_of_le_of_lt hsT hP) (not_lt.mpr h1.le))
@@ -265,7 +265,7 @@ lemma clampSP_simpleProcessL2_T (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
   rw [trimMeasure_T_eq_restrict]
   refine Filter.eventuallyEq_of_mem
     (self_mem_ae_restrict (MeasureTheory.measurableSet_predictable_Ioc_prod
-      (𝓕 := natFiltration hBmeas) 0 T MeasurableSet.univ)) (fun z hz => ?_)
+      (𝓕 := natFiltration hBmeas) 0 T MeasurableSet.univ)) (fun z hz ↦ ?_)
   obtain ⟨⟨_, hzT⟩, _⟩ := hz
   exact clampSP_apply T z.1 hBmeas V hzT z.2
 
@@ -278,7 +278,7 @@ lemma itoProcessCLM_simpleProcessL2_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurabl
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (ht : t ≤ T) :
     (itoProcessCLM hB T t hBmeas (simpleProcessL2_T (μ := μ) T hBmeas V) : Ω → ℝ)
       =ᵐ[μ] itoSimpleProcess hBmeas V t := by
-  have hclampT : clampSP T hBmeas V ∈ TBoundedSP T hBmeas := fun p hp => by
+  have hclampT : clampSP T hBmeas V ∈ TBoundedSP T hBmeas := fun p hp ↦ by
     obtain ⟨a, _, rfl⟩ := Finset.mem_image.mp (Finsupp.mapDomain_support hp)
     exact inf_le_right
   have hP1 : simpleProcessL2_T (μ := μ) T hBmeas V
@@ -364,7 +364,7 @@ lemma itoIntegralL2_simpleAssembly (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) = itoSimpleLp hB hBmeas V := by
   rw [itoIntegralL2, LinearMap.extendOfNorm_eq (simpleAssembly_denseRange (μ := μ) hBmeas)
-    ⟨1, fun W => by rw [one_mul]; exact (assembly_isometry hB hBmeas W).le⟩]
+    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry hB hBmeas W).le⟩]
   rfl
 
 /-- **Simple-process increment-independence (the step-2 core).** For a simple
@@ -377,14 +377,14 @@ the remaining work of step 2. -/
 lemma condExp_itoIntegralL2_simple (t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     μ[(itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ) | natFiltration hBmeas t]
-      =ᵐ[μ] fun ω => itoSimpleProcess hBmeas V t ω := by
+      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
   have hbridge : (itoIntegralL2 hB hBmeas (simpleAssembly hBmeas V) : Ω → ℝ)
       =ᵐ[μ] itoSimple hBmeas V := by
     rw [itoIntegralL2_simpleAssembly]
     exact (memLp_itoSimple hB hBmeas V).coeFn_toLp
   exact (condExp_congr_ae hbridge).trans
-    (condExp_itoSimple_eq hB (V.value.support.sup (fun p => p.2)) t hBmeas V
-      (fun p hp => Finset.le_sup hp))
+    (condExp_itoSimple_eq hB (V.value.support.sup (fun p ↦ p.2)) t hBmeas V
+      (fun p hp ↦ Finset.le_sup hp))
 
 /-! ## Step 2 — horizon consistency
 
@@ -406,7 +406,7 @@ theorem itoProcessL2Inf_eq_itoProcessCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measur
   refine congrFun (DenseRange.equalizer (simpleAssembly_denseRange (μ := μ) hBmeas)
     (itoProcessL2Inf hB t hBmeas).continuous
     ((itoProcessCLM hB T t hBmeas).comp (restrictToBand (μ := μ) T hBmeas)).continuous
-    (funext fun V => ?_)) f
+    (funext fun V ↦ ?_)) f
   simp only [Function.comp_apply, ContinuousLinearMap.comp_apply]
   refine Lp.ext ?_
   have hLHS : (itoProcessL2Inf hB t hBmeas (simpleAssembly hBmeas V) : Ω → ℝ)

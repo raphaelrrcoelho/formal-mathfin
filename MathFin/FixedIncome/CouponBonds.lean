@@ -71,13 +71,13 @@ lemma annuityValue_closed_form (n : ℕ) (c r Δt : ℝ)
 /-- **Forward = spot under a flat curve**: under a constant short rate `r`, the
 instantaneous forward rate `-∂_T log B(t, T)` equals `r` at every horizon. -/
 lemma hasDerivAt_neg_log_zcb_T (r t T : ℝ) :
-    HasDerivAt (fun T' => -Real.log (zcb r t T')) r T := by
+    HasDerivAt (fun T' ↦ -Real.log (zcb r t T')) r T := by
   have h_eq : ∀ T' : ℝ, -Real.log (zcb r t T') = r * (T' - t) := by
     intro T'
     show -Real.log (Real.exp (-(r * (T' - t)))) = r * (T' - t)
     rw [Real.log_exp]
     ring
-  have h_lin : HasDerivAt (fun T' : ℝ => r * (T' - t)) r T := by
+  have h_lin : HasDerivAt (fun T' : ℝ ↦ r * (T' - t)) r T := by
     have h := ((hasDerivAt_id T).sub_const t).const_mul r
     simpa using h
   exact h_lin.congr_of_eventuallyEq (Filter.Eventually.of_forall h_eq)
@@ -92,7 +92,7 @@ lemma couponBondPrice_strictAnti
     (h_pos : ∀ i ∈ s, 0 < c i)
     (h_future : ∀ i ∈ s, t < T i)
     (h_nonempty : s.Nonempty) :
-    StrictAnti (fun r => ∑ i ∈ s, c i * Real.exp (-(r * (T i - t)))) := by
+    StrictAnti (fun r ↦ ∑ i ∈ s, c i * Real.exp (-(r * (T i - t)))) := by
   intro r₁ r₂ hr
   apply Finset.sum_lt_sum_of_nonempty h_nonempty
   intro i hi

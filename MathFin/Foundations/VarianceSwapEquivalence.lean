@@ -86,7 +86,7 @@ theorem varianceSwap_log_eq_QV_limit_value
       = σ ^ 2 ∧
     -- Realised-variance QV-limit form → σ²·T (the genuine equipartition functional)
     Filter.Tendsto
-      (fun n : ℕ => ∫ ω, ∑ k ∈ Finset.range (n + 1),
+      (fun n : ℕ ↦ ∫ ω, ∑ k ∈ Finset.range (n + 1),
         (bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -
          bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ)
       Filter.atTop (nhds (σ ^ 2 * T)) :=

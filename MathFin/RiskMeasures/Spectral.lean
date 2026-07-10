@@ -59,10 +59,10 @@ noncomputable def spectralRiskFinite (s : Finset ι) (φ : ι → ℝ) (Q : ι �
 /-- **Translation invariance**: if `Σ φ = 1`, then `ρ(Q + c·𝟙) = ρ(Q) + c`. -/
 theorem spectralRisk_translation (s : Finset ι) (φ : ι → ℝ) (Q : ι → ℝ)
     (c : ℝ) (h_norm : ∑ i ∈ s, φ i = 1) :
-    spectralRiskFinite s φ (fun i => Q i + c) =
+    spectralRiskFinite s φ (fun i ↦ Q i + c) =
       spectralRiskFinite s φ Q + c := by
   unfold spectralRiskFinite
-  rw [show (fun i => φ i * (Q i + c)) = (fun i => φ i * Q i + φ i * c) from by
+  rw [show (fun i ↦ φ i * (Q i + c)) = (fun i ↦ φ i * Q i + φ i * c) from by
         funext i; ring]
   rw [Finset.sum_add_distrib, ← Finset.sum_mul, h_norm, one_mul]
 
@@ -73,7 +73,7 @@ theorem spectralRisk_mono (s : Finset ι) (φ Q Q' : ι → ℝ)
     (hφ : ∀ i ∈ s, 0 ≤ φ i) (hQ : ∀ i ∈ s, Q i ≤ Q' i) :
     spectralRiskFinite s φ Q ≤ spectralRiskFinite s φ Q' := by
   unfold spectralRiskFinite
-  exact Finset.sum_le_sum fun i hi =>
+  exact Finset.sum_le_sum fun i hi ↦
     mul_le_mul_of_nonneg_left (hQ i hi) (hφ i hi)
 
 /-- **Convex combination of normalized spectra remains normalized**:
@@ -92,10 +92,10 @@ by the convex combination of the underlying weight functions. -/
 theorem spectralRisk_convex_combination
     (s : Finset ι) (φ ψ : ι → ℝ) (Q : ι → ℝ) (t : ℝ) :
     t * spectralRiskFinite s φ Q + (1 - t) * spectralRiskFinite s ψ Q =
-      spectralRiskFinite s (fun i => t * φ i + (1 - t) * ψ i) Q := by
+      spectralRiskFinite s (fun i ↦ t * φ i + (1 - t) * ψ i) Q := by
   unfold spectralRiskFinite
   rw [Finset.mul_sum, Finset.mul_sum, ← Finset.sum_add_distrib]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
+  refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   ring
 
 end MathFin

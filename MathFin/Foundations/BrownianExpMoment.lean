@@ -50,38 +50,38 @@ include hB
 /-- `exp(c · B_s)` is integrable: the Gaussian-law-transfer base stone
 `integrable_exp_mul_of_hasLaw` at the marginal law `B_s ~ N(0, s)`. -/
 lemma integrable_exp_mul_eval (s : ℝ≥0) (c : ℝ) :
-    Integrable (fun ω => Real.exp (c * B s ω)) μ :=
+    Integrable (fun ω ↦ Real.exp (c * B s ω)) μ :=
   integrable_exp_mul_of_hasLaw (hB.hasLaw_eval s) c
 
 /-- The Brownian marginal MGF: `∫ exp(c · B_s) ∂μ = exp(c² s / 2)`, the gaussianReal MGF
 `integral_exp_mul_gaussianReal_zero` transferred along `B_s ~ N(0, s)`. -/
 lemma integral_exp_mul_eval (s : ℝ≥0) (c : ℝ) :
     ∫ ω, Real.exp (c * B s ω) ∂μ = Real.exp (c ^ 2 * (s : ℝ) / 2) := by
-  have hg : AEStronglyMeasurable (fun x : ℝ => Real.exp (c * x)) (Measure.map (B s) μ) :=
+  have hg : AEStronglyMeasurable (fun x : ℝ ↦ Real.exp (c * x)) (Measure.map (B s) μ) :=
     (Real.continuous_exp.comp (continuous_const.mul continuous_id)).aestronglyMeasurable
   rw [(integral_map (hB.hasLaw_eval s).aemeasurable hg).symm, (hB.hasLaw_eval s).map_eq,
     integral_exp_mul_gaussianReal_zero]
 
 /-- `exp(c · B_s) ∈ L²(μ)`: its square is `exp(2c · B_s)`, integrable by the marginal MGF. -/
 lemma memLp_exp_mul_eval (s : ℝ≥0) (c : ℝ) :
-    MemLp (fun ω => Real.exp (c * B s ω)) 2 μ := by
-  have hmeas : AEStronglyMeasurable (fun ω => Real.exp (c * B s ω)) μ :=
+    MemLp (fun ω ↦ Real.exp (c * B s ω)) 2 μ := by
+  have hmeas : AEStronglyMeasurable (fun ω ↦ Real.exp (c * B s ω)) μ :=
     ((Real.continuous_exp.comp (continuous_const.mul continuous_id)).measurable.comp_aemeasurable
       (hB.hasLaw_eval s).aemeasurable).aestronglyMeasurable
   rw [memLp_two_iff_integrable_sq hmeas]
-  have hsq : (fun ω => Real.exp (c * B s ω) ^ 2) = (fun ω => Real.exp (2 * c * B s ω)) := by
+  have hsq : (fun ω ↦ Real.exp (c * B s ω) ^ 2) = (fun ω ↦ Real.exp (2 * c * B s ω)) := by
     funext ω; rw [← Real.exp_nat_mul]; congr 1; push_cast; ring
   rw [hsq]
   exact integrable_exp_mul_eval hB s (2 * c)
 
 /-- `exp(c · |B_s|) ∈ L²(μ)`: dominated by `exp(c · B_s) + exp(−c · B_s) ∈ L²`. -/
 lemma memLp_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
-    MemLp (fun ω => Real.exp (c * |B s ω|)) 2 μ := by
-  have hmeas : AEStronglyMeasurable (fun ω => Real.exp (c * |B s ω|)) μ :=
+    MemLp (fun ω ↦ Real.exp (c * |B s ω|)) 2 μ := by
+  have hmeas : AEStronglyMeasurable (fun ω ↦ Real.exp (c * |B s ω|)) μ :=
     ((Real.continuous_exp.comp (continuous_const.mul continuous_abs)).measurable.comp_aemeasurable
       (hB.hasLaw_eval s).aemeasurable).aestronglyMeasurable
   refine ((memLp_exp_mul_eval hB s c).add (memLp_exp_mul_eval hB s (-c))).mono hmeas
-    (ae_of_all _ fun ω => ?_)
+    (ae_of_all _ fun ω ↦ ?_)
   simp only [Pi.add_apply]
   rw [Real.norm_eq_abs, Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _),
     abs_of_nonneg (by positivity : (0 : ℝ) ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω))]
@@ -89,20 +89,20 @@ lemma memLp_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
 
 /-- `exp(c · |B_s|)` is integrable: dominated by `exp(c·B_s) + exp(−c·B_s) ∈ L¹`. -/
 lemma integrable_exp_abs_eval (s : ℝ≥0) (c : ℝ) :
-    Integrable (fun ω => Real.exp (c * |B s ω|)) μ :=
+    Integrable (fun ω ↦ Real.exp (c * |B s ω|)) μ :=
   ((integrable_exp_mul_eval hB s c).add (integrable_exp_mul_eval hB s (-c))).mono'
     ((Real.continuous_exp.comp (continuous_const.mul continuous_abs)).measurable.comp_aemeasurable
       (hB.hasLaw_eval s).aemeasurable).aestronglyMeasurable
-    (ae_of_all _ fun ω => by
+    (ae_of_all _ fun ω ↦ by
       rw [Real.norm_eq_abs, abs_of_nonneg (Real.exp_nonneg _)]; exact exp_abs_le_add c (B s ω))
 
 /-- Uniform exponential-moment bound: `∫ exp(c · |B_s|) ∂μ ≤ 2 · exp(c² s / 2)`. -/
 lemma integral_exp_abs_eval_le (s : ℝ≥0) (c : ℝ) :
     ∫ ω, Real.exp (c * |B s ω|) ∂μ ≤ 2 * Real.exp (c ^ 2 * (s : ℝ) / 2) := by
   have hbnd : ∀ ω, Real.exp (c * |B s ω|)
-      ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω) := fun ω => exp_abs_le_add c (B s ω)
-  have hlhs_int : Integrable (fun ω => Real.exp (c * |B s ω|)) μ := integrable_exp_abs_eval hB s c
-  have hsum_int : Integrable (fun ω => Real.exp (c * B s ω) + Real.exp (-c * B s ω)) μ :=
+      ≤ Real.exp (c * B s ω) + Real.exp (-c * B s ω) := fun ω ↦ exp_abs_le_add c (B s ω)
+  have hlhs_int : Integrable (fun ω ↦ Real.exp (c * |B s ω|)) μ := integrable_exp_abs_eval hB s c
+  have hsum_int : Integrable (fun ω ↦ Real.exp (c * B s ω) + Real.exp (-c * B s ω)) μ :=
     (integrable_exp_mul_eval hB s c).add (integrable_exp_mul_eval hB s (-c))
   calc ∫ ω, Real.exp (c * |B s ω|) ∂μ
       ≤ ∫ ω, (Real.exp (c * B s ω) + Real.exp (-c * B s ω)) ∂μ :=

@@ -150,7 +150,7 @@ lemma spotPath_update_succ (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) (b : B
   rw [Finset.prod_range_succ]
   have h_prefix : ∏ i ∈ Finset.range k, (if Function.update ω k b i then u else d)
       = ∏ i ∈ Finset.range k, (if ω i then u else d) :=
-    Finset.prod_congr rfl fun i hi => by
+    Finset.prod_congr rfl fun i hi ↦ by
       rw [Function.update_of_ne (Finset.mem_range.1 hi).ne]
   rw [h_prefix]
   simp [mul_assoc]
@@ -167,10 +167,10 @@ lemma spotPath_update_succ_false (S₀ u d : ℝ) (k : ℕ) (ω : ℕ → Bool) 
 
 /-- The spot path is adapted: `S_k` depends only on the first `k` flips. -/
 lemma pathAdaptedAt_spotPath (S₀ u d : ℝ) (k : ℕ) :
-    PathAdaptedAt k (spotPath S₀ u d k) := fun ω ω' h => by
+    PathAdaptedAt k (spotPath S₀ u d k) := fun ω ω' h ↦ by
   unfold spotPath
   congr 1
-  exact Finset.prod_congr rfl fun i hi => by rw [h i (Finset.mem_range.1 hi)]
+  exact Finset.prod_congr rfl fun i hi ↦ by rw [h i (Finset.mem_range.1 hi)]
 
 /-- **Snell envelope, by remaining steps**: `snellAux q Z j k` is the envelope
 value at time `k` with `j` steps to the horizon. `j = 0`: the payoff;
@@ -209,14 +209,14 @@ theorem pathAdaptedAt_snellAux (hZ : ∀ n, PathAdaptedAt n (Z n)) :
     ∀ j k, PathAdaptedAt k (snellAux q Z j k) := by
   intro j
   induction j with
-  | zero => exact fun k => hZ k
+  | zero => exact fun k ↦ hZ k
   | succ j ih =>
     intro k ω ω' hω
     have h_child : ∀ b : Bool,
         snellAux q Z j (k + 1) (Function.update ω k b)
           = snellAux q Z j (k + 1) (Function.update ω' k b) := by
       intro b
-      refine ih (k + 1) _ _ fun i hi => ?_
+      refine ih (k + 1) _ _ fun i hi ↦ ?_
       rcases eq_or_ne i k with rfl | hi'
       · simp
       · rw [Function.update_of_ne hi', Function.update_of_ne hi']
@@ -240,7 +240,7 @@ theorem snellAux_le_of_supermartingale_of_ge (hq0 : 0 ≤ q) (hq1 : q ≤ 1)
     ∀ j k ω, snellAux q Z j k ω ≤ U k ω := by
   intro j
   induction j with
-  | zero => exact fun k ω => hU_ge k ω
+  | zero => exact fun k ω ↦ hU_ge k ω
   | succ j ih =>
     intro k ω
     refine max_le (hU_ge k ω) ?_
@@ -265,7 +265,7 @@ through the Bellman `max`. -/
 theorem snellAux_eq_discounted_americanPrice (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ) :
     ∀ j k ω,
       snellAux (crrUpProb u d r)
-        (fun n ω => Real.exp (-r * n) * g (spotPath S₀ u d n ω)) j k ω
+        (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) j k ω
       = Real.exp (-r * k) * americanPrice u d r g j (spotPath S₀ u d k ω) := by
   intro j
   induction j with
@@ -273,10 +273,10 @@ theorem snellAux_eq_discounted_americanPrice (u d r : ℝ) (g : ℝ → ℝ) (S�
   | succ j ih =>
     intro k ω
     have h_cont : crrUpProb u d r * snellAux (crrUpProb u d r)
-          (fun n ω => Real.exp (-r * n) * g (spotPath S₀ u d n ω)) j (k + 1)
+          (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) j (k + 1)
           (Function.update ω k true)
         + (1 - crrUpProb u d r) * snellAux (crrUpProb u d r)
-          (fun n ω => Real.exp (-r * n) * g (spotPath S₀ u d n ω)) j (k + 1)
+          (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) j (k + 1)
           (Function.update ω k false)
         = Real.exp (-r * k) * binomialOptionPriceOnePeriod u d r
             (americanPrice u d r g j (spotPath S₀ u d k ω * u))
@@ -322,14 +322,14 @@ theorem discounted_americanPrice_supermartingale (u d r : ℝ) (g : ℝ → ℝ)
           americanPrice u d r g (N - (k + 1))
             (spotPath S₀ u d (k + 1) (Function.update ω k false)))
       = crrUpProb u d r * snellAux (crrUpProb u d r)
-            (fun n ω => Real.exp (-r * n) * g (spotPath S₀ u d n ω)) (N - (k + 1)) (k + 1)
+            (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) (N - (k + 1)) (k + 1)
             (Function.update ω k true)
           + (1 - crrUpProb u d r) * snellAux (crrUpProb u d r)
-            (fun n ω => Real.exp (-r * n) * g (spotPath S₀ u d n ω)) (N - (k + 1)) (k + 1)
+            (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) (N - (k + 1)) (k + 1)
             (Function.update ω k false) := by
         rw [snellAux_eq_discounted_americanPrice, snellAux_eq_discounted_americanPrice]
     _ ≤ snellAux (crrUpProb u d r)
-          (fun n ω => Real.exp (-r * n) * g (spotPath S₀ u d n ω)) ((N - (k + 1)) + 1) k ω :=
+          (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) ((N - (k + 1)) + 1) k ω :=
         snellAux_supermartingale _ _ _ _ _
     _ = Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω) := by
         rw [← hjk, snellAux_eq_discounted_americanPrice]
@@ -343,7 +343,7 @@ theorem discounted_intrinsic_le_americanPrice (u d r : ℝ) (g : ℝ → ℝ) (S
       ≤ Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω) := by
   rw [← snellAux_eq_discounted_americanPrice]
   exact snellAux_ge_payoff (crrUpProb u d r)
-    (fun n ω => Real.exp (-r * n) * g (spotPath S₀ u d n ω)) (N - k) k ω
+    (fun n ω ↦ Real.exp (-r * n) * g (spotPath S₀ u d n ω)) (N - k) k ω
 
 /-- **Snell minimality at the American price**: any pathwise supermartingale
 `U` (w.r.t. the risk-neutral node average) dominating the discounted intrinsic
@@ -371,8 +371,8 @@ value at time `k` depends only on the first `k` flips — its
 the American price. -/
 lemma pathAdaptedAt_discounted_americanPrice (u d r : ℝ) (g : ℝ → ℝ) (S₀ : ℝ)
     (N k : ℕ) :
-    PathAdaptedAt k (fun ω => Real.exp (-r * k) *
-      americanPrice u d r g (N - k) (spotPath S₀ u d k ω)) := fun ω ω' h => by
+    PathAdaptedAt k (fun ω ↦ Real.exp (-r * k) *
+      americanPrice u d r g (N - k) (spotPath S₀ u d k ω)) := fun ω ω' h ↦ by
   show Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω)
       = Real.exp (-r * k) * americanPrice u d r g (N - k) (spotPath S₀ u d k ω')
   rw [pathAdaptedAt_spotPath S₀ u d k ω ω' h]

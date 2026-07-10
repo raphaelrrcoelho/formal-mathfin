@@ -134,8 +134,8 @@ theorem pricingKernel_two_state_linear
   unfold pricingKernel_two_state
   have h := statePricePricing_add Finset.univ
       (statePrices_two_state z_up z_down rT)
-      (fun i => α * (![X_up, X_down] : Fin 2 → ℝ) i)
-      (fun i => β * (![Y_up, Y_down] : Fin 2 → ℝ) i)
+      (fun i ↦ α * (![X_up, X_down] : Fin 2 → ℝ) i)
+      (fun i ↦ β * (![Y_up, Y_down] : Fin 2 → ℝ) i)
   have hα := statePricePricing_smul Finset.univ
       (statePrices_two_state z_up z_down rT) (![X_up, X_down] : Fin 2 → ℝ) α
   have hβ := statePricePricing_smul Finset.univ
@@ -143,7 +143,7 @@ theorem pricingKernel_two_state_linear
   calc statePricePricing Finset.univ (statePrices_two_state z_up z_down rT)
         ![α * X_up + β * Y_up, α * X_down + β * Y_down]
       = statePricePricing Finset.univ (statePrices_two_state z_up z_down rT)
-          (fun i => α * (![X_up, X_down] : Fin 2 → ℝ) i +
+          (fun i ↦ α * (![X_up, X_down] : Fin 2 → ℝ) i +
             β * (![Y_up, Y_down] : Fin 2 → ℝ) i) := by
         congr 1
         funext i
@@ -161,7 +161,7 @@ theorem pricingKernel_two_state_bond
     (z_up z_down rT : ℝ) (h_up : 0 < z_up) (h_down : z_down < 0) :
     pricingKernel_two_state z_up z_down rT 1 1 = Real.exp (-rT) := by
   unfold pricingKernel_two_state
-  rw [show (![(1 : ℝ), 1] : Fin 2 → ℝ) = fun _ => (1 : ℝ) from by
+  rw [show (![(1 : ℝ), 1] : Fin 2 → ℝ) = fun _ ↦ (1 : ℝ) from by
     funext i; fin_cases i <;> rfl]
   rw [statePricePricing_one, Fin.sum_univ_two]
   exact statePrices_two_state_sum_eq_bond z_up z_down rT h_up h_down
@@ -176,8 +176,8 @@ theorem pricingKernel_two_state_nonneg
     0 ≤ pricingKernel_two_state z_up z_down rT X_up X_down := by
   unfold pricingKernel_two_state
   refine statePricePricing_nonneg _ _ _
-      (fun i _ => statePrices_two_state_nonneg z_up z_down rT h_up h_down i)
-      (fun i _ => ?_)
+      (fun i _ ↦ statePrices_two_state_nonneg z_up z_down rT h_up h_down i)
+      (fun i _ ↦ ?_)
   fin_cases i
   · exact hXu
   · exact hXd
@@ -204,6 +204,6 @@ theorem stateprice_call_butterfly_nonneg
         + (∑ i, statePrices_two_state z_up z_down rT i * max (S i - K₃) 0) :=
   callPrice_finiteState_butterfly_nonneg Finset.univ S
     (statePrices_two_state z_up z_down rT)
-    (fun i _ => statePrices_two_state_nonneg z_up z_down rT h_up h_down i) K₁ K₃
+    (fun i _ ↦ statePrices_two_state_nonneg z_up z_down rT h_up h_down i) K₁ K₃
 
 end MathFin

@@ -102,17 +102,17 @@ theorem noArbitrage_of_emm_multi {N M : ℕ} (z : Fin M → Fin N → ℝ)
     -- then both sides are ∑ ∑ over indexes that swap via Finset.sum_comm.
     simp_rw [Finset.mul_sum]
     rw [Finset.sum_comm]
-    refine Finset.sum_congr rfl fun k _ => ?_
-    refine Finset.sum_congr rfl fun i _ => ?_
+    refine Finset.sum_congr rfl fun k _ ↦ ?_
+    refine Finset.sum_congr rfl fun i _ ↦ ?_
     ring
   have h_zero : ∑ i, q i * (∑ k, θ k * z k i) = 0 := by
     rw [h_swap]
-    refine Finset.sum_eq_zero fun k _ => ?_
+    refine Finset.sum_eq_zero fun k _ ↦ ?_
     rw [h_q_z k, mul_zero]
   -- But each term ≥ 0 and the i₀-term is > 0, so the sum is > 0. Contradiction.
   have h_term_nn : ∀ i ∈ (Finset.univ : Finset (Fin N)),
       0 ≤ q i * (∑ k, θ k * z k i) :=
-    fun i _ => mul_nonneg (hq_pos i).le (h_nn i)
+    fun i _ ↦ mul_nonneg (hq_pos i).le (h_nn i)
   have h_term_pos : 0 < q i₀ * (∑ k, θ k * z k i₀) :=
     mul_pos (hq_pos i₀) h_pos
   have h_sum_pos : 0 < ∑ i, q i * (∑ k, θ k * z k i) :=
@@ -140,23 +140,23 @@ theorem hasEMM_multi_of_not_hasArbitrage {N M : ℕ} [NeZero N]
       have h1 : (∑ k, c k • z k) i = v i := by rw [hc]
       rw [Finset.sum_apply] at h1
       simpa only [Pi.smul_apply, smul_eq_mul] using h1
-    refine absurd ⟨c, fun i => ?_, ?_⟩ h
+    refine absurd ⟨c, fun i ↦ ?_, ?_⟩ h
     · rw [hpayoff i]; exact hsimplex.1 i
     · obtain ⟨i₀, hi₀⟩ : ∃ i₀, 0 < v i₀ := by
         by_contra hcon
         simp only [not_exists, not_lt] at hcon
-        have hle : ∑ i, v i ≤ 0 := Finset.sum_nonpos fun i _ => hcon i
+        have hle : ∑ i, v i ≤ 0 := Finset.sum_nonpos fun i _ ↦ hcon i
         rw [hsimplex.2] at hle; linarith
       exact ⟨i₀, by rw [hpayoff i₀]; exact hi₀⟩
   obtain ⟨q, hq_pos, hq_dual⟩ := exists_pos_dual_of_disjoint_stdSimplex V hdisj
-  have hzk : ∀ k, (∑ i, q i * z k i) = 0 := fun k =>
+  have hzk : ∀ k, (∑ i, q i * z k i) = 0 := fun k ↦
     hq_dual (z k) (Submodule.subset_span ⟨k, rfl⟩)
   set Z : ℝ := ∑ i, q i with hZdef
-  have hZ_pos : 0 < Z := Finset.sum_pos (fun i _ => hq_pos i) Finset.univ_nonempty
-  refine ⟨fun i => q i / Z, fun i => div_pos (hq_pos i) hZ_pos, ?_, fun k => ?_⟩
+  have hZ_pos : 0 < Z := Finset.sum_pos (fun i _ ↦ hq_pos i) Finset.univ_nonempty
+  refine ⟨fun i ↦ q i / Z, fun i ↦ div_pos (hq_pos i) hZ_pos, ?_, fun k ↦ ?_⟩
   · rw [← Finset.sum_div, ← hZdef, div_self hZ_pos.ne']
-  · have hcongr : ∀ i, (q i / Z) * z k i = (q i * z k i) / Z := fun i => by ring
-    rw [Finset.sum_congr rfl (fun i _ => hcongr i), ← Finset.sum_div, hzk k, zero_div]
+  · have hcongr : ∀ i, (q i / Z) * z k i = (q i * z k i) / Z := fun i ↦ by ring
+    rw [Finset.sum_congr rfl (fun i _ ↦ hcongr i), ← Finset.sum_div, hzk k, zero_div]
 
 /-- **Multi-state FTAP biconditional**: an EMM exists iff there is no
 arbitrage. -/

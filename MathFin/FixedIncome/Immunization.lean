@@ -59,11 +59,11 @@ noncomputable def bondPortfolioDur
 `−bondPortfolioDur`). -/
 lemma hasDerivAt_bondPortfolioValue_r
     {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :
-    HasDerivAt (fun r' => bondPortfolioValue s w T t r')
+    HasDerivAt (fun r' ↦ bondPortfolioValue s w T t r')
       (-bondPortfolioDur s w T t r) r := by
   unfold bondPortfolioValue bondPortfolioDur
   have h_each : ∀ i ∈ s, HasDerivAt
-      (fun r' => w i * Real.exp (-(r' * (T i - t))))
+      (fun r' ↦ w i * Real.exp (-(r' * (T i - t))))
       (-(w i * (T i - t) * Real.exp (-(r * (T i - t))))) r := by
     intro i _
     -- each summand's rate-derivative *is* the ZCB duration atom
@@ -100,7 +100,7 @@ lemma bondPortfolio_immunization_first_order
     (t r : ℝ)
     (h_match : bondPortfolioDur sA wA TA t r =
                bondPortfolioDur sL wL TL t r) :
-    HasDerivAt (fun r' =>
+    HasDerivAt (fun r' ↦
         bondPortfolioValue sA wA TA t r' -
         bondPortfolioValue sL wL TL t r')
       0 r := by

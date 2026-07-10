@@ -71,8 +71,8 @@ each `Ioi`, and the left limit at `x` is `f x` (continuity gives the
 `𝓝[<] x`-limit). -/
 private lemma isCadlag_of_continuous {ι E : Type*} [TopologicalSpace ι] [PartialOrder ι]
     [TopologicalSpace E] {f : ι → E} (hf : Continuous f) : IsCadlag f where
-  right_continuous := fun _ => hf.continuousWithinAt
-  left_limit := fun x => ⟨f x, hf.continuousWithinAt.tendsto⟩
+  right_continuous := fun _ ↦ hf.continuousWithinAt
+  left_limit := fun x ↦ ⟨f x, hf.continuousWithinAt.tendsto⟩
 
 omit hB in
 /-- **Pathwise continuity of the elementary Itô integral.** Given continuous
@@ -81,11 +81,11 @@ finite sum `∑_p V(p)ω·(B_{p.2∧t}ω − B_{p.1∧t}ω)` (`itoSimpleProcess_
 summand the continuous path `B(·)ω` composed with the continuous clamp
 `t ↦ min p.i t`. -/
 theorem itoSimpleProcess_pathContinuous (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) (ω : Ω) :
-    Continuous fun t : ℝ≥0 => itoSimpleProcess hBmeas V t ω := by
-  simp_rw [fun t => itoSimpleProcess_apply hBmeas V t ω, Finsupp.sum]
-  refine continuous_finsetSum _ fun p _ => ?_
+    Continuous fun t : ℝ≥0 ↦ itoSimpleProcess hBmeas V t ω := by
+  simp_rw [fun t ↦ itoSimpleProcess_apply hBmeas V t ω, Finsupp.sum]
+  refine continuous_finsetSum _ fun p _ ↦ ?_
   refine continuous_const.mul (Continuous.sub ?_ ?_)
   · exact (hBcont ω).comp (continuous_const.min continuous_id)
   · exact (hBcont ω).comp (continuous_const.min continuous_id)
@@ -96,12 +96,12 @@ B1a's martingale property (`itoSimpleProcess_isMartingale`) with the continuous
 `Martingale.IsLocalMartingale`, so `(V ● B)` lands in the upstream
 local-martingale class. -/
 theorem itoSimpleProcess_isLocalMartingale (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (V : SimpleProcess ℝ (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas)) :
-    IsLocalMartingale (fun t ω => itoSimpleProcess hBmeas V t ω)
+    IsLocalMartingale (fun t ω ↦ itoSimpleProcess hBmeas V t ω)
       (ItoIntegralL2.natFiltration hBmeas) μ :=
   Martingale.IsLocalMartingale (itoSimpleProcess_isMartingale hB hBmeas V)
-    (fun ω => isCadlag_of_continuous (itoSimpleProcess_pathContinuous hBmeas hBcont V ω))
+    (fun ω ↦ isCadlag_of_continuous (itoSimpleProcess_pathContinuous hBmeas hBcont V ω))
 
 end ItoIntegralProcess
 end MathFin

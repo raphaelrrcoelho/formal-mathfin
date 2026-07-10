@@ -45,7 +45,7 @@ include hB
 
 /-- For `s ≤ t : ℝ≥0`, the increment `B t − B s` has law `gaussianReal 0 (t − s)`. -/
 private lemma hasLaw_increment {s t : ℝ≥0} (hst : s ≤ t) :
-    HasLaw (fun ω => B t ω - B s ω) (gaussianReal 0 (t - s)) μ := by
+    HasLaw (fun ω ↦ B t ω - B s ω) (gaussianReal 0 (t - s)) μ := by
   have hL := hB.hasLaw_sub t s
   have hv : nndist (t : ℝ) (s : ℝ) = (t - s : ℝ≥0) := by
     apply NNReal.coe_injective
@@ -61,13 +61,13 @@ private lemma integral_increment_eq_zero {s t : ℝ≥0} (hst : s ≤ t) :
 
 /-- The increment `B t − B s` has variance `t − s`. -/
 private lemma variance_increment {s t : ℝ≥0} (hst : s ≤ t) :
-    Var[fun ω => B t ω - B s ω; μ] = ((t - s : ℝ≥0) : ℝ) := by
+    Var[fun ω ↦ B t ω - B s ω; μ] = ((t - s : ℝ≥0) : ℝ) := by
   have h := (hasLaw_increment hB hst).variance_eq
   simpa using h.trans variance_id_gaussianReal
 
 /-- The increment `B t − B s` is in `L²`. -/
 private lemma memLp_increment_two (s t : ℝ≥0) :
-    MemLp (fun ω => B t ω - B s ω) 2 μ :=
+    MemLp (fun ω ↦ B t ω - B s ω) 2 μ :=
   hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 
 /-- Wiener step-integral isometry. For a pre-Brownian motion `B`, scalar `c`,
@@ -101,30 +101,30 @@ theorem wiener_finset_isometry
     ∫ ω, (∑ k : Fin n, c k * (B (p k.succ) ω - B (p k.castSucc) ω)) ^ 2 ∂μ
       = ∑ k : Fin n, c k ^ 2 * ((p k.succ - p k.castSucc : ℝ≥0) : ℝ) := by
   set X : Fin n → Ω → ℝ :=
-    fun k ω => c k * (B (p k.succ) ω - B (p k.castSucc) ω) with hX
+    fun k ω ↦ c k * (B (p k.succ) ω - B (p k.castSucc) ω) with hX
   have hpk : ∀ k : Fin n, p k.castSucc ≤ p k.succ :=
-    fun k => hp (Fin.castSucc_le_succ k)
-  have h_memLp : ∀ k, MemLp (X k) 2 μ := fun k =>
+    fun k ↦ hp (Fin.castSucc_le_succ k)
+  have h_memLp : ∀ k, MemLp (X k) 2 μ := fun k ↦
     (memLp_increment_two hB (p k.castSucc) (p k.succ)).const_mul (c k)
   have h_pair :
-      Set.Pairwise (↑(Finset.univ : Finset (Fin n))) (fun i j => X i ⟂ᵢ[μ] X j) := by
+      Set.Pairwise (↑(Finset.univ : Finset (Fin n))) (fun i j ↦ X i ⟂ᵢ[μ] X j) := by
     intro i _ j _ hij
     exact ((hB.hasIndepIncrements n p hp).comp
-      (fun k x => c k * x) (fun _ => measurable_const.mul measurable_id)).indepFun hij
+      (fun k x ↦ c k * x) (fun _ ↦ measurable_const.mul measurable_id)).indepFun hij
   have h_mean_sum : ∫ ω, (∑ k : Fin n, X k) ω ∂μ = 0 := by
     simp_rw [Finset.sum_apply, integral_finsetSum _
-      (fun k _ => (h_memLp k).integrable one_le_two)]
-    exact Finset.sum_eq_zero fun k _ => by
+      (fun k _ ↦ (h_memLp k).integrable one_le_two)]
+    exact Finset.sum_eq_zero fun k _ ↦ by
       simp [hX, integral_const_mul, integral_increment_eq_zero hB (hpk k)]
   calc ∫ ω, (∑ k : Fin n, X k ω) ^ 2 ∂μ
       = ∫ ω, ((∑ k : Fin n, X k) ω) ^ 2 ∂μ := by simp_rw [Finset.sum_apply]
     _ = Var[∑ k : Fin n, X k; μ] :=
         (variance_of_integral_eq_zero
-          (Finset.aemeasurable_sum _ fun k _ => (h_memLp k).aemeasurable) h_mean_sum).symm
+          (Finset.aemeasurable_sum _ fun k _ ↦ (h_memLp k).aemeasurable) h_mean_sum).symm
     _ = ∑ k : Fin n, Var[X k; μ] :=
-        IndepFun.variance_sum (fun k _ => h_memLp k) h_pair
+        IndepFun.variance_sum (fun k _ ↦ h_memLp k) h_pair
     _ = ∑ k : Fin n, c k ^ 2 * ((p k.succ - p k.castSucc : ℝ≥0) : ℝ) :=
-        Finset.sum_congr rfl fun k _ => by
+        Finset.sum_congr rfl fun k _ ↦ by
           simp [hX, variance_const_mul, variance_increment hB (hpk k)]
 
 end IsPreBrownianReal
@@ -147,10 +147,10 @@ Itô-CLM, and predictable-Itô L² isometries. -/
 theorem norm_extendOfNorm_eq_of_isometry
     (h_dense : DenseRange e) (h_isom : ∀ x, ‖f x‖ = ‖e x‖) (y : Eₗ) :
     ‖f.extendOfNorm e y‖ = ‖y‖ := by
-  have h_on_range : ∀ x, ‖f.extendOfNorm e (e x)‖ = ‖e x‖ := fun x => by
-    rw [LinearMap.extendOfNorm_eq h_dense ⟨1, fun z => by rw [one_mul]; exact (h_isom z).le⟩,
+  have h_on_range : ∀ x, ‖f.extendOfNorm e (e x)‖ = ‖e x‖ := fun x ↦ by
+    rw [LinearMap.extendOfNorm_eq h_dense ⟨1, fun z ↦ by rw [one_mul]; exact (h_isom z).le⟩,
         h_isom]
-  exact h_dense.induction_on (p := fun z => ‖f.extendOfNorm e z‖ = ‖z‖) y
+  exact h_dense.induction_on (p := fun z ↦ ‖f.extendOfNorm e z‖ = ‖z‖) y
     (isClosed_eq (continuous_norm.comp (f.extendOfNorm e).continuous) continuous_norm)
     h_on_range
 

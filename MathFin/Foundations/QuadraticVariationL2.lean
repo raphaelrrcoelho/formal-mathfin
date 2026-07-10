@@ -60,9 +60,9 @@ theorem integral_increment_pow4 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
     apply NNReal.coe_injective
     rw [coe_nndist, Real.dist_eq, NNReal.coe_sub ht,
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
-  have hlaw : HasLaw (fun ω => B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
+  have hlaw : HasLaw (fun ω ↦ B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
     rw [← hv]; exact hB.hasLaw_sub t₁ t₀
-  have hcomp := hlaw.integral_comp (f := fun x : ℝ => x ^ 4)
+  have hcomp := hlaw.integral_comp (f := fun x : ℝ ↦ x ^ 4)
     (measurable_id.pow_const 4).aestronglyMeasurable
   simp only [Function.comp_def] at hcomp
   rw [hcomp, integral_pow4_gaussianReal, NNReal.coe_sub ht]
@@ -77,10 +77,10 @@ theorem integral_increment_sq_centered {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁
     apply NNReal.coe_injective
     rw [coe_nndist, Real.dist_eq, NNReal.coe_sub ht,
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
-  have hlaw : HasLaw (fun ω => B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
+  have hlaw : HasLaw (fun ω ↦ B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
     rw [← hv]; exact hB.hasLaw_sub t₁ t₀
   have hcomp := hlaw.integral_comp
-    (f := fun y : ℝ => (y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) ^ 2) (by fun_prop)
+    (f := fun y : ℝ ↦ (y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) ^ 2) (by fun_prop)
   simp only [Function.comp_def] at hcomp
   rw [integral_sq_sub_var_sq_gaussianReal] at hcomp
   rw [NNReal.coe_sub ht] at hcomp
@@ -90,12 +90,12 @@ omit hB in
 /-- A squared increment over `[a, b] ⊆ [0, c]`, shifted by any constant, is `𝓕_c`-adapted:
 it is built from `B a, B b` (`a, b ≤ c`) by difference, square, and subtraction. -/
 theorem adaptedAt_increment_sq_sub {a b c : ℝ≥0} (hac : a ≤ c) (hbc : b ≤ c) (r : ℝ) :
-    AdaptedAt B c (fun ω => (B b ω - B a ω) ^ 2 - r) := by
-  have hincr : AdaptedAt B c (fun ω => B b ω - B a ω) :=
+    AdaptedAt B c (fun ω ↦ (B b ω - B a ω) ^ 2 - r) := by
+  have hincr : AdaptedAt B c (fun ω ↦ B b ω - B a ω) :=
     (adaptedAt_eval hbc).sub (adaptedAt_eval hac)
-  have hsq : AdaptedAt B c (fun ω => (B b ω - B a ω) ^ 2) := by
+  have hsq : AdaptedAt B c (fun ω ↦ (B b ω - B a ω) ^ 2) := by
     simpa only [← pow_two] using hincr.mul hincr
-  exact hsq.sub ⟨fun _ => r, measurable_const, rfl⟩
+  exact hsq.sub ⟨fun _ ↦ r, measurable_const, rfl⟩
 
 /-- **A centered squared Brownian increment has mean zero**: `E[(ΔB)² − (t₁−t₀)] = 0`
 for `t₀ ≤ t₁`. The law-transfer of `integral_sq_sub_var_gaussianReal` — i.e. `E[(ΔB)²] = t₁−t₀`.
@@ -106,10 +106,10 @@ theorem integral_increment_centered_mean {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t�
     apply NNReal.coe_injective
     rw [coe_nndist, Real.dist_eq, NNReal.coe_sub ht,
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
-  have hlaw : HasLaw (fun ω => B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
+  have hlaw : HasLaw (fun ω ↦ B t₁ ω - B t₀ ω) (gaussianReal 0 (t₁ - t₀)) μ := by
     rw [← hv]; exact hB.hasLaw_sub t₁ t₀
   have hcomp := hlaw.integral_comp
-    (f := fun y : ℝ => y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) (by fun_prop)
+    (f := fun y : ℝ ↦ y ^ 2 - ((t₁ - t₀ : ℝ≥0) : ℝ)) (by fun_prop)
   simp only [Function.comp_def] at hcomp
   rw [integral_sq_sub_var_gaussianReal] at hcomp
   rw [NNReal.coe_sub ht] at hcomp
@@ -119,9 +119,9 @@ theorem integral_increment_centered_mean {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t�
 moments. Needed for the `L²`-integrability of products of squared increments in the
 quadratic-variation assembly. -/
 theorem memLp_increment_four (t₀ t₁ : ℝ≥0) :
-    MemLp (fun ω => B t₁ ω - B t₀ ω) 4 μ := by
-  have hmap : MemLp (id : ℝ → ℝ) 4 (Measure.map (fun ω => B t₁ ω - B t₀ ω) μ) := by
-    rw [show Measure.map (fun ω => B t₁ ω - B t₀ ω) μ
+    MemLp (fun ω ↦ B t₁ ω - B t₀ ω) 4 μ := by
+  have hmap : MemLp (id : ℝ → ℝ) 4 (Measure.map (fun ω ↦ B t₁ ω - B t₀ ω) μ) := by
+    rw [show Measure.map (fun ω ↦ B t₁ ω - B t₀ ω) μ
           = gaussianReal 0 (nndist (t₁ : ℝ) (t₀ : ℝ)) from (hB.hasLaw_sub t₁ t₀).map_eq]
     exact memLp_id_gaussianReal (μ := 0) 4
   exact (memLp_map_measure_iff measurable_id.aestronglyMeasurable
@@ -137,22 +137,22 @@ theorem integral_increment_sq_centered_cross (hBmeas : ∀ t, Measurable (B t))
     {a b c d : ℝ≥0} (hab : a ≤ b) (hbc : b ≤ c) (hcd : c ≤ d) :
     ∫ ω, ((B b ω - B a ω) ^ 2 - ((b : ℝ) - a)) * ((B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) ∂μ = 0 := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  set χ : Ω → ℝ := fun ω => (B b ω - B a ω) ^ 2 - ((b : ℝ) - a) with hχdef
+  set χ : Ω → ℝ := fun ω ↦ (B b ω - B a ω) ^ 2 - ((b : ℝ) - a) with hχdef
   have hχ_adapted : AdaptedAt B c χ :=
     adaptedAt_increment_sq_sub (hab.trans hbc) hbc ((b : ℝ) - a)
-  have hindep : IndepFun χ (fun ω => (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) μ := by
+  have hindep : IndepFun χ (fun ω ↦ (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) μ := by
     have h := (adapted_indepFun_increment hB hBmeas hcd hχ_adapted).comp
-      (φ := (id : ℝ → ℝ)) (ψ := fun x => x ^ 2 - ((d : ℝ) - c)) measurable_id (by fun_prop)
+      (φ := (id : ℝ → ℝ)) (ψ := fun x ↦ x ^ 2 - ((d : ℝ) - c)) measurable_id (by fun_prop)
     simpa [Function.comp_def] using h
   have hχm : Measurable χ := hχ_adapted.measurable hBmeas
-  have hYm : Measurable (fun ω => (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) := by fun_prop
+  have hYm : Measurable (fun ω ↦ (B d ω - B c ω) ^ 2 - ((d : ℝ) - c)) := by fun_prop
   rw [hindep.integral_fun_mul_eq_mul_integral hχm.aestronglyMeasurable hYm.aestronglyMeasurable,
       integral_increment_centered_mean hB hcd, mul_zero]
 
 /-- A centered squared Brownian increment is in `L²` (`Yₖ = (ΔB)² − Δt`): the squared
 increment is `L²` since the increment is `L⁴`, and a constant is `L²` on a probability space. -/
 theorem memLp_increment_sq_centered_two (t₀ t₁ : ℝ≥0) (r : ℝ) :
-    MemLp (fun ω => (B t₁ ω - B t₀ ω) ^ 2 - r) 2 μ := by
+    MemLp (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2 - r) 2 μ := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   haveI : ENNReal.HolderTriple 4 4 2 := ⟨by
     have h2 : (2 : ℝ≥0∞) ≠ 0 := by norm_num
@@ -160,9 +160,9 @@ theorem memLp_increment_sq_centered_two (t₀ t₁ : ℝ≥0) (r : ℝ) :
     rw [show (4 : ℝ≥0∞) = 2 * 2 from by norm_num,
       ENNReal.mul_inv (Or.inl h2) (Or.inl ht), ← two_mul, ← mul_assoc,
       ENNReal.mul_inv_cancel h2 ht, one_mul]⟩
-  have hmul : MemLp (fun ω => (B t₁ ω - B t₀ ω) * (B t₁ ω - B t₀ ω)) 2 μ :=
+  have hmul : MemLp (fun ω ↦ (B t₁ ω - B t₀ ω) * (B t₁ ω - B t₀ ω)) 2 μ :=
     (memLp_increment_four hB t₀ t₁).mul (memLp_increment_four hB t₀ t₁)
-  have hsq : MemLp (fun ω => (B t₁ ω - B t₀ ω) ^ 2) 2 μ := by
+  have hsq : MemLp (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 2) 2 μ := by
     simpa only [← pow_two] using hmul
   exact hsq.sub (memLp_const r)
 
@@ -185,13 +185,13 @@ theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   classical
   set Y : ℕ → Ω → ℝ :=
-    fun k ω => (B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k) with hY
-  have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k => memLp_increment_sq_centered_two hB _ _ _
-  have hint : ∀ k l, Integrable (fun ω => Y k ω * Y l ω) μ :=
-    fun k l => (hYL2 k).integrable_mul (hYL2 l)
+    fun k ω ↦ (B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k) with hY
+  have hYL2 : ∀ k, MemLp (Y k) 2 μ := fun k ↦ memLp_increment_sq_centered_two hB _ _ _
+  have hint : ∀ k l, Integrable (fun ω ↦ Y k ω * Y l ω) μ :=
+    fun k l ↦ (hYL2 k).integrable_mul (hYL2 l)
   -- Telescoping: `∑ Δsₖ = sₙ − s₀ = sₙ`, so `∑ (ΔBₖ)² − sₙ = ∑ Yₖ`.
   have htel : ∑ k ∈ Finset.range n, ((s (k + 1) : ℝ) - s k) = (s n : ℝ) := by
-    rw [Finset.sum_range_sub (fun k => (s k : ℝ))]; simp [hs0]
+    rw [Finset.sum_range_sub (fun k ↦ (s k : ℝ))]; simp [hs0]
   have hrw : ∀ ω, ∑ k ∈ Finset.range n, Y k ω
       = (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2) - (s n : ℝ) := by
     intro ω; simp only [hY, Finset.sum_sub_distrib, htel]
@@ -201,7 +201,7 @@ theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
     intro k _ l _ hlk
     rcases lt_or_gt_of_ne hlk with hlt | hgt
     · -- l < k
-      rw [show (fun ω => Y k ω * Y l ω) = fun ω => Y l ω * Y k ω from funext fun ω => mul_comm _ _]
+      rw [show (fun ω ↦ Y k ω * Y l ω) = fun ω ↦ Y l ω * Y k ω from funext fun ω ↦ mul_comm _ _]
       exact integral_increment_sq_centered_cross hB hBmeas (hmono (Nat.le_succ l))
         (hmono (Nat.succ_le_of_lt hlt)) (hmono (Nat.le_succ k))
     · -- k < l
@@ -209,26 +209,26 @@ theorem sum_increment_sq_sub_sq_integral (hBmeas : ∀ t, Measurable (B t))
         (hmono (Nat.succ_le_of_lt hgt)) (hmono (Nat.le_succ l))
   calc ∫ ω, (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2 ∂μ
       = ∫ ω, (∑ k ∈ Finset.range n, Y k ω) ^ 2 ∂μ := by
-        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
         show (∑ k ∈ Finset.range n, (B (s (k + 1)) ω - B (s k) ω) ^ 2 - (s n : ℝ)) ^ 2
           = (∑ k ∈ Finset.range n, Y k ω) ^ 2
         rw [hrw ω]
     _ = ∫ ω, ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, Y k ω * Y l ω ∂μ := by
-        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
         show (∑ k ∈ Finset.range n, Y k ω) ^ 2
           = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, Y k ω * Y l ω
         rw [sq, Finset.sum_mul_sum]
     _ = ∑ k ∈ Finset.range n, ∑ l ∈ Finset.range n, ∫ ω, Y k ω * Y l ω ∂μ := by
-        rw [integral_finsetSum _ fun k _ => integrable_finsetSum _ fun l _ => hint k l]
-        exact Finset.sum_congr rfl fun k _ => integral_finsetSum _ fun l _ => hint k l
+        rw [integral_finsetSum _ fun k _ ↦ integrable_finsetSum _ fun l _ ↦ hint k l]
+        exact Finset.sum_congr rfl fun k _ ↦ integral_finsetSum _ fun l _ ↦ hint k l
     _ = ∑ k ∈ Finset.range n, 2 * ((s (k + 1) : ℝ) - s k) ^ 2 := by
-        refine Finset.sum_congr rfl fun k hk => ?_
-        rw [Finset.sum_eq_single k (fun l hl hlk => hcross k hk l hl hlk)
-          (fun hk' => absurd hk hk')]
+        refine Finset.sum_congr rfl fun k hk ↦ ?_
+        rw [Finset.sum_eq_single k (fun l hl hlk ↦ hcross k hk l hl hlk)
+          (fun hk' ↦ absurd hk hk')]
         show ∫ ω, Y k ω * Y k ω ∂μ = 2 * ((s (k + 1) : ℝ) - s k) ^ 2
-        rw [show (fun ω => Y k ω * Y k ω)
-              = fun ω => ((B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k)) ^ 2
-            from funext fun ω => by rw [hY]; ring]
+        rw [show (fun ω ↦ Y k ω * Y k ω)
+              = fun ω ↦ ((B (s (k + 1)) ω - B (s k) ω) ^ 2 - ((s (k + 1) : ℝ) - s k)) ^ 2
+            from funext fun ω ↦ by rw [hY]; ring]
         exact integral_increment_sq_centered hB (hmono (Nat.le_succ k))
 
 /-- **Quadratic variation converges as the mesh shrinks.** If every gap `sₖ₊₁ − sₖ ≤ δ`, the
@@ -242,10 +242,10 @@ theorem sum_increment_sq_sub_sq_le (hBmeas : ∀ t, Measurable (B t))
       ≤ 2 * δ * (s n : ℝ) := by
   rw [sum_increment_sq_sub_sq_integral hB hBmeas hmono hs0 n]
   have htel : ∑ k ∈ Finset.range n, ((s (k + 1) : ℝ) - s k) = (s n : ℝ) := by
-    rw [Finset.sum_range_sub (fun k => (s k : ℝ))]; simp [hs0]
+    rw [Finset.sum_range_sub (fun k ↦ (s k : ℝ))]; simp [hs0]
   calc ∑ k ∈ Finset.range n, 2 * ((s (k + 1) : ℝ) - s k) ^ 2
       ≤ ∑ k ∈ Finset.range n, 2 * δ * ((s (k + 1) : ℝ) - s k) := by
-        refine Finset.sum_le_sum fun k hk => ?_
+        refine Finset.sum_le_sum fun k hk ↦ ?_
         have hΔ0 : 0 ≤ (s (k + 1) : ℝ) - s k :=
           sub_nonneg.mpr (NNReal.coe_le_coe.mpr (hmono (Nat.le_succ k)))
         nlinarith [hδ k hk, hΔ0]
@@ -260,17 +260,17 @@ partition of `[0, T]` into `n` pieces, the sum of squared increments converges t
 square: `E[(∑_{k<n} (B_{(k+1)T/n} − B_{kT/n})² − T)²] → 0`. Immediate from the mesh bound
 (`sum_increment_sq_sub_sq_le`, here mesh `= T/n`) with explicit rate `2T²/n`, squeezed to `0`. -/
 theorem tendsto_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
-    Tendsto (fun n : ℕ => ∫ ω, (∑ k ∈ Finset.range n,
+    Tendsto (fun n : ℕ ↦ ∫ ω, (∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 - (T : ℝ)) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  refine squeeze_zero' (g := fun n : ℕ => 2 * (T : ℝ) ^ 2 / (n : ℝ))
-    (Eventually.of_forall fun n => integral_nonneg fun ω => sq_nonneg _) ?_
+  refine squeeze_zero' (g := fun n : ℕ ↦ 2 * (T : ℝ) ^ 2 / (n : ℝ))
+    (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (tendsto_const_div_atTop_nhds_zero_nat (2 * (T : ℝ) ^ 2))
   filter_upwards [eventually_gt_atTop 0] with n hn
   have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hnR : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
-  have hmono : Monotone (unifPart T n) := fun a b hab => by
+  have hmono : Monotone (unifPart T n) := fun a b hab ↦ by
     simp only [unifPart]; gcongr
   have hs0 : unifPart T n 0 = 0 := by simp [unifPart]
   have hsn : unifPart T n n = T := by simp only [unifPart, div_self hn0, one_mul]
@@ -291,26 +291,26 @@ not of the marginal mean alone (which gives only `E[∑(ΔBₖ)²] = T`). It is 
 result's first real consumer. -/
 theorem tendstoInMeasure_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     TendstoInMeasure μ
-      (fun n ω => ∑ k ∈ Finset.range n,
+      (fun n ω ↦ ∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2)
-      atTop (fun _ => (T : ℝ)) := by
+      atTop (fun _ ↦ (T : ℝ)) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   -- each centered sum `Sₙ − T` lies in `L²` (each squared increment is `L²`, via `r = 0`)
-  have hmem : ∀ n : ℕ, MemLp (fun ω => (∑ k ∈ Finset.range n,
+  have hmem : ∀ n : ℕ, MemLp (fun ω ↦ (∑ k ∈ Finset.range n,
       (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) 2 μ := by
     intro n
-    have hsum : MemLp (fun ω => ∑ k ∈ Finset.range n,
+    have hsum : MemLp (fun ω ↦ ∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
       apply memLp_finsetSum
       intro k _
       simpa using memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1)) 0
     exact hsum.sub (memLp_const (T : ℝ))
   refine tendstoInMeasure_of_tendsto_eLpNorm (by norm_num : (2 : ℝ≥0∞) ≠ 0)
-    (fun n => (Finset.measurable_sum _ fun k _ =>
+    (fun n ↦ (Finset.measurable_sum _ fun k _ ↦
       ((hBmeas _).sub (hBmeas _)).pow_const 2).aestronglyMeasurable)
     aestronglyMeasurable_const ?_
   -- `eLpNorm (Sₙ − T) 2 = ofReal √(∫ (Sₙ − T)²) → 0`, the L² convergence `tendsto_qv`
-  have hconv : ∀ n : ℕ, eLpNorm (fun ω => (∑ k ∈ Finset.range n,
+  have hconv : ∀ n : ℕ, eLpNorm (fun ω ↦ (∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) 2 μ
       = ENNReal.ofReal (Real.sqrt (∫ ω, ((∑ k ∈ Finset.range n,
         (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) ^ 2 ∂μ)) := by
@@ -318,19 +318,19 @@ theorem tendstoInMeasure_qv (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     rw [(hmem n).eLpNorm_eq_integral_rpow_norm (by norm_num) (by norm_num),
       ENNReal.toReal_ofNat, ← one_div, ← Real.sqrt_eq_rpow]
     congr 2
-    refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+    refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
     show ‖(∑ k ∈ Finset.range n,
           (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)‖ ^ (2 : ℝ)
         = ((∑ k ∈ Finset.range n,
           (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) ^ 2
     rw [Real.norm_eq_abs, show (2 : ℝ) = ((2 : ℕ) : ℝ) from by norm_num, Real.rpow_natCast, sq_abs]
-  have hlim : Tendsto (fun n : ℕ => ENNReal.ofReal (Real.sqrt (∫ ω, ((∑ k ∈ Finset.range n,
+  have hlim : Tendsto (fun n : ℕ ↦ ENNReal.ofReal (Real.sqrt (∫ ω, ((∑ k ∈ Finset.range n,
       (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) - (T : ℝ)) ^ 2 ∂μ)))
       atTop (𝓝 0) := by
     rw [show (0 : ℝ≥0∞) = ENNReal.ofReal (Real.sqrt 0) from by simp]
     exact (ENNReal.continuous_ofReal.tendsto _).comp
       ((Real.continuous_sqrt.tendsto _).comp (tendsto_qv hB hBmeas T))
-  exact Tendsto.congr (fun n => (hconv n).symm) hlim
+  exact Tendsto.congr (fun n ↦ (hconv n).symm) hlim
 
 end QuadraticVariationL2
 end MathFin

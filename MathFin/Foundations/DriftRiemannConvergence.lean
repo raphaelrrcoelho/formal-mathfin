@@ -44,7 +44,7 @@ collapse to `g` (`cell_collapse` + continuity), then dominated convergence on th
 measure `timeMeasure.restrict (0,T]` with the constant bound `C`. -/
 theorem tendsto_riemannSum_setIntegral {g : ℝ≥0 → ℝ} (hg : Continuous g) {C : ℝ}
     (hbdd : ∀ s, |g s| ≤ C) (T : ℝ≥0) :
-    Tendsto (fun n => ∑ k ∈ Finset.range n,
+    Tendsto (fun n ↦ ∑ k ∈ Finset.range n,
         g (unifPart T n k) * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ)))
       atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T, g s ∂timeMeasure)) := by
   classical
@@ -56,10 +56,10 @@ theorem tendsto_riemannSum_setIntegral {g : ℝ≥0 → ℝ} (hg : Continuous g)
         g (unifPart T n k) * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ)))
       = ∫ s in Set.Ioc (0 : ℝ≥0) T, (∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s) ∂timeMeasure := by
+            (fun _ ↦ g (unifPart T n k)) s) ∂timeMeasure := by
     intro n
-    rw [integral_finsetSum _ (fun k _ => (integrable_const _).indicator measurableSet_Ioc)]
-    refine Finset.sum_congr rfl fun k hk => ?_
+    rw [integral_finsetSum _ (fun k _ ↦ (integrable_const _).indicator measurableSet_Ioc)]
+    refine Finset.sum_congr rfl fun k hk ↦ ?_
     have hk1 : k + 1 ≤ n := Finset.mem_range.mp hk
     rw [setIntegral_indicator measurableSet_Ioc,
       Set.inter_eq_right.mpr (Set.Ioc_subset_Ioc zero_le (unifPart_le_T hk1)),
@@ -70,18 +70,18 @@ theorem tendsto_riemannSum_setIntegral {g : ℝ≥0 → ℝ} (hg : Continuous g)
   simp only [hsum]
   -- a.e. convergence of the step functions to `g` on `(0,T]` (cell collapse + continuity)
   have hae : ∀ᵐ s ∂(timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)),
-      Tendsto (fun n => ∑ k ∈ Finset.range n,
+      Tendsto (fun n ↦ ∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s) atTop (𝓝 (g s)) := by
-    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs => ?_)
+            (fun _ ↦ g (unifPart T n k)) s) atTop (𝓝 (g s)) := by
+    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs ↦ ?_)
     rw [Metric.tendsto_atTop]
     intro ε hε
     obtain ⟨δ, hδ, hδc⟩ := Metric.continuousAt_iff.mp hg.continuousAt ε hε
     obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
-    refine ⟨max N 1, fun n hn => ?_⟩
+    refine ⟨max N 1, fun n hn ↦ ?_⟩
     have hn1 : 0 < n := lt_of_lt_of_le one_pos (le_trans (le_max_right _ _) hn)
     have hnN : N ≤ n := le_trans (le_max_left _ _) hn
-    obtain ⟨k, _, hval, hclose⟩ := cell_collapse T n hn1 s hs (fun j => g (unifPart T n j))
+    obtain ⟨k, _, hval, hclose⟩ := cell_collapse T n hn1 s hs (fun j ↦ g (unifPart T n j))
     rw [hval]
     refine hδc ?_
     rw [NNReal.dist_eq]
@@ -94,30 +94,30 @@ theorem tendsto_riemannSum_setIntegral {g : ℝ≥0 → ℝ} (hg : Continuous g)
   have hbnd : ∀ n, ∀ᵐ s ∂(timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)),
       ‖∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s‖ ≤ C := by
+            (fun _ ↦ g (unifPart T n k)) s‖ ≤ C := by
     intro n
-    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs => ?_)
+    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs ↦ ?_)
     rcases Nat.eq_zero_or_pos n with hn0 | hn
     · simp [hn0, hC0]
-    · obtain ⟨k, _, hval, _⟩ := cell_collapse T n hn s hs (fun j => g (unifPart T n j))
+    · obtain ⟨k, _, hval, _⟩ := cell_collapse T n hn s hs (fun j ↦ g (unifPart T n j))
       rw [Real.norm_eq_abs, hval]
       exact hbdd _
   -- dominated convergence on the finite time measure
-  have hmeas : ∀ n, AEStronglyMeasurable (fun s => ∑ k ∈ Finset.range n,
+  have hmeas : ∀ n, AEStronglyMeasurable (fun s ↦ ∑ k ∈ Finset.range n,
       (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-        (fun _ => g (unifPart T n k)) s) (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := by
+        (fun _ ↦ g (unifPart T n k)) s) (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := by
     intro n
-    have hrw : (fun s => ∑ k ∈ Finset.range n,
+    have hrw : (fun s ↦ ∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s)
+            (fun _ ↦ g (unifPart T n k)) s)
         = ∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) := by
+            (fun _ ↦ g (unifPart T n k)) := by
       funext s; rw [Finset.sum_apply]
     rw [hrw]
-    exact Finset.aestronglyMeasurable_sum _ fun k _ =>
+    exact Finset.aestronglyMeasurable_sum _ fun k _ ↦
       (stronglyMeasurable_const.indicator measurableSet_Ioc).aestronglyMeasurable
-  exact tendsto_integral_of_dominated_convergence (fun _ => C) hmeas
+  exact tendsto_integral_of_dominated_convergence (fun _ ↦ C) hmeas
     (integrable_const C) hbnd hae
 
 /-- **The `θ²` drift Riemann-convergence.** For a bounded (`|θ| ≤ C`) integrand `θ` whose every
@@ -126,13 +126,13 @@ converge to the pathwise energy `∫ s in (0,T], θ_s² ∂timeMeasure` — the 
 continuous Doléans exponent, per path. Specialization of `tendsto_riemannSum_setIntegral` to
 `g = θ(·,ω)²` (continuous, bounded by `C²`). -/
 theorem tendsto_driftSq_riemannSum {Ω : Type*} {θ : ℝ≥0 → Ω → ℝ}
-    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 => θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C)
+    (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C)
     (T : ℝ≥0) (ω : Ω) :
-    Tendsto (fun n => ∑ k ∈ Finset.range n,
+    Tendsto (fun n ↦ ∑ k ∈ Finset.range n,
         (θ (unifPart T n k) ω) ^ 2 * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ)))
       atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) T, (θ s ω) ^ 2 ∂timeMeasure)) := by
-  refine tendsto_riemannSum_setIntegral (g := fun s => (θ s ω) ^ 2) (C := C ^ 2)
-    ((hcont ω).pow 2) (fun s => ?_) T
+  refine tendsto_riemannSum_setIntegral (g := fun s ↦ (θ s ω) ^ 2) (C := C ^ 2)
+    ((hcont ω).pow 2) (fun s ↦ ?_) T
   rw [abs_of_nonneg (sq_nonneg _), ← sq_abs (θ s ω)]
   exact pow_le_pow_left₀ (abs_nonneg _) (hbdd s ω) 2
 
@@ -145,7 +145,7 @@ This is the horizon-`u` variant the continuous-Girsanov assembly needs for `simp
 at intermediate times. -/
 theorem tendsto_riemannSum_setIntegral_clamp {g : ℝ≥0 → ℝ} (hg : Continuous g) {C : ℝ}
     (hbdd : ∀ s, |g s| ≤ C) (T : ℝ≥0) {u : ℝ≥0} (huT : u ≤ T) :
-    Tendsto (fun n => ∑ k ∈ Finset.range n, g (unifPart T n k)
+    Tendsto (fun n ↦ ∑ k ∈ Finset.range n, g (unifPart T n k)
         * (NNReal.toReal (min (unifPart T n (k + 1)) u) - NNReal.toReal (min (unifPart T n k) u)))
       atTop (𝓝 (∫ s in Set.Ioc (0 : ℝ≥0) u, g s ∂timeMeasure)) := by
   classical
@@ -165,10 +165,10 @@ theorem tendsto_riemannSum_setIntegral_clamp {g : ℝ≥0 → ℝ} (hg : Continu
         * (NNReal.toReal (min (unifPart T n (k + 1)) u) - NNReal.toReal (min (unifPart T n k) u)))
       = ∫ s in Set.Ioc (0 : ℝ≥0) u, (∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s) ∂timeMeasure := by
+            (fun _ ↦ g (unifPart T n k)) s) ∂timeMeasure := by
     intro n
-    rw [integral_finsetSum _ (fun k _ => (integrable_const _).indicator measurableSet_Ioc)]
-    refine Finset.sum_congr rfl fun k _ => ?_
+    rw [integral_finsetSum _ (fun k _ ↦ (integrable_const _).indicator measurableSet_Ioc)]
+    refine Finset.sum_congr rfl fun k _ ↦ ?_
     rw [setIntegral_indicator measurableSet_Ioc, setIntegral_const, smul_eq_mul, measureReal_def,
       Set.inter_comm, timeMeasure_Ioc_inter, NNReal.coe_zero,
       max_eq_left (unifPart T n k).coe_nonneg,
@@ -178,19 +178,19 @@ theorem tendsto_riemannSum_setIntegral_clamp {g : ℝ≥0 → ℝ} (hg : Continu
   simp only [hsum]
   -- a.e. convergence of the step functions to `g` on (0,u] ⊆ (0,T]
   have hae : ∀ᵐ s ∂(timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)),
-      Tendsto (fun n => ∑ k ∈ Finset.range n,
+      Tendsto (fun n ↦ ∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s) atTop (𝓝 (g s)) := by
-    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs => ?_)
+            (fun _ ↦ g (unifPart T n k)) s) atTop (𝓝 (g s)) := by
+    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs ↦ ?_)
     have hsT : s ∈ Set.Ioc (0 : ℝ≥0) T := ⟨hs.1, le_trans hs.2 huT⟩
     rw [Metric.tendsto_atTop]
     intro ε hε
     obtain ⟨δ, hδ, hδc⟩ := Metric.continuousAt_iff.mp hg.continuousAt ε hε
     obtain ⟨N, hN⟩ := exists_nat_gt ((T : ℝ) / δ)
-    refine ⟨max N 1, fun n hn => ?_⟩
+    refine ⟨max N 1, fun n hn ↦ ?_⟩
     have hn1 : 0 < n := lt_of_lt_of_le one_pos (le_trans (le_max_right _ _) hn)
     have hnN : N ≤ n := le_trans (le_max_left _ _) hn
-    obtain ⟨k, _, hval, hclose⟩ := cell_collapse T n hn1 s hsT (fun j => g (unifPart T n j))
+    obtain ⟨k, _, hval, hclose⟩ := cell_collapse T n hn1 s hsT (fun j ↦ g (unifPart T n j))
     rw [hval]
     refine hδc ?_
     rw [NNReal.dist_eq]
@@ -203,30 +203,30 @@ theorem tendsto_riemannSum_setIntegral_clamp {g : ℝ≥0 → ℝ} (hg : Continu
   have hbnd : ∀ n, ∀ᵐ s ∂(timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)),
       ‖∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s‖ ≤ C := by
+            (fun _ ↦ g (unifPart T n k)) s‖ ≤ C := by
     intro n
-    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs => ?_)
+    refine ae_restrict_of_forall_mem measurableSet_Ioc (fun s hs ↦ ?_)
     have hsT : s ∈ Set.Ioc (0 : ℝ≥0) T := ⟨hs.1, le_trans hs.2 huT⟩
     rcases Nat.eq_zero_or_pos n with hn0 | hn
     · simp [hn0, hC0]
-    · obtain ⟨k, _, hval, _⟩ := cell_collapse T n hn s hsT (fun j => g (unifPart T n j))
+    · obtain ⟨k, _, hval, _⟩ := cell_collapse T n hn s hsT (fun j ↦ g (unifPart T n j))
       rw [Real.norm_eq_abs, hval]
       exact hbdd _
-  have hmeas : ∀ n, AEStronglyMeasurable (fun s => ∑ k ∈ Finset.range n,
+  have hmeas : ∀ n, AEStronglyMeasurable (fun s ↦ ∑ k ∈ Finset.range n,
       (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-        (fun _ => g (unifPart T n k)) s) (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) := by
+        (fun _ ↦ g (unifPart T n k)) s) (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) u)) := by
     intro n
-    have hrw : (fun s => ∑ k ∈ Finset.range n,
+    have hrw : (fun s ↦ ∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) s)
+            (fun _ ↦ g (unifPart T n k)) s)
         = ∑ k ∈ Finset.range n,
           (Set.Ioc (unifPart T n k) (unifPart T n (k + 1))).indicator
-            (fun _ => g (unifPart T n k)) := by
+            (fun _ ↦ g (unifPart T n k)) := by
       funext s; rw [Finset.sum_apply]
     rw [hrw]
-    exact Finset.aestronglyMeasurable_sum _ fun k _ =>
+    exact Finset.aestronglyMeasurable_sum _ fun k _ ↦
       (stronglyMeasurable_const.indicator measurableSet_Ioc).aestronglyMeasurable
-  exact tendsto_integral_of_dominated_convergence (fun _ => C) hmeas
+  exact tendsto_integral_of_dominated_convergence (fun _ ↦ C) hmeas
     (integrable_const C) hbnd hae
 
 end MathFin

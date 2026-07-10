@@ -83,7 +83,7 @@ theorem expBtheta_isQMartingale
   -- `D` is adapted (continuous function of the adapted `X_u`).
   have hDsm : ∀ u, StronglyMeasurable[𝓕 u] (D u) := by
     intro u
-    have hcont : Continuous fun x : ℝ => a * (x + θ * (u : ℝ)) - a ^ 2 * (u : ℝ) / 2 := by
+    have hcont : Continuous fun x : ℝ ↦ a * (x + θ * (u : ℝ)) - a ^ 2 * (u : ℝ) / 2 := by
       fun_prop
     exact Real.continuous_exp.comp_stronglyMeasurable
       (hcont.comp_stronglyMeasurable (hX.stronglyAdapted u))

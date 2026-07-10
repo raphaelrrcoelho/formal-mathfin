@@ -147,7 +147,7 @@ private lemma max_payoff_eq_indicator {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
     max (bsTerminal S_0 r σ T z - K) 0 =
       (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
-        (fun z' => bsTerminal S_0 r σ T z' - K) z := by
+        (fun z' ↦ bsTerminal S_0 r σ T z' - K) z := by
   by_cases h : z ∈ Set.Ioi (-bsd2 S_0 K r σ T)
   · rw [Set.indicator_of_mem h]
     have hST : bsTerminal S_0 r σ T z > K :=
@@ -196,19 +196,19 @@ theorem bs_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   -- Key identity: ν_log - (-d_2) = d_1
   have h_shift_eq : ν_log - (-d_2) = d_1 := by
     rw [d_1_def, d_2_def, bsd2]; ring
-  have h_payoff_meas : Measurable fun z : ℝ => max (bsTerminal S_0 r σ T z - K) 0 := by
+  have h_payoff_meas : Measurable fun z : ℝ ↦ max (bsTerminal S_0 r σ T z - K) 0 := by
     unfold bsTerminal; fun_prop
   -- Step 1-3: pull out e^{-rT}, HasLaw transfer, convert to volume with pdf
   rw [integral_const_mul]
-  rw [show (fun ω => max (bsTerminal S_0 r σ T (Z ω) - K) 0)
-        = (fun z => max (bsTerminal S_0 r σ T z - K) 0) ∘ Z from rfl,
+  rw [show (fun ω ↦ max (bsTerminal S_0 r σ T (Z ω) - K) 0)
+        = (fun z ↦ max (bsTerminal S_0 r σ T z - K) 0) ∘ Z from rfl,
       hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Step 4: max → indicator
-  rw [show (fun z : ℝ => gaussianPDFReal 0 1 z • max (bsTerminal S_0 r σ T z - K) 0)
+  rw [show (fun z : ℝ ↦ gaussianPDFReal 0 1 z • max (bsTerminal S_0 r σ T z - K) 0)
         = (Set.Ioi (-d_2)).indicator
-            (fun z => gaussianPDFReal 0 1 z * (bsTerminal S_0 r σ T z - K)) from
-      funext (fun z => by
+            (fun z ↦ gaussianPDFReal 0 1 z * (bsTerminal S_0 r σ T z - K)) from
+      funext (fun z ↦ by
         rw [smul_eq_mul, max_payoff_eq_indicator hS_0 hK hσ hT z]
         by_cases hz : z ∈ Set.Ioi (-d_2)
         · rw [Set.indicator_of_mem hz, Set.indicator_of_mem hz]
@@ -228,12 +228,12 @@ theorem bs_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
       exact Real.exp_add _ _
     rw [h_exp]
     ring
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ => h_split_integrand z)]
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ ↦ h_split_integrand z)]
   -- Step 6: integrability of each piece on Ioi(-d_2)
   have h_int_pdf_Ioi : IntegrableOn (gaussianPDFReal 0 1) (Set.Ioi (-d_2)) volume :=
     (integrable_gaussianPDFReal 0 1).integrableOn
   have h_int_asset : IntegrableOn
-      (fun z : ℝ => Real.exp (ν_log * z) * gaussianPDFReal 0 1 z)
+      (fun z : ℝ ↦ Real.exp (ν_log * z) * gaussianPDFReal 0 1 z)
       (Set.Ioi (-d_2)) volume := by
     refine ((integrable_gaussianPDFReal ν_log 1).const_mul
       (Real.exp (ν_log^2 / 2))).integrableOn.congr_fun ?_ measurableSet_Ioi

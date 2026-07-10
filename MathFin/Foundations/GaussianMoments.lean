@@ -81,20 +81,20 @@ i.e. `Var(X²) = 2·Var(X)²` for `X ~ N(0,v)`. This is the kurtosis `E[X⁴] = 
 gives the `2t²/n` rate of the L² quadratic variation. -/
 lemma integral_sq_sub_var_sq_gaussianReal (v : ℝ≥0) :
     ∫ x, (x ^ 2 - (v : ℝ)) ^ 2 ∂(gaussianReal 0 v) = 2 * (v : ℝ) ^ 2 := by
-  have hint2 : Integrable (fun x : ℝ => x ^ 2) (gaussianReal 0 v) :=
+  have hint2 : Integrable (fun x : ℝ ↦ x ^ 2) (gaussianReal 0 v) :=
     (memLp_id_gaussianReal (μ := 0) (v := v) 2).integrable_sq
-  have hint4 : Integrable (fun x : ℝ => x ^ 4) (gaussianReal 0 v) := by
+  have hint4 : Integrable (fun x : ℝ ↦ x ^ 4) (gaussianReal 0 v) := by
     have h := (memLp_id_gaussianReal (μ := 0) (v := v) 4).integrable_norm_pow (p := 4) (by norm_num)
     simp only [id_eq, Real.norm_eq_abs] at h
-    have hfe : (fun x : ℝ => |x| ^ 4) = fun x : ℝ => x ^ 4 :=
-      funext fun x => by rw [pow_abs, abs_of_nonneg (by positivity)]
+    have hfe : (fun x : ℝ ↦ |x| ^ 4) = fun x : ℝ ↦ x ^ 4 :=
+      funext fun x ↦ by rw [pow_abs, abs_of_nonneg (by positivity)]
     rwa [hfe] at h
-  have hcm2 : Integrable (fun x : ℝ => 2 * (v : ℝ) * x ^ 2) (gaussianReal 0 v) :=
+  have hcm2 : Integrable (fun x : ℝ ↦ 2 * (v : ℝ) * x ^ 2) (gaussianReal 0 v) :=
     hint2.const_mul (2 * (v : ℝ))
-  have hdiff : Integrable (fun a : ℝ => a ^ 4 - 2 * (v : ℝ) * a ^ 2) (gaussianReal 0 v) :=
+  have hdiff : Integrable (fun a : ℝ ↦ a ^ 4 - 2 * (v : ℝ) * a ^ 2) (gaussianReal 0 v) :=
     hint4.sub hcm2
   have hexpand : ∀ x : ℝ, (x ^ 2 - (v : ℝ)) ^ 2 = x ^ 4 - 2 * (v : ℝ) * x ^ 2 + (v : ℝ) ^ 2 :=
-    fun x => by ring
+    fun x ↦ by ring
   have huniv : (gaussianReal 0 v).real Set.univ = 1 := by
     rw [measureReal_def, measure_univ, ENNReal.toReal_one]
   rw [integral_congr_ae (Filter.Eventually.of_forall hexpand),
@@ -109,7 +109,7 @@ lemma integral_sq_sub_var_sq_gaussianReal (v : ℝ≥0) :
 `E[X² − Var] = 0` for `X ~ N(0,v)`. (`E[X²] = v`.) -/
 lemma integral_sq_sub_var_gaussianReal (v : ℝ≥0) :
     ∫ x, (x ^ 2 - (v : ℝ)) ∂(gaussianReal 0 v) = 0 := by
-  have hint2 : Integrable (fun x : ℝ => x ^ 2) (gaussianReal 0 v) :=
+  have hint2 : Integrable (fun x : ℝ ↦ x ^ 2) (gaussianReal 0 v) :=
     (memLp_id_gaussianReal (μ := 0) (v := v) 2).integrable_sq
   have huniv : (gaussianReal 0 v).real Set.univ = 1 := by
     rw [measureReal_def, measure_univ, ENNReal.toReal_one]

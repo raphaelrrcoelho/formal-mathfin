@@ -71,7 +71,7 @@ variance is unchanged. This is the static (single-Gaussian) Girsanov
 theorem. -/
 theorem gaussianReal_withDensity_esscher (c : ℝ) :
     (gaussianReal 0 1).withDensity
-      (fun x => ENNReal.ofReal (Real.exp (c * x - c ^ 2 / 2))) = gaussianReal c 1 := by
+      (fun x ↦ ENNReal.ofReal (Real.exp (c * x - c ^ 2 / 2))) = gaussianReal c 1 := by
   rw [gaussianReal_of_var_ne_zero 0 (one_ne_zero), gaussianReal_of_var_ne_zero c (one_ne_zero)]
   rw [← withDensity_mul _ (by fun_prop) (by fun_prop)]
   congr 1
@@ -105,11 +105,11 @@ theorem hasLaw_esscher_tilt {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {P : Measure Ω} {W : Ω → ℝ} (c : ℝ)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
     HasLaw W (gaussianReal c 1)
-      (P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) where
+      (P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) where
   aemeasurable := hWmeas.aemeasurable
   map_eq := by
-    rw [show (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))
-          = (fun x => ENNReal.ofReal (Real.exp (c * x - c ^ 2 / 2))) ∘ W from rfl,
+    rw [show (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))
+          = (fun x ↦ ENNReal.ofReal (Real.exp (c * x - c ^ 2 / 2))) ∘ W from rfl,
         map_withDensity_comp P hWmeas (by fun_prop), hW.map_eq,
         gaussianReal_withDensity_esscher]
 
@@ -118,13 +118,13 @@ Recentering by a constant translates the mean. -/
 theorem hasLaw_sub_const {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {Q : Measure Ω} {W : Ω → ℝ} (c m : ℝ)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal m 1) Q) :
-    HasLaw (fun ω => W ω - c) (gaussianReal (m - c) 1) Q where
+    HasLaw (fun ω ↦ W ω - c) (gaussianReal (m - c) 1) Q where
   aemeasurable := (hWmeas.sub_const c).aemeasurable
   map_eq := by
-    rw [show (fun ω => W ω - c) = (fun y : ℝ => y - c) ∘ W from rfl,
-        ← Measure.map_map (show Measurable (fun y : ℝ => y - c) by fun_prop) hWmeas,
+    rw [show (fun ω ↦ W ω - c) = (fun y : ℝ ↦ y - c) ∘ W from rfl,
+        ← Measure.map_map (show Measurable (fun y : ℝ ↦ y - c) by fun_prop) hWmeas,
         hW.map_eq,
-        show (fun y : ℝ => y - c) = (fun y => y + (-c)) from by funext y; ring,
+        show (fun y : ℝ ↦ y - c) = (fun y ↦ y + (-c)) from by funext y; ring,
         gaussianReal_map_add_const, sub_eq_add_neg]
 
 /-- **The Esscher-tilted measure is a probability measure.** Its total mass
@@ -135,7 +135,7 @@ theorem esscherTilt_isProbabilityMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {P : Measure Ω} {W : Ω → ℝ} (c : ℝ)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
     IsProbabilityMeasure
-      (P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) := by
+      (P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) := by
   constructor
   rw [← Set.preimage_univ (f := W),
       ← Measure.map_apply hWmeas MeasurableSet.univ,
@@ -161,13 +161,13 @@ theorem BSCallHyp.exists_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
     ∃ (Q : Measure Ω) (hQ : IsProbabilityMeasure Q),
-      Q = P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
-      @BSCallHyp _ _ Q hQ S_0 K r σ T (fun ω => W ω - c) := by
-  have h_std : HasLaw (fun ω => W ω - c) (gaussianReal 0 1)
-      (P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) := by
+      Q = P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
+      @BSCallHyp _ _ Q hQ S_0 K r σ T (fun ω ↦ W ω - c) := by
+  have h_std : HasLaw (fun ω ↦ W ω - c) (gaussianReal 0 1)
+      (P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2)))) := by
     have h := hasLaw_sub_const c c hWmeas (hasLaw_esscher_tilt c hWmeas hW)
     rwa [sub_self] at h
-  exact ⟨P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))),
+  exact ⟨P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))),
     esscherTilt_isProbabilityMeasure c hWmeas hW, rfl,
     @BSCallHyp.mk _ _ _ (esscherTilt_isProbabilityMeasure c hWmeas hW)
       _ _ _ _ _ _ hS_0 hK hσ hT h_std⟩
@@ -213,7 +213,7 @@ theorem discounted_terminal_eq_S0_of_physical {Ω : Type*} {mΩ : MeasurableSpac
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
     ∃ (Q : Measure Ω) (_ : IsProbabilityMeasure Q),
-      Q = P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
+      Q = P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
       ∫ ω, Real.exp (-(r * T)) * bsTerminal S_0 r σ T (W ω - c) ∂Q = S_0 := by
   obtain ⟨Q, hQ, hQeq, hbs⟩ :=
     BSCallHyp.exists_of_physical (S_0 := S_0) (K := K) (r := r) (σ := σ) (T := T)
@@ -232,7 +232,7 @@ theorem bs_call_formula_of_physical {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T)
     (hWmeas : Measurable W) (hW : HasLaw W (gaussianReal 0 1) P) :
     ∃ (Q : Measure Ω) (_ : IsProbabilityMeasure Q),
-      Q = P.withDensity (fun ω => ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
+      Q = P.withDensity (fun ω ↦ ENNReal.ofReal (Real.exp (c * W ω - c ^ 2 / 2))) ∧
       ∫ ω, Real.exp (-r * T) * max (bsTerminal S_0 r σ T (W ω - c) - K) 0 ∂Q
         = S_0 * Phi (bsd1 S_0 K r σ T)
           - K * Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by

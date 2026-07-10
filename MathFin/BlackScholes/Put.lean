@@ -47,14 +47,14 @@ lemma integral_exp_mul_gaussianPDFReal_Iic (a c : ℝ) :
     ∫ z in Set.Iic a, Real.exp (c * z) * gaussianPDFReal 0 1 z
       = Real.exp (c^2 / 2) * Phi (a - c) := by
   rw [setIntegral_congr_fun measurableSet_Iic
-        (fun z _ => exp_mul_gaussianPDFReal_zero_one c z), integral_const_mul]
+        (fun z _ ↦ exp_mul_gaussianPDFReal_zero_one c z), integral_const_mul]
   congr 1
   have h_int_eq : ∫ z in Set.Iic a, gaussianPDFReal c 1 z
       = (gaussianReal c (1 : ℝ≥0) (Set.Iic a)).toReal :=
     setIntegral_gaussianPDFReal_eq_toReal measurableSet_Iic c
   have h_shift : gaussianReal c (1 : ℝ≥0) (Set.Iic a) =
                  gaussianReal 0 1 (Set.Iic (a - c)) := by
-    have hmap : (gaussianReal (0 : ℝ) 1).map (fun y => y + c) = gaussianReal c 1 := by
+    have hmap : (gaussianReal (0 : ℝ) 1).map (fun y ↦ y + c) = gaussianReal c 1 := by
       rw [gaussianReal_map_add_const, zero_add]
     rw [← hmap, Measure.map_apply (by fun_prop) measurableSet_Iic]
     congr 1; ext y; simp [Set.mem_Iic, le_sub_iff_add_le, add_comm]
@@ -67,7 +67,7 @@ private lemma max_put_payoff_eq_indicator {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
     max (K - bsTerminal S_0 r σ T z) 0 =
       (Set.Iic (-bsd2 S_0 K r σ T)).indicator
-        (fun z' => K - bsTerminal S_0 r σ T z') z := by
+        (fun z' ↦ K - bsTerminal S_0 r σ T z') z := by
   by_cases h : z ∈ Set.Iic (-bsd2 S_0 K r σ T)
   · rw [Set.indicator_of_mem h]
     have hz_le : z ≤ -bsd2 S_0 K r σ T := h
@@ -116,19 +116,19 @@ theorem bs_put_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   -- Key identity: -d_2 - ν_log = -d_1
   have h_shift_eq : (-d_2) - ν_log = -d_1 := by
     rw [d_1_def, d_2_def, bsd2]; ring
-  have h_payoff_meas : Measurable fun z : ℝ => max (K - bsTerminal S_0 r σ T z) 0 := by
+  have h_payoff_meas : Measurable fun z : ℝ ↦ max (K - bsTerminal S_0 r σ T z) 0 := by
     unfold bsTerminal; fun_prop
   -- Step 1-3: pull out e^{-rT}, HasLaw transfer, convert to volume with pdf
   rw [integral_const_mul]
-  rw [show (fun ω => max (K - bsTerminal S_0 r σ T (Z ω)) 0)
-        = (fun z => max (K - bsTerminal S_0 r σ T z) 0) ∘ Z from rfl,
+  rw [show (fun ω ↦ max (K - bsTerminal S_0 r σ T (Z ω)) 0)
+        = (fun z ↦ max (K - bsTerminal S_0 r σ T z) 0) ∘ Z from rfl,
       hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Step 4: max → indicator on Iic(-d_2)
-  rw [show (fun z : ℝ => gaussianPDFReal 0 1 z • max (K - bsTerminal S_0 r σ T z) 0)
+  rw [show (fun z : ℝ ↦ gaussianPDFReal 0 1 z • max (K - bsTerminal S_0 r σ T z) 0)
         = (Set.Iic (-d_2)).indicator
-            (fun z => gaussianPDFReal 0 1 z * (K - bsTerminal S_0 r σ T z)) from
-      funext (fun z => by
+            (fun z ↦ gaussianPDFReal 0 1 z * (K - bsTerminal S_0 r σ T z)) from
+      funext (fun z ↦ by
         rw [smul_eq_mul, max_put_payoff_eq_indicator hS_0 hK hσ hT z]
         by_cases hz : z ∈ Set.Iic (-d_2)
         · rw [Set.indicator_of_mem hz, Set.indicator_of_mem hz]
@@ -147,12 +147,12 @@ theorem bs_put_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
             = Real.exp ((r - σ^2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
       exact Real.exp_add _ _
     rw [h_exp]; ring
-  rw [setIntegral_congr_fun measurableSet_Iic (fun z _ => h_split_integrand z)]
+  rw [setIntegral_congr_fun measurableSet_Iic (fun z _ ↦ h_split_integrand z)]
   -- Step 6: integrability of each piece on Iic(-d_2)
   have h_int_pdf_Iic : IntegrableOn (gaussianPDFReal 0 1) (Set.Iic (-d_2)) volume :=
     (integrable_gaussianPDFReal 0 1).integrableOn
   have h_int_asset : IntegrableOn
-      (fun z : ℝ => Real.exp (ν_log * z) * gaussianPDFReal 0 1 z)
+      (fun z : ℝ ↦ Real.exp (ν_log * z) * gaussianPDFReal 0 1 z)
       (Set.Iic (-d_2)) volume := by
     refine ((integrable_gaussianPDFReal ν_log 1).const_mul
       (Real.exp (ν_log^2 / 2))).integrableOn.congr_fun ?_ measurableSet_Iic

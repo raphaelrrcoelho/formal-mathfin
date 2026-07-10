@@ -127,7 +127,7 @@ theorem isCriticalPoint_of_lagrangian_FOC
                  lam_1 * (∑ i ∈ s, δw i) + lam_2 * (∑ i ∈ s, μ i * δw i) := by
     rw [Finset.mul_sum, Finset.mul_sum]
     rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl (fun i _ => by ring)
+    refine Finset.sum_congr rfl (fun i _ ↦ by ring)
   rw [h_split, h_sum_zero, h_mu_zero]
   ring
 
@@ -181,10 +181,10 @@ lemma quadratic_form_perturb_linear_coeff
   -- ∑_i ∑_j Sg(i,j) δw_i w_j = ∑_i δw_i · (∑_j Sg(i,j) w_j) = ∑_i δw_i · (Σw)_i
   rw [show ∑ i ∈ s, ∑ j ∈ s, Sg i j * δw i * w j =
         ∑ i ∈ s, δw i * (∑ j ∈ s, Sg i j * w j) from
-      Finset.sum_congr rfl (fun i _ => by
+      Finset.sum_congr rfl (fun i _ ↦ by
         rw [Finset.mul_sum]
-        refine Finset.sum_congr rfl (fun j _ => by ring))]
-  refine Finset.sum_congr rfl (fun i _ => by ring)
+        refine Finset.sum_congr rfl (fun j _ ↦ by ring))]
+  refine Finset.sum_congr rfl (fun i _ ↦ by ring)
 
 /-- **Sufficient condition for tangency from the Lagrangian FOC**:
 specialising to the case `lam_1 = 0` (no budget constraint, only expected-

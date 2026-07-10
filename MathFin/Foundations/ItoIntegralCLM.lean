@@ -504,11 +504,11 @@ lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
       exact integral_zero_measure gf
   -- π-system induction over `predictableRect` (Phase 2 + Phase 3).
   refine MeasurableSpace.induction_on_inter
-    (C := fun s _ => ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0)
+    (C := fun s _ ↦ ∫ z in s, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0)
     (h_eq := (generateFrom_predictableRect hBmeas).symm)
     (h_inter := isPiSystem_predictableRect hBmeas)
     (empty := setIntegral_empty)
-    (basic := fun R hR => h_orth R hR)
+    (basic := fun R hR ↦ h_orth R hR)
     (compl := ?_) (iUnion := ?_) s hs
   · -- Complement: `∫ g = ∫_S g + ∫_Sᶜ g`; total is zero, S piece is zero, so Sᶜ piece is zero.
     intro S hS hPS
@@ -558,10 +558,10 @@ private lemma uncurry_iocSP_T_eq {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)
     {a b : ℝ≥0} (hab : a ≤ b) (hbT : b ≤ T) {F : Set Ω}
     (hF : MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F) :
     Function.uncurry ⇑(iocSP_T hBmeas hab hbT hF : TBoundedSP T hBmeas).val
-      = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) := by
+      = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) := by
   funext ⟨t, ω⟩
   change ⇑((ElementaryPredictableSet.IocProd a b hF).indicator (1 : ℝ)) t ω
-      = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) (t, ω)
+      = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) (t, ω)
   rw [ElementaryPredictableSet.coe_indicator,
       ElementaryPredictableSet.coe_IocProd a b hF]
   rfl
@@ -589,19 +589,19 @@ private lemma inner_simpleAssembly_T_iocSP_T {T : ℝ≥0} (hBmeas : ∀ t, Meas
   have h_ae_eq : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas),
       (⟪(simpleAssembly_T (μ := μ) T hBmeas (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z,
         (g : ℝ≥0 × Ω → ℝ) z⟫_ℝ : ℝ)
-        = (Set.Ioc a b ×ˢ F).indicator (fun z => (g : ℝ≥0 × Ω → ℝ) z) z := by
+        = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z := by
     filter_upwards [h_coe] with z hz
     -- Rewrite simpleAssembly_T V into uncurry V via h_coe; then uncurry V via h_uncurry_eq.
     have hSA_eq :
         (simpleAssembly_T (μ := μ) T hBmeas (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
-          = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) z := by
+          = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by
       calc (simpleAssembly_T (μ := μ) T hBmeas (iocSP_T hBmeas hab hbT hF) : ℝ≥0 × Ω → ℝ) z
           = Function.uncurry ⇑(iocSP_T hBmeas hab hbT hF : TBoundedSP T hBmeas).val z := hz
-        _ = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) z := by rw [h_uncurry_eq]
+        _ = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by rw [h_uncurry_eq]
     rw [hSA_eq]
     -- Real inner product: ⟪x, y⟫_ℝ = y * x for x, y : ℝ.
-    show (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) z
-        = (Set.Ioc a b ×ˢ F).indicator (fun z => (g : ℝ≥0 × Ω → ℝ) z) z
+    show (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z
+        = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z
     by_cases hz_in : z ∈ Set.Ioc a b ×ˢ F
     · rw [Set.indicator_of_mem hz_in, Set.indicator_of_mem hz_in, mul_one]
     · rw [Set.indicator_of_notMem hz_in, Set.indicator_of_notMem hz_in, mul_zero]
@@ -708,8 +708,8 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   refine (Lp.eq_zero_iff_ae_eq_zero (f := g)).mpr ?_
   exact Lp.ae_eq_zero_of_forall_setIntegral_eq_zero g
     (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
-    (fun _ _ _ => ((Lp.memLp g).integrable one_le_two).integrableOn)
-    (fun s hs _ => setIntegral_eq_zero_of_orthogonal_pred T hBmeas g h_orth s hs)
+    (fun _ _ _ ↦ ((Lp.memLp g).integrable one_le_two).integrableOn)
+    (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal_pred T hBmeas g h_orth s hs)
 
 /-! ### The CLM `itoIntegralCLM_T` and its isometry -/
 

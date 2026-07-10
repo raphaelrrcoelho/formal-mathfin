@@ -36,7 +36,7 @@ noncomputable def bsVDiv (K r q σ : ℝ) (S τ : ℝ) : ℝ :=
 /-- **BS-Merton delta**: `∂_S V_q = e^{-qT} · Φ(d₁')` where `d₁' = bsd1 S K (r-q) σ T`. -/
 lemma hasDerivAt_bsVDiv_S {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsVDiv K r q σ s τ)
+    HasDerivAt (fun s ↦ bsVDiv K r q σ s τ)
       (Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ)) S := by
   have h_bs := hasDerivAt_bsV_S (r := r - q) hK hσ hS hτ
   exact h_bs.const_mul (Real.exp (-(q * τ)))
@@ -44,7 +44,7 @@ lemma hasDerivAt_bsVDiv_S {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 /-- **BS-Merton gamma**: `∂²_S V_q = e^{-qT} · ϕ(d₁') / (S σ √τ)`. -/
 lemma hasDerivAt_bsVDiv_SS {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => Real.exp (-(q * τ)) * Phi (bsd1 s K (r - q) σ τ))
+    HasDerivAt (fun s ↦ Real.exp (-(q * τ)) * Phi (bsd1 s K (r - q) σ τ))
       (Real.exp (-(q * τ)) * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ)
         / (S * σ * Real.sqrt τ)) S := by
   have h_bs := hasDerivAt_bsV_SS (r := r - q) hK hσ hS hτ
@@ -55,7 +55,7 @@ lemma hasDerivAt_bsVDiv_SS {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 /-- **BS-Merton vega**: `∂_σ V_q = e^{-qT} · S · ϕ(d₁') · √τ`. -/
 lemma hasDerivAt_bsVDiv_sigma {K r q : ℝ} (hK : 0 < K)
     {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsVDiv K r q s S τ)
+    HasDerivAt (fun s ↦ bsVDiv K r q s S τ)
       (Real.exp (-(q * τ)) * S * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ)
         * Real.sqrt τ) σ := by
   have h_bs := hasDerivAt_bsV_sigma (r := r - q) hK hS hσ hτ
@@ -70,10 +70,10 @@ lemma hasDerivAt_bsVDiv_sigma {K r q : ℝ} (hK : 0 < K)
 and `e^{-qT} · e^{-(r-q)τ} = e^{-rτ}`. -/
 lemma hasDerivAt_bsVDiv_r {K q σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) (r : ℝ) :
-    HasDerivAt (fun r' => bsVDiv K r' q σ S τ)
+    HasDerivAt (fun r' ↦ bsVDiv K r' q σ S τ)
       (K * τ * Real.exp (-(r * τ)) * Phi (bsd2 S K (r - q) σ τ)) r := by
   -- Chain rule on r' ↦ r' - q.
-  have h_sub_q : HasDerivAt (fun r' : ℝ => r' - q) 1 r := by
+  have h_sub_q : HasDerivAt (fun r' : ℝ ↦ r' - q) 1 r := by
     simpa using (hasDerivAt_id r).sub_const q
   have h_bsV_rho := hasDerivAt_bsV_r (σ := σ) (τ := τ) hK hσ hτ hS (r - q)
   have h_comp := h_bsV_rho.comp r h_sub_q
@@ -98,13 +98,13 @@ Combining and using `S · e^{-qτ} · Φ(d₁') − K · e^{-rτ} · Φ(d₂') =
 the result collapses to `-S · τ · e^{-qτ} · Φ(d₁')`. -/
 lemma hasDerivAt_bsVDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) (q : ℝ) :
-    HasDerivAt (fun q' => bsVDiv K r q' σ S τ)
+    HasDerivAt (fun q' ↦ bsVDiv K r q' σ S τ)
       (-(S * τ * Real.exp (-(q * τ)) * Phi (bsd1 S K (r - q) σ τ))) q := by
   -- Setup: f(q') = e^{-q'τ}, g(q') = bsV(K, r-q', σ, S, τ). V_q = f·g.
   -- ∂_q' f = -τ · e^{-q'τ}
-  have h_f : HasDerivAt (fun q' : ℝ => Real.exp (-(q' * τ)))
+  have h_f : HasDerivAt (fun q' : ℝ ↦ Real.exp (-(q' * τ)))
       (-τ * Real.exp (-(q * τ))) q := by
-    have h_neg : HasDerivAt (fun q' : ℝ => -(q' * τ)) (-τ) q := by
+    have h_neg : HasDerivAt (fun q' : ℝ ↦ -(q' * τ)) (-τ) q := by
       have := (hasDerivAt_id q).mul_const τ
       convert this.neg using 1 <;> first | rfl | ring
     have h := h_neg.exp
@@ -112,12 +112,12 @@ lemma hasDerivAt_bsVDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
     try rfl
     ring
   -- ∂_q' [bsV(K, r-q', σ, S, τ)] via chain rule on (r - q').
-  have h_sub : HasDerivAt (fun q' : ℝ => r - q') (-1) q := by
+  have h_sub : HasDerivAt (fun q' : ℝ ↦ r - q') (-1) q := by
     have := (hasDerivAt_id q).const_sub r
     simpa using this
   have h_bsV_rho := hasDerivAt_bsV_r (σ := σ) (τ := τ) hK hσ hτ hS (r - q)
   have h_g := h_bsV_rho.comp q h_sub
-  -- h_g : HasDerivAt (fun q' => bsV K (r - q') σ S τ) (K·τ·e^{-(r-q)τ}·Φ(d_2) · -1) q
+  -- h_g : HasDerivAt (fun q' ↦ bsV K (r - q') σ S τ) (K·τ·e^{-(r-q)τ}·Φ(d_2) · -1) q
   -- Product: V_q' = f(q') · g(q'), derivative = f'(q)·g(q) + f(q)·g'(q).
   have h_full := h_f.mul h_g
   unfold bsVDiv
@@ -131,14 +131,14 @@ lemma hasDerivAt_bsVDiv_q {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
 Product rule on `V_q = e^{-qτ} · bsV(K, r-q, σ, S, τ)`. -/
 lemma hasDerivAt_bsVDiv_tau {K r q σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun t => bsVDiv K r q σ S t)
+    HasDerivAt (fun t ↦ bsVDiv K r q σ S t)
       (-(q * bsVDiv K r q σ S τ) +
         Real.exp (-(q * τ)) *
           (σ * S * gaussianPDFReal 0 1 (bsd1 S K (r - q) σ τ) / (2 * Real.sqrt τ)
             + (r - q) * K * Real.exp (-((r - q) * τ)) * Phi (bsd2 S K (r - q) σ τ))) τ := by
   -- f(t) = e^{-qt}, derivative -q · e^{-qt}
-  have h_f : HasDerivAt (fun t : ℝ => Real.exp (-(q * t))) (-q * Real.exp (-(q * τ))) τ := by
-    have h_neg : HasDerivAt (fun t : ℝ => -(q * t)) (-q) τ := by
+  have h_f : HasDerivAt (fun t : ℝ ↦ Real.exp (-(q * t))) (-q * Real.exp (-(q * τ))) τ := by
+    have h_neg : HasDerivAt (fun t : ℝ ↦ -(q * t)) (-q) τ := by
       have := (hasDerivAt_id τ).const_mul q
       convert this.neg using 1 <;> first | rfl | ring
     have h := h_neg.exp

@@ -396,7 +396,7 @@ rationals `q < i` of `{ω | X (q : ℝ) ω ∈ A}`. -/
 private lemma hittingAfter_lt_eq_iUnion_rationals
     [TopologicalSpace β]
     {X : ℝ → Ω → β} {A : Set β}
-    (hX_cont : ∀ ω, Continuous (fun t => X t ω)) (hA_open : IsOpen A)
+    (hX_cont : ∀ ω, Continuous (fun t ↦ X t ω)) (hA_open : IsOpen A)
     (i : ℝ) :
     {ω | hittingAfter X A 0 ω < (i : WithTop ℝ)}
       = ⋃ (q : ℚ) (_ : (0 : ℝ) ≤ (q : ℝ)) (_ : (q : ℝ) < i),
@@ -406,14 +406,14 @@ private lemma hittingAfter_lt_eq_iUnion_rationals
   simp only [Set.mem_iUnion, Set.mem_setOf_eq, Set.mem_Ico, exists_prop]
   constructor
   · rintro ⟨j, ⟨hj_nn, hj_lt⟩, hXj⟩
-    have h_pre : (fun t : ℝ => X t ω) ⁻¹' A ∈ nhds j :=
+    have h_pre : (fun t : ℝ ↦ X t ω) ⁻¹' A ∈ nhds j :=
       ((hX_cont ω).continuousAt).preimage_mem_nhds (hA_open.mem_nhds hXj)
     rcases lt_or_eq_of_le hj_nn with hj_pos | hj_zero
     · obtain ⟨δ, hδ_pos, hδ_sub⟩ : ∃ δ > 0,
-          Set.Ioo (j - δ) (j + δ) ⊆ (fun t : ℝ => X t ω) ⁻¹' A := by
+          Set.Ioo (j - δ) (j + δ) ⊆ (fun t : ℝ ↦ X t ω) ⁻¹' A := by
         have h_nhds := Metric.mem_nhds_iff.mp h_pre
         obtain ⟨ε, hε_pos, hε_sub⟩ := h_nhds
-        refine ⟨ε, hε_pos, fun s hs => ?_⟩
+        refine ⟨ε, hε_pos, fun s hs ↦ ?_⟩
         refine hε_sub ?_
         simp only [Metric.mem_ball, Real.dist_eq, Set.mem_Ioo] at hs ⊢
         cases hs with | intro h1 h2 => exact abs_sub_lt_iff.mpr ⟨by linarith, by linarith⟩
@@ -427,7 +427,7 @@ private lemma hittingAfter_lt_eq_iUnion_rationals
         hδ'_lt_min.trans_le ((min_le_right _ _).trans (min_le_left _ _))
       have hδ'_lt_i_sub_j : δ' < i - j :=
         hδ'_lt_min.trans_le ((min_le_right _ _).trans (min_le_right _ _))
-      have h_sub_pre : Set.Ioo (j - δ') (j + δ') ⊆ (fun t : ℝ => X t ω) ⁻¹' A := by
+      have h_sub_pre : Set.Ioo (j - δ') (j + δ') ⊆ (fun t : ℝ ↦ X t ω) ⁻¹' A := by
         intro s hs
         refine hδ_sub ⟨?_, ?_⟩
         · linarith [hs.1, hδ'_le_δ]
@@ -449,13 +449,13 @@ private lemma hittingAfter_lt_eq_iUnion_rationals
 private lemma measurableSet_hittingAfter_lt_of_open
     [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β]
     {𝓕 : Filtration ℝ mΩ} {X : ℝ → Ω → β} {A : Set β}
-    (hX_cont : ∀ ω, Continuous (fun t => X t ω)) (hX_adapted : Adapted 𝓕 X)
+    (hX_cont : ∀ ω, Continuous (fun t ↦ X t ω)) (hX_adapted : Adapted 𝓕 X)
     (hA_open : IsOpen A) (i : ℝ) :
     MeasurableSet[𝓕 i] {ω | hittingAfter X A 0 ω < (i : WithTop ℝ)} := by
   rw [hittingAfter_lt_eq_iUnion_rationals hX_cont hA_open]
-  refine MeasurableSet.iUnion fun q => ?_
-  refine MeasurableSet.iUnion fun hq_nn => ?_
-  refine MeasurableSet.iUnion fun hq_lt => ?_
+  refine MeasurableSet.iUnion fun q ↦ ?_
+  refine MeasurableSet.iUnion fun hq_nn ↦ ?_
+  refine MeasurableSet.iUnion fun hq_lt ↦ ?_
   exact 𝓕.mono hq_lt.le _ (hX_adapted (q : ℝ) hA_open.measurableSet)
 
 /-- **Saporito Proposition 4.3.6.** For a continuous adapted process `X` and an
@@ -465,10 +465,10 @@ theorem isStoppingTime_hittingAfter_of_open
     [TopologicalSpace β] [MeasurableSpace β] [BorelSpace β]
     {𝓕 : Filtration ℝ mΩ} [𝓕.IsRightContinuous]
     {X : ℝ → Ω → β} {A : Set β}
-    (hX_cont : ∀ ω, Continuous (fun t => X t ω)) (hX_adapted : Adapted 𝓕 X)
+    (hX_cont : ∀ ω, Continuous (fun t ↦ X t ω)) (hX_adapted : Adapted 𝓕 X)
     (hA_open : IsOpen A) :
     IsStoppingTime 𝓕 (hittingAfter X A 0) :=
-  isStoppingTime_of_measurableSet_lt_of_isRightContinuous fun i =>
+  isStoppingTime_of_measurableSet_lt_of_isRightContinuous fun i ↦
     measurableSet_hittingAfter_lt_of_open hX_cont hX_adapted hA_open i
 
 end MathFin

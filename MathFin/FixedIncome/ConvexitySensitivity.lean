@@ -67,7 +67,7 @@ noncomputable def convexityNumerator (s : Finset ι) (t : ι → ℕ) (c : ι �
 Summing over cashflows: `d/dy ModNum = −ConvNum`. -/
 theorem hasDerivAt_modifiedNumerator
     (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) :
-    HasDerivAt (fun y' => modifiedNumerator s t c y')
+    HasDerivAt (fun y' ↦ modifiedNumerator s t c y')
                (-convexityNumerator s t c y) y := by
   unfold modifiedNumerator convexityNumerator
   rw [show -∑ i ∈ s, (t i : ℝ) * ((t i : ℝ) + 1) * c i / (1 + y) ^ (t i + 2) =
@@ -75,13 +75,13 @@ theorem hasDerivAt_modifiedNumerator
     rw [← Finset.sum_neg_distrib]]
   apply HasDerivAt.fun_sum
   intros i _
-  have h_term : HasDerivAt (fun y' : ℝ => c i / (1 + y') ^ (t i + 1))
+  have h_term : HasDerivAt (fun y' : ℝ ↦ c i / (1 + y') ^ (t i + 1))
                 (-(((t i + 1 : ℕ) : ℝ) * c i / (1 + y) ^ (t i + 1 + 1))) y :=
     hasDerivAt_coupon_term (c i) (t i + 1) hy
   have h_pulled := h_term.const_mul ((t i : ℝ))
   have h_func :
-      (fun y' : ℝ => (t i : ℝ) * (c i / (1 + y') ^ (t i + 1))) =
-      (fun y' : ℝ => (t i : ℝ) * c i / (1 + y') ^ (t i + 1)) := by
+      (fun y' : ℝ ↦ (t i : ℝ) * (c i / (1 + y') ^ (t i + 1))) =
+      (fun y' : ℝ ↦ (t i : ℝ) * c i / (1 + y') ^ (t i + 1)) := by
     funext y'; ring
   rw [h_func] at h_pulled
   convert h_pulled using 1 <;> try rfl
@@ -99,7 +99,7 @@ gives the full discrete yield Taylor expansion of the bond price:
   `P(y + Δy) ≈ P(y) − ModNum(y) · Δy + ½ · ConvNum(y) · (Δy)²`. -/
 theorem hasDerivAt_bondPriceDisc_secondDeriv
     (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ} (hy : 1 + y ≠ 0) :
-    HasDerivAt (fun y' => -modifiedNumerator s t c y')
+    HasDerivAt (fun y' ↦ -modifiedNumerator s t c y')
                (convexityNumerator s t c y) y := by
   have h := (hasDerivAt_modifiedNumerator s t c hy).neg
   rw [neg_neg] at h
@@ -111,7 +111,7 @@ duration-convexity yield Taylor expansion. -/
 theorem bondPriceDisc_secondDeriv_eq_convexity_times_price
     (s : Finset ι) (t : ι → ℕ) (c : ι → ℝ) {y : ℝ}
     (hy : 1 + y ≠ 0) :
-    ∃ P'' : ℝ, HasDerivAt (fun y' => -modifiedNumerator s t c y') P'' y ∧
+    ∃ P'' : ℝ, HasDerivAt (fun y' ↦ -modifiedNumerator s t c y') P'' y ∧
       P'' / bondPriceDisc s t c y =
         convexityNumerator s t c y / bondPriceDisc s t c y := by
   refine ⟨convexityNumerator s t c y,

@@ -50,8 +50,8 @@ version against the actual discount factor is `forwardRate_eq_neg_log_discount`
 below). -/
 theorem hasDerivAt_T_mul_spotRate {R : ℝ → ℝ} {R'_T T : ℝ}
     (hR : HasDerivAt R R'_T T) :
-    HasDerivAt (fun t => t * R t) (R T + T * R'_T) T := by
-  have h_id : HasDerivAt (fun t : ℝ => t) 1 T := hasDerivAt_id _
+    HasDerivAt (fun t ↦ t * R t) (R T + T * R'_T) T := by
+  have h_id : HasDerivAt (fun t : ℝ ↦ t) 1 T := hasDerivAt_id _
   have h_mul := h_id.mul hR
   convert h_mul using 1 <;> first | rfl | ring
 
@@ -64,7 +64,7 @@ this states the result against the *actual* discount factor rather than the
 `rate_eq_neg_log_deriv` principle. -/
 theorem forwardRate_eq_neg_log_discount {R : ℝ → ℝ} {R'_T T : ℝ}
     (hR : HasDerivAt R R'_T T) :
-    HasDerivAt (fun t => -(Real.log (Real.exp (-(t * R t))))) (R T + T * R'_T) T :=
+    HasDerivAt (fun t ↦ -(Real.log (Real.exp (-(t * R t))))) (R T + T * R'_T) T :=
   rate_eq_neg_log_deriv (hasDerivAt_T_mul_spotRate hR)
 
 end MathFin

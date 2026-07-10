@@ -54,12 +54,12 @@ theorem emm_le_superReplication (z : Fin M → Fin N → ℝ) (Y : Fin N → ℝ
     have hswap : ∑ n, q n * (∑ m, θ m * z m n) = ∑ m, θ m * (∑ n, q n * z m n) := by
       simp_rw [Finset.mul_sum]
       rw [Finset.sum_comm]
-      exact Finset.sum_congr rfl fun m _ => Finset.sum_congr rfl fun n _ => by ring
+      exact Finset.sum_congr rfl fun m _ ↦ Finset.sum_congr rfl fun n _ ↦ by ring
     rw [hswap]
-    exact Finset.sum_eq_zero fun m _ => by rw [hq_mart m, mul_zero]
+    exact Finset.sum_eq_zero fun m _ ↦ by rw [hq_mart m, mul_zero]
   calc ∑ n, q n * Y n
       ≤ ∑ n, q n * (x + ∑ m, θ m * z m n) :=
-        Finset.sum_le_sum fun n _ => mul_le_mul_of_nonneg_left (hsr n) (hq_nn n)
+        Finset.sum_le_sum fun n _ ↦ mul_le_mul_of_nonneg_left (hsr n) (hq_nn n)
     _ = x := by
         simp_rw [mul_add]
         rw [Finset.sum_add_distrib, ← Finset.sum_mul, hq_sum, one_mul, hcross, add_zero]

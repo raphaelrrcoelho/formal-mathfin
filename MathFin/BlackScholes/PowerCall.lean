@@ -133,9 +133,9 @@ theorem bs_power_call_formula
       BSCallHyp Q (bsPowerEffectiveSpot S_0 r σ T a) K r ((a : ℝ) * σ) T Z :=
     bsCallHyp_powered a ha hK h
   have h_int :
-      (fun ω => Real.exp (-r * T) *
+      (fun ω ↦ Real.exp (-r * T) *
           max (bsPowerTerminal S_0 r σ T a (Z ω) - K) 0) =
-      (fun ω => Real.exp (-r * T) *
+      (fun ω ↦ Real.exp (-r * T) *
           max (bsTerminal (bsPowerEffectiveSpot S_0 r σ T a) r
                 ((a : ℝ) * σ) T (Z ω) - K) 0) := by
     funext ω

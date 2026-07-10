@@ -62,7 +62,7 @@ theorem firstToDefault_survival
     (hmeas : ∀ i, Measurable (τ i))
     (hn : 0 < n) {t : ℝ} (ht : 0 ≤ t) :
     μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
-      (fun i : Fin n => τ i ω)} =
+      (fun i : Fin n ↦ τ i ω)} =
         ENNReal.ofReal (survivalProbability (∑ i, rates i) 0 t) := by
   rw [minimum_survival hrates_pos hexp_law hindep hmeas hn ht]
   unfold survivalProbability
@@ -80,7 +80,7 @@ theorem firstToDefault_spread_eq_sum_hazards
     (hmeas : ∀ i, Measurable (τ i))
     (hn : 0 < n) {t : ℝ} (ht : 0 < t) :
     -Real.log ((μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
-        (fun i : Fin n => τ i ω)}).toReal) / t
+        (fun i : Fin n ↦ τ i ω)}).toReal) / t
       = ∑ i, rates i := by
   rw [firstToDefault_survival hrates_pos hexp_law hindep hmeas hn ht.le,
     ENNReal.toReal_ofReal (survival_pos _ _ _).le]

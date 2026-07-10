@@ -42,7 +42,7 @@ a.e.-continuous modification into an everywhere-continuous adapted process. -/
   MeasurableSpace.generateFrom {s | MeasurableSet[m0] s ∧ μ s = 0}
 
 lemma nullsAlg_le : nullsAlg m0 μ ≤ m0 :=
-  MeasurableSpace.generateFrom_le fun _ hs => hs.1
+  MeasurableSpace.generateFrom_le fun _ hs ↦ hs.1
 
 /-- **The measure-theoretic crux.** Every set measurable for the null-augmented
 σ-algebra `m₁ ⊔ 𝓝` is `μ`-a.e. equal to an `m₁`-measurable set. This is exactly
@@ -53,7 +53,7 @@ theorem exists_ae_eq_of_sup_nulls {m₁ : MeasurableSpace Ω}
     {s : Set Ω} (hs : MeasurableSet[m₁ ⊔ nullsAlg m0 μ] s) :
     ∃ t, MeasurableSet[m₁] t ∧ s =ᵐ[μ] t := by
   exact (sup_le le_eventuallyMeasurableSpace
-    (MeasurableSpace.generateFrom_le fun _ hu =>
+    (MeasurableSpace.generateFrom_le fun _ hu ↦
       ⟨∅, m₁.measurableSet_empty, ae_eq_empty.mpr hu.2⟩) :
     m₁ ⊔ nullsAlg m0 μ ≤ eventuallyMeasurableSpace m₁ (ae μ)) s hs
 
@@ -71,7 +71,7 @@ theorem condExp_sup_nulls [IsFiniteMeasure μ] {m₁ : MeasurableSpace Ω} (hm�
   haveI : SigmaFinite (μ.trim hm₁) := (isFiniteMeasure_trim hm₁).toSigmaFinite
   haveI : SigmaFinite (μ.trim hm) := (isFiniteMeasure_trim hm).toSigmaFinite
   refine (ae_eq_condExp_of_forall_setIntegral_eq hm hf
-    (fun s _ _ => integrable_condExp.integrableOn) (fun s hs _ => ?_)
+    (fun s _ _ ↦ integrable_condExp.integrableOn) (fun s hs _ ↦ ?_)
     ((stronglyMeasurable_condExp.mono le_sup_left).aestronglyMeasurable)).symm
   obtain ⟨t, htm, hst⟩ := exists_ae_eq_of_sup_nulls hs
   rw [setIntegral_congr_set hst, setIntegral_condExp hm₁ hf htm]
@@ -90,8 +90,8 @@ variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
 /-- Continuity ⟹ càdlàg (B3's `isCadlag_of_continuous` is `private`; re-derived). -/
 private lemma isCadlag_of_continuous {ι E : Type*} [TopologicalSpace ι] [PartialOrder ι]
     [TopologicalSpace E] {f : ι → E} (hf : Continuous f) : IsCadlag f where
-  right_continuous := fun _ => hf.continuousWithinAt
-  left_limit := fun x => ⟨f x, hf.continuousWithinAt.tendsto⟩
+  right_continuous := fun _ ↦ hf.continuousWithinAt
+  left_limit := fun x ↦ ⟨f x, hf.continuousWithinAt.tendsto⟩
 
 /-- The **null-augmented Brownian filtration** `𝓕ᴮ ⊔ 𝓝`: at each time it adjoins the
 `μ`-null measurable sets to `𝓕ᴮ_t`. This supplies the **completeness** (null-set
@@ -110,7 +110,7 @@ omit [IsProbabilityMeasure μ] in
 genuine continuous path; off the `μ`-null `Gᶜ` it is `0`. -/
 noncomputable def itoLocalMod (G : Set Ω) (T t : ℝ≥0) (hBmeas : ∀ s, Measurable (B s))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (ω : Ω) : ℝ :=
-  G.indicator (fun ω => itoContinuousMod T hBmeas φ (min t T) ω) ω
+  G.indicator (fun ω ↦ itoContinuousMod T hBmeas φ (min t T) ω) ω
 
 /-- **The general-integrand Itô process has an everywhere-continuous local-martingale
 representative.** There is a process `X : ℝ≥0 → Ω → ℝ` that (i) is a **modification** of
@@ -126,19 +126,19 @@ hypothesis forces the everywhere-continuous representative: its **adaptedness** 
 augmentation supplies (the repaired good set `G ∈ 𝓝`), its **martingale property** transferring
 across the augmentation via `condExp_sup_nulls`. -/
 theorem exists_continuous_localMartingale_modification (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ∃ X : ℝ≥0 → Ω → ℝ,
       (∀ t, t ≤ T → X t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ) ∧
-      (∀ ω, Continuous fun t => X t ω) ∧
+      (∀ ω, Continuous fun t ↦ X t ω) ∧
       IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ ∧
       (∀ i, StronglyMeasurable[augFiltration (μ := μ) hBmeas i] (X i)) := by
   -- the a.e. good behaviour: pointwise convergence (∀ t ≤ T) + path continuity on [0,T]
   have hae : ∀ᵐ ω ∂μ,
       (∀ t : ℝ≥0, t ≤ T → Tendsto
-        (fun n => itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
+        (fun n ↦ itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
         (𝓝 (itoContinuousMod T hBmeas φ t ω)))
-      ∧ ContinuousOn (fun t => itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
+      ∧ ContinuousOn (fun t ↦ itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
     filter_upwards [itoContinuousMod_tendsto hB T hBmeas hBcont φ,
       itoContinuousMod_continuousOn hB T hBmeas hBcont φ] with ω h1 h2 using ⟨h1, h2⟩
   -- extract a genuinely measurable, co-null, augmentation-measurable good set G = Nᶜ
@@ -151,20 +151,20 @@ theorem exists_continuous_localMartingale_modification (T : ℝ≥0)
       (show N ∈ {s | MeasurableSet[m0] s ∧ μ s = 0} from ⟨hNmeas, hNnull⟩)).compl
   have hGgood : ∀ ω ∈ G,
       (∀ t : ℝ≥0, t ≤ T → Tendsto
-        (fun n => itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
+        (fun n ↦ itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
         (𝓝 (itoContinuousMod T hBmeas φ t ω)))
-      ∧ ContinuousOn (fun t => itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
+      ∧ ContinuousOn (fun t ↦ itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
     intro ω hω
     rw [hGdef, Set.mem_compl_iff] at hω
-    exact not_not.mp (fun h => hω (hsubN h))
-  have hGtend := fun ω hω => (hGgood ω hω).1
-  have hGcont := fun ω hω => (hGgood ω hω).2
+    exact not_not.mp (fun h ↦ hω (hsubN h))
+  have hGtend := fun ω hω ↦ (hGgood ω hω).1
+  have hGcont := fun ω hω ↦ (hGgood ω hω).2
   -- (1) modification: X i =ᵐ itoProcessCLM T (min i T) φ
-  have hmod : ∀ i : ℝ≥0, (fun ω => itoLocalMod G T i hBmeas φ ω)
+  have hmod : ∀ i : ℝ≥0, (fun ω ↦ itoLocalMod G T i hBmeas φ ω)
       =ᵐ[μ] (itoProcessCLM hB T (min i T) hBmeas φ : Ω → ℝ) := by
     intro i
-    have hstep : (fun ω => itoLocalMod G T i hBmeas φ ω)
-        =ᵐ[μ] (fun ω => itoContinuousMod T hBmeas φ (min i T) ω) := by
+    have hstep : (fun ω ↦ itoLocalMod G T i hBmeas φ ω)
+        =ᵐ[μ] (fun ω ↦ itoContinuousMod T hBmeas φ (min i T) ω) := by
       have hG_ae : ∀ᵐ ω ∂μ, ω ∈ G := by rw [ae_iff]; exact hGnull
       filter_upwards [hG_ae] with ω hω
       simp only [itoLocalMod, Set.indicator_of_mem hω]
@@ -185,53 +185,53 @@ theorem exists_continuous_localMartingale_modification (T : ℝ≥0)
       exact ⟨g, hg.mono ((natFiltration hBmeas).mono hTi), hfg⟩
   -- (3) the augmented martingale condExp identity for X
   have hmart : ∀ {i j : ℝ≥0}, i ≤ j →
-      μ[(fun ω => itoLocalMod G T j hBmeas φ ω) | natFiltration hBmeas i ⊔ nullsAlg m0 μ]
-        =ᵐ[μ] (fun ω => itoLocalMod G T i hBmeas φ ω) := by
+      μ[(fun ω ↦ itoLocalMod G T j hBmeas φ ω) | natFiltration hBmeas i ⊔ nullsAlg m0 μ]
+        =ᵐ[μ] (fun ω ↦ itoLocalMod G T i hBmeas φ ω) := by
     intro i j hij
-    calc μ[(fun ω => itoLocalMod G T j hBmeas φ ω) | natFiltration hBmeas i ⊔ nullsAlg m0 μ]
+    calc μ[(fun ω ↦ itoLocalMod G T j hBmeas φ ω) | natFiltration hBmeas i ⊔ nullsAlg m0 μ]
         =ᵐ[μ] μ[(itoProcessCLM hB T (min j T) hBmeas φ : Ω → ℝ)
             | natFiltration hBmeas i ⊔ nullsAlg m0 μ] := condExp_congr_ae (hmod j)
       _ =ᵐ[μ] μ[(itoProcessCLM hB T (min j T) hBmeas φ : Ω → ℝ) | natFiltration hBmeas i] :=
           condExp_sup_nulls ((natFiltration hBmeas).le i) ((Lp.memLp _).integrable (by norm_num))
       _ =ᵐ[μ] (itoProcessCLM hB T (min i T) hBmeas φ : Ω → ℝ) := hCLMmart hij
-      _ =ᵐ[μ] (fun ω => itoLocalMod G T i hBmeas φ ω) := (hmod i).symm
+      _ =ᵐ[μ] (fun ω ↦ itoLocalMod G T i hBmeas φ ω) := (hmod i).symm
   -- (4) everywhere continuity of the paths
-  have hcont : ∀ ω, Continuous (fun t => itoLocalMod G T t hBmeas φ ω) := by
+  have hcont : ∀ ω, Continuous (fun t ↦ itoLocalMod G T t hBmeas φ ω) := by
     intro ω
     by_cases hω : ω ∈ G
-    · have hrw : (fun t => itoLocalMod G T t hBmeas φ ω)
-          = fun t => itoContinuousMod T hBmeas φ (min t T) ω :=
-        funext fun t => by simp only [itoLocalMod, Set.indicator_of_mem hω]
+    · have hrw : (fun t ↦ itoLocalMod G T t hBmeas φ ω)
+          = fun t ↦ itoContinuousMod T hBmeas φ (min t T) ω :=
+        funext fun t ↦ by simp only [itoLocalMod, Set.indicator_of_mem hω]
       rw [hrw]
       exact (hGcont ω hω).comp_continuous (continuous_id.min continuous_const)
-        (fun t => ⟨zero_le, min_le_right _ _⟩)
-    · have hrw : (fun t => itoLocalMod G T t hBmeas φ ω) = fun _ => (0 : ℝ) :=
-        funext fun t => by simp only [itoLocalMod, Set.indicator_of_notMem hω]
+        (fun t ↦ ⟨zero_le, min_le_right _ _⟩)
+    · have hrw : (fun t ↦ itoLocalMod G T t hBmeas φ ω) = fun _ ↦ (0 : ℝ) :=
+        funext fun t ↦ by simp only [itoLocalMod, Set.indicator_of_notMem hω]
       rw [hrw]; exact continuous_const
   -- (5) adaptedness to the augmented filtration (the augmentation-measurability core)
   have hadapt : ∀ i : ℝ≥0, StronglyMeasurable[natFiltration hBmeas i ⊔ nullsAlg m0 μ]
-      (fun ω => itoLocalMod G T i hBmeas φ ω) := by
+      (fun ω ↦ itoLocalMod G T i hBmeas φ ω) := by
     intro i
     refine stronglyMeasurable_of_tendsto atTop
-      (f := fun n => G.indicator
-        (fun ω => itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val (min i T) ω))
-      (fun n => ?_) ?_
+      (f := fun n ↦ G.indicator
+        (fun ω ↦ itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val (min i T) ω))
+      (fun n ↦ ?_) ?_
     · exact (((itoSimpleProcess_isMartingale hB hBmeas
           ((approxSeq T hBmeas φ).choose n).val).1 (min i T)).mono
         (((natFiltration hBmeas).mono (min_le_left i T)).trans le_sup_left)).indicator
         ((le_sup_right : nullsAlg m0 μ ≤ natFiltration hBmeas i ⊔ nullsAlg m0 μ) _ hGaug)
-    · refine tendsto_pi_nhds.mpr (fun ω => ?_)
+    · refine tendsto_pi_nhds.mpr (fun ω ↦ ?_)
       by_cases hω : ω ∈ G
       · simp only [Set.indicator_of_mem hω, itoLocalMod]
         exact hGtend ω hω (min i T) (min_le_right i T)
       · simp only [Set.indicator_of_notMem hω, itoLocalMod]
         exact tendsto_const_nhds
   -- assemble
-  refine ⟨fun t ω => itoLocalMod G T t hBmeas φ ω, fun t ht => ?_, hcont, ?_,
-    fun i => by rw [augFiltration_apply]; exact hadapt i⟩
+  refine ⟨fun t ω ↦ itoLocalMod G T t hBmeas φ ω, fun t ht ↦ ?_, hcont, ?_,
+    fun i ↦ by rw [augFiltration_apply]; exact hadapt i⟩
   · have h := hmod t; rwa [min_eq_left ht] at h
-  · refine Martingale.IsLocalMartingale ⟨fun i => ?_, fun i j hij => ?_⟩
-      (fun ω => isCadlag_of_continuous (hcont ω))
+  · refine Martingale.IsLocalMartingale ⟨fun i ↦ ?_, fun i j hij ↦ ?_⟩
+      (fun ω ↦ isCadlag_of_continuous (hcont ω))
     · rw [augFiltration_apply]; exact hadapt i
     · rw [augFiltration_apply]; exact hmart hij
 

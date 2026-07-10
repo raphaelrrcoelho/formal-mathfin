@@ -104,30 +104,30 @@ measure-preserving onto the one-period law, whose log-expectation is
 theorem kellyGrowth_n_periods (n : ℕ) {p : ℝ} (hp : 0 ≤ p) (hp1 : p ≤ 1)
     (b f : ℝ) :
     ∫ R : Fin n → ℝ, ∑ i, Real.log (R i)
-        ∂(Measure.pi fun _ : Fin n => kellyReturnMeasure p b f)
+        ∂(Measure.pi fun _ : Fin n ↦ kellyReturnMeasure p b f)
       = (n : ℝ) * kellyGrowth p b f := by
   haveI : IsProbabilityMeasure (kellyReturnMeasure p b f) :=
     kellyReturnMeasure_isProbability hp hp1 b f
   -- each coordinate evaluation is measure-preserving onto the one-period law
   have hmp : ∀ i : Fin n, MeasurePreserving (Function.eval i)
-      (Measure.pi fun _ : Fin n => kellyReturnMeasure p b f)
-      (kellyReturnMeasure p b f) := fun i => measurePreserving_eval _ i
+      (Measure.pi fun _ : Fin n ↦ kellyReturnMeasure p b f)
+      (kellyReturnMeasure p b f) := fun i ↦ measurePreserving_eval _ i
   -- linearity of expectation: integrability of each coordinate's log
   have hint : ∀ i ∈ Finset.univ (α := Fin n),
-      Integrable (fun R : Fin n → ℝ => Real.log (R i))
-        (Measure.pi fun _ : Fin n => kellyReturnMeasure p b f) := fun i _ =>
+      Integrable (fun R : Fin n → ℝ ↦ Real.log (R i))
+        (Measure.pi fun _ : Fin n ↦ kellyReturnMeasure p b f) := fun i _ ↦
     ((hmp i).integrable_comp Real.measurable_log.aestronglyMeasurable).mpr
       (integrable_log_kellyReturnMeasure p b f)
   rw [integral_finsetSum _ hint]
   -- each marginal integral is the one-period expected log-growth
   have hi : ∀ i : Fin n,
       ∫ R : Fin n → ℝ, Real.log (R i)
-          ∂(Measure.pi fun _ : Fin n => kellyReturnMeasure p b f)
+          ∂(Measure.pi fun _ : Fin n ↦ kellyReturnMeasure p b f)
         = kellyGrowth p b f := by
     intro i
     have hmap := (hmp i).map_eq
     calc ∫ R : Fin n → ℝ, Real.log (R i)
-        ∂(Measure.pi fun _ : Fin n => kellyReturnMeasure p b f)
+        ∂(Measure.pi fun _ : Fin n ↦ kellyReturnMeasure p b f)
         = ∫ x, Real.log x ∂(kellyReturnMeasure p b f) := by
           conv_rhs => rw [← hmap]
           rw [integral_map (measurable_pi_apply i).aemeasurable
@@ -141,7 +141,7 @@ independent of the horizon `n` — maximizing `n · kellyGrowth` is the same
 single-period problem, so Kelly is myopic. -/
 lemma kelly_n_periods_deriv_at_kelly (n : ℕ) {p b : ℝ}
     (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
-    HasDerivAt (fun f => (n : ℝ) * kellyGrowth p b f) 0 (kellyFraction p b) := by
+    HasDerivAt (fun f ↦ (n : ℝ) * kellyGrowth p b f) 0 (kellyFraction p b) := by
   have h := kellyGrowth_deriv_at_kelly hp hp1 hb
   have h_mul := h.const_mul (n : ℝ)
   simpa using h_mul

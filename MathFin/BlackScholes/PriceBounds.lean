@@ -114,7 +114,7 @@ theorem bsV_nonneg
     (h : BSCallHyp Q S_0 K r σ T Z) :
     0 ≤ bsV K r σ S_0 T := by
   rw [bsV_eq_riskNeutralExpectation h]
-  exact integral_nonneg fun _ =>
+  exact integral_nonneg fun _ ↦
     mul_nonneg (Real.exp_pos _).le (le_max_right _ _)
 
 /-- **Put price non-negativity**: `0 ≤ bsP`. Same argument with `(K − S_T)⁺`. -/
@@ -125,7 +125,7 @@ theorem bsP_nonneg
     (h : BSCallHyp Q S_0 K r σ T Z) :
     0 ≤ bsP K r σ S_0 T := by
   rw [bsP_eq_riskNeutralExpectation h]
-  exact integral_nonneg fun _ =>
+  exact integral_nonneg fun _ ↦
     mul_nonneg (Real.exp_pos _).le (le_max_right _ _)
 
 /-! ### The two formula-direct upper bounds (Phi-bounds path, no parity)

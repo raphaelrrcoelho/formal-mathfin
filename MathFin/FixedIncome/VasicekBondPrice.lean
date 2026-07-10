@@ -76,7 +76,7 @@ noncomputable def vasicekBondB (κ T : ℝ) : ℝ := (1 - Real.exp (-(κ * T))) 
 — the deterministic integrand whose Wiener integral is the diffusion part of the
 integrated short rate. -/
 noncomputable def vasicekIntegratedKernel (κ T : ℝ) : ℝ → ℝ :=
-  fun u => (1 - Real.exp (-(κ * (T - u)))) / κ
+  fun u ↦ (1 - Real.exp (-(κ * (T - u)))) / κ
 
 /-- The deterministic mean of the integrated short rate,
 `M(T) = ∫₀ᵀ (r₀e^{−κs} + θ(1 − e^{−κs})) ds = r₀·B(T) + θ·(T − B(T))`. -/
@@ -128,22 +128,22 @@ lemma vasicekIntegratedKernel_integral_sq {κ : ℝ} (hκ : κ ≠ 0) (T : ℝ�
       = vasicekBondV κ (T : ℝ) := by
   rw [← intervalIntegral.integral_of_le (by positivity : (0 : ℝ) ≤ (T : ℝ))]
   have hderiv : ∀ u ∈ Set.uIcc (0 : ℝ) (T : ℝ),
-      HasDerivAt (fun u : ℝ => u / κ ^ 2 - 2 * Real.exp (-(κ * ((T : ℝ) - u))) / κ ^ 3
+      HasDerivAt (fun u : ℝ ↦ u / κ ^ 2 - 2 * Real.exp (-(κ * ((T : ℝ) - u))) / κ ^ 3
           + Real.exp (-(2 * κ * ((T : ℝ) - u))) / (2 * κ ^ 3))
         ((vasicekIntegratedKernel κ T u) ^ 2) u := by
     intro u _
     have he : Real.exp (-(2 * κ * ((T : ℝ) - u)))
         = Real.exp (-(κ * ((T : ℝ) - u))) * Real.exp (-(κ * ((T : ℝ) - u))) := by
       rw [← Real.exp_add]; congr 1; ring
-    have hlin : HasDerivAt (fun u : ℝ => u / κ ^ 2) (1 / κ ^ 2) u :=
+    have hlin : HasDerivAt (fun u : ℝ ↦ u / κ ^ 2) (1 / κ ^ 2) u :=
       (hasDerivAt_id u).div_const (κ ^ 2)
-    have harg1 : HasDerivAt (fun u => -(κ * ((T : ℝ) - u))) κ u := by
-      have h : HasDerivAt (fun u => -(κ * ((T : ℝ) - u))) (-(κ * (-1))) u := by
+    have harg1 : HasDerivAt (fun u ↦ -(κ * ((T : ℝ) - u))) κ u := by
+      have h : HasDerivAt (fun u ↦ -(κ * ((T : ℝ) - u))) (-(κ * (-1))) u := by
         apply HasDerivAt.neg; apply HasDerivAt.const_mul
         simpa using (hasDerivAt_id u).const_sub (T : ℝ)
       simpa using h
-    have harg2 : HasDerivAt (fun u => -(2 * κ * ((T : ℝ) - u))) (2 * κ) u := by
-      have h : HasDerivAt (fun u => -(2 * κ * ((T : ℝ) - u))) (-(2 * κ * (-1))) u := by
+    have harg2 : HasDerivAt (fun u ↦ -(2 * κ * ((T : ℝ) - u))) (2 * κ) u := by
+      have h : HasDerivAt (fun u ↦ -(2 * κ * ((T : ℝ) - u))) (-(2 * κ * (-1))) u := by
         apply HasDerivAt.neg; apply HasDerivAt.const_mul
         simpa using (hasDerivAt_id u).const_sub (T : ℝ)
       simpa using h
@@ -188,13 +188,13 @@ private lemma vasicekIntegratedKernelLp_integral_sq {κ : ℝ} (hκ : 0 < κ) (T
 private lemma vasicekBondV_nonneg {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
     (0 : ℝ) ≤ vasicekBondV κ (T : ℝ) := by
   rw [← vasicekIntegratedKernelLp_integral_sq hκ T]
-  exact integral_nonneg fun u => sq_nonneg _
+  exact integral_nonneg fun u ↦ sq_nonneg _
 
 /-- **The centred diffusion law.** `σ∫₀ᵀ g dB`'s core — the Wiener integral of the integrated
 kernel — is centred Gaussian with variance `V(T)`. The single source of the Vasicek Gaussian
 law, consumed by both `vasicekIntegratedRate_hasLaw_gaussian` and `vasicekBondPrice_eq`. -/
 private lemma vasicekWienerLaw (hB : IsPreBrownianReal B μ) {κ : ℝ} (hκ : 0 < κ) (T : ℝ≥0) :
-    HasLaw (fun ω => wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
+    HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
       (gaussianReal 0 (vasicekBondV κ (T : ℝ)).toNNReal) μ := by
   have h0 := wienerIntegralLp_hasLaw_gaussian hB T (vasicekIntegratedKernelLp hκ T)
   rwa [vasicekIntegratedKernelLp_integral_sq hκ T] at h0
@@ -234,7 +234,7 @@ theorem vasicekBondPrice_eq (hB : IsPreBrownianReal B μ)
   set M : ℝ := vasicekIntegratedMean r₀ θ κ (T : ℝ) with hM
   set V : ℝ := vasicekBondV κ (T : ℝ) with hV
   have hV_nonneg : (0 : ℝ) ≤ V := hV ▸ vasicekBondV_nonneg hκ T
-  have hW : HasLaw (fun ω => wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
+  have hW : HasLaw (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)
       (gaussianReal 0 V.toNNReal) μ := hV ▸ vasicekWienerLaw hB hκ T
   -- Factor the integrand: exp(−(M + σW)) = exp(−M)·exp((−σ)·W).
   have hfactor : ∀ ω, Real.exp (-(vasicekIntegratedRate hB r₀ θ σ hκ T ω))
@@ -246,10 +246,10 @@ theorem vasicekBondPrice_eq (hB : IsPreBrownianReal B μ)
     ring
   simp_rw [hfactor]
   rw [integral_const_mul,
-    show (fun ω => Real.exp ((-σ) * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)))
-        = (fun x => Real.exp ((-σ) * x))
-          ∘ (fun ω => wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω) from rfl,
-    hW.integral_comp (by fun_prop : AEStronglyMeasurable (fun x => Real.exp ((-σ) * x))
+    show (fun ω ↦ Real.exp ((-σ) * (wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω)))
+        = (fun x ↦ Real.exp ((-σ) * x))
+          ∘ (fun ω ↦ wienerIntegralLp B hB T (vasicekIntegratedKernelLp hκ T) ω) from rfl,
+    hW.integral_comp (by fun_prop : AEStronglyMeasurable (fun x ↦ Real.exp ((-σ) * x))
       (gaussianReal 0 V.toNNReal)),
     integral_exp_mul_gaussianReal_zero (-σ) V.toNNReal,
     Real.coe_toNNReal _ hV_nonneg, ← Real.exp_add]

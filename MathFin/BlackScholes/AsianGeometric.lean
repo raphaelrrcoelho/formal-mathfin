@@ -50,11 +50,11 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω} [IsProbabilit
 /-- **Zero start**: `B_0 = 0` a.s., since `∫ (B_0)² = min(0,0) = 0`. -/
 private lemma brownian_start_zero (hB : IsPreBrownianReal B μ) : B 0 =ᵐ[μ] 0 := by
   have hmem : MemLp (B 0) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval 0).memLp_two
-  have hint : Integrable (fun ω => B 0 ω * B 0 ω) μ := hmem.integrable_mul hmem
+  have hint : Integrable (fun ω ↦ B 0 ω * B 0 ω) μ := hmem.integrable_mul hmem
   have hsq : ∫ ω, B 0 ω * B 0 ω ∂μ = 0 := by
     rw [integral_mul_eval hB 0 0]; simp
-  have h0 : (fun ω => B 0 ω * B 0 ω) =ᵐ[μ] 0 :=
-    (integral_eq_zero_iff_of_nonneg (fun ω => mul_self_nonneg _) hint).mp hsq
+  have h0 : (fun ω ↦ B 0 ω * B 0 ω) =ᵐ[μ] 0 :=
+    (integral_eq_zero_iff_of_nonneg (fun ω ↦ mul_self_nonneg _) hint).mp hsq
   filter_upwards [h0] with ω hω
   exact mul_self_eq_zero.mp hω
 
@@ -64,7 +64,7 @@ Gaussian part of the log geometric average `log √(S_s·S_t)` — has the centr
 `N(0, (3s+t)/4)`, the variance coming from the Brownian covariance `∫ B_s·B_t = min(s,t)`. -/
 theorem asianGeom_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     {s t : ℝ≥0} (hst : s ≤ t) (hsT : s ≤ T) (htT : t ≤ T) :
-    HasLaw (fun ω => (B s ω + B t ω) / 2)
+    HasLaw (fun ω ↦ (B s ω + B t ω) / 2)
       (gaussianReal 0 ((3 * (s : ℝ) + t) / 4).toNNReal) μ := by
   -- The two step indices `(0, s]` and `(0, t]`, and the kernel `f = ½·𝟙_{(0,s]} + ½·𝟙_{(0,t]}`.
   set is : StepIndex T := ⟨(0, s), ⟨zero_le, hsT⟩⟩ with his
@@ -77,13 +77,13 @@ theorem asianGeom_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     rw [hf, map_add, map_smul, map_smul, wienerIntegralLp_stepIndicator,
       wienerIntegralLp_stepIndicator]
   -- The increment `coeFn`s: `wInc(0,u] = B_u − B_0` a.e.
-  have e1 : (wienerIncrementLp B hB is : Ω → ℝ) =ᵐ[μ] fun ω => B s ω - B 0 ω :=
+  have e1 : (wienerIncrementLp B hB is : Ω → ℝ) =ᵐ[μ] fun ω ↦ B s ω - B 0 ω :=
     (memLp_increment_two hB is).coeFn_toLp
-  have e2 : (wienerIncrementLp B hB it : Ω → ℝ) =ᵐ[μ] fun ω => B t ω - B 0 ω :=
+  have e2 : (wienerIncrementLp B hB it : Ω → ℝ) =ᵐ[μ] fun ω ↦ B t ω - B 0 ω :=
     (memLp_increment_two hB it).coeFn_toLp
   -- The Wiener integral's `coeFn` is `½(B_s − B_0) + ½(B_t − B_0)` a.e.
-  have hcoe : (fun ω => wienerIntegralLp B hB T f ω)
-      =ᵐ[μ] fun ω => (1 / 2 : ℝ) * (B s ω - B 0 ω) + (1 / 2 : ℝ) * (B t ω - B 0 ω) := by
+  have hcoe : (fun ω ↦ wienerIntegralLp B hB T f ω)
+      =ᵐ[μ] fun ω ↦ (1 / 2 : ℝ) * (B s ω - B 0 ω) + (1 / 2 : ℝ) * (B t ω - B 0 ω) := by
     rw [hf_eq]
     have ha := Lp.coeFn_add ((1 / 2 : ℝ) • wienerIncrementLp B hB is)
       ((1 / 2 : ℝ) • wienerIncrementLp B hB it)
@@ -93,25 +93,25 @@ theorem asianGeom_driver_hasLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     rw [ha]
     simp only [Pi.add_apply, hcs, hct, Pi.smul_apply, smul_eq_mul, he1, he2]
   -- Which is `(B_s + B_t)/2` a.e. (zero start `B_0 = 0`).
-  have hae : (fun ω => wienerIntegralLp B hB T f ω) =ᵐ[μ] fun ω => (B s ω + B t ω) / 2 := by
+  have hae : (fun ω ↦ wienerIntegralLp B hB T f ω) =ᵐ[μ] fun ω ↦ (B s ω + B t ω) / 2 := by
     filter_upwards [hcoe, brownian_start_zero hB] with ω hc hz
     simp only [Pi.zero_apply] at hz
     rw [hc, hz]; ring
   -- The variance `∫ f² = (3s+t)/4`, computed on the Ω-side via `∫ B_u·B_v = min(u,v)`.
   have hms : MemLp (B s) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval s).memLp_two
   have hmt : MemLp (B t) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval t).memLp_two
-  have i1 : Integrable (fun ω => (1 / 4 : ℝ) * (B s ω * B s ω)) μ :=
+  have i1 : Integrable (fun ω ↦ (1 / 4 : ℝ) * (B s ω * B s ω)) μ :=
     (hms.integrable_mul hms).const_mul _
-  have i2 : Integrable (fun ω => (1 / 2 : ℝ) * (B s ω * B t ω)) μ :=
+  have i2 : Integrable (fun ω ↦ (1 / 2 : ℝ) * (B s ω * B t ω)) μ :=
     (hms.integrable_mul hmt).const_mul _
-  have i3 : Integrable (fun ω => (1 / 4 : ℝ) * (B t ω * B t ω)) μ :=
+  have i3 : Integrable (fun ω ↦ (1 / 4 : ℝ) * (B t ω * B t ω)) μ :=
     (hmt.integrable_mul hmt).const_mul _
-  have i12 : Integrable (fun ω => (1 / 4 : ℝ) * (B s ω * B s ω)
+  have i12 : Integrable (fun ω ↦ (1 / 4 : ℝ) * (B s ω * B s ω)
       + (1 / 2 : ℝ) * (B s ω * B t ω)) μ := i1.add i2
   have hvar : (∫ x in Set.Ioc (0 : ℝ) (T : ℝ), (f x) ^ 2 ∂volume) = (3 * (s : ℝ) + t) / 4 := by
     rw [← wienerIntegralLp_integral_sq hB T f]
-    have hsq_ae : (fun ω => (wienerIntegralLp B hB T f ω) ^ 2)
-        =ᵐ[μ] fun ω => (1 / 4 : ℝ) * (B s ω * B s ω) + (1 / 2 : ℝ) * (B s ω * B t ω)
+    have hsq_ae : (fun ω ↦ (wienerIntegralLp B hB T f ω) ^ 2)
+        =ᵐ[μ] fun ω ↦ (1 / 4 : ℝ) * (B s ω * B s ω) + (1 / 2 : ℝ) * (B s ω * B t ω)
             + (1 / 4 : ℝ) * (B t ω * B t ω) := by
       filter_upwards [hae] with ω hω
       rw [hω]; ring

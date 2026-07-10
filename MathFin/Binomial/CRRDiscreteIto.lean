@@ -132,7 +132,7 @@ theorem binomial_QV_per_step_eq (r σ T : ℝ) (n : ℕ) (hT : 0 < T) (hn : 1 �
 `Binomial/DriftLimit.lean`. -/
 theorem tendsto_sum_drift_atTop_BS_drift
     {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ => (n : ℝ) * binomialLogReturnDrift r σ T n)
+    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnDrift r σ T n)
       atTop (𝓝 ((r - σ ^ 2 / 2) * T)) := by
   unfold binomialLogReturnDrift crrStep
   -- After unfolding, the function is `n · (2 p_n − 1) · σ · √(T/n)`, exactly
@@ -147,7 +147,7 @@ theorem tendsto_sum_drift_atTop_BS_drift
 = 4 σ² T · p · (1−p)`. -/
 theorem tendsto_sum_QV_atTop_BS_QV
     {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ => (n : ℝ) * binomialLogReturnQV r σ T n)
+    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnQV r σ T n)
       atTop (𝓝 (σ ^ 2 * T)) := by
   refine (crr_variance_limit (r := r) hσ hT).congr' ?_
   filter_upwards [Filter.eventually_gt_atTop 0] with n hn
@@ -166,9 +166,9 @@ distributional convergence to the BS call price is proved separately in
 Packaged as a single conjunction for downstream consumption. -/
 theorem binomial_discrete_ito_convergence
     {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ => (n : ℝ) * binomialLogReturnDrift r σ T n)
+    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnDrift r σ T n)
         atTop (𝓝 ((r - σ ^ 2 / 2) * T)) ∧
-    Tendsto (fun n : ℕ => (n : ℝ) * binomialLogReturnQV r σ T n)
+    Tendsto (fun n : ℕ ↦ (n : ℝ) * binomialLogReturnQV r σ T n)
         atTop (𝓝 (σ ^ 2 * T)) :=
   ⟨tendsto_sum_drift_atTop_BS_drift hσ hT,
    tendsto_sum_QV_atTop_BS_QV hσ hT⟩

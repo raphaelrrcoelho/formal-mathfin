@@ -35,26 +35,26 @@ open MeasureTheory ProbabilityTheory Real
 
 /-- `(−ϕ(0,1,·))' = z · ϕ(0,1,z)`. Algebraic content: `d/dz [exp(-z²/2)] = -z · exp(-z²/2)`. -/
 lemma hasDerivAt_neg_gaussianPDFReal_zero_one (z : ℝ) :
-    HasDerivAt (fun z' : ℝ => -gaussianPDFReal 0 1 z')
+    HasDerivAt (fun z' : ℝ ↦ -gaussianPDFReal 0 1 z')
       (z * gaussianPDFReal 0 1 z) z := by
   unfold gaussianPDFReal
   simp only [NNReal.coe_one, mul_one, sub_zero]
   set c := (Real.sqrt (2 * π))⁻¹
   -- d/dz [-z²/2] = -z
-  have h_sq : HasDerivAt (fun z' : ℝ => -(z'^2)/2) (-z) z := by
-    have h_pow : HasDerivAt (fun z' : ℝ => z'^2) (2 * z) z := by
+  have h_sq : HasDerivAt (fun z' : ℝ ↦ -(z'^2)/2) (-z) z := by
+    have h_pow : HasDerivAt (fun z' : ℝ ↦ z'^2) (2 * z) z := by
       simpa using hasDerivAt_pow 2 z
-    have h_div : HasDerivAt (fun z' : ℝ => z'^2 / 2) z z := by
+    have h_div : HasDerivAt (fun z' : ℝ ↦ z'^2 / 2) z z := by
       have := h_pow.div_const 2; simpa using this
-    have h_neg : HasDerivAt (fun z' : ℝ => -(z'^2 / 2)) (-z) z := h_div.neg
-    have h_eq : (fun z' : ℝ => -(z'^2)/2) = (fun z' : ℝ => -(z'^2 / 2)) := by
+    have h_neg : HasDerivAt (fun z' : ℝ ↦ -(z'^2 / 2)) (-z) z := h_div.neg
+    have h_eq : (fun z' : ℝ ↦ -(z'^2)/2) = (fun z' : ℝ ↦ -(z'^2 / 2)) := by
       funext z'; ring
     rw [h_eq]; exact h_neg
   -- d/dz [exp(-z²/2)] = exp(-z²/2) · -z
-  have h_exp : HasDerivAt (fun z' : ℝ => Real.exp (-(z'^2)/2))
+  have h_exp : HasDerivAt (fun z' : ℝ ↦ Real.exp (-(z'^2)/2))
       (Real.exp (-(z^2)/2) * -z) z := h_sq.exp
   -- d/dz [c · exp(-z²/2)] = c · exp(-z²/2) · -z
-  have h_const : HasDerivAt (fun z' : ℝ => c * Real.exp (-(z'^2)/2))
+  have h_const : HasDerivAt (fun z' : ℝ ↦ c * Real.exp (-(z'^2)/2))
       (c * (Real.exp (-(z^2)/2) * -z)) z := h_exp.const_mul c
   -- neg
   have h_neg := h_const.neg
@@ -64,11 +64,11 @@ lemma hasDerivAt_neg_gaussianPDFReal_zero_one (z : ℝ) :
 `.neg`-flip of `hasDerivAt_neg_gaussianPDFReal_zero_one`). The single
 standard-normal first-derivative reused across the Greeks files. -/
 theorem hasDerivAt_gaussianPDFReal_zero_one (z : ℝ) :
-    HasDerivAt (fun z' : ℝ => gaussianPDFReal 0 1 z')
+    HasDerivAt (fun z' : ℝ ↦ gaussianPDFReal 0 1 z')
       (-(z * gaussianPDFReal 0 1 z)) z := by
   have h := (hasDerivAt_neg_gaussianPDFReal_zero_one z).neg
-  have h_eq : ((-fun z' : ℝ => -gaussianPDFReal 0 1 z') : ℝ → ℝ)
-            = fun z' : ℝ => gaussianPDFReal 0 1 z' := by funext z'; simp
+  have h_eq : ((-fun z' : ℝ ↦ -gaussianPDFReal 0 1 z') : ℝ → ℝ)
+            = fun z' : ℝ ↦ gaussianPDFReal 0 1 z' := by funext z'; simp
   rw [h_eq] at h
   exact h
 
@@ -85,20 +85,20 @@ theorem hasDerivAt_Phi (x : ℝ) :
   have h_int_ax : IntervalIntegrable (gaussianPDFReal 0 1) volume a x :=
     h_pdf_int.intervalIntegrable
   -- FTC right endpoint
-  have h_ftc : HasDerivAt (fun u => ∫ z in a..u, gaussianPDFReal 0 1 z)
+  have h_ftc : HasDerivAt (fun u ↦ ∫ z in a..u, gaussianPDFReal 0 1 z)
       (gaussianPDFReal 0 1 x) x :=
     intervalIntegral.integral_hasDerivAt_right h_int_ax
       h_pdf_cont.aestronglyMeasurable.stronglyMeasurableAtFilter
       h_pdf_cont.continuousAt
   -- Add the constant Phi a.
   have h_shifted : HasDerivAt
-      (fun u => Phi a + ∫ z in a..u, gaussianPDFReal 0 1 z)
+      (fun u ↦ Phi a + ∫ z in a..u, gaussianPDFReal 0 1 z)
       (gaussianPDFReal 0 1 x) x := by
     have := h_ftc.const_add (Phi a)
     simpa using this
   -- Phi equals this function in a neighborhood of x (for y > a).
   have h_eq_nhds : Phi =ᶠ[nhds x]
-      (fun u => Phi a + ∫ z in a..u, gaussianPDFReal 0 1 z) := by
+      (fun u ↦ Phi a + ∫ z in a..u, gaussianPDFReal 0 1 z) := by
     refine Filter.eventually_of_mem (Ioi_mem_nhds hax) ?_
     intro y hy
     rw [Set.mem_Ioi] at hy
@@ -107,7 +107,7 @@ theorem hasDerivAt_Phi (x : ℝ) :
     have h_decomp : Set.Iic y = Set.Iic a ∪ Set.Ioc a y := by
       ext z
       simp only [Set.mem_Iic, Set.mem_union, Set.mem_Ioc]
-      refine ⟨fun hz => ?_, fun hz => ?_⟩
+      refine ⟨fun hz ↦ ?_, fun hz ↦ ?_⟩
       · by_cases h : z ≤ a
         · exact Or.inl h
         · exact Or.inr ⟨not_le.mp h, hz⟩

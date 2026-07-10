@@ -105,7 +105,7 @@ theorem discrete_ito_formula
   -- Telescoping: f(X N) - f(X 0) = Σ (f(X (k+1)) - f(X k))
   have h_tele : f (X N) - f (X 0) =
       ∑ k ∈ Finset.range N, (f (X (k + 1)) - f (X k)) :=
-    (Finset.sum_range_sub (fun n => f (X n)) N).symm
+    (Finset.sum_range_sub (fun n ↦ f (X n)) N).symm
   rw [h_tele]
   -- Per-summand Taylor decomposition
   have h_summand : ∀ k,
@@ -116,7 +116,7 @@ theorem discrete_ito_formula
     intro k
     unfold discreteTaylorRemainder
     ring
-  rw [Finset.sum_congr rfl (fun k _ => h_summand k)]
+  rw [Finset.sum_congr rfl (fun k _ ↦ h_summand k)]
   -- Distribute the three-term sum and pull the (1/2) constant out
   rw [Finset.sum_add_distrib, Finset.sum_add_distrib, ← Finset.mul_sum]
 

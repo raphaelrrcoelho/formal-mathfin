@@ -64,7 +64,7 @@ lemma creditSpread_eq_hazard {h t T : ℝ} (htT : t < T) :
 
 /-- **Positive hazard ⇒ strictly decreasing survival in horizon `T`**. -/
 lemma survival_strictAnti_of_pos_hazard {h t : ℝ} (hh : 0 < h) :
-    StrictAntiOn (fun T => survivalProbability h t T) (Set.Ici t) := by
+    StrictAntiOn (fun T ↦ survivalProbability h t T) (Set.Ici t) := by
   intro T₁ _ T₂ _ hT
   unfold survivalProbability
   have h_arg : -(h * (T₂ - t)) < -(h * (T₁ - t)) := by

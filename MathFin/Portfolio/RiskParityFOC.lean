@@ -143,7 +143,7 @@ theorem riskContribution_eq_variance_div_card_of_riskParity
   have h_sum : ∑ j ∈ s, riskContribution s Sg w j =
                (s.card : ℝ) * riskContribution s Sg w i := by
     have h_all_eq : ∀ j ∈ s,
-        riskContribution s Sg w j = riskContribution s Sg w i := fun j hj => h_RP j hj i hi
+        riskContribution s Sg w j = riskContribution s Sg w i := fun j hj ↦ h_RP j hj i hi
     rw [Finset.sum_congr rfl h_all_eq, Finset.sum_const, nsmul_eq_mul]
   rw [sum_riskContribution_eq_variance] at h_sum
   field_simp
@@ -171,62 +171,62 @@ symmetry of `Σ`, halved), and the log-barrier term contributes `− b_j / w_j`.
 theorem hasDerivAt_logBarrierObj_update
     {ι : Type*} [DecidableEq ι] (s : Finset ι) (Sg : ι → ι → ℝ) (b w : ι → ℝ)
     (j : ι) (hj : j ∈ s) (hSg : ∀ a c, Sg a c = Sg c a) (hwj : w j ≠ 0) :
-    HasDerivAt (fun x => logBarrierObj s Sg b (Function.update w j x))
+    HasDerivAt (fun x ↦ logBarrierObj s Sg b (Function.update w j x))
       (marginalVariance s Sg w j - b j / w j) (w j) := by
   -- === derivative of the quadratic term ===
   -- coordinate factor:  d/dx (update w j x) k = [k = j]
-  have hu : ∀ k, HasDerivAt (fun x => Function.update w j x k)
+  have hu : ∀ k, HasDerivAt (fun x ↦ Function.update w j x k)
       (if k = j then (1 : ℝ) else 0) (w j) := by
     intro k
     by_cases hk : k = j
     · rw [if_pos hk]
-      have hfun : (fun x => Function.update w j x k) = fun x => x := by
+      have hfun : (fun x ↦ Function.update w j x k) = fun x ↦ x := by
         funext x; rw [hk, Function.update_self]
       rw [hfun]; exact hasDerivAt_id (w j)
     · rw [if_neg hk]
-      have hfun : (fun x => Function.update w j x k) = fun _ => w k := by
+      have hfun : (fun x ↦ Function.update w j x k) = fun _ ↦ w k := by
         funext x; rw [Function.update_of_ne hk]
       rw [hfun]; exact hasDerivAt_const (w j) (w k)
   -- inner marginal factor:  d/dx ∑_l Sg k l · (update w j x) l = Sg k j
-  have hv : ∀ k, HasDerivAt (fun x => ∑ l ∈ s, Sg k l * Function.update w j x l)
+  have hv : ∀ k, HasDerivAt (fun x ↦ ∑ l ∈ s, Sg k l * Function.update w j x l)
       (Sg k j) (w j) := by
     intro k
-    have hterm : ∀ l, HasDerivAt (fun x => Sg k l * Function.update w j x l)
+    have hterm : ∀ l, HasDerivAt (fun x ↦ Sg k l * Function.update w j x l)
         (if l = j then Sg k j else 0) (w j) := by
       intro l
       by_cases hl : l = j
       · rw [if_pos hl]
-        have hfun : (fun x => Sg k l * Function.update w j x l)
-            = fun x => Sg k l * x := by funext x; rw [hl, Function.update_self]
+        have hfun : (fun x ↦ Sg k l * Function.update w j x l)
+            = fun x ↦ Sg k l * x := by funext x; rw [hl, Function.update_self]
         rw [hfun, hl]
         simpa using (hasDerivAt_id (w j)).const_mul (Sg k j)
       · rw [if_neg hl]
-        have hfun : (fun x => Sg k l * Function.update w j x l)
-            = fun _ => Sg k l * w l := by funext x; rw [Function.update_of_ne hl]
+        have hfun : (fun x ↦ Sg k l * Function.update w j x l)
+            = fun _ ↦ Sg k l * w l := by funext x; rw [Function.update_of_ne hl]
         rw [hfun]; exact hasDerivAt_const (w j) (Sg k l * w l)
-    have hsum : HasDerivAt (fun x => ∑ l ∈ s, Sg k l * Function.update w j x l)
+    have hsum : HasDerivAt (fun x ↦ ∑ l ∈ s, Sg k l * Function.update w j x l)
         (∑ l ∈ s, if l = j then Sg k j else 0) (w j) :=
-      HasDerivAt.fun_sum (fun l (_ : l ∈ s) => hterm l)
+      HasDerivAt.fun_sum (fun l (_ : l ∈ s) ↦ hterm l)
     rw [Finset.sum_ite_eq' s j, if_pos hj] at hsum
     exact hsum
   -- product rule per outer index k
   have hF : ∀ k, HasDerivAt
-      (fun x => Function.update w j x k * ∑ l ∈ s, Sg k l * Function.update w j x l)
+      (fun x ↦ Function.update w j x k * ∑ l ∈ s, Sg k l * Function.update w j x l)
       ((if k = j then (1 : ℝ) else 0)
           * (∑ l ∈ s, Sg k l * Function.update w j (w j) l)
         + Function.update w j (w j) k * Sg k j) (w j) :=
-    fun k => (hu k).mul (hv k)
+    fun k ↦ (hu k).mul (hv k)
   -- sum over k: derivative of the whole quadratic (pre-simplification)
   have hsum : HasDerivAt
-      (fun x => ∑ k ∈ s,
+      (fun x ↦ ∑ k ∈ s,
         Function.update w j x k * ∑ l ∈ s, Sg k l * Function.update w j x l)
       (∑ k ∈ s, ((if k = j then (1 : ℝ) else 0)
           * (∑ l ∈ s, Sg k l * Function.update w j (w j) l)
         + Function.update w j (w j) k * Sg k j)) (w j) :=
-    HasDerivAt.fun_sum (fun k (_ : k ∈ s) => hF k)
+    HasDerivAt.fun_sum (fun k (_ : k ∈ s) ↦ hF k)
   -- identify that sum with `portfolioVariance ∘ update`
-  have hfun : (fun x => portfolioVariance s Sg (Function.update w j x))
-      = (fun x => ∑ k ∈ s,
+  have hfun : (fun x ↦ portfolioVariance s Sg (Function.update w j x))
+      = (fun x ↦ ∑ k ∈ s,
           Function.update w j x k * ∑ l ∈ s, Sg k l * Function.update w j x l) := by
     funext x; rfl
   -- simplify the derivative sum to `2 · (Σw)_j`
@@ -247,15 +247,15 @@ theorem hasDerivAt_logBarrierObj_update
       rfl
     have h2 : (∑ k ∈ s, w k * Sg k j) = marginalVariance s Sg w j := by
       unfold marginalVariance
-      refine Finset.sum_congr rfl (fun k _ => ?_)
+      refine Finset.sum_congr rfl (fun k _ ↦ ?_)
       rw [hSg k j]; ring
     rw [h1, h2]; ring
   -- assemble: half the quadratic derivative
-  have hPV : HasDerivAt (fun x => portfolioVariance s Sg (Function.update w j x))
+  have hPV : HasDerivAt (fun x ↦ portfolioVariance s Sg (Function.update w j x))
       (2 * marginalVariance s Sg w j) (w j) := by
     rw [hfun, ← hderiv_eq]; exact hsum
   have hHalf : HasDerivAt
-      (fun x => (1 / 2 : ℝ) * portfolioVariance s Sg (Function.update w j x))
+      (fun x ↦ (1 / 2 : ℝ) * portfolioVariance s Sg (Function.update w j x))
       (marginalVariance s Sg w j) (w j) := by
     have h := hPV.const_mul (1 / 2 : ℝ)
     have he : (1 / 2 : ℝ) * (2 * marginalVariance s Sg w j)
@@ -263,27 +263,27 @@ theorem hasDerivAt_logBarrierObj_update
     rwa [he] at h
   -- === derivative of the log-barrier term ===
   have hLog : HasDerivAt
-      (fun x => ∑ i ∈ s, b i * Real.log (Function.update w j x i))
+      (fun x ↦ ∑ i ∈ s, b i * Real.log (Function.update w j x i))
       (b j / w j) (w j) := by
-    have hterm : ∀ i, HasDerivAt (fun x => b i * Real.log (Function.update w j x i))
+    have hterm : ∀ i, HasDerivAt (fun x ↦ b i * Real.log (Function.update w j x i))
         (if i = j then b j / w j else 0) (w j) := by
       intro i
       by_cases hi : i = j
       · rw [if_pos hi]
-        have hfun : (fun x => b i * Real.log (Function.update w j x i))
-            = fun x => b i * Real.log x := by
+        have hfun : (fun x ↦ b i * Real.log (Function.update w j x i))
+            = fun x ↦ b i * Real.log x := by
           funext x; rw [hi, Function.update_self]
         rw [hfun, hi, div_eq_mul_inv]
         exact (Real.hasDerivAt_log hwj).const_mul (b j)
       · rw [if_neg hi]
-        have hfun : (fun x => b i * Real.log (Function.update w j x i))
-            = fun _ => b i * Real.log (w i) := by
+        have hfun : (fun x ↦ b i * Real.log (Function.update w j x i))
+            = fun _ ↦ b i * Real.log (w i) := by
           funext x; rw [Function.update_of_ne hi]
         rw [hfun]; exact hasDerivAt_const (w j) (b i * Real.log (w i))
     have hsumLog : HasDerivAt
-        (fun x => ∑ i ∈ s, b i * Real.log (Function.update w j x i))
+        (fun x ↦ ∑ i ∈ s, b i * Real.log (Function.update w j x i))
         (∑ i ∈ s, if i = j then b j / w j else 0) (w j) :=
-      HasDerivAt.fun_sum (fun i (_ : i ∈ s) => hterm i)
+      HasDerivAt.fun_sum (fun i (_ : i ∈ s) ↦ hterm i)
     rw [Finset.sum_ite_eq' s j, if_pos hj] at hsumLog
     exact hsumLog
   -- === combine ===
@@ -298,7 +298,7 @@ the condition for `w` to be a critical point of `L`. -/
 theorem logBarrierObj_critical_iff_FOC
     {ι : Type*} [DecidableEq ι] (s : Finset ι) (Sg : ι → ι → ℝ) (b w : ι → ℝ)
     (j : ι) (hj : j ∈ s) (hSg : ∀ a c, Sg a c = Sg c a) (hwj : w j ≠ 0) :
-    HasDerivAt (fun x => logBarrierObj s Sg b (Function.update w j x)) 0 (w j) ↔
+    HasDerivAt (fun x ↦ logBarrierObj s Sg b (Function.update w j x)) 0 (w j) ↔
       marginalVariance s Sg w j = b j / w j := by
   have hd := hasDerivAt_logBarrierObj_update s Sg b w j hj hSg hwj
   constructor

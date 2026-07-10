@@ -176,7 +176,7 @@ lemma mertonCallTerm_nonneg {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k)
     (n : ℕ) : 0 ≤ mertonCallTerm S_0 K r σ T k δ Λ n := by
   rw [mertonCallTerm_eq_integral δ Λ hS_0 hK hσ hT hk n]
-  exact integral_nonneg fun z =>
+  exact integral_nonneg fun z ↦
     mul_nonneg (Real.exp_pos _).le (le_max_right _ _)
 
 lemma mertonCallTerm_le_spot {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
@@ -195,7 +195,7 @@ lemma mertonPutTerm_nonneg {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k)
     (n : ℕ) : 0 ≤ mertonPutTerm S_0 K r σ T k δ Λ n := by
   rw [mertonPutTerm_eq_integral δ Λ hS_0 hK hσ hT hk n]
-  exact integral_nonneg fun z =>
+  exact integral_nonneg fun z ↦
     mul_nonneg (Real.exp_pos _).le (le_max_right _ _)
 
 lemma mertonPutTerm_le_strike {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
@@ -214,10 +214,10 @@ lemma mertonPutTerm_le_strike {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
 /-- The Poisson-weighted conditional spots form a convergent (exponential)
 series — the quantitative heart of the mixture's well-definedness. -/
 lemma summable_weights_mul_mertonSpot (S_0 k : ℝ) (Λ : ℝ≥0) :
-    Summable (fun n : ℕ =>
+    Summable (fun n : ℕ ↦
       rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonSpot S_0 k Λ n) := by
   refine ((PoissonPgf.hasSum_poisson_weights_mul_pow Λ (1 + k)).summable.mul_left
-    (S_0 * rexp (-(k * (Λ : ℝ))))).congr fun n => ?_
+    (S_0 * rexp (-(k * (Λ : ℝ))))).congr fun n ↦ ?_
   unfold mertonSpot
   ring
 
@@ -225,7 +225,7 @@ lemma integrable_mertonCallTerm {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :
     Integrable (mertonCallTerm S_0 K r σ T k δ Λ) (poissonMeasure Λ) := by
   rw [integrable_poissonMeasure_iff]
-  refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_)
+  refine Summable.of_nonneg_of_le (fun n ↦ by positivity) (fun n ↦ ?_)
     (summable_weights_mul_mertonSpot S_0 k Λ)
   have hterm : ‖mertonCallTerm S_0 K r σ T k δ Λ n‖
       ≤ mertonSpot S_0 k Λ n := by
@@ -238,7 +238,7 @@ lemma integrable_mertonPutTerm {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (hk : -1 < k) :
     Integrable (mertonPutTerm S_0 K r σ T k δ Λ) (poissonMeasure Λ) := by
   rw [integrable_poissonMeasure_iff]
-  refine Summable.of_nonneg_of_le (fun n => by positivity) (fun n => ?_)
+  refine Summable.of_nonneg_of_le (fun n ↦ by positivity) (fun n ↦ ?_)
     ((hasSum_one_poissonMeasure Λ).summable.mul_right (K * rexp (-r * T)))
   have hterm : ‖mertonPutTerm S_0 K r σ T k δ Λ n‖ ≤ K * rexp (-r * T) := by
     rw [Real.norm_eq_abs,
@@ -250,7 +250,7 @@ lemma integrable_mertonSpot {S_0 k : ℝ} (Λ : ℝ≥0)
     (hS_0 : 0 < S_0) (hk : -1 < k) :
     Integrable (mertonSpot S_0 k Λ) (poissonMeasure Λ) := by
   rw [integrable_poissonMeasure_iff]
-  refine (summable_weights_mul_mertonSpot S_0 k Λ).congr fun n => ?_
+  refine (summable_weights_mul_mertonSpot S_0 k Λ).congr fun n ↦ ?_
   rw [Real.norm_eq_abs, abs_of_nonneg (mertonSpot_pos hS_0 hk Λ n).le]
 
 /-! ### The textbook series, the iterated expectation, and the
@@ -277,7 +277,7 @@ theorem mertonCallPrice_eq_iterated_expectation {S_0 K r σ T k : ℝ}
       = ∫ n, (∫ z, rexp (-r * T) *
           max (bsTerminal (mertonSpot S_0 k Λ n) r (mertonVol σ δ T n) T z - K) 0
           ∂(gaussianReal 0 1)) ∂(poissonMeasure Λ) :=
-  integral_congr_ae (ae_of_all _ fun n =>
+  integral_congr_ae (ae_of_all _ fun n ↦
     mertonCallTerm_eq_integral δ Λ hS_0 hK hσ hT hk n)
 
 /-- **Spot recombination (Merton's compensation identity)**:
@@ -289,7 +289,7 @@ theorem integral_mertonSpot (S_0 k : ℝ) (Λ : ℝ≥0) :
     ∫ n, mertonSpot S_0 k Λ n ∂(poissonMeasure Λ) = S_0 := by
   rw [integral_poissonMeasure]
   simp_rw [smul_eq_mul]
-  rw [tsum_congr (fun n => show
+  rw [tsum_congr (fun n ↦ show
         rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * mertonSpot S_0 k Λ n
           = (S_0 * rexp (-(k * (Λ : ℝ))))
             * (rexp (-(Λ : ℝ)) * (Λ : ℝ) ^ n / n ! * (1 + k) ^ n) from by
@@ -323,7 +323,7 @@ theorem merton_put_call_parity {S_0 K r σ T k : ℝ} (δ : ℝ) (Λ : ℝ≥0)
   unfold mertonCallPrice mertonPutPrice
   rw [← integral_sub (integrable_mertonCallTerm δ Λ hS_0 hK hσ hT hk)
       (integrable_mertonPutTerm δ Λ hS_0 hK hσ hT hk),
-    integral_congr_ae (ae_of_all _ fun n =>
+    integral_congr_ae (ae_of_all _ fun n ↦
       mertonTerm_parity S_0 K r σ T k δ Λ n),
     integral_sub (integrable_mertonSpot Λ hS_0 hk) (integrable_const _),
     integral_mertonSpot, integral_const, probReal_univ, one_smul]

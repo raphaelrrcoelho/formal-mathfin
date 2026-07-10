@@ -53,8 +53,8 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 /-- Centering a Lipschitz coefficient at `0`: `x ↦ f x − f 0` is `L`-Lipschitz and
 sends `0 ↦ 0`, so it composes with an `L²` process via `LipschitzWith.compLp`. -/
 theorem lipschitz_sub_const {f : ℝ → ℝ} {L : ℝ≥0} (hf : LipschitzWith L f) :
-    LipschitzWith L (fun x => f x - f 0) :=
-  LipschitzWith.of_dist_le_mul fun x y => by
+    LipschitzWith L (fun x ↦ f x - f 0) :=
+  LipschitzWith.of_dist_le_mul fun x y ↦ by
     simpa only [Real.dist_eq, sub_sub_sub_cancel_right] using hf.dist_le_mul x y
 
 /-- **The coefficient composition** `f ∘ X ∈ E` for a Lipschitz `f : ℝ → ℝ` and a
@@ -80,7 +80,7 @@ theorem lipComp_sub_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
 /-- **The Picard iterate** `Φ(X) = η + driftProcessAssembled(b∘X) + itoProcessAssembled(σ∘X)`,
 a self-map of `E`. Its fixed point is the strong solution of the SDE. -/
 noncomputable def picardMap (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
     (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (X : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
@@ -93,7 +93,7 @@ initial condition cancels in the difference; the drift term contributes `T·L_b`
 bound `T` × Lipschitz `L_b`), the Itô term `√T·L_σ` (operator bound `√T` × Lipschitz `L_σ`).
 For `T` small this constant is `< 1`, giving a contraction. -/
 theorem picardMap_contraction (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
     (η_E X Y : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ‖picardMap hB T hBmeas hBcont hb hσ η_E X - picardMap hB T hBmeas hBcont hb hσ η_E Y‖
@@ -138,14 +138,14 @@ theorem picardMap_contraction (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
 condition on the horizon `T` given the Lipschitz constants). Packages
 `picardMap_contraction` as Mathlib's `ContractingWith`. -/
 theorem picardMap_contractingWith (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
     (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :
     ContractingWith (Real.toNNReal ((T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ))
       (picardMap hB T hBmeas hBcont hb hσ η_E) := by
   have hc0 : (0 : ℝ) ≤ (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ := by positivity
-  refine ⟨?_, LipschitzWith.of_dist_le_mul fun X Y => ?_⟩
+  refine ⟨?_, LipschitzWith.of_dist_le_mul fun X Y ↦ ?_⟩
   · rw [← NNReal.coe_lt_coe, Real.coe_toNNReal _ hc0, NNReal.coe_one]; exact hc
   · rw [dist_eq_norm, dist_eq_norm, Real.coe_toNNReal _ hc0]
     exact picardMap_contraction hB T hBmeas hBcont hb hσ η_E X Y
@@ -154,7 +154,7 @@ theorem picardMap_contractingWith (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
 Picard map in `E`, from Banach's fixed-point theorem (`ContractingWith.fixedPoint`; `E` is a
 complete, nonempty metric space). -/
 noncomputable def picardSolution (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
     (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :
@@ -165,12 +165,12 @@ noncomputable def picardSolution (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
 the Picard map, and it is the *only* one — the SDE `dX = b(X)dt + σ(X)dB` has a unique
 strong solution in `E` under the contraction condition. -/
 theorem picardMap_exists_unique_fixedPoint (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
     (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :
     ∃! X, picardMap hB T hBmeas hBcont hb hσ η_E X = X := by
-  refine ⟨picardSolution hB T hBmeas hBcont hb hσ η_E hc, ?_, fun Y hY => ?_⟩
+  refine ⟨picardSolution hB T hBmeas hBcont hb hσ η_E hc, ?_, fun Y hY ↦ ?_⟩
   · exact (picardMap_contractingWith hB T hBmeas hBcont hb hσ η_E hc).fixedPoint_isFixedPt
   · exact (picardMap_contractingWith hB T hBmeas hBcont hb hσ η_E hc).fixedPoint_unique hY
 

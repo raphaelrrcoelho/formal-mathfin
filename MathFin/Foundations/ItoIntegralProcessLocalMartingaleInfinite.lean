@@ -37,12 +37,12 @@ open ItoIntegralProcessL2Infinite ItoIntegralProcessLocalMartingaleGeneral ItoLo
 /-- Continuity ⟹ càdlàg (the `[0,T]` file's `isCadlag_of_continuous` is `private`; re-derived). -/
 private lemma isCadlag_of_continuous {ι E : Type*} [TopologicalSpace ι] [PartialOrder ι]
     [TopologicalSpace E] {g : ι → E} (hg : Continuous g) : IsCadlag g where
-  right_continuous := fun _ => hg.continuousWithinAt
-  left_limit := fun x => ⟨g x, hg.continuousWithinAt.tendsto⟩
+  right_continuous := fun _ ↦ hg.continuousWithinAt
+  left_limit := fun x ↦ ⟨g x, hg.continuousWithinAt.tendsto⟩
 
 variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
-  (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+  (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
   (f : Lp ℝ 2 ((timeMeasure.prod μ).trim (natFiltration (mΩ := m0) hBmeas).predictable_le_prod))
 
 /-- The per-horizon (`T = n`) everywhere-continuous local-martingale modification of the
@@ -60,7 +60,7 @@ lemma horizonProc_mod_inf (n : ℕ) (t : ℝ≥0) (ht : t ≤ (n : ℝ≥0)) :
   exact (itoProcessL2Inf_eq_itoProcessCLM hB (n : ℝ≥0) t hBmeas ht f).symm ▸ hmod
 
 lemma horizonProc_cont (n : ℕ) (ω : Ω) :
-    Continuous (fun t => horizonProc hB hBmeas hBcont f n t ω) :=
+    Continuous (fun t ↦ horizonProc hB hBmeas hBcont f n t ω) :=
   (exists_continuous_localMartingale_modification hB (n : ℝ≥0) hBmeas hBcont
     (restrictToBand (μ := μ) (n : ℝ≥0) hBmeas f)).choose_spec.2.1 ω
 
@@ -76,9 +76,9 @@ lemma horizonProc_agree (m n : ℕ) (hmn : m ≤ n) :
     ∀ᵐ ω ∂μ, ∀ t < (m : ℝ≥0),
       horizonProc hB hBmeas hBcont f m t ω = horizonProc hB hBmeas hBcont f n t ω := by
   refine indistinguishable_of_modification_on (P := μ) (isOpen_Iio)
-    (Filter.Eventually.of_forall fun ω => (horizonProc_cont hB hBmeas hBcont f m ω).continuousOn)
-    (Filter.Eventually.of_forall fun ω => (horizonProc_cont hB hBmeas hBcont f n ω).continuousOn)
-    (fun t ht => ?_)
+    (Filter.Eventually.of_forall fun ω ↦ (horizonProc_cont hB hBmeas hBcont f m ω).continuousOn)
+    (Filter.Eventually.of_forall fun ω ↦ (horizonProc_cont hB hBmeas hBcont f n ω).continuousOn)
+    (fun t ht ↦ ?_)
   have htm : t ≤ (m : ℝ≥0) := le_of_lt ht
   have htn : t ≤ (n : ℝ≥0) := htm.trans (by exact_mod_cast hmn)
   exact (horizonProc_mod_inf hB hBmeas hBcont f m t htm).trans
@@ -88,7 +88,7 @@ lemma horizonProc_agree (m n : ℕ) (hmn : m ≤ n) :
 `t`), restricted to the good set `G`. On `G` all horizons agree on overlaps, so this is a single
 continuous path; off the `μ`-null `Gᶜ` it is `0`. -/
 noncomputable def gluedProc (G : Set Ω) (t : ℝ≥0) (ω : Ω) : ℝ :=
-  G.indicator (fun ω => horizonProc hB hBmeas hBcont f (⌈t⌉₊ + 1) t ω) ω
+  G.indicator (fun ω ↦ horizonProc hB hBmeas hBcont f (⌈t⌉₊ + 1) t ω) ω
 
 include hBcont
 
@@ -104,16 +104,16 @@ needs in order to stop `X`. -/
 theorem exists_continuous_martingale_modification_infinite :
     ∃ X : ℝ≥0 → Ω → ℝ,
       (∀ t, X t =ᵐ[μ] (itoProcessL2Inf hB t hBmeas f : Ω → ℝ)) ∧
-      (∀ ω, Continuous fun t => X t ω) ∧
+      (∀ ω, Continuous fun t ↦ X t ω) ∧
       Martingale X (augFiltration (μ := μ) hBmeas) μ := by
   -- co-null good set on which every pair of horizons agrees on its overlap
   have hae : ∀ᵐ ω ∂μ, ∀ m n : ℕ, m ≤ n → ∀ t < (m : ℝ≥0),
       horizonProc hB hBmeas hBcont f m t ω = horizonProc hB hBmeas hBcont f n t ω := by
-    refine ae_all_iff.mpr fun m => ae_all_iff.mpr fun n => ?_
+    refine ae_all_iff.mpr fun m ↦ ae_all_iff.mpr fun n ↦ ?_
     by_cases hmn : m ≤ n
     · filter_upwards [horizonProc_agree hB hBmeas hBcont f m n hmn] with ω hω
-      exact fun _ => hω
-    · exact Filter.Eventually.of_forall fun ω h => absurd h hmn
+      exact fun _ ↦ hω
+    · exact Filter.Eventually.of_forall fun ω h ↦ absurd h hmn
   obtain ⟨N, hsubN, hNmeas, hNnull⟩ := exists_measurable_superset_of_null (ae_iff.mp hae)
   set G : Set Ω := Nᶜ with hGdef
   have hGnull : μ Gᶜ = 0 := by rw [hGdef, compl_compl]; exact hNnull
@@ -124,7 +124,7 @@ theorem exists_continuous_martingale_modification_infinite :
       horizonProc hB hBmeas hBcont f m t ω = horizonProc hB hBmeas hBcont f n t ω := by
     intro ω hω
     rw [hGdef, Set.mem_compl_iff] at hω
-    exact not_not.mp fun h => hω (hsubN h)
+    exact not_not.mp fun h ↦ hω (hsubN h)
   -- symmetric agreement: any two horizons strictly above `t` agree at `t`, on `G`
   have hGsymm : ∀ ω ∈ G, ∀ (p q : ℕ) (t : ℝ≥0), t < (p : ℝ≥0) → t < (q : ℝ≥0) →
       horizonProc hB hBmeas hBcont f p t ω = horizonProc hB hBmeas hBcont f q t ω := by
@@ -133,7 +133,7 @@ theorem exists_continuous_martingale_modification_infinite :
     · exact hGgood ω hω p q hpq t htp
     · exact (hGgood ω hω q p hqp t htq).symm
   -- `⌈t⌉₊+1` is a horizon strictly above `t`
-  have hceil : ∀ t : ℝ≥0, t < ((⌈t⌉₊ + 1 : ℕ) : ℝ≥0) := fun t =>
+  have hceil : ∀ t : ℝ≥0, t < ((⌈t⌉₊ + 1 : ℕ) : ℝ≥0) := fun t ↦
     lt_of_le_of_lt (Nat.le_ceil t) (by exact_mod_cast Nat.lt_succ_self ⌈t⌉₊)
   -- on `G`, the glued process equals horizon `K` on `[0,K)` for every `K`
   have hglueK : ∀ ω ∈ G, ∀ (K : ℕ) (t : ℝ≥0), t < (K : ℝ≥0) →
@@ -142,32 +142,32 @@ theorem exists_continuous_martingale_modification_infinite :
     simp only [gluedProc, Set.indicator_of_mem hω]
     exact hGsymm ω hω (⌈t⌉₊ + 1) K t (hceil t) htK
   -- (1) everywhere continuity of the glued paths
-  have hcont : ∀ ω, Continuous (fun t => gluedProc hB hBmeas hBcont f G t ω) := by
+  have hcont : ∀ ω, Continuous (fun t ↦ gluedProc hB hBmeas hBcont f G t ω) := by
     intro ω
     by_cases hω : ω ∈ G
-    · refine continuous_iff_continuousAt.mpr fun t₀ => ?_
+    · refine continuous_iff_continuousAt.mpr fun t₀ ↦ ?_
       set K : ℕ := ⌈t₀⌉₊ + 1 with hKdef
       have ht₀K : t₀ < (K : ℝ≥0) := hceil t₀
       refine (horizonProc_cont hB hBmeas hBcont f K ω).continuousAt.congr ?_
-      refine (Filter.eventuallyEq_of_mem (Iio_mem_nhds ht₀K) fun t ht => ?_).symm
+      refine (Filter.eventuallyEq_of_mem (Iio_mem_nhds ht₀K) fun t ht ↦ ?_).symm
       exact hglueK ω hω K t ht
-    · have hrw : (fun t => gluedProc hB hBmeas hBcont f G t ω) = fun _ => (0 : ℝ) :=
-        funext fun t => by simp only [gluedProc, Set.indicator_of_notMem hω]
+    · have hrw : (fun t ↦ gluedProc hB hBmeas hBcont f G t ω) = fun _ ↦ (0 : ℝ) :=
+        funext fun t ↦ by simp only [gluedProc, Set.indicator_of_notMem hω]
       rw [hrw]; exact continuous_const
   -- (2) modification at every `t`
-  have hmod : ∀ t : ℝ≥0, (fun ω => gluedProc hB hBmeas hBcont f G t ω)
+  have hmod : ∀ t : ℝ≥0, (fun ω ↦ gluedProc hB hBmeas hBcont f G t ω)
       =ᵐ[μ] (itoProcessL2Inf hB t hBmeas f : Ω → ℝ) := by
     intro t
     have hG_ae : ∀ᵐ ω ∂μ, ω ∈ G := by rw [ae_iff]; exact hGnull
-    have hstep : (fun ω => gluedProc hB hBmeas hBcont f G t ω)
-        =ᵐ[μ] (fun ω => horizonProc hB hBmeas hBcont f (⌈t⌉₊ + 1) t ω) := by
+    have hstep : (fun ω ↦ gluedProc hB hBmeas hBcont f G t ω)
+        =ᵐ[μ] (fun ω ↦ horizonProc hB hBmeas hBcont f (⌈t⌉₊ + 1) t ω) := by
       filter_upwards [hG_ae] with ω hω
       simp only [gluedProc, Set.indicator_of_mem hω]
     exact hstep.trans
       (horizonProc_mod_inf hB hBmeas hBcont f (⌈t⌉₊ + 1) t (le_of_lt (hceil t)))
   -- (3) adaptedness to the augmented filtration
   have hadapt : ∀ i : ℝ≥0, StronglyMeasurable[natFiltration hBmeas i ⊔ nullsAlg m0 μ]
-      (fun ω => gluedProc hB hBmeas hBcont f G i ω) := by
+      (fun ω ↦ gluedProc hB hBmeas hBcont f G i ω) := by
     intro i
     have h := horizonProc_adapted hB hBmeas hBcont f (⌈i⌉₊ + 1) i
     rw [augFiltration_apply] at h
@@ -175,10 +175,10 @@ theorem exists_continuous_martingale_modification_infinite :
       ((le_sup_right : nullsAlg m0 μ ≤ natFiltration hBmeas i ⊔ nullsAlg m0 μ) _ hGaug)
   -- (4) the augmented martingale identity, from the GLOBAL itoProcessL2Inf martingale
   have hmart : ∀ {i j : ℝ≥0}, i ≤ j →
-      μ[(fun ω => gluedProc hB hBmeas hBcont f G j ω) | natFiltration hBmeas i ⊔ nullsAlg m0 μ]
-        =ᵐ[μ] (fun ω => gluedProc hB hBmeas hBcont f G i ω) := by
+      μ[(fun ω ↦ gluedProc hB hBmeas hBcont f G j ω) | natFiltration hBmeas i ⊔ nullsAlg m0 μ]
+        =ᵐ[μ] (fun ω ↦ gluedProc hB hBmeas hBcont f G i ω) := by
     intro i j hij
-    calc μ[(fun ω => gluedProc hB hBmeas hBcont f G j ω)
+    calc μ[(fun ω ↦ gluedProc hB hBmeas hBcont f G j ω)
             | natFiltration hBmeas i ⊔ nullsAlg m0 μ]
         =ᵐ[μ] μ[(itoProcessL2Inf hB j hBmeas f : Ω → ℝ)
             | natFiltration hBmeas i ⊔ nullsAlg m0 μ] := condExp_congr_ae (hmod j)
@@ -186,10 +186,10 @@ theorem exists_continuous_martingale_modification_infinite :
           condExp_sup_nulls ((natFiltration hBmeas).le i) ((Lp.memLp _).integrable (by norm_num))
       _ =ᵐ[μ] (itoProcessL2Inf hB i hBmeas f : Ω → ℝ) :=
           itoProcessL2Inf_isMartingale hB hBmeas f hij
-      _ =ᵐ[μ] (fun ω => gluedProc hB hBmeas hBcont f G i ω) := (hmod i).symm
+      _ =ᵐ[μ] (fun ω ↦ gluedProc hB hBmeas hBcont f G i ω) := (hmod i).symm
   -- assemble the GLOBAL martingale
-  refine ⟨fun t ω => gluedProc hB hBmeas hBcont f G t ω, hmod, hcont,
-    ⟨fun i => ?_, fun i j hij => ?_⟩⟩
+  refine ⟨fun t ω ↦ gluedProc hB hBmeas hBcont f G t ω, hmod, hcont,
+    ⟨fun i ↦ ?_, fun i j hij ↦ ?_⟩⟩
   · rw [augFiltration_apply]; exact hadapt i
   · rw [augFiltration_apply]; exact hmart hij
 
@@ -199,12 +199,12 @@ martingale plus the everywhere-continuous, hence càdlàg, paths). -/
 theorem exists_continuous_localMartingale_modification_infinite :
     ∃ X : ℝ≥0 → Ω → ℝ,
       (∀ t, X t =ᵐ[μ] (itoProcessL2Inf hB t hBmeas f : Ω → ℝ)) ∧
-      (∀ ω, Continuous fun t => X t ω) ∧
+      (∀ ω, Continuous fun t ↦ X t ω) ∧
       IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ := by
   obtain ⟨X, hmod, hcont, hmart⟩ :=
     exists_continuous_martingale_modification_infinite hB hBmeas hBcont f
   exact ⟨X, hmod, hcont,
-    Martingale.IsLocalMartingale hmart (fun ω => isCadlag_of_continuous (hcont ω))⟩
+    Martingale.IsLocalMartingale hmart (fun ω ↦ isCadlag_of_continuous (hcont ω))⟩
 
 end ItoLocalMartingaleInfinite
 end MathFin

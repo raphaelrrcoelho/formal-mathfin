@@ -93,7 +93,7 @@ tower: it is `IsTangentPortfolioN` written out. -/
 theorem tangentTwo_isTangentPortfolioN (r₁ r₂ σ₁ σ₂ ρ : ℝ) :
     IsTangentPortfolioN (Finset.univ : Finset (Fin 2))
       ![r₁, r₂]
-      (fun i j => ![![σ₁ ^ 2, ρ * σ₁ * σ₂], ![ρ * σ₁ * σ₂, σ₂ ^ 2]] i j)
+      (fun i j ↦ ![![σ₁ ^ 2, ρ * σ₁ * σ₂], ![ρ * σ₁ * σ₂, σ₂ ^ 2]] i j)
       ![σ₂ ^ 2 * r₁ - ρ * σ₁ * σ₂ * r₂, σ₁ ^ 2 * r₂ - ρ * σ₁ * σ₂ * r₁] := by
   intro i _ j _
   fin_cases i <;> fin_cases j <;>

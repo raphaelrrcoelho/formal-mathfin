@@ -70,23 +70,23 @@ theorem tendsto_realizedVariance_gbm_L2 (hB : IsPreBrownianReal B μ)
     (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {S : ℝ≥0 → Ω → ℝ} {S₀ μd σ : ℝ} (hS₀ : 0 < S₀)
     (hS : ∀ t ω, S t ω = S₀ * Real.exp ((μd - σ ^ 2 / 2) * (t : ℝ) + σ * B t ω)) :
-    Tendsto (fun n : ℕ => ∫ ω, (∑ k ∈ Finset.range n,
+    Tendsto (fun n : ℕ ↦ ∫ ω, (∑ k ∈ Finset.range n,
         (Real.log (S (unifPart T n (k + 1)) ω) - Real.log (S (unifPart T n k) ω)) ^ 2
           - σ ^ 2 * (T : ℝ)) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   -- The log-price is an Itô process with constant-slope drift and diffusion σ·B.
   have hlog : ∀ (t : ℝ≥0) (ω : Ω), Real.log (S t ω)
-      = (fun _ : Ω => Real.log S₀) ω
-        + (fun (t : ℝ≥0) (_ : Ω) => (μd - σ ^ 2 / 2) * (t : ℝ)) t ω
+      = (fun _ : Ω ↦ Real.log S₀) ω
+        + (fun (t : ℝ≥0) (_ : Ω) ↦ (μd - σ ^ 2 / 2) * (t : ℝ)) t ω
         + σ * B t ω := by
     intro t ω
     rw [hS t ω, Real.log_mul hS₀.ne' (Real.exp_pos _).ne', Real.log_exp]
     ring
   exact ItoProcessQV.tendsto_qv_ito_process hB hBmeas T
-    (X := fun t ω => Real.log (S t ω))
+    (X := fun t ω ↦ Real.log (S t ω))
     (Ca := |μd - σ ^ 2 / 2|) (abs_nonneg _) hlog
-    (fun t => measurable_const)
-    (fun s t hst ω => by
+    (fun t ↦ measurable_const)
+    (fun s t hst ω ↦ by
       have hts : (s : ℝ) ≤ (t : ℝ) := NNReal.coe_le_coe.mpr hst
       rw [← mul_sub, abs_mul, abs_of_nonneg (sub_nonneg.mpr hts)])
 

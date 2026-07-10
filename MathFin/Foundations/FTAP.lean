@@ -51,7 +51,7 @@ theorem emm_implies_no_arbitrage
     -- `martingaleTransform_isMartingale` now takes an a.e. boundedness
     -- hypothesis; our everywhere bound supplies it via `Eventually.of_forall`.
     exact martingaleTransform_isMartingale hSQ hφ_pred
-      ⟨K, Filter.Eventually.of_forall fun ω n => hK n ω⟩
+      ⟨K, Filter.Eventually.of_forall fun ω n ↦ hK n ω⟩
   have hV0_zero : V 0 = 0 := by simp [V]
   have hV_T_integral : ∫ ω, V T ω ∂Q = 0 := by
     have : ∫ ω, V T ω ∂Q = ∫ ω, V 0 ω ∂Q := by

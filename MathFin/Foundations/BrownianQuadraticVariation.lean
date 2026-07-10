@@ -46,7 +46,7 @@ structure BrownianQuadraticVariation {Ω : Type*} [MeasurableSpace Ω]
   measurable : ∀ t : ℝ, Measurable (B t)
   gaussian_increments : ∀ ⦃s t : ℝ⦄, 0 ≤ s → s ≤ t →
     ∃ v : NNReal, (v : ℝ) = t - s ∧
-      Measure.map (fun ω => B t ω - B s ω) μ = gaussianReal 0 v
+      Measure.map (fun ω ↦ B t ω - B s ω) μ = gaussianReal 0 v
 
 namespace BrownianQuadraticVariation
 
@@ -54,12 +54,12 @@ variable {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ → Ω →
 
 /-- The increment `B t − B s` is measurable. -/
 theorem measurable_increment (hB : BrownianQuadraticVariation μ B)
-    (s t : ℝ) : Measurable (fun ω => B t ω - B s ω) :=
+    (s t : ℝ) : Measurable (fun ω ↦ B t ω - B s ω) :=
   (hB.measurable t).sub (hB.measurable s)
 
 /-- Integrability of `x²` under any centered real Gaussian. -/
 private lemma integrable_sq_gaussianReal_zero (v : ℝ≥0) :
-    Integrable (fun x : ℝ => x ^ 2) (gaussianReal 0 v) := by
+    Integrable (fun x : ℝ ↦ x ^ 2) (gaussianReal 0 v) := by
   have h_lp : MemLp (id : ℝ → ℝ) 2 (gaussianReal 0 v) := memLp_id_gaussianReal 2
   exact h_lp.integrable_sq
 
@@ -68,9 +68,9 @@ theorem integral_sq_increment (hB : BrownianQuadraticVariation μ B)
     {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ^ 2 ∂μ = t - s := by
   obtain ⟨v, hv, h_map⟩ := hB.gaussian_increments hs hst
-  have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
+  have h_aem : AEMeasurable (fun ω ↦ B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
-  have h_map_int : ∫ y : ℝ, y ^ 2 ∂(Measure.map (fun ω => B t ω - B s ω) μ)
+  have h_map_int : ∫ y : ℝ, y ^ 2 ∂(Measure.map (fun ω ↦ B t ω - B s ω) μ)
       = ∫ ω, (B t ω - B s ω) ^ 2 ∂μ :=
     integral_map h_aem (by fun_prop)
   rw [← h_map_int, h_map, MathFin.integral_sq_gaussianReal, hv]
@@ -78,11 +78,11 @@ theorem integral_sq_increment (hB : BrownianQuadraticVariation μ B)
 /-- The squared increment is integrable. -/
 theorem integrable_sq_increment (hB : BrownianQuadraticVariation μ B)
     {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
-    Integrable (fun ω => (B t ω - B s ω) ^ 2) μ := by
+    Integrable (fun ω ↦ (B t ω - B s ω) ^ 2) μ := by
   obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hs hst
-  have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
+  have h_aem : AEMeasurable (fun ω ↦ B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
-  refine (show Integrable ((fun x : ℝ => x ^ 2) ∘ (fun ω => B t ω - B s ω)) μ from
+  refine (show Integrable ((fun x : ℝ ↦ x ^ 2) ∘ (fun ω ↦ B t ω - B s ω)) μ from
     Integrable.comp_aemeasurable ?_ h_aem)
   rw [h_map]
   exact integrable_sq_gaussianReal_zero _
@@ -94,9 +94,9 @@ theorem integral_increment (hB : BrownianQuadraticVariation μ B)
     {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     ∫ ω, (B t ω - B s ω) ∂μ = 0 := by
   obtain ⟨v, _hv, h_map⟩ := hB.gaussian_increments hs hst
-  have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
+  have h_aem : AEMeasurable (fun ω ↦ B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
-  have h_map_int : ∫ y : ℝ, y ∂(Measure.map (fun ω => B t ω - B s ω) μ)
+  have h_map_int : ∫ y : ℝ, y ∂(Measure.map (fun ω ↦ B t ω - B s ω) μ)
       = ∫ ω, (B t ω - B s ω) ∂μ :=
     integral_map h_aem (by fun_prop)
   rw [← h_map_int, h_map, integral_id_gaussianReal]
@@ -104,11 +104,11 @@ theorem integral_increment (hB : BrownianQuadraticVariation μ B)
 /-- Integrability of the BM increment `B_t − B_s` under a finite measure. -/
 theorem integrable_increment [IsFiniteMeasure μ]
     (hB : BrownianQuadraticVariation μ B) {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
-    Integrable (fun ω => B t ω - B s ω) μ := by
+    Integrable (fun ω ↦ B t ω - B s ω) μ := by
   obtain ⟨v, _, h_map⟩ := hB.gaussian_increments hs hst
-  have h_aem : AEMeasurable (fun ω => B t ω - B s ω) μ :=
+  have h_aem : AEMeasurable (fun ω ↦ B t ω - B s ω) μ :=
     (hB.measurable_increment s t).aemeasurable
-  refine (show Integrable ((fun x : ℝ => x) ∘ (fun ω => B t ω - B s ω)) μ from
+  refine (show Integrable ((fun x : ℝ ↦ x) ∘ (fun ω ↦ B t ω - B s ω)) μ from
     Integrable.comp_aemeasurable ?_ h_aem)
   rw [h_map]
   exact (memLp_id_gaussianReal 1).integrable (by norm_num)
@@ -134,11 +134,11 @@ private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ 
         (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
       = n * t / (n + 1) := by
   rw [integral_finsetSum _
-    (fun k _ => hB.integrable_sq_increment (equipartition_start_nonneg ht n k)
+    (fun k _ ↦ hB.integrable_sq_increment (equipartition_start_nonneg ht n k)
       (equipartition_endpoint_le ht n k))]
   have hsum : ∀ k ∈ Finset.range n,
       ∫ ω, (B (((k : ℝ) + 1) * t / (n + 1)) ω - B ((k : ℝ) * t / (n + 1)) ω) ^ 2 ∂μ
-        = t / (n + 1) := fun k _ => by
+        = t / (n + 1) := fun k _ ↦ by
     rw [hB.integral_sq_increment (equipartition_start_nonneg ht n k)
       (equipartition_endpoint_le ht n k)]
     field_simp
@@ -148,24 +148,24 @@ private lemma integral_sum_sq_equipartition (hB : BrownianQuadraticVariation μ 
 
 /-- Real-analysis fact: `n t / (n + 1) → t` as `n → ∞`. -/
 private lemma tendsto_nt_div_succ (t : ℝ) :
-    Filter.Tendsto (fun n : ℕ => (n : ℝ) * t / ((n : ℝ) + 1)) atTop (nhds t) := by
+    Filter.Tendsto (fun n : ℕ ↦ (n : ℝ) * t / ((n : ℝ) + 1)) atTop (nhds t) := by
   have h_eq : ∀ n : ℕ, (n : ℝ) * t / ((n : ℝ) + 1) = t - t / ((n : ℝ) + 1) := by
     intro n
     have hn : ((n : ℝ) + 1) ≠ 0 := by positivity
     field_simp
     ring
-  rw [show (fun n : ℕ => (n : ℝ) * t / ((n : ℝ) + 1)) =
-    (fun n : ℕ => t - t / ((n : ℝ) + 1)) from funext h_eq]
-  have h_one_div : Filter.Tendsto (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1)) atTop (nhds (0 : ℝ)) :=
+  rw [show (fun n : ℕ ↦ (n : ℝ) * t / ((n : ℝ) + 1)) =
+    (fun n : ℕ ↦ t - t / ((n : ℝ) + 1)) from funext h_eq]
+  have h_one_div : Filter.Tendsto (fun n : ℕ ↦ (1 : ℝ) / ((n : ℝ) + 1)) atTop (nhds (0 : ℝ)) :=
     tendsto_one_div_add_atTop_nhds_zero_nat
-  have h_t_div : Filter.Tendsto (fun n : ℕ => t / ((n : ℝ) + 1)) atTop (nhds (0 : ℝ)) := by
-    have h_const_mul : Filter.Tendsto (fun n : ℕ => t * ((1 : ℝ) / ((n : ℝ) + 1))) atTop
+  have h_t_div : Filter.Tendsto (fun n : ℕ ↦ t / ((n : ℝ) + 1)) atTop (nhds (0 : ℝ)) := by
+    have h_const_mul : Filter.Tendsto (fun n : ℕ ↦ t * ((1 : ℝ) / ((n : ℝ) + 1))) atTop
         (nhds (t * 0)) := h_one_div.const_mul t
     rw [mul_zero] at h_const_mul
     refine h_const_mul.congr ?_
     intro n
     ring
-  have h_sub : Filter.Tendsto (fun n : ℕ => t - t / ((n : ℝ) + 1)) atTop (nhds (t - 0)) :=
+  have h_sub : Filter.Tendsto (fun n : ℕ ↦ t - t / ((n : ℝ) + 1)) atTop (nhds (t - 0)) :=
     tendsto_const_nhds.sub h_t_div
   rwa [sub_zero] at h_sub
 
@@ -175,11 +175,11 @@ with `n + 1` subintervals have expectation tending to `t` as `n → ∞`. -/
 theorem qv_equals_t (hB : BrownianQuadraticVariation μ B)
     {t : ℝ} (ht : 0 ≤ t) :
     Filter.Tendsto
-      (fun n : ℕ =>
+      (fun n : ℕ ↦
         ∫ ω, (∑ k ∈ Finset.range n,
           (B ((↑k + 1) * t / (n + 1)) ω - B (↑k * t / (n + 1)) ω) ^ 2) ∂μ)
       atTop (nhds t) :=
-  (tendsto_nt_div_succ t).congr fun n =>
+  (tendsto_nt_div_succ t).congr fun n ↦
     (hB.integral_sum_sq_equipartition ht n).symm
 
 end BrownianQuadraticVariation
@@ -196,7 +196,7 @@ arguments `t' s'` (subject `B t' − B s'`, no negation), mirroring
 theorem brownianQuadraticVariation_of_isPreBrownianReal
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} {B : ℝ≥0 → Ω → ℝ}
     (hB : IsPreBrownianReal B μ) (hBmeas : ∀ u : ℝ≥0, Measurable (B u)) :
-    BrownianQuadraticVariation μ (fun t ω => B t.toNNReal ω) where
+    BrownianQuadraticVariation μ (fun t ω ↦ B t.toNNReal ω) where
   measurable t := hBmeas t.toNNReal
   gaussian_increments := by
     intro s t hs hst

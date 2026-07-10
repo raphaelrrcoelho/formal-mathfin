@@ -32,15 +32,15 @@ theorem sq_integral_le_measureReal_mul {α : Type*} {m : MeasurableSpace α} {ν
     [IsFiniteMeasure ν] {f : α → ℝ} (hf : MemLp f 2 ν) :
     (∫ a, f a ∂ν) ^ 2 ≤ (ν Set.univ).toReal * ∫ a, (f a) ^ 2 ∂ν := by
   have hp : (2 : ℝ).HolderConjugate 2 := Real.HolderConjugate.two_two
-  have hint_nonneg : 0 ≤ ∫ a, (f a) ^ 2 ∂ν := integral_nonneg fun a => sq_nonneg _
+  have hint_nonneg : 0 ≤ ∫ a, (f a) ^ 2 ∂ν := integral_nonneg fun a ↦ sq_nonneg _
   have hmeas_nonneg : 0 ≤ (ν Set.univ).toReal := ENNReal.toReal_nonneg
   have hhold := integral_mul_le_Lp_mul_Lq_of_nonneg (μ := ν) hp
-    (f := |f|) (g := fun _ => (1 : ℝ))
-    (ae_of_all ν fun a => abs_nonneg (f a)) (ae_of_all ν fun _ => zero_le_one)
+    (f := |f|) (g := fun _ ↦ (1 : ℝ))
+    (ae_of_all ν fun a ↦ abs_nonneg (f a)) (ae_of_all ν fun _ ↦ zero_le_one)
     (by simpa [ENNReal.ofReal_ofNat] using hf.abs)
     (by simpa [ENNReal.ofReal_ofNat] using memLp_const (1 : ℝ))
   have hpow : ∫ a, |f| a ^ (2 : ℝ) ∂ν = ∫ a, (f a) ^ 2 ∂ν := by
-    refine integral_congr_ae (ae_of_all _ fun a => ?_)
+    refine integral_congr_ae (ae_of_all _ fun a ↦ ?_)
     show |f a| ^ (2 : ℝ) = (f a) ^ 2
     rw [show (2 : ℝ) = ((2 : ℕ) : ℝ) by norm_num, Real.rpow_natCast, sq_abs]
   rw [hpow, Real.one_rpow, MeasureTheory.integral_const, smul_eq_mul, mul_one, measureReal_def]

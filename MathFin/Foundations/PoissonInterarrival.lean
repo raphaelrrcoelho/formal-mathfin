@@ -50,13 +50,13 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 theorem survival_eq {rate : ℝ≥0} {N : ℝ → Ω → ℕ}
     (hmeas : ∀ t, Measurable (N t)) (hzero : ∀ ω, N 0 ω = 0)
     (hincr : ∀ ⦃s t : ℝ⦄, 0 ≤ s → (hst : s ≤ t) →
-      Measure.map (fun ω => N t ω - N s ω) μ
+      Measure.map (fun ω ↦ N t ω - N s ω) μ
         = poissonMeasure (rate * ⟨t - s, sub_nonneg.mpr hst⟩))
     {t : ℝ} (ht : 0 ≤ t) :
     μ {ω | N t ω = 0} = ENNReal.ofReal (rexp (-((rate : ℝ) * t))) := by
   have h := hincr le_rfl ht
-  rw [show (fun ω => N t ω - N 0 ω) = N t from
-    funext fun ω => by rw [hzero ω, Nat.sub_zero]] at h
+  rw [show (fun ω ↦ N t ω - N 0 ω) = N t from
+    funext fun ω ↦ by rw [hzero ω, Nat.sub_zero]] at h
   have hset : μ {ω | N t ω = 0} = μ.map (N t) {0} := by
     rw [Measure.map_apply (hmeas t) (measurableSet_singleton 0)]
     rfl
@@ -72,16 +72,16 @@ theorem survival_factorizes {N : ℝ → Ω → ℕ}
     (hzero : ∀ ω, N 0 ω = 0)
     (hmono : ∀ ⦃s t : ℝ⦄, s ≤ t → ∀ ω, N s ω ≤ N t ω)
     (hindep : ∀ ⦃s t u v : ℝ⦄, 0 ≤ s → s ≤ t → t ≤ u → u ≤ v →
-      IndepFun (fun ω => N t ω - N s ω) (fun ω => N v ω - N u ω) μ)
+      IndepFun (fun ω ↦ N t ω - N s ω) (fun ω ↦ N v ω - N u ω) μ)
     {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
     μ {ω | N t ω = 0}
       = μ {ω | N s ω = 0} * μ {ω | N t ω - N s ω = 0} := by
-  have hI : IndepFun (N s) (fun ω => N t ω - N s ω) μ := by
+  have hI : IndepFun (N s) (fun ω ↦ N t ω - N s ω) μ := by
     have h := hindep le_rfl hs le_rfl hst
-    rwa [show (fun ω => N s ω - N 0 ω) = N s from
-      funext fun ω => by rw [hzero ω, Nat.sub_zero]] at h
+    rwa [show (fun ω ↦ N s ω - N 0 ω) = N s from
+      funext fun ω ↦ by rw [hzero ω, Nat.sub_zero]] at h
   have hsplit : {ω | N t ω = 0}
-      = (N s) ⁻¹' {0} ∩ (fun ω => N t ω - N s ω) ⁻¹' {0} := by
+      = (N s) ⁻¹' {0} ∩ (fun ω ↦ N t ω - N s ω) ⁻¹' {0} := by
     ext ω
     have hm := hmono hst ω
     simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage,
@@ -100,7 +100,7 @@ theorem map_firstArrival_eq_expMeasure [IsProbabilityMeasure μ]
     {rate : ℝ≥0} (hrate : 0 < rate) {N : ℝ → Ω → ℕ}
     (hmeas : ∀ t, Measurable (N t)) (hzero : ∀ ω, N 0 ω = 0)
     (hincr : ∀ ⦃s t : ℝ⦄, 0 ≤ s → (hst : s ≤ t) →
-      Measure.map (fun ω => N t ω - N s ω) μ
+      Measure.map (fun ω ↦ N t ω - N s ω) μ
         = poissonMeasure (rate * ⟨t - s, sub_nonneg.mpr hst⟩))
     {τ : Ω → ℝ} (hτ_meas : Measurable τ) (hτ_nonneg : ∀ ω, 0 ≤ τ ω)
     (hτ_first : ∀ ⦃t : ℝ⦄, 0 ≤ t → {ω | t < τ ω} = {ω | N t ω = 0}) :
@@ -116,12 +116,12 @@ theorem map_firstArrival_eq_expMeasure [IsProbabilityMeasure μ]
       show ((expMeasure (rate : ℝ) (Set.Iic x)).toReal)
         = cdf (expMeasure (rate : ℝ)) x from by rw [cdf_eq_real, measureReal_def],
       cdf_expMeasure_eq hr x]
-  refine Measure.ext_of_Iic _ _ fun x => ?_
+  refine Measure.ext_of_Iic _ _ fun x ↦ ?_
   rw [Measure.map_apply hτ_meas measurableSet_Iic, hexp_Iic x]
   rcases lt_or_ge x 0 with hx | hx
   · -- x < 0 : τ ≥ 0 makes the event empty
     rw [if_neg (not_le.mpr hx), ENNReal.ofReal_zero,
-      show τ ⁻¹' Set.Iic x = ∅ from Set.eq_empty_of_forall_notMem fun ω h =>
+      show τ ⁻¹' Set.Iic x = ∅ from Set.eq_empty_of_forall_notMem fun ω h ↦
         absurd (le_trans (hτ_nonneg ω) (Set.mem_Iic.mp h)) (not_le.mpr hx)]
     exact measure_empty
   · -- x ≥ 0 : complement of the survival event

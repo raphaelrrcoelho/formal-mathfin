@@ -49,7 +49,7 @@ Derived by transferring `Integrable id (gaussianReal 0 1)` (the existence of the
 first moment of `N(0, 1)`) through the withDensity identification of
 `gaussianReal`. -/
 lemma integrable_id_mul_gaussianPDFReal_volume :
-    Integrable (fun z : ℝ => z * gaussianPDFReal 0 1 z) volume := by
+    Integrable (fun z : ℝ ↦ z * gaussianPDFReal 0 1 z) volume := by
   have h_id_integrable : Integrable (id : ℝ → ℝ) (gaussianReal (0 : ℝ) 1) := by
     have h_memLp : MemLp (id : ℝ → ℝ) 2 (gaussianReal (0 : ℝ) 1) := memLp_id_gaussianReal 2
     exact (h_memLp.mono_exponent (by norm_num : (1 : ℝ≥0∞) ≤ 2)).integrable le_rfl
@@ -57,11 +57,11 @@ lemma integrable_id_mul_gaussianPDFReal_volume :
   have h_pdf_meas : Measurable (gaussianPDF (0 : ℝ) 1) := by
     unfold gaussianPDF; fun_prop
   have h_pdf_lt_top : ∀ᵐ z ∂(volume : Measure ℝ), gaussianPDF (0 : ℝ) 1 z < ∞ := by
-    refine ae_of_all _ (fun z => ?_)
+    refine ae_of_all _ (fun z ↦ ?_)
     unfold gaussianPDF; exact ENNReal.ofReal_lt_top
   rw [integrable_withDensity_iff_integrable_smul' h_pdf_meas h_pdf_lt_top] at h_id_integrable
-  have h_eq : (fun z : ℝ => (gaussianPDF (0 : ℝ) 1 z).toReal • id z)
-            = (fun z : ℝ => z * gaussianPDFReal 0 1 z) := by
+  have h_eq : (fun z : ℝ ↦ (gaussianPDF (0 : ℝ) 1 z).toReal • id z)
+            = (fun z : ℝ ↦ z * gaussianPDFReal 0 1 z) := by
     funext z
     show (gaussianPDF (0 : ℝ) 1 z).toReal • z = z * gaussianPDFReal 0 1 z
     unfold gaussianPDF
@@ -81,27 +81,27 @@ lemma integral_id_mul_gaussianPDFReal_Ioi (a : ℝ) :
     ∫ z in Set.Ioi a, z * gaussianPDFReal 0 1 z = gaussianPDFReal 0 1 a := by
   -- Antiderivative of z · ϕ(0,1,z) is -ϕ(0,1,z)
   have h_deriv : ∀ x ∈ Set.Ioi a,
-      HasDerivAt (fun z' => -gaussianPDFReal 0 1 z') (x * gaussianPDFReal 0 1 x) x := by
+      HasDerivAt (fun z' ↦ -gaussianPDFReal 0 1 z') (x * gaussianPDFReal 0 1 x) x := by
     intro x _; exact hasDerivAt_neg_gaussianPDFReal_zero_one x
-  have h_cont : ContinuousWithinAt (fun z' : ℝ => -gaussianPDFReal 0 1 z') (Set.Ici a) a := by
-    have : Continuous fun z' : ℝ => -gaussianPDFReal 0 1 z' := by
+  have h_cont : ContinuousWithinAt (fun z' : ℝ ↦ -gaussianPDFReal 0 1 z') (Set.Ici a) a := by
+    have : Continuous fun z' : ℝ ↦ -gaussianPDFReal 0 1 z' := by
       unfold gaussianPDFReal; fun_prop
     exact this.continuousWithinAt
-  have h_int : IntegrableOn (fun z' : ℝ => z' * gaussianPDFReal 0 1 z') (Set.Ioi a) volume := by
-    have h_full : Integrable (fun z' : ℝ => z' * gaussianPDFReal 0 1 z') volume :=
+  have h_int : IntegrableOn (fun z' : ℝ ↦ z' * gaussianPDFReal 0 1 z') (Set.Ioi a) volume := by
+    have h_full : Integrable (fun z' : ℝ ↦ z' * gaussianPDFReal 0 1 z') volume :=
       integrable_id_mul_gaussianPDFReal_volume
     exact h_full.integrableOn
-  have h_lim : Tendsto (fun z' : ℝ => -gaussianPDFReal 0 1 z') atTop (𝓝 0) := by
+  have h_lim : Tendsto (fun z' : ℝ ↦ -gaussianPDFReal 0 1 z') atTop (𝓝 0) := by
     rw [show (0 : ℝ) = -0 from neg_zero.symm]
     refine Tendsto.neg ?_
     -- gaussianPDFReal 0 1 z = (sqrt(2π))⁻¹ · exp(-z²/2). Both factors handled separately.
-    have h_atBot : Tendsto (fun z : ℝ => -(z - 0)^2/2) atTop atBot := by
-      have h_sub : Tendsto (fun z : ℝ => (z - 0)^2) atTop atTop := by simp
-      have h_neg : Tendsto (fun z : ℝ => -((z - 0)^2)) atTop atBot :=
+    have h_atBot : Tendsto (fun z : ℝ ↦ -(z - 0)^2/2) atTop atBot := by
+      have h_sub : Tendsto (fun z : ℝ ↦ (z - 0)^2) atTop atTop := by simp
+      have h_neg : Tendsto (fun z : ℝ ↦ -((z - 0)^2)) atTop atBot :=
         tendsto_neg_atTop_atBot.comp h_sub
       have h_div := h_neg.atBot_div_const (by norm_num : (0 : ℝ) < 2)
       simpa using h_div
-    have h_exp : Tendsto (fun z : ℝ => Real.exp (-(z - 0)^2/2)) atTop (𝓝 0) :=
+    have h_exp : Tendsto (fun z : ℝ ↦ Real.exp (-(z - 0)^2/2)) atTop (𝓝 0) :=
       Real.tendsto_exp_atBot.comp h_atBot
     have h_mul := h_exp.const_mul ((Real.sqrt (2 * π))⁻¹ : ℝ)
     rw [mul_zero] at h_mul
@@ -152,7 +152,7 @@ private lemma bachelier_max_payoff_eq_indicator {S_0 K σ T : ℝ}
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (z : ℝ) :
     max (bachelierTerminal S_0 σ T z - K) 0 =
       (Set.Ioi (-bachelierD S_0 K σ T)).indicator
-        (fun z' => bachelierTerminal S_0 σ T z' - K) z := by
+        (fun z' ↦ bachelierTerminal S_0 σ T z' - K) z := by
   by_cases h : z ∈ Set.Ioi (-bachelierD S_0 K σ T)
   · rw [Set.indicator_of_mem h]
     have hST : bachelierTerminal S_0 σ T z > K :=
@@ -193,18 +193,18 @@ theorem bachelier_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   have hsqrT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
   have h_σsqT_pos : 0 < σ * Real.sqrt T := mul_pos hσ hsqrT_pos
   have h_σsqT_ne : σ * Real.sqrt T ≠ 0 := h_σsqT_pos.ne'
-  have h_payoff_meas : Measurable fun z : ℝ => max (bachelierTerminal S_0 σ T z - K) 0 := by
+  have h_payoff_meas : Measurable fun z : ℝ ↦ max (bachelierTerminal S_0 σ T z - K) 0 := by
     unfold bachelierTerminal; fun_prop
   -- HasLaw transfer + convert to volume integral
-  rw [show (fun ω => max (bachelierTerminal S_0 σ T (Z ω) - K) 0)
-        = (fun z => max (bachelierTerminal S_0 σ T z - K) 0) ∘ Z from rfl,
+  rw [show (fun ω ↦ max (bachelierTerminal S_0 σ T (Z ω) - K) 0)
+        = (fun z ↦ max (bachelierTerminal S_0 σ T z - K) 0) ∘ Z from rfl,
       hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- max → indicator on Ioi(-d)
-  rw [show (fun z : ℝ => gaussianPDFReal 0 1 z • max (bachelierTerminal S_0 σ T z - K) 0)
+  rw [show (fun z : ℝ ↦ gaussianPDFReal 0 1 z • max (bachelierTerminal S_0 σ T z - K) 0)
         = (Set.Ioi (-d)).indicator
-            (fun z => gaussianPDFReal 0 1 z * (bachelierTerminal S_0 σ T z - K)) from
-      funext (fun z => by
+            (fun z ↦ gaussianPDFReal 0 1 z * (bachelierTerminal S_0 σ T z - K)) from
+      funext (fun z ↦ by
         rw [smul_eq_mul, bachelier_max_payoff_eq_indicator hK hσ hT z]
         by_cases hz : z ∈ Set.Ioi (-d)
         · rw [Set.indicator_of_mem hz, Set.indicator_of_mem hz]
@@ -217,11 +217,11 @@ theorem bachelier_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
         = σ * Real.sqrt T * (z * gaussianPDFReal 0 1 z) +
           (S_0 - K) * gaussianPDFReal 0 1 z := by
     intro z; unfold bachelierTerminal; ring
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ => h_split z)]
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ ↦ h_split z)]
   -- Integrability and split
   have h_int_pdf : IntegrableOn (gaussianPDFReal 0 1) (Set.Ioi (-d)) volume :=
     (integrable_gaussianPDFReal 0 1).integrableOn
-  have h_int_z_pdf : IntegrableOn (fun z : ℝ => z * gaussianPDFReal 0 1 z)
+  have h_int_z_pdf : IntegrableOn (fun z : ℝ ↦ z * gaussianPDFReal 0 1 z)
       (Set.Ioi (-d)) volume := integrable_id_mul_gaussianPDFReal_volume.integrableOn
   rw [integral_add (h_int_z_pdf.const_mul _) (h_int_pdf.const_mul _)]
   rw [integral_const_mul, integral_const_mul]

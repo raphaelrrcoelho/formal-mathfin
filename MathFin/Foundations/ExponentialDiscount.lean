@@ -72,8 +72,8 @@ The proof: `log(exp(−H s)) = −H s` (logs and exps are inverses), so
 hypothesis. -/
 theorem rate_eq_neg_log_deriv {H : ℝ → ℝ} {H' t : ℝ}
     (hH : HasDerivAt H H' t) :
-    HasDerivAt (fun s => -(Real.log (Real.exp (-H s)))) H' t := by
-  have h_eq : (fun s : ℝ => -(Real.log (Real.exp (-H s)))) = H := by
+    HasDerivAt (fun s ↦ -(Real.log (Real.exp (-H s)))) H' t := by
+  have h_eq : (fun s : ℝ ↦ -(Real.log (Real.exp (-H s)))) = H := by
     funext s; rw [Real.log_exp, neg_neg]
   rw [h_eq]
   exact hH

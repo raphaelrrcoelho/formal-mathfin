@@ -62,9 +62,9 @@ theorem itoSimpleProcessLp_norm_le (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
   -- `(V●B)_t = μ[itoSimple V | 𝓕_t]`: B1a's martingale at `t ≤ T' = t ⊔ T`, with
   -- `(V●B)_{T'} = itoSimple V` since `T'` is past every right endpoint.
   have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
-    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp => (hVT p hp).trans (le_max_right t T)
-  have hcond : (μ[fun ω => itoSimpleProcess hBmeas V (max t T) ω | natFiltration hBmeas t])
-      =ᵐ[μ] fun ω => itoSimpleProcess hBmeas V t ω :=
+    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
+  have hcond : (μ[fun ω ↦ itoSimpleProcess hBmeas V (max t T) ω | natFiltration hBmeas t])
+      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω :=
     (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T) (le_max_left t T)
   simp only [hT'eq] at hcond
   -- conditional expectation is an L² contraction.
@@ -111,7 +111,7 @@ theorem itoProcessCLM_simpleAssembly_T (T t : ℝ≥0) (hBmeas : ∀ u, Measurab
     itoProcessCLM hB T t hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
       = itoSimpleProcessLp hB hBmeas V.val t := by
   rw [itoProcessCLM, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    ⟨1, fun W => by rw [one_mul]; exact itoSimpleProcessLp_norm_le hB T t hBmeas W.val W.property⟩]
+    ⟨1, fun W ↦ by rw [one_mul]; exact itoSimpleProcessLp_norm_le hB T t hBmeas W.val W.property⟩]
   rfl
 
 /-- The existing terminal CLM on a simple embedding reproduces `itoSimpleLp` (the
@@ -121,7 +121,7 @@ theorem itoIntegralCLM_T_simpleAssembly_T (T : ℝ≥0) (hBmeas : ∀ u, Measura
     itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
       = itoSimpleLp hB hBmeas V.val := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    ⟨1, fun W => by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
+    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
   rfl
 
 omit [IsProbabilityMeasure μ] in
@@ -130,9 +130,9 @@ omit [IsProbabilityMeasure μ] in
 theorem condExp_itoSimple_eq (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (V : SimpleProcess ℝ (natFiltration hBmeas)) (hVT : ∀ p ∈ V.value.support, p.2 ≤ T) :
     μ[itoSimple hBmeas V | natFiltration hBmeas t]
-      =ᵐ[μ] fun ω => itoSimpleProcess hBmeas V t ω := by
+      =ᵐ[μ] fun ω ↦ itoSimpleProcess hBmeas V t ω := by
   have hT'eq : itoSimpleProcess hBmeas V (max t T) = itoSimple hBmeas V :=
-    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp => (hVT p hp).trans (le_max_right t T)
+    itoSimpleProcess_eq_itoSimple hBmeas V fun p hp ↦ (hVT p hp).trans (le_max_right t T)
   simpa only [hT'eq] using (itoSimpleProcess_isMartingale hB hBmeas V).2 t (max t T) (le_max_left t T)
 
 /-- **The key identity.** The general Itô integral at time `t` is the
@@ -146,13 +146,13 @@ theorem itoProcessCLM_eq_condExpL2 (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
     itoProcessCLM hB T t hBmeas φ
       = (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)
           (itoIntegralCLM_T hB T hBmeas φ) : Lp ℝ 2 μ) := by
-  have hcont_R : Continuous fun ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) =>
+  have hcont_R : Continuous fun ψ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) ↦
       (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)
         (itoIntegralCLM_T hB T hBmeas ψ) : Lp ℝ 2 μ) :=
     (continuous_subtype_val.comp (condExpL2 ℝ ℝ ((natFiltration hBmeas).le t)).continuous).comp
       (itoIntegralCLM_T hB T hBmeas).continuous
   refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-    (itoProcessCLM hB T t hBmeas).continuous hcont_R (funext fun V => ?_)) φ
+    (itoProcessCLM hB T t hBmeas).continuous hcont_R (funext fun V ↦ ?_)) φ
   simp only [Function.comp_apply]
   rw [itoProcessCLM_simpleAssembly_T, itoIntegralCLM_T_simpleAssembly_T]
   refine Lp.ext ?_
@@ -225,10 +225,10 @@ theorem itoProcessCLM_terminal_eq (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u
     itoProcessCLM hB T T hBmeas φ = itoIntegralCLM_T hB T hBmeas φ :=
   congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
     (itoProcessCLM hB T T hBmeas).continuous (itoIntegralCLM_T hB T hBmeas).continuous
-    (funext fun V => by
+    (funext fun V ↦ by
       simp only [Function.comp_apply, itoProcessCLM_simpleAssembly_T,
         itoIntegralCLM_T_simpleAssembly_T, itoSimpleProcessLp, itoSimpleLp,
-        itoSimpleProcess_eq_itoSimple hBmeas V.val (fun p hp => V.property p hp)])) φ
+        itoSimpleProcess_eq_itoSimple hBmeas V.val (fun p hp ↦ V.property p hp)])) φ
 
 /-- **Terminal Itô isometry.** At the horizon the process is the terminal integral
 (`itoProcessCLM_terminal_eq`), so `‖(φ●B)_T‖ = ‖φ‖` exactly. -/
@@ -244,21 +244,21 @@ contraction `‖(φ●B)_t − (Vₙ●B)_t‖ ≤ ‖φ − Vₙ‖` is `t`-fre
 continuous (`TendstoUniformly.continuous`). -/
 theorem itoIntegralProcessGen_l2_continuous (T : ℝ≥0) (hBmeas : ∀ u, Measurable (B u))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    Continuous (fun t => itoProcessCLM hB T t hBmeas φ) := by
+    Continuous (fun t ↦ itoProcessCLM hB T t hBmeas φ) := by
   -- approximate `φ` by a sequence of simple-process embeddings (dense range).
   obtain ⟨g, hg_range, hg_lim⟩ := mem_closure_iff_seq_limit.mp
     ((simpleAssembly_T_denseRange (μ := μ) T hBmeas).closure_range.ge (Set.mem_univ φ))
   choose V hV using hg_range
   -- each approximant's process is continuous in `t` (bridge to B1a's continuity).
-  have hcont_n : ∀ n, Continuous (fun t => itoProcessCLM hB T t hBmeas (g n)) := fun n => by
+  have hcont_n : ∀ n, Continuous (fun t ↦ itoProcessCLM hB T t hBmeas (g n)) := fun n ↦ by
     simp only [← hV n, itoProcessCLM_simpleAssembly_T]
     exact itoSimpleProcessLp_l2_continuous hB hBmeas (V n).val
   -- uniform convergence: `dist ≤ ‖φ − gₙ‖ → 0`, independent of `t`.
-  have huniform : TendstoUniformly (fun n t => itoProcessCLM hB T t hBmeas (g n))
-      (fun t => itoProcessCLM hB T t hBmeas φ) Filter.atTop := by
+  have huniform : TendstoUniformly (fun n t ↦ itoProcessCLM hB T t hBmeas (g n))
+      (fun t ↦ itoProcessCLM hB T t hBmeas φ) Filter.atTop := by
     rw [Metric.tendstoUniformly_iff]
     intro ε hε
-    have hnorm_lim : Filter.Tendsto (fun n => ‖φ - g n‖) Filter.atTop (nhds 0) := by
+    have hnorm_lim : Filter.Tendsto (fun n ↦ ‖φ - g n‖) Filter.atTop (nhds 0) := by
       have := (tendsto_const_nhds (x := φ)).sub hg_lim
       simpa using this.norm
     filter_upwards [hnorm_lim.eventually (eventually_lt_nhds hε)] with n hn t

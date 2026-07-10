@@ -54,7 +54,7 @@ theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
     ∀ t ∈ Set.Icc 0 b, g t = 0 := by
   intro t ht
   obtain ⟨ht0, htb⟩ := ht
-  set G : ℝ → ℝ := fun u => ∫ s in (0:ℝ)..u, g s with hGdef
+  set G : ℝ → ℝ := fun u ↦ ∫ s in (0:ℝ)..u, g s with hGdef
   -- g is interval-integrable on every [0,u] with u ≥ 0 (continuous on Ici 0)
   have hgii : ∀ u, 0 ≤ u → IntervalIntegrable g volume 0 u := by
     intro u hu
@@ -64,7 +64,7 @@ theorem gronwall_zero_of_le_const_mul_integral {g : ℝ → ℝ} {K b : ℝ}
   -- G ≥ 0 on [0,∞)
   have hGnonneg : ∀ u, 0 ≤ u → 0 ≤ G u := by
     intro u hu
-    exact intervalIntegral.integral_nonneg hu (fun s _ => hg0 s)
+    exact intervalIntegral.integral_nonneg hu (fun s _ ↦ hg0 s)
   -- G continuous on [0,t]
   have hGcont : ContinuousOn G (Set.Icc 0 t) := by
     have hInt : IntegrableOn g (Set.uIcc 0 t) volume := by
@@ -115,20 +115,20 @@ private lemma drift_energy_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω
     [IsProbabilityMeasure μ] {μ_coef : ℝ → ℝ} {Lμ : ℝ≥0} (hμ : LipschitzWith Lμ μ_coef)
     {X Y : ℝ → Ω → ℝ} {s : ℝ} (hs : 0 ≤ s)
     (hfL2 : ∀ᵐ ω ∂μ,
-      MemLp (fun u => μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Set.Ioc 0 s)))
-    (hLHSint : Integrable (fun ω => (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
-    (hprodXY : Integrable (Function.uncurry fun u ω => (X u ω - Y u ω) ^ 2)
+      MemLp (fun u ↦ μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Set.Ioc 0 s)))
+    (hLHSint : Integrable (fun ω ↦ (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
+    (hprodXY : Integrable (Function.uncurry fun u ω ↦ (X u ω - Y u ω) ^ 2)
       ((volume.restrict (Set.uIoc 0 s)).prod μ)) :
     (∫ ω, (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2 ∂μ)
       ≤ (Lμ : ℝ) ^ 2 * s * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ) := by
   -- the state-error interval- and time-integrability come from product-integrability (Fubini)
-  have hXYii : ∀ᵐ ω ∂μ, IntervalIntegrable (fun u => (X u ω - Y u ω) ^ 2) volume 0 s := by
+  have hXYii : ∀ᵐ ω ∂μ, IntervalIntegrable (fun u ↦ (X u ω - Y u ω) ^ 2) volume 0 s := by
     filter_upwards [hprodXY.prod_left_ae] with ω hω
     simp only [Function.uncurry] at hω
     rw [Set.uIoc_of_le hs] at hω
     exact (intervalIntegrable_iff_integrableOn_Ioc_of_le hs).mpr hω
-  have hRHSint : Integrable (fun ω => ∫ u in (0:ℝ)..s, (X u ω - Y u ω) ^ 2) μ := by
-    refine (hprodXY.integral_prod_right).congr (ae_of_all _ fun ω => ?_)
+  have hRHSint : Integrable (fun ω ↦ ∫ u in (0:ℝ)..s, (X u ω - Y u ω) ^ 2) μ := by
+    refine (hprodXY.integral_prod_right).congr (ae_of_all _ fun ω ↦ ?_)
     simp only [Function.uncurry]
     rw [intervalIntegral.integral_of_le hs, Set.uIoc_of_le hs]
   -- a.e. pointwise:  (∫₀ˢ (μ(Xᵤ)−μ(Yᵤ)))² ≤ s·(Lμ²·∫₀ˢ (Xᵤ−Yᵤ)²)
@@ -147,11 +147,11 @@ private lemma drift_energy_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω
         rw [mul_pow, sq_abs]
       rw [h1, h2]
       exact pow_le_pow_left₀ (abs_nonneg _) hd 2
-    have hLHS_ii : IntervalIntegrable (fun u => (μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) volume 0 s :=
+    have hLHS_ii : IntervalIntegrable (fun u ↦ (μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) volume 0 s :=
       (intervalIntegrable_iff_integrableOn_Ioc_of_le hs).mpr hL2.integrable_sq
     have hmono : (∫ u in (0:ℝ)..s, (μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2)
         ≤ ∫ u in (0:ℝ)..s, (Lμ : ℝ) ^ 2 * (X u ω - Y u ω) ^ 2 :=
-      intervalIntegral.integral_mono_on hs hLHS_ii (hii.const_mul _) (fun u _ => hLip u)
+      intervalIntegral.integral_mono_on hs hLHS_ii (hii.const_mul _) (fun u _ ↦ hLip u)
     calc (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2
         ≤ s * ∫ u in (0:ℝ)..s, (μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2 := hCS
       _ ≤ s * ∫ u in (0:ℝ)..s, (Lμ : ℝ) ^ 2 * (X u ω - Y u ω) ^ 2 :=
@@ -165,7 +165,7 @@ private lemma drift_energy_le {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω
         rw [MeasureTheory.integral_const_mul, MeasureTheory.integral_const_mul]; ring
     _ = s * (Lμ : ℝ) ^ 2 * ∫ u in (0:ℝ)..s, ∫ ω, (X u ω - Y u ω) ^ 2 ∂μ := by
         rw [← MeasureTheory.intervalIntegral_integral_swap
-          (f := fun u ω => (X u ω - Y u ω) ^ 2) hprodXY]
+          (f := fun u ω ↦ (X u ω - Y u ω) ^ 2) hprodXY]
     _ = (Lμ : ℝ) ^ 2 * s * ∫ u in (0:ℝ)..s, ∫ ω, (X u ω - Y u ω) ^ 2 ∂μ := by ring
 
 /-- **Pathwise SDE uniqueness via the `L²`-energy Grönwall argument.** Let `X, Y : ℝ → Ω → ℝ`
@@ -184,11 +184,11 @@ theorem sde_pathwise_uniqueness
     {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
     {μ_coef : ℝ → ℝ} {X Y : ℝ → Ω → ℝ} {Iσ : (ℝ → Ω → ℝ) → ℝ → Ω → ℝ}
     {Cdrift Cdiff : ℝ} (hCd : 0 ≤ Cdrift)
-    (hXYint : ∀ s, 0 ≤ s → Integrable (fun ω => (X s ω - Y s ω) ^ 2) μ)
+    (hXYint : ∀ s, 0 ≤ s → Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ)
     (hDint : ∀ s, 0 ≤ s →
-      Integrable (fun ω => (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
-    (hJint : ∀ s, 0 ≤ s → Integrable (fun ω => ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ)
-    (hEcont : ContinuousOn (fun s => ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Ici 0))
+      Integrable (fun ω ↦ (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ)
+    (hJint : ∀ s, 0 ≤ s → Integrable (fun ω ↦ ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ)
+    (hEcont : ContinuousOn (fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Ici 0))
     (hdecomp : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ, X s ω - Y s ω
       = (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) + ((Iσ X) s ω - (Iσ Y) s ω))
     (hdrift : ∀ s, 0 ≤ s →
@@ -199,10 +199,10 @@ theorem sde_pathwise_uniqueness
         ≤ Cdiff * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)) :
     ∀ t, 0 ≤ t → ∀ᵐ ω ∂μ, X t ω = Y t ω := by
   -- the L² energy of the state error
-  set E : ℝ → ℝ := fun s => ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ with hEdef
-  have hE0 : ∀ s, 0 ≤ E s := fun s => integral_nonneg fun ω => sq_nonneg _
-  have hAnn : ∀ s, 0 ≤ s → 0 ≤ ∫ u in (0:ℝ)..s, E u := fun s hs =>
-    intervalIntegral.integral_nonneg hs fun u _ => hE0 u
+  set E : ℝ → ℝ := fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ with hEdef
+  have hE0 : ∀ s, 0 ≤ E s := fun s ↦ integral_nonneg fun ω ↦ sq_nonneg _
+  have hAnn : ∀ s, 0 ≤ s → 0 ≤ ∫ u in (0:ℝ)..s, E u := fun s hs ↦
+    intervalIntegral.integral_nonneg hs fun u _ ↦ hE0 u
   -- per-time energy inequality:  E s ≤ 2·Cdrift·s·(∫₀ˢ E) + 2·Cdiff·(∫₀ˢ E)
   have hEbound : ∀ s, 0 ≤ s →
       E s ≤ 2 * Cdrift * s * (∫ u in (0:ℝ)..s, E u) + 2 * Cdiff * (∫ u in (0:ℝ)..s, E u) := by
@@ -215,15 +215,15 @@ theorem sde_pathwise_uniqueness
     have hptw : ∀ ω, ((∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω))
           + ((Iσ X) s ω - (Iσ Y) s ω)) ^ 2
         ≤ 2 * (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2
-          + 2 * ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 := fun ω => by
+          + 2 * ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 := fun ω ↦ by
       nlinarith [sq_nonneg ((∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω))
         - ((Iσ X) s ω - (Iσ Y) s ω))]
-    have hLint : Integrable (fun ω => ((∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω))
+    have hLint : Integrable (fun ω ↦ ((∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω))
         + ((Iσ X) s ω - (Iσ Y) s ω)) ^ 2) μ := by
       apply (hXYint s hs).congr
       filter_upwards [hdecomp s hs] with ω hω
       rw [hω]
-    have hRint : Integrable (fun ω => 2 * (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2
+    have hRint : Integrable (fun ω ↦ 2 * (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2
         + 2 * ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ :=
       ((hDint s hs).const_mul 2).add ((hJint s hs).const_mul 2)
     rw [hEeq]
@@ -255,8 +255,8 @@ theorem sde_pathwise_uniqueness
           rw [add_mul]
           linarith [mul_le_mul_of_nonneg_right hmono hAs]
   -- E t = 0 with a nonnegative integrand ⇒ Xₜ = Yₜ a.s.
-  have hsq0 : (fun ω => (X t ω - Y t ω) ^ 2) =ᵐ[μ] 0 :=
-    (integral_eq_zero_iff_of_nonneg (fun ω => sq_nonneg _) (hXYint t ht)).mp hEt
+  have hsq0 : (fun ω ↦ (X t ω - Y t ω) ^ 2) =ᵐ[μ] 0 :=
+    (integral_eq_zero_iff_of_nonneg (fun ω ↦ sq_nonneg _) (hXYint t ht)).mp hEt
   filter_upwards [hsq0] with ω hω
   simp only [Pi.zero_apply] at hω
   exact sub_eq_zero.mp (sq_eq_zero_iff.mp hω)
@@ -280,24 +280,24 @@ structure IsL2SolutionPair {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω)
   solvesDiff : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ, X s ω - Y s ω
     = (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) + ((Iσ X) s ω - (Iσ Y) s ω)
   /-- The `L²` error `s ↦ 𝔼[(Xₛ−Yₛ)²]` is continuous (continuous `L²` solution paths). -/
-  energyCont : ContinuousOn (fun s => ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Ici 0)
+  energyCont : ContinuousOn (fun s ↦ ∫ ω, (X s ω - Y s ω) ^ 2 ∂μ) (Set.Ici 0)
   /-- **Itô isometry bound** for the diffusion difference — the sole assumed property of `Iσ`. -/
   isometry : ∀ s, 0 ≤ s → (∫ ω, ((Iσ X) s ω - (Iσ Y) s ω) ^ 2 ∂μ)
     ≤ Cdiff * ∫ u in (0:ℝ)..s, (∫ ω, (X u ω - Y u ω) ^ 2 ∂μ)
   /-- The state error is square-integrable at each time. -/
-  stateSq : ∀ s, 0 ≤ s → Integrable (fun ω => (X s ω - Y s ω) ^ 2) μ
+  stateSq : ∀ s, 0 ≤ s → Integrable (fun ω ↦ (X s ω - Y s ω) ^ 2) μ
   /-- The drift-difference integrand is `L²` in time, a.e. `ω`. -/
   driftMemL2 : ∀ s, 0 ≤ s → ∀ᵐ ω ∂μ,
-    MemLp (fun u => μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Set.Ioc 0 s))
+    MemLp (fun u ↦ μ_coef (X u ω) - μ_coef (Y u ω)) 2 (volume.restrict (Set.Ioc 0 s))
   /-- The drift term is square-integrable. -/
   driftSq : ∀ s, 0 ≤ s →
-    Integrable (fun ω => (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ
+    Integrable (fun ω ↦ (∫ u in (0:ℝ)..s, μ_coef (X u ω) - μ_coef (Y u ω)) ^ 2) μ
   /-- The diffusion term is square-integrable. -/
-  diffSq : ∀ s, 0 ≤ s → Integrable (fun ω => ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ
+  diffSq : ∀ s, 0 ≤ s → Integrable (fun ω ↦ ((Iσ X) s ω - (Iσ Y) s ω) ^ 2) μ
   /-- The squared state error is jointly integrable on `(0,s] × Ω` (for Tonelli). Its two
   marginals — interval-integrability in time and integrability of the time-integral — are Fubini
   consequences, derived inside `drift_energy_le` rather than carried as separate fields. -/
-  stateSqProdInt : ∀ s, 0 ≤ s → Integrable (Function.uncurry fun u ω => (X u ω - Y u ω) ^ 2)
+  stateSqProdInt : ∀ s, 0 ≤ s → Integrable (Function.uncurry fun u ω ↦ (X u ω - Y u ω) ^ 2)
     ((volume.restrict (Set.uIoc 0 s)).prod μ)
 
 /-- **Theorem 8.2.5 (uniqueness), pathwise `L²` form.** Two `L²` strong solutions sharing a driver
@@ -311,7 +311,7 @@ theorem IsL2SolutionPair.uniqueness {Ω : Type*} [MeasurableSpace Ω] {μ : Meas
     ∀ t, 0 ≤ t → ∀ᵐ ω ∂μ, X t ω = Y t ω :=
   sde_pathwise_uniqueness (Cdrift := (Lμ : ℝ) ^ 2) (sq_nonneg _)
     h.stateSq h.driftSq h.diffSq h.energyCont h.solvesDiff
-    (fun s hs => drift_energy_le h.lipschitz hs (h.driftMemL2 s hs) (h.driftSq s hs)
+    (fun s hs ↦ drift_energy_le h.lipschitz hs (h.driftMemL2 s hs) (h.driftSq s hs)
       (h.stateSqProdInt s hs))
     h.isometry
 
@@ -319,17 +319,17 @@ theorem IsL2SolutionPair.uniqueness {Ω : Type*} [MeasurableSpace Ω] {μ : Meas
 probability space is an `IsL2SolutionPair`. So `IsL2SolutionPair.uniqueness` is not vacuously
 true of a contradictory hypothesis set. -/
 example {Ω : Type*} [MeasurableSpace Ω] (μ : Measure Ω) [IsProbabilityMeasure μ] :
-    IsL2SolutionPair μ (μ_coef := fun _ => 0) (Lμ := 0) (Cdiff := 0)
-      (X := fun _ _ => 0) (Y := fun _ _ => 0) (Iσ := fun _ _ _ => 0) where
+    IsL2SolutionPair μ (μ_coef := fun _ ↦ 0) (Lμ := 0) (Cdiff := 0)
+      (X := fun _ _ ↦ 0) (Y := fun _ _ ↦ 0) (Iσ := fun _ _ _ ↦ 0) where
   lipschitz := (LipschitzWith.const (0 : ℝ)).weaken (le_refl 0)
-  solvesDiff := fun s _ => ae_of_all _ fun ω => by simp
+  solvesDiff := fun s _ ↦ ae_of_all _ fun ω ↦ by simp
   energyCont := by simpa using continuousOn_const
-  isometry := fun s _ => by simp
-  stateSq := fun s _ => by simp
-  driftMemL2 := fun s _ => ae_of_all _ fun ω => by simp
-  driftSq := fun s _ => by simp
-  diffSq := fun s _ => by simp
-  stateSqProdInt := fun s _ => by
+  isometry := fun s _ ↦ by simp
+  stateSq := fun s _ ↦ by simp
+  driftMemL2 := fun s _ ↦ ae_of_all _ fun ω ↦ by simp
+  driftSq := fun s _ ↦ by simp
+  diffSq := fun s _ ↦ by simp
+  stateSqProdInt := fun s _ ↦ by
     simp only [sub_self, ne_eq, OfNat.ofNat_ne_zero, not_false_eq_true, zero_pow]
     exact integrable_zero _ _ _
 

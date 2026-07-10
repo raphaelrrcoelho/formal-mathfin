@@ -52,12 +52,12 @@ theorem integrable_bsLogPrice_sq_increment
     [IsFiniteMeasure μ]
     (hB : BrownianQuadraticVariation μ B) (S_0 r σ : ℝ)
     {s t : ℝ} (hs : 0 ≤ s) (hst : s ≤ t) :
-    Integrable (fun ω => (bsLogPrice S_0 r σ B t ω -
+    Integrable (fun ω ↦ (bsLogPrice S_0 r σ B t ω -
                           bsLogPrice S_0 r σ B s ω) ^ 2) μ := by
   set a : ℝ := (r - σ ^ 2 / 2) * (t - s) with a_def
-  have h_eq : (fun ω => (bsLogPrice S_0 r σ B t ω -
+  have h_eq : (fun ω ↦ (bsLogPrice S_0 r σ B t ω -
                          bsLogPrice S_0 r σ B s ω) ^ 2)
-            = (fun ω => a ^ 2 + 2 * a * σ * (B t ω - B s ω) +
+            = (fun ω ↦ a ^ 2 + 2 * a * σ * (B t ω - B s ω) +
                         σ ^ 2 * (B t ω - B s ω) ^ 2) := by
     funext ω
     unfold bsLogPrice
@@ -92,7 +92,7 @@ theorem expected_bsLogPrice_equipartition_sum
   have hn_pos : (0 : ℝ) < (n : ℝ) + 1 := by positivity
   have hn_ne : ((n : ℝ) + 1) ≠ 0 := hn_pos.ne'
   have h_start_nonneg : ∀ k : ℕ, (0 : ℝ) ≤ (k : ℝ) * T / ((n : ℝ) + 1) :=
-    fun k => div_nonneg (mul_nonneg (Nat.cast_nonneg k) hT) hn_pos.le
+    fun k ↦ div_nonneg (mul_nonneg (Nat.cast_nonneg k) hT) hn_pos.le
   -- subinterval endpoint inequality
   have h_endpt_le : ∀ k : ℕ,
       (((k : ℝ) * T) / ((n : ℝ) + 1)) ≤
@@ -108,7 +108,7 @@ theorem expected_bsLogPrice_equipartition_sum
     field_simp
     ring
   -- swap sum and integral
-  rw [integral_finsetSum _ (fun k _ =>
+  rw [integral_finsetSum _ (fun k _ ↦
     integrable_bsLogPrice_sq_increment hB S_0 r σ (h_start_nonneg k) (h_endpt_le k))]
   -- per-summand QV identity
   have h_each : ∀ k ∈ Finset.range (n + 1),

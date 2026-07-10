@@ -57,7 +57,7 @@ lemma modifiedNumerator_eq_macaulayNumerator_div
       macaulayNumerator s t c y / (1 + y) := by
   unfold modifiedNumerator macaulayNumerator
   rw [Finset.sum_div]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
+  refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   rw [pow_succ]
   field_simp
 

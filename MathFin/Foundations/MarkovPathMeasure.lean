@@ -55,11 +55,11 @@ one-step law `P`: it reads only the **last** coordinate of the history. That
 restriction is exactly the Markov property of the resulting construction. -/
 noncomputable def markovTransitionKernel (P : ι → PMF ι) (n : ℕ) :
     Kernel (Π _i : Iic n, ι) ι :=
-  ⟨fun h => (P (h ⟨n, mem_Iic.mpr le_rfl⟩)).toMeasure,
+  ⟨fun h ↦ (P (h ⟨n, mem_Iic.mpr le_rfl⟩)).toMeasure,
     measurable_of_countable _⟩
 
 instance (P : ι → PMF ι) (n : ℕ) : IsMarkovKernel (markovTransitionKernel P n) :=
-  ⟨fun _ => PMF.toMeasure.isProbabilityMeasure _⟩
+  ⟨fun _ ↦ PMF.toMeasure.isProbabilityMeasure _⟩
 
 /-- The law of the Markov chain `(init, P)` on the space of infinite
 trajectories: the Ionescu–Tulcea construction applied to the last-coordinate
@@ -82,17 +82,17 @@ omit [Countable ι] in
 lemma measurableSet_pathCylinder (path : ℕ → ι) (n : ℕ) :
     MeasurableSet (pathCylinder path n) := by
   have h : pathCylinder path n
-      = ⋂ k ∈ Set.Iic n, (fun ω : ℕ → ι => ω k) ⁻¹' {path k} := by
+      = ⋂ k ∈ Set.Iic n, (fun ω : ℕ → ι ↦ ω k) ⁻¹' {path k} := by
     ext ω
     simp [pathCylinder]
   rw [h]
   exact MeasurableSet.biInter (Set.to_countable _)
-    (fun k _ => (measurable_pi_apply k) (measurableSet_singleton _))
+    (fun k _ ↦ (measurable_pi_apply k) (measurableSet_singleton _))
 
 omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
 /-- The cylinder is the `frestrictLe`-preimage of a single restricted path. -/
 lemma frestrictLe_preimage_singleton (path : ℕ → ι) (n : ℕ) :
-    frestrictLe (π := fun _ => ι) n ⁻¹' {fun i : Iic n => path ↑i}
+    frestrictLe (π := fun _ ↦ ι) n ⁻¹' {fun i : Iic n ↦ path ↑i}
       = pathCylinder path n := by
   ext ω
   simp only [Set.mem_preimage, Set.mem_singleton_iff, funext_iff,
@@ -102,8 +102,8 @@ omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
 /-- Splitting the `(n+1)`-cylinder through the pair map
 `ω ↦ (history up to n, state at n+1)`. -/
 lemma pairMap_preimage_singleton_prod (path : ℕ → ι) (n : ℕ) :
-    (fun ω : ℕ → ι => (frestrictLe n ω, ω (n + 1))) ⁻¹'
-        ({fun i : Iic n => path ↑i} ×ˢ {path (n + 1)})
+    (fun ω : ℕ → ι ↦ (frestrictLe n ω, ω (n + 1))) ⁻¹'
+        ({fun i : Iic n ↦ path ↑i} ×ˢ {path (n + 1)})
       = pathCylinder path (n + 1) := by
   ext ω
   simp only [Set.mem_preimage, Set.mem_prod, Set.mem_singleton_iff, funext_iff,
@@ -114,7 +114,7 @@ lemma pairMap_preimage_singleton_prod (path : ℕ → ι) (n : ℕ) :
     · exact h₁ k hk'
     · exact h₂
   · intro h
-    exact ⟨fun k hk => h k (by omega), h (n + 1) le_rfl⟩
+    exact ⟨fun k hk ↦ h k (by omega), h (n + 1) le_rfl⟩
 
 /-- Comp-product of a measure and a kernel on a rectangle with singleton
 base: `(μ ⊗ₘ κ)({a} ×ˢ t) = μ {a} · κ a t`. -/
@@ -133,8 +133,8 @@ lemma markovPathMeasure_cylinder_zero (init : PMF ι) (P : ι → PMF ι)
     markovPathMeasure init P (pathCylinder path 0) = init (path 0) := by
   have hdef : ((default : Iic (0 : ℕ)) : ℕ) = 0 :=
     Nat.le_zero.mp (mem_Iic.mp (default : Iic (0 : ℕ)).2)
-  have hset : (MeasurableEquiv.piUnique (fun _ : Iic (0 : ℕ) => ι)).symm ⁻¹'
-      {fun i : Iic (0 : ℕ) => path ↑i} = {path 0} := by
+  have hset : (MeasurableEquiv.piUnique (fun _ : Iic (0 : ℕ) ↦ ι)).symm ⁻¹'
+      {fun i : Iic (0 : ℕ) ↦ path ↑i} = {path 0} := by
     rw [MeasurableEquiv.preimage_symm, Set.image_singleton]
     simp only [MeasurableEquiv.piUnique_apply]
     rw [hdef]
@@ -155,10 +155,10 @@ lemma markovPathMeasure_cylinder_succ (init : PMF ι) (P : ι → PMF ι)
     markovPathMeasure init P (pathCylinder path (n + 1))
       = markovPathMeasure init P (pathCylinder path n)
           * P (path n) (path (n + 1)) := by
-  have hpair : Measurable (fun ω : ℕ → ι => (frestrictLe n ω, ω (n + 1))) :=
+  have hpair : Measurable (fun ω : ℕ → ι ↦ (frestrictLe n ω, ω (n + 1))) :=
     (measurable_frestrictLe n).prodMk (measurable_pi_apply (n + 1))
   have hprob : IsProbabilityMeasure
-      ((markovPathMeasure init P).map (frestrictLe (π := fun _ => ι) n)) :=
+      ((markovPathMeasure init P).map (frestrictLe (π := fun _ ↦ ι) n)) :=
     Measure.isProbabilityMeasure_map (measurable_frestrictLe n).aemeasurable
   unfold markovPathMeasure at hprob ⊢
   rw [← pairMap_preimage_singleton_prod path n,
@@ -169,7 +169,7 @@ lemma markovPathMeasure_cylinder_succ (init : PMF ι) (P : ι → PMF ι)
     Measure.map_apply (measurable_frestrictLe n) (measurableSet_singleton _),
     frestrictLe_preimage_singleton path n]
   congr 1
-  rw [show (markovTransitionKernel P n) (fun i : Iic n => path ↑i)
+  rw [show (markovTransitionKernel P n) (fun i : Iic n ↦ path ↑i)
       = (P (path n)).toMeasure from rfl]
   exact PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton _)
 

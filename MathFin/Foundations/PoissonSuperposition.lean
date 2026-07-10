@@ -52,7 +52,7 @@ private lemma sum_pmf_mul_pmf (a b : ℝ≥0) (n : ℕ) :
           (rexp (-(b : ℝ)) * (b : ℝ) ^ (n - j) / (n - j)!)
       = rexp (-((a : ℝ) + b)) * ((a : ℝ) + b) ^ n / n ! := by
   rw [add_pow, Finset.mul_sum, Finset.sum_div]
-  refine Finset.sum_congr rfl fun j hj => ?_
+  refine Finset.sum_congr rfl fun j hj ↦ ?_
   have hjn : j ≤ n := Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)
   have hfact : ((n.choose j : ℝ)) * (j ! : ℝ) * ((n - j)! : ℝ) = (n ! : ℝ) := by
     exact_mod_cast congrArg (Nat.cast : ℕ → ℝ)
@@ -94,14 +94,14 @@ Absent from Mathlib; proved by evaluating both sides on singletons and
 collapsing the Cauchy product with the binomial theorem. -/
 theorem poissonMeasure_conv_poissonMeasure (a b : ℝ≥0) :
     poissonMeasure a ∗ poissonMeasure b = poissonMeasure (a + b) := by
-  refine Measure.ext_of_singleton fun n => ?_
+  refine Measure.ext_of_singleton fun n ↦ ?_
   have h_ind : Measurable (Set.indicator {n} (1 : ℕ → ℝ≥0∞)) :=
     measurable_const.indicator (measurableSet_singleton n)
   rw [poissonMeasure_singleton, ← lintegral_indicator_one (measurableSet_singleton n),
     Measure.lintegral_conv h_ind,
-    show poissonMeasure a = Measure.sum (fun j =>
+    show poissonMeasure a = Measure.sum (fun j ↦
       ENNReal.ofReal (rexp (-(a : ℝ)) * (a : ℝ) ^ j / j !) • Measure.dirac j) from rfl,
-    show poissonMeasure b = Measure.sum (fun k =>
+    show poissonMeasure b = Measure.sum (fun k ↦
       ENNReal.ofReal (rexp (-(b : ℝ)) * (b : ℝ) ^ k / k !) • Measure.dirac k) from rfl]
   simp_rw [lintegral_sum_measure, lintegral_smul_measure, lintegral_dirac,
     smul_eq_mul, tsum_pmf_indicator]
@@ -113,10 +113,10 @@ theorem poissonMeasure_conv_poissonMeasure (a b : ℝ≥0) :
     intro j hj
     rw [if_neg (by have := Finset.mem_range.not.mp hj; omega), mul_zero]
   rw [tsum_eq_sum h_supp,
-    Finset.sum_congr rfl fun j hj => by
+    Finset.sum_congr rfl fun j hj ↦ by
       rw [if_pos (Nat.lt_succ_iff.mp (Finset.mem_range.mp hj)),
         ← ENNReal.ofReal_mul (by positivity)],
-    ← ENNReal.ofReal_sum_of_nonneg fun j _ => by positivity,
+    ← ENNReal.ofReal_sum_of_nonneg fun j _ ↦ by positivity,
     sum_pmf_mul_pmf]
   norm_num [NNReal.coe_add]
 
@@ -129,8 +129,8 @@ are needed: a nonzero pushforward forces a.e.-measurability. -/
 theorem indepFun_map_add_poissonMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {μ : Measure Ω} {a b : ℝ≥0} {X Y : Ω → ℕ} (hXY : IndepFun X Y μ)
     (hX : μ.map X = poissonMeasure a) (hY : μ.map Y = poissonMeasure b) :
-    μ.map (fun ω => X ω + Y ω) = poissonMeasure (a + b) := by
-  rw [show (fun ω => X ω + Y ω) = X + Y from rfl,
+    μ.map (fun ω ↦ X ω + Y ω) = poissonMeasure (a + b) := by
+  rw [show (fun ω ↦ X ω + Y ω) = X + Y from rfl,
     hXY.map_add_eq_map_conv_map₀', hX, hY, poissonMeasure_conv_poissonMeasure]
   · apply AEMeasurable.of_map_ne_zero
     simp [hX, NeZero.ne]

@@ -110,16 +110,16 @@ with the stochastic term the Itô-integral process `(f_x(·,B) ● B)_t`. That p
 null-augmented Brownian filtration — so the compensated process `f(t,B_t) − f(0,B_0) − ∫₀ᵗ drift`
 is (a modification of) a continuous local martingale. -/
 theorem ito_formula_td_process
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 => B s ω))
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω))
     (T : ℝ≥0) {f f_t f_x f_xx f_tt f_tx f_xxx : ℝ → ℝ → ℝ}
-    (hf_t : ∀ t x, HasDerivAt (fun s => f s x) (f_t t x) t)
-    (hf_tt : ∀ t x, HasDerivAt (fun s => f_t s x) (f_tt t x) t)
-    (hf_tx : ∀ t x, HasDerivAt (fun u => f_t t u) (f_tx t x) x)
-    (hf_x : ∀ t x, HasDerivAt (fun u => f t u) (f_x t x) x)
-    (hf_xx : ∀ t x, HasDerivAt (fun u => f_x t u) (f_xx t x) x)
-    (hf_xxx : ∀ t x, HasDerivAt (fun u => f_xx t u) (f_xxx t x) x)
-    (hf_x_cont : Continuous fun p : ℝ × ℝ => f_x p.1 p.2)
-    (hf_xx_cont : Continuous fun p : ℝ × ℝ => f_xx p.1 p.2)
+    (hf_t : ∀ t x, HasDerivAt (fun s ↦ f s x) (f_t t x) t)
+    (hf_tt : ∀ t x, HasDerivAt (fun s ↦ f_t s x) (f_tt t x) t)
+    (hf_tx : ∀ t x, HasDerivAt (fun u ↦ f_t t u) (f_tx t x) x)
+    (hf_x : ∀ t x, HasDerivAt (fun u ↦ f t u) (f_x t x) x)
+    (hf_xx : ∀ t x, HasDerivAt (fun u ↦ f_x t u) (f_xx t x) x)
+    (hf_xxx : ∀ t x, HasDerivAt (fun u ↦ f_xx t u) (f_xxx t x) x)
+    (hf_x_cont : Continuous fun p : ℝ × ℝ ↦ f_x p.1 p.2)
+    (hf_xx_cont : Continuous fun p : ℝ × ℝ ↦ f_xx p.1 p.2)
     {Ct C1 C2 Ctt Ctx Cxxx : ℝ}
     (hbd_t : ∀ t x, |f_t t x| ≤ Ct) (hbd_x : ∀ t x, |f_x t x| ≤ C1)
     (hbd_xx : ∀ t x, |f_xx t x| ≤ C2)
@@ -128,8 +128,8 @@ theorem ito_formula_td_process
     ∃ F : Lp ℝ 2 ((timeMeasure.prod μ).trim
       (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod),
       (∀ t : ℝ≥0, t ≤ T →
-        (fun ω => f (t : ℝ) (B t ω) - f 0 (B 0 ω)) =ᵐ[μ]
-          (fun ω => (itoProcessL2Inf hB t hBmeas F) ω
+        (fun ω ↦ f (t : ℝ) (B t ω) - f 0 (B 0 ω)) =ᵐ[μ]
+          (fun ω ↦ (itoProcessL2Inf hB t hBmeas F) ω
             + ∫ s in Set.Ioc 0 t,
                 (f_t s (B s ω) + (1 / 2) * f_xx s (B s ω)) ∂ItoIntegralL2.timeMeasure)) ∧
       (∀ (i j : ℝ≥0), i ≤ j →
@@ -137,7 +137,7 @@ theorem ito_formula_td_process
           =ᵐ[μ] (itoProcessL2Inf hB i hBmeas F : Ω → ℝ)) ∧
       (∃ X : ℝ≥0 → Ω → ℝ,
         (∀ t, X t =ᵐ[μ] (itoProcessL2Inf hB t hBmeas F : Ω → ℝ)) ∧
-        (∀ ω, Continuous fun t => X t ω) ∧
+        (∀ ω, Continuous fun t ↦ X t ω) ∧
         IsLocalMartingale X (augFiltration (μ := μ) hBmeas) μ) := by
   classical
   -- the explicit horizon-`T` witness `gfx_T = [f_x(·, B)]`
@@ -146,8 +146,8 @@ theorem ito_formula_td_process
   -- extend it to a `[0,∞)` integrand `F` agreeing with `gfx_T` (hence `[f_x]`) on `(0,T]`
   obtain ⟨F, hF_eq⟩ := exists_fullHorizon_extension T hBmeas gfxT
   have hF_fx : (⇑F : ℝ≥0 × Ω → ℝ)
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z => f_x z.1 (B z.1 z.2) := hF_eq.trans hgfxT_eq
-  refine ⟨F, fun t ht => ?_, fun i j hij => itoProcessL2Inf_isMartingale hB hBmeas F hij,
+      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ f_x z.1 (B z.1 z.2) := hF_eq.trans hgfxT_eq
+  refine ⟨F, fun t ht ↦ ?_, fun i j hij ↦ itoProcessL2Inf_isMartingale hB hBmeas F hij,
     exists_continuous_localMartingale_modification_infinite hB hBmeas hBcont (f := F)⟩
   -- the explicit horizon-`t` witness and terminal identity at `t`
   obtain ⟨gfxt, hgfxt_eq, hMt⟩ := ito_formula_td_L2_bddDeriv_explicit hB hBmeas hBcont t

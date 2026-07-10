@@ -31,7 +31,7 @@ structure BivariateGaussianHyp {Ω : Type*} {mΩ : MeasurableSpace Ω}
   X_meas : Measurable X
   Y_meas : Measurable Y
   /-- (X, Y) is jointly Gaussian. -/
-  joint_gaussian : HasGaussianLaw (fun ω => (X ω, Y ω)) P
+  joint_gaussian : HasGaussianLaw (fun ω ↦ (X ω, Y ω)) P
   /-- Marginal mean of X. -/
   mean_X : ∫ ω, X ω ∂P = μ_X
   /-- Marginal mean of Y. -/
@@ -61,9 +61,9 @@ private noncomputable def linearShift (β : ℝ) : ℝ × ℝ →L[ℝ] ℝ × �
 theorem conditional_expectation_formula
     (h : BivariateGaussianHyp P X Y μ_X μ_Y σ_X σ_Y ρ) :
     (P[X | MeasurableSpace.comap Y inferInstance])
-      =ᵐ[P] fun ω => μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y) := by
+      =ᵐ[P] fun ω ↦ μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y) := by
   set β : ℝ := ρ * σ_X / σ_Y with hβ_def
-  set Xhat : Ω → ℝ := fun ω => μ_X + β * (Y ω - μ_Y)
+  set Xhat : Ω → ℝ := fun ω ↦ μ_X + β * (Y ω - μ_Y)
   have hY_le : MeasurableSpace.comap Y inferInstance ≤ mΩ := by
     rintro s ⟨t, ht, rfl⟩
     exact h.Y_meas ht
@@ -81,21 +81,21 @@ theorem conditional_expectation_formula
   have h_condXhat : P[Xhat | MeasurableSpace.comap Y inferInstance] = Xhat :=
     condExp_of_stronglyMeasurable hY_le hXhat_smeas hXhat_int
   have hPair_eq :
-      (fun ω => (X ω - β * Y ω, Y ω))
-        = (linearShift β) ∘ (fun ω => (X ω, Y ω)) := by
+      (fun ω ↦ (X ω - β * Y ω, Y ω))
+        = (linearShift β) ∘ (fun ω ↦ (X ω, Y ω)) := by
     funext ω
     simp [Function.comp]
-  have h_jointGaussian_diff : HasGaussianLaw (fun ω => (X ω - β * Y ω, Y ω)) P := by
+  have h_jointGaussian_diff : HasGaussianLaw (fun ω ↦ (X ω - β * Y ω, Y ω)) P := by
     rw [hPair_eq]
     exact h.joint_gaussian.map_of_measurable (linearShift β)
       (linearShift β).continuous.measurable
-  have hcov_zero : cov[fun ω => X ω - β * Y ω, Y; P] = 0 := by
+  have hcov_zero : cov[fun ω ↦ X ω - β * Y ω, Y; P] = 0 := by
     have h_memLp_X : MemLp X 2 P := h.joint_gaussian.fst.memLp_two
     have h_memLp_Y : MemLp Y 2 P := h.joint_gaussian.snd.memLp_two
-    have h_memLp_betaY : MemLp (fun ω => β * Y ω) 2 P := h_memLp_Y.const_mul β
-    rw [show (fun ω => X ω - β * Y ω) = (fun ω => X ω) - (fun ω => β * Y ω) from rfl]
+    have h_memLp_betaY : MemLp (fun ω ↦ β * Y ω) 2 P := h_memLp_Y.const_mul β
+    rw [show (fun ω ↦ X ω - β * Y ω) = (fun ω ↦ X ω) - (fun ω ↦ β * Y ω) from rfl]
     rw [covariance_sub_left h_memLp_X h_memLp_betaY h_memLp_Y]
-    rw [show (fun ω => β * Y ω) = β • Y from by
+    rw [show (fun ω ↦ β * Y ω) = β • Y from by
       funext ω
       simp [Pi.smul_apply, smul_eq_mul]]
     rw [covariance_smul_left, h.cov_XY,
@@ -105,54 +105,54 @@ theorem conditional_expectation_formula
     rw [hβ_def]
     field_simp
     ring
-  have hIndep : IndepFun (fun ω => X ω - β * Y ω) Y P :=
+  have hIndep : IndepFun (fun ω ↦ X ω - β * Y ω) Y P :=
     h_jointGaussian_diff.indepFun_of_covariance_eq_zero hcov_zero
-  have h_diff_meas : Measurable (fun ω => X ω - β * Y ω) :=
+  have h_diff_meas : Measurable (fun ω ↦ X ω - β * Y ω) :=
     h.X_meas.sub (h.Y_meas.const_mul β)
   have h_diff_smeas_comap :
-      StronglyMeasurable[MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ)]
-        (fun ω => X ω - β * Y ω) :=
+      StronglyMeasurable[MeasurableSpace.comap (fun ω ↦ X ω - β * Y ω) (borel ℝ)]
+        (fun ω ↦ X ω - β * Y ω) :=
     (Measurable.of_comap_le le_rfl).stronglyMeasurable
   have h_diff_le_comap :
-      MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ) ≤ mΩ :=
+      MeasurableSpace.comap (fun ω ↦ X ω - β * Y ω) (borel ℝ) ≤ mΩ :=
     h_diff_meas.comap_le
   have h_indep_sigma :
-      Indep (MeasurableSpace.comap (fun ω => X ω - β * Y ω) (borel ℝ))
+      Indep (MeasurableSpace.comap (fun ω ↦ X ω - β * Y ω) (borel ℝ))
             (MeasurableSpace.comap Y inferInstance) P :=
     (IndepFun_iff_Indep _ _ _).mp hIndep
   have hE_diff : ∫ ω, X ω - β * Y ω ∂P = μ_X - β * μ_Y := by
     rw [integral_sub hX_int (hY_int.const_mul β), integral_const_mul, h.mean_X, h.mean_Y]
-  have h_int_diff : Integrable (fun ω => X ω - β * Y ω) P :=
+  have h_int_diff : Integrable (fun ω ↦ X ω - β * Y ω) P :=
     hX_int.sub (hY_int.const_mul β)
   have h_condDiff :
-      P[fun ω => X ω - β * Y ω | (MeasurableSpace.comap Y inferInstance)]
-        =ᵐ[P] fun _ => μ_X - β * μ_Y := by
+      P[fun ω ↦ X ω - β * Y ω | (MeasurableSpace.comap Y inferInstance)]
+        =ᵐ[P] fun _ ↦ μ_X - β * μ_Y := by
     have := condExp_indep_eq h_diff_le_comap hY_le h_diff_smeas_comap h_indep_sigma
     rw [hE_diff] at this
     exact this
-  have h_X_decomp : (X : Ω → ℝ) = Xhat + (fun ω => X ω - β * Y ω - (μ_X - β * μ_Y)) := by
+  have h_X_decomp : (X : Ω → ℝ) = Xhat + (fun ω ↦ X ω - β * Y ω - (μ_X - β * μ_Y)) := by
     funext ω
     show X ω = (μ_X + β * (Y ω - μ_Y)) + (X ω - β * Y ω - (μ_X - β * μ_Y))
     ring
   have h_cond_split :
       P[X | MeasurableSpace.comap Y inferInstance]
         =ᵐ[P] (P[Xhat | MeasurableSpace.comap Y inferInstance])
-          + (P[fun ω => X ω - β * Y ω - (μ_X - β * μ_Y)
+          + (P[fun ω ↦ X ω - β * Y ω - (μ_X - β * μ_Y)
               | MeasurableSpace.comap Y inferInstance]) := by
     conv_lhs => rw [h_X_decomp]
     exact condExp_add hXhat_int (h_int_diff.sub (integrable_const _)) _
   have h_cond_centered :
-      P[fun ω => X ω - β * Y ω - (μ_X - β * μ_Y)
+      P[fun ω ↦ X ω - β * Y ω - (μ_X - β * μ_Y)
         | MeasurableSpace.comap Y inferInstance]
-        =ᵐ[P] fun _ => (0 : ℝ) := by
-    have h1 : P[fun ω => X ω - β * Y ω - (μ_X - β * μ_Y)
+        =ᵐ[P] fun _ ↦ (0 : ℝ) := by
+    have h1 : P[fun ω ↦ X ω - β * Y ω - (μ_X - β * μ_Y)
         | MeasurableSpace.comap Y inferInstance]
               =ᵐ[P]
-              (P[fun ω => X ω - β * Y ω | MeasurableSpace.comap Y inferInstance])
-                - P[fun _ : Ω => μ_X - β * μ_Y | MeasurableSpace.comap Y inferInstance] :=
+              (P[fun ω ↦ X ω - β * Y ω | MeasurableSpace.comap Y inferInstance])
+                - P[fun _ : Ω ↦ μ_X - β * μ_Y | MeasurableSpace.comap Y inferInstance] :=
       condExp_sub h_int_diff (integrable_const _) _
-    have h2 : P[fun _ : Ω => μ_X - β * μ_Y | MeasurableSpace.comap Y inferInstance]
-            = fun _ => μ_X - β * μ_Y :=
+    have h2 : P[fun _ : Ω ↦ μ_X - β * μ_Y | MeasurableSpace.comap Y inferInstance]
+            = fun _ ↦ μ_X - β * μ_Y :=
       condExp_const hY_le (μ_X - β * μ_Y)
     filter_upwards [h1, h_condDiff] with ω hω1 hω2
     show _ = (0 : ℝ)
@@ -161,7 +161,7 @@ theorem conditional_expectation_formula
   refine h_cond_split.trans ?_
   filter_upwards [h_cond_centered] with ω hω
   show ((P[Xhat | MeasurableSpace.comap Y inferInstance]) +
-        (P[fun ω => X ω - β * Y ω - (μ_X - β * μ_Y)
+        (P[fun ω ↦ X ω - β * Y ω - (μ_X - β * μ_Y)
           | MeasurableSpace.comap Y inferInstance])) ω
       = μ_X + (ρ * σ_X / σ_Y) * (Y ω - μ_Y)
   simp only [Pi.add_apply]

@@ -33,7 +33,7 @@ open MeasureTheory ProbabilityTheory Real
 expression in `hasDerivAt_bsd1_sigma`. Useful for higher-order Greeks. -/
 private lemma hasDerivAt_bsd1_sigma_clean (S K r : ℝ) {σ τ : ℝ}
     (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsd1 S K r s τ) (-(bsd2 S K r σ τ) / σ) σ := by
+    HasDerivAt (fun s ↦ bsd1 S K r s τ) (-(bsd2 S K r σ τ) / σ) σ := by
   have h := hasDerivAt_bsd1_sigma S K r hσ hτ
   convert h using 1
   try rfl
@@ -54,7 +54,7 @@ Strategy: vega-as-function-of-S is `S · ϕ(d₁(S)) · √τ`. Product rule:
 `= ϕ(d₁) √τ - d₁ ϕ(d₁) / σ = ϕ(d₁) (σ√τ − d₁) / σ = -ϕ(d₁) d₂ / σ`. -/
 lemma hasDerivAt_bsV_vanna {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => s * gaussianPDFReal 0 1 (bsd1 s K r σ τ) * Real.sqrt τ)
+    HasDerivAt (fun s ↦ s * gaussianPDFReal 0 1 (bsd1 s K r σ τ) * Real.sqrt τ)
       (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) * bsd2 S K r σ τ / σ)) S := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
@@ -62,7 +62,7 @@ lemma hasDerivAt_bsV_vanna {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have hS_ne : S ≠ 0 := hS.ne'
   have h_d1_S := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
   have h_pdf_d1 := (hasDerivAt_gaussianPDFReal_zero_one (bsd1 S K r σ τ)).comp S h_d1_S
-  have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
+  have h_id : HasDerivAt (fun s : ℝ ↦ s) 1 S := hasDerivAt_id S
   have h_prod := h_id.mul h_pdf_d1
   have h_full := h_prod.mul_const (Real.sqrt τ)
   convert h_full using 1 <;> try rfl
@@ -79,7 +79,7 @@ clean derivative `∂_σ d₁ = -d₂/σ` (above) and `ϕ'(d₁) = -d₁ ϕ(d₁
 constants S and √τ. -/
 lemma hasDerivAt_bsV_volga {K r : ℝ} (_hK : 0 < K)
     {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (fun s => S * gaussianPDFReal 0 1 (bsd1 S K r s τ) * Real.sqrt τ)
+    HasDerivAt (fun s ↦ S * gaussianPDFReal 0 1 (bsd1 S K r s τ) * Real.sqrt τ)
       (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ
         * bsd1 S K r σ τ * bsd2 S K r σ τ / σ) σ := by
   have hσ_ne : σ ≠ 0 := hσ.ne'
@@ -96,7 +96,7 @@ The product/chain rules give `ϕ(d₁) · ∂_τ d₁`. The magic identity is no
 needed here: `∂_τ d₁` already has a clean closed form. -/
 lemma hasDerivAt_bsV_charm {K r σ : ℝ} (hσ : 0 < σ)
     {S τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun t => Phi (bsd1 S K r σ t))
+    HasDerivAt (fun t ↦ Phi (bsd1 S K r σ t))
       (gaussianPDFReal 0 1 (bsd1 S K r σ τ)
         * (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ))) τ := by
   have h_d1_τ := hasDerivAt_bsd1_tau S K r σ hσ hτ

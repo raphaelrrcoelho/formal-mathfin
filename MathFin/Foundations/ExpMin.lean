@@ -45,7 +45,7 @@ private lemma expMeasure_Ioi (r : ℝ) (hr : 0 < r) {t : ℝ} (ht : 0 ≤ t) :
 /-- The set `{ω | t < min_i τ_i ω}` rewrites to `⋂_i {ω | t < τ_i ω}`. -/
 private lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
     {ω : Ω | t < (Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
-      (fun i : Fin n => τ i ω))}
+      (fun i : Fin n ↦ τ i ω))}
       = ⋂ i : Fin n, (τ i) ⁻¹' Set.Ioi t := by
   ext ω
   simp [Finset.lt_inf'_iff, Set.mem_iInter, Set.mem_preimage, Set.mem_Ioi]
@@ -64,17 +64,17 @@ theorem minimum_survival
     (hmeas : ∀ i, Measurable (τ i))
     (hn : 0 < n) {t : ℝ} (ht : 0 ≤ t) :
     μ {ω | t < Finset.univ.inf' ⟨⟨0, hn⟩, Finset.mem_univ _⟩
-      (fun i : Fin n => τ i ω)} =
+      (fun i : Fin n ↦ τ i ω)} =
         ENNReal.ofReal (Real.exp (-((∑ i, rates i) * t))) := by
   rw [min_gt_iInter hn t]
-  rw [hindep.meas_iInter (fun _ => ⟨Set.Ioi t, measurableSet_Ioi, rfl⟩)]
+  rw [hindep.meas_iInter (fun _ ↦ ⟨Set.Ioi t, measurableSet_Ioi, rfl⟩)]
   have step_each : ∀ i, μ ((τ i) ⁻¹' Set.Ioi t)
-      = ENNReal.ofReal (Real.exp (-(rates i * t))) := fun i => by
+      = ENNReal.ofReal (Real.exp (-(rates i * t))) := fun i ↦ by
     rw [show μ ((τ i) ⁻¹' Set.Ioi t) = (Measure.map (τ i) μ) (Set.Ioi t) from
       (Measure.map_apply (hmeas i) measurableSet_Ioi).symm,
       hexp_law i, expMeasure_Ioi (rates i) (hrates_pos i) ht]
   simp_rw [step_each]
-  rw [← ENNReal.ofReal_prod_of_nonneg (fun i _ => (Real.exp_pos _).le)]
+  rw [← ENNReal.ofReal_prod_of_nonneg (fun i _ ↦ (Real.exp_pos _).le)]
   congr 1
   rw [← Real.exp_sum]
   congr 1

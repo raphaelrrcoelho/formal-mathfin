@@ -71,7 +71,7 @@ variable {Ω : Type*}
 `[0,∞]`-valued Radon–Nikodym derivative. Nonnegative whenever the numéraires are
 positive. -/
 noncomputable def numeraireDensity (BT NT : Ω → ℝ) (B0 N0 : ℝ) : Ω → ℝ≥0∞ :=
-  fun ω => ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))
+  fun ω ↦ ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))
 
 /-- The numéraire density is a nonnegative real when both numéraires are
 positive. -/
@@ -96,18 +96,18 @@ normalization condition `𝔼^Q[N_T/B_T] = N₀/B₀` (equivalently: `N/B` is a
 `Q`-martingale), the total mass `∫ dQ^N/dQ ∂Q` equals `(B₀/N₀)·(N₀/B₀) = 1`. -/
 theorem numeraireMeasure_isProbabilityMeasure
     (hNTpos : ∀ ω, 0 < NT ω) (hBTpos : ∀ ω, 0 < BT ω) (hB0 : 0 < B0) (hN0 : 0 < N0)
-    (hint : Integrable (fun ω => NT ω / BT ω) Q)
+    (hint : Integrable (fun ω ↦ NT ω / BT ω) Q)
     (hmart : ∫ ω, NT ω / BT ω ∂Q = N0 / B0) :
     IsProbabilityMeasure (numeraireMeasure Q BT NT B0 N0) := by
   constructor
   have hden : numeraireMeasure Q BT NT B0 N0
-      = Q.withDensity (fun ω => ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))) := rfl
+      = Q.withDensity (fun ω ↦ ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))) := rfl
   rw [hden, withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ]
-  have hρnn : 0 ≤ᵐ[Q] fun ω => NT ω * B0 / (N0 * BT ω) :=
+  have hρnn : 0 ≤ᵐ[Q] fun ω ↦ NT ω * B0 / (N0 * BT ω) :=
     ae_of_all _ (numeraireDensity_toReal_nonneg hNTpos hBTpos hB0.le hN0)
-  have heq : (fun ω => NT ω * B0 / (N0 * BT ω)) = fun ω => (B0 / N0) * (NT ω / BT ω) := by
+  have heq : (fun ω ↦ NT ω * B0 / (N0 * BT ω)) = fun ω ↦ (B0 / N0) * (NT ω / BT ω) := by
     funext ω; ring
-  have hρint : Integrable (fun ω => NT ω * B0 / (N0 * BT ω)) Q := by
+  have hρint : Integrable (fun ω ↦ NT ω * B0 / (N0 * BT ω)) Q := by
     rw [heq]; exact hint.const_mul _
   rw [← ofReal_integral_eq_lintegral_ofReal hρint hρnn, heq, integral_const_mul, hmart]
   have hone : B0 / N0 * (N0 / B0) = 1 := by
@@ -127,11 +127,11 @@ theorem changeOfNumeraire (X : Ω → ℝ)
     N0 * ∫ ω, X ω / NT ω ∂(numeraireMeasure Q BT NT B0 N0)
       = B0 * ∫ ω, X ω / BT ω ∂Q := by
   have hden : numeraireMeasure Q BT NT B0 N0
-      = Q.withDensity (fun ω => ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))) := rfl
-  have hdmeas : Measurable fun ω => NT ω * B0 / (N0 * BT ω) :=
+      = Q.withDensity (fun ω ↦ ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))) := rfl
+  have hdmeas : Measurable fun ω ↦ NT ω * B0 / (N0 * BT ω) :=
     (hNTmeas.mul measurable_const).div (measurable_const.mul hBTmeas)
   rw [hden, integral_withDensity_eq_integral_toReal_smul hdmeas.ennreal_ofReal
-    (ae_of_all _ fun _ => ENNReal.ofReal_lt_top)]
+    (ae_of_all _ fun _ ↦ ENNReal.ofReal_lt_top)]
   have hcongr : ∀ ω, (ENNReal.ofReal (NT ω * B0 / (N0 * BT ω))).toReal • (X ω / NT ω)
       = (B0 / N0) * (X ω / BT ω) := by
     intro ω
@@ -171,39 +171,39 @@ theorem changeOfNumeraire_setIntegral_eq (T : ℝ≥0)
     (hNpos : ∀ u ω, 0 < N u ω) (hBpos : ∀ u ω, 0 < B u ω)
     (hB0 : 0 ≤ B0) (hN0 : 0 < N0)
     (hNmeas : ∀ u, Measurable (N u)) (hBmeas : ∀ u, Measurable (B u))
-    (hDsm : ∀ u, StronglyMeasurable[𝓕 u] (fun ω => X u ω / N u ω))
-    (hNB : Martingale (fun t ω => (B0 / N0) * (N t ω / B t ω)) 𝓕 Q)
-    (hXB : Martingale (fun t ω => (B0 / N0) * (X t ω / B t ω)) 𝓕 Q)
+    (hDsm : ∀ u, StronglyMeasurable[𝓕 u] (fun ω ↦ X u ω / N u ω))
+    (hNB : Martingale (fun t ω ↦ (B0 / N0) * (N t ω / B t ω)) 𝓕 Q)
+    (hXB : Martingale (fun t ω ↦ (B0 / N0) * (X t ω / B t ω)) 𝓕 Q)
     (hmix : ∀ u, u ≤ T →
-      Integrable (fun ω => X u ω / N u ω * (N T ω * B0 / (N0 * B T ω))) Q)
+      Integrable (fun ω ↦ X u ω / N u ω * (N T ω * B0 / (N0 * B T ω))) Q)
     {s t : ℝ≥0} (hst : s ≤ t) (htT : t ≤ T)
     {A : Set Ω} (hA : MeasurableSet[𝓕 s] A) :
     ∫ ω in A, X t ω / N t ω
-        ∂(Q.withDensity (fun ω => ENNReal.ofReal (N T ω * B0 / (N0 * B T ω))))
+        ∂(Q.withDensity (fun ω ↦ ENNReal.ofReal (N T ω * B0 / (N0 * B T ω))))
       = ∫ ω in A, X s ω / N s ω
-        ∂(Q.withDensity (fun ω => ENNReal.ofReal (N T ω * B0 / (N0 * B T ω)))) := by
+        ∂(Q.withDensity (fun ω ↦ ENNReal.ofReal (N T ω * B0 / (N0 * B T ω)))) := by
   -- The density `Z_T = (N_T·B₀)/(N₀·B_T)` is measurable and nonnegative.
-  have hZmeasT : Measurable (fun ω => N T ω * B0 / (N0 * B T ω)) :=
+  have hZmeasT : Measurable (fun ω ↦ N T ω * B0 / (N0 * B T ω)) :=
     ((hNmeas T).mul measurable_const).div (measurable_const.mul (hBmeas T))
-  have hZpos : ∀ ω, 0 ≤ N T ω * B0 / (N0 * B T ω) := fun ω =>
+  have hZpos : ∀ ω, 0 ≤ N T ω * B0 / (N0 * B T ω) := fun ω ↦
     div_nonneg (mul_nonneg (hNpos T ω).le hB0) (mul_nonneg hN0.le (hBpos T ω).le)
   -- `Z_t = (N_t·B₀)/(N₀·B_t) = (B₀/N₀)(N_t/B_t)` is the normalisation martingale `hNB`.
-  have hZ : Martingale (fun u ω => N u ω * B0 / (N0 * B u ω)) 𝓕 Q := by
-    have hfeq : (fun u (ω : Ω) => N u ω * B0 / (N0 * B u ω))
-        = fun u ω => (B0 / N0) * (N u ω / B u ω) := by
+  have hZ : Martingale (fun u ω ↦ N u ω * B0 / (N0 * B u ω)) 𝓕 Q := by
+    have hfeq : (fun u (ω : Ω) ↦ N u ω * B0 / (N0 * B u ω))
+        = fun u ω ↦ (B0 / N0) * (N u ω / B u ω) := by
       funext u ω; ring
     rw [hfeq]; exact hNB
   -- `Z_t·D_t = (B₀/N₀)(X_t/B_t)` — the `N_t` cancels — is the martingale `hXB`.
   have hZD : Martingale
-      (fun t ω => N t ω * B0 / (N0 * B t ω) * (X t ω / N t ω)) 𝓕 Q := by
-    have hfeq : (fun t (ω : Ω) => N t ω * B0 / (N0 * B t ω) * (X t ω / N t ω))
-        = fun t ω => (B0 / N0) * (X t ω / B t ω) := by
+      (fun t ω ↦ N t ω * B0 / (N0 * B t ω) * (X t ω / N t ω)) 𝓕 Q := by
+    have hfeq : (fun t (ω : Ω) ↦ N t ω * B0 / (N0 * B t ω) * (X t ω / N t ω))
+        = fun t ω ↦ (B0 / N0) * (X t ω / B t ω) := by
       funext u ω
       field_simp [hN0.ne', (hNpos u ω).ne', (hBpos u ω).ne']
     rw [hfeq]; exact hXB
   -- Instantiate the Bayes engine at `Z_t = (N_t·B₀)/(N₀·B_t)`, `D_t = X_t/N_t`.
-  exact changeOfMeasure_setIntegral_eq (Z := fun u ω => N u ω * B0 / (N0 * B u ω))
-    (D := fun u ω => X u ω / N u ω) T hZmeasT hZpos hDsm hZ hZD hmix hst htT hA
+  exact changeOfMeasure_setIntegral_eq (Z := fun u ω ↦ N u ω * B0 / (N0 * B u ω))
+    (D := fun u ω ↦ X u ω / N u ω) T hZmeasT hZpos hDsm hZ hZD hmix hst htT hA
 
 end Dynamic
 

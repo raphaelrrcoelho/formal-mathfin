@@ -48,9 +48,9 @@ theorem exists_pos_dual_of_disjoint_stdSimplex
   -- use neg-closure to promote the one-sided `≤ 0` to the two-sided `= 0`.
   obtain ⟨q, hpos, hle⟩ :=
     exists_pos_separating_of_cone_disjoint_simplex (V : Set (ι → ℝ)) V.convex
-      V.closed_of_finiteDimensional (fun x hx c _ => V.smul_mem c hx)
-      (by rw [Set.disjoint_left]; exact fun x hxΔ hxV => hV x hxV hxΔ)
-  refine ⟨q, hpos, fun v hv => le_antisymm (hle v hv) ?_⟩
+      V.closed_of_finiteDimensional (fun x hx c _ ↦ V.smul_mem c hx)
+      (by rw [Set.disjoint_left]; exact fun x hxΔ hxV ↦ hV x hxV hxΔ)
+  refine ⟨q, hpos, fun v hv ↦ le_antisymm (hle v hv) ?_⟩
   have hneg := hle (-v) (V.neg_mem hv)
   simp only [Pi.neg_apply, mul_neg, Finset.sum_neg_distrib] at hneg
   linarith

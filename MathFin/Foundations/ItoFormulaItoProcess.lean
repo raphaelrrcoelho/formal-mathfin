@@ -55,7 +55,7 @@ continuous Itô integral `itoIntegralCLM_T` carrying it. Together with the drift
 term this is `f(X_T) − f(X₀) = ∫₀ᵀ f'(X_s) dX_s + ½∫₀ᵀ f''(X_s)·σ² ds`. The instantiation of
 `ito_formula_td_localized` at the time-localized inner map `(t, x) ↦ X₀ + b·φₙ(t) + σx`. -/
 theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 => B s ω) (T : ℝ≥0) (X₀ b σ : ℝ)
+    (hBcont : ∀ ω, Continuous fun s : ℝ≥0 ↦ B s ω) (T : ℝ≥0) (X₀ b σ : ℝ)
     {f f' f'' f''' : ℝ → ℝ}
     (hf' : ∀ x, HasDerivAt f (f' x) x) (hf'' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf''' : ∀ x, HasDerivAt f'' (f''' x) x)
@@ -64,8 +64,8 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
     (hg'' : ∀ x, |f'' x| ≤ C * Real.exp (lam * |x|))
     (hg''' : ∀ x, |f''' x| ≤ C * Real.exp (lam * |x|)) :
     ∃ gfx : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (fun ω => f (X₀ + b * (T : ℝ) + σ * B T ω) - f (X₀ + b * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]
-        (fun ω => (itoIntegralCLM_T hB T hBmeas gfx) ω
+      (fun ω ↦ f (X₀ + b * (T : ℝ) + σ * B T ω) - f (X₀ + b * (0 : ℝ) + σ * B 0 ω)) =ᵐ[μ]
+        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gfx) ω
           + ∫ s in Set.Ioc 0 T,
               (f' (X₀ + b * (s : ℝ) + σ * B s ω) * b
                 + (1 / 2) * (f'' (X₀ + b * (s : ℝ) + σ * B s ω) * σ ^ 2))
@@ -127,43 +127,43 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
           mul_le_mul (hcf t) (hfbd h hh t x) (abs_nonneg _) hCsum_nonneg
       _ = Csum * K * Real.exp (lam' * |x|) := by ring
   -- the five single-term coefficient bounds `|cf t| ≤ Csum`
-  have hcoef_t : ∀ t : ℝ, |b * S.cutD1 n t| ≤ Csum := fun t => by
+  have hcoef_t : ∀ t : ℝ, |b * S.cutD1 n t| ≤ Csum := fun t ↦ by
     rw [abs_mul, hCsum]
     have h := mul_le_mul_of_nonneg_left (S.cutD1_bdd n t) (abs_nonneg b)
     linarith [h, t2, t3, t4, t5, t6]
-  have hcoef_x : ∀ _t : ℝ, |σ| ≤ Csum := fun _ => by rw [hCsum]; linarith [t1, t3, t4, t5, t6]
-  have hcoef_xx : ∀ _t : ℝ, |σ ^ 2| ≤ Csum := fun _ => by
+  have hcoef_x : ∀ _t : ℝ, |σ| ≤ Csum := fun _ ↦ by rw [hCsum]; linarith [t1, t3, t4, t5, t6]
+  have hcoef_xx : ∀ _t : ℝ, |σ ^ 2| ≤ Csum := fun _ ↦ by
     rw [abs_of_nonneg (sq_nonneg σ), hCsum]; linarith [t1, t2, t4, t5, t6]
-  have hcoef_tx : ∀ t : ℝ, |b * σ * S.cutD1 n t| ≤ Csum := fun t => by
+  have hcoef_tx : ∀ t : ℝ, |b * σ * S.cutD1 n t| ≤ Csum := fun t ↦ by
     rw [abs_mul, abs_mul, hCsum]
     have h := mul_le_mul_of_nonneg_left (S.cutD1_bdd n t) (mul_nonneg (abs_nonneg b) (abs_nonneg σ))
     linarith [h, t1, t2, t3, t4, t6]
-  have hcoef_xxx : ∀ _t : ℝ, |σ ^ 3| ≤ Csum := fun _ => by
+  have hcoef_xxx : ∀ _t : ℝ, |σ ^ 3| ≤ Csum := fun _ ↦ by
     rw [abs_pow, hCsum]; linarith [t1, t2, t3, t4, t5]
   -- continuity of `f'`, `f''` (from one-higher differentiability) and the inner argument
-  have hf'c : Continuous f' := Differentiable.continuous (fun x => (hf'' x).differentiableAt)
-  have hf''c : Continuous f'' := Differentiable.continuous (fun x => (hf''' x).differentiableAt)
-  have hargc : Continuous fun p : ℝ × ℝ => X₀ + b * S.cut n p.1 + σ * p.2 :=
+  have hf'c : Continuous f' := Differentiable.continuous (fun x ↦ (hf'' x).differentiableAt)
+  have hf''c : Continuous f'' := Differentiable.continuous (fun x ↦ (hf''' x).differentiableAt)
+  have hargc : Continuous fun p : ℝ × ℝ ↦ X₀ + b * S.cut n p.1 + σ * p.2 :=
     (continuous_const.add (continuous_const.mul ((S.continuous_cut n).comp continuous_fst))).add
       (continuous_const.mul continuous_snd)
   -- the clean `x`-exponent derivative (constant inner offset `c`, slope `σ`)
-  have hInx : ∀ c y : ℝ, HasDerivAt (fun u => c + σ * u) σ y :=
-    fun c y => by simpa using ((hasDerivAt_id y).const_mul σ).const_add c
+  have hInx : ∀ c y : ℝ, HasDerivAt (fun u ↦ c + σ * u) σ y :=
+    fun c y ↦ by simpa using ((hasDerivAt_id y).const_mul σ).const_add c
   obtain ⟨gfx, hgfx⟩ := ito_formula_td_localized hB hBmeas hBcont T
-    (f := fun t x => f (X₀ + b * S.cut n t + σ * x))
-    (f_t := fun t x => b * S.cutD1 n t * f' (X₀ + b * S.cut n t + σ * x))
-    (f_x := fun t x => σ * f' (X₀ + b * S.cut n t + σ * x))
-    (f_xx := fun t x => σ ^ 2 * f'' (X₀ + b * S.cut n t + σ * x))
-    (f_tt := fun t x => b * S.cutD2 n t * f' (X₀ + b * S.cut n t + σ * x)
+    (f := fun t x ↦ f (X₀ + b * S.cut n t + σ * x))
+    (f_t := fun t x ↦ b * S.cutD1 n t * f' (X₀ + b * S.cut n t + σ * x))
+    (f_x := fun t x ↦ σ * f' (X₀ + b * S.cut n t + σ * x))
+    (f_xx := fun t x ↦ σ ^ 2 * f'' (X₀ + b * S.cut n t + σ * x))
+    (f_tt := fun t x ↦ b * S.cutD2 n t * f' (X₀ + b * S.cut n t + σ * x)
       + b ^ 2 * S.cutD1 n t ^ 2 * f'' (X₀ + b * S.cut n t + σ * x))
-    (f_tx := fun t x => b * σ * S.cutD1 n t * f'' (X₀ + b * S.cut n t + σ * x))
-    (f_xxx := fun t x => σ ^ 3 * f''' (X₀ + b * S.cut n t + σ * x))
-    (fun t x => by
+    (f_tx := fun t x ↦ b * σ * S.cutD1 n t * f'' (X₀ + b * S.cut n t + σ * x))
+    (f_xxx := fun t x ↦ σ ^ 3 * f''' (X₀ + b * S.cut n t + σ * x))
+    (fun t x ↦ by
       rw [show b * S.cutD1 n t * f' (X₀ + b * S.cut n t + σ * x)
             = f' (X₀ + b * S.cut n t + σ * x) * (b * S.cutD1 n t) by ring]
       exact (hf' (X₀ + b * S.cut n t + σ * x)).comp t
         (((S.cut_hasDerivAt n t).const_mul b).const_add X₀ |>.add_const (σ * x)))
-    (fun t x => by
+    (fun t x ↦ by
       rw [show b * S.cutD2 n t * f' (X₀ + b * S.cut n t + σ * x)
               + b ^ 2 * S.cutD1 n t ^ 2 * f'' (X₀ + b * S.cut n t + σ * x)
             = b * S.cutD2 n t * f' (X₀ + b * S.cut n t + σ * x)
@@ -171,21 +171,21 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
       exact ((S.cutD1_hasDerivAt n t).const_mul b).mul
         ((hf'' (X₀ + b * S.cut n t + σ * x)).comp t
           (((S.cut_hasDerivAt n t).const_mul b).const_add X₀ |>.add_const (σ * x))))
-    (fun t x => by
+    (fun t x ↦ by
       rw [show b * σ * S.cutD1 n t * f'' (X₀ + b * S.cut n t + σ * x)
             = b * S.cutD1 n t * (f'' (X₀ + b * S.cut n t + σ * x) * σ) by ring]
       exact (((hf'' (X₀ + b * S.cut n t + σ * x)).comp x
         (hInx (X₀ + b * S.cut n t) x)).const_mul (b * S.cutD1 n t)))
-    (fun t x => by
+    (fun t x ↦ by
       rw [show σ * f' (X₀ + b * S.cut n t + σ * x)
             = f' (X₀ + b * S.cut n t + σ * x) * σ by ring]
       exact (hf' (X₀ + b * S.cut n t + σ * x)).comp x (hInx (X₀ + b * S.cut n t) x))
-    (fun t x => by
+    (fun t x ↦ by
       rw [show σ ^ 2 * f'' (X₀ + b * S.cut n t + σ * x)
             = σ * (f'' (X₀ + b * S.cut n t + σ * x) * σ) by ring]
       exact ((hf'' (X₀ + b * S.cut n t + σ * x)).comp x
         (hInx (X₀ + b * S.cut n t) x)).const_mul σ)
-    (fun t x => by
+    (fun t x ↦ by
       rw [show σ ^ 3 * f''' (X₀ + b * S.cut n t + σ * x)
             = σ ^ 2 * (f''' (X₀ + b * S.cut n t + σ * x) * σ) by ring]
       exact ((hf''' (X₀ + b * S.cut n t + σ * x)).comp x
@@ -194,10 +194,10 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
     (continuous_const.mul (hf'c.comp hargc))
     (continuous_const.mul (hf''c.comp hargc))
     (lam := lam') (C := Cg) hlam'0
-    (fun t x => hbound (fun t => b * S.cutD1 n t) f' hcoef_t hg' t x)
-    (fun t x => hbound (fun _ => σ) f' hcoef_x hg' t x)
-    (fun t x => hbound (fun _ => σ ^ 2) f'' hcoef_xx hg'' t x)
-    (fun t x => by
+    (fun t x ↦ hbound (fun t ↦ b * S.cutD1 n t) f' hcoef_t hg' t x)
+    (fun t x ↦ hbound (fun _ ↦ σ) f' hcoef_x hg' t x)
+    (fun t x ↦ hbound (fun _ ↦ σ ^ 2) f'' hcoef_xx hg'' t x)
+    (fun t x ↦ by
       refine (abs_add_le _ _).trans ?_
       rw [hCg]
       have hKe : (0 : ℝ) ≤ K * Real.exp (lam' * |x|) := mul_nonneg hK0 (Real.exp_nonneg _)
@@ -223,15 +223,15 @@ theorem ito_formula_itoProcess (hBmeas : ∀ t, Measurable (B t))
         _ = (|b| * S.M₂ + b ^ 2 * S.M₁ ^ 2) * (K * Real.exp (lam' * |x|)) := by ring
         _ ≤ Csum * (K * Real.exp (lam' * |x|)) := mul_le_mul_of_nonneg_right hsum_le hKe
         _ = Csum * K * Real.exp (lam' * |x|) := by ring)
-    (fun t x => hbound (fun t => b * σ * S.cutD1 n t) f'' hcoef_tx hg'' t x)
-    (fun t x => hbound (fun _ => σ ^ 3) f''' hcoef_xxx hg''' t x)
+    (fun t x ↦ hbound (fun t ↦ b * σ * S.cutD1 n t) f'' hcoef_tx hg'' t x)
+    (fun t x ↦ hbound (fun _ ↦ σ ^ 3) f''' hcoef_xxx hg''' t x)
   -- reduce off `[0, T]`: the cutoff is the identity, with unit slope
   refine ⟨gfx, ?_⟩
   filter_upwards [hgfx] with ω hω
   rw [S.cut_eq_id_of_abs_le (x := (T : ℝ)) (by rw [abs_of_nonneg (NNReal.coe_nonneg T)]; linarith),
       S.cut_eq_id_of_abs_le (x := (0 : ℝ)) (by rw [abs_zero]; positivity)] at hω
   rw [hω, add_right_inj]
-  refine integral_congr_ae ((ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ fun s hs => ?_))
+  refine integral_congr_ae ((ae_restrict_iff' measurableSet_Ioc).mpr (ae_of_all _ fun s hs ↦ ?_))
   have hsn : (s : ℝ) ≤ (n : ℝ) := le_trans (by exact_mod_cast hs.2) hTn
   dsimp only
   rw [S.cut_eq_id_of_abs_le (x := (s : ℝ)) (by rw [abs_of_nonneg (NNReal.coe_nonneg s)]; linarith),

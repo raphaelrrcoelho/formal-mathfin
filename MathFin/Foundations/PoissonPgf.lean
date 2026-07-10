@@ -47,7 +47,7 @@ namespace PoissonPgf
 `∑ₙ e^{−r} rⁿ/n! · xⁿ = e^{r(x−1)}` — absolute convergence included, this
 being the exponential series at `r·x` rescaled by `e^{−r}`. -/
 lemma hasSum_poisson_weights_mul_pow (r : ℝ≥0) (x : ℝ) :
-    HasSum (fun n : ℕ => rexp (-(r : ℝ)) * (r : ℝ) ^ n / n ! * x ^ n)
+    HasSum (fun n : ℕ ↦ rexp (-(r : ℝ)) * (r : ℝ) ^ n / n ! * x ^ n)
       (rexp ((r : ℝ) * (x - 1))) := by
   convert (NormedSpace.expSeries_div_hasSum_exp ((r : ℝ) * x)).mul_left
     (rexp (-(r : ℝ))) using 1 <;>
@@ -68,7 +68,7 @@ lemma tsum_poisson_weights_mul_pow (r : ℝ≥0) (x : ℝ) :
 is finite-dimensional (`integral_poissonMeasure`). -/
 theorem integral_pow_poissonMeasure (r : ℝ≥0) (x : ℝ) :
     ∫ n, x ^ n ∂(poissonMeasure r) = rexp ((r : ℝ) * (x - 1)) := by
-  rw [integral_poissonMeasure r (fun n => x ^ n)]
+  rw [integral_poissonMeasure r (fun n ↦ x ^ n)]
   simp_rw [smul_eq_mul]
   exact tsum_poisson_weights_mul_pow r x
 

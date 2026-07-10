@@ -50,9 +50,9 @@ A direct consequence of positive vega (`hasDerivAt_bsV_sigma` + `bsV_vega_pos`)
 and the mean-value theorem (`strictMonoOn_of_deriv_pos`). -/
 theorem bsV_strictMonoOn_sigma {K r T : ℝ} (hK : 0 < K) (hT : 0 < T)
     {S : ℝ} (hS : 0 < S) :
-    StrictMonoOn (fun σ => bsV K r σ S T) (Set.Ioi 0) := by
+    StrictMonoOn (fun σ ↦ bsV K r σ S T) (Set.Ioi 0) := by
   apply strictMonoOn_of_deriv_pos (convex_Ioi 0)
-  · -- ContinuousOn (fun σ => bsV K r σ S T) (Set.Ioi 0)
+  · -- ContinuousOn (fun σ ↦ bsV K r σ S T) (Set.Ioi 0)
     intro σ hσ
     have hσ_pos : 0 < σ := hσ
     exact ((hasDerivAt_bsV_sigma (r := r) hK hS hσ_pos hT).continuousAt).continuousWithinAt

@@ -77,25 +77,25 @@ lemma integral_gaussianPDFReal_Ioi (a : ℝ) :
       = ∫ x in Set.Ioi a, gaussianPDFReal 0 1 x := by
     rw [gaussianReal_apply_eq_integral _ one_ne_zero]
     exact ENNReal.toReal_ofReal <| setIntegral_nonneg measurableSet_Ioi
-      (fun _ _ => gaussianPDFReal_nonneg _ _ _)
+      (fun _ _ ↦ gaussianPDFReal_nonneg _ _ _)
   rw [← h_meas, gaussianReal_Ioi_toReal, Phi_neg]
 
 /-- Integrability of the shortfall integrand `x ↦ max(μ + σx − c, 0)·ϕ(x)`:
 dominated by `(|μ − c| + |σ|·|x|)·ϕ(x)`, whose pieces are the Gaussian mass and
 the (absolute) first moment. -/
 lemma integrable_shortfall (μ σ c : ℝ) :
-    Integrable (fun x => max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x) volume := by
+    Integrable (fun x ↦ max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x) volume := by
   have h_meas : AEStronglyMeasurable
-      (fun x => max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x) volume :=
+      (fun x ↦ max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x) volume :=
     ((((measurable_const.add (measurable_const.mul measurable_id)).sub
       measurable_const).max measurable_const).mul
       (measurable_gaussianPDFReal 0 1)).aestronglyMeasurable
   have h_dom : Integrable
-      (fun x => |μ - c| * gaussianPDFReal 0 1 x + |σ| * |x * gaussianPDFReal 0 1 x|)
+      (fun x ↦ |μ - c| * gaussianPDFReal 0 1 x + |σ| * |x * gaussianPDFReal 0 1 x|)
       volume :=
     ((integrable_gaussianPDFReal 0 1).const_mul _).add
       (integrable_id_mul_gaussianPDFReal_volume.abs.const_mul _)
-  refine h_dom.mono' h_meas (Filter.Eventually.of_forall fun x => ?_)
+  refine h_dom.mono' h_meas (Filter.Eventually.of_forall fun x ↦ ?_)
   have h_pdf_nn : 0 ≤ gaussianPDFReal 0 1 x := gaussianPDFReal_nonneg 0 1 x
   have h_max_nn : 0 ≤ max (μ + σ * x - c) 0 := le_max_right _ _
   rw [Real.norm_eq_abs, abs_of_nonneg (mul_nonneg h_max_nn h_pdf_nn)]
@@ -120,17 +120,17 @@ into the truncated first moment (`= ϕ(z)`) minus `z` times the tail mass. -/
 lemma integral_max_sub_mul_gaussianPDFReal (z : ℝ) :
     ∫ x, max (x - z) 0 * gaussianPDFReal 0 1 x
       = gaussianPDFReal 0 1 z - z * (1 - Phi z) := by
-  have h_eq : (fun x => max (x - z) 0 * gaussianPDFReal 0 1 x)
-      = Set.indicator (Set.Ioi z) (fun x => (x - z) * gaussianPDFReal 0 1 x) := by
+  have h_eq : (fun x ↦ max (x - z) 0 * gaussianPDFReal 0 1 x)
+      = Set.indicator (Set.Ioi z) (fun x ↦ (x - z) * gaussianPDFReal 0 1 x) := by
     funext x
     by_cases hx : x ∈ Set.Ioi z
     · rw [Set.indicator_of_mem hx, max_eq_left (sub_nonneg.2 (Set.mem_Ioi.1 hx).le)]
-    · have hxz : x ≤ z := not_lt.1 (fun h => hx (Set.mem_Ioi.2 h))
+    · have hxz : x ≤ z := not_lt.1 (fun h ↦ hx (Set.mem_Ioi.2 h))
       rw [Set.indicator_of_notMem hx, max_eq_right (sub_nonpos.2 hxz), zero_mul]
   rw [h_eq, integral_indicator measurableSet_Ioi]
-  have h_int_x : IntegrableOn (fun x => x * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
+  have h_int_x : IntegrableOn (fun x ↦ x * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
     integrable_id_mul_gaussianPDFReal_volume.integrableOn
-  have h_int_pdf : IntegrableOn (fun x => z * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
+  have h_int_pdf : IntegrableOn (fun x ↦ z * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
     ((integrable_gaussianPDFReal 0 1).const_mul z).integrableOn
   calc ∫ x in Set.Ioi z, (x - z) * gaussianPDFReal 0 1 x
       = ∫ x in Set.Ioi z,
@@ -151,8 +151,8 @@ lemma integral_shortfall_gaussian (μ σ c : ℝ) (hσ : 0 < σ) :
     ∫ x, max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x
       = σ * (gaussianPDFReal 0 1 ((c - μ) / σ)
           - (c - μ) / σ * (1 - Phi ((c - μ) / σ))) := by
-  have h_eq : (fun x => max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x)
-      = fun x => σ * (max (x - (c - μ) / σ) 0 * gaussianPDFReal 0 1 x) := by
+  have h_eq : (fun x ↦ max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x)
+      = fun x ↦ σ * (max (x - (c - μ) / σ) 0 * gaussianPDFReal 0 1 x) := by
     funext x
     have h_arg : μ + σ * x - c = σ * (x - (c - μ) / σ) := by field_simp; ring
     have h_scale : max (σ * (x - (c - μ) / σ)) 0 = σ * max (x - (c - μ) / σ) 0 := by
@@ -184,22 +184,22 @@ theorem gaussianCVaR_le_ruObjective (μ σ z α c : ℝ)
     (hzα : Phi z = α) (hα1 : α < 1) :
     gaussianCVaR μ σ z α ≤ ruObjective μ σ α c := by
   have h1α : 0 < 1 - α := sub_pos.2 hα1
-  have h_int_const : IntegrableOn (fun x => (μ - c) * gaussianPDFReal 0 1 x)
+  have h_int_const : IntegrableOn (fun x ↦ (μ - c) * gaussianPDFReal 0 1 x)
       (Set.Ioi z) volume :=
     ((integrable_gaussianPDFReal 0 1).const_mul _).integrableOn
-  have h_int_lin : IntegrableOn (fun x => σ * (x * gaussianPDFReal 0 1 x))
+  have h_int_lin : IntegrableOn (fun x ↦ σ * (x * gaussianPDFReal 0 1 x))
       (Set.Ioi z) volume :=
     (integrable_id_mul_gaussianPDFReal_volume.const_mul _).integrableOn
   have h_tail_int : IntegrableOn
-      (fun x => (μ + σ * x - c) * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
+      (fun x ↦ (μ + σ * x - c) * gaussianPDFReal 0 1 x) (Set.Ioi z) volume :=
     (h_int_const.add h_int_lin).congr_fun
-      (fun x _ => by simp only [Pi.add_apply]; ring) measurableSet_Ioi
+      (fun x _ ↦ by simp only [Pi.add_apply]; ring) measurableSet_Ioi
   -- the certificate, integrated: ∫_{Ioi z} (μ + σx − c)·ϕ ≤ E[(L−c)⁺]
   have h_cert : ∫ x in Set.Ioi z, (μ + σ * x - c) * gaussianPDFReal 0 1 x
       ≤ ∫ x, max (μ + σ * x - c) 0 * gaussianPDFReal 0 1 x := by
     rw [← integral_indicator measurableSet_Ioi]
     refine integral_mono (h_tail_int.integrable_indicator measurableSet_Ioi)
-      (integrable_shortfall μ σ c) (fun x => ?_)
+      (integrable_shortfall μ σ c) (fun x ↦ ?_)
     have h_pdf_nn : 0 ≤ gaussianPDFReal 0 1 x := gaussianPDFReal_nonneg 0 1 x
     by_cases hx : x ∈ Set.Ioi z
     · rw [Set.indicator_of_mem hx]

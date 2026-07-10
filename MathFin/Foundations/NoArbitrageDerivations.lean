@@ -107,7 +107,7 @@ theorem putCall_parity_from_no_arbitrage
       = ∑ i ∈ s, (q i * max (S i - K) 0 - q i * max (K - S i) 0) := by
         rw [Finset.sum_sub_distrib]
     _ = ∑ i ∈ s, q i * (S i - K) := Finset.sum_congr rfl h_pointwise
-    _ = ∑ i ∈ s, (q i * S i - K * q i) := Finset.sum_congr rfl (fun i _ => by ring)
+    _ = ∑ i ∈ s, (q i * S i - K * q i) := Finset.sum_congr rfl (fun i _ ↦ by ring)
     _ = (∑ i ∈ s, q i * S i) - K * (∑ i ∈ s, q i) := by
         rw [Finset.sum_sub_distrib, ← Finset.mul_sum]
     _ = S₀ - K * DF := by rw [h_bond, h_stock]
@@ -133,7 +133,7 @@ theorem forward_price_from_no_arbitrage
   -- Λ(S - F) = Λ(S) - F · Λ(1) = S_0 - F · DF.
   have h_eval : ∑ i ∈ s, q i * (S i - F) = S₀ - F * DF := by
     calc ∑ i ∈ s, q i * (S i - F)
-        = ∑ i ∈ s, (q i * S i - F * q i) := Finset.sum_congr rfl (fun i _ => by ring)
+        = ∑ i ∈ s, (q i * S i - F * q i) := Finset.sum_congr rfl (fun i _ ↦ by ring)
       _ = (∑ i ∈ s, q i * S i) - F * (∑ i ∈ s, q i) := by
           rw [Finset.sum_sub_distrib, ← Finset.mul_sum]
       _ = S₀ - F * DF := by rw [h_bond, h_stock]

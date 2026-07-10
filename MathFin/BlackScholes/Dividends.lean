@@ -53,8 +53,8 @@ theorem bs_dividends_call_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   have h_bs := bs_call_formula h
   -- e^{-rT} = e^{-qT} · e^{-(r-q)T}
   have h_factor :
-      (fun ω => Real.exp (-r * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0)
-      = (fun ω => Real.exp (-(q * T)) *
+      (fun ω ↦ Real.exp (-r * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0)
+      = (fun ω ↦ Real.exp (-(q * T)) *
           (Real.exp (-(r - q) * T) * max (bsTerminal S_0 (r - q) σ T (Z ω) - K) 0)) := by
     funext ω
     rw [← mul_assoc, ← Real.exp_add]

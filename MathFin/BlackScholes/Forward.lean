@@ -66,10 +66,10 @@ theorem expected_terminal_eq_forward
   have hsqrT_pos : 0 < Real.sqrt T := Real.sqrt_pos.mpr hT
   have hν_log_sq : ν_log^2 = σ^2 * T := by rw [ν_log_def, mul_pow, Real.sq_sqrt hT.le]
   have h_algebra : μ_log + ν_log^2 / 2 = r * T := by rw [hν_log_sq]; ring
-  have h_term_meas : Measurable fun z : ℝ => bsTerminal S_0 r σ T z := by
+  have h_term_meas : Measurable fun z : ℝ ↦ bsTerminal S_0 r σ T z := by
     unfold bsTerminal; fun_prop
-  rw [show (fun ω => bsTerminal S_0 r σ T (Z ω))
-        = (fun z => bsTerminal S_0 r σ T z) ∘ Z from rfl,
+  rw [show (fun ω ↦ bsTerminal S_0 r σ T (Z ω))
+        = (fun z ↦ bsTerminal S_0 r σ T z) ∘ Z from rfl,
       hZ.integral_comp h_term_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Rewrite pdf · S_T(z) = S_0 · exp(μ_log) · (exp(ν_log · z) · pdf)
@@ -84,8 +84,8 @@ theorem expected_terminal_eq_forward
             = Real.exp ((r - σ^2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
       exact Real.exp_add _ _
     rw [smul_eq_mul, h_exp]; ring
-  rw [show (fun z => gaussianPDFReal 0 1 z • bsTerminal S_0 r σ T z)
-        = (fun z => S_0 * Real.exp μ_log *
+  rw [show (fun z ↦ gaussianPDFReal 0 1 z • bsTerminal S_0 r σ T z)
+        = (fun z ↦ S_0 * Real.exp μ_log *
             (Real.exp (ν_log * z) * gaussianPDFReal 0 1 z)) from funext h_factor]
   rw [integral_const_mul, integral_exp_mul_gaussianPDFReal_univ]
   rw [show S_0 * Real.exp μ_log * Real.exp (ν_log^2 / 2)

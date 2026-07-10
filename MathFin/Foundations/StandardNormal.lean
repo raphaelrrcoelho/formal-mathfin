@@ -65,7 +65,7 @@ lemma setIntegral_gaussianPDFReal_eq_toReal {s : Set ℝ} (hs : MeasurableSet s)
     ∫ z in s, gaussianPDFReal μ 1 z = (gaussianReal μ 1 s).toReal := by
   rw [gaussianReal_apply_eq_integral μ (one_ne_zero : (1 : ℝ≥0) ≠ 0) s]
   exact (ENNReal.toReal_ofReal (setIntegral_nonneg hs
-    (fun _ _ => gaussianPDFReal_nonneg _ _ _))).symm
+    (fun _ _ ↦ gaussianPDFReal_nonneg _ _ _))).symm
 
 /-- `Φ(x)` as the Lebesgue integral of the standard-normal density over `(-∞, x]`. -/
 lemma Phi_eq_integral (x : ℝ) :
@@ -75,10 +75,10 @@ lemma Phi_eq_integral (x : ℝ) :
 /-- `Φ(-x) = 1 − Φ(x)`. Symmetry of the standard normal around 0. -/
 lemma Phi_neg (x : ℝ) : Phi (-x) = 1 - Phi x := by
   -- Standard normal is symmetric: gaussianReal 0 1 is invariant under negation
-  have hmap : (gaussianReal (0 : ℝ) 1).map (fun y => -y) = gaussianReal 0 1 := by
+  have hmap : (gaussianReal (0 : ℝ) 1).map (fun y ↦ -y) = gaussianReal 0 1 := by
     rw [gaussianReal_map_neg, neg_zero]
   -- Iic(-x) under negation pulls back to Ici x
-  have h_preimage : (fun y : ℝ => -y) ⁻¹' Set.Iic (-x) = Set.Ici x := by
+  have h_preimage : (fun y : ℝ ↦ -y) ⁻¹' Set.Iic (-x) = Set.Ici x := by
     ext y; simp [Set.mem_Ici]
   -- gaussianReal 0 1 (Iic(-x)) = gaussianReal 0 1 (Ici x)
   have h_eq : gaussianReal (0 : ℝ) 1 (Set.Iic (-x)) = gaussianReal 0 1 (Set.Ici x) := by
@@ -173,14 +173,14 @@ lemma integral_exp_mul_gaussianPDFReal_Ioi (a c : ℝ) :
     ∫ z in Set.Ioi a, Real.exp (c * z) * gaussianPDFReal 0 1 z
       = Real.exp (c^2 / 2) * Phi (c - a) := by
   rw [setIntegral_congr_fun measurableSet_Ioi
-        (fun z _ => exp_mul_gaussianPDFReal_zero_one c z), integral_const_mul]
+        (fun z _ ↦ exp_mul_gaussianPDFReal_zero_one c z), integral_const_mul]
   congr 1
   have h_int_eq : ∫ z in Set.Ioi a, gaussianPDFReal c 1 z
       = (gaussianReal c (1 : ℝ≥0) (Set.Ioi a)).toReal :=
     setIntegral_gaussianPDFReal_eq_toReal measurableSet_Ioi c
   have h_shift : gaussianReal c (1 : ℝ≥0) (Set.Ioi a) =
                  gaussianReal 0 1 (Set.Ioi (a - c)) := by
-    have hmap : (gaussianReal (0 : ℝ) 1).map (fun y => y + c) = gaussianReal c 1 := by
+    have hmap : (gaussianReal (0 : ℝ) 1).map (fun y ↦ y + c) = gaussianReal c 1 := by
       rw [gaussianReal_map_add_const, zero_add]
     rw [← hmap, Measure.map_apply (by fun_prop) measurableSet_Ioi]
     congr 1; ext y; simp [Set.mem_Ioi, sub_lt_iff_lt_add, add_comm]
@@ -200,8 +200,8 @@ integrals consume directly, and the completing-the-square shift it factors throu
 load-bearing primitives with no Mathlib analogue. -/
 lemma integral_exp_mul_gaussianPDFReal_univ (c : ℝ) :
     ∫ z, Real.exp (c * z) * gaussianPDFReal 0 1 z = Real.exp (c^2 / 2) := by
-  rw [show (fun z => Real.exp (c * z) * gaussianPDFReal 0 1 z)
-        = (fun z => Real.exp (c^2 / 2) * gaussianPDFReal c 1 z) from
+  rw [show (fun z ↦ Real.exp (c * z) * gaussianPDFReal 0 1 z)
+        = (fun z ↦ Real.exp (c^2 / 2) * gaussianPDFReal c 1 z) from
       funext (exp_mul_gaussianPDFReal_zero_one c),
       integral_const_mul,
       integral_gaussianPDFReal_eq_one c (one_ne_zero : (1 : ℝ≥0) ≠ 0), mul_one]

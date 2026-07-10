@@ -63,7 +63,7 @@ difference between `2 · ∑ B_{kT/n} · ΔB_k` and `B_T² − B_0² − T` tend
 zero. The proof is one algebraic step from the pathwise discrete identity
 (`discrete_squaring_identity`) plus `tendsto_qv` (the L² QV of BM). -/
 theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
-    Tendsto (fun n : ℕ =>
+    Tendsto (fun n : ℕ ↦
         ∫ ω, (2 * (∑ k ∈ Finset.range n,
                       B (unifPart T n k) ω *
                         (B (unifPart T n (k + 1)) ω
@@ -84,7 +84,7 @@ theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
     have hn0 : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
     have hsn : unifPart T n n = T := by simp only [unifPart, div_self hn0, one_mul]
     have hs0 : unifPart T n 0 = 0 := by simp [unifPart]
-    have h := discrete_squaring_identity n (fun k => B (unifPart T n k) ω)
+    have h := discrete_squaring_identity n (fun k ↦ B (unifPart T n k) ω)
     rw [hsn, hs0] at h
     linarith
   -- Replace the integrand and use `tendsto_qv` (filter out the trivial n=0 case).
@@ -101,7 +101,7 @@ theorem itoSquared_L2_tendsto (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
 "the Itô integral of `s ↦ B_s` against `dB_s` equals `½(B_T² − B_0² − T)`",
 extracted from the `factor-of-2` form `itoSquared_L2_tendsto`. -/
 theorem itoSquared_L2_tendsto_div2 (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
-    Tendsto (fun n : ℕ =>
+    Tendsto (fun n : ℕ ↦
         ∫ ω, ((∑ k ∈ Finset.range n,
                   B (unifPart T n k) ω *
                     (B (unifPart T n (k + 1)) ω

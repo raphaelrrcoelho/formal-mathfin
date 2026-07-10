@@ -39,7 +39,7 @@ through the put strike-derivative `∂_K bsP = e^{-rτ} · Φ(−d₂)` from
 `BlackScholes.StrikeGreeks`. -/
 lemma hasDerivAt_bsP_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
     {K τ : ℝ} (hK : 0 < K) (hτ : 0 < τ) :
-    HasDerivAt (fun k => Real.exp (-(r * τ)) * Phi (-bsd2 S k r σ τ))
+    HasDerivAt (fun k ↦ Real.exp (-(r * τ)) * Phi (-bsd2 S k r σ τ))
       (Real.exp (-(r * τ)) *
         gaussianPDFReal 0 1 (bsd2 S K r σ τ) /
         (K * σ * Real.sqrt τ)) K := by
@@ -54,8 +54,8 @@ lemma hasDerivAt_bsP_KK {S r σ : ℝ} (hS : 0 < S) (hσ : 0 < σ)
   have hσ_ne : σ ≠ 0 := hσ.ne'
   have hK_ne : K ≠ 0 := hK.ne'
   have h1 := h.congr_of_eventuallyEq
-    (f₁ := fun k => Real.exp (-(r * τ)) * Phi (-bsd2 S k r σ τ))
-    (Filter.Eventually.of_forall fun x => by simp only [Function.comp_def, Pi.neg_apply])
+    (f₁ := fun k ↦ Real.exp (-(r * τ)) * Phi (-bsd2 S k r σ τ))
+    (Filter.Eventually.of_forall fun x ↦ by simp only [Function.comp_def, Pi.neg_apply])
   refine h1.congr_deriv ?_
   rw [h_pdf_sym]
   field_simp

@@ -99,15 +99,15 @@ theorem expected_bsLogPrice_sq_increment
     intro ω
     rw [h_inc]; ring
   -- Integrate term by term using public BQV helpers
-  rw [show (fun ω => (bsLogPrice S_0 r σ B t ω - bsLogPrice S_0 r σ B s ω) ^ 2) =
-      (fun ω => a ^ 2 + 2 * a * σ * (B t ω - B s ω) +
+  rw [show (fun ω ↦ (bsLogPrice S_0 r σ B t ω - bsLogPrice S_0 r σ B s ω) ^ 2) =
+      (fun ω ↦ a ^ 2 + 2 * a * σ * (B t ω - B s ω) +
                 σ ^ 2 * (B t ω - B s ω) ^ 2) from funext h_sq]
-  have h_int_const : Integrable (fun _ : Ω => a ^ 2) μ := integrable_const _
+  have h_int_const : Integrable (fun _ : Ω ↦ a ^ 2) μ := integrable_const _
   have h_int_lin : Integrable
-      (fun ω => 2 * a * σ * (B t ω - B s ω)) μ :=
+      (fun ω ↦ 2 * a * σ * (B t ω - B s ω)) μ :=
     (hB.integrable_increment hs hst).const_mul (2 * a * σ)
   have h_int_sq : Integrable
-      (fun ω => σ ^ 2 * (B t ω - B s ω) ^ 2) μ :=
+      (fun ω ↦ σ ^ 2 * (B t ω - B s ω) ^ 2) μ :=
     (hB.integrable_sq_increment hs hst).const_mul (σ ^ 2)
   -- Split the three-term integral via two `integral_add` extractions (avoids
   -- the syntactic-vs-definitional mismatch between `Integrable.add` Pi-form

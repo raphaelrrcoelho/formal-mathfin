@@ -53,14 +53,14 @@ lemma bsP_eq_bsV (K r σ S τ : ℝ) :
 /-- **Put delta**: `∂_S P = Φ(d₁) − 1`. -/
 lemma hasDerivAt_bsP_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsP K r σ s τ) (Phi (bsd1 S K r σ τ) - 1) S := by
-  have h_eq : (fun s : ℝ => bsP K r σ s τ)
-            = fun s => bsV K r σ s τ - s + K * Real.exp (-(r * τ)) := by
+    HasDerivAt (fun s ↦ bsP K r σ s τ) (Phi (bsd1 S K r σ τ) - 1) S := by
+  have h_eq : (fun s : ℝ ↦ bsP K r σ s τ)
+            = fun s ↦ bsV K r σ s τ - s + K * Real.exp (-(r * τ)) := by
     funext s; exact bsP_eq_bsV K r σ s τ
   rw [h_eq]
   have h_V := hasDerivAt_bsV_S (r := r) hK hσ hS hτ
-  have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
-  have h_const : HasDerivAt (fun _ : ℝ => K * Real.exp (-(r * τ))) 0 S := hasDerivAt_const _ _
+  have h_id : HasDerivAt (fun s : ℝ ↦ s) 1 S := hasDerivAt_id S
+  have h_const : HasDerivAt (fun _ : ℝ ↦ K * Real.exp (-(r * τ))) 0 S := hasDerivAt_const _ _
   have h := (h_V.sub h_id).add h_const
   convert h using 1 <;> try rfl
   ring
@@ -69,10 +69,10 @@ lemma hasDerivAt_bsP_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 (differs from put by a linear term in `S`, which vanishes on second differentiation). -/
 lemma hasDerivAt_bsP_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => Phi (bsd1 s K r σ τ) - 1)
+    HasDerivAt (fun s ↦ Phi (bsd1 s K r σ τ) - 1)
       (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S := by
   have h := hasDerivAt_bsV_SS (r := r) hK hσ hS hτ
-  have h_const : HasDerivAt (fun _ : ℝ => (1 : ℝ)) 0 S := hasDerivAt_const _ _
+  have h_const : HasDerivAt (fun _ : ℝ ↦ (1 : ℝ)) 0 S := hasDerivAt_const _ _
   have h' := h.sub h_const
   convert h' using 1 <;> try rfl
   ring
@@ -83,21 +83,21 @@ Via parity: `∂_τ P = ∂_τ V + ∂_τ (K e^{-rτ}) = (call theta) − r K e^
 The `Φ(d₂) → Φ(-d₂)` rearrangement uses `Φ(d₂) + Φ(-d₂) = 1`. -/
 lemma hasDerivAt_bsP_tau {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun t => bsP K r σ S t)
+    HasDerivAt (fun t ↦ bsP K r σ S t)
       (σ * S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (2 * Real.sqrt τ)
         - r * K * Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ)) τ := by
-  have h_eq : (fun t : ℝ => bsP K r σ S t)
-            = fun t => bsV K r σ S t - S + K * Real.exp (-(r * t)) := by
+  have h_eq : (fun t : ℝ ↦ bsP K r σ S t)
+            = fun t ↦ bsV K r σ S t - S + K * Real.exp (-(r * t)) := by
     funext t; exact bsP_eq_bsV K r σ S t
   rw [h_eq]
   have h_V := hasDerivAt_bsV_tau (r := r) hK hσ hS hτ
-  have h_const_S : HasDerivAt (fun _ : ℝ => S) 0 τ := hasDerivAt_const _ _
-  have h_neg_r : HasDerivAt (fun t : ℝ => -(r * t)) (-r) τ := by
+  have h_const_S : HasDerivAt (fun _ : ℝ ↦ S) 0 τ := hasDerivAt_const _ _
+  have h_neg_r : HasDerivAt (fun t : ℝ ↦ -(r * t)) (-r) τ := by
     have h := (hasDerivAt_id τ).const_mul r
     convert h.neg using 1 <;> first | rfl | ring
-  have h_exp : HasDerivAt (fun t : ℝ => Real.exp (-(r * t)))
+  have h_exp : HasDerivAt (fun t : ℝ ↦ Real.exp (-(r * t)))
       (Real.exp (-(r * τ)) * -r) τ := h_neg_r.exp
-  have h_K_exp : HasDerivAt (fun t : ℝ => K * Real.exp (-(r * t)))
+  have h_K_exp : HasDerivAt (fun t : ℝ ↦ K * Real.exp (-(r * t)))
       (K * (Real.exp (-(r * τ)) * -r)) τ := h_exp.const_mul K
   have h := (h_V.sub h_const_S).add h_K_exp
   convert h using 1
@@ -109,15 +109,15 @@ lemma hasDerivAt_bsP_tau {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 correction is `σ`-independent). -/
 lemma hasDerivAt_bsP_sigma {K r : ℝ} (hK : 0 < K)
     {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsP K r s S τ)
+    HasDerivAt (fun s ↦ bsP K r s S τ)
       (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ) σ := by
-  have h_eq : (fun s : ℝ => bsP K r s S τ)
-            = fun s => bsV K r s S τ - S + K * Real.exp (-(r * τ)) := by
+  have h_eq : (fun s : ℝ ↦ bsP K r s S τ)
+            = fun s ↦ bsV K r s S τ - S + K * Real.exp (-(r * τ)) := by
     funext s; exact bsP_eq_bsV K r s S τ
   rw [h_eq]
   have h_V := hasDerivAt_bsV_sigma (r := r) hK hS hσ hτ
-  have h_const_S : HasDerivAt (fun _ : ℝ => S) 0 σ := hasDerivAt_const _ _
-  have h_const_disc : HasDerivAt (fun _ : ℝ => K * Real.exp (-(r * τ))) 0 σ := hasDerivAt_const _ _
+  have h_const_S : HasDerivAt (fun _ : ℝ ↦ S) 0 σ := hasDerivAt_const _ _
+  have h_const_disc : HasDerivAt (fun _ : ℝ ↦ K * Real.exp (-(r * τ))) 0 σ := hasDerivAt_const _ _
   have h := (h_V.sub h_const_S).add h_const_disc
   convert h using 1 <;> try rfl
   ring
@@ -128,20 +128,20 @@ Via parity: `∂_r P = ∂_r V + ∂_r (K e^{-rτ}) = K τ e^{-rτ} Φ(d₂) −
 and `Φ(d₂) − 1 = -Φ(-d₂)`. -/
 lemma hasDerivAt_bsP_r {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) (r : ℝ) :
-    HasDerivAt (fun r' => bsP K r' σ S τ)
+    HasDerivAt (fun r' ↦ bsP K r' σ S τ)
       (-(K * τ * Real.exp (-(r * τ)) * Phi (-bsd2 S K r σ τ))) r := by
-  have h_eq : (fun r' : ℝ => bsP K r' σ S τ)
-            = fun r' => bsV K r' σ S τ - S + K * Real.exp (-(r' * τ)) := by
+  have h_eq : (fun r' : ℝ ↦ bsP K r' σ S τ)
+            = fun r' ↦ bsV K r' σ S τ - S + K * Real.exp (-(r' * τ)) := by
     funext r'; exact bsP_eq_bsV K r' σ S τ
   rw [h_eq]
   have h_V := hasDerivAt_bsV_r hK hσ hτ hS r
-  have h_const_S : HasDerivAt (fun _ : ℝ => S) 0 r := hasDerivAt_const _ _
-  have h_neg : HasDerivAt (fun r' : ℝ => -(r' * τ)) (-τ) r := by
+  have h_const_S : HasDerivAt (fun _ : ℝ ↦ S) 0 r := hasDerivAt_const _ _
+  have h_neg : HasDerivAt (fun r' : ℝ ↦ -(r' * τ)) (-τ) r := by
     have h := (hasDerivAt_id r).mul_const τ
     convert h.neg using 1 <;> first | rfl | ring
-  have h_exp : HasDerivAt (fun r' : ℝ => Real.exp (-(r' * τ)))
+  have h_exp : HasDerivAt (fun r' : ℝ ↦ Real.exp (-(r' * τ)))
       (Real.exp (-(r * τ)) * -τ) r := h_neg.exp
-  have h_K_exp : HasDerivAt (fun r' : ℝ => K * Real.exp (-(r' * τ)))
+  have h_K_exp : HasDerivAt (fun r' : ℝ ↦ K * Real.exp (-(r' * τ)))
       (K * (Real.exp (-(r * τ)) * -τ)) r := h_exp.const_mul K
   have h := (h_V.sub h_const_S).add h_K_exp
   convert h using 1

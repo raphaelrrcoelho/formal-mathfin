@@ -56,10 +56,10 @@ merge, to a constant multiple of `x^(a−1)` supported on `(0, z]`. -/
 private lemma pdf_mul_eq (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
     gammaPDF a r x * exponentialPDF r (z - x)
       = ENNReal.ofReal ((Set.Ioc 0 z).indicator
-          (fun t => r ^ (a + 1) / Gamma a * Real.exp (-(r * z)) * t ^ (a - 1)) x) := by
+          (fun t ↦ r ^ (a + 1) / Gamma a * Real.exp (-(r * z)) * t ^ (a - 1)) x) := by
   rcases lt_or_gt_of_ne hx with hx_neg | hx_pos
   · rw [gammaPDF_of_neg hx_neg,
-      Set.indicator_of_notMem (fun h => absurd h.1 (not_lt.mpr hx_neg.le)),
+      Set.indicator_of_notMem (fun h ↦ absurd h.1 (not_lt.mpr hx_neg.le)),
       ENNReal.ofReal_zero, zero_mul]
   · by_cases hxz : x ≤ z
     · have hzx : (0 : ℝ) ≤ z - x := by linarith
@@ -77,7 +77,7 @@ private lemma pdf_mul_eq (ha : 0 < a) (hr : 0 < r) {z x : ℝ} (hx : x ≠ 0) :
         _ = r ^ (a + 1) / Gamma a * Real.exp (-(r * z)) * x ^ (a - 1) := by
             rw [hexp, Real.rpow_add_one hr.ne']; ring
     · rw [exponentialPDF_of_neg (by linarith), mul_zero,
-        Set.indicator_of_notMem (fun h => absurd h.2 hxz), ENNReal.ofReal_zero]
+        Set.indicator_of_notMem (fun h ↦ absurd h.2 hxz), ENNReal.ofReal_zero]
 
 /-- The elementary Beta-degenerate integral: `∫_{(0,z]} x^(a−1) dx = z^a / a`. -/
 private lemma setIntegral_rpow_Ioc (ha : 0 < a) {z : ℝ} (hz : 0 ≤ z) :
@@ -94,8 +94,8 @@ private lemma lintegral_gammaPDF_mul_exponentialPDF
     ∫⁻ x, gammaPDF a r x * exponentialPDF r (z - x) = gammaPDF (a + 1) r z := by
   rcases lt_or_ge z 0 with hz | hz
   · -- `z < 0`: integrand vanishes identically, and so does the target density
-    rw [gammaPDF_of_neg hz, show (fun x => gammaPDF a r x * exponentialPDF r (z - x))
-        = fun _ => 0 from funext fun x => ?_, lintegral_zero]
+    rw [gammaPDF_of_neg hz, show (fun x ↦ gammaPDF a r x * exponentialPDF r (z - x))
+        = fun _ ↦ 0 from funext fun x ↦ ?_, lintegral_zero]
     rcases lt_or_ge x 0 with hx | hx
     · rw [gammaPDF_of_neg hx, zero_mul]
     · rw [exponentialPDF_of_neg (by linarith), mul_zero]
@@ -104,18 +104,18 @@ private lemma lintegral_gammaPDF_mul_exponentialPDF
       refine ae_iff.mpr ?_
       simp
     set c : ℝ := r ^ (a + 1) / Gamma a * Real.exp (-(r * z)) with hc_def
-    have h_int : IntegrableOn (fun x : ℝ => c * x ^ (a - 1)) (Set.Ioc 0 z) volume := by
+    have h_int : IntegrableOn (fun x : ℝ ↦ c * x ^ (a - 1)) (Set.Ioc 0 z) volume := by
       refine Integrable.const_mul ?_ c
       exact (intervalIntegral.intervalIntegrable_rpow' (by linarith)).1
     calc ∫⁻ x, gammaPDF a r x * exponentialPDF r (z - x)
         = ∫⁻ x, ENNReal.ofReal
-            ((Set.Ioc 0 z).indicator (fun t => c * t ^ (a - 1)) x) := by
+            ((Set.Ioc 0 z).indicator (fun t ↦ c * t ^ (a - 1)) x) := by
           refine lintegral_congr_ae ?_
           filter_upwards [h0] with x hx
           exact pdf_mul_eq ha hr hx
       _ = ∫⁻ x, (Set.Ioc 0 z).indicator
-            (fun t => ENNReal.ofReal (c * t ^ (a - 1))) x := by
-          refine lintegral_congr fun x => ?_
+            (fun t ↦ ENNReal.ofReal (c * t ^ (a - 1))) x := by
+          refine lintegral_congr fun x ↦ ?_
           by_cases hx : x ∈ Set.Ioc 0 z
           · rw [Set.indicator_of_mem hx, Set.indicator_of_mem hx]
           · rw [Set.indicator_of_notMem hx, Set.indicator_of_notMem hx,
@@ -125,7 +125,7 @@ private lemma lintegral_gammaPDF_mul_exponentialPDF
       _ = ENNReal.ofReal (∫ x in Set.Ioc 0 z, c * x ^ (a - 1)) := by
           rw [← ofReal_integral_eq_lintegral_ofReal h_int]
           refine Filter.Eventually.mono (ae_restrict_mem measurableSet_Ioc)
-            fun x hx => ?_
+            fun x hx ↦ ?_
           have : (0 : ℝ) ≤ x ^ (a - 1) := Real.rpow_nonneg hx.1.le _
           positivity
       _ = ENNReal.ofReal (c * (z ^ a / a)) := by
@@ -162,48 +162,48 @@ theorem gammaMeasure_conv_expMeasure (ha : 0 < a) (hr : 0 < r) :
         = ∫⁻ w, exponentialPDF r (w - x) * s.indicator 1 w := by
     intro x
     rw [lintegral_withDensity_eq_lintegral_mul _ he
-      (show Measurable fun y : ℝ => s.indicator 1 (x + y) from
+      (show Measurable fun y : ℝ ↦ s.indicator 1 (x + y) from
         h_ind.comp (measurable_const_add x))]
     rw [← lintegral_add_right_eq_self
-      (fun w => exponentialPDF r (w - x) * s.indicator 1 w) x]
-    refine lintegral_congr fun y => ?_
+      (fun w ↦ exponentialPDF r (w - x) * s.indicator 1 w) x]
+    refine lintegral_congr fun y ↦ ?_
     simp only [Pi.mul_apply]
     rw [add_sub_cancel_right, add_comm x y]
   simp_rw [step_inner]
   -- unfold the outer withDensity
-  have h_inner_meas : Measurable fun x : ℝ =>
+  have h_inner_meas : Measurable fun x : ℝ ↦
       ∫⁻ w, exponentialPDF r (w - x) * s.indicator 1 w := by
-    refine Measurable.lintegral_prod_right' (f := fun p : ℝ × ℝ =>
+    refine Measurable.lintegral_prod_right' (f := fun p : ℝ × ℝ ↦
       exponentialPDF r (p.2 - p.1) * s.indicator 1 p.2) ?_
     exact (he.comp (measurable_snd.sub measurable_fst)).mul (h_ind.comp measurable_snd)
   rw [lintegral_withDensity_eq_lintegral_mul _ hg h_inner_meas]
   -- push the density inside, Tonelli-swap, evaluate via the heart identity
-  have h_uncurry : Measurable fun p : ℝ × ℝ =>
+  have h_uncurry : Measurable fun p : ℝ × ℝ ↦
       gammaPDF a r p.1 * (exponentialPDF r (p.2 - p.1) * s.indicator 1 p.2) :=
     (hg.comp measurable_fst).mul
       ((he.comp (measurable_snd.sub measurable_fst)).mul (h_ind.comp measurable_snd))
-  calc ∫⁻ x, (gammaPDF a r * fun x =>
+  calc ∫⁻ x, (gammaPDF a r * fun x ↦
         ∫⁻ w, exponentialPDF r (w - x) * s.indicator 1 w) x
       = ∫⁻ x, ∫⁻ w, gammaPDF a r x * (exponentialPDF r (w - x) * s.indicator 1 w) := by
-        refine lintegral_congr fun x => ?_
+        refine lintegral_congr fun x ↦ ?_
         simp only [Pi.mul_apply]
-        exact (lintegral_const_mul _ (show Measurable fun w : ℝ =>
+        exact (lintegral_const_mul _ (show Measurable fun w : ℝ ↦
           exponentialPDF r (w - x) * s.indicator 1 w from
             (he.comp (measurable_sub_const x)).mul h_ind)).symm
     _ = ∫⁻ w, ∫⁻ x, gammaPDF a r x * (exponentialPDF r (w - x) * s.indicator 1 w) :=
         lintegral_lintegral_swap h_uncurry.aemeasurable
     _ = ∫⁻ w, gammaPDF (a + 1) r w * s.indicator 1 w := by
-        refine lintegral_congr fun w => ?_
-        rw [show (fun x => gammaPDF a r x * (exponentialPDF r (w - x) * s.indicator 1 w))
-            = fun x => gammaPDF a r x * exponentialPDF r (w - x) * s.indicator 1 w from
-          funext fun x => by ring]
-        rw [lintegral_mul_const _ (show Measurable fun x : ℝ =>
+        refine lintegral_congr fun w ↦ ?_
+        rw [show (fun x ↦ gammaPDF a r x * (exponentialPDF r (w - x) * s.indicator 1 w))
+            = fun x ↦ gammaPDF a r x * exponentialPDF r (w - x) * s.indicator 1 w from
+          funext fun x ↦ by ring]
+        rw [lintegral_mul_const _ (show Measurable fun x : ℝ ↦
             gammaPDF a r x * exponentialPDF r (w - x) from
           hg.mul (he.comp (measurable_const_sub w))),
           lintegral_gammaPDF_mul_exponentialPDF ha hr w]
     _ = ∫⁻ w in s, gammaPDF (a + 1) r w := by
         rw [← lintegral_indicator hs]
-        refine lintegral_congr fun w => ?_
+        refine lintegral_congr fun w ↦ ?_
         by_cases hw : w ∈ s
         · simp [Set.indicator_of_mem hw]
         · simp [Set.indicator_of_notMem hw]
@@ -232,9 +232,9 @@ theorem map_sum_iidExp [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 < r)
     rcases t.eq_empty_or_nonempty with rfl | ht
     · simpa [expMeasure] using hlaw i
     · have hsum_meas : Measurable (∑ j ∈ t, X j) := by
-        rw [show (∑ j ∈ t, X j) = fun a => ∑ j ∈ t, X j a from
-          funext fun a => Finset.sum_apply a t X]
-        exact t.measurable_sum fun j _ => hmeas j
+        rw [show (∑ j ∈ t, X j) = fun a ↦ ∑ j ∈ t, X j a from
+          funext fun a ↦ Finset.sum_apply a t X]
+        exact t.measurable_sum fun j _ ↦ hmeas j
       have hindep' : IndepFun (∑ j ∈ t, X j) (X i) μ :=
         hindep.indepFun_finsetSum_of_notMem hmeas hi
       rw [Finset.sum_cons,
@@ -256,11 +256,11 @@ theorem sum_iidExp_law_gammaMeasure [IsProbabilityMeasure μ] {r : ℝ} (hr : 0 
     {n : ℕ} (hn : n ≠ 0) {X : Fin n → Ω → ℝ} (hmeas : ∀ i, Measurable (X i))
     (hlaw : ∀ i, Measure.map (X i) μ = expMeasure r)
     (hindep : iIndepFun X μ) :
-    Measure.map (fun ω => ∑ i, X i ω) μ = gammaMeasure n r := by
+    Measure.map (fun ω ↦ ∑ i, X i ω) μ = gammaMeasure n r := by
   haveI : Nonempty (Fin n) := ⟨⟨0, Nat.pos_of_ne_zero hn⟩⟩
   have h := map_sum_iidExp hr hmeas hlaw hindep Finset.univ Finset.univ_nonempty
-  rw [show (fun ω => ∑ i, X i ω) = ∑ i, X i from
-    funext fun ω => (Finset.sum_apply ω Finset.univ X).symm]
+  rw [show (fun ω ↦ ∑ i, X i ω) = ∑ i, X i from
+    funext fun ω ↦ (Finset.sum_apply ω Finset.univ X).symm]
   simpa [Finset.card_univ] using h
 
 end ErlangSum

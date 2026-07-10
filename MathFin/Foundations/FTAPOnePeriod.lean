@@ -49,7 +49,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Measure Ω) [IsProbability
 non-loss with a chance of gain — any `θ` whose discounted gain `θ · Y` is `≥ 0`
 a.e. already has `θ · Y = 0` a.e. -/
 def NoArbitrage : Prop :=
-  ∀ θ : ℝ, 0 ≤ᵐ[P] (fun ω => θ * Y ω) → (fun ω => θ * Y ω) =ᵐ[P] 0
+  ∀ θ : ℝ, 0 ≤ᵐ[P] (fun ω ↦ θ * Y ω) → (fun ω ↦ θ * Y ω) =ᵐ[P] 0
 
 /-- **Equivalent martingale measure** (one period): `Q ~ P`, `Y` is `Q`-integrable,
 and `E_Q[Y] = 0`. -/
@@ -67,10 +67,10 @@ Under `Q`, a non-negative discounted gain integrates to `θ · E_Q[Y] = 0`, so i
 theorem noArbitrage_of_isEMM {Q : Measure Ω} (hQ : IsEMM P Y Q) : NoArbitrage P Y := by
   haveI := hQ.prob
   intro θ hpos
-  have hposQ : 0 ≤ᵐ[Q] (fun ω => θ * Y ω) := hQ.absP.ae_le hpos
+  have hposQ : 0 ≤ᵐ[Q] (fun ω ↦ θ * Y ω) := hQ.absP.ae_le hpos
   have hintegral : ∫ ω, θ * Y ω ∂Q = 0 := by
     rw [integral_const_mul, hQ.fair, mul_zero]
-  have hzeroQ : (fun ω => θ * Y ω) =ᵐ[Q] 0 :=
+  have hzeroQ : (fun ω ↦ θ * Y ω) =ᵐ[Q] 0 :=
     (integral_eq_zero_iff_of_nonneg_ae hposQ (hQ.int.const_mul θ)).mp hintegral
   exact hQ.Pabs.ae_eq hzeroQ
 
@@ -107,33 +107,33 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
   set mu : ℝ := a / D with hmudef
   have hlam : 0 < lam := div_pos (neg_pos.mpr hb) hD
   have hmu : 0 < mu := div_pos ha hD
-  set Z : Ω → ℝ := fun ω => if 0 ≤ Y ω then lam else mu with hZdef
-  have hZpos : ∀ ω, 0 < Z ω := fun ω => by simp only [hZdef]; split_ifs <;> assumption
+  set Z : Ω → ℝ := fun ω ↦ if 0 ≤ Y ω then lam else mu with hZdef
+  have hZpos : ∀ ω, 0 < Z ω := fun ω ↦ by simp only [hZdef]; split_ifs <;> assumption
   have hZmeas : Measurable Z := Measurable.ite hs measurable_const measurable_const
-  have hZbound : ∀ ω, ‖Z ω‖ ≤ max lam mu := fun ω => by
+  have hZbound : ∀ ω, ‖Z ω‖ ≤ max lam mu := fun ω ↦ by
     rw [Real.norm_eq_abs, abs_of_pos (hZpos ω)]
     simp only [hZdef]; split_ifs <;> [exact le_max_left _ _; exact le_max_right _ _]
   have hZint : Integrable Z P :=
     ⟨hZmeas.aestronglyMeasurable, HasFiniteIntegral.of_bounded (Filter.Eventually.of_forall hZbound)⟩
-  have hZYint : Integrable (fun ω => Z ω * Y ω) P :=
+  have hZYint : Integrable (fun ω ↦ Z ω * Y ω) P :=
     hYint.bdd_mul hZmeas.aestronglyMeasurable (Filter.Eventually.of_forall hZbound)
   -- `∫ Z·g = λ·∫_s g + μ·∫_sᶜ g`
-  have hsplit : ∀ g : Ω → ℝ, Integrable (fun ω => Z ω * g ω) P →
+  have hsplit : ∀ g : Ω → ℝ, Integrable (fun ω ↦ Z ω * g ω) P →
       ∫ ω, Z ω * g ω ∂P = lam * (∫ ω in s, g ω ∂P) + mu * (∫ ω in sᶜ, g ω ∂P) := by
     intro g hZg
     rw [← integral_add_compl hs hZg]
     congr 1
     · rw [show (∫ ω in s, Z ω * g ω ∂P) = ∫ ω in s, lam * g ω ∂P from
-        setIntegral_congr_fun hs fun ω hω => by
+        setIntegral_congr_fun hs fun ω hω ↦ by
           simp only [hZdef, if_pos (show (0 : ℝ) ≤ Y ω from hω)],
         integral_const_mul]
     · rw [show (∫ ω in sᶜ, Z ω * g ω ∂P) = ∫ ω in sᶜ, mu * g ω ∂P from
-        setIntegral_congr_fun hs.compl fun ω hω => by
+        setIntegral_congr_fun hs.compl fun ω hω ↦ by
           simp only [hZdef, if_neg (show ¬ (0 : ℝ) ≤ Y ω from hω)],
         integral_const_mul]
   -- normalisation `∫ Z = 1`
   have hZsum : ∫ ω, Z ω ∂P = 1 := by
-    have h := hsplit (fun _ => 1) (by simpa using hZint)
+    have h := hsplit (fun _ ↦ 1) (by simpa using hZint)
     simp only [mul_one, setIntegral_const, smul_eq_mul, Measure.real] at h
     rw [h, hlamdef, hmudef]
     field_simp [hD.ne']
@@ -144,21 +144,21 @@ theorem exists_isEMM_of_pos_tails (hY : Measurable Y) (hYint : Integrable Y P)
     field_simp
     ring
   -- the EMM measure
-  set Q : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (Z ω)) with hQdef
-  have hofReal_meas : Measurable (fun ω => ENNReal.ofReal (Z ω)) :=
+  set Q : Measure Ω := P.withDensity (fun ω ↦ ENNReal.ofReal (Z ω)) with hQdef
+  have hofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (Z ω)) :=
     ENNReal.measurable_ofReal.comp hZmeas
   obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hZmeas hZpos hZint hZsum
   rw [← hQdef] at hQprob hQP hPQ
   haveI := hQprob
   have hYintQ : Integrable Y Q := by
     rw [hQdef, integrable_withDensity_iff_integrable_smul' hofReal_meas
-      (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
-    refine hZYint.congr (Filter.Eventually.of_forall fun ω => ?_)
+      (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
+    refine hZYint.congr (Filter.Eventually.of_forall fun ω ↦ ?_)
     simp only [ENNReal.toReal_ofReal (hZpos ω).le, smul_eq_mul]
   have hQfair : ∫ ω, Y ω ∂Q = 0 := by
     rw [hQdef, integral_withDensity_eq_integral_toReal_smul hofReal_meas
-      (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
-    have hfe : (fun ω => (ENNReal.ofReal (Z ω)).toReal • Y ω) = fun ω => Z ω * Y ω := by
+      (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
+    have hfe : (fun ω ↦ (ENNReal.ofReal (Z ω)).toReal • Y ω) = fun ω ↦ Z ω * Y ω := by
       funext ω
       simp only [ENNReal.toReal_ofReal (hZpos ω).le, smul_eq_mul]
     rw [hfe]; exact hZY
@@ -174,10 +174,10 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     (hNA : NoArbitrage P Y) : ∃ Q, IsEMM P Y Q := by
   classical
   -- the two halves of the no-arbitrage dichotomy: a one-signed `Y` is null
-  have hpos_kills : 0 ≤ᵐ[P] Y → Y =ᵐ[P] 0 := fun h => by
+  have hpos_kills : 0 ≤ᵐ[P] Y → Y =ᵐ[P] 0 := fun h ↦ by
     have hk := hNA 1 (by filter_upwards [h] with ω hh; simpa using hh)
     filter_upwards [hk] with ω hh; simpa using hh
-  have hneg_kills : Y ≤ᵐ[P] 0 → Y =ᵐ[P] 0 := fun h => by
+  have hneg_kills : Y ≤ᵐ[P] 0 → Y =ᵐ[P] 0 := fun h ↦ by
     have hk := hNA (-1) (by
       filter_upwards [h] with ω hh
       rw [neg_one_mul]; exact neg_nonneg.mpr (by simpa using hh))
@@ -189,8 +189,8 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
   · -- non-degenerate: both tails are strictly signed
     set s : Set Ω := {ω | 0 ≤ Y ω}
     have hs : MeasurableSet s := measurableSet_le measurable_const hY
-    have hYs : ∀ ω ∈ s, 0 ≤ Y ω := fun ω hω => hω
-    have hYsc : ∀ ω ∈ sᶜ, Y ω ≤ 0 := fun ω hω => le_of_lt (not_le.mp hω)
+    have hYs : ∀ ω ∈ s, 0 ≤ Y ω := fun ω hω ↦ hω
+    have hYsc : ∀ ω ∈ sᶜ, Y ω ≤ 0 := fun ω hω ↦ le_of_lt (not_le.mp hω)
     have ha0 : 0 ≤ ∫ ω in s, Y ω ∂P := setIntegral_nonneg hs hYs
     have hc0 : ∫ ω in sᶜ, Y ω ∂P ≤ 0 := setIntegral_nonpos hs.compl hYsc
     have ha_pos : 0 < ∫ ω in s, Y ω ∂P := by
@@ -210,9 +210,9 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
       · exact h
       · -- `∫_{sᶜ} Y = 0` with `Y ≤ 0` on `sᶜ` ⟹ `Y ≥ᵐ 0` ⟹ (NA, θ=1) `Y =ᵐ 0`
         refine absurd (hpos_kills ?_) hY0
-        have hscz : (fun ω => -Y ω) =ᵐ[P.restrict sᶜ] 0 := by
-          have hnn : 0 ≤ᵐ[P.restrict sᶜ] (fun ω => -Y ω) :=
-            (ae_restrict_iff' hs.compl).mpr (ae_of_all _ fun ω hω => by simpa using hYsc ω hω)
+        have hscz : (fun ω ↦ -Y ω) =ᵐ[P.restrict sᶜ] 0 := by
+          have hnn : 0 ≤ᵐ[P.restrict sᶜ] (fun ω ↦ -Y ω) :=
+            (ae_restrict_iff' hs.compl).mpr (ae_of_all _ fun ω hω ↦ by simpa using hYsc ω hω)
           have hint0 : ∫ ω in sᶜ, -Y ω ∂P = 0 := by rw [integral_neg, h, neg_zero]
           exact (integral_eq_zero_iff_of_nonneg_ae hnn hYint.neg.restrict).mp hint0
         filter_upwards [(ae_restrict_iff' hs.compl).mp hscz] with ω hω
@@ -234,44 +234,44 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
     ∃ Q, IsEMM P Y Q := by
   classical
   -- bounded strictly-positive weight `w = (1 + |Y|)⁻¹ ∈ (0, 1]`
-  set w : Ω → ℝ := fun ω => (1 + |Y ω|)⁻¹ with hwdef
+  set w : Ω → ℝ := fun ω ↦ (1 + |Y ω|)⁻¹ with hwdef
   have hw_meas : Measurable w := (measurable_const.add hY.abs).inv
-  have hden_pos : ∀ ω, (0 : ℝ) < 1 + |Y ω| := fun ω => by positivity
-  have hw_pos : ∀ ω, 0 < w ω := fun ω => by simp only [hwdef]; exact inv_pos.mpr (hden_pos ω)
-  have hw_le_one : ∀ ω, w ω ≤ 1 := fun ω => by
+  have hden_pos : ∀ ω, (0 : ℝ) < 1 + |Y ω| := fun ω ↦ by positivity
+  have hw_pos : ∀ ω, 0 < w ω := fun ω ↦ by simp only [hwdef]; exact inv_pos.mpr (hden_pos ω)
+  have hw_le_one : ∀ ω, w ω ≤ 1 := fun ω ↦ by
     simp only [hwdef]; exact inv_le_one_of_one_le₀ (by linarith [abs_nonneg (Y ω)])
   have hw_int : Integrable w P :=
     ⟨hw_meas.aestronglyMeasurable, HasFiniteIntegral.of_bounded
-      (Filter.Eventually.of_forall fun ω => by
+      (Filter.Eventually.of_forall fun ω ↦ by
         rw [Real.norm_eq_abs, abs_of_pos (hw_pos ω)]; exact hw_le_one ω)⟩
   -- normalising constant `κ = ∫ w ∂P ∈ (0, 1]`
   set κ : ℝ := ∫ ω, w ω ∂P with hκdef
   have hκ_pos : 0 < κ := by
     rw [hκdef, integral_pos_iff_support_of_nonneg_ae
-        (ae_of_all _ fun ω => (hw_pos ω).le) hw_int,
+        (ae_of_all _ fun ω ↦ (hw_pos ω).le) hw_int,
       show Function.support w = Set.univ from
-        Set.eq_univ_of_forall fun ω => (hw_pos ω).ne']
+        Set.eq_univ_of_forall fun ω ↦ (hw_pos ω).ne']
     rw [measure_univ]; exact one_pos
   -- bounded strictly-positive density `d = w / κ`, `∫ d ∂P = 1`
-  set d : Ω → ℝ := fun ω => w ω / κ with hddef
+  set d : Ω → ℝ := fun ω ↦ w ω / κ with hddef
   have hd_meas : Measurable d := hw_meas.div_const κ
-  have hd_pos : ∀ ω, 0 < d ω := fun ω => div_pos (hw_pos ω) hκ_pos
+  have hd_pos : ∀ ω, 0 < d ω := fun ω ↦ div_pos (hw_pos ω) hκ_pos
   have hd_int : Integrable d P := hw_int.div_const κ
   have hd_sum : ∫ ω, d ω ∂P = 1 := by
     simp only [hddef, div_eq_inv_mul]
     rw [integral_const_mul, ← hκdef, inv_mul_cancel₀ hκ_pos.ne']
   -- equivalent probability measure `P̃`
-  set Pt : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (d ω)) with hPtdef
-  have hd_ofReal_meas : Measurable (fun ω => ENNReal.ofReal (d ω)) :=
+  set Pt : Measure Ω := P.withDensity (fun ω ↦ ENNReal.ofReal (d ω)) with hPtdef
+  have hd_ofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (d ω)) :=
     ENNReal.measurable_ofReal.comp hd_meas
   obtain ⟨hPt_prob, hPt_ll_P, hP_ll_Pt⟩ :=
     isEquivProbMeasure_withDensity P hd_meas hd_pos hd_int hd_sum
   rw [← hPtdef] at hPt_prob hPt_ll_P hP_ll_Pt
   haveI := hPt_prob
   -- `Y` is `P̃`-integrable: `|Y · d| ≤ κ⁻¹` is bounded
-  have hdY_int : Integrable (fun ω => d ω * Y ω) P := by
+  have hdY_int : Integrable (fun ω ↦ d ω * Y ω) P := by
     refine ⟨(hd_meas.mul hY).aestronglyMeasurable, HasFiniteIntegral.of_bounded
-      (C := κ⁻¹) (Filter.Eventually.of_forall fun ω => ?_)⟩
+      (C := κ⁻¹) (Filter.Eventually.of_forall fun ω ↦ ?_)⟩
     rw [Real.norm_eq_abs, abs_mul, abs_of_pos (hd_pos ω)]
     have h1 : w ω * |Y ω| ≤ 1 := by
       simp only [hwdef, inv_mul_eq_div, div_le_one (hden_pos ω)]
@@ -281,11 +281,11 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
     exact h1
   have hYintPt : Integrable Y Pt := by
     rw [hPtdef, integrable_withDensity_iff_integrable_smul' hd_ofReal_meas
-      (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
-    refine hdY_int.congr (Filter.Eventually.of_forall fun ω => ?_)
+      (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
+    refine hdY_int.congr (Filter.Eventually.of_forall fun ω ↦ ?_)
     simp only [ENNReal.toReal_ofReal (hd_pos ω).le, smul_eq_mul]
   -- no-arbitrage transfers across the equivalence `P̃ ~ P`
-  have hNAt : NoArbitrage Pt Y := fun θ h =>
+  have hNAt : NoArbitrage Pt Y := fun θ h ↦
     hPt_ll_P.ae_eq (hNA θ (hP_ll_Pt.ae_le h))
   obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_integrable Pt Y hY hYintPt hNAt
   exact ⟨Q, hQ.prob, hQ.absP.trans hPt_ll_P, hP_ll_Pt.trans hQ.Pabs, hQ.int, hQ.fair⟩
@@ -299,7 +299,7 @@ measure-theoretic step beyond the finite-`Ω` Harrison–Pliska result of
 `Foundations/FTAPDiscrete.lean`. -/
 theorem ftap_one_period (hY : Measurable Y) :
     NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
-  ⟨fun hNA => exists_isEMM_of_noArbitrage P Y hY hNA,
-   fun ⟨_, hQ⟩ => noArbitrage_of_isEMM P Y hQ⟩
+  ⟨fun hNA ↦ exists_isEMM_of_noArbitrage P Y hY hNA,
+   fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM P Y hQ⟩
 
 end MathFin.OnePeriod

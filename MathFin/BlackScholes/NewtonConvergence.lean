@@ -97,11 +97,11 @@ theorem newtonStep_quadratic_error
   --   g x − g r = ∫_r^x (f' t − f' x) dt
   have hsub : Set.uIcc r x ⊆ Set.Icc (r - δ) (r + δ) := Set.uIcc_subset_Icc hr hx
   have hg : ∀ t ∈ Set.uIcc r x,
-      HasDerivAt (fun w => f w - f' x * w) (f' t - f' x) t := fun t ht =>
+      HasDerivAt (fun w ↦ f w - f' x * w) (f' t - f' x) t := fun t ht ↦
     (hd t (hsub ht)).sub (by simpa using (hasDerivAt_id t).const_mul (f' x))
-  have hcontI : ContinuousOn (fun t => f' t - f' x) (Set.Icc (r - δ) (r + δ)) := by
+  have hcontI : ContinuousOn (fun t ↦ f' t - f' x) (Set.Icc (r - δ) (r + δ)) := by
     have hlipOn : LipschitzOnWith (Real.toNNReal L) f' (Set.Icc (r - δ) (r + δ)) :=
-      lipschitzOnWith_iff_dist_le_mul.2 fun y hy w hw => by
+      lipschitzOnWith_iff_dist_le_mul.2 fun y hy w hw ↦ by
         rw [Real.dist_eq, Real.dist_eq]
         simpa [Real.coe_toNNReal L hL] using hlip y hy w hw
     exact hlipOn.continuousOn.sub continuousOn_const
@@ -116,7 +116,7 @@ theorem newtonStep_quadratic_error
       rw [hroot]; ring
     rw [h_eq, abs_neg, ← hftc]
     rcases le_total r x with hrx | hxr
-    · have hb : ∀ t ∈ Set.Icc r x, |f' t - f' x| ≤ L * (x - t) := fun t ht => by
+    · have hb : ∀ t ∈ Set.Icc r x, |f' t - f' x| ≤ L * (x - t) := fun t ht ↦ by
         have h := hlip t (hsub (by rw [Set.uIcc_of_le hrx]; exact ht)) x hx
         rwa [abs_sub_comm t x,
           abs_of_nonneg (by linarith [ht.2] : (0:ℝ) ≤ x - t)] at h
@@ -133,20 +133,20 @@ theorem newtonStep_quadratic_error
             -- second FTC: the dominating integrand has explicit primitive
             -- s ↦ L·(x·s − s²/2)
             have hP : ∀ t ∈ Set.uIcc r x,
-                HasDerivAt (fun s => L * (x * s - s ^ 2 / 2)) (L * (x - t)) t := by
+                HasDerivAt (fun s ↦ L * (x * s - s ^ 2 / 2)) (L * (x - t)) t := by
               intro t _
-              have h2 : HasDerivAt (fun s : ℝ => s ^ 2 / 2) t t := by
+              have h2 : HasDerivAt (fun s : ℝ ↦ s ^ 2 / 2) t t := by
                 have h := (hasDerivAt_pow 2 t).div_const 2
                 norm_num at h
                 exact h
-              have h1 : HasDerivAt (fun s : ℝ => x * s) x t := by
+              have h1 : HasDerivAt (fun s : ℝ ↦ x * s) x t := by
                 simpa using (hasDerivAt_id t).const_mul x
               simpa using (h1.sub h2).const_mul L
             rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hP
               ((continuous_const.mul
                 (continuous_const.sub continuous_id)).intervalIntegrable r x)]
             ring
-    · have hb : ∀ t ∈ Set.Icc x r, |f' t - f' x| ≤ L * (t - x) := fun t ht => by
+    · have hb : ∀ t ∈ Set.Icc x r, |f' t - f' x| ≤ L * (t - x) := fun t ht ↦ by
         have h := hlip t
           (Set.uIcc_subset_Icc hx hr (by rw [Set.uIcc_of_le hxr]; exact ht)) x hx
         rwa [abs_of_nonneg (by linarith [ht.1] : (0:ℝ) ≤ t - x)] at h
@@ -164,13 +164,13 @@ theorem newtonStep_quadratic_error
             -- second FTC: the dominating integrand has explicit primitive
             -- s ↦ L·(s²/2 − x·s)
             have hP : ∀ t ∈ Set.uIcc x r,
-                HasDerivAt (fun s => L * (s ^ 2 / 2 - x * s)) (L * (t - x)) t := by
+                HasDerivAt (fun s ↦ L * (s ^ 2 / 2 - x * s)) (L * (t - x)) t := by
               intro t _
-              have h2 : HasDerivAt (fun s : ℝ => s ^ 2 / 2) t t := by
+              have h2 : HasDerivAt (fun s : ℝ ↦ s ^ 2 / 2) t t := by
                 have h := (hasDerivAt_pow 2 t).div_const 2
                 norm_num at h
                 exact h
-              have h1 : HasDerivAt (fun s : ℝ => x * s) x t := by
+              have h1 : HasDerivAt (fun s : ℝ ↦ x * s) x t := by
                 simpa using (hasDerivAt_id t).const_mul x
               simpa using (h2.sub h1).const_mul L
             rw [intervalIntegral.integral_eq_sub_of_hasDerivAt hP
@@ -256,11 +256,11 @@ theorem newtonSeq_tendsto_root
     (hx₀ : |x₀ - r| ≤ δ) (hbasin : L * δ ≤ m) :
     Tendsto (newtonSeq f f' x₀) atTop (𝓝 r) := by
   rw [tendsto_iff_dist_tendsto_zero]
-  have h_geo : Tendsto (fun n : ℕ => (1 / 2 : ℝ) ^ n * |x₀ - r|) atTop (𝓝 0) := by
-    have h_pow : Tendsto (fun n : ℕ => (1 / 2 : ℝ) ^ n) atTop (𝓝 0) :=
+  have h_geo : Tendsto (fun n : ℕ ↦ (1 / 2 : ℝ) ^ n * |x₀ - r|) atTop (𝓝 0) := by
+    have h_pow : Tendsto (fun n : ℕ ↦ (1 / 2 : ℝ) ^ n) atTop (𝓝 0) :=
       tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num)
     simpa using h_pow.mul_const |x₀ - r|
-  refine squeeze_zero (fun n => dist_nonneg) (fun n => ?_) h_geo
+  refine squeeze_zero (fun n ↦ dist_nonneg) (fun n ↦ ?_) h_geo
   rw [Real.dist_eq]
   exact newtonSeq_error_le_geometric hroot hm0 hL hd hlip hm hx₀ hbasin n
 

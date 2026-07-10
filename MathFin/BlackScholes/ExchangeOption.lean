@@ -233,14 +233,14 @@ theorem exchangeOption_numeraire_price
     (Q : Measure Ω) (S1T S2T : Ω → ℝ) (S2_0 : ℝ)
     (hS2meas : Measurable S2T) (hS2pos : ∀ ω, 0 < S2T ω) (hS20 : 0 < S2_0) :
     S2_0 * ∫ ω, max (S1T ω / S2T ω - 1) 0
-        ∂(numeraireMeasure Q (fun _ => 1) S2T 1 S2_0)
+        ∂(numeraireMeasure Q (fun _ ↦ 1) S2T 1 S2_0)
       = ∫ ω, max (S1T ω - S2T ω) 0 ∂Q := by
-  have hL : ∀ ω, max (S1T ω / S2T ω - 1) 0 = max (S1T ω - S2T ω) 0 / S2T ω := fun ω => by
+  have hL : ∀ ω, max (S1T ω / S2T ω - 1) 0 = max (S1T ω - S2T ω) 0 / S2T ω := fun ω ↦ by
     rw [exchange_payoff_eq_ratio (S1T ω) (S2T ω) (hS2pos ω),
         mul_div_cancel_left₀ _ (hS2pos ω).ne']
-  have hkey := changeOfNumeraire (Q := Q) (X := fun ω => max (S1T ω - S2T ω) 0)
-      (BT := fun _ => (1 : ℝ)) (NT := S2T) (B0 := (1 : ℝ)) (N0 := S2_0)
-      hS2meas measurable_const hS2pos (fun _ => one_pos) zero_le_one hS20
+  have hkey := changeOfNumeraire (Q := Q) (X := fun ω ↦ max (S1T ω - S2T ω) 0)
+      (BT := fun _ ↦ (1 : ℝ)) (NT := S2T) (B0 := (1 : ℝ)) (N0 := S2_0)
+      hS2meas measurable_const hS2pos (fun _ ↦ one_pos) zero_le_one hS20
   simp_rw [div_one, one_mul] at hkey
   simp_rw [hL]
   exact hkey

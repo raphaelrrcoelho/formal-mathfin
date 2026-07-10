@@ -76,7 +76,7 @@ recovery direction `μ(t) = −d/dt log S(t)` that the classical definition
 log-derivative form against `S = survivalFromForce μ`. -/
 theorem force_eq_neg_log_deriv_survival {μ : ℝ → ℝ} (t : ℝ)
     (hμ : Continuous μ) :
-    HasDerivAt (fun s => -(Real.log (survivalFromForce μ s))) (μ t) t := by
+    HasDerivAt (fun s ↦ -(Real.log (survivalFromForce μ s))) (μ t) t := by
   have hH : HasDerivAt (forceCumulative μ) (μ t) t :=
     intervalIntegral.integral_hasDerivAt_right
       (hμ.intervalIntegrable 0 t)
@@ -91,18 +91,18 @@ theorem gompertz_cumulative_force (B c t : ℝ) (hc : c ≠ 0) :
     ∫ u in (0:ℝ)..t, B * Real.exp (c * u) =
       (B / c) * (Real.exp (c * t) - 1) := by
   -- Antiderivative: (B/c) e^{c u}. Use FTC for HasDerivAt.
-  have h_anti : ∀ u, HasDerivAt (fun u => (B / c) * Real.exp (c * u))
+  have h_anti : ∀ u, HasDerivAt (fun u ↦ (B / c) * Real.exp (c * u))
                       (B * Real.exp (c * u)) u := by
     intro u
-    have h_cu : HasDerivAt (fun u : ℝ => c * u) c u := by
+    have h_cu : HasDerivAt (fun u : ℝ ↦ c * u) c u := by
       have := (hasDerivAt_id u).const_mul c
       simpa using this
-    have h_exp : HasDerivAt (fun u => Real.exp (c * u))
+    have h_exp : HasDerivAt (fun u ↦ Real.exp (c * u))
                   (Real.exp (c * u) * c) u := h_cu.exp
     have h := h_exp.const_mul (B / c)
     rw [show B * Real.exp (c * u) = B / c * (Real.exp (c * u) * c) from by field_simp]
     exact h
-  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _ => h_anti u)
+  rw [intervalIntegral.integral_eq_sub_of_hasDerivAt (fun u _ ↦ h_anti u)
         (Continuous.intervalIntegrable (by fun_prop) _ _)]
   simp [Real.exp_zero]
   ring

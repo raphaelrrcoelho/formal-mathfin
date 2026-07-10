@@ -46,7 +46,7 @@ noncomputable def bsAssetDigital (K r σ : ℝ) (S τ : ℝ) : ℝ :=
 Direct chain rule on `Φ ∘ d₂(S)`. -/
 lemma hasDerivAt_bsCashDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsCashDigital K r σ s τ)
+    HasDerivAt (fun s ↦ bsCashDigital K r σ s τ)
       (Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) / (S * σ * Real.sqrt τ)) S := by
   have h_d2_S := hasDerivAt_bsd2_S (r := r) hK hσ hτ hS
   have h_Phi_d2 := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp S h_d2_S
@@ -61,7 +61,7 @@ The chain rule gives `Φ(d₁) + S · ϕ(d₁) · ∂_S d₁ = Φ(d₁) + S · �
 = Φ(d₁) + ϕ(d₁) / (σ √τ)`. -/
 lemma hasDerivAt_bsAssetDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsAssetDigital K r σ s τ)
+    HasDerivAt (fun s ↦ bsAssetDigital K r σ s τ)
       (Phi (bsd1 S K r σ τ) + gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (σ * Real.sqrt τ)) S := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
@@ -69,7 +69,7 @@ lemma hasDerivAt_bsAssetDigital_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have hS_ne : S ≠ 0 := hS.ne'
   have h_d1_S := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
-  have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
+  have h_id : HasDerivAt (fun s : ℝ ↦ s) 1 S := hasDerivAt_id S
   have h := h_id.mul h_Phi_d1
   unfold bsAssetDigital
   convert h using 1 <;> try rfl
@@ -84,7 +84,7 @@ Differentiating δ_asset = Φ(d₁) + ϕ(d₁)/(σ√τ): the Φ-term contribute
 lemma hasDerivAt_bsAssetDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt
-      (fun s => Phi (bsd1 s K r σ τ) +
+      (fun s ↦ Phi (bsd1 s K r σ τ) +
         gaussianPDFReal 0 1 (bsd1 s K r σ τ) / (σ * Real.sqrt τ))
       (-(gaussianPDFReal 0 1 (bsd1 S K r σ τ) *
         bsd2 S K r σ τ / (S * σ ^ 2 * τ))) S := by
@@ -113,7 +113,7 @@ Direct chain rule. The Lean form of `∂_τ d₁` is `((r + σ²/2)τ − log(S/
 this equals the textbook clean form `(r + σ²/2)/(σ√τ) − d₁/(2τ)` by algebraic
 identity (left to the consumer). -/
 lemma hasDerivAt_bsAssetDigital_tau (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun t => bsAssetDigital K r σ S t)
+    HasDerivAt (fun t ↦ bsAssetDigital K r σ S t)
       (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) *
         (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ))) τ := by
   have h_d1_τ := hasDerivAt_bsd1_tau S K r σ hσ hτ
@@ -129,17 +129,17 @@ Product rule on `V_cash(τ) = e^{-rτ} · Φ(d₂(τ))`:
 * `∂_τ e^{-rτ} = -r · e^{-rτ}`
 * `∂_τ Φ(d₂(τ)) = ϕ(d₂) · ∂_τ d₂`. -/
 lemma hasDerivAt_bsCashDigital_tau (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun t => bsCashDigital K r σ S t)
+    HasDerivAt (fun t ↦ bsCashDigital K r σ S t)
       (-r * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ) +
         Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) *
           (((r + σ^2/2) * τ - Real.log (S/K)) / (2 * σ * τ * Real.sqrt τ)
             - σ / (2 * Real.sqrt τ))) τ := by
   have h_d2_τ := hasDerivAt_bsd2_tau S K r σ hσ hτ
   have h_Phi := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp τ h_d2_τ
-  have h_neg : HasDerivAt (fun t : ℝ => -(r * t)) (-r) τ := by
+  have h_neg : HasDerivAt (fun t : ℝ ↦ -(r * t)) (-r) τ := by
     have h := (hasDerivAt_id τ).const_mul r
     convert h.neg using 1 <;> first | rfl | ring
-  have h_exp : HasDerivAt (fun t : ℝ => Real.exp (-(r * t)))
+  have h_exp : HasDerivAt (fun t : ℝ ↦ Real.exp (-(r * t)))
       (Real.exp (-(r * τ)) * (-r)) τ := h_neg.exp
   have h := h_exp.mul h_Phi
   unfold bsCashDigital
@@ -152,7 +152,7 @@ lemma hasDerivAt_bsCashDigital_tau (S K r σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (h
 Chain rule on `Φ ∘ d₁`. The Lean form of `∂_σ d₁` is
 `(σ²τ/2 − log(S/K) − rτ)/(σ²√τ)`, which equals `-d₂/σ` via `bsd2_eq`. -/
 lemma hasDerivAt_bsAssetDigital_sigma (S K r : ℝ) {σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (fun σ' => bsAssetDigital K r σ' S τ)
+    HasDerivAt (fun σ' ↦ bsAssetDigital K r σ' S τ)
       (-(S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * bsd2 S K r σ τ / σ)) σ := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
@@ -172,7 +172,7 @@ lemma hasDerivAt_bsAssetDigital_sigma (S K r : ℝ) {σ τ : ℝ} (hσ : 0 < σ)
 Chain rule on `Φ ∘ d₂`. The Lean form of `∂_σ d₂ = ∂_σ d₁ − √τ` equals `-d₁/σ`
 via `bsd2_eq` plus the identity `bsd2 + σ√τ = bsd1`. -/
 lemma hasDerivAt_bsCashDigital_sigma (S K : ℝ) {r σ τ : ℝ} (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (fun σ' => bsCashDigital K r σ' S τ)
+    HasDerivAt (fun σ' ↦ bsCashDigital K r σ' S τ)
       (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) *
         bsd1 S K r σ τ / σ)) σ := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
@@ -194,7 +194,7 @@ lemma hasDerivAt_bsCashDigital_sigma (S K : ℝ) {r σ τ : ℝ} (hσ : 0 < σ) 
 
 Direct chain rule since `∂_r d₁ = √τ/σ` (the difference `d₁ − d₂` is `r`-independent). -/
 lemma hasDerivAt_bsAssetDigital_r (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :
-    HasDerivAt (fun r' => bsAssetDigital K r' σ S τ)
+    HasDerivAt (fun r' ↦ bsAssetDigital K r' σ S τ)
       (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * (Real.sqrt τ / σ)) r := by
   have h_d1_r := hasDerivAt_bsd1_r S K σ τ hσ hτ r
   have h_Phi := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp r h_d1_r
@@ -209,16 +209,16 @@ Product rule on `V_cash(r) = e^{-rτ} · Φ(d₂(r))`:
 * `∂_r e^{-rτ} = -τ · e^{-rτ}`
 * `∂_r Φ(d₂(r)) = ϕ(d₂) · √τ/σ`. -/
 lemma hasDerivAt_bsCashDigital_r (S K σ : ℝ) (hσ : 0 < σ) {τ : ℝ} (hτ : 0 < τ) (r : ℝ) :
-    HasDerivAt (fun r' => bsCashDigital K r' σ S τ)
+    HasDerivAt (fun r' ↦ bsCashDigital K r' σ S τ)
       (Real.exp (-(r * τ)) *
         (gaussianPDFReal 0 1 (bsd2 S K r σ τ) * (Real.sqrt τ / σ)
           - τ * Phi (bsd2 S K r σ τ))) r := by
   have h_d2_r := hasDerivAt_bsd2_r S K σ τ hσ hτ r
   have h_Phi := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp r h_d2_r
-  have h_neg_r : HasDerivAt (fun r' : ℝ => -(r' * τ)) (-τ) r := by
+  have h_neg_r : HasDerivAt (fun r' : ℝ ↦ -(r' * τ)) (-τ) r := by
     have h := (hasDerivAt_id r).mul_const τ
     convert h.neg using 1 <;> first | rfl | ring
-  have h_exp : HasDerivAt (fun r' : ℝ => Real.exp (-(r' * τ)))
+  have h_exp : HasDerivAt (fun r' : ℝ ↦ Real.exp (-(r' * τ)))
       (Real.exp (-(r * τ)) * (-τ)) r := h_neg_r.exp
   have h := h_exp.mul h_Phi
   unfold bsCashDigital
@@ -237,7 +237,7 @@ Differentiating δ_cash(s) = `e^{-rτ} · ϕ(d₂(s)) / (s · σ · √τ)` as a
 lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     HasDerivAt
-      (fun s => Real.exp (-(r * τ)) *
+      (fun s ↦ Real.exp (-(r * τ)) *
         gaussianPDFReal 0 1 (bsd2 s K r σ τ) / (s * σ * Real.sqrt τ))
       (-(Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) *
         bsd1 S K r σ τ / (S ^ 2 * σ ^ 2 * τ))) S := by
@@ -253,8 +253,8 @@ lemma hasDerivAt_bsCashDigital_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   -- Numerator f(s) = e^{-rτ} · ϕ(d₂(s)).
   have h_num := h_pdf.const_mul (Real.exp (-(r * τ)))
   -- Denominator g(s) = s · σ · √τ.
-  have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
-  have h_denom : HasDerivAt (fun s : ℝ => s * σ * Real.sqrt τ) (σ * Real.sqrt τ) S := by
+  have h_id : HasDerivAt (fun s : ℝ ↦ s) 1 S := hasDerivAt_id S
+  have h_denom : HasDerivAt (fun s : ℝ ↦ s * σ * Real.sqrt τ) (σ * Real.sqrt τ) S := by
     have h := (h_id.mul_const σ).mul_const (Real.sqrt τ)
     convert h using 1 <;> first | rfl | ring
   have h_div := h_num.div h_denom h_denom_ne

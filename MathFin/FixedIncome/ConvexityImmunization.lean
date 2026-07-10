@@ -52,11 +52,11 @@ noncomputable def bondPortfolioConv
 `∂_r (Dur_P · P) = −Conv_P · P`. -/
 lemma hasDerivAt_bondPortfolioDur_r
     {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :
-    HasDerivAt (fun r' => bondPortfolioDur s w T t r')
+    HasDerivAt (fun r' ↦ bondPortfolioDur s w T t r')
       (-bondPortfolioConv s w T t r) r := by
   unfold bondPortfolioDur bondPortfolioConv
   have h_each : ∀ i ∈ s, HasDerivAt
-      (fun r' => w i * (T i - t) * Real.exp (-(r' * (T i - t))))
+      (fun r' ↦ w i * (T i - t) * Real.exp (-(r' * (T i - t))))
       (-(w i * (T i - t) ^ 2 * Real.exp (-(r * (T i - t))))) r := by
     intro i _
     -- each summand's rate-derivative is the ZCB duration atom `ZCB.hasDerivAt_zcb_r`
@@ -72,7 +72,7 @@ lemma hasDerivAt_bondPortfolioDur_r
 `∂²P/∂r² = Conv_P · P` (equivalently `∂_r (−Dur_P · P) = Conv_P · P`). -/
 lemma hasDerivAt_neg_bondPortfolioDur_r
     {ι : Type*} (s : Finset ι) (w T : ι → ℝ) (t r : ℝ) :
-    HasDerivAt (fun r' => -bondPortfolioDur s w T t r')
+    HasDerivAt (fun r' ↦ -bondPortfolioDur s w T t r')
       (bondPortfolioConv s w T t r) r := by
   have h := (hasDerivAt_bondPortfolioDur_r s w T t r).neg
   rw [neg_neg] at h
@@ -99,7 +99,7 @@ lemma bondPortfolio_immunization_second_order
     (t r : ℝ)
     (h_match_conv :
       bondPortfolioConv sA wA TA t r = bondPortfolioConv sL wL TL t r) :
-    HasDerivAt (fun r' =>
+    HasDerivAt (fun r' ↦
         -bondPortfolioDur sA wA TA t r' -
         (-bondPortfolioDur sL wL TL t r'))
       0 r := by

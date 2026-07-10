@@ -106,26 +106,26 @@ lemma bs_identity {S K r σ τ : ℝ} (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ) (
 /-- `∂_S d₁(S, K, r, σ, τ) = 1 / (S · σ · √τ)`. -/
 lemma hasDerivAt_bsd1_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) :
-    HasDerivAt (fun s => bsd1 s K r σ τ) (1 / (S * σ * Real.sqrt τ)) S := by
+    HasDerivAt (fun s ↦ bsd1 s K r σ τ) (1 / (S * σ * Real.sqrt τ)) S := by
   have h_sqrt_τ_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_τ_ne : Real.sqrt τ ≠ 0 := h_sqrt_τ_pos.ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'
   have h_sK_pos : 0 < S / K := div_pos hS hK
   -- s ↦ s/K: HasDerivAt _ (1/K) S
-  have h_div : HasDerivAt (fun s : ℝ => s / K) (1 / K) S := by
+  have h_div : HasDerivAt (fun s : ℝ ↦ s / K) (1 / K) S := by
     have := (hasDerivAt_id S).div_const K
     simpa using this
   -- s ↦ log(s/K): HasDerivAt _ (1/S) S (chain rule)
-  have h_log : HasDerivAt (fun s : ℝ => Real.log (s / K)) (1 / S) S := by
+  have h_log : HasDerivAt (fun s : ℝ ↦ Real.log (s / K)) (1 / S) S := by
     have := (Real.hasDerivAt_log h_sK_pos.ne').comp S h_div
     convert this using 1 <;> try rfl
     field_simp
   -- s ↦ log(s/K) + (r + σ²/2)τ: same derivative
-  have h_num : HasDerivAt (fun s : ℝ => Real.log (s / K) + (r + σ ^ 2 / 2) * τ) (1 / S) S := by
+  have h_num : HasDerivAt (fun s : ℝ ↦ Real.log (s / K) + (r + σ ^ 2 / 2) * τ) (1 / S) S := by
     simpa using h_log.add_const ((r + σ ^ 2 / 2) * τ)
   -- s ↦ (log(s/K) + (r + σ²/2)τ) / (σ √τ): derivative is (1/S) / (σ√τ)
   have h_div_στ : HasDerivAt
-      (fun s : ℝ => (Real.log (s / K) + (r + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
+      (fun s : ℝ ↦ (Real.log (s / K) + (r + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
       ((1 / S) / (σ * Real.sqrt τ)) S :=
     h_num.div_const (σ * Real.sqrt τ)
   have h_val_eq : (1 : ℝ) / (S * σ * Real.sqrt τ) = 1 / S / (σ * Real.sqrt τ) := by field_simp
@@ -136,10 +136,10 @@ lemma hasDerivAt_bsd1_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 <
 `S`-independent). -/
 lemma hasDerivAt_bsd2_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) :
-    HasDerivAt (fun s => bsd2 s K r σ τ) (1 / (S * σ * Real.sqrt τ)) S := by
+    HasDerivAt (fun s ↦ bsd2 s K r σ τ) (1 / (S * σ * Real.sqrt τ)) S := by
   have h_diff := (hasDerivAt_bsd1_S (r := r) hK hσ hτ hS).sub_const (σ * Real.sqrt τ)
-  have h_fun_eq : (fun s : ℝ => bsd1 s K r σ τ - σ * Real.sqrt τ)
-        = (fun s : ℝ => bsd2 s K r σ τ) := by
+  have h_fun_eq : (fun s : ℝ ↦ bsd1 s K r σ τ - σ * Real.sqrt τ)
+        = (fun s : ℝ ↦ bsd2 s K r σ τ) := by
     funext s; rw [bsd2]
   rw [← h_fun_eq]
   exact h_diff
@@ -149,7 +149,7 @@ lemma hasDerivAt_bsd2_S {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 <
 /-- `∂_τ d₁(S, K, r, σ, τ) = ((r + σ²/2)τ − log(S/K)) / (2 σ τ √τ)`. -/
 lemma hasDerivAt_bsd1_tau (S K r σ : ℝ) (hσ : 0 < σ)
     {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun t => bsd1 S K r σ t)
+    HasDerivAt (fun t ↦ bsd1 S K r σ t)
       (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ)) τ := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
@@ -159,14 +159,14 @@ lemma hasDerivAt_bsd1_tau (S K r σ : ℝ) (hσ : 0 < σ)
   have h_στ_ne : σ * Real.sqrt τ ≠ 0 := h_στ.ne'
   have h_sqrt_sq : Real.sqrt τ ^ 2 = τ := Real.sq_sqrt hτ.le
   -- Numerator: f(τ) = log(S/K) + (r + σ²/2)τ → f' = r + σ²/2
-  have h_f : HasDerivAt (fun t : ℝ => Real.log (S / K) + (r + σ ^ 2 / 2) * t)
+  have h_f : HasDerivAt (fun t : ℝ ↦ Real.log (S / K) + (r + σ ^ 2 / 2) * t)
       (r + σ ^ 2 / 2) τ := by
-    have h_lin : HasDerivAt (fun t : ℝ => (r + σ ^ 2 / 2) * t) (r + σ ^ 2 / 2) τ := by
+    have h_lin : HasDerivAt (fun t : ℝ ↦ (r + σ ^ 2 / 2) * t) (r + σ ^ 2 / 2) τ := by
       have := (hasDerivAt_id τ).const_mul (r + σ ^ 2 / 2)
       simpa using this
     exact h_lin.const_add (Real.log (S / K))
   -- Denominator: g(τ) = σ √τ → g' = σ/(2√τ)
-  have h_g : HasDerivAt (fun t : ℝ => σ * Real.sqrt t) (σ / (2 * Real.sqrt τ)) τ := by
+  have h_g : HasDerivAt (fun t : ℝ ↦ σ * Real.sqrt t) (σ / (2 * Real.sqrt τ)) τ := by
     have h_sqrt_deriv : HasDerivAt Real.sqrt (1 / (2 * Real.sqrt τ)) τ :=
       Real.hasDerivAt_sqrt hτ.ne'
     have := h_sqrt_deriv.const_mul σ
@@ -174,8 +174,8 @@ lemma hasDerivAt_bsd1_tau (S K r σ : ℝ) (hσ : 0 < σ)
     field_simp
   -- Quotient rule
   have h_quot := h_f.div h_g h_στ_ne
-  have h_fun_eq : (fun t : ℝ => (Real.log (S / K) + (r + σ ^ 2 / 2) * t) / (σ * Real.sqrt t))
-        = (fun t : ℝ => bsd1 S K r σ t) := by
+  have h_fun_eq : (fun t : ℝ ↦ (Real.log (S / K) + (r + σ ^ 2 / 2) * t) / (σ * Real.sqrt t))
+        = (fun t : ℝ ↦ bsd1 S K r σ t) := by
     funext t; rfl
   rw [← h_fun_eq]
   convert h_quot using 1 <;> try rfl
@@ -187,16 +187,16 @@ lemma hasDerivAt_bsd1_tau (S K r σ : ℝ) (hσ : 0 < σ)
 /-- `∂_τ d₂(S, K, r, σ, τ) = ∂_τ d₁ − σ/(2√τ)`. -/
 lemma hasDerivAt_bsd2_tau (S K r σ : ℝ) (hσ : 0 < σ)
     {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun t => bsd2 S K r σ t)
+    HasDerivAt (fun t ↦ bsd2 S K r σ t)
       (((r + σ ^ 2 / 2) * τ - Real.log (S / K)) / (2 * σ * τ * Real.sqrt τ)
         - σ / (2 * Real.sqrt τ)) τ := by
   have h_d1 := hasDerivAt_bsd1_tau S K r σ hσ hτ
   have h_sqrt : HasDerivAt Real.sqrt (1 / (2 * Real.sqrt τ)) τ := Real.hasDerivAt_sqrt hτ.ne'
   have h_const_mul := h_sqrt.const_mul σ
-  -- h_const_mul : HasDerivAt (fun t => σ * sqrt t) (σ * (1/(2√τ))) τ
+  -- h_const_mul : HasDerivAt (fun t ↦ σ * sqrt t) (σ * (1/(2√τ))) τ
   have h_diff := h_d1.sub h_const_mul
-  have h_fun_eq : (fun t : ℝ => bsd1 S K r σ t - σ * Real.sqrt t)
-        = (fun t : ℝ => bsd2 S K r σ t) := by
+  have h_fun_eq : (fun t : ℝ ↦ bsd1 S K r σ t - σ * Real.sqrt t)
+        = (fun t : ℝ ↦ bsd2 S K r σ t) := by
     funext t; rw [bsd2]
   rw [← h_fun_eq]
   convert h_diff using 1 <;> try rfl
@@ -207,7 +207,7 @@ lemma hasDerivAt_bsd2_tau (S K r σ : ℝ) (hσ : 0 < σ)
 /-- `∂_σ d₁(S, K, r, σ, τ) = (σ²τ/2 − log(S/K) − rτ) / (σ²√τ)`. -/
 lemma hasDerivAt_bsd1_sigma (S K r : ℝ) {σ : ℝ} (hσ : 0 < σ)
     {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsd1 S K r s τ)
+    HasDerivAt (fun s ↦ bsd1 S K r s τ)
       ((σ ^ 2 * τ / 2 - Real.log (S / K) - r * τ) / (σ ^ 2 * Real.sqrt τ)) σ := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
@@ -217,22 +217,22 @@ lemma hasDerivAt_bsd1_sigma (S K r : ℝ) {σ : ℝ} (hσ : 0 < σ)
   have h_στ_ne : σ * Real.sqrt τ ≠ 0 := h_στ.ne'
   have h_sqrt_sq : Real.sqrt τ ^ 2 = τ := Real.sq_sqrt hτ.le
   -- N(σ) = log(S/K) + (r + σ²/2) τ; N'(σ) = στ
-  have h_sq : HasDerivAt (fun s : ℝ => s ^ 2) (2 * σ) σ := by
+  have h_sq : HasDerivAt (fun s : ℝ ↦ s ^ 2) (2 * σ) σ := by
     simpa using hasDerivAt_pow 2 σ
-  have h_sq_div : HasDerivAt (fun s : ℝ => s ^ 2 / 2) σ σ := by
+  have h_sq_div : HasDerivAt (fun s : ℝ ↦ s ^ 2 / 2) σ σ := by
     have := h_sq.div_const 2; simpa using this
-  have h_inner : HasDerivAt (fun s : ℝ => r + s ^ 2 / 2) σ σ := h_sq_div.const_add r
-  have h_inner_mul : HasDerivAt (fun s : ℝ => (r + s ^ 2 / 2) * τ) (σ * τ) σ := by
+  have h_inner : HasDerivAt (fun s : ℝ ↦ r + s ^ 2 / 2) σ σ := h_sq_div.const_add r
+  have h_inner_mul : HasDerivAt (fun s : ℝ ↦ (r + s ^ 2 / 2) * τ) (σ * τ) σ := by
     have := h_inner.mul_const τ; simpa using this
-  have h_N : HasDerivAt (fun s : ℝ => Real.log (S / K) + (r + s ^ 2 / 2) * τ)
+  have h_N : HasDerivAt (fun s : ℝ ↦ Real.log (S / K) + (r + s ^ 2 / 2) * τ)
       (σ * τ) σ := h_inner_mul.const_add (Real.log (S / K))
   -- D(σ) = σ√τ; D'(σ) = √τ
-  have h_D : HasDerivAt (fun s : ℝ => s * Real.sqrt τ) (Real.sqrt τ) σ := by
+  have h_D : HasDerivAt (fun s : ℝ ↦ s * Real.sqrt τ) (Real.sqrt τ) σ := by
     have := (hasDerivAt_id σ).mul_const (Real.sqrt τ); simpa using this
   -- Quotient rule
   have h_quot := h_N.div h_D h_στ_ne
-  have h_fun_eq : (fun s : ℝ => (Real.log (S / K) + (r + s ^ 2 / 2) * τ) / (s * Real.sqrt τ))
-        = (fun s : ℝ => bsd1 S K r s τ) := by funext s; rfl
+  have h_fun_eq : (fun s : ℝ ↦ (Real.log (S / K) + (r + s ^ 2 / 2) * τ) / (s * Real.sqrt τ))
+        = (fun s : ℝ ↦ bsd1 S K r s τ) := by funext s; rfl
   rw [← h_fun_eq]
   convert h_quot using 1 <;> try rfl
   field_simp
@@ -241,16 +241,16 @@ lemma hasDerivAt_bsd1_sigma (S K r : ℝ) {σ : ℝ} (hσ : 0 < σ)
 /-- `∂_σ d₂ = ∂_σ d₁ − √τ` (since `d₂ = d₁ − σ√τ`). -/
 lemma hasDerivAt_bsd2_sigma (S K r : ℝ) {σ : ℝ} (hσ : 0 < σ)
     {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsd2 S K r s τ)
+    HasDerivAt (fun s ↦ bsd2 S K r s τ)
       ((σ ^ 2 * τ / 2 - Real.log (S / K) - r * τ) / (σ ^ 2 * Real.sqrt τ)
         - Real.sqrt τ) σ := by
   have h_d1 := hasDerivAt_bsd1_sigma S K r hσ hτ
   -- ∂_σ (σ √τ) = √τ
-  have h_σsqrt : HasDerivAt (fun s : ℝ => s * Real.sqrt τ) (Real.sqrt τ) σ := by
+  have h_σsqrt : HasDerivAt (fun s : ℝ ↦ s * Real.sqrt τ) (Real.sqrt τ) σ := by
     have := (hasDerivAt_id σ).mul_const (Real.sqrt τ); simpa using this
   have h_diff := h_d1.sub h_σsqrt
-  have h_fun_eq : (fun s : ℝ => bsd1 S K r s τ - s * Real.sqrt τ)
-        = (fun s : ℝ => bsd2 S K r s τ) := by funext s; rw [bsd2]
+  have h_fun_eq : (fun s : ℝ ↦ bsd1 S K r s τ - s * Real.sqrt τ)
+        = (fun s : ℝ ↦ bsd2 S K r s τ) := by funext s; rw [bsd2]
   rw [← h_fun_eq]
   exact h_diff
 
@@ -259,24 +259,24 @@ lemma hasDerivAt_bsd2_sigma (S K r : ℝ) {σ : ℝ} (hσ : 0 < σ)
 /-- `∂_r d₁(S, K, r, σ, τ) = √τ / σ`. -/
 lemma hasDerivAt_bsd1_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
     (r : ℝ) :
-    HasDerivAt (fun r' => bsd1 S K r' σ τ) (Real.sqrt τ / σ) r := by
+    HasDerivAt (fun r' ↦ bsd1 S K r' σ τ) (Real.sqrt τ / σ) r := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'
   -- N(r) = log(S/K) + (r + σ²/2) τ; N'(r) = τ
-  have h_id : HasDerivAt (fun r' : ℝ => r') 1 r := hasDerivAt_id r
-  have h_inner : HasDerivAt (fun r' : ℝ => r' + σ ^ 2 / 2) 1 r := by
+  have h_id : HasDerivAt (fun r' : ℝ ↦ r') 1 r := hasDerivAt_id r
+  have h_inner : HasDerivAt (fun r' : ℝ ↦ r' + σ ^ 2 / 2) 1 r := by
     have := h_id.add_const (σ ^ 2 / 2); simpa using this
-  have h_inner_mul : HasDerivAt (fun r' : ℝ => (r' + σ ^ 2 / 2) * τ) τ r := by
+  have h_inner_mul : HasDerivAt (fun r' : ℝ ↦ (r' + σ ^ 2 / 2) * τ) τ r := by
     have := h_inner.mul_const τ; simpa using this
-  have h_N : HasDerivAt (fun r' : ℝ => Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) τ r :=
+  have h_N : HasDerivAt (fun r' : ℝ ↦ Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) τ r :=
     h_inner_mul.const_add (Real.log (S / K))
   -- d_1(r) = N(r) / (σ √τ); D is constant, so ∂_r d_1 = N'(r) / (σ√τ) = τ/(σ√τ) = √τ/σ
   have h_div : HasDerivAt
-      (fun r' : ℝ => (Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
+      (fun r' : ℝ ↦ (Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
       (τ / (σ * Real.sqrt τ)) r := h_N.div_const (σ * Real.sqrt τ)
-  have h_fun_eq : (fun r' : ℝ => (Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
-        = (fun r' : ℝ => bsd1 S K r' σ τ) := by funext r'; rfl
+  have h_fun_eq : (fun r' : ℝ ↦ (Real.log (S / K) + (r' + σ ^ 2 / 2) * τ) / (σ * Real.sqrt τ))
+        = (fun r' : ℝ ↦ bsd1 S K r' σ τ) := by funext r'; rfl
   rw [← h_fun_eq]
   convert h_div using 1
   try rfl
@@ -288,10 +288,10 @@ lemma hasDerivAt_bsd1_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
 /-- `∂_r d₂ = ∂_r d₁ = √τ / σ` (since `d₂ − d₁` is `r`-independent). -/
 lemma hasDerivAt_bsd2_r (S K σ τ : ℝ) (hσ : 0 < σ) (hτ : 0 < τ)
     (r : ℝ) :
-    HasDerivAt (fun r' => bsd2 S K r' σ τ) (Real.sqrt τ / σ) r := by
+    HasDerivAt (fun r' ↦ bsd2 S K r' σ τ) (Real.sqrt τ / σ) r := by
   have h_diff := (hasDerivAt_bsd1_r S K σ τ hσ hτ r).sub_const (σ * Real.sqrt τ)
-  have h_fun_eq : (fun r' : ℝ => bsd1 S K r' σ τ - σ * Real.sqrt τ)
-        = (fun r' : ℝ => bsd2 S K r' σ τ) := by funext r'; rw [bsd2]
+  have h_fun_eq : (fun r' : ℝ ↦ bsd1 S K r' σ τ - σ * Real.sqrt τ)
+        = (fun r' : ℝ ↦ bsd2 S K r' σ τ) := by funext r'; rw [bsd2]
   rw [← h_fun_eq]
   exact h_diff
 
@@ -305,7 +305,7 @@ noncomputable def bsV (K r σ : ℝ) (S τ : ℝ) : ℝ :=
 /-- **Delta**: `∂_S V = Φ(d₁)` — the magic identity makes everything else cancel. -/
 lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsV K r σ s τ) (Phi (bsd1 S K r σ τ)) S := by
+    HasDerivAt (fun s ↦ bsV K r σ s τ) (Phi (bsd1 S K r σ τ)) S := by
   have h_sqrt_τ_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_τ_ne : Real.sqrt τ ≠ 0 := h_sqrt_τ_pos.ne'
   have hσ_ne : σ ≠ 0 := hσ.ne'
@@ -316,14 +316,14 @@ lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
   have h_Phi_d2 := (hasDerivAt_Phi (bsd2 S K r σ τ)).comp S h_d2_S
   -- d/dS [S · Φ(d₁)] = Φ(d₁) + S · pdf(d₁) · ∂_S d₁
-  have h_id : HasDerivAt (fun s : ℝ => s) 1 S := hasDerivAt_id S
+  have h_id : HasDerivAt (fun s : ℝ ↦ s) 1 S := hasDerivAt_id S
   have h_S_Phi_d1 := h_id.mul h_Phi_d1
   -- d/dS [K · exp(-rτ) · Φ(d₂)] = K · exp(-rτ) · pdf(d₂) · ∂_S d₂
   have h_K_exp_Phi_d2 := h_Phi_d2.const_mul (K * Real.exp (-(r * τ)))
   have h_V := h_S_Phi_d1.sub h_K_exp_Phi_d2
-  have h_fun_eq : (fun s : ℝ => s * Phi (bsd1 s K r σ τ) -
+  have h_fun_eq : (fun s : ℝ ↦ s * Phi (bsd1 s K r σ τ) -
       K * Real.exp (-(r * τ)) * Phi (bsd2 s K r σ τ))
-        = (fun s : ℝ => bsV K r σ s τ) := by
+        = (fun s : ℝ ↦ bsV K r σ s τ) := by
     funext s; rfl
   rw [← h_fun_eq]
   convert h_V using 1 <;> try rfl
@@ -337,7 +337,7 @@ lemma hasDerivAt_bsV_S {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 `∂_S V = Phi(d₁)` (the `hasDerivAt_bsV_S` result). -/
 lemma hasDerivAt_bsV_SS {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => Phi (bsd1 s K r σ τ))
+    HasDerivAt (fun s ↦ Phi (bsd1 s K r σ τ))
       (gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ)) S := by
   have h_d1_S := hasDerivAt_bsd1_S (r := r) hK hσ hτ hS
   have h_Phi_d1 := (hasDerivAt_Phi (bsd1 S K r σ τ)).comp S h_d1_S
@@ -350,7 +350,7 @@ collapses the `pdf(d₂) ∂_τ d₂` term into `−S ϕ(d₁) ∂_τ d₂`, lea
 `S ϕ(d₁) (∂_τ d₁ − ∂_τ d₂) = S ϕ(d₁) · σ/(2√τ)`. -/
 lemma hasDerivAt_bsV_tau {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun t => bsV K r σ S t)
+    HasDerivAt (fun t ↦ bsV K r σ S t)
       (σ * S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (2 * Real.sqrt τ)
         + r * K * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)) τ := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
@@ -367,22 +367,22 @@ lemma hasDerivAt_bsV_tau {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   -- d/dτ[S · Phi(d₁(τ))]
   have h_S_Phi_d1 := h_Phi_d1.const_mul S
   -- d/dτ[exp(-rτ)] = -r exp(-rτ)
-  have h_neg_r : HasDerivAt (fun t : ℝ => -(r * t)) (-r) τ := by
-    have h1 : HasDerivAt (fun t : ℝ => r * t) r τ := by
+  have h_neg_r : HasDerivAt (fun t : ℝ ↦ -(r * t)) (-r) τ := by
+    have h1 : HasDerivAt (fun t : ℝ ↦ r * t) r τ := by
       simpa using (hasDerivAt_id τ).const_mul r
     exact h1.neg
-  have h_exp : HasDerivAt (fun t : ℝ => Real.exp (-(r * t)))
+  have h_exp : HasDerivAt (fun t : ℝ ↦ Real.exp (-(r * t)))
       (Real.exp (-(r * τ)) * -r) τ := h_neg_r.exp
   -- d/dτ[K · exp(-rτ)] = K · (-r) exp(-rτ)
-  have h_K_exp : HasDerivAt (fun t : ℝ => K * Real.exp (-(r * t)))
+  have h_K_exp : HasDerivAt (fun t : ℝ ↦ K * Real.exp (-(r * t)))
       (K * (Real.exp (-(r * τ)) * -r)) τ := h_exp.const_mul K
   -- d/dτ[K · exp(-rτ) · Phi(d₂(τ))] = product rule
   have h_K_exp_Phi_d2 := h_K_exp.mul h_Phi_d2
   have h_V := h_S_Phi_d1.sub h_K_exp_Phi_d2
-  have h_fun_eq : (fun t : ℝ =>
-      S * (Phi ∘ fun t' => bsd1 S K r σ t') t -
-        (fun y => K * Real.exp (-(r * y)) * (Phi ∘ fun t' => bsd2 S K r σ t') y) t)
-        = (fun t : ℝ => bsV K r σ S t) := by
+  have h_fun_eq : (fun t : ℝ ↦
+      S * (Phi ∘ fun t' ↦ bsd1 S K r σ t') t -
+        (fun y ↦ K * Real.exp (-(r * y)) * (Phi ∘ fun t' ↦ bsd2 S K r σ t') y) t)
+        = (fun t : ℝ ↦ bsV K r σ S t) := by
     funext t; rfl
   rw [← h_fun_eq]
   convert h_V using 1 <;> try rfl
@@ -396,11 +396,11 @@ lemma hasDerivAt_bsV_tau {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 /-- **Theta**: `∂_t V = -∂_τ V` via the chain rule on `τ = T − t`. -/
 lemma hasDerivAt_bsV_t {K T r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S t : ℝ} (hS : 0 < S) (ht_T : t < T) :
-    HasDerivAt (fun t' => bsV K r σ S (T - t'))
+    HasDerivAt (fun t' ↦ bsV K r σ S (T - t'))
       (-(σ * S * gaussianPDFReal 0 1 (bsd1 S K r σ (T - t)) / (2 * Real.sqrt (T - t))
         + r * K * Real.exp (-(r * (T - t))) * Phi (bsd2 S K r σ (T - t)))) t := by
   have hτ : 0 < T - t := sub_pos.mpr ht_T
-  have h_τ_deriv : HasDerivAt (fun t' : ℝ => T - t') (-1) t := by
+  have h_τ_deriv : HasDerivAt (fun t' : ℝ ↦ T - t') (-1) t := by
     have := (hasDerivAt_id t).const_sub T
     simpa using this
   have h_V_τ := hasDerivAt_bsV_tau (r := r) hK hσ hS hτ
@@ -418,7 +418,7 @@ Since `d₂ = d₁ − σ√τ`, we have `∂_σ d₂ = ∂_σ d₁ − √τ`. 
 leaving `K e^{-rτ} · ϕ(d₂) · √τ = S · ϕ(d₁) · √τ`. -/
 lemma hasDerivAt_bsV_sigma {K r : ℝ} (hK : 0 < K)
     {S σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsV K r s S τ)
+    HasDerivAt (fun s ↦ bsV K r s S τ)
       (S * gaussianPDFReal 0 1 (bsd1 S K r σ τ) * Real.sqrt τ) σ := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
@@ -434,10 +434,10 @@ lemma hasDerivAt_bsV_sigma {K r : ℝ} (hK : 0 < K)
   -- d/dσ [K · exp(-rτ) · Phi(d₂(σ))]
   have h_K_exp_Phi_d2 := h_Phi_d2.const_mul (K * Real.exp (-(r * τ)))
   have h_V := h_S_Phi_d1.sub h_K_exp_Phi_d2
-  have h_fun_eq : (fun s : ℝ =>
-      S * (Phi ∘ fun s' => bsd1 S K r s' τ) s -
-        K * Real.exp (-(r * τ)) * (Phi ∘ fun s' => bsd2 S K r s' τ) s)
-        = (fun s : ℝ => bsV K r s S τ) := by funext s; rfl
+  have h_fun_eq : (fun s : ℝ ↦
+      S * (Phi ∘ fun s' ↦ bsd1 S K r s' τ) s -
+        K * Real.exp (-(r * τ)) * (Phi ∘ fun s' ↦ bsd2 S K r s' τ) s)
+        = (fun s : ℝ ↦ bsV K r s S τ) := by funext s; rfl
   rw [← h_fun_eq]
   convert h_V using 1 <;> try rfl
   have h_bs := bs_identity (r := r) hS hK hσ hτ
@@ -454,7 +454,7 @@ because `∂_r d₁ = ∂_r d₂ = √τ/σ` (the difference `d₁ − d₂` is 
 The remaining surviving term comes from `∂_r [exp(-rτ)] = −τ · exp(-rτ)`. -/
 lemma hasDerivAt_bsV_r {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) (r : ℝ) :
-    HasDerivAt (fun r' => bsV K r' σ S τ)
+    HasDerivAt (fun r' ↦ bsV K r' σ S τ)
       (K * τ * Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)) r := by
   have h_sqrt_pos : 0 < Real.sqrt τ := Real.sqrt_pos.mpr hτ
   have h_sqrt_ne : Real.sqrt τ ≠ 0 := h_sqrt_pos.ne'
@@ -469,22 +469,22 @@ lemma hasDerivAt_bsV_r {K σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ
   -- d/dr [S · Phi(d₁(r))]
   have h_S_Phi_d1 := h_Phi_d1.const_mul S
   -- d/dr [exp(-rτ)] = -τ · exp(-rτ)
-  have h_neg_r : HasDerivAt (fun r' : ℝ => -(r' * τ)) (-τ) r := by
-    have h_lin : HasDerivAt (fun r' : ℝ => r' * τ) τ r := by
+  have h_neg_r : HasDerivAt (fun r' : ℝ ↦ -(r' * τ)) (-τ) r := by
+    have h_lin : HasDerivAt (fun r' : ℝ ↦ r' * τ) τ r := by
       have := (hasDerivAt_id r).mul_const τ; simpa using this
     exact h_lin.neg
-  have h_exp : HasDerivAt (fun r' : ℝ => Real.exp (-(r' * τ)))
+  have h_exp : HasDerivAt (fun r' : ℝ ↦ Real.exp (-(r' * τ)))
       (Real.exp (-(r * τ)) * -τ) r := h_neg_r.exp
   -- d/dr [K · exp(-rτ)] = K · -τ · exp(-rτ)
-  have h_K_exp : HasDerivAt (fun r' : ℝ => K * Real.exp (-(r' * τ)))
+  have h_K_exp : HasDerivAt (fun r' : ℝ ↦ K * Real.exp (-(r' * τ)))
       (K * (Real.exp (-(r * τ)) * -τ)) r := h_exp.const_mul K
   -- d/dr [K · exp(-rτ) · Phi(d₂(r))]
   have h_K_exp_Phi_d2 := h_K_exp.mul h_Phi_d2
   have h_V := h_S_Phi_d1.sub h_K_exp_Phi_d2
-  have h_fun_eq : (fun r' : ℝ =>
-      S * (Phi ∘ fun r'' => bsd1 S K r'' σ τ) r' -
-        (fun r'' => K * Real.exp (-(r'' * τ)) * (Phi ∘ fun r''' => bsd2 S K r''' σ τ) r'') r')
-        = (fun r' : ℝ => bsV K r' σ S τ) := by funext r'; rfl
+  have h_fun_eq : (fun r' : ℝ ↦
+      S * (Phi ∘ fun r'' ↦ bsd1 S K r'' σ τ) r' -
+        (fun r'' ↦ K * Real.exp (-(r'' * τ)) * (Phi ∘ fun r''' ↦ bsd2 S K r''' σ τ) r'') r')
+        = (fun r' : ℝ ↦ bsV K r' σ S τ) := by funext r'; rfl
   rw [← h_fun_eq]
   convert h_V using 1 <;> try rfl
   have h_bs := bs_identity (r := r) hS hK hσ hτ

@@ -80,13 +80,13 @@ lemma varianceTwo_eq_w_dot_Sigma_w (w σ₁ σ₂ ρ : ℝ) :
 
 /-- **Derivative of `E(w) = w r₁ + (1 − w) r₂`** is `r₁ − r₂`. -/
 lemma hasDerivAt_expectedReturnTwo (w r₁ r₂ : ℝ) :
-    HasDerivAt (fun w' => expectedReturnTwo w' r₁ r₂) (r₁ - r₂) w := by
+    HasDerivAt (fun w' ↦ expectedReturnTwo w' r₁ r₂) (r₁ - r₂) w := by
   unfold expectedReturnTwo
-  have h1 : HasDerivAt (fun w' : ℝ => w' * r₁) r₁ w := by
+  have h1 : HasDerivAt (fun w' : ℝ ↦ w' * r₁) r₁ w := by
     simpa using (hasDerivAt_id w).mul_const r₁
-  have h_sub : HasDerivAt (fun w' : ℝ => (1 : ℝ) - w') (-1) w := by
+  have h_sub : HasDerivAt (fun w' : ℝ ↦ (1 : ℝ) - w') (-1) w := by
     simpa using (hasDerivAt_id w).const_sub 1
-  have h2 : HasDerivAt (fun w' : ℝ => (1 - w') * r₂) (-r₂) w := by
+  have h2 : HasDerivAt (fun w' : ℝ ↦ (1 - w') * r₂) (-r₂) w := by
     have := h_sub.mul_const r₂
     simpa using this
   have h := h1.add h2
@@ -96,28 +96,28 @@ lemma hasDerivAt_expectedReturnTwo (w r₁ r₂ : ℝ) :
 `V'(w) = 2 · ((Σw)₁ − (Σw)₂)`. Proof: polynomial rewrite of `V` in the form
 `A w² + B w + C`, then `(A w² + B w + C)' = 2 A w + B`. -/
 lemma hasDerivAt_varianceTwo (w σ₁ σ₂ ρ : ℝ) :
-    HasDerivAt (fun w' => varianceTwo w' σ₁ σ₂ ρ)
+    HasDerivAt (fun w' ↦ varianceTwo w' σ₁ σ₂ ρ)
                (2 * (marginalVarOne w σ₁ σ₂ ρ - marginalVarTwo w σ₁ σ₂ ρ)) w := by
   -- Rewrite V as A w² + B w + C
-  have h_v_poly : (fun w' : ℝ => varianceTwo w' σ₁ σ₂ ρ) =
-      (fun w' => (σ₁^2 + σ₂^2 - 2*ρ*σ₁*σ₂) * w'^2 +
+  have h_v_poly : (fun w' : ℝ ↦ varianceTwo w' σ₁ σ₂ ρ) =
+      (fun w' ↦ (σ₁^2 + σ₂^2 - 2*ρ*σ₁*σ₂) * w'^2 +
                  (-2*σ₂^2 + 2*ρ*σ₁*σ₂) * w' + σ₂^2) := by
     funext w'
     unfold varianceTwo
     ring
   rw [h_v_poly]
-  have h_sq : HasDerivAt (fun w' : ℝ => w'^2) (2*w) w := by
+  have h_sq : HasDerivAt (fun w' : ℝ ↦ w'^2) (2*w) w := by
     have := hasDerivAt_pow 2 w
     convert this using 1 <;> first | rfl | (push_cast; ring)
   have h_term1 := h_sq.const_mul (σ₁^2 + σ₂^2 - 2*ρ*σ₁*σ₂)
   have h_term2 := (hasDerivAt_id w).const_mul (-2*σ₂^2 + 2*ρ*σ₁*σ₂)
-  have h_term3 : HasDerivAt (fun _ : ℝ => (σ₂^2 : ℝ)) 0 w := hasDerivAt_const w _
+  have h_term3 : HasDerivAt (fun _ : ℝ ↦ (σ₂^2 : ℝ)) 0 w := hasDerivAt_const w _
   have h := (h_term1.add h_term2).add h_term3
   convert h using 1 <;> first | rfl | (unfold marginalVarOne marginalVarTwo; ring)
 
 /-- **Derivative of `E²(w)`** is `2 E (r₁ − r₂)`. -/
 lemma hasDerivAt_expectedReturnTwo_sq (w r₁ r₂ : ℝ) :
-    HasDerivAt (fun w' => (expectedReturnTwo w' r₁ r₂)^2)
+    HasDerivAt (fun w' ↦ (expectedReturnTwo w' r₁ r₂)^2)
                (2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂)) w := by
   have h := (hasDerivAt_expectedReturnTwo w r₁ r₂).pow 2
   convert h using 1 <;> first | rfl | (push_cast; ring)
@@ -125,7 +125,7 @@ lemma hasDerivAt_expectedReturnTwo_sq (w r₁ r₂ : ℝ) :
 /-- **Derivative of `Sh²(w) = E²/V`**: textbook formula `Sh²'(w) = (2EE'V − E²V')/V²`. -/
 theorem hasDerivAt_sharpeSqTwo (w r₁ r₂ σ₁ σ₂ ρ : ℝ)
     (hV : varianceTwo w σ₁ σ₂ ρ ≠ 0) :
-    HasDerivAt (fun w' => sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ)
+    HasDerivAt (fun w' ↦ sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ)
                ((2 * expectedReturnTwo w r₁ r₂ * (r₁ - r₂) *
                    varianceTwo w σ₁ σ₂ ρ -
                  (expectedReturnTwo w r₁ r₂)^2 *
@@ -164,7 +164,7 @@ algebraic identity. -/
 theorem sharpeSqTwo_critical_iff_crossProduct_FOC
     (w r₁ r₂ σ₁ σ₂ ρ : ℝ) (hV : varianceTwo w σ₁ σ₂ ρ ≠ 0)
     (hE : expectedReturnTwo w r₁ r₂ ≠ 0) :
-    HasDerivAt (fun w' => sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔
+    HasDerivAt (fun w' ↦ sharpeSqTwo w' r₁ r₂ σ₁ σ₂ ρ) 0 w ↔
       r₂ * marginalVarOne w σ₁ σ₂ ρ = r₁ * marginalVarTwo w σ₁ σ₂ ρ := by
   -- (a) The derivative computed above is unique; if HasDerivAt f 0 w, then
   --     the computed expression equals 0.

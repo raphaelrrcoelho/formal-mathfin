@@ -58,40 +58,40 @@ noncomputable def statePricePricing (s : Finset ι) (q : ι → ℝ) (X : ι →
 
 /-- **Zero payoff has zero price**. -/
 lemma statePricePricing_zero (s : Finset ι) (q : ι → ℝ) :
-    statePricePricing s q (fun _ => 0) = 0 := by
+    statePricePricing s q (fun _ ↦ 0) = 0 := by
   unfold statePricePricing
   simp
 
 /-- **Unit-payoff price = sum of state prices**: `V_0(1) = ∑ q_i`. By
 no-arb this is the zero-coupon bond price `e^{−rT}` (consistency condition). -/
 lemma statePricePricing_one (s : Finset ι) (q : ι → ℝ) :
-    statePricePricing s q (fun _ => 1) = ∑ i ∈ s, q i := by
+    statePricePricing s q (fun _ ↦ 1) = ∑ i ∈ s, q i := by
   unfold statePricePricing
   simp
 
 /-- **Scalar payoff**: `V_0(c · 1) = c · ∑ q_i`. -/
 lemma statePricePricing_const (s : Finset ι) (q : ι → ℝ) (c : ℝ) :
-    statePricePricing s q (fun _ => c) = c * ∑ i ∈ s, q i := by
+    statePricePricing s q (fun _ ↦ c) = c * ∑ i ∈ s, q i := by
   unfold statePricePricing
-  rw [show (fun i => q i * c) = (fun i => c * q i) from funext (fun i => by ring)]
+  rw [show (fun i ↦ q i * c) = (fun i ↦ c * q i) from funext (fun i ↦ by ring)]
   rw [← Finset.mul_sum]
 
 
 /-- **Linearity in payoff** (sum): `V_0(X + Y) = V_0(X) + V_0(Y)`. -/
 lemma statePricePricing_add (s : Finset ι) (q X Y : ι → ℝ) :
-    statePricePricing s q (fun i => X i + Y i) =
+    statePricePricing s q (fun i ↦ X i + Y i) =
       statePricePricing s q X + statePricePricing s q Y := by
   unfold statePricePricing
   rw [← Finset.sum_add_distrib]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
+  refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   ring
 
 /-- **Scalar homogeneity in payoff**: `V_0(c · X) = c · V_0(X)`. -/
 lemma statePricePricing_smul (s : Finset ι) (q X : ι → ℝ) (c : ℝ) :
-    statePricePricing s q (fun i => c * X i) = c * statePricePricing s q X := by
+    statePricePricing s q (fun i ↦ c * X i) = c * statePricePricing s q X := by
   unfold statePricePricing
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
+  refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   ring
 
 /-- **Risk-neutral consistency**: if `q i = e^{−rT} · ν i`, then state-price
@@ -99,11 +99,11 @@ pricing equals discounted risk-neutral expectation:
 `V_0(X) = e^{−rT} · E^ν[X] = e^{−rT} · ∑ ν_i · X_i`. -/
 theorem statePricePricing_eq_riskNeutral
     (s : Finset ι) (ν X : ι → ℝ) (rT : ℝ) :
-    statePricePricing s (fun i => Real.exp (-rT) * ν i) X =
+    statePricePricing s (fun i ↦ Real.exp (-rT) * ν i) X =
       Real.exp (-rT) * ∑ i ∈ s, ν i * X i := by
   unfold statePricePricing
   rw [Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
+  refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   ring
 
 /-- **No-arbitrage monotonicity**: under non-negative state prices and a

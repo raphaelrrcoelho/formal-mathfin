@@ -61,8 +61,8 @@ open Set Real ProbabilityTheory
 functions are simultaneously convex and concave; the inequality holds
 with equality. -/
 lemma convexOn_sub_const_id (a : ℝ) :
-    ConvexOn ℝ Set.univ (fun K : ℝ => a - K) := by
-  refine ⟨convex_univ, fun K₁ _ K₂ _ s t _ _ hst => ?_⟩
+    ConvexOn ℝ Set.univ (fun K : ℝ ↦ a - K) := by
+  refine ⟨convex_univ, fun K₁ _ K₂ _ s t _ _ hst ↦ ?_⟩
   show a - (s • K₁ + t • K₂) ≤ s • (a - K₁) + t • (a - K₂)
   simp only [smul_eq_mul]
   -- Equality (affine functions are tight): `s·a + t·a = a` via `s + t = 1`.
@@ -76,7 +76,7 @@ Butterfly non-negativity and Breeden-Litzenberger PDF positivity are
 discrete and infinitesimal consequences (respectively) of this single fact,
 after passing through risk-neutral expectation. -/
 lemma convexOn_call_payoff (S : ℝ) :
-    ConvexOn ℝ Set.univ (fun K : ℝ => max (S - K) 0) :=
+    ConvexOn ℝ Set.univ (fun K : ℝ ↦ max (S - K) 0) :=
   (convexOn_sub_const_id S).sup (convexOn_const (0 : ℝ) convex_univ)
 
 /-- **Call payoff is antitone in the strike**: higher strikes pay less.
@@ -84,8 +84,8 @@ lemma convexOn_call_payoff (S : ℝ) :
 Equivalent to monotonicity of `max(·, 0)` composed with `K ↦ S − K` (which
 is itself antitone). The single-line consequence of monotonicity of `max`. -/
 lemma antitone_call_payoff (S : ℝ) :
-    Antitone (fun K : ℝ => max (S - K) 0) :=
-  fun _ _ h => max_le_max (by linarith) le_rfl
+    Antitone (fun K : ℝ ↦ max (S - K) 0) :=
+  fun _ _ h ↦ max_le_max (by linarith) le_rfl
 
 /-! ## The continuous-price face
 
@@ -97,7 +97,7 @@ in the strike. The proof is the second-derivative test:
   is non-negative for every `K > 0`.
 
 We feed these to Mathlib's `convexOn_of_deriv2_nonneg'`. The only delicate
-step is identifying `deriv (fun K' => bsV K' r σ S τ)` with the explicit
+step is identifying `deriv (fun K' ↦ bsV K' r σ S τ)` with the explicit
 first derivative in a neighborhood of each interior point so the second
 derivative inherits the closed form — handled below with
 `HasDerivAt.congr_of_eventuallyEq`. -/
@@ -108,17 +108,17 @@ half-line. Used to bridge `hasDerivAt_bsV_KK` to a second-derivative
 statement on `deriv` itself. -/
 private lemma deriv_bsV_eq_on_Ioi (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ)
     (hτ : 0 < τ) {K : ℝ} (hK : K ∈ Set.Ioi (0 : ℝ)) :
-    deriv (fun k => bsV k r σ S τ) K =
+    deriv (fun k ↦ bsV k r σ S τ) K =
       -(Real.exp (-(r * τ)) * Phi (bsd2 S K r σ τ)) :=
   (hasDerivAt_bsV_K (S := S) (r := r) (σ := σ) hS hσ hK hτ).deriv
 
 /-- **Local equality of derivatives on `(0, ∞)`**: in a neighbourhood of any
-`K > 0`, `deriv (fun K' => bsV K' r σ S τ)` agrees with the explicit closed
+`K > 0`, `deriv (fun K' ↦ bsV K' r σ S τ)` agrees with the explicit closed
 form, so derivative facts about the closed form transfer to `deriv`. -/
 private lemma deriv_bsV_eventuallyEq (S r σ τ : ℝ) (hS : 0 < S) (hσ : 0 < σ)
     (hτ : 0 < τ) {K : ℝ} (hK : 0 < K) :
-    (fun K' => deriv (fun k => bsV k r σ S τ) K') =ᶠ[nhds K]
-      (fun K' => -(Real.exp (-(r * τ)) * Phi (bsd2 S K' r σ τ))) := by
+    (fun K' ↦ deriv (fun k ↦ bsV k r σ S τ) K') =ᶠ[nhds K]
+      (fun K' ↦ -(Real.exp (-(r * τ)) * Phi (bsd2 S K' r σ τ))) := by
   filter_upwards [isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hK)] with K' hK'
   exact deriv_bsV_eq_on_Ioi S r σ τ hS hσ hτ hK'
 
@@ -131,7 +131,7 @@ This is the second-derivative test applied to BS: at every `K > 0`,
 first derivative on `Ioi 0`, both of which we have in closed form from
 `hasDerivAt_bsV_K` and `hasDerivAt_bsV_KK`. -/
 theorem bsV_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
-    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K => bsV K r σ S τ) := by
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K ↦ bsV K r σ S τ) := by
   refine convexOn_of_deriv2_nonneg' (convex_Ioi 0) ?_ ?_ ?_
   -- (1) bsV is differentiable on Ioi 0 (from hasDerivAt_bsV_K).
   · intro K hK
@@ -148,7 +148,7 @@ theorem bsV_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ :
     have h_pos : 0 < K := hK
     have h_KK := hasDerivAt_bsV_KK (S := S) (r := r) (σ := σ) hS hσ h_pos hτ
     have h_ev := deriv_bsV_eventuallyEq S r σ τ hS hσ hτ h_pos
-    have h_d2 : deriv^[2] (fun k => bsV k r σ S τ) K =
+    have h_d2 : deriv^[2] (fun k ↦ bsV k r σ S τ) K =
         Real.exp (-(r * τ)) * gaussianPDFReal 0 1 (bsd2 S K r σ τ) /
           (K * σ * Real.sqrt τ) :=
       (h_KK.congr_of_eventuallyEq h_ev).deriv
@@ -162,12 +162,12 @@ strike-convexity: `bsP = bsV + (K·e^{-rτ} − S)` differs from `bsV` by an aff
 function of `K`, and convexity is preserved by adding an affine function. The
 second-derivative apparatus of `PutStrikeConvexity` is not needed. -/
 theorem bsP_strike_convexOn {S r σ τ : ℝ} (hS : 0 < S) (hσ : 0 < σ) (hτ : 0 < τ) :
-    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K => bsP K r σ S τ) := by
-  have h_eq : (fun K => bsP K r σ S τ)
-      = (fun K => bsV K r σ S τ) + (fun K => K * Real.exp (-(r * τ)) - S) := by
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K ↦ bsP K r σ S τ) := by
+  have h_eq : (fun K ↦ bsP K r σ S τ)
+      = (fun K ↦ bsV K r σ S τ) + (fun K ↦ K * Real.exp (-(r * τ)) - S) := by
     funext K; simp only [Pi.add_apply]; rw [bsP_eq_bsV K r σ S τ]; ring
   rw [h_eq]
-  refine (bsV_strike_convexOn hS hσ hτ).add ⟨convex_Ioi 0, fun K₁ _ K₂ _ s t _ _ hst => ?_⟩
+  refine (bsV_strike_convexOn hS hσ hτ).add ⟨convex_Ioi 0, fun K₁ _ K₂ _ s t _ _ hst ↦ ?_⟩
   dsimp only
   simp only [smul_eq_mul]
   nlinarith [show s * S + t * S = S from by linear_combination S * hst]

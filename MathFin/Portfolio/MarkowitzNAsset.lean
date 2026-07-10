@@ -45,7 +45,7 @@ noncomputable def portfolioVarN
 /-- **Quadratic scaling**: `Var(c · w) = c² · Var(w)`. -/
 lemma portfolioVarN_smul {ι : Type*} (s : Finset ι)
     (w : ι → ℝ) (σ : ι → ι → ℝ) (c : ℝ) :
-    portfolioVarN s (fun i => c * w i) σ = c ^ 2 * portfolioVarN s w σ := by
+    portfolioVarN s (fun i ↦ c * w i) σ = c ^ 2 * portfolioVarN s w σ := by
   unfold portfolioVarN
   rw [Finset.mul_sum]
   refine Finset.sum_congr rfl ?_
@@ -69,7 +69,7 @@ lemma portfolioVarN_diag {ι : Type*} [DecidableEq ι] (s : Finset ι)
     intro j hj
     by_cases hij : j = i
     · subst hij; simp [sq]
-    · have : σ i j = 0 := h_diag i hi j hj (fun h => hij h.symm)
+    · have : σ i j = 0 := h_diag i hi j hj (fun h ↦ hij h.symm)
       rw [this]; simp [hij]
   rw [Finset.sum_congr rfl h_inner]
   rw [Finset.sum_ite_eq' s i]
@@ -83,10 +83,10 @@ lemma portfolioVarN_equal_weights_iid {ι : Type*} [DecidableEq ι]
     (kernel : ι → ι → ℝ)
     (h_diag : ∀ i ∈ s, ∀ j ∈ s, i ≠ j → kernel i j = 0)
     (h_var : ∀ i ∈ s, kernel i i = σ_sq) :
-    portfolioVarN s (fun _ => c) kernel = c ^ 2 * s.card * σ_sq := by
+    portfolioVarN s (fun _ ↦ c) kernel = c ^ 2 * s.card * σ_sq := by
   rw [portfolioVarN_diag s _ kernel h_diag]
   have h_eq : ∀ i ∈ s, c ^ 2 * kernel i i = c ^ 2 * σ_sq :=
-    fun i hi => by rw [h_var i hi]
+    fun i hi ↦ by rw [h_var i hi]
   rw [Finset.sum_congr rfl h_eq, Finset.sum_const, nsmul_eq_mul]
   ring
 
@@ -103,8 +103,8 @@ lemma portfolioVarN_nonneg_of_psd
 matches the two-asset formula in `Markowitz.lean`. -/
 lemma portfolioVarN_two_asset_compat (w σ₁ σ₂ ρ : ℝ) :
     portfolioVarN (Finset.univ : Finset (Fin 2))
-        (fun i => if i = 0 then w else 1 - w)
-        (fun i j =>
+        (fun i ↦ if i = 0 then w else 1 - w)
+        (fun i j ↦
           if i = 0 ∧ j = 0 then σ₁ ^ 2
           else if i = 1 ∧ j = 1 then σ₂ ^ 2
           else ρ * σ₁ * σ₂) =

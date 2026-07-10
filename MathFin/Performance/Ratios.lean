@@ -143,7 +143,7 @@ noncomputable def kellyGrowth (p b f : ℝ) : ℝ :=
 the derivative of the expected log-growth vanishes. -/
 lemma kellyGrowth_deriv_at_kelly {p b : ℝ}
     (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
-    HasDerivAt (fun f => kellyGrowth p b f) 0 (kellyFraction p b) := by
+    HasDerivAt (fun f ↦ kellyGrowth p b f) 0 (kellyFraction p b) := by
   unfold kellyGrowth kellyFraction
   set f₀ : ℝ := (p * b - (1 - p)) / b with hf₀_def
   have hb_ne : b ≠ 0 := hb.ne'
@@ -160,16 +160,16 @@ lemma kellyGrowth_deriv_at_kelly {p b : ℝ}
   have h_1_sub_pos : 0 < 1 - f₀ := by rw [h_1_sub]; positivity
   have h_1_sub_ne : 1 - f₀ ≠ 0 := h_1_sub_pos.ne'
   -- Derivative of f ↦ log(1 + f·b) at f₀: b / (1 + f₀·b)
-  have h1 : HasDerivAt (fun f => Real.log (1 + f * b))
+  have h1 : HasDerivAt (fun f ↦ Real.log (1 + f * b))
       (b / (1 + f₀ * b)) f₀ := by
-    have hbase : HasDerivAt (fun f : ℝ => 1 + f * b) b f₀ := by
+    have hbase : HasDerivAt (fun f : ℝ ↦ 1 + f * b) b f₀ := by
       have := (hasDerivAt_id f₀).mul_const b
       simpa using this.const_add 1
     simpa [div_eq_mul_inv] using hbase.log h_1_add_ne
   -- Derivative of f ↦ log(1 - f) at f₀: -1 / (1 - f₀)
-  have h2 : HasDerivAt (fun f => Real.log (1 - f))
+  have h2 : HasDerivAt (fun f ↦ Real.log (1 - f))
       (-1 / (1 - f₀)) f₀ := by
-    have hbase : HasDerivAt (fun f : ℝ => 1 - f) (-1) f₀ := by
+    have hbase : HasDerivAt (fun f : ℝ ↦ 1 - f) (-1) f₀ := by
       simpa using (hasDerivAt_id f₀).const_sub 1
     simpa [div_eq_mul_inv] using hbase.log h_1_sub_ne
   -- Combine

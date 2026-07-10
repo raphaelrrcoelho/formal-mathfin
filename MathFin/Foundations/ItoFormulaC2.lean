@@ -41,12 +41,12 @@ include hB
 `|f″| ≤ C₂` and `|f‴| ≤ C₃`, the uniform-partition Riemann–Itô sums `∑ f′(B_{tₖ})·ΔBₖ`
 converge in `L²(μ)` to `f(B_T) − f(B_0) − ½∫₀ᵀ f″(B_s) ds`. -/
 theorem ito_formula_L2
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 => B s ω)) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω)) (T : ℝ≥0)
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
     {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2) {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
-    Tendsto (fun n : ℕ =>
+    Tendsto (fun n : ℕ ↦
         ∫ ω, (∑ k ∈ Finset.range n,
                 f' (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)
               - (f (B T ω) - f (B 0 ω)
@@ -54,50 +54,50 @@ theorem ito_formula_L2
       atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   classical
-  have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x => (hf'' x).continuousAt
+  have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt
   have hf'm : Measurable f' :=
-    (continuous_iff_continuousAt.mpr fun x => (hf' x).continuousAt).measurable
+    (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
   have hf''m : Measurable f'' := hf''_cont.measurable
-  have hfm : Measurable f := (continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt).measurable
+  have hfm : Measurable f := (continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt).measurable
   have hA1 := tendsto_weighted_qv (μ := μ) hB hBmeas hBcont (g := f'') hf''_cont hf2 T
   have hA2 := tendsto_ito_remainder hB hBmeas T hf hf' hf'' hf3
-  set Isum : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
+  set Isum : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       f' (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) with hIsum
-  set QV : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
+  set QV : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       f'' (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 with hQVdef
-  set Rem : ℕ → Ω → ℝ := fun n ω => ∑ k ∈ Finset.range n,
+  set Rem : ℕ → Ω → ℝ := fun n ω ↦ ∑ k ∈ Finset.range n,
       discreteTaylorRemainder f f' f'' (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω) with hRemdef
-  set I2 : Ω → ℝ := fun ω => ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure with hI2def
-  show Tendsto (fun n => ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ)
+  set I2 : Ω → ℝ := fun ω ↦ ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure with hI2def
+  show Tendsto (fun n ↦ ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ)
     atTop (𝓝 0)
   -- `L²` membership of the second-order integral and the two discrete sums
   have hI2_memLp : MemLp I2 2 μ := memLp_pathIntegral (μ := μ) hB hBmeas hBcont hf''_cont hf2 T
   have hQV_memLp : ∀ n, MemLp (QV n) 2 μ := by
     intro n
     rw [hQVdef]
-    refine memLp_finsetSum _ fun k _ => ?_
-    have hZ : MemLp (fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
+    refine memLp_finsetSum _ fun k _ ↦ ?_
+    have hZ : MemLp (fun ω ↦ (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) 2 μ := by
       have h := (memLp_increment_sq_centered_two hB (unifPart T n k) (unifPart T n (k + 1))
           ((unifPart T n (k + 1) : ℝ) - unifPart T n k)).add
           (memLp_const (μ := μ) ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
-      have heq : ((fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
+      have heq : ((fun ω ↦ (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2
             - ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
-          + fun _ : Ω => ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
-          = fun ω => (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 := by
+          + fun _ : Ω ↦ ((unifPart T n (k + 1) : ℝ) - unifPart T n k))
+          = fun ω ↦ (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2 := by
         funext ω; simp only [Pi.add_apply]; ring
       rwa [heq] at h
-    have haesm : AEStronglyMeasurable (fun ω => f'' (B (unifPart T n k) ω)
+    have haesm : AEStronglyMeasurable (fun ω ↦ f'' (B (unifPart T n k) ω)
         * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 2) μ :=
       (hf''m.comp (hBmeas _)).aestronglyMeasurable.mul hZ.aestronglyMeasurable
-    refine MemLp.mono (hZ.const_mul C2) haesm (Eventually.of_forall fun ω => ?_)
+    refine MemLp.mono (hZ.const_mul C2) haesm (Eventually.of_forall fun ω ↦ ?_)
     simp only [Real.norm_eq_abs, abs_mul]
     rw [abs_of_nonneg (le_trans (abs_nonneg _) (hf2 0))]
     exact mul_le_mul_of_nonneg_right (hf2 _) (abs_nonneg _)
   have hRem_memLp : ∀ n, MemLp (Rem n) 2 μ := by
     intro n
     rw [hRemdef]
-    refine memLp_finsetSum _ fun k _ => ?_
-    have hmeas : Measurable (fun ω => discreteTaylorRemainder f f' f''
+    refine memLp_finsetSum _ fun k _ ↦ ?_
+    have hmeas : Measurable (fun ω ↦ discreteTaylorRemainder f f' f''
         (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) := by
       unfold discreteTaylorRemainder
       exact (((hfm.comp (hBmeas _)).sub (hfm.comp (hBmeas _))).sub
@@ -106,7 +106,7 @@ theorem ito_formula_L2
     rw [memLp_two_iff_integrable_sq hmeas.aestronglyMeasurable]
     refine Integrable.mono'
       ((integrable_increment_pow6 hB (unifPart T n k) (unifPart T n (k + 1))).const_mul (C3 ^ 2))
-      (hmeas.pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω => ?_)
+      (hmeas.pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω ↦ ?_)
     rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
     have hb := abs_discreteTaylorRemainder_le hf hf' hf'' hf3
       (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)
@@ -121,23 +121,23 @@ theorem ito_formula_L2
             * (C3 * |B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω| ^ 3) :=
           mul_self_le_mul_self (abs_nonneg _) hb
       _ = C3 ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 := by rw [← he]; ring
-  have hInt_a : ∀ n, Integrable (fun ω => (QV n ω - I2 ω) ^ 2) μ :=
-    fun n => ((hQV_memLp n).sub hI2_memLp).integrable_sq
-  have hInt_b : ∀ n, Integrable (fun ω => Rem n ω ^ 2) μ :=
-    fun n => (hRem_memLp n).integrable_sq
+  have hInt_a : ∀ n, Integrable (fun ω ↦ (QV n ω - I2 ω) ^ 2) μ :=
+    fun n ↦ ((hQV_memLp n).sub hI2_memLp).integrable_sq
+  have hInt_b : ∀ n, Integrable (fun ω ↦ Rem n ω ^ 2) μ :=
+    fun n ↦ (hRem_memLp n).integrable_sq
   -- the upper bound `½∫(QVₙ−∫f″ds)² + 2∫Remₙ² → 0` (A1 + A2)
-  have hupper : Tendsto (fun n => (1 / 2) * ∫ ω, (QV n ω - I2 ω) ^ 2 ∂μ
+  have hupper : Tendsto (fun n ↦ (1 / 2) * ∫ ω, (QV n ω - I2 ω) ^ 2 ∂μ
       + 2 * ∫ ω, Rem n ω ^ 2 ∂μ) atTop (𝓝 0) := by
     have h := (hA1.const_mul (1 / 2)).add (hA2.const_mul 2)
     simp only [mul_zero, add_zero] at h
     exact h
-  refine squeeze_zero' (Eventually.of_forall fun n => integral_nonneg fun ω => sq_nonneg _) ?_ hupper
+  refine squeeze_zero' (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_ hupper
   filter_upwards [eventually_gt_atTop 0] with n hn
   -- discrete Itô formula: `Isumₙ − I = −½(QVₙ − ∫f″ds) − Remₙ` (`n > 0`)
   have hpt : ∀ ω, Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)
       = -(1 / 2) * (QV n ω - I2 ω) - Rem n ω := by
     intro ω
-    have hd := discrete_ito_formula n (fun k => B (unifPart T n k) ω) f f' f''
+    have hd := discrete_ito_formula n (fun k ↦ B (unifPart T n k) ω) f f' f''
     have hnn : unifPart T n n = T := by
       have hne : (n : ℝ≥0) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
       simp only [unifPart, div_self hne, one_mul]
@@ -147,14 +147,14 @@ theorem ito_formula_L2
     linarith [hd]
   calc ∫ ω, (Isum n ω - (f (B T ω) - f (B 0 ω) - (1 / 2) * I2 ω)) ^ 2 ∂μ
       = ∫ ω, (-(1 / 2) * (QV n ω - I2 ω) - Rem n ω) ^ 2 ∂μ := by
-        refine integral_congr_ae (Eventually.of_forall fun ω => ?_)
+        refine integral_congr_ae (Eventually.of_forall fun ω ↦ ?_)
         show (Isum n ω - (f (B T ω) - f (B 0 ω) - 1 / 2 * I2 ω)) ^ 2
           = (-(1 / 2) * (QV n ω - I2 ω) - Rem n ω) ^ 2
         rw [hpt ω]
     _ ≤ ∫ ω, ((1 / 2) * (QV n ω - I2 ω) ^ 2 + 2 * Rem n ω ^ 2) ∂μ := by
-        refine integral_mono_of_nonneg (Eventually.of_forall fun ω => sq_nonneg _)
+        refine integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
           (((hInt_a n).const_mul (1 / 2)).add ((hInt_b n).const_mul 2))
-          (Eventually.of_forall fun ω => ?_)
+          (Eventually.of_forall fun ω ↦ ?_)
         nlinarith [sq_nonneg ((1 / 2) * (QV n ω - I2 ω) - Rem n ω)]
     _ = (1 / 2) * ∫ ω, (QV n ω - I2 ω) ^ 2 ∂μ + 2 * ∫ ω, Rem n ω ^ 2 ∂μ := by
         rw [integral_add ((hInt_a n).const_mul (1 / 2)) ((hInt_b n).const_mul 2),

@@ -183,7 +183,7 @@ theorem binomialPrice_succ_eq_onePeriod (u d r : ℝ) (g : ℝ → ℝ) (n : ℕ
 
 /-- **Linearity of the binomial price** in the payoff function. -/
 lemma binomialPrice_add (u d r : ℝ) (g h : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    binomialPrice u d r (fun x => g x + h x) n S =
+    binomialPrice u d r (fun x ↦ g x + h x) n S =
       binomialPrice u d r g n S + binomialPrice u d r h n S := by
   induction n generalizing S with
   | zero => rfl
@@ -194,7 +194,7 @@ lemma binomialPrice_add (u d r : ℝ) (g h : ℝ → ℝ) (n : ℕ) (S : ℝ) :
 
 /-- **Scalar homogeneity of the binomial price** in the payoff function. -/
 lemma binomialPrice_smul (u d r c : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
-    binomialPrice u d r (fun x => c * g x) n S = c * binomialPrice u d r g n S := by
+    binomialPrice u d r (fun x ↦ c * g x) n S = c * binomialPrice u d r g n S := by
   induction n generalizing S with
   | zero => rfl
   | succ n ih =>
@@ -205,7 +205,7 @@ lemma binomialPrice_smul (u d r c : ℝ) (g : ℝ → ℝ) (n : ℕ) (S : ℝ) :
 /-- **Constant-payoff price**: a deterministic payoff `c` at maturity has time-0
 price `e^{-rn} · c` for `n` steps. -/
 theorem binomialPrice_const (u d r c : ℝ) (_h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
-    binomialPrice u d r (fun _ => c) n S = Real.exp (-(n : ℝ) * r) * c := by
+    binomialPrice u d r (fun _ ↦ c) n S = Real.exp (-(n : ℝ) * r) * c := by
   induction n generalizing S with
   | zero => simp
   | succ n ih =>
@@ -237,7 +237,7 @@ lemma crrUpProb_mul_up_add (u d r : ℝ) (h : BinomialNoArb u d r) :
 itself) returns `S` — the discounted stock price is a martingale under the
 risk-neutral probability. -/
 theorem binomialPrice_id (u d r : ℝ) (h : BinomialNoArb u d r) (n : ℕ) (S : ℝ) :
-    binomialPrice u d r (fun x => x) n S = S := by
+    binomialPrice u d r (fun x ↦ x) n S = S := by
   have hmart := crrUpProb_mul_up_add u d r h
   induction n generalizing S with
   | zero => rfl

@@ -36,7 +36,7 @@ open MathFin
 leaving only `Φ(d₁)`. -/
 example {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
-    HasDerivAt (fun s => bsV K r σ s τ) (Phi (bsd1 S K r σ τ)) S :=
+    HasDerivAt (fun s ↦ bsV K r σ s τ) (Phi (bsd1 S K r σ τ)) S :=
   hasDerivAt_bsV_S hK hσ hS hτ
 
 /-! ### 2. Markowitz two-asset minimum variance via completing-the-square -/
@@ -74,7 +74,7 @@ example {μ₁ μ₂ σ₁ σ₂ ρ z : ℝ}
 /-- At the Kelly fraction, the derivative of the expected log-growth vanishes —
 this characterizes `f*` as the (interior) optimum. -/
 example {p b : ℝ} (hp : 0 < p) (hp1 : p < 1) (hb : 0 < b) :
-    HasDerivAt (fun f => kellyGrowth p b f) 0 (kellyFraction p b) :=
+    HasDerivAt (fun f ↦ kellyGrowth p b f) 0 (kellyFraction p b) :=
   kellyGrowth_deriv_at_kelly hp hp1 hb
 
 /-! ### 5. Variance swap fair strike (Demeterfi-Derman-Kamal log-payoff piece) -/

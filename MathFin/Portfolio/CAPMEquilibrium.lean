@@ -116,14 +116,14 @@ theorem CAPM_from_market_equilibrium
         μ_excess i * portfolioVariance s Sg w_M := by
     unfold portfolioVariance
     rw [Finset.mul_sum]
-    refine Finset.sum_congr rfl (fun j _ => by ring)
+    refine Finset.sum_congr rfl (fun j _ ↦ by ring)
   -- RHS = μ_M · (Σw_M)_i
   have h_RHS :
       ∑ j ∈ s, w_M j * (μ_excess j * marginalVariance s Sg w_M i) =
         portfolioReturn s w_M μ_excess * marginalVariance s Sg w_M i := by
     unfold portfolioReturn
     rw [Finset.sum_mul]
-    refine Finset.sum_congr rfl (fun j _ => by ring)
+    refine Finset.sum_congr rfl (fun j _ ↦ by ring)
   rw [h_LHS, h_RHS] at h_sum
   -- h_sum: μ_excess i * Var(R_M) = μ_M * (Σw_M)_i
   -- Divide both sides by Var(R_M)
@@ -147,7 +147,7 @@ theorem expectedReturn_eq_SML_from_equilibrium
       (marginalVariance s Sg w_M i / portfolioVariance s Sg w_M)
       (∑ k ∈ s, w_M k * μ k) := by
   unfold securityMarketLine
-  have h := CAPM_from_market_equilibrium s w_M (fun k => μ k - rf) Sg i hi h_var h_FOC
+  have h := CAPM_from_market_equilibrium s w_M (fun k ↦ μ k - rf) Sg i hi h_var h_FOC
   -- h: μ i - rf = β_i · (∑ k w_M(k) (μ k - rf))
   -- We want: μ i = rf + β_i · ((∑ k w_M(k) μ k) - rf)
   unfold portfolioReturn at h

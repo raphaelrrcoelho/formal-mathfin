@@ -11,7 +11,7 @@ public import Mathlib
 # Equivalent probability measure from a positive normalised density
 
 A measurable, strictly-positive, `P`-integrable density `g` with `∫ g ∂P = 1` defines an
-**equivalent probability measure** `P.withDensity (fun ω => ENNReal.ofReal (g ω))`: it is a
+**equivalent probability measure** `P.withDensity (fun ω ↦ ENNReal.ofReal (g ω))`: it is a
 probability measure (total mass `∫ g = 1`) and mutually absolutely continuous with `P`
 (`withDensity` is always `≪ P`, and `P ≪` it because the density is a.e. nonzero).
 
@@ -28,22 +28,22 @@ namespace MathFin
 open MeasureTheory
 
 /-- A measurable, strictly-positive, `P`-integrable density `g` with `∫ g ∂P = 1` makes
-`Q = P.withDensity (fun ω => ENNReal.ofReal (g ω))` a probability measure equivalent to `P`:
+`Q = P.withDensity (fun ω ↦ ENNReal.ofReal (g ω))` a probability measure equivalent to `P`:
 `IsProbabilityMeasure Q`, `Q ≪ P`, and `P ≪ Q`. -/
 theorem isEquivProbMeasure_withDensity {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Measure Ω)
     {g : Ω → ℝ} (hmeas : Measurable g) (hpos : ∀ ω, 0 < g ω) (hint : Integrable g P)
     (hsum : ∫ ω, g ω ∂P = 1) :
-    IsProbabilityMeasure (P.withDensity (fun ω => ENNReal.ofReal (g ω))) ∧
-      P.withDensity (fun ω => ENNReal.ofReal (g ω)) ≪ P ∧
-      P ≪ P.withDensity (fun ω => ENNReal.ofReal (g ω)) := by
-  have hofReal_meas : Measurable (fun ω => ENNReal.ofReal (g ω)) :=
+    IsProbabilityMeasure (P.withDensity (fun ω ↦ ENNReal.ofReal (g ω))) ∧
+      P.withDensity (fun ω ↦ ENNReal.ofReal (g ω)) ≪ P ∧
+      P ≪ P.withDensity (fun ω ↦ ENNReal.ofReal (g ω)) := by
+  have hofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (g ω)) :=
     ENNReal.measurable_ofReal.comp hmeas
   refine ⟨⟨?_⟩, withDensity_absolutelyContinuous _ _,
     withDensity_absolutelyContinuous' hofReal_meas.aemeasurable
-      (Filter.Eventually.of_forall fun ω => ?_)⟩
+      (Filter.Eventually.of_forall fun ω ↦ ?_)⟩
   · rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
       ← ofReal_integral_eq_lintegral_ofReal hint
-        (Filter.Eventually.of_forall fun ω => (hpos ω).le), hsum, ENNReal.ofReal_one]
+        (Filter.Eventually.of_forall fun ω ↦ (hpos ω).le), hsum, ENNReal.ofReal_one]
   · simp only [ne_eq, ENNReal.ofReal_eq_zero, not_le]; exact hpos ω
 
 end MathFin

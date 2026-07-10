@@ -65,7 +65,7 @@ lemma simpleQuadVar_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) (ω : Ω) :
     simpleQuadVar (Ω := Ω) s c N T ω ≤ K ^ 2 * (T : ℝ) := by
   rw [simpleQuadVar, ← simpleTau_sum hs0 N hNT, Finset.mul_sum]
-  refine Finset.sum_le_sum fun i _ => mul_le_mul_of_nonneg_right ?_ (simpleTau_nonneg hs i T)
+  refine Finset.sum_le_sum fun i _ ↦ mul_le_mul_of_nonneg_right ?_ (simpleTau_nonneg hs i T)
   nlinarith [(abs_le.mp (hc_bdd i ω)).1, (abs_le.mp (hc_bdd i ω)).2]
 
 /-- **Log-linearity of the rescaled simple Doléans density.** `E^{r·c}_T = exp(r·∑cᵢΔXᵢ −
@@ -73,25 +73,25 @@ lemma simpleQuadVar_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {
 variation by `r²`. The `r = −1` case is the density `Z_{−c}`; `r = −2, −4` power the `L²`/`L⁴`
 bounds. -/
 lemma simpleDoleansExp_scaled_eq (s : ℕ → ℝ≥0) (c : ℕ → Ω → ℝ) (r : ℝ) (N : ℕ) (T : ℝ≥0) (ω : Ω) :
-    simpleDoleansExp (X := X) s (fun i ω => r * c i ω) N T ω
+    simpleDoleansExp (X := X) s (fun i ω ↦ r * c i ω) N T ω
       = Real.exp (r * simpleStochSum (X := X) s c N T ω
           - 2⁻¹ * r ^ 2 * simpleQuadVar (Ω := Ω) s c N T ω) := by
   rw [simpleDoleansExp_eq_exp_sum]
   congr 1
   rw [simpleStochSum, simpleQuadVar, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
-  refine Finset.sum_congr rfl fun i _ => by ring
+  refine Finset.sum_congr rfl fun i _ ↦ by ring
 
 /-- The density `Z_{−c}` in stochastic-exponent form: `Z_{−c}_T = exp(−∑cᵢΔXᵢ − ½∑cᵢ²Δτᵢ)`, the
 `r = −1` specialization of `simpleDoleansExp_scaled_eq`. -/
 lemma simpleDoleansExp_neg_eq (s : ℕ → ℝ≥0) (c : ℕ → Ω → ℝ) (N : ℕ) (T : ℝ≥0) (ω : Ω) :
-    simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω
+    simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω
       = Real.exp (-simpleStochSum (X := X) s c N T ω
           - 2⁻¹ * simpleQuadVar (Ω := Ω) s c N T ω) := by
   rw [simpleDoleansExp_eq_exp_sum]
   congr 1
   rw [simpleStochSum, simpleQuadVar, Finset.mul_sum, ← Finset.sum_neg_distrib,
     ← Finset.sum_sub_distrib]
-  refine Finset.sum_congr rfl fun i _ => by ring
+  refine Finset.sum_congr rfl fun i _ ↦ by ring
 
 variable {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 mΩ}
   [SigmaFiniteFiltration P 𝓕] [hX : IsFilteredPreBrownian X 𝓕 P]
@@ -101,9 +101,9 @@ variable {P : Measure Ω} [IsProbabilityMeasure P] {𝓕 : Filtration ℝ≥0 m�
 private lemma scaled_adapted_bounded {s : ℕ → ℝ≥0} {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (r : ℝ) :
-    (∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω => r * c i ω))
+    (∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (fun ω ↦ r * c i ω))
       ∧ (∀ i ω, |r * c i ω| ≤ |r| * K) :=
-  ⟨fun i => (hc i).const_mul r, fun i ω => by
+  ⟨fun i ↦ (hc i).const_mul r, fun i ω ↦ by
     rw [abs_mul]; exact mul_le_mul_of_nonneg_left (hc_bdd i ω) (abs_nonneg r)⟩
 
 include hX in
@@ -111,9 +111,9 @@ include hX in
 lemma measurable_simpleDoleans {s : ℕ → ℝ≥0} (hs : Monotone s) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) (T : ℝ≥0) :
-    Measurable (fun ω => simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) :=
-  (((simpleDoleansExp_isMartingale (X := X) (P := P) s hs (fun i ω => -(c i ω))
-    (fun i => (hc i).neg) (fun i ω => by rw [abs_neg]; exact hc_bdd i ω) N).1 T).mono
+    Measurable (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) :=
+  (((simpleDoleansExp_isMartingale (X := X) (P := P) s hs (fun i ω ↦ -(c i ω))
+    (fun i ↦ (hc i).neg) (fun i ω ↦ by rw [abs_neg]; exact hc_bdd i ω) N).1 T).mono
       (𝓕.le T)).measurable
 
 include hX in
@@ -123,24 +123,24 @@ include hX in
 lemma quad_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
-    ∫ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 4 ∂P
+    ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4 ∂P
       ≤ Real.exp (6 * K ^ 2 * (T : ℝ)) := by
   obtain ⟨h4m, h4b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-4)
-  have hmean : ∫ ω, simpleDoleansExp (X := X) s (fun i ω => (-4 : ℝ) * c i ω) N T ω ∂P = 1 :=
+  have hmean : ∫ ω, simpleDoleansExp (X := X) s (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω ∂P = 1 :=
     simpleDoleansExp_integral_eq_one (X := X) s hs _ h4m h4b N T
-  have hint4 : Integrable (fun ω => simpleDoleansExp (X := X) s
-      (fun i ω => (-4 : ℝ) * c i ω) N T ω) P :=
+  have hint4 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
+      (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω) P :=
     (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ h4m h4b N).integrable T
-  have hpt : ∀ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 4
+  have hpt : ∀ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4
       ≤ Real.exp (6 * K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
-          (fun i ω => (-4 : ℝ) * c i ω) N T ω := by
+          (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω := by
     intro ω
     rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, ← Real.exp_nat_mul, ← Real.exp_add]
     exact Real.exp_le_exp.mpr (by push_cast; linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
-  calc ∫ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 4 ∂P
+  calc ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4 ∂P
       ≤ ∫ ω, Real.exp (6 * K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
-          (fun i ω => (-4 : ℝ) * c i ω) N T ω ∂P :=
-        integral_mono_of_nonneg (ae_of_all _ fun ω => by positivity) (hint4.const_mul _)
+          (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω ∂P :=
+        integral_mono_of_nonneg (ae_of_all _ fun ω ↦ by positivity) (hint4.const_mul _)
           (ae_of_all _ hpt)
     _ = Real.exp (6 * K ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
 
@@ -152,24 +152,24 @@ unit-mean density. This is the `M` the limit density's Fatou `L²` bound consume
 lemma sq_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
-    ∫ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2 ∂P
+    ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2 ∂P
       ≤ Real.exp (K ^ 2 * (T : ℝ)) := by
   obtain ⟨h2m, h2b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-2)
-  have hmean : ∫ ω, simpleDoleansExp (X := X) s (fun i ω => (-2 : ℝ) * c i ω) N T ω ∂P = 1 :=
+  have hmean : ∫ ω, simpleDoleansExp (X := X) s (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω ∂P = 1 :=
     simpleDoleansExp_integral_eq_one (X := X) s hs _ h2m h2b N T
-  have hint2 : Integrable (fun ω => simpleDoleansExp (X := X) s
-      (fun i ω => (-2 : ℝ) * c i ω) N T ω) P :=
+  have hint2 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
+      (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω) P :=
     (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ h2m h2b N).integrable T
-  have hpt : ∀ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2
+  have hpt : ∀ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2
       ≤ Real.exp (K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
-          (fun i ω => (-2 : ℝ) * c i ω) N T ω := by
+          (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω := by
     intro ω
     rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two, ← Real.exp_add, ← Real.exp_add]
     exact Real.exp_le_exp.mpr (by linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
-  calc ∫ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2 ∂P
+  calc ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2 ∂P
       ≤ ∫ ω, Real.exp (K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
-          (fun i ω => (-2 : ℝ) * c i ω) N T ω ∂P :=
-        integral_mono_of_nonneg (ae_of_all _ fun ω => sq_nonneg _) (hint2.const_mul _)
+          (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω ∂P :=
+        integral_mono_of_nonneg (ae_of_all _ fun ω ↦ sq_nonneg _) (hint2.const_mul _)
           (ae_of_all _ hpt)
     _ = Real.exp (K ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
 
@@ -180,15 +180,15 @@ density limit's Fatou `L²` bound as the per-`n` `MemLp` hypothesis. -/
 lemma memLp_simpleDoleans_two {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
-    MemLp (fun ω => simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) 2 P := by
+    MemLp (fun ω ↦ simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) 2 P := by
   obtain ⟨h2m, h2b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-2)
   have hZmeas := measurable_simpleDoleans (X := X) (P := P) hs hc hc_bdd N T
-  have hint2 : Integrable (fun ω => simpleDoleansExp (X := X) s
-      (fun i ω => (-2 : ℝ) * c i ω) N T ω) P :=
+  have hint2 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
+      (fun i ω ↦ (-2 : ℝ) * c i ω) N T ω) P :=
     (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ h2m h2b N).integrable T
   rw [memLp_two_iff_integrable_sq hZmeas.aestronglyMeasurable]
   refine (hint2.const_mul (Real.exp (K ^ 2 * (T : ℝ)))).mono'
-    (hZmeas.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω => ?_)
+    (hZmeas.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦ ?_)
   rw [Real.norm_of_nonneg (sq_nonneg _), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two,
     ← Real.exp_add, ← Real.exp_add]
   exact Real.exp_le_exp.mpr (by linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
@@ -199,14 +199,14 @@ include hX in
 lemma integrable_simpleDoleans_four {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
-    Integrable (fun ω => (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 4) P := by
+    Integrable (fun ω ↦ (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4) P := by
   obtain ⟨h4m, h4b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-4)
-  have hint4 : Integrable (fun ω => simpleDoleansExp (X := X) s
-      (fun i ω => (-4 : ℝ) * c i ω) N T ω) P :=
+  have hint4 : Integrable (fun ω ↦ simpleDoleansExp (X := X) s
+      (fun i ω ↦ (-4 : ℝ) * c i ω) N T ω) P :=
     (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ h4m h4b N).integrable T
   refine (hint4.const_mul (Real.exp (6 * K ^ 2 * (T : ℝ)))).mono'
     ((measurable_simpleDoleans (X := X) (P := P) hs hc hc_bdd N T).pow_const 4).aestronglyMeasurable
-    (ae_of_all _ fun ω => ?_)
+    (ae_of_all _ fun ω ↦ ?_)
   rw [Real.norm_of_nonneg (by positivity), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq,
     ← Real.exp_nat_mul, ← Real.exp_add]
   exact Real.exp_le_exp.mpr (by push_cast; linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
@@ -218,9 +218,9 @@ omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
 /-- Measurability of the drift-corrected exponential `D_u`. -/
 lemma measurable_driftExp {s : ℕ → ℝ≥0} (hs : Monotone s) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) (a : ℝ) (N : ℕ) (u : ℝ≥0) :
-    Measurable (fun ω => Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) := by
+    Measurable (fun ω ↦ Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) := by
   have hXu : Measurable (X u) := ((hX.stronglyAdapted u).mono (𝓕.le u)).measurable
-  have hsd : Measurable (fun ω => simpleDrift s c N u ω) :=
+  have hsd : Measurable (fun ω ↦ simpleDrift s c N u ω) :=
     ((stronglyMeasurable_simpleDrift hs hc N u).mono (𝓕.le u)).measurable
   fun_prop (disch := first | exact hXu | exact hsd)
 
@@ -233,7 +233,7 @@ lemma quad_integral_driftExp_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s
     {K : ℝ} (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T) (hNT : T ≤ s N) :
     ∫ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4 ∂P
       ≤ Real.exp (4 * |a| * K * (T : ℝ)) * ∫ ω, Real.exp (4 * a * X u ω) ∂P := by
-  have hMGF : Integrable (fun ω => Real.exp (4 * a * X u ω)) P :=
+  have hMGF : Integrable (fun ω ↦ Real.exp (4 * a * X u ω)) P :=
     integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (4 * a)
   have hpt : ∀ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4
       ≤ Real.exp (4 * |a| * K * (T : ℝ)) * Real.exp (4 * a * X u ω) := by
@@ -251,7 +251,7 @@ lemma quad_integral_driftExp_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s
     nlinarith [h4, sq_nonneg a, u.coe_nonneg]
   calc ∫ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4 ∂P
       ≤ ∫ ω, Real.exp (4 * |a| * K * (T : ℝ)) * Real.exp (4 * a * X u ω) ∂P :=
-        integral_mono_of_nonneg (ae_of_all _ fun ω => by positivity) (hMGF.const_mul _)
+        integral_mono_of_nonneg (ae_of_all _ fun ω ↦ by positivity) (hMGF.const_mul _)
           (ae_of_all _ hpt)
     _ = Real.exp (4 * |a| * K * (T : ℝ)) * ∫ ω, Real.exp (4 * a * X u ω) ∂P := integral_const_mul _ _
 
@@ -262,12 +262,12 @@ omit [IsProbabilityMeasure P] [SigmaFiniteFiltration P 𝓕] in
 lemma integrable_driftExp_four {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T) (hNT : T ≤ s N) :
-    Integrable (fun ω => (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4) P := by
-  have hMGF : Integrable (fun ω => Real.exp (4 * a * X u ω)) P :=
+    Integrable (fun ω ↦ (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4) P := by
+  have hMGF : Integrable (fun ω ↦ Real.exp (4 * a * X u ω)) P :=
     integrable_exp_mul_of_hasLaw (hX.hasLaw_eval u) (4 * a)
   refine (hMGF.const_mul (Real.exp (4 * |a| * K * (T : ℝ)))).mono'
     ((measurable_driftExp (X := X) (P := P) hs hc a N u).pow_const 4).aestronglyMeasurable
-    (ae_of_all _ fun ω => ?_)
+    (ae_of_all _ fun ω ↦ ?_)
   have hK0 : (0 : ℝ) ≤ K := (abs_nonneg _).trans (hc_bdd 0 ω)
   rw [Real.norm_of_nonneg (by positivity), ← Real.exp_nat_mul, ← Real.exp_add]
   refine Real.exp_le_exp.mpr ?_
@@ -292,14 +292,14 @@ include hX in
 lemma memLp_mixedProduct_two {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T) (hNT : T ≤ s N) :
-    MemLp (fun ω => Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
-      * simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) 2 P := by
+    MemLp (fun ω ↦ Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
+      * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) 2 P := by
   have hDmeas := measurable_driftExp (X := X) (P := P) hs hc a N u
   have hZmeas := measurable_simpleDoleans (X := X) (P := P) hs hc hc_bdd N T
   rw [memLp_two_iff_integrable_sq (hDmeas.mul hZmeas).aestronglyMeasurable]
   refine (((integrable_driftExp_four (X := X) (P := P) hs hs0 hc hc_bdd a N huT hNT).add
     (integrable_simpleDoleans_four (X := X) (P := P) hs hs0 hc hc_bdd N hNT)).const_mul 2⁻¹).mono'
-    ((hDmeas.mul hZmeas).pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω =>
+    ((hDmeas.mul hZmeas).pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦
       (Real.norm_of_nonneg (sq_nonneg _)).le.trans (sq_mul_le_half_add_pow4 _ _))
 
 include hX in
@@ -309,19 +309,19 @@ lemma sq_integral_mixedProduct_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 :
     (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
     (hc_bdd : ∀ i ω, |c i ω| ≤ K) (a : ℝ) (N : ℕ) {u T : ℝ≥0} (huT : u ≤ T) (hNT : T ≤ s N) :
     ∫ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
-      * simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2 ∂P
+      * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2 ∂P
       ≤ 2⁻¹ * (Real.exp (4 * |a| * K * (T : ℝ)) * (∫ ω, Real.exp (4 * a * X u ω) ∂P)
           + Real.exp (6 * K ^ 2 * (T : ℝ))) := by
   have hD4 := integrable_driftExp_four (X := X) (P := P) hs hs0 hc hc_bdd a N huT hNT
   have hZ4 := integrable_simpleDoleans_four (X := X) (P := P) hs hs0 hc hc_bdd N hNT
   calc ∫ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)
-        * simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2 ∂P
+        * simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 2 ∂P
       ≤ ∫ ω, 2⁻¹ * ((Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4
-          + (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 4) ∂P :=
-        integral_mono_of_nonneg (ae_of_all _ fun ω => sq_nonneg _) ((hD4.add hZ4).const_mul _)
-          (ae_of_all _ fun ω => sq_mul_le_half_add_pow4 _ _)
+          + (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4) ∂P :=
+        integral_mono_of_nonneg (ae_of_all _ fun ω ↦ sq_nonneg _) ((hD4.add hZ4).const_mul _)
+          (ae_of_all _ fun ω ↦ sq_mul_le_half_add_pow4 _ _)
     _ = 2⁻¹ * ((∫ ω, (Real.exp (a * (X u ω + simpleDrift s c N u ω) - a ^ 2 * (u : ℝ) / 2)) ^ 4 ∂P)
-          + ∫ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 4 ∂P) := by
+          + ∫ ω, (simpleDoleansExp (X := X) s (fun i ω ↦ -(c i ω)) N T ω) ^ 4 ∂P) := by
         rw [integral_const_mul, integral_add hD4 hZ4]
     _ ≤ 2⁻¹ * (Real.exp (4 * |a| * K * (T : ℝ)) * (∫ ω, Real.exp (4 * a * X u ω) ∂P)
           + Real.exp (6 * K ^ 2 * (T : ℝ))) :=

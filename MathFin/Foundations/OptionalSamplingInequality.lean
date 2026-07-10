@@ -75,14 +75,14 @@ theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
     (hσ_le_τ : σ ≤ τ) (hτ_le : ∀ ω, τ ω ≤ n)
     [SigmaFinite (μ.trim hσ.measurableSpace_le)] :
     stoppedValue f σ ≤ᵐ[μ] μ[stoppedValue f τ | hσ.measurableSpace] := by
-  have hσ_le : ∀ ω, σ ω ≤ n := fun ω => (hσ_le_τ ω).trans (hτ_le ω)
+  have hσ_le : ∀ ω, σ ω ≤ n := fun ω ↦ (hσ_le_τ ω).trans (hτ_le ω)
   -- the two halves of the Doob decomposition
   have hM : Martingale (martingalePart f ℱ μ) ℱ μ :=
     martingale_martingalePart hf.1 hf.integrable
   -- stopped values split exactly along the decomposition
   have h_split : ∀ ρ : Ω → ℕ∞, stoppedValue f ρ
       = stoppedValue (martingalePart f ℱ μ) ρ
-        + stoppedValue (predictablePart f ℱ μ) ρ := fun ρ => by
+        + stoppedValue (predictablePart f ℱ μ) ρ := fun ρ ↦ by
     funext ω
     simp only [stoppedValue, Pi.add_apply, martingalePart, Pi.sub_apply,
       sub_add_cancel]
@@ -110,11 +110,11 @@ theorem submartingale_optional_sampling [SigmaFiniteFiltration μ ℱ]
   -- compensator half: pathwise monotone, then condExp_mono
   have h_untopA_mono : ∀ ω, (σ ω).untopA ≤ (τ ω).untopA := by
     intro ω
-    have hτ_ne : τ ω ≠ ⊤ := fun h => by
+    have hτ_ne : τ ω ≠ ⊤ := fun h ↦ by
       have hle := hτ_le ω
       rw [h] at hle
       exact WithTop.not_top_le_coe n hle
-    have hσ_ne : σ ω ≠ ⊤ := fun h => hτ_ne (top_le_iff.1 (h ▸ hσ_le_τ ω))
+    have hσ_ne : σ ω ≠ ⊤ := fun h ↦ hτ_ne (top_le_iff.1 (h ▸ hσ_le_τ ω))
     obtain ⟨a, ha⟩ := WithTop.ne_top_iff_exists.1 hσ_ne
     obtain ⟨b, hb⟩ := WithTop.ne_top_iff_exists.1 hτ_ne
     have hab : a ≤ b := by

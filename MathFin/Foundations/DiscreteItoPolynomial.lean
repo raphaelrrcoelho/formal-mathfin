@@ -51,7 +51,7 @@ namespace MathFin
 /-- For `f(x) = x³`, with `f'(x) = 3x²` and `f''(x) = 6x`, the discrete
 Taylor remainder is `(b − a)³`. Pure ring identity. -/
 lemma discreteTaylorRemainder_cube (Xk Xkp1 : ℝ) :
-    discreteTaylorRemainder (fun x => x ^ 3) (fun x => 3 * x ^ 2) (fun x => 6 * x) Xk Xkp1
+    discreteTaylorRemainder (fun x ↦ x ^ 3) (fun x ↦ 3 * x ^ 2) (fun x ↦ 6 * x) Xk Xkp1
       = (Xkp1 - Xk) ^ 3 := by
   unfold discreteTaylorRemainder
   ring
@@ -61,7 +61,7 @@ Taylor remainder is `4·a·(b − a)³ + (b − a)⁴`. The cube term is the
 deterministic part (vanishes a.s. as the partition refines, by Brownian
 third-moment bounds) and the quartic term is the higher-order tail. -/
 lemma discreteTaylorRemainder_quartic (Xk Xkp1 : ℝ) :
-    discreteTaylorRemainder (fun x => x ^ 4) (fun x => 4 * x ^ 3) (fun x => 12 * x ^ 2)
+    discreteTaylorRemainder (fun x ↦ x ^ 4) (fun x ↦ 4 * x ^ 3) (fun x ↦ 12 * x ^ 2)
         Xk Xkp1 = 4 * Xk * (Xkp1 - Xk) ^ 3 + (Xkp1 - Xk) ^ 4 := by
   unfold discreteTaylorRemainder
   ring
@@ -81,18 +81,18 @@ theorem discrete_cubing_identity (N : ℕ) (X : ℕ → ℝ) :
       3 * (∑ k ∈ Finset.range N, X k ^ 2 * (X (k + 1) - X k)) +
       3 * (∑ k ∈ Finset.range N, X k * (X (k + 1) - X k) ^ 2) +
       ∑ k ∈ Finset.range N, (X (k + 1) - X k) ^ 3 := by
-  have h := discrete_ito_formula N X (fun x => x ^ 3) (fun x => 3 * x ^ 2) (fun x => 6 * x)
+  have h := discrete_ito_formula N X (fun x ↦ x ^ 3) (fun x ↦ 3 * x ^ 2) (fun x ↦ 6 * x)
   -- Substitute the cube remainder.
-  rw [Finset.sum_congr rfl (fun k _ => discreteTaylorRemainder_cube (X k) (X (k + 1)))] at h
+  rw [Finset.sum_congr rfl (fun k _ ↦ discreteTaylorRemainder_cube (X k) (X (k + 1)))] at h
   -- Factor the constant out of each Itô-sum (one `mul_sum` per `have` to avoid
   -- the multi-occurrence rewrite ambiguity), then `ring` over the three sums as
   -- atoms.
   have e1 : (∑ k ∈ Finset.range N, 3 * X k ^ 2 * (X (k + 1) - X k))
       = 3 * ∑ k ∈ Finset.range N, X k ^ 2 * (X (k + 1) - X k) := by
-    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun k _ => by ring
+    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun k _ ↦ by ring
   have e2 : (∑ k ∈ Finset.range N, 6 * X k * (X (k + 1) - X k) ^ 2)
       = 6 * ∑ k ∈ Finset.range N, X k * (X (k + 1) - X k) ^ 2 := by
-    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun k _ => by ring
+    rw [Finset.mul_sum]; exact Finset.sum_congr rfl fun k _ ↦ by ring
   rw [e1, e2] at h
   rw [h]; ring
 

@@ -46,8 +46,8 @@ open Set Real ProbabilityTheory
 positive part of an affine function. The spot-direction sibling of
 `convexOn_call_payoff`. -/
 lemma convexOn_call_payoff_spot (K : ℝ) :
-    ConvexOn ℝ Set.univ (fun S : ℝ => max (S - K) 0) := by
-  refine ConvexOn.sup ⟨convex_univ, fun a _ b _ s t _ _ hst => ?_⟩
+    ConvexOn ℝ Set.univ (fun S : ℝ ↦ max (S - K) 0) := by
+  refine ConvexOn.sup ⟨convex_univ, fun a _ b _ s t _ _ hst ↦ ?_⟩
     (convexOn_const (0 : ℝ) convex_univ)
   show s • a + t • b - K ≤ s • (a - K) + t • (b - K)
   simp only [smul_eq_mul]
@@ -63,7 +63,7 @@ The proof is the second-derivative test, exactly parallel to
 * `hasDerivAt_bsV_SS`: `∂²_S bsV = ϕ(d₁)/(S σ √τ)` (gamma) exists and is
   non-negative for every `S > 0`.
 
-The only delicate step is identifying `deriv (fun s => bsV K r σ s τ)` with
+The only delicate step is identifying `deriv (fun s ↦ bsV K r σ s τ)` with
 the closed-form delta in a neighbourhood of each interior point, so the
 second derivative inherits the closed form. -/
 
@@ -71,16 +71,16 @@ second derivative inherits the closed form. -/
 closed-form delta on the whole positive half-line. -/
 private lemma deriv_bsV_S_eq_on_Ioi (K r σ τ : ℝ) (hK : 0 < K) (hσ : 0 < σ)
     (hτ : 0 < τ) {S : ℝ} (hS : S ∈ Set.Ioi (0 : ℝ)) :
-    deriv (fun s => bsV K r σ s τ) S = Phi (bsd1 S K r σ τ) :=
+    deriv (fun s ↦ bsV K r σ s τ) S = Phi (bsd1 S K r σ τ) :=
   (hasDerivAt_bsV_S (K := K) (r := r) (σ := σ) hK hσ hS hτ).deriv
 
 /-- **Local equality of derivatives on `(0, ∞)`**: in a neighbourhood of any
-`S > 0`, `deriv (fun s => bsV K r σ s τ)` agrees with the closed-form delta,
+`S > 0`, `deriv (fun s ↦ bsV K r σ s τ)` agrees with the closed-form delta,
 so derivative facts about the closed form transfer to `deriv`. -/
 private lemma deriv_bsV_S_eventuallyEq (K r σ τ : ℝ) (hK : 0 < K) (hσ : 0 < σ)
     (hτ : 0 < τ) {S : ℝ} (hS : 0 < S) :
-    (fun s => deriv (fun s' => bsV K r σ s' τ) s) =ᶠ[nhds S]
-      (fun s => Phi (bsd1 s K r σ τ)) := by
+    (fun s ↦ deriv (fun s' ↦ bsV K r σ s' τ) s) =ᶠ[nhds S]
+      (fun s ↦ Phi (bsd1 s K r σ τ)) := by
   filter_upwards [isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hS)] with s hs
   exact deriv_bsV_S_eq_on_Ioi K r σ τ hK hσ hτ hs
 
@@ -88,7 +88,7 @@ private lemma deriv_bsV_S_eventuallyEq (K r σ τ : ℝ) (hK : 0 < K) (hσ : 0 <
 price face of S-convexity: at every `S > 0`,
 `∂²_S bsV = ϕ(d₁)/(S σ √τ) ≥ 0` (gamma). -/
 theorem bsV_spot_convexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ) :
-    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun s => bsV K r σ s τ) := by
+    ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun s ↦ bsV K r σ s τ) := by
   refine convexOn_of_deriv2_nonneg' (convex_Ioi 0) ?_ ?_ ?_
   -- (1) bsV is differentiable in S on Ioi 0 (from hasDerivAt_bsV_S).
   · intro S hS
@@ -105,7 +105,7 @@ theorem bsV_spot_convexOn {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0
     have h_pos : (0 : ℝ) < S := hS
     have h_SS := hasDerivAt_bsV_SS (K := K) (r := r) (σ := σ) hK hσ h_pos hτ
     have h_ev := deriv_bsV_S_eventuallyEq K r σ τ hK hσ hτ h_pos
-    have h_d2 : deriv^[2] (fun s => bsV K r σ s τ) S =
+    have h_d2 : deriv^[2] (fun s ↦ bsV K r σ s τ) S =
         gaussianPDFReal 0 1 (bsd1 S K r σ τ) / (S * σ * Real.sqrt τ) :=
       (h_SS.congr_of_eventuallyEq h_ev).deriv
     rw [h_d2]

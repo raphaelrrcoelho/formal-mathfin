@@ -30,7 +30,7 @@ continue to consume the marginal hypothesis directly.
 
 The substantive new fact is `scaled_isPreBrownian_eval_law`:
 
-  `IsPreBrownianReal W Q  ⟹  HasLaw (fun ω => W T.toNNReal ω / √T) (gaussianReal 0 1) Q`.
+  `IsPreBrownianReal W Q  ⟹  HasLaw (fun ω ↦ W T.toNNReal ω / √T) (gaussianReal 0 1) Q`.
 
 It combines `IsPreBrownianReal.hasLaw_eval` (Brownian marginal `W_T ~ N(0, T)`)
 with `Mathlib`'s `gaussianReal_div_const` (Gaussian scaling under `· / c`).
@@ -77,7 +77,7 @@ lemma scaled_isPreBrownian_eval_law
     {Q : Measure Ω} [IsProbabilityMeasure Q]
     (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
     {T : ℝ} (hT : 0 < T) :
-    HasLaw (fun ω => W T.toNNReal ω / Real.sqrt T) (gaussianReal 0 1) Q := by
+    HasLaw (fun ω ↦ W T.toNNReal ω / Real.sqrt T) (gaussianReal 0 1) Q := by
   have h_eval : HasLaw (W T.toNNReal) (gaussianReal 0 T.toNNReal) Q :=
     hW.hasLaw_eval T.toNNReal
   have h_div := gaussianReal_div_const h_eval (Real.sqrt T)
@@ -103,7 +103,7 @@ theorem BSCallHyp.of_isPreBrownian
     (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
-    BSCallHyp Q S_0 K r σ T (fun ω => W T.toNNReal ω / Real.sqrt T) :=
+    BSCallHyp Q S_0 K r σ T (fun ω ↦ W T.toNNReal ω / Real.sqrt T) :=
   ⟨hS_0, hK, hσ, hT, scaled_isPreBrownian_eval_law W hW hT⟩
 
 /-- **`BachelierHyp` from a pre-Brownian motion**. Same scaled `Z := W
@@ -116,7 +116,7 @@ theorem BachelierHyp.of_isPreBrownian
     (W : ℝ≥0 → Ω → ℝ) (hW : IsPreBrownianReal W Q)
     {S_0 K σ T : ℝ}
     (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
-    BachelierHyp Q S_0 K σ T (fun ω => W T.toNNReal ω / Real.sqrt T) :=
+    BachelierHyp Q S_0 K σ T (fun ω ↦ W T.toNNReal ω / Real.sqrt T) :=
   ⟨hK, hσ, hT, scaled_isPreBrownian_eval_law W hW hT⟩
 
 /-- **`bsTerminal` expressed in terms of Brownian motion**: substituting the

@@ -54,14 +54,14 @@ Proof: chain rule via `HasDerivAt.pow` on `(1 + y')^n`, then `HasDerivAt.div`
 with a constant numerator. The `n = 0` and `n ≥ 1` cases are bundled by the
 final `field_simp + ring`. -/
 lemma hasDerivAt_coupon_term (c_val : ℝ) (n : ℕ) {y : ℝ} (hy : 1 + y ≠ 0) :
-    HasDerivAt (fun y' => c_val / (1 + y') ^ n)
+    HasDerivAt (fun y' ↦ c_val / (1 + y') ^ n)
                (-((n : ℝ) * c_val / (1 + y) ^ (n + 1))) y := by
-  have h_base : HasDerivAt (fun y' : ℝ => (1 : ℝ) + y') 1 y :=
+  have h_base : HasDerivAt (fun y' : ℝ ↦ (1 : ℝ) + y') 1 y :=
     (hasDerivAt_id y).const_add 1
-  have h_pow : HasDerivAt (fun y' : ℝ => (1 + y') ^ n)
+  have h_pow : HasDerivAt (fun y' : ℝ ↦ (1 + y') ^ n)
                ((n : ℝ) * (1 + y) ^ (n - 1) * 1) y := h_base.pow n
   have h_pow_ne : (1 + y) ^ n ≠ 0 := pow_ne_zero _ hy
-  have h_const : HasDerivAt (fun _ : ℝ => c_val) 0 y := hasDerivAt_const y c_val
+  have h_const : HasDerivAt (fun _ : ℝ ↦ c_val) 0 y := hasDerivAt_const y c_val
   have h_div := h_const.div h_pow h_pow_ne
   rw [show (-((n : ℝ) * c_val / (1 + y) ^ (n + 1)))
         = (0 * (1 + y) ^ n - c_val * ((n : ℝ) * (1 + y) ^ (n - 1) * 1)) / ((1 + y) ^ n) ^ 2 from by

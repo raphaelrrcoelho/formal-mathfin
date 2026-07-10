@@ -51,8 +51,8 @@ converges to `σ² · T` as the partition refines:
   `lim_n E[Σ_{k=0}^{n} (X_{(k+1)T/(n+1)} − X_{kT/(n+1)})²] = σ² · T`.
 
 Proof structure:
-1. Build `Tendsto (fun _ => σ²·T) atTop (𝓝 (σ²·T))` (constant).
-2. Build `Tendsto (fun n => drift² · T² / (n+1)) atTop (𝓝 0)` via
+1. Build `Tendsto (fun _ ↦ σ²·T) atTop (𝓝 (σ²·T))` (constant).
+2. Build `Tendsto (fun n ↦ drift² · T² / (n+1)) atTop (𝓝 0)` via
    `tendsto_one_div_add_atTop_nhds_zero_nat` + scaling.
 3. Add the two via `Tendsto.add` ⟹ `Tendsto (σ²·T + drift²·T²/(n+1))
    atTop (𝓝 (σ²·T + 0)) = (𝓝 (σ²·T))`.
@@ -63,33 +63,33 @@ theorem tendsto_expected_bsLogPrice_equipartition_sum
     (hB : BrownianQuadraticVariation μ B) (S_0 r σ : ℝ)
     {T : ℝ} (hT : 0 ≤ T) :
     Filter.Tendsto
-      (fun n : ℕ => ∫ ω, ∑ k ∈ Finset.range (n + 1),
+      (fun n : ℕ ↦ ∫ ω, ∑ k ∈ Finset.range (n + 1),
         (bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -
          bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ)
       Filter.atTop (nhds (σ ^ 2 * T)) := by
   -- Step 1: drift contribution → 0 via 1/(n+1) → 0 + scaling.
-  have h_one_div : Filter.Tendsto (fun n : ℕ => (1 : ℝ) / ((n : ℝ) + 1))
+  have h_one_div : Filter.Tendsto (fun n : ℕ ↦ (1 : ℝ) / ((n : ℝ) + 1))
       Filter.atTop (nhds (0 : ℝ)) :=
     tendsto_one_div_add_atTop_nhds_zero_nat
   have h_decay_mul : Filter.Tendsto
-      (fun n : ℕ => (r - σ ^ 2 / 2) ^ 2 * T ^ 2 * ((1 : ℝ) / ((n : ℝ) + 1)))
+      (fun n : ℕ ↦ (r - σ ^ 2 / 2) ^ 2 * T ^ 2 * ((1 : ℝ) / ((n : ℝ) + 1)))
       Filter.atTop (nhds ((r - σ ^ 2 / 2) ^ 2 * T ^ 2 * 0)) :=
     h_one_div.const_mul _
   rw [mul_zero] at h_decay_mul
   have h_decay : Filter.Tendsto
-      (fun n : ℕ => (r - σ ^ 2 / 2) ^ 2 * T ^ 2 / ((n : ℝ) + 1))
+      (fun n : ℕ ↦ (r - σ ^ 2 / 2) ^ 2 * T ^ 2 / ((n : ℝ) + 1))
       Filter.atTop (nhds (0 : ℝ)) := by
     refine h_decay_mul.congr ?_
     intro n
     rw [mul_one_div]
   -- Step 2: constant Tendsto for σ²·T.
-  have h_const : Filter.Tendsto (fun _ : ℕ => σ ^ 2 * T)
+  have h_const : Filter.Tendsto (fun _ : ℕ ↦ σ ^ 2 * T)
       Filter.atTop (nhds (σ ^ 2 * T)) :=
     tendsto_const_nhds
   -- Step 3: sum of two Tendsto, then simplify nhds(σ²·T + 0) = nhds(σ²·T).
   have h_sum :
       Filter.Tendsto
-        (fun n : ℕ => σ ^ 2 * T +
+        (fun n : ℕ ↦ σ ^ 2 * T +
           (r - σ ^ 2 / 2) ^ 2 * T ^ 2 / ((n : ℝ) + 1))
         Filter.atTop (nhds (σ ^ 2 * T)) := by
     have := h_const.add h_decay
@@ -100,7 +100,7 @@ theorem tendsto_expected_bsLogPrice_equipartition_sum
         (bsLogPrice S_0 r σ B (((k : ℝ) + 1) * T / ((n : ℝ) + 1)) ω -
          bsLogPrice S_0 r σ B ((k : ℝ) * T / ((n : ℝ) + 1)) ω) ^ 2 ∂μ
         = σ ^ 2 * T + (r - σ ^ 2 / 2) ^ 2 * T ^ 2 / ((n : ℝ) + 1) :=
-    fun n => expected_bsLogPrice_equipartition_sum hB S_0 r σ hT n
-  exact h_sum.congr (fun n => (h_eq n).symm)
+    fun n ↦ expected_bsLogPrice_equipartition_sum hB S_0 r σ hT n
+  exact h_sum.congr (fun n ↦ (h_eq n).symm)
 
 end MathFin

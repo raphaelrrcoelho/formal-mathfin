@@ -55,12 +55,12 @@ variable {r t : ℝ}
 private lemma continuousOn_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (r : ℝ) :
     ContinuousOn (gammaPDFReal a r) (Set.Ici 0) := by
   have hform : ContinuousOn
-      (fun x : ℝ => r ^ a / Real.Gamma a * x ^ (a - 1) * rexp (-(r * x)))
+      (fun x : ℝ ↦ r ^ a / Real.Gamma a * x ^ (a - 1) * rexp (-(r * x)))
       (Set.Ici 0) := by
     refine ContinuousOn.mul (ContinuousOn.mul continuousOn_const ?_) ?_
-    · exact continuousOn_id.rpow_const fun x _ => Or.inr (by linarith)
+    · exact continuousOn_id.rpow_const fun x _ ↦ Or.inr (by linarith)
     · exact ((continuous_const.mul continuous_id).neg.rexp).continuousOn
-  exact hform.congr fun x hx => by
+  exact hform.congr fun x hx ↦ by
     rw [gammaPDFReal, if_pos (Set.mem_Ici.mp hx)]
 
 private lemma intervalIntegrable_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (ht : 0 ≤ t) :
@@ -68,7 +68,7 @@ private lemma intervalIntegrable_gammaPDFReal {a : ℝ} (ha : 1 ≤ a) (ht : 0 �
   refine ContinuousOn.intervalIntegrable ?_
   refine (continuousOn_gammaPDFReal ha r).mono ?_
   rw [Set.uIcc_of_le ht]
-  exact fun x hx => hx.1
+  exact fun x hx ↦ hx.1
 
 /-! ### The Gamma CDF as an interval integral -/
 
@@ -84,9 +84,9 @@ private lemma gammaMeasure_Iic {a : ℝ} (ha : 1 ≤ a) (hr : 0 < r) (ht : 0 ≤
     withDensity_apply _ measurableSet_Iic,
     lintegral_Iic_eq_lintegral_Iio_add_Icc _ ht,
     lintegral_gammaPDF_of_nonpos le_rfl, zero_add,
-    show gammaPDF a r = fun s => ENNReal.ofReal (gammaPDFReal a r s) from rfl,
+    show gammaPDF a r = fun s ↦ ENNReal.ofReal (gammaPDFReal a r s) from rfl,
     ← ofReal_integral_eq_lintegral_ofReal hInt
-      (Filter.Eventually.of_forall fun s =>
+      (Filter.Eventually.of_forall fun s ↦
         gammaPDFReal_nonneg (by linarith) hr s),
     integral_Icc_eq_integral_Ioc, ← intervalIntegral.integral_of_le ht]
 
@@ -96,15 +96,15 @@ private lemma gammaMeasure_Iic {a : ℝ} (ha : 1 ≤ a) (hr : 0 < r) (ht : 0 ≤
 has derivative `γ_k(s) − γ_{k+1}(s)` (Gamma densities of natural shapes). -/
 private lemma hasDerivAt_gamma_antideriv {k : ℕ} (hk : k ≠ 0)
     {s : ℝ} (hs : 0 ≤ s) :
-    HasDerivAt (fun u : ℝ => (r * u) ^ k * rexp (-(r * u)) / k !)
+    HasDerivAt (fun u : ℝ ↦ (r * u) ^ k * rexp (-(r * u)) / k !)
       (gammaPDFReal k r s - gammaPDFReal (k + 1 : ℕ) r s) s := by
   obtain ⟨m, rfl⟩ : ∃ m, k = m + 1 :=
     ⟨k - 1, (Nat.succ_pred_eq_of_pos (Nat.pos_of_ne_zero hk)).symm⟩
-  have h1 : HasDerivAt (fun u : ℝ => (r * u) ^ (m + 1))
+  have h1 : HasDerivAt (fun u : ℝ ↦ (r * u) ^ (m + 1))
       (((m + 1 : ℕ) : ℝ) * (r * s) ^ m * r) s := by
     have := (hasDerivAt_pow (m + 1) (r * s)).comp s ((hasDerivAt_id s).const_mul r)
     convert this using 1 <;> first | rfl | (push_cast; ring)
-  have h2 : HasDerivAt (fun u : ℝ => rexp (-(r * u)))
+  have h2 : HasDerivAt (fun u : ℝ ↦ rexp (-(r * u)))
       (rexp (-(r * s)) * (-r)) s := by
     have := (((hasDerivAt_id s).const_mul r).neg).exp
     simpa using this
@@ -153,7 +153,7 @@ private lemma integral_gammaPDFReal_sub_succ (ht : 0 ≤ t)
   have hint2 := intervalIntegrable_gammaPDFReal (a := ((k + 1 : ℕ) : ℝ)) (r := r) hk1' ht
   rw [← intervalIntegral.integral_sub hint1 hint2,
     intervalIntegral.integral_eq_sub_of_hasDerivAt
-      (fun s hs => hasDerivAt_gamma_antideriv hk
+      (fun s hs ↦ hasDerivAt_gamma_antideriv hk
         (by rw [Set.uIcc_of_le ht] at hs; exact hs.1))
       (hint1.sub hint2)]
   rw [mul_zero, zero_pow hk, zero_mul, zero_div, sub_zero]
@@ -164,7 +164,7 @@ CDF). -/
 private lemma integral_gammaPDFReal_one (ht : 0 ≤ t) :
     ∫ s in (0:ℝ)..t, gammaPDFReal 1 r s = 1 - rexp (-(r * t)) := by
   have hderiv : ∀ s ∈ Set.uIcc (0:ℝ) t,
-      HasDerivAt (fun u : ℝ => -rexp (-(r * u))) (gammaPDFReal 1 r s) s := by
+      HasDerivAt (fun u : ℝ ↦ -rexp (-(r * u))) (gammaPDFReal 1 r s) s := by
     intro s hs
     rw [Set.uIcc_of_le ht] at hs
     have h := hasDerivAt_neg_exp_mul_exp (r := r) (x := s)
@@ -201,10 +201,10 @@ theorem map_count_eq_poissonMeasure [IsProbabilityMeasure μ]
     μ.map (N t) = poissonMeasure (rate * ⟨t, ht⟩) := by
   have hr : (0 : ℝ) < rate := NNReal.coe_pos.mpr hrate
   -- arrival times
-  set T : ℕ → Ω → ℝ := fun k ω => ∑ i ∈ Finset.range k, ξ i ω with hT
-  have hTmeas : ∀ k, Measurable (T k) := fun k =>
-    Finset.measurable_sum _ fun i _ => hmeas i
-  have hTmono : ∀ k ω, T k ω ≤ T (k + 1) ω := fun k ω => by
+  set T : ℕ → Ω → ℝ := fun k ω ↦ ∑ i ∈ Finset.range k, ξ i ω with hT
+  have hTmeas : ∀ k, Measurable (T k) := fun k ↦
+    Finset.measurable_sum _ fun i _ ↦ hmeas i
+  have hTmono : ∀ k ω, T k ω ≤ T (k + 1) ω := fun k ω ↦ by
     rw [hT]
     simp only [Finset.sum_range_succ]
     exact le_add_of_nonneg_right (hnonneg k ω)
@@ -214,10 +214,10 @@ theorem map_count_eq_poissonMeasure [IsProbabilityMeasure μ]
     have h := ErlangSum.map_sum_iidExp hr hmeas hlaw hindep (Finset.range k)
       (Finset.nonempty_range_iff.mpr hk)
     rwa [show (∑ i ∈ Finset.range k, ξ i) = T k from
-        funext fun ω => Finset.sum_apply ω (Finset.range k) ξ,
+        funext fun ω ↦ Finset.sum_apply ω (Finset.range k) ξ,
       Finset.card_range] at h
   -- arrival events and their measures
-  have hTset_meas : ∀ k, MeasurableSet {ω | T k ω ≤ t} := fun k =>
+  have hTset_meas : ∀ k, MeasurableSet {ω | T k ω ≤ t} := fun k ↦
     measurableSet_le (hTmeas k) measurable_const
   have hF : ∀ k : ℕ, k ≠ 0 → μ {ω | T k ω ≤ t}
       = ENNReal.ofReal (∫ s in (0:ℝ)..t, gammaPDFReal k rate s) := by
@@ -234,17 +234,17 @@ theorem map_count_eq_poissonMeasure [IsProbabilityMeasure μ]
     intro k
     ext ω
     simp [hcount t k ω, hT, not_le]
-  have hNmeas : Measurable (N t) := measurable_to_countable' fun k => by
+  have hNmeas : Measurable (N t) := measurable_to_countable' fun k ↦ by
     rw [hpre k]; exact (hTset_meas k).diff (hTset_meas (k + 1))
   have hsub : ∀ k : ℕ, {ω | T (k + 1) ω ≤ t} ⊆ {ω | T k ω ≤ t} :=
-    fun k ω h => le_trans (hTmono k ω) h
+    fun k ω h ↦ le_trans (hTmono k ω) h
   have hdiff : ∀ k : ℕ, μ ((N t) ⁻¹' {k})
       = μ {ω | T k ω ≤ t} - μ {ω | T (k + 1) ω ≤ t} := by
     intro k
     rw [hpre k, measure_sdiff (hsub k) (hTset_meas (k + 1)).nullMeasurableSet
       (measure_ne_top μ _)]
   -- assemble per singleton
-  refine Measure.ext_of_singleton fun k => ?_
+  refine Measure.ext_of_singleton fun k ↦ ?_
   rw [Measure.map_apply hNmeas (measurableSet_singleton k),
     poissonMeasure_singleton, hdiff k]
   have hco : ((rate * ⟨t, ht⟩ : ℝ≥0) : ℝ) = (rate : ℝ) * t := rfl
@@ -264,7 +264,7 @@ theorem map_count_eq_poissonMeasure [IsProbabilityMeasure μ]
   · -- k ≥ 1 : the Gamma-CDF difference identity
     have hk : k ≠ 0 := Nat.pos_iff_ne_zero.mp hkpos
     have hnn : 0 ≤ ∫ s in (0:ℝ)..t, gammaPDFReal (k + 1 : ℕ) rate s :=
-      intervalIntegral.integral_nonneg ht fun s _ =>
+      intervalIntegral.integral_nonneg ht fun s _ ↦
         gammaPDFReal_nonneg (by positivity) hr s
     rw [hF k hk, hF (k + 1) (Nat.succ_ne_zero k),
       ← ENNReal.ofReal_sub _ hnn,

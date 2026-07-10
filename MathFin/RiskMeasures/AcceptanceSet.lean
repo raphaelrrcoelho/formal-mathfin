@@ -35,7 +35,7 @@ namespace MathFin
 monotonicity, cash-invariance, positive homogeneity, subadditivity. -/
 structure IsCoherentRisk {ι : Type*} [Fintype ι] (ρ : (ι → ℝ) → ℝ) : Prop where
   monotone : ∀ X Y : ι → ℝ, (∀ i, X i ≤ Y i) → ρ Y ≤ ρ X
-  cashInvariant : ∀ (X : ι → ℝ) (m : ℝ), ρ (fun i => X i + m) = ρ X - m
+  cashInvariant : ∀ (X : ι → ℝ) (m : ℝ), ρ (fun i ↦ X i + m) = ρ X - m
   posHom : ∀ (l : ℝ), 0 ≤ l → ∀ X : ι → ℝ, ρ (l • X) = l * ρ X
   subadditive : ∀ X Y : ι → ℝ, ρ (X + Y) ≤ ρ X + ρ Y
 
@@ -49,7 +49,7 @@ lemma rho_zero (hρ : IsCoherentRisk ρ) : ρ 0 = 0 := by
 
 /-- A coherent risk measure is convex (subadditive + positively homogeneous). -/
 lemma convexOn (hρ : IsCoherentRisk ρ) : ConvexOn ℝ Set.univ ρ := by
-  refine ⟨convex_univ, fun x _ y _ a b ha hb _ => ?_⟩
+  refine ⟨convex_univ, fun x _ y _ a b ha hb _ ↦ ?_⟩
   have hsub := hρ.subadditive (a • x) (b • y)
   rw [hρ.posHom a ha, hρ.posHom b hb] at hsub
   simpa [smul_eq_mul] using hsub
@@ -107,29 +107,29 @@ least-upper-bound is the point-from-cone separation of the rejected position `X 
 acceptance cone, normalised to a representing density. -/
 theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [Nonempty ι] {ρ : (ι → ℝ) → ℝ}
     (hρ : IsCoherentRisk ρ) (X : ι → ℝ) :
-    IsLUB ((fun q => ∑ i, q i * (- X i)) '' representingSet ρ) (ρ X) := by
+    IsLUB ((fun q ↦ ∑ i, q i * (- X i)) '' representingSet ρ) (ρ X) := by
   classical
   constructor
   · rintro y ⟨q, ⟨hq_nn, hq_sum, hq_rep⟩, rfl⟩
     show ∑ i, q i * (- X i) ≤ ρ X
-    have hmem : (fun i => X i + ρ X) ∈ {Y : ι → ℝ | ρ Y ≤ 0} := by
-      show ρ (fun i => X i + ρ X) ≤ 0
+    have hmem : (fun i ↦ X i + ρ X) ∈ {Y : ι → ℝ | ρ Y ≤ 0} := by
+      show ρ (fun i ↦ X i + ρ X) ≤ 0
       rw [hρ.cashInvariant X (ρ X)]; simp
     have h0 := hq_rep _ hmem
     have hexp : ∑ i, q i * (X i + ρ X) = (∑ i, q i * X i) + ρ X := by
       rw [show (∑ i, q i * (X i + ρ X)) = ∑ i, (q i * X i + q i * ρ X) from
-            Finset.sum_congr rfl fun i _ => by ring, Finset.sum_add_distrib,
+            Finset.sum_congr rfl fun i _ ↦ by ring, Finset.sum_add_distrib,
           ← Finset.sum_mul, hq_sum, one_mul]
     rw [hexp] at h0
     have hneg : ∑ i, q i * (-X i) = - ∑ i, q i * X i := by
-      rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ => by ring
+      rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ ↦ by ring
     rw [hneg]; linarith
   · intro b hb
     by_contra hlt
     rw [not_le] at hlt
     set ε := ρ X - b with hε
     have hε_pos : 0 < ε := by rw [hε]; linarith
-    set X' : ι → ℝ := fun i => X i + (ρ X - ε) with hX'
+    set X' : ι → ℝ := fun i ↦ X i + (ρ X - ε) with hX'
     have hX'_notin : X' ∉ {Y : ι → ℝ | ρ Y ≤ 0} := by
       show ¬ ρ X' ≤ 0
       rw [hX', hρ.cashInvariant X (ρ X - ε), not_le]; linarith
@@ -150,16 +150,16 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [Nonempty ι] {ρ : (ι →
       by_contra hge
       rw [not_lt] at hge
       have hsum_zero : ∑ i, p i = 0 :=
-        le_antisymm (Finset.sum_nonpos fun i _ => hp_nonpos i) hge
-      have hp_zero : ∀ i, p i = 0 := fun i =>
-        (Finset.sum_eq_zero_iff_of_nonpos fun i _ => hp_nonpos i).mp hsum_zero i (Finset.mem_univ i)
+        le_antisymm (Finset.sum_nonpos fun i _ ↦ hp_nonpos i) hge
+      have hp_zero : ∀ i, p i = 0 := fun i ↦
+        (Finset.sum_eq_zero_iff_of_nonpos fun i _ ↦ hp_nonpos i).mp hsum_zero i (Finset.mem_univ i)
       have hpX'0 : ∑ i, p i * X' i = 0 :=
-        Finset.sum_eq_zero fun i _ => by rw [hp_zero i, zero_mul]
+        Finset.sum_eq_zero fun i _ ↦ by rw [hp_zero i, zero_mul]
       linarith [hp_pos]
     set S := ∑ i, p i with hS
     have hS_ne : S ≠ 0 := ne_of_lt hsum_p_neg
-    set q : ι → ℝ := fun i => p i / S with hq_def
-    have hq_nn : ∀ i, 0 ≤ q i := fun i => by
+    set q : ι → ℝ := fun i ↦ p i / S with hq_def
+    have hq_nn : ∀ i, 0 ≤ q i := fun i ↦ by
       rw [hq_def, div_nonneg_iff]; right; exact ⟨hp_nonpos i, le_of_lt hsum_p_neg⟩
     have hq_sum : ∑ i, q i = 1 := by
       have hh : ∑ i, q i = (∑ i, p i) / S := by rw [hq_def, ← Finset.sum_div]
@@ -168,20 +168,20 @@ theorem coherentRisk_isLUB {ι : Type*} [Fintype ι] [Nonempty ι] {ρ : (ι →
       intro Z hZ
       have hpZ := hp_le Z hZ
       have heq : ∑ i, q i * Z i = (∑ i, p i * Z i) / S := by
-        rw [hq_def, Finset.sum_div]; exact Finset.sum_congr rfl fun i _ => by rw [div_mul_eq_mul_div]
+        rw [hq_def, Finset.sum_div]; exact Finset.sum_congr rfl fun i _ ↦ by rw [div_mul_eq_mul_div]
       rw [heq, div_nonneg_iff]; right; exact ⟨hpZ, le_of_lt hsum_p_neg⟩
     have hq_mem : q ∈ representingSet ρ := ⟨hq_nn, hq_sum, hq_rep⟩
     have hle_b : ∑ i, q i * (- X i) ≤ b := hb ⟨q, hq_mem, rfl⟩
     have hqX'_neg : ∑ i, q i * X' i < 0 := by
       have heq : ∑ i, q i * X' i = (∑ i, p i * X' i) / S := by
-        rw [hq_def, Finset.sum_div]; exact Finset.sum_congr rfl fun i _ => by rw [div_mul_eq_mul_div]
+        rw [hq_def, Finset.sum_div]; exact Finset.sum_congr rfl fun i _ ↦ by rw [div_mul_eq_mul_div]
       rw [heq]; exact div_neg_of_pos_of_neg hp_pos hsum_p_neg
     have hX'_exp : ∑ i, q i * X' i = (∑ i, q i * X i) + (ρ X - ε) := by
       rw [hX', show (∑ i, q i * (X i + (ρ X - ε))) = ∑ i, (q i * X i + q i * (ρ X - ε)) from
-            Finset.sum_congr rfl fun i _ => by ring, Finset.sum_add_distrib,
+            Finset.sum_congr rfl fun i _ ↦ by ring, Finset.sum_add_distrib,
           ← Finset.sum_mul, hq_sum, one_mul]
     have hnegX : ∑ i, q i * (-X i) = - ∑ i, q i * X i := by
-      rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ => by ring
+      rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ ↦ by ring
     rw [hnegX] at hle_b
     rw [hX'_exp] at hqX'_neg
     linarith [hle_b, hqX'_neg]

@@ -81,13 +81,13 @@ theorem chooser_integral_decomp
     (C P S : Ω → ℝ) (K_disc : ℝ)
     (hPCP : ∀ ω, C ω - P ω = S ω - K_disc)
     (hint_C : Integrable C Q)
-    (hint_put : Integrable (fun ω => max 0 (K_disc - S ω)) Q) :
+    (hint_put : Integrable (fun ω ↦ max 0 (K_disc - S ω)) Q) :
     ∫ ω, max (C ω) (P ω) ∂Q =
       (∫ ω, C ω ∂Q) + ∫ ω, max 0 (K_disc - S ω) ∂Q := by
   have h_pointwise : ∀ ω, max (C ω) (P ω) = C ω + max 0 (K_disc - S ω) :=
-    fun ω => chooser_via_pcp (C ω) (P ω) (S ω) K_disc (hPCP ω)
-  rw [show (fun ω => max (C ω) (P ω)) =
-        (fun ω => C ω + max 0 (K_disc - S ω)) from funext h_pointwise]
+    fun ω ↦ chooser_via_pcp (C ω) (P ω) (S ω) K_disc (hPCP ω)
+  rw [show (fun ω ↦ max (C ω) (P ω)) =
+        (fun ω ↦ C ω + max 0 (K_disc - S ω)) from funext h_pointwise]
   exact integral_add hint_C hint_put
 
 /-- **Chooser price expanded** via the BS pricing formulas `bsV` and `bsP`:

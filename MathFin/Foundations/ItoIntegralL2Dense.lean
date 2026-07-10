@@ -84,10 +84,10 @@ omit hB [IsProbabilityMeasure μ] in
 private lemma uncurry_iocSP_eq (hBmeas : ∀ t, Measurable (B t)) (a b : ℝ≥0) {F : Set Ω}
     (hF : MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas) a] F) :
     Function.uncurry ⇑(iocSP hBmeas a b hF)
-      = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) := by
+      = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) := by
   funext ⟨t, ω⟩
   change ⇑((ElementaryPredictableSet.IocProd a b hF).indicator (1 : ℝ)) t ω
-      = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) (t, ω)
+      = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) (t, ω)
   rw [ElementaryPredictableSet.coe_indicator,
       ElementaryPredictableSet.coe_IocProd a b hF]
   rfl
@@ -111,17 +111,17 @@ private lemma inner_simpleAssembly_iocSP (hBmeas : ∀ t, Measurable (B t)) (a b
         (natFiltration (mΩ := mΩ) hBmeas).predictable_le_prod),
       (⟪(simpleAssembly (μ := μ) hBmeas (iocSP hBmeas a b hF) : ℝ≥0 × Ω → ℝ) z,
         (g : ℝ≥0 × Ω → ℝ) z⟫_ℝ : ℝ)
-        = (Set.Ioc a b ×ˢ F).indicator (fun z => (g : ℝ≥0 × Ω → ℝ) z) z := by
+        = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z := by
     filter_upwards [h_coe] with z hz
     have hSA_eq :
         (simpleAssembly (μ := μ) hBmeas (iocSP hBmeas a b hF) : ℝ≥0 × Ω → ℝ) z
-          = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) z := by
+          = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by
       calc (simpleAssembly (μ := μ) hBmeas (iocSP hBmeas a b hF) : ℝ≥0 × Ω → ℝ) z
           = Function.uncurry ⇑(iocSP hBmeas a b hF) z := hz
-        _ = (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) z := by rw [h_uncurry_eq]
+        _ = (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z := by rw [h_uncurry_eq]
     rw [hSA_eq]
-    show (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ => (1 : ℝ)) z
-        = (Set.Ioc a b ×ˢ F).indicator (fun z => (g : ℝ≥0 × Ω → ℝ) z) z
+    show (g : ℝ≥0 × Ω → ℝ) z * (Set.Ioc a b ×ˢ F).indicator (fun _ ↦ (1 : ℝ)) z
+        = (Set.Ioc a b ×ˢ F).indicator (fun z ↦ (g : ℝ≥0 × Ω → ℝ) z) z
     by_cases hz_in : z ∈ Set.Ioc a b ×ˢ F
     · rw [Set.indicator_of_mem hz_in, Set.indicator_of_mem hz_in, mul_one]
     · rw [Set.indicator_of_notMem hz_in, Set.indicator_of_notMem hz_in, mul_zero]
@@ -188,11 +188,11 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
     rw [← ItoIntegralCLM.generateFrom_predictableRect hBmeas]
     exact MeasurableSpace.measurableSet_generateFrom hR
   -- the finite frames
-  set Φ : ℕ → Set (ℝ≥0 × Ω) := fun n => Set.Ioc 0 ((n : ℝ≥0) + 1) ×ˢ Set.univ with hΦ
-  have hΦ_mem : ∀ n, Φ n ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas := fun n =>
+  set Φ : ℕ → Set (ℝ≥0 × Ω) := fun n ↦ Set.Ioc 0 ((n : ℝ≥0) + 1) ×ˢ Set.univ with hΦ
+  have hΦ_mem : ∀ n, Φ n ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas := fun n ↦
     Or.inr ⟨0, (n : ℝ≥0) + 1, Set.univ, by positivity, MeasurableSet.univ, rfl⟩
   have hΦ_meas : ∀ n, MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable] (Φ n) :=
-    fun n => hRpred _ (hΦ_mem n)
+    fun n ↦ hRpred _ (hΦ_mem n)
   -- per-frame a.e. zero
   have h_frame : ∀ n : ℕ, (g : ℝ≥0 × Ω → ℝ)
       =ᵐ[((timeMeasure.prod μ).trim
@@ -236,14 +236,14 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
         ∫ z in R, (gₙ : ℝ≥0 × Ω → ℝ) z
           ∂(ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas) = 0 := by
       intro R hR
-      rw [setIntegral_congr_ae (hRpred R hR) (hgn_coe.mono fun z hz _ => hz)]
+      rw [setIntegral_congr_ae (hRpred R hR) (hgn_coe.mono fun z hz _ ↦ hz)]
       exact h_transfer_g R hR
     have hgn0 : (gₙ : ℝ≥0 × Ω → ℝ)
         =ᵐ[ItoIntegralCLM.trimMeasure_T (μ := μ) ((n : ℝ≥0) + 1) hBmeas] 0 :=
       Lp.ae_eq_zero_of_forall_setIntegral_eq_zero gₙ
         (by norm_num : (2 : ℝ≥0∞) ≠ 0) (by norm_num : (2 : ℝ≥0∞) ≠ ∞)
-        (fun _ _ _ => ((Lp.memLp gₙ).integrable one_le_two).integrableOn)
-        (fun s hs _ => ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred
+        (fun _ _ _ ↦ ((Lp.memLp gₙ).integrable one_le_two).integrableOn)
+        (fun s hs _ ↦ ItoIntegralCLM.setIntegral_eq_zero_of_orthogonal_pred
           (μ := μ) ((n : ℝ≥0) + 1) hBmeas gₙ h_transfer s hs)
     exact hgn_coe.symm.trans hgn0
   -- patch: a.e. zero on every frame + the cover's complement is null ⇒ a.e. zero
@@ -300,7 +300,7 @@ theorem simpleAssembly_denseRange (hBmeas : ∀ t, Measurable (B t)) :
   intro g h_mem
   rw [Submodule.mem_orthogonal] at h_mem
   refine (Lp.eq_zero_iff_ae_eq_zero (f := g)).mpr ?_
-  exact aezeroOfOrth (μ := μ) hBmeas g (fun V => h_mem _ ⟨V, rfl⟩)
+  exact aezeroOfOrth (μ := μ) hBmeas g (fun V ↦ h_mem _ ⟨V, rfl⟩)
 
 /-- **The unbounded-horizon Itô integral as a CLM.** Built from `itoAssembly`
 along the (now dense) `simpleAssembly` via `LinearMap.extendOfNorm`. Its domain

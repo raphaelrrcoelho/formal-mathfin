@@ -72,7 +72,7 @@ call price. Stated as the derivative of the first strike-derivative
 `-(e^{-rT}·Φ(d_2))` of `bsV`. -/
 theorem breedenLitzenberger {S_0 r σ : ℝ} (hS : 0 < S_0) (hσ : 0 < σ)
     {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :
-    HasDerivAt (fun k => -(Real.exp (-(r * T)) * Phi (bsd2 S_0 k r σ T)))
+    HasDerivAt (fun k ↦ -(Real.exp (-(r * T)) * Phi (bsd2 S_0 k r σ T)))
       (Real.exp (-(r * T)) * lognormalTerminalPDF S_0 r σ T K) K := by
   have h := hasDerivAt_bsV_KK (S := S_0) (r := r) (σ := σ) hS hσ hK hT
   convert h using 1
@@ -117,11 +117,11 @@ lognormal terminal PDF. -/
 theorem deriv2_bsV_eq_exp_neg_rT_pdf
     {S_0 r σ : ℝ} (hS₀ : 0 < S_0) (hσ : 0 < σ)
     {K T : ℝ} (hK : 0 < K) (hT : 0 < T) :
-    deriv (deriv (fun K' => bsV K' r σ S_0 T)) K =
+    deriv (deriv (fun K' ↦ bsV K' r σ S_0 T)) K =
       Real.exp (-(r * T)) * lognormalTerminalPDF S_0 r σ T K := by
   -- First identify deriv on Ioi 0 with the explicit closed form.
-  have h_ev : (fun K' => deriv (fun k => bsV k r σ S_0 T) K') =ᶠ[nhds K]
-      (fun K' => -(Real.exp (-(r * T)) * Phi (bsd2 S_0 K' r σ T))) := by
+  have h_ev : (fun K' ↦ deriv (fun k ↦ bsV k r σ S_0 T) K') =ᶠ[nhds K]
+      (fun K' ↦ -(Real.exp (-(r * T)) * Phi (bsd2 S_0 K' r σ T))) := by
     filter_upwards [isOpen_Ioi.mem_nhds (Set.mem_Ioi.mpr hK)] with K' hK'
     exact (hasDerivAt_bsV_K hS₀ hσ hK' hT).deriv
   -- The explicit first derivative has the explicit second derivative.
@@ -160,7 +160,7 @@ theorem lognormalTerminalPDF_nonneg_via_strike_convexity
     0 ≤ lognormalTerminalPDF S_0 r σ T K := by
   -- Step 1: pin the structural input — bsV is strike-convex on (0, ∞).
   -- (Listed but not unfolded here: the convexity is what justifies step 2.)
-  have _h_conv : ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K' => bsV K' r σ S_0 T) :=
+  have _h_conv : ConvexOn ℝ (Set.Ioi (0 : ℝ)) (fun K' ↦ bsV K' r σ S_0 T) :=
     bsV_strike_convexOn hS₀ hσ hT
   -- Step 2: from the closed form `∂²_K bsV K = e^{-rT}·gaussianPDF/(K σ √T)`
   -- (the same formula that drives bsV_strike_convexOn), the second derivative
@@ -172,7 +172,7 @@ theorem lognormalTerminalPDF_nonneg_via_strike_convexity
   have h_pdf_unfolded_nn : 0 ≤ gaussianPDFReal 0 1 (bsd2 S_0 K r σ T) /
       (K * σ * Real.sqrt T) :=
     div_nonneg (gaussianPDFReal_nonneg _ _ _) h_den_pos.le
-  have h_d2_nn : 0 ≤ deriv (deriv (fun K' => bsV K' r σ S_0 T)) K := by
+  have h_d2_nn : 0 ≤ deriv (deriv (fun K' ↦ bsV K' r σ S_0 T)) K := by
     rw [h_d2_eq]; unfold lognormalTerminalPDF
     exact mul_nonneg h_exp_pos.le h_pdf_unfolded_nn
   -- Step 3: Breeden-Litzenberger identifies the second derivative with

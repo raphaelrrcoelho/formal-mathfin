@@ -57,7 +57,7 @@ private lemma functional_eq_sum_single {ι : Type*} [Fintype ι] [DecidableEq ι
     · intro b _ hb; rw [Pi.single_eq_of_ne (Ne.symm hb), mul_zero]
     · intro h; exact absurd (Finset.mem_univ j) h
   conv_lhs => rw [hwsum]
-  rw [map_sum]; exact Finset.sum_congr rfl fun i _ => by rw [map_smul, smul_eq_mul]
+  rw [map_sum]; exact Finset.sum_congr rfl fun i _ ↦ by rw [map_smul, smul_eq_mul]
 
 /-- A functional bounded below by a negative `u` on a cone `C` is nonnegative on `C`: a ray
 `c ∈ C` with `f c < 0` is unbounded below on `C` (scale by `(u-1)/f c ≥ 0`), contradicting the
@@ -89,7 +89,7 @@ theorem exists_pos_separating_of_cone_disjoint_simplex
     ∃ q : ι → ℝ, (∀ i, 0 < q i) ∧ ∀ v ∈ C, ∑ i, q i * v i ≤ 0 := by
   classical
   rcases C.eq_empty_or_nonempty with hCempty | hCne
-  · exact ⟨fun _ => 1, fun _ => one_pos, fun w hw => by rw [hCempty] at hw; simp at hw⟩
+  · exact ⟨fun _ ↦ 1, fun _ ↦ one_pos, fun w hw ↦ by rw [hCempty] at hw; simp at hw⟩
   obtain ⟨x₀, hx₀⟩ := hCne
   have h0C : (0 : ι → ℝ) ∈ C := by simpa using hCcone hx₀ (le_refl (0 : ℝ))
   have hconvΔ : Convex ℝ (stdSimplex ℝ ι) := convex_stdSimplex ℝ ι
@@ -99,15 +99,15 @@ theorem exists_pos_separating_of_cone_disjoint_simplex
   have hv_neg : v < 0 := by have h0 := hfv 0 h0C; rwa [map_zero] at h0
   have hfC_nonneg : ∀ c ∈ C, 0 ≤ f c := functional_nonneg_on_cone hCcone hv_neg hfv
   have hsingle_mem : ∀ i, (Pi.single i (1 : ℝ)) ∈ stdSimplex ℝ ι := by
-    intro i; refine ⟨fun j => ?_, ?_⟩
+    intro i; refine ⟨fun j ↦ ?_, ?_⟩
     · rw [Pi.single_apply]; split <;> norm_num
     · simp [Finset.sum_pi_single']
-  have hsingle_neg : ∀ i, f (Pi.single i (1 : ℝ)) < 0 := fun i => by
+  have hsingle_neg : ∀ i, f (Pi.single i (1 : ℝ)) < 0 := fun i ↦ by
     have := hfu _ (hsingle_mem i); linarith
-  refine ⟨fun i => - f (Pi.single i 1), fun i => by have := hsingle_neg i; linarith, fun w hw => ?_⟩
+  refine ⟨fun i ↦ - f (Pi.single i 1), fun i ↦ by have := hsingle_neg i; linarith, fun w hw ↦ ?_⟩
   calc ∑ i, (- f (Pi.single i (1 : ℝ))) * w i
       = - ∑ i, w i * f (Pi.single i 1) := by
-        rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ => by ring
+        rw [← Finset.sum_neg_distrib]; exact Finset.sum_congr rfl fun i _ ↦ by ring
     _ = - f w := by rw [← functional_eq_sum_single f w]
     _ ≤ 0 := by have := hfC_nonneg w hw; linarith
 
@@ -127,14 +127,14 @@ theorem exists_separating_of_not_mem_cone
   obtain ⟨f, u, hfx₀, hfC⟩ := geometric_hahn_banach_point_closed hCconv hCclosed hx₀
   have hu_neg : u < 0 := by have h0' := hfC 0 h0; rwa [map_zero] at h0'
   have hfC_nonneg : ∀ c ∈ C, 0 ≤ f c := functional_nonneg_on_cone hCcone hu_neg hfC
-  refine ⟨fun i => - f (Pi.single i 1), fun v hv => ?_, ?_⟩
+  refine ⟨fun i ↦ - f (Pi.single i 1), fun v hv ↦ ?_, ?_⟩
   · have hsum : ∑ i, (- f (Pi.single i (1 : ℝ))) * v i = - f v := by
       rw [functional_eq_sum_single f v, ← Finset.sum_neg_distrib]
-      exact Finset.sum_congr rfl fun i _ => by ring
+      exact Finset.sum_congr rfl fun i _ ↦ by ring
     rw [hsum]; have := hfC_nonneg v hv; linarith
   · have hsum : ∑ i, (- f (Pi.single i (1 : ℝ))) * x₀ i = - f x₀ := by
       rw [functional_eq_sum_single f x₀, ← Finset.sum_neg_distrib]
-      exact Finset.sum_congr rfl fun i _ => by ring
+      exact Finset.sum_congr rfl fun i _ ↦ by ring
     rw [hsum]; linarith
 
 end MathFin

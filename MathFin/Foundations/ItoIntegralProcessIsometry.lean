@@ -47,21 +47,21 @@ private lemma integral_rectTerm_mul_band (t : ℝ≥0) (hBmeas : ∀ u, Measurab
       = (∫ ω, V.value p ω * V.value q ω ∂μ)
           * max 0 ((min (min (p.2 : ℝ) q.2) (t : ℝ)) - (max (p.1 : ℝ) q.1)) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
-  have hfun : (fun z : ℝ≥0 × Ω => rectTerm hBmeas V p z * rectTerm hBmeas V q z)
-      = fun z => ((Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) z.1
-                    * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) z.1)
+  have hfun : (fun z : ℝ≥0 × Ω ↦ rectTerm hBmeas V p z * rectTerm hBmeas V q z)
+      = fun z ↦ ((Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1
+                    * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) z.1)
                   * (V.value p z.2 * V.value q z.2) := by
     funext z; simp only [rectTerm]; ring
   rw [setIntegral_congr_fun (measurableSet_Ioc.prod MeasurableSet.univ)
-        (fun z _ => congrFun hfun z),
+        (fun z _ ↦ congrFun hfun z),
       ← Measure.restrict_prod_eq_prod_univ,
       integral_prod_mul
-        (fun i : ℝ≥0 => (Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) i
-          * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) i)
-        (fun ω => V.value p ω * V.value q ω), mul_comm]
+        (fun i : ℝ≥0 ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) i
+          * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) i)
+        (fun ω ↦ V.value p ω * V.value q ω), mul_comm]
   congr 1
-  have hpt : ∀ i : ℝ≥0, (Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) i
-        * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) i
+  have hpt : ∀ i : ℝ≥0, (Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) i
+        * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) i
         = (Set.Ioc p.1 p.2 ∩ Set.Ioc q.1 q.2).indicator (1 : ℝ≥0 → ℝ) i := by
     intro i; rw [Set.inter_indicator_one]; rfl
   simp_rw [hpt]
@@ -154,25 +154,25 @@ private lemma band_integral_uncurry_sq {t T : ℝ≥0} (htT : t ≤ T)
   rw [trimMeasure_T_restrict_band htT]
   simp only [pow_two]
   have hsm : StronglyMeasurable[(natFiltration hBmeas).predictable]
-      (fun z => Function.uncurry ⇑V z * Function.uncurry ⇑V z) :=
+      (fun z ↦ Function.uncurry ⇑V z * Function.uncurry ⇑V z) :=
     V.isStronglyPredictable.mul V.isStronglyPredictable
   rw [integral_trimMeasure_T hBmeas hsm]
   -- (B) expand the square into the rectangle double sum and integrate termwise.
   have hint : ∀ p ∈ V.value.support, ∀ q ∈ V.value.support,
-      Integrable (fun z => rectTerm hBmeas V p z * rectTerm hBmeas V q z) (timeMeasure.prod μ) :=
-    fun p _ q _ => (memLp_rectTerm hBmeas V p).integrable_mul (memLp_rectTerm hBmeas V q)
-  have hsq : (fun z => Function.uncurry ⇑V z * Function.uncurry ⇑V z)
+      Integrable (fun z ↦ rectTerm hBmeas V p z * rectTerm hBmeas V q z) (timeMeasure.prod μ) :=
+    fun p _ q _ ↦ (memLp_rectTerm hBmeas V p).integrable_mul (memLp_rectTerm hBmeas V q)
+  have hsq : (fun z ↦ Function.uncurry ⇑V z * Function.uncurry ⇑V z)
       =ᵐ[(timeMeasure.prod μ).restrict (Set.Ioc 0 t ×ˢ (Set.univ : Set Ω))]
-        fun z => ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
+        fun z ↦ ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           rectTerm hBmeas V p z * rectTerm hBmeas V q z := by
     filter_upwards [ae_restrict_of_ae (uncurry_ae_eq_sum_rectTerm hBmeas V)] with z hz
     rw [hz, Finset.sum_mul_sum]
   rw [integral_congr_ae hsq,
-      integral_finsetSum _ (fun p hp =>
-        (integrable_finsetSum _ fun q hq => hint p hp q hq).integrableOn)]
-  refine Finset.sum_congr rfl fun p hp => ?_
-  rw [integral_finsetSum _ fun q hq => (hint p hp q hq).integrableOn]
-  exact Finset.sum_congr rfl fun q _ => integral_rectTerm_mul_band hB t hBmeas V p q
+      integral_finsetSum _ (fun p hp ↦
+        (integrable_finsetSum _ fun q hq ↦ hint p hp q hq).integrableOn)]
+  refine Finset.sum_congr rfl fun p hp ↦ ?_
+  rw [integral_finsetSum _ fun q hq ↦ (hint p hp q hq).integrableOn]
+  exact Finset.sum_congr rfl fun q _ ↦ integral_rectTerm_mul_band hB t hBmeas V p q
 
 omit [IsProbabilityMeasure μ] in
 /-- **Time-indexed Itô isometry on a simple process.** `‖(V●B)_t‖² = ∫_{(0,t]×Ω}(uncurry V)²`
@@ -193,7 +193,7 @@ private lemma itoSimpleProcessLp_band_isometry {t T : ℝ≥0} (htT : t ≤ T)
     filter_upwards [(memLp_itoSimpleProcess hB hBmeas V t).coeFn_toLp] with ω hω
     rw [show (itoSimpleProcessLp hB hBmeas V t : Ω → ℝ) ω = itoSimpleProcess hBmeas V t ω from hω]
   rw [hLHS, itoSimpleProcess_isometry_time hB hBmeas V t]
-  refine Finset.sum_congr rfl fun p _ => Finset.sum_congr rfl fun q _ => ?_
+  refine Finset.sum_congr rfl fun p _ ↦ Finset.sum_congr rfl fun q _ ↦ ?_
   congr 1
   push_cast
   exact band_overlap_real _ _ _ _ _
@@ -216,9 +216,9 @@ private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
     Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) →L[ℝ]
       Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
   LinearMap.mkContinuous
-    { toFun := fun φ => ((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).toLp
+    { toFun := fun φ ↦ ((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).toLp
         ((Set.Ioc 0 t ×ˢ (Set.univ : Set Ω)).indicator (φ : ℝ≥0 × Ω → ℝ))
-      map_add' := fun φ ψ => by
+      map_add' := fun φ ψ ↦ by
         refine Lp.ext ?_
         filter_upwards [((Lp.memLp (φ + ψ)).indicator (measurableSet_band t hBmeas)).coeFn_toLp,
           Lp.coeFn_add (((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).toLp _)
@@ -229,7 +229,7 @@ private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
         rw [e_sum, e_radd, Pi.add_apply, e_φ, e_ψ]
         simp only [Set.indicator_apply, h_φψ, Pi.add_apply]
         split_ifs <;> ring
-      map_smul' := fun c φ => by
+      map_smul' := fun c φ ↦ by
         refine Lp.ext ?_
         filter_upwards [((Lp.memLp (c • φ)).indicator (measurableSet_band t hBmeas)).coeFn_toLp,
           Lp.coeFn_smul c (((Lp.memLp φ).indicator (measurableSet_band t hBmeas)).toLp _),
@@ -238,7 +238,7 @@ private noncomputable def truncCLM (T t : ℝ≥0) (hBmeas : ∀ u, Measurable (
         rw [e_sm, RingHom.id_apply, e_rsmul, Pi.smul_apply, e_φ]
         simp only [Set.indicator_apply, h_φ, Pi.smul_apply, smul_eq_mul]
         split_ifs <;> ring }
-    1 (fun φ => by
+    1 (fun φ ↦ by
       simp only [LinearMap.coe_mk, AddHom.coe_mk]
       rw [one_mul, Lp.norm_toLp, Lp.norm_def]
       exact ENNReal.toReal_mono (Lp.memLp φ).2.ne (eLpNorm_indicator_le _))
@@ -276,7 +276,7 @@ theorem itoProcessCLM_norm_sq {t T : ℝ≥0} (htT : t ≤ T) (hBmeas : ∀ u, M
   refine congrFun (DenseRange.equalizer (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
     ((continuous_pow 2).comp (itoProcessCLM hB T t hBmeas).continuous.norm)
     ((continuous_pow 2).comp (truncCLM (μ := μ) T t hBmeas).continuous.norm)
-    (funext fun V => ?_)) φ
+    (funext fun V ↦ ?_)) φ
   simp only [Function.comp_apply]
   rw [itoProcessCLM_simpleAssembly_T, truncCLM_norm_sq,
       itoSimpleProcessLp_band_isometry hB htT hBmeas V.val]

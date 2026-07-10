@@ -56,9 +56,9 @@ lemma zcb_yield_eq_rate {r t T : ℝ} (htT : t < T) :
 
 /-- `∂_r B(t, T) = -(T - t) · B(t, T)`. Duration of a ZCB equals time-to-maturity. -/
 lemma hasDerivAt_zcb_r (t T : ℝ) (r : ℝ) :
-    HasDerivAt (fun r' => zcb r' t T) (-(T - t) * zcb r t T) r := by
+    HasDerivAt (fun r' ↦ zcb r' t T) (-(T - t) * zcb r t T) r := by
   unfold zcb
-  have h_lin : HasDerivAt (fun r' : ℝ => -(r' * (T - t))) (-(T - t)) r := by
+  have h_lin : HasDerivAt (fun r' : ℝ ↦ -(r' * (T - t))) (-(T - t)) r := by
     have h := (hasDerivAt_id r).mul_const (T - t)
     rw [one_mul] at h
     exact h.neg
@@ -74,7 +74,7 @@ lemma zcb_duration_eq_time_to_maturity (t T r : ℝ) :
 
 /-- `∂²_r B(t, T) = (T - t)² · B(t, T)`. Convexity = (time-to-maturity)². -/
 lemma hasDerivAt_zcb_r_r (t T : ℝ) (r : ℝ) :
-    HasDerivAt (fun r' => -(T - t) * zcb r' t T) ((T - t)^2 * zcb r t T) r := by
+    HasDerivAt (fun r' ↦ -(T - t) * zcb r' t T) ((T - t)^2 * zcb r t T) r := by
   have h := (hasDerivAt_zcb_r t T r).const_mul (-(T - t))
   rw [show (T - t) ^ 2 * zcb r t T = -(T - t) * (-(T - t) * zcb r t T) from by ring]
   exact h

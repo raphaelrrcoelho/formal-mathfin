@@ -116,7 +116,7 @@ lemma stronglyMeasurable_marshalMult (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
     StronglyMeasurable[(natFiltration hBmeas (marshalPart hBmeas T V i) : MeasurableSpace Ω)]
       (marshalMult hBmeas T V i) := by
   unfold marshalMult
-  refine Finset.stronglyMeasurable_fun_sum _ (fun p _ => ?_)
+  refine Finset.stronglyMeasurable_fun_sum _ (fun p _ ↦ ?_)
   by_cases hcond : p.1 ≤ marshalPart hBmeas T V i ∧ marshalPart hBmeas T V (i + 1) ≤ p.2
   · simp only [hcond]
     exact ((V.measurable_value p).mono ((natFiltration hBmeas).mono hcond.1)
@@ -226,7 +226,7 @@ lemma telescope_cover (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     exact V.le_of_mem_support_value p hp
   rw [← ha_eq, ← hb_eq, ← Finset.sum_filter]
   have hset : ((Finset.range N).filter
-      (fun i => marshalPart hBmeas T V a ≤ marshalPart hBmeas T V i ∧
+      (fun i ↦ marshalPart hBmeas T V a ≤ marshalPart hBmeas T V i ∧
         marshalPart hBmeas T V (i + 1) ≤ marshalPart hBmeas T V b)) = Finset.Ico a b := by
     ext i
     simp only [Finset.mem_filter, Finset.mem_range, Finset.mem_Ico]
@@ -244,8 +244,8 @@ lemma telescope_cover (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       · rw [marshalPart_le_iff hBmeas T V ha hi_card]; exact hai
       · rw [marshalPart_le_iff hBmeas T V hi1_card hb]; omega
   rw [hset, Finset.sum_Ico_eq_sub _ hab,
-    Finset.sum_range_sub (fun i => F (marshalPart hBmeas T V i)) b,
-    Finset.sum_range_sub (fun i => F (marshalPart hBmeas T V i)) a]
+    Finset.sum_range_sub (fun i ↦ F (marshalPart hBmeas T V i)) b,
+    Finset.sum_range_sub (fun i ↦ F (marshalPart hBmeas T V i)) a]
   ring
 
 /-- **The marshalled stochastic exponent equals the elementary Itô integral of `V`.** Over the
@@ -260,14 +260,14 @@ lemma marshalStochExp_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       = itoSimpleProcess hBmeas V T ω := by
   rw [itoSimpleProcess_apply, Finsupp.sum]
   have hRHS : ∀ p ∈ V.value.support, V.value p ω * (B (min p.2 T) ω - B (min p.1 T) ω)
-      = V.value p ω * (B p.2 ω - B p.1 ω) := fun p hp => by
+      = V.value p ω * (B p.2 ω - B p.1 ω) := fun p hp ↦ by
     rw [min_eq_left (hle p hp), min_eq_left ((V.le_of_mem_support_value p hp).trans (hle p hp))]
   rw [Finset.sum_congr rfl hRHS]
   simp only [marshalMult, Finset.sum_mul]
   rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl (fun p hp => ?_)
-  rw [← telescope_cover hBmeas T V hp (fun x => B x ω) hN, Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
+  refine Finset.sum_congr rfl (fun p hp ↦ ?_)
+  rw [← telescope_cover hBmeas T V hp (fun x ↦ B x ω) hN, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   by_cases hc : p.1 ≤ marshalPart hBmeas T V i ∧ marshalPart hBmeas T V (i + 1) ≤ p.2
   · rw [if_pos hc, if_pos hc]
   · rw [if_neg hc, if_neg hc, zero_mul, mul_zero]
@@ -320,9 +320,9 @@ lemma marshalDrift_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
   rw [simpleDrift]
   simp only [marshalMult, Finset.sum_mul]
   rw [Finset.sum_comm]
-  refine Finset.sum_congr rfl (fun p hp => ?_)
-  rw [← telescope_cover hBmeas T V hp (fun x => NNReal.toReal (min x u)) hN, Finset.mul_sum]
-  refine Finset.sum_congr rfl (fun i _ => ?_)
+  refine Finset.sum_congr rfl (fun p hp ↦ ?_)
+  rw [← telescope_cover hBmeas T V hp (fun x ↦ NNReal.toReal (min x u)) hN, Finset.mul_sum]
+  refine Finset.sum_congr rfl (fun i _ ↦ ?_)
   by_cases hc : p.1 ≤ marshalPart hBmeas T V i ∧ marshalPart hBmeas T V (i + 1) ≤ p.2
   · rw [if_pos hc, if_pos hc]
   · rw [if_neg hc, if_neg hc, zero_mul, mul_zero]
@@ -339,11 +339,11 @@ lemma marshalMult_eq_uncurry (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     simp only [Set.mem_singleton_iff]
     exact (lt_of_le_of_lt zero_le ht1).ne'
   rw [SimpleProcess.apply_eq, Set.indicator_of_notMem ht0, zero_add, Finsupp.sum, marshalMult]
-  refine Finset.sum_congr rfl (fun p hp => ?_)
+  refine Finset.sum_congr rfl (fun p hp ↦ ?_)
   rw [Set.indicator_apply]
   by_cases hmem : t ∈ Set.Ioc p.1 p.2
   · rw [if_pos hmem, if_pos ((mem_Ioc_iff_cover hBmeas T V hle ht1 ht2 hp).mp hmem)]
-  · rw [if_neg hmem, if_neg (fun hc => hmem ((mem_Ioc_iff_cover hBmeas T V hle ht1 ht2 hp).mpr hc))]
+  · rw [if_neg hmem, if_neg (fun hc ↦ hmem ((mem_Ioc_iff_cover hBmeas T V hle ht1 ht2 hp).mpr hc))]
 
 /-! ### The clamped marshalled step process (Rung 1 approximant)
 
@@ -364,9 +364,9 @@ noncomputable def marshalStepSP (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     stepSP hBmeas (a := marshalPart hBmeas T V i.1) (b := marshalPart hBmeas T V (i.1 + 1))
       (marshalPart_mono hBmeas T V hle (Nat.le_succ i.1))
       (marshalPart_le_T hBmeas T V hle (i.1 + 1))
-      (φ := fun ω => clampM C (marshalMult hBmeas T V i.1 ω))
+      (φ := fun ω ↦ clampM C (marshalMult hBmeas T V i.1 ω))
       (measurable_clampM_comp hBmeas (stronglyMeasurable_marshalMult hBmeas T V i.1).measurable)
-      (M := C) (fun _ => clampM_abs_le hC _)
+      (M := C) (fun _ ↦ clampM_abs_le hC _)
 
 /-- The clamped marshalled step process integrates to the clamped stochastic sum
 `∑ᵢ clampM C (marshalMult i)·(B_{sᵢ₊₁} − B_{sᵢ})`. -/
@@ -377,9 +377,9 @@ lemma itoSimple_marshalStepSP (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       = ∑ i ∈ Finset.range N, clampM C (marshalMult hBmeas T V i ω)
           * (B (marshalPart hBmeas T V (i + 1)) ω - B (marshalPart hBmeas T V i) ω) := by
   rw [marshalStepSP, AddSubmonoidClass.coe_finsetSum, itoSimple_sum, Finset.sum_apply,
-    ← Finset.sum_attach (Finset.range N) (fun i => clampM C (marshalMult hBmeas T V i ω)
+    ← Finset.sum_attach (Finset.range N) (fun i ↦ clampM C (marshalMult hBmeas T V i ω)
       * (B (marshalPart hBmeas T V (i + 1)) ω - B (marshalPart hBmeas T V i) ω))]
-  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [itoSimple_stepSP]
 
 /-- **The uncurried clamped step process is a sum of cell indicators.** -/
@@ -389,13 +389,13 @@ lemma uncurry_marshalStepSP (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     Function.uncurry ⇑(marshalStepSP hBmeas T V hle hC N).val (s, ω)
       = ∑ i ∈ Finset.range N,
           (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-            (fun _ => clampM C (marshalMult hBmeas T V i ω)) s := by
+            (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s := by
   show ⇑(marshalStepSP hBmeas T V hle hC N).val s ω = _
   rw [marshalStepSP, AddSubmonoidClass.coe_finsetSum, coe_finsetSum_apply,
-    ← Finset.sum_attach (Finset.range N) (fun i =>
+    ← Finset.sum_attach (Finset.range N) (fun i ↦
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-        (fun _ => clampM C (marshalMult hBmeas T V i ω)) s)]
-  refine Finset.sum_congr rfl fun i _ => ?_
+        (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s)]
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [SimpleProcess.apply_eq]
   simp only [stepSP]
   rw [Finsupp.sum_single_index (by simp)]
@@ -409,24 +409,24 @@ lemma sum_cell_indicator_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
     {N : ℕ} (hmpN : marshalPart hBmeas T V N = T) {s : ℝ≥0} (hs0 : 0 < s) (hsT : s ≤ T) :
     ∑ i ∈ Finset.range N,
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-        (fun _ => (1 : ℝ)) s = 1 := by
+        (fun _ ↦ (1 : ℝ)) s = 1 := by
   have hsub : ∀ i,
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-          (fun _ => (1 : ℝ)) s
-      = (Set.Iic (marshalPart hBmeas T V (i + 1))).indicator (fun _ => (1 : ℝ)) s
-        - (Set.Iic (marshalPart hBmeas T V i)).indicator (fun _ => (1 : ℝ)) s := fun i => by
+          (fun _ ↦ (1 : ℝ)) s
+      = (Set.Iic (marshalPart hBmeas T V (i + 1))).indicator (fun _ ↦ (1 : ℝ)) s
+        - (Set.Iic (marshalPart hBmeas T V i)).indicator (fun _ ↦ (1 : ℝ)) s := fun i ↦ by
     have hab := marshalPart_mono hBmeas T V hle (Nat.le_succ i)
     simp only [Set.indicator_apply, Set.mem_Ioc, Set.mem_Iic]
     by_cases h1 : s ≤ marshalPart hBmeas T V i
-    · rw [if_neg (fun h => absurd h.1 (not_lt.mpr h1)), if_pos (h1.trans hab), if_pos h1]; ring
+    · rw [if_neg (fun h ↦ absurd h.1 (not_lt.mpr h1)), if_pos (h1.trans hab), if_pos h1]; ring
     · rw [not_le] at h1
       by_cases h2 : s ≤ marshalPart hBmeas T V (i + 1)
       · rw [if_pos ⟨h1, h2⟩, if_pos h2, if_neg (not_le.mpr h1)]; ring
       · rw [not_le] at h2
-        rw [if_neg (fun h => absurd h.2 (not_le.mpr h2)), if_neg (not_le.mpr h2),
+        rw [if_neg (fun h ↦ absurd h.2 (not_le.mpr h2)), if_neg (not_le.mpr h2),
           if_neg (not_le.mpr (hab.trans_lt h2))]; ring
   simp_rw [hsub]
-  rw [Finset.sum_range_sub (fun i => (Set.Iic (marshalPart hBmeas T V i)).indicator (fun _ => (1 : ℝ)) s),
+  rw [Finset.sum_range_sub (fun i ↦ (Set.Iic (marshalPart hBmeas T V i)).indicator (fun _ ↦ (1 : ℝ)) s),
     hmpN, marshalPart_zero hBmeas T V hle,
     Set.indicator_of_mem (Set.mem_Iic.mpr hsT),
     Set.indicator_of_notMem (by simp only [Set.mem_Iic, not_le]; exact hs0)]
@@ -443,9 +443,9 @@ lemma uncurry_marshalStepSP_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
   rw [uncurry_marshalStepSP]
   have hstep : ∀ i ∈ Finset.range N,
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-          (fun _ => clampM C (marshalMult hBmeas T V i ω)) s
+          (fun _ ↦ clampM C (marshalMult hBmeas T V i ω)) s
       = (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-          (fun _ => clampM C (⇑V s ω)) s := by
+          (fun _ ↦ clampM C (⇑V s ω)) s := by
     intro i _
     rw [Set.indicator_apply, Set.indicator_apply]
     by_cases hmem : s ∈ Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))
@@ -455,10 +455,10 @@ lemma uncurry_marshalStepSP_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : ℝ
     · rw [if_neg hmem, if_neg hmem]
   have hconst : ∀ i,
       (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-          (fun _ => clampM C (⇑V s ω)) s
+          (fun _ ↦ clampM C (⇑V s ω)) s
       = clampM C (⇑V s ω) *
           (Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))).indicator
-            (fun _ => (1 : ℝ)) s := by
+            (fun _ ↦ (1 : ℝ)) s := by
     intro i
     rw [Set.indicator_apply, Set.indicator_apply]
     by_cases hmem : s ∈ Set.Ioc (marshalPart hBmeas T V i) (marshalPart hBmeas T V (i + 1))
@@ -501,12 +501,12 @@ lemma uncurry_marshalStepSP_ae_eq_clamp (hBmeas : ∀ t, Measurable (B t)) (T : 
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
     {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T) :
     Function.uncurry ⇑(marshalStepSP hBmeas T V hle hC N).val
-      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z => clampM C (Function.uncurry ⇑V z) := by
+      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] fun z ↦ clampM C (Function.uncurry ⇑V z) := by
   have hsupp : ∀ᵐ z ∂(trimMeasure_T (μ := μ) T hBmeas), z.1 ∈ Set.Ioc 0 T := by
     rw [trimMeasure_T_eq_restrict]
     exact ae_restrict_of_forall_mem
       (MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := natFiltration hBmeas) 0 T
-        MeasurableSet.univ) (fun z hz => hz.1)
+        MeasurableSet.univ) (fun z hz ↦ hz.1)
   filter_upwards [hsupp] with z hz
   exact uncurry_marshalStepSP_eq_clamp hBmeas T V hle hC hmpN hz.1 hz.2 z.2
 
@@ -549,7 +549,7 @@ lemma itoIntegralCLM_T_simpleAssembly_T (hB : IsPreBrownianReal B μ) (T : ℝ�
     itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas V)
       = itoAssembly_T hB T hBmeas V := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange T hBmeas)
-    ⟨1, fun W => by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
+    ⟨1, fun W ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas W).le⟩]
 
 /-- **The clamped marshalled approximant converges to `θ̂` in the integrand `L²`.** The contraction
 `norm_simpleAssembly_marshalStepSP_sub_le` squeezed against `V n → θ̂`. This is the single
@@ -559,14 +559,14 @@ theorem tendsto_simpleAssembly_marshalStepSP (T : ℝ≥0)
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
-    Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas
+    Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1))) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)) := by
   rw [tendsto_iff_norm_sub_tendsto_zero]
-  refine squeeze_zero (fun n => norm_nonneg _) (fun n => ?_)
+  refine squeeze_zero (fun n ↦ norm_nonneg _) (fun n ↦ ?_)
     (tendsto_iff_norm_sub_tendsto_zero.mp hV)
   exact norm_simpleAssembly_marshalStepSP_sub_le hBmeas T (V n).val (V n).property hC
     (marshalPart_card_sub_one hBmeas T (V n).val (V n).property) hpred hbdd
@@ -582,9 +582,9 @@ theorem tendsto_itoAssembly_marshalStepSP (hB : IsPreBrownianReal B μ) (T : ℝ
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
-    Tendsto (fun n => itoAssembly_T hB T hBmeas
+    Tendsto (fun n ↦ itoAssembly_T hB T hBmeas
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1)))
       atTop (𝓝 (itoIntegralCLM_T hB T hBmeas
@@ -600,7 +600,7 @@ lemma tendstoInMeasure_congr_left {E : Type*} [MetricSpace E] {f f' : ℕ → Ω
     (h : ∀ n, f n =ᵐ[μ] f' n) (hfg : TendstoInMeasure μ f atTop g) :
     TendstoInMeasure μ f' atTop g := by
   intro ε hε
-  refine (hfg ε hε).congr fun n => measure_congr ?_
+  refine (hfg ε hε).congr fun n ↦ measure_congr ?_
   rw [Filter.eventuallyEq_set]
   filter_upwards [h n] with x hx
   simp only [hx]
@@ -610,7 +610,7 @@ is a sequence `V : ℕ → TBoundedSP` with `simpleAssembly_T (V n) → θ̂`. -
 lemma exists_approxSeq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
     ∃ V : ℕ → TBoundedSP T hBmeas,
-      Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
         (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)) := by
   obtain ⟨x, hx_mem, hx_tendsto⟩ := mem_closure_iff_seq_limit.mp
     (simpleAssembly_T_denseRange (μ := μ) T hBmeas
@@ -626,13 +626,13 @@ theorem tendstoInMeasure_marshalStochSum (hB : IsPreBrownianReal B μ) (T : ℝ�
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
-    TendstoInMeasure μ (fun n => itoSimple hBmeas
+    TendstoInMeasure μ (fun n ↦ itoSimple hBmeas
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1)).val) atTop
       (⇑(itoIntegralCLM_T hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) := by
-  refine tendstoInMeasure_congr_left (fun n => ?_)
+  refine tendstoInMeasure_congr_left (fun n ↦ ?_)
     (tendstoInMeasure_of_tendsto_Lp
       (tendsto_itoAssembly_marshalStepSP hB T hBmeas hpred hC hbdd V hV))
   exact (memLp_itoSimple hB hBmeas (marshalStepSP hBmeas T (V n).val (V n).property hC
@@ -646,19 +646,19 @@ theorem exists_subseq_marshalStochSum_ae (hB : IsPreBrownianReal B μ) (T : ℝ�
     (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
     (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
-    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+    (hV : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
       (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
     (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
-    ∃ ms : ℕ → ℕ, StrictMono ms ∧ ∀ᵐ ω ∂μ, Tendsto (fun k => itoSimple hBmeas
+    ∃ ms : ℕ → ℕ, StrictMono ms ∧ ∀ᵐ ω ∂μ, Tendsto (fun k ↦ itoSimple hBmeas
         (marshalStepSP hBmeas T (V (ns (ms k))).val (V (ns (ms k))).property hC
           ((marshalEndpoints hBmeas T (V (ns (ms k))).val).card - 1)).val ω) atTop
       (𝓝 (⇑(itoIntegralCLM_T hB T hBmeas
         (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)) ω)) := by
-  have hconv : TendstoInMeasure μ (fun k => itoSimple hBmeas
+  have hconv : TendstoInMeasure μ (fun k ↦ itoSimple hBmeas
       (marshalStepSP hBmeas T (V (ns k)).val (V (ns k)).property hC
         ((marshalEndpoints hBmeas T (V (ns k)).val).card - 1)).val) atTop
       (⇑(itoIntegralCLM_T hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :=
-    fun ε hε => (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hC hbdd V hV ε hε).comp hns
+    fun ε hε ↦ (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hC hbdd V hV ε hε).comp hns
   obtain ⟨ms, hms, hae⟩ := hconv.exists_seq_tendsto_ae
   exact ⟨ms, hms, hae⟩
 

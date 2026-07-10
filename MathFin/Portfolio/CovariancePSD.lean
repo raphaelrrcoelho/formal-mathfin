@@ -59,13 +59,13 @@ anywhere. -/
 theorem portfolioVarN_covariance_eq_variance
     (s : Finset ι) (w : ι → ℝ) (R : ι → Ω → ℝ)
     (hR : ∀ i ∈ s, MemLp (R i) 2 μ) :
-    portfolioVarN s w (fun i j => cov[R i, R j; μ]) =
+    portfolioVarN s w (fun i j ↦ cov[R i, R j; μ]) =
       Var[∑ i ∈ s, w i • R i; μ] := by
-  have hwR : ∀ i ∈ s, MemLp (w i • R i) 2 μ := fun i hi => (hR i hi).const_smul (w i)
+  have hwR : ∀ i ∈ s, MemLp (w i • R i) 2 μ := fun i hi ↦ (hR i hi).const_smul (w i)
   rw [variance_sum' hwR]
   unfold portfolioVarN
-  refine Finset.sum_congr rfl fun i hi => ?_
-  refine Finset.sum_congr rfl fun j hj => ?_
+  refine Finset.sum_congr rfl fun i hi ↦ ?_
+  refine Finset.sum_congr rfl fun j hj ↦ ?_
   rw [covariance_smul_left, covariance_smul_right]
   ring
 
@@ -89,7 +89,7 @@ variance is non-negative — because it *is* the variance `Var[∑ wᵢ Rᵢ] �
 theorem portfolioVarN_covariance_nonneg
     (s : Finset ι) (w : ι → ℝ) (R : ι → Ω → ℝ)
     (hR : ∀ i ∈ s, MemLp (R i) 2 μ) :
-    0 ≤ portfolioVarN s w (fun i j => cov[R i, R j; μ]) :=
+    0 ≤ portfolioVarN s w (fun i j ↦ cov[R i, R j; μ]) :=
   portfolioVarN_nonneg_of_psd s w _ (covariance_kernel_psd s R hR)
 
 /-- **`portfolioVariance` is the Markowitz double sum**: the `marginalVariance`-
@@ -100,9 +100,9 @@ lemma portfolioVariance_eq_portfolioVarN {ι : Type*}
     (s : Finset ι) (Sg : ι → ι → ℝ) (w : ι → ℝ) :
     portfolioVariance s Sg w = portfolioVarN s w Sg := by
   unfold portfolioVariance marginalVariance portfolioVarN
-  refine Finset.sum_congr rfl fun i _ => ?_
+  refine Finset.sum_congr rfl fun i _ ↦ ?_
   rw [Finset.mul_sum]
-  exact Finset.sum_congr rfl fun j _ => by ring
+  exact Finset.sum_congr rfl fun j _ ↦ by ring
 
 /-- **`portfolioVariance` non-negativity from random returns**: the genuine
 covariance-kernel PSD fact (`covariance_kernel_psd`, a self-dot variance),
@@ -111,7 +111,7 @@ CAPM / Lagrangian / risk-parity files use. -/
 theorem portfolioVariance_covariance_nonneg
     (s : Finset ι) (w : ι → ℝ) (R : ι → Ω → ℝ)
     (hR : ∀ i ∈ s, MemLp (R i) 2 μ) :
-    0 ≤ portfolioVariance s (fun i j => cov[R i, R j; μ]) w := by
+    0 ≤ portfolioVariance s (fun i j ↦ cov[R i, R j; μ]) w := by
   rw [portfolioVariance_eq_portfolioVarN]
   exact portfolioVarN_covariance_nonneg s w R hR
 

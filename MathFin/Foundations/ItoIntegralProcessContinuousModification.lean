@@ -70,13 +70,13 @@ property + B3's path continuity), so Degenne's continuous-time maximal inequalit
 `maximal_ineq_norm` applies directly at `n := T`, where `⨆ i : Set.Iic T` is the
 running supremum over the whole interval `[0,T]`. -/
 theorem itoSimpleProcess_maximal_weak (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (V : SimpleProcess ℝ (natFiltration hBmeas)) (T : ℝ≥0) (ε : ℝ) :
     ε • μ.real {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V i ω‖}
       ≤ ∫ ω in {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V i ω‖},
           ‖itoSimpleProcess hBmeas V T ω‖ ∂μ :=
   maximal_ineq_norm (itoSimpleProcess_isMartingale hB hBmeas V) ε T
-    (fun ω _ => (itoSimpleProcess_pathContinuous hBmeas hBcont V ω).continuousWithinAt)
+    (fun ω _ ↦ (itoSimpleProcess_pathContinuous hBmeas hBcont V ω).continuousWithinAt)
 
 /-- **Chebyshev form** of the maximal bound, with the `L²` terminal norm on the
 right. For a `T`-bounded simple process `V`, the probability that the running
@@ -86,7 +86,7 @@ maximum of `(V ● B)` over `[0,T]` reaches `ε` is at most
 probability space) and the terminal Itô isometry
 `‖(V●B)_T‖_{L²} = ‖simpleAssembly_T V‖`. -/
 theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (T : ℝ≥0) (V : TBoundedSP T hBmeas) {ε : ℝ} (hε : 0 < ε) :
     μ.real {ω | ε ≤ ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas V.val i ω‖}
       ≤ ε⁻¹ * ‖simpleAssembly_T (μ := μ) T hBmeas V‖ := by
@@ -97,11 +97,11 @@ theorem itoSimpleProcess_maximal_prob (hBmeas : ∀ t, Measurable (B t))
   have hweak := itoSimpleProcess_maximal_weak hB hBmeas hBcont V.val T ε
   -- ∫_S ‖f‖ ≤ ∫ ‖f‖
   have hsub : ∫ ω in S, ‖f ω‖ ∂μ ≤ ∫ ω, ‖f ω‖ ∂μ :=
-    setIntegral_le_integral hfi.norm (ae_of_all _ fun ω => norm_nonneg _)
+    setIntegral_le_integral hfi.norm (ae_of_all _ fun ω ↦ norm_nonneg _)
   -- ∫ ‖f‖ ≤ ‖f‖_{L²} = ‖itoSimpleProcessLp V T‖
   have hL2 : ∫ ω, ‖f ω‖ ∂μ ≤ ‖itoSimpleProcessLp hB hBmeas V.val T‖ := by
     rw [itoSimpleProcessLp, Lp.norm_toLp,
-      ← ENNReal.toReal_ofReal (integral_nonneg fun ω => norm_nonneg _),
+      ← ENNReal.toReal_ofReal (integral_nonneg fun ω ↦ norm_nonneg _),
       ofReal_integral_norm_eq_lintegral_enorm hfi, ← eLpNorm_one_eq_lintegral_enorm]
     exact ENNReal.toReal_mono hf.2.ne (eLpNorm_le_eLpNorm_of_exponent_le (by norm_num) hf.1)
   -- terminal Itô isometry on the simple embedding
@@ -151,12 +151,12 @@ probabilities that the running max of the consecutive difference
 `≤ εₙ⁻¹ · ‖simpleAssembly_T (Vₙ − Vₙ₊₁)‖ ≤ εₙ⁻¹ · 2·2⁻ⁿ = 2·(2/3)ⁿ`. The choice
 `εₙ = (3/4)ⁿ ∈ (2⁻¹, 1)ⁿ` makes both `Σ εₙ⁻¹·2⁻ⁿ` and `Σ εₙ` converge. -/
 theorem summable_maximal_tail (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : ℕ → TBoundedSP T hBmeas)
     (hV : ∀ n, ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
-    Summable (fun n => μ.real {ω | (3 / 4 : ℝ) ^ n ≤
+    Summable (fun n ↦ μ.real {ω | (3 / 4 : ℝ) ^ n ≤
       ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖}) := by
-  refine Summable.of_nonneg_of_le (fun n => measureReal_nonneg) (fun n => ?_)
+  refine Summable.of_nonneg_of_le (fun n ↦ measureReal_nonneg) (fun n ↦ ?_)
     ((summable_geometric_of_lt_one (r := 2 / 3) (by norm_num) (by norm_num)).mul_left 2)
   -- per-term: μ.real {…} ≤ 2 * (2/3)ⁿ
   refine (itoSimpleProcess_maximal_prob hB hBmeas hBcont T (V n - V (n + 1))
@@ -187,18 +187,18 @@ summable, for almost every `ω` the running maximum of the consecutive differenc
 `(Vₙ − Vₙ₊₁) ● B` over `[0,T]` is eventually below `(3/4)ⁿ`. This is the pathwise
 input to the uniform-Cauchy argument. -/
 theorem ae_eventually_sup_lt (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (V : ℕ → TBoundedSP T hBmeas)
     (hV : ∀ n, ‖simpleAssembly_T (μ := μ) T hBmeas (V n) - φ‖ ≤ (2⁻¹ : ℝ) ^ n) :
     ∀ᵐ ω ∂μ, ∀ᶠ n in atTop,
       (⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖) < (3 / 4 : ℝ) ^ n := by
-  set A : ℕ → Set Ω := fun n => {ω | (3 / 4 : ℝ) ^ n ≤
+  set A : ℕ → Set Ω := fun n ↦ {ω | (3 / 4 : ℝ) ^ n ≤
     ⨆ i : Set.Iic T, ‖itoSimpleProcess hBmeas (V n - V (n + 1)).val i ω‖} with hA
   have hconv : (∑' n, μ (A n)) ≠ ∞ := by
     have heq : ∀ n, μ (A n) = ENNReal.ofReal (μ.real (A n)) :=
-      fun n => (ENNReal.ofReal_toReal (measure_ne_top μ _)).symm
+      fun n ↦ (ENNReal.ofReal_toReal (measure_ne_top μ _)).symm
     simp_rw [heq]
-    rw [← ENNReal.ofReal_tsum_of_nonneg (fun n => measureReal_nonneg)
+    rw [← ENNReal.ofReal_tsum_of_nonneg (fun n ↦ measureReal_nonneg)
       (summable_maximal_tail hB T hBmeas hBcont φ V hV)]
     exact ENNReal.ofReal_ne_top
   filter_upwards [ae_eventually_notMem hconv] with ω hω
@@ -214,11 +214,11 @@ junk value of an unbounded family): `(W ● B)_· ω` is continuous (B3) and `[0
 is compact, so the family is bounded above. This unlocks the pointwise control of
 consecutive differences. -/
 lemma norm_le_iSup_Iic (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (W : SimpleProcess ℝ (natFiltration hBmeas)) (ω : Ω) {i : ℝ≥0} (hi : i ≤ T) :
     ‖itoSimpleProcess hBmeas W i ω‖
       ≤ ⨆ j : Set.Iic T, ‖itoSimpleProcess hBmeas W (j : ℝ≥0) ω‖ := by
-  have hcont : Continuous fun j : Set.Iic T => ‖itoSimpleProcess hBmeas W (j : ℝ≥0) ω‖ :=
+  have hcont : Continuous fun j : Set.Iic T ↦ ‖itoSimpleProcess hBmeas W (j : ℝ≥0) ω‖ :=
     (continuous_norm.comp (itoSimpleProcess_pathContinuous hBmeas hBcont W ω)).comp
       continuous_subtype_val
   have hIic : (Set.Iic T : Set ℝ≥0) = Set.Icc 0 T := by
@@ -232,7 +232,7 @@ approximating simple integrals `(Vₙ ● B)_t ω`, junk off the convergence set
 subsequence `Vₙ` is `approxSeq`'s choice for `φ`. -/
 noncomputable def itoContinuousMod (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) (t : ℝ≥0) (ω : Ω) : ℝ :=
-  limUnder atTop fun n => itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω
+  limUnder atTop fun n ↦ itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω
 
 /-- **Pointwise a.s. convergence.** For almost every `ω` and every `t ≤ T`, the
 approximating sequence `(Vₙ ● B)_t ω` converges to `itoContinuousMod φ t ω`. The
@@ -240,21 +240,21 @@ consecutive distances are eventually `< (3/4)ⁿ` (a.s., uniformly in `t ≤ T`,
 `ae_eventually_sup_lt` + the running-max keystone + linearity), hence summable,
 so the sequence is Cauchy in the complete space `ℝ`. -/
 theorem itoContinuousMod_tendsto (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ∀ᵐ ω ∂μ, ∀ t : ℝ≥0, t ≤ T →
-      Tendsto (fun n => itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
+      Tendsto (fun n ↦ itoSimpleProcess hBmeas ((approxSeq T hBmeas φ).choose n).val t ω) atTop
         (𝓝 (itoContinuousMod T hBmeas φ t ω)) := by
   set V := (approxSeq T hBmeas φ).choose with hVdef
   have hV := (approxSeq T hBmeas φ).choose_spec
   filter_upwards [ae_eventually_sup_lt hB T hBmeas hBcont φ V hV] with ω hω
   intro t ht
-  have hcauchy : CauchySeq (fun n => itoSimpleProcess hBmeas (V n).val t ω) := by
+  have hcauchy : CauchySeq (fun n ↦ itoSimpleProcess hBmeas (V n).val t ω) := by
     apply cauchySeq_of_summable_dist
     obtain ⟨N, hN⟩ := eventually_atTop.mp hω
     rw [← summable_nat_add_iff N]
-    refine Summable.of_nonneg_of_le (fun n => dist_nonneg) (fun n => ?_)
-      (f := fun n => (3 / 4 : ℝ) ^ (n + N)) ?_
+    refine Summable.of_nonneg_of_le (fun n ↦ dist_nonneg) (fun n ↦ ?_)
+      (f := fun n ↦ (3 / 4 : ℝ) ^ (n + N)) ?_
     · rw [dist_eq_norm]
       have hcoe : ((V (n + N) - V (n + N + 1)).val : SimpleProcess ℝ (natFiltration hBmeas))
           = (V (n + N)).val - (V (n + N + 1)).val := rfl
@@ -278,33 +278,33 @@ convergence `itoSimpleProcessLp Vₙ t = itoProcessCLM T t (simpleAssembly_T V�
 itoProcessCLM T t φ`, via the bridge + CLM continuity). In-measure limits are
 a.e.-unique. -/
 theorem itoContinuousMod_modification (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) {t : ℝ≥0} (ht : t ≤ T) :
-    (fun ω => itoContinuousMod T hBmeas φ t ω) =ᵐ[μ] itoProcessCLM hB T t hBmeas φ := by
+    (fun ω ↦ itoContinuousMod T hBmeas φ t ω) =ᵐ[μ] itoProcessCLM hB T t hBmeas φ := by
   set V := (approxSeq T hBmeas φ).choose with hVdef
   have hV := (approxSeq T hBmeas φ).choose_spec
-  set F : ℕ → Ω → ℝ := fun n ω => itoSimpleProcess hBmeas (V n).val t ω with hF
+  set F : ℕ → Ω → ℝ := fun n ω ↦ itoSimpleProcess hBmeas (V n).val t ω with hF
   have hFmeas : ∀ n, AEStronglyMeasurable (F n) μ :=
-    fun n => (memLp_itoSimpleProcess hB hBmeas (V n).val t).1
+    fun n ↦ (memLp_itoSimpleProcess hB hBmeas (V n).val t).1
   -- (a) F → itoContinuousMod a.e. ⟹ in measure
-  have hmeasG : TendstoInMeasure μ F atTop (fun ω => itoContinuousMod T hBmeas φ t ω) := by
+  have hmeasG : TendstoInMeasure μ F atTop (fun ω ↦ itoContinuousMod T hBmeas φ t ω) := by
     refine tendstoInMeasure_of_tendsto_ae hFmeas ?_
     filter_upwards [itoContinuousMod_tendsto hB T hBmeas hBcont φ] with ω hω using hω t ht
   -- (b) F → ⇑(itoProcessCLM T t φ) in measure, from L² convergence
-  have hsa : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop (𝓝 φ) := by
+  have hsa : Tendsto (fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop (𝓝 φ) := by
     rw [tendsto_iff_norm_sub_tendsto_zero]
-    exact squeeze_zero (fun n => norm_nonneg _) hV
+    exact squeeze_zero (fun n ↦ norm_nonneg _) hV
       (tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num))
-  have hLp : Tendsto (fun n => itoSimpleProcessLp hB hBmeas (V n).val t) atTop
+  have hLp : Tendsto (fun n ↦ itoSimpleProcessLp hB hBmeas (V n).val t) atTop
       (𝓝 (itoProcessCLM hB T t hBmeas φ)) := by
-    have hrw : (fun n => itoSimpleProcessLp hB hBmeas (V n).val t)
-        = fun n => itoProcessCLM hB T t hBmeas (simpleAssembly_T (μ := μ) T hBmeas (V n)) :=
-      funext fun n => (itoProcessCLM_simpleAssembly_T hB T t hBmeas (V n)).symm
+    have hrw : (fun n ↦ itoSimpleProcessLp hB hBmeas (V n).val t)
+        = fun n ↦ itoProcessCLM hB T t hBmeas (simpleAssembly_T (μ := μ) T hBmeas (V n)) :=
+      funext fun n ↦ (itoProcessCLM_simpleAssembly_T hB T t hBmeas (V n)).symm
     rw [hrw]
     exact ((itoProcessCLM hB T t hBmeas).continuous.tendsto φ).comp hsa
-  have heLp : Tendsto (fun n => eLpNorm (F n - ⇑(itoProcessCLM hB T t hBmeas φ)) 2 μ) atTop (𝓝 0) := by
+  have heLp : Tendsto (fun n ↦ eLpNorm (F n - ⇑(itoProcessCLM hB T t hBmeas φ)) 2 μ) atTop (𝓝 0) := by
     refine (Lp.tendsto_Lp_iff_tendsto_eLpNorm'' F
-      (fun n => memLp_itoSimpleProcess hB hBmeas (V n).val t)
+      (fun n ↦ memLp_itoSimpleProcess hB hBmeas (V n).val t)
       (⇑(itoProcessCLM hB T t hBmeas φ)) (Lp.memLp _)).mp ?_
     simp only [Lp.toLp_coeFn]
     exact hLp
@@ -318,7 +318,7 @@ omit hB in
 for `t ≤ T`, `‖(Vₐ ● B)_t − (Vₐ₊₁ ● B)_t‖` is at most the running max of
 `(Vₐ − Vₐ₊₁) ● B` over `[0,T]`. -/
 lemma consecutive_norm_le (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω) (V : ℕ → TBoundedSP T hBmeas)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω) (V : ℕ → TBoundedSP T hBmeas)
     (ω : Ω) {t : ℝ≥0} (ht : t ≤ T) (a : ℕ) :
     ‖itoSimpleProcess hBmeas (V a).val t ω - itoSimpleProcess hBmeas (V (a + 1)).val t ω‖
       ≤ ⨆ j : Set.Iic T, ‖itoSimpleProcess hBmeas (V a - V (a + 1)).val (j : ℝ≥0) ω‖ := by
@@ -337,9 +337,9 @@ approximating continuous paths `(Vₙ ● B)_· ω` (B3) converge to it *uniform
 differences, uniform in `t`). A uniform limit of continuous functions is
 continuous. -/
 theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
-    ∀ᵐ ω ∂μ, ContinuousOn (fun t => itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
+    ∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ itoContinuousMod T hBmeas φ t ω) (Set.Icc 0 T) := by
   set V := (approxSeq T hBmeas φ).choose with hVdef
   have hV := (approxSeq T hBmeas φ).choose_spec
   filter_upwards [ae_eventually_sup_lt hB T hBmeas hBcont φ V hV,
@@ -347,11 +347,11 @@ theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
   rw [show (Set.Icc 0 T : Set ℝ≥0) = Set.Iic T from by
     ext x; simp only [Set.mem_Icc, Set.mem_Iic, zero_le, true_and]]
   obtain ⟨N, hN⟩ := eventually_atTop.mp hω
-  have huniform : TendstoUniformlyOn (fun n t => itoSimpleProcess hBmeas (V n).val t ω)
-      (fun t => itoContinuousMod T hBmeas φ t ω) atTop (Set.Iic T) := by
+  have huniform : TendstoUniformlyOn (fun n t ↦ itoSimpleProcess hBmeas (V n).val t ω)
+      (fun t ↦ itoContinuousMod T hBmeas φ t ω) atTop (Set.Iic T) := by
     rw [Metric.tendstoUniformlyOn_iff]
     intro ε hε
-    have htend0 : Tendsto (fun n => 4 * (3 / 4 : ℝ) ^ n) atTop (𝓝 0) := by
+    have htend0 : Tendsto (fun n ↦ 4 * (3 / 4 : ℝ) ^ n) atTop (𝓝 0) := by
       rw [show (0 : ℝ) = 4 * 0 from by ring]
       exact (tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num)).const_mul 4
     filter_upwards [eventually_ge_atTop N, htend0.eventually_lt_const hε] with n hn hnε
@@ -359,7 +359,7 @@ theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     rw [Set.mem_Iic] at ht
     rw [dist_comm]
     -- the uniform bound: dist (fₙ t ω) (X t ω) ≤ 4·(3/4)ⁿ
-    have htendsto : Tendsto (fun k => itoSimpleProcess hBmeas (V (k + n)).val t ω) atTop
+    have htendsto : Tendsto (fun k ↦ itoSimpleProcess hBmeas (V (k + n)).val t ω) atTop
         (𝓝 (itoContinuousMod T hBmeas φ t ω)) := (htends t ht).comp (tendsto_add_atTop_nat n)
     have hstep : ∀ k, dist (itoSimpleProcess hBmeas (V (k + n)).val t ω)
         (itoSimpleProcess hBmeas (V (k + 1 + n)).val t ω) ≤ (3 / 4 : ℝ) ^ n * (3 / 4 : ℝ) ^ k := by
@@ -374,8 +374,8 @@ theorem itoContinuousMod_continuousOn (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
     refine lt_of_le_of_lt (h0.trans (le_of_eq ?_)) hnε
     rw [show (1 : ℝ) - 3 / 4 = 1 / 4 from by norm_num]; ring
   have hcont : ∀ᶠ n in atTop,
-      ContinuousOn (fun t => itoSimpleProcess hBmeas (V n).val t ω) (Set.Iic T) :=
-    Eventually.of_forall fun n =>
+      ContinuousOn (fun t ↦ itoSimpleProcess hBmeas (V n).val t ω) (Set.Iic T) :=
+    Eventually.of_forall fun n ↦
       (itoSimpleProcess_pathContinuous hBmeas hBcont (V n).val ω).continuousOn
   exact huniform.continuousOn hcont.frequently
 
@@ -388,13 +388,13 @@ everywhere with the `L²` process value `itoProcessCLM T t φ` at every `t ≤ T
 the first pathwise-regularity result for the general integrand, and the
 localization gateway for the unbounded-coefficient Itô calculus. -/
 theorem exists_continuous_modification_itoProcess (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
-    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
     ∃ X : ℝ≥0 → Ω → ℝ,
       (∀ t, t ≤ T → X t =ᵐ[μ] itoProcessCLM hB T t hBmeas φ) ∧
-      (∀ᵐ ω ∂μ, ContinuousOn (fun t => X t ω) (Set.Icc 0 T)) :=
+      (∀ᵐ ω ∂μ, ContinuousOn (fun t ↦ X t ω) (Set.Icc 0 T)) :=
   ⟨itoContinuousMod T hBmeas φ,
-    fun _ ht => itoContinuousMod_modification hB T hBmeas hBcont φ ht,
+    fun _ ht ↦ itoContinuousMod_modification hB T hBmeas hBcont φ ht,
     itoContinuousMod_continuousOn hB T hBmeas hBcont φ⟩
 
 end ItoIntegralProcessContinuousModification

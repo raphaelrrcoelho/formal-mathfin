@@ -115,34 +115,34 @@ lemma tendsto_crrStep_zero (T : ℝ) : Tendsto (crrStep T) atTop (𝓝 0) := by
 
 /-- `√(T/n) → 0` as `n → ∞`. -/
 lemma tendsto_sqrt_crrStep_zero (T : ℝ) :
-    Tendsto (fun n => Real.sqrt (crrStep T n)) atTop (𝓝 0) := by
+    Tendsto (fun n ↦ Real.sqrt (crrStep T n)) atTop (𝓝 0) := by
   rw [show (0 : ℝ) = Real.sqrt 0 from Real.sqrt_zero.symm]
   exact (Real.continuous_sqrt.tendsto 0).comp (tendsto_crrStep_zero T)
 
 /-! ### Exponential difference quotients (first-order Taylor at 0) -/
 
 /-- **Difference quotient of `exp` at 0**: `(e^{c x} − 1) / x → c` as `x → 0` (`x ≠ 0`).
-    Just `HasDerivAt (fun x => e^{cx}) c 0` unpacked via `hasDerivAt_iff_tendsto_slope`. -/
+    Just `HasDerivAt (fun x ↦ e^{cx}) c 0` unpacked via `hasDerivAt_iff_tendsto_slope`. -/
 lemma tendsto_exp_sub_one_div (c : ℝ) :
-    Tendsto (fun x : ℝ => (Real.exp (c * x) - 1) / x) (𝓝[≠] 0) (𝓝 c) := by
-  have h_deriv : HasDerivAt (fun x : ℝ => Real.exp (c * x)) c 0 := by
-    have h_lin : HasDerivAt (fun x : ℝ => c * x) c 0 := by
+    Tendsto (fun x : ℝ ↦ (Real.exp (c * x) - 1) / x) (𝓝[≠] 0) (𝓝 c) := by
+  have h_deriv : HasDerivAt (fun x : ℝ ↦ Real.exp (c * x)) c 0 := by
+    have h_lin : HasDerivAt (fun x : ℝ ↦ c * x) c 0 := by
       simpa using (hasDerivAt_id (0 : ℝ)).const_mul c
     have := h_lin.exp
     simpa using this
   have h_slope := h_deriv.tendsto_slope
   have h_eq : ∀ x : ℝ,
-      slope (fun x : ℝ => Real.exp (c * x)) 0 x = (Real.exp (c * x) - 1) / x := by
+      slope (fun x : ℝ ↦ Real.exp (c * x)) 0 x = (Real.exp (c * x) - 1) / x := by
     intro x
     rw [slope_def_field]
     simp [Real.exp_zero]
   exact h_slope.congr' (Eventually.of_forall h_eq)
 
 private lemma tendsto_sq_nhdsWithin_ne_zero :
-    Tendsto (fun h : ℝ => h^2) (𝓝[≠] 0) (𝓝[≠] 0) := by
+    Tendsto (fun h : ℝ ↦ h^2) (𝓝[≠] 0) (𝓝[≠] 0) := by
   refine tendsto_nhdsWithin_iff.mpr ⟨?_, ?_⟩
-  · have h_cont : Continuous (fun h : ℝ => h^2) := by continuity
-    have h_tendsto_nhds : Tendsto (fun h : ℝ => h^2) (𝓝 0) (𝓝 0) := by
+  · have h_cont : Continuous (fun h : ℝ ↦ h^2) := by continuity
+    have h_tendsto_nhds : Tendsto (fun h : ℝ ↦ h^2) (𝓝 0) (𝓝 0) := by
       have := h_cont.tendsto 0
       simpa using this
     exact h_tendsto_nhds.mono_left nhdsWithin_le_nhds
@@ -152,18 +152,18 @@ private lemma tendsto_sq_nhdsWithin_ne_zero :
 /-- `(e^{c · h²} − 1) / h² → c` as `h → 0` (`h ≠ 0`).
     Composition of `tendsto_exp_sub_one_div` with `h ↦ h²`. -/
 lemma tendsto_exp_sq_sub_one_div_sq (c : ℝ) :
-    Tendsto (fun h : ℝ => (Real.exp (c * h^2) - 1) / h^2) (𝓝[≠] 0) (𝓝 c) :=
+    Tendsto (fun h : ℝ ↦ (Real.exp (c * h^2) - 1) / h^2) (𝓝[≠] 0) (𝓝 c) :=
   (tendsto_exp_sub_one_div c).comp tendsto_sq_nhdsWithin_ne_zero
 
 /-- `(e^{c · h²} − 1) / h → 0` as `h → 0` (`h ≠ 0`).
     Equals `h · ((e^{c·h²} − 1)/h²) → 0 · c = 0`. -/
 lemma tendsto_exp_sq_sub_one_div_h (c : ℝ) :
-    Tendsto (fun h : ℝ => (Real.exp (c * h^2) - 1) / h) (𝓝[≠] 0) (𝓝 0) := by
-  have h_id : Tendsto (fun h : ℝ => h) (𝓝[≠] 0) (𝓝 0) :=
+    Tendsto (fun h : ℝ ↦ (Real.exp (c * h^2) - 1) / h) (𝓝[≠] 0) (𝓝 0) := by
+  have h_id : Tendsto (fun h : ℝ ↦ h) (𝓝[≠] 0) (𝓝 0) :=
     tendsto_id.mono_left nhdsWithin_le_nhds
   have h_sq := tendsto_exp_sq_sub_one_div_sq c
   have h_mul := h_id.mul h_sq
-  -- h_mul : Tendsto (fun h => h * ((exp(c·h²)-1)/h²)) (𝓝[≠] 0) (𝓝 (0 * c))
+  -- h_mul : Tendsto (fun h ↦ h * ((exp(c·h²)-1)/h²)) (𝓝[≠] 0) (𝓝 (0 * c))
   have h_target_eq : (0 : ℝ) * c = 0 := zero_mul c
   rw [h_target_eq] at h_mul
   refine h_mul.congr' ?_
@@ -182,11 +182,11 @@ private lemma exp_diff_sub_eq (σ h : ℝ) :
 
 /-- `(e^{σ h} − e^{-σ h}) / h → 2σ` as `h → 0` (`h ≠ 0`). -/
 lemma tendsto_sinh_div (σ : ℝ) :
-    Tendsto (fun h : ℝ => (Real.exp (σ * h) - Real.exp (-(σ * h))) / h)
+    Tendsto (fun h : ℝ ↦ (Real.exp (σ * h) - Real.exp (-(σ * h))) / h)
       (𝓝[≠] 0) (𝓝 (2 * σ)) := by
-  have h_pos : Tendsto (fun h : ℝ => (Real.exp (σ * h) - 1) / h) (𝓝[≠] 0) (𝓝 σ) :=
+  have h_pos : Tendsto (fun h : ℝ ↦ (Real.exp (σ * h) - 1) / h) (𝓝[≠] 0) (𝓝 σ) :=
     tendsto_exp_sub_one_div σ
-  have h_neg : Tendsto (fun h : ℝ => (Real.exp (-(σ * h)) - 1) / h) (𝓝[≠] 0) (𝓝 (-σ)) := by
+  have h_neg : Tendsto (fun h : ℝ ↦ (Real.exp (-(σ * h)) - 1) / h) (𝓝[≠] 0) (𝓝 (-σ)) := by
     refine (tendsto_exp_sub_one_div (-σ)).congr' ?_
     filter_upwards with h
     rw [show -σ * h = -(σ * h) from by ring]
@@ -217,7 +217,7 @@ As `h_n → 0`:
 
 Hence `p_n → (0 − (−σ)) / (σ − (−σ)) = σ / (2σ) = 1/2`. -/
 theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ => crrProb r σ T n) atTop (𝓝 (1/2)) := by
+    Tendsto (fun n : ℕ ↦ crrProb r σ T n) atTop (𝓝 (1/2)) := by
   -- Step 1: define the per-h probability function and prove p(h) → 1/2 as h → 0 (h ≠ 0).
   -- p(h) = (e^{r·h²} - e^{-σh}) / (e^{σh} - e^{-σh})
   --      = [(e^{r·h²}-1)/h - (e^{-σh}-1)/h] / [(e^{σh}-1)/h - (e^{-σh}-1)/h]  (for h ≠ 0)
@@ -231,18 +231,18 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     · exact absurd hσ0 hσ.ne'
     · exact absurd hh0 hh
   -- Limits of numerator and denominator (working with the difference-quotient form):
-  have h_neg_div : Tendsto (fun h : ℝ => (Real.exp (-(σ * h)) - 1) / h) (𝓝[≠] 0) (𝓝 (-σ)) := by
+  have h_neg_div : Tendsto (fun h : ℝ ↦ (Real.exp (-(σ * h)) - 1) / h) (𝓝[≠] 0) (𝓝 (-σ)) := by
     refine (tendsto_exp_sub_one_div (-σ)).congr' ?_
     filter_upwards with h
     rw [show -σ * h = -(σ * h) from by ring]
   have h_num_tendsto : Tendsto
-      (fun h : ℝ => (Real.exp (r * h^2) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
+      (fun h : ℝ ↦ (Real.exp (r * h^2) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
       (𝓝[≠] 0) (𝓝 σ) := by
     have h_sub := (tendsto_exp_sq_sub_one_div_h r).sub h_neg_div
     have h_target : ((0 : ℝ) - (-σ)) = σ := by ring
     rwa [h_target] at h_sub
   have h_denom_tendsto : Tendsto
-      (fun h : ℝ => (Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
+      (fun h : ℝ ↦ (Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
       (𝓝[≠] 0) (𝓝 (2 * σ)) := by
     have h_sub := (tendsto_exp_sub_one_div σ).sub h_neg_div
     have h_target : ((σ - (-σ)) : ℝ) = 2 * σ := by ring
@@ -250,7 +250,7 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
   -- Quotient: p_h → σ / (2σ) = 1/2
   have h_2σ_ne : (2 * σ : ℝ) ≠ 0 := by positivity
   have h_p_tendsto :
-      Tendsto (fun h : ℝ =>
+      Tendsto (fun h : ℝ ↦
           ((Real.exp (r * h^2) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
             / ((Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h))
         (𝓝[≠] 0) (𝓝 (σ / (2 * σ))) :=
@@ -272,7 +272,7 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     rw [h_num_eq, exp_diff_sub_eq σ h]
     field_simp
   -- Step 3: compose with h_n = √(T/n) → 0+
-  have h_h_n_tendsto : Tendsto (fun n : ℕ => Real.sqrt (crrStep T n)) atTop (𝓝[≠] 0) := by
+  have h_h_n_tendsto : Tendsto (fun n : ℕ ↦ Real.sqrt (crrStep T n)) atTop (𝓝[≠] 0) := by
     refine tendsto_nhdsWithin_iff.mpr ⟨tendsto_sqrt_crrStep_zero T, ?_⟩
     filter_upwards [Filter.eventually_ge_atTop 1] with n hn
     have h_n_pos : (0 : ℝ) < n := by exact_mod_cast hn
@@ -290,10 +290,10 @@ theorem crrProb_tendsto_half {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     Real.sq_sqrt h_step_pos.le
   -- Show: crrProb r σ T n = [the composition output]
   -- Compose pulls back through `h_p_form` once we identify rT/n with r·(√(T/n))² etc.
-  show ((fun h : ℝ =>
+  show ((fun h : ℝ ↦
           ((Real.exp (r * h^2) - 1) / h - (Real.exp (-(σ * h)) - 1) / h)
             / ((Real.exp (σ * h) - 1) / h - (Real.exp (-(σ * h)) - 1) / h))
-          ∘ fun n : ℕ => Real.sqrt (crrStep T n)) n = crrProb r σ T n
+          ∘ fun n : ℕ ↦ Real.sqrt (crrStep T n)) n = crrProb r σ T n
   simp only [Function.comp_apply]
   rw [h_p_form (Real.sqrt (crrStep T n)) h_sqrt_ne]
   unfold crrProb crrUp crrDown crrPerStepRate
@@ -309,18 +309,18 @@ leading order. Follows directly from `crrProb_tendsto_half` and limit arithmetic
 
 The formula simplifies: `n · σ² · (T/n) · 4 p_n (1 − p_n) = 4 σ² T · p_n (1 − p_n)`. -/
 theorem crr_variance_limit {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ => 4 * σ^2 * T * (crrProb r σ T n) * (1 - crrProb r σ T n))
+    Tendsto (fun n : ℕ ↦ 4 * σ^2 * T * (crrProb r σ T n) * (1 - crrProb r σ T n))
       atTop (𝓝 (σ^2 * T)) := by
   have h_p := crrProb_tendsto_half (r := r) hσ hT
-  have h_1_minus_p : Tendsto (fun n : ℕ => 1 - crrProb r σ T n) atTop (𝓝 (1/2)) := by
-    have h_const : Tendsto (fun _ : ℕ => (1 : ℝ)) atTop (𝓝 1) := tendsto_const_nhds
+  have h_1_minus_p : Tendsto (fun n : ℕ ↦ 1 - crrProb r σ T n) atTop (𝓝 (1/2)) := by
+    have h_const : Tendsto (fun _ : ℕ ↦ (1 : ℝ)) atTop (𝓝 1) := tendsto_const_nhds
     have := h_const.sub h_p
     have h_target : (1 - 1/2 : ℝ) = 1/2 := by norm_num
     rwa [h_target] at this
   have h_prod := h_p.mul h_1_minus_p
   -- h_prod : Tendsto (p_n * (1 - p_n)) atTop (𝓝 ((1/2) * (1/2))) = (𝓝 (1/4))
   have h_const_mul : Tendsto
-      (fun n : ℕ => 4 * σ^2 * T * (crrProb r σ T n * (1 - crrProb r σ T n)))
+      (fun n : ℕ ↦ 4 * σ^2 * T * (crrProb r σ T n * (1 - crrProb r σ T n)))
       atTop (𝓝 (4 * σ^2 * T * (1/2 * (1/2)))) := h_prod.const_mul _
   have h_target_eq : (4 * σ^2 * T * (1/2 * (1/2)) : ℝ) = σ^2 * T := by ring
   rw [h_target_eq] at h_const_mul

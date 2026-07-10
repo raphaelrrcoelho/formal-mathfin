@@ -53,6 +53,6 @@ lemma wienerIntegralLp_stepIndicator (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     rw [wienerAssembly, Finsupp.linearCombination_single, one_smul]
   rw [hstep, hincr, wienerIntegralLp]
   exact LinearMap.extendOfNorm_eq (stepAssembly_denseRange T)
-    ⟨1, fun z => by rw [one_mul]; exact (wiener_assembly_isometry hB T z).le⟩ _
+    ⟨1, fun z ↦ by rw [one_mul]; exact (wiener_assembly_isometry hB T z).le⟩ _
 
 end MathFin

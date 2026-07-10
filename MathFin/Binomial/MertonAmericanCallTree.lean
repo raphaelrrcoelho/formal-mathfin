@@ -88,7 +88,7 @@ lemma weighted_max_zero_ge {q a b : ℝ} (hq : 0 ≤ q) (h1q : q ≤ 1) :
     max (q * a + (1 - q) * b) 0 ≤ q * max a 0 + (1 - q) * max b 0 := by
   have h1q_nn : 0 ≤ 1 - q := by linarith
   -- Jensen for the convex `x ↦ max x 0` (`= id ⊔ const 0`), evaluated at `a, b`.
-  have hconv : ConvexOn ℝ Set.univ (fun x : ℝ => max x 0) :=
+  have hconv : ConvexOn ℝ Set.univ (fun x : ℝ ↦ max x 0) :=
     (convexOn_id convex_univ).sup (convexOn_const 0 convex_univ)
   simpa using hconv.2 (Set.mem_univ a) (Set.mem_univ b) hq h1q_nn (by ring)
 
@@ -226,7 +226,7 @@ one-period continuation dominance lifts to every step by induction. -/
 theorem call_intrinsic_le_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r)
     (hr : 0 ≤ r) (hK : 0 ≤ K) :
     ∀ (n : ℕ) (S : ℝ),
-      max (S - K) 0 ≤ binomialPrice u d r (fun S' => max (S' - K) 0) n S := by
+      max (S - K) 0 ≤ binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S := by
   intro n
   induction n with
   | zero => intro S; simp
@@ -245,7 +245,7 @@ theorem call_intrinsic_le_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r
     -- Step 3: the one-step European recursion at S equals exactly that
     -- one-period continuation of binomialPrice n at the daughter nodes.
     have h_succ := binomialPrice_succ_eq_onePeriod u d r
-      (fun S' => max (S' - K) 0) n S
+      (fun S' ↦ max (S' - K) 0) n S
     linarith
 
 /-- **Merton 1973 (multi-step): American ≤ European call** in the binomial tree
@@ -259,8 +259,8 @@ plus monotonicity of the one-period operator). -/
 theorem americanCallPrice_le_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r)
     (hr : 0 ≤ r) (hK : 0 ≤ K) :
     ∀ (n : ℕ) (S : ℝ),
-      americanPrice u d r (fun S' => max (S' - K) 0) n S ≤
-        binomialPrice u d r (fun S' => max (S' - K) 0) n S := by
+      americanPrice u d r (fun S' ↦ max (S' - K) 0) n S ≤
+        binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S := by
   intro n
   induction n with
   | zero =>
@@ -270,12 +270,12 @@ theorem americanCallPrice_le_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u 
     intro S
     rw [americanPrice_succ]
     have h_intrinsic : max (S - K) 0 ≤
-        binomialPrice u d r (fun S' => max (S' - K) 0) (n + 1) S :=
+        binomialPrice u d r (fun S' ↦ max (S' - K) 0) (n + 1) S :=
       call_intrinsic_le_binomialPrice (K := K) h hr hK (n + 1) S
     have h_cont : binomialOptionPriceOnePeriod u d r
-          (americanPrice u d r (fun S' => max (S' - K) 0) n (S * u))
-          (americanPrice u d r (fun S' => max (S' - K) 0) n (S * d)) ≤
-        binomialPrice u d r (fun S' => max (S' - K) 0) (n + 1) S := by
+          (americanPrice u d r (fun S' ↦ max (S' - K) 0) n (S * u))
+          (americanPrice u d r (fun S' ↦ max (S' - K) 0) n (S * d)) ≤
+        binomialPrice u d r (fun S' ↦ max (S' - K) 0) (n + 1) S := by
       rw [binomialPrice_succ_eq_onePeriod]
       exact binomialOptionPriceOnePeriod_mono (h := h) (ih (S * u)) (ih (S * d))
     exact max_le h_intrinsic h_cont
@@ -288,8 +288,8 @@ Both inequalities together: `americanCallPrice_le_binomialPrice` (this file)
 + `binomialPrice_le_americanPrice` (`Binomial.American`). -/
 theorem americanCallPrice_eq_binomialPrice {u d r K : ℝ} (h : BinomialNoArb u d r)
     (hr : 0 ≤ r) (hK : 0 ≤ K) (n : ℕ) (S : ℝ) :
-    americanPrice u d r (fun S' => max (S' - K) 0) n S =
-      binomialPrice u d r (fun S' => max (S' - K) 0) n S :=
+    americanPrice u d r (fun S' ↦ max (S' - K) 0) n S =
+      binomialPrice u d r (fun S' ↦ max (S' - K) 0) n S :=
   le_antisymm
     (americanCallPrice_le_binomialPrice (K := K) h hr hK n S)
     (binomialPrice_le_americanPrice h _ n S)

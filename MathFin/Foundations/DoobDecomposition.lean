@@ -54,7 +54,7 @@ canonical parts `martingalePart f ℱ μ` and `predictablePart f ℱ μ`. -/
 theorem doob_decomposition_unique [SigmaFiniteFiltration μ ℱ]
     {f M A : ℕ → Ω → E}
     (hM : Martingale M ℱ μ)
-    (hA : StronglyAdapted ℱ fun n => A (n + 1)) (hA0 : A 0 = 0)
+    (hA : StronglyAdapted ℱ fun n ↦ A (n + 1)) (hA0 : A 0 = 0)
     (hA_int : ∀ n, Integrable (A n) μ)
     (hMA : M + A = f) (n : ℕ) :
     M n =ᵐ[μ] martingalePart f ℱ μ n ∧ A n =ᵐ[μ] predictablePart f ℱ μ n := by
@@ -70,16 +70,16 @@ up to a.e. equality at every time. The witnesses are Mathlib's
 theorem doob_decomposition [SigmaFiniteFiltration μ ℱ]
     {f : ℕ → Ω → E} (hf : StronglyAdapted ℱ f) (hf_int : ∀ n, Integrable (f n) μ) :
     ∃ M A : ℕ → Ω → E,
-      (Martingale M ℱ μ ∧ (StronglyAdapted ℱ fun n => A (n + 1)) ∧ A 0 = 0 ∧
+      (Martingale M ℱ μ ∧ (StronglyAdapted ℱ fun n ↦ A (n + 1)) ∧ A 0 = 0 ∧
         M + A = f) ∧
       ∀ M' A' : ℕ → Ω → E, Martingale M' ℱ μ →
-        (StronglyAdapted ℱ fun n => A' (n + 1)) → A' 0 = 0 →
+        (StronglyAdapted ℱ fun n ↦ A' (n + 1)) → A' 0 = 0 →
         (∀ n, Integrable (A' n) μ) → M' + A' = f →
         ∀ n, M' n =ᵐ[μ] M n ∧ A' n =ᵐ[μ] A n :=
   ⟨martingalePart f ℱ μ, predictablePart f ℱ μ,
     ⟨martingale_martingalePart hf hf_int, stronglyAdapted_predictablePart,
      predictablePart_zero, martingalePart_add_predictablePart ℱ μ f⟩,
-   fun _ _ hM' hA' hA'0 hA'_int hM'A' n =>
+   fun _ _ hM' hA' hA'0 hA'_int hM'A' n ↦
      doob_decomposition_unique hM' hA' hA'0 hA'_int hM'A' n⟩
 
 end MathFin

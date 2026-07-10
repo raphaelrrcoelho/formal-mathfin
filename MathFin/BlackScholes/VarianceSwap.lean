@@ -70,17 +70,17 @@ lemma integral_log_forward_div_bsTerminal_eq {S_0 : ℝ} (hS : 0 < S_0)
       Real.log ((S_0 * Real.exp (r * T)) /
                 (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z)))
         = σ^2 * T / 2 - σ * Real.sqrt T * z :=
-    fun z => log_forward_div_bsTerminal_eq hS r σ T z
-  rw [show (fun z => Real.log ((S_0 * Real.exp (r * T)) /
+    fun z ↦ log_forward_div_bsTerminal_eq hS r σ T z
+  rw [show (fun z ↦ Real.log ((S_0 * Real.exp (r * T)) /
               (S_0 * Real.exp ((r - σ^2/2) * T + σ * Real.sqrt T * z))))
-        = (fun z => σ^2 * T / 2 - σ * Real.sqrt T * z) from funext h_integrand_eq]
+        = (fun z ↦ σ^2 * T / 2 - σ * Real.sqrt T * z) from funext h_integrand_eq]
   have h_const_integrable :
-      Integrable (fun _ : ℝ => σ^2 * T / 2) (gaussianReal 0 1) :=
+      Integrable (fun _ : ℝ ↦ σ^2 * T / 2) (gaussianReal 0 1) :=
     integrable_const _
   have h_id_basic : Integrable (id : ℝ → ℝ) (gaussianReal 0 1) :=
     (memLp_id_gaussianReal (μ := 0) (v := 1) 1).integrable (by norm_cast)
   have h_id_integrable :
-      Integrable (fun z : ℝ => σ * Real.sqrt T * z) (gaussianReal 0 1) :=
+      Integrable (fun z : ℝ ↦ σ * Real.sqrt T * z) (gaussianReal 0 1) :=
     h_id_basic.const_mul (σ * Real.sqrt T)
   rw [integral_sub h_const_integrable h_id_integrable]
   rw [integral_const, integral_const_mul, integral_id_gaussianReal]
@@ -109,11 +109,11 @@ lemma integral_bsTerminal_eq_forward (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
     ∫ z, S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z) ∂(gaussianReal 0 1)
       = S_0 * Real.exp (r * T) := by
   rw [integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0),
-      show (fun z => gaussianPDFReal 0 1 z •
+      show (fun z ↦ gaussianPDFReal 0 1 z •
             (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)))
-          = (fun z => S_0 * Real.exp ((r - σ ^ 2 / 2) * T) *
+          = (fun z ↦ S_0 * Real.exp ((r - σ ^ 2 / 2) * T) *
               (Real.exp (σ * Real.sqrt T * z) * gaussianPDFReal 0 1 z)) from
-        funext fun z => by rw [smul_eq_mul, Real.exp_add]; ring,
+        funext fun z ↦ by rw [smul_eq_mul, Real.exp_add]; ring,
       integral_const_mul, integral_exp_mul_gaussianPDFReal_univ,
       show S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp ((σ * Real.sqrt T) ^ 2 / 2)
           = S_0 * (Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp ((σ * Real.sqrt T) ^ 2 / 2))
@@ -128,11 +128,11 @@ lemma integral_excess_return_eq_zero (S_0 r σ T : ℝ) (hT : 0 ≤ T) :
     ∫ z, (S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
             - S_0 * Real.exp (r * T)) / (S_0 * Real.exp (r * T)) ∂(gaussianReal 0 1) = 0 := by
   have hint : Integrable
-      (fun z => S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)) (gaussianReal 0 1) := by
-    have h1 : Integrable (fun z => Real.exp (σ * Real.sqrt T * z)) (gaussianReal 0 1) :=
+      (fun z ↦ S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)) (gaussianReal 0 1) := by
+    have h1 : Integrable (fun z ↦ Real.exp (σ * Real.sqrt T * z)) (gaussianReal 0 1) :=
       integrable_exp_mul_gaussianReal (σ * Real.sqrt T)
     refine (h1.const_mul (S_0 * Real.exp ((r - σ ^ 2 / 2) * T))).congr
-      (Filter.Eventually.of_forall fun z => ?_)
+      (Filter.Eventually.of_forall fun z ↦ ?_)
     show S_0 * Real.exp ((r - σ ^ 2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
         = S_0 * Real.exp ((r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
     rw [mul_assoc, ← Real.exp_add]

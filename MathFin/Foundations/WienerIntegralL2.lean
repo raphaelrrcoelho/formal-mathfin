@@ -118,7 +118,7 @@ noncomputable def stepIndicatorLp (T : ℝ≥0) (i : StepIndex T) :
 
 /-- The Wiener increment `B(hi) - B(lo)` is in `L²(μ)`. -/
 lemma memLp_increment_two (hB : IsPreBrownianReal B μ) {T : ℝ≥0} (i : StepIndex T) :
-    MemLp (fun ω => B i.1.2 ω - B i.1.1 ω) 2 μ :=
+    MemLp (fun ω ↦ B i.1.2 ω - B i.1.1 ω) 2 μ :=
   hB.isGaussianProcess.hasGaussianLaw_sub.memLp_two
 
 /-- The Wiener increment `B(hi) - B(lo)` as an element of `Lp ℝ 2 μ`. -/
@@ -188,17 +188,17 @@ lemma covariance_increment_aux (hB : IsPreBrownianReal B μ)
   have hBt : MemLp (B t) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval t).memLp_two
   have hBu : MemLp (B u) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval u).memLp_two
   have hBv : MemLp (B v) 2 μ := (hB.isGaussianProcess.hasGaussianLaw_eval v).memLp_two
-  have hInt_tv : Integrable (fun ω => B t ω * B v ω) μ :=
+  have hInt_tv : Integrable (fun ω ↦ B t ω * B v ω) μ :=
     MemLp.integrable_mul hBt hBv
-  have hInt_tu : Integrable (fun ω => B t ω * B u ω) μ :=
+  have hInt_tu : Integrable (fun ω ↦ B t ω * B u ω) μ :=
     MemLp.integrable_mul hBt hBu
-  have hInt_sv : Integrable (fun ω => B s ω * B v ω) μ :=
+  have hInt_sv : Integrable (fun ω ↦ B s ω * B v ω) μ :=
     MemLp.integrable_mul hBs hBv
-  have hInt_su : Integrable (fun ω => B s ω * B u ω) μ :=
+  have hInt_su : Integrable (fun ω ↦ B s ω * B u ω) μ :=
     MemLp.integrable_mul hBs hBu
   have h_eq_fun :
-      (fun ω => (B t ω - B s ω) * (B v ω - B u ω)) =
-        (fun ω => B t ω * B v ω - B t ω * B u ω - B s ω * B v ω + B s ω * B u ω) := by
+      (fun ω ↦ (B t ω - B s ω) * (B v ω - B u ω)) =
+        (fun ω ↦ B t ω * B v ω - B t ω * B u ω - B s ω * B v ω + B s ω * B u ω) := by
     funext ω
     ring
   have e1 : ∫ ω, B t ω * B v ω - B t ω * B u ω ∂μ =
@@ -262,7 +262,7 @@ private lemma inner_wienerIncrementLp_eq (hB : IsPreBrownianReal B μ)
     have h_sub :
         Set.Ioc (max (i.lo : ℝ) j.lo) (min (i.hi : ℝ) j.hi) ⊆ Set.Ioc (0 : ℝ) (T : ℝ) := by
       rw [← h_inter]
-      exact fun x hx => i.interval_subset_Ioc_zero_T hx.1
+      exact fun x hx ↦ i.interval_subset_Ioc_zero_T hx.1
     rw [Measure.real_def,
         Measure.restrict_apply (i.measurableSet_interval.inter j.measurableSet_interval),
         h_inter, Set.inter_eq_left.mpr h_sub, Real.volume_Ioc,
@@ -278,9 +278,9 @@ theorem wiener_assembly_isometry (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
         ← @real_inner_self_eq_norm_sq _ _ _ (stepAssembly T f)]
     simp only [wienerAssembly, stepAssembly, Finsupp.linearCombination_apply]
     rw [Finsupp.sum_inner, Finsupp.sum_inner]
-    refine Finsupp.sum_congr (fun i _ => ?_)
+    refine Finsupp.sum_congr (fun i _ ↦ ?_)
     rw [Finsupp.inner_sum, Finsupp.inner_sum]
-    refine Finsupp.sum_congr (fun j _ => ?_)
+    refine Finsupp.sum_congr (fun j _ ↦ ?_)
     rw [real_inner_smul_left, real_inner_smul_right,
         real_inner_smul_left, real_inner_smul_right,
         inner_wienerIncrementLp_eq hB i j]
@@ -356,7 +356,7 @@ private lemma setIntegral_eq_zero_of_orthogonal {T : ℝ≥0}
   have hg_int : Integrable g (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) :=
     (Lp.memLp g).integrable (by norm_num : (1 : ℝ≥0∞) ≤ 2)
   -- Apply π-system induction over `Borel ℝ = generateFrom {Ioc a b | a ≤ b}`.
-  refine MeasurableSpace.induction_on_inter (C := fun s _ =>
+  refine MeasurableSpace.induction_on_inter (C := fun s _ ↦
     ∫ x in s, g x ∂(volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) = 0)
     (h_eq := borel_eq_generateFrom_Ioc_le ℝ) (h_inter := ?_)
     (empty := ?_) (basic := ?_) (compl := ?_) (iUnion := ?_) s hs
@@ -399,12 +399,12 @@ theorem stepAssembly_denseRange (T : ℝ≥0) :
   rw [Submodule.eq_bot_iff]
   intro g h_mem
   rw [Submodule.mem_orthogonal] at h_mem
-  have h_orth : ∀ i : StepIndex T, ⟪stepIndicatorLp T i, g⟫_ℝ = 0 := fun i =>
+  have h_orth : ∀ i : StepIndex T, ⟪stepIndicatorLp T i, g⟫_ℝ = 0 := fun i ↦
     h_mem _ ⟨Finsupp.single i 1, by simp [stepAssembly, Finsupp.linearCombination_single]⟩
   exact (Lp.eq_zero_iff_ae_eq_zero (f := g)).mpr <|
     Lp.ae_eq_zero_of_forall_setIntegral_eq_zero g (by norm_num) (by simp)
-      (fun _ _ _ => ((Lp.memLp g).integrable one_le_two).integrableOn)
-      (fun s hs _ => setIntegral_eq_zero_of_orthogonal g h_orth s hs)
+      (fun _ _ _ ↦ ((Lp.memLp g).integrable one_le_two).integrableOn)
+      (fun s hs _ ↦ setIntegral_eq_zero_of_orthogonal g h_orth s hs)
 
 /-- The Wiener integral as a continuous linear isometry
 `Lp ℝ 2 (volume.restrict (Set.Ioc 0 T)) →L[ℝ] Lp ℝ 2 μ`. -/

@@ -95,7 +95,7 @@ theorem multi_period_FTAP_marginals {u d r : ℝ} (h : BinomialNoArb u d r) (n :
   have h_p : crrUpProb u d r * u + (1 - crrUpProb u d r) * d = Real.exp r := by
     have h_ud_ne : u - d ≠ 0 := (sub_pos.mpr h.d_lt_u).ne'
     unfold crrUpProb; field_simp; ring
-  refine ⟨fun _ => crrUpProb u d r, fun _ => h_p, ?_⟩
+  refine ⟨fun _ ↦ crrUpProb u d r, fun _ ↦ h_p, ?_⟩
   intro q hq
   funext k
   exact ExistsUnique.unique (second_FTAP_single_period h) (hq k) h_p

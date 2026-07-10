@@ -71,9 +71,9 @@ lemma integral_exp_affine_gaussianPDFReal_univ (α β : ℝ) :
     ∫ z, Real.exp (α + β * z) * gaussianPDFReal 0 1 z =
       Real.exp (α + β^2 / 2) := by
   -- Factor the integrand: exp(α + β·z) · pdf = exp(α) · (exp(β·z) · pdf).
-  rw [show (fun z => Real.exp (α + β * z) * gaussianPDFReal 0 1 z) =
-        (fun z => Real.exp α * (Real.exp (β * z) * gaussianPDFReal 0 1 z))
-      from funext (fun z => by rw [Real.exp_add]; ring)]
+  rw [show (fun z ↦ Real.exp (α + β * z) * gaussianPDFReal 0 1 z) =
+        (fun z ↦ Real.exp α * (Real.exp (β * z) * gaussianPDFReal 0 1 z))
+      from funext (fun z ↦ by rw [Real.exp_add]; ring)]
   rw [integral_const_mul, integral_exp_mul_gaussianPDFReal_univ]
   -- exp(α) · exp(β²/2) = exp(α + β²/2)
   rw [← Real.exp_add]

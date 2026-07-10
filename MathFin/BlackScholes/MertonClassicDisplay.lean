@@ -123,7 +123,7 @@ theorem mertonCallPrice_eq_classic_tsum {S_0 K k T : ℝ} (r σ δ : ℝ) (Λ : 
       = ∑' n : ℕ, rexp (-((Λ : ℝ) * (1 + k))) * ((Λ : ℝ) * (1 + k)) ^ n / n !
           * bsV K (mertonRate r k T Λ n) (mertonVol σ δ T n) S_0 T := by
   rw [mertonCallPrice_eq_tsum]
-  refine tsum_congr fun n => ?_
+  refine tsum_congr fun n ↦ ?_
   rw [mertonCallTerm_eq_classic r σ δ Λ hS_0 hK hT hk n,
     show -((Λ : ℝ) * (1 + k)) = -(Λ : ℝ) + -(k * (Λ : ℝ)) from by ring,
     Real.exp_add, mul_pow]

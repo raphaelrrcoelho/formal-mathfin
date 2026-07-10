@@ -70,14 +70,14 @@ theorem vasicekDeterministic_solves_ODE (r₀ θ κ t : ℝ) :
     HasDerivAt (vasicekDeterministic r₀ θ κ)
       (κ * (θ - vasicekDeterministic r₀ θ κ t)) t := by
   unfold vasicekDeterministic
-  have h_neg_kt : HasDerivAt (fun t => -(κ * t)) (-κ) t := by
-    have h_kt : HasDerivAt (fun t : ℝ => κ * t) κ t := by
+  have h_neg_kt : HasDerivAt (fun t ↦ -(κ * t)) (-κ) t := by
+    have h_kt : HasDerivAt (fun t : ℝ ↦ κ * t) κ t := by
       have := (hasDerivAt_id t).const_mul κ
       simpa using this
     exact h_kt.neg
-  have h_exp : HasDerivAt (fun t => Real.exp (-(κ * t)))
+  have h_exp : HasDerivAt (fun t ↦ Real.exp (-(κ * t)))
                 (Real.exp (-(κ * t)) * (-κ)) t := h_neg_kt.exp
-  have h_mul : HasDerivAt (fun t => (r₀ - θ) * Real.exp (-(κ * t)))
+  have h_mul : HasDerivAt (fun t ↦ (r₀ - θ) * Real.exp (-(κ * t)))
                 ((r₀ - θ) * (Real.exp (-(κ * t)) * (-κ))) t :=
     h_exp.const_mul (r₀ - θ)
   have h := h_mul.const_add θ
@@ -87,9 +87,9 @@ theorem vasicekDeterministic_solves_ODE (r₀ θ κ t : ℝ) :
 `(r₀ − θ) e^{−κt}` decays exponentially: `κt → ∞`, so `e^{−κt} → 0`. -/
 theorem vasicekDeterministic_tendsto_mean (r₀ θ κ : ℝ) (hκ : 0 < κ) :
     Filter.Tendsto (vasicekDeterministic r₀ θ κ) Filter.atTop (nhds θ) := by
-  have h1 : Filter.Tendsto (fun t : ℝ => κ * t) Filter.atTop Filter.atTop :=
+  have h1 : Filter.Tendsto (fun t : ℝ ↦ κ * t) Filter.atTop Filter.atTop :=
     Filter.Tendsto.const_mul_atTop hκ Filter.tendsto_id
-  have h2 : Filter.Tendsto (fun t : ℝ => Real.exp (-(κ * t)))
+  have h2 : Filter.Tendsto (fun t : ℝ ↦ Real.exp (-(κ * t)))
       Filter.atTop (nhds 0) :=
     Real.tendsto_exp_neg_atTop_nhds_zero.comp h1
   unfold vasicekDeterministic

@@ -40,35 +40,35 @@ include hB
 `|f″| ≤ C₂`, `|f‴| ≤ C₃`, there is an Itô-`L²` integrand `gf'` (the realization of
 `s ↦ f′(B_s)`) with `f(B_T) − f(B_0) =ᵐ[μ] itoIntegralCLM_T gf' + ½∫₀ᵀ f″(B_s) ds`. -/
 theorem ito_formula_L2_bddDeriv
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 => B s ω)) (T : ℝ≥0)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ B s ω)) (T : ℝ≥0)
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
     {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
     ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
-      (fun ω => f (B T ω) - f (B 0 ω)) =ᵐ[μ]
-        (fun ω => (itoIntegralCLM_T hB T hBmeas gf') ω
+      (fun ω ↦ f (B T ω) - f (B 0 ω)) =ᵐ[μ]
+        (fun ω ↦ (itoIntegralCLM_T hB T hBmeas gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure) := by
-  have hf'_cont : Continuous f' := continuous_iff_continuousAt.mpr fun x => (hf' x).continuousAt
-  have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x => (hf'' x).continuousAt
-  have hf_cont : Continuous f := continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt
+  have hf'_cont : Continuous f' := continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt
+  have hf''_cont : Continuous f'' := continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt
+  have hf_cont : Continuous f := continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt
   obtain ⟨gf', hgf'⟩ := itoIntegralCLM_T_of_bdd_cont hB hBmeas hBcont hf'_cont hf1 T
   refine ⟨gf', ?_⟩
-  set I : Ω → ℝ := fun ω => f (B T ω) - f (B 0 ω)
+  set I : Ω → ℝ := fun ω ↦ f (B T ω) - f (B 0 ω)
     - (1 / 2) * ∫ s in Set.Ioc 0 T, f'' (B s ω) ∂ItoIntegralL2.timeMeasure with hI
   -- `f` is `C₁`-Lipschitz, so `f(B_t)` is dominated by `|f 0| + C₁·|B_t| ∈ L²`
-  have hlip : ∀ x : ℝ, |f x| ≤ |f 0| + C1 * |x| := fun x => by
+  have hlip : ∀ x : ℝ, |f x| ≤ |f 0| + C1 * |x| := fun x ↦ by
     have h := (convex_uIcc (0 : ℝ) x).norm_image_sub_le_of_norm_hasDerivWithin_le
-      (fun u _ => (hf u).hasDerivWithinAt) (fun u _ => by rw [Real.norm_eq_abs]; exact hf1 u)
+      (fun u _ ↦ (hf u).hasDerivWithinAt) (fun u _ ↦ by rw [Real.norm_eq_abs]; exact hf1 u)
       Set.left_mem_uIcc Set.right_mem_uIcc
     rw [Real.norm_eq_abs, Real.norm_eq_abs, sub_zero] at h
     have h2 : |f x| - |f 0| ≤ |f x - f 0| := abs_sub_abs_le_abs_sub _ _
     linarith [h, h2]
-  have hfB : ∀ t : ℝ≥0, MemLp (fun ω => f (B t ω)) 2 μ := fun t => by
+  have hfB : ∀ t : ℝ≥0, MemLp (fun ω ↦ f (B t ω)) 2 μ := fun t ↦ by
     refine MemLp.mono ((memLp_const (μ := μ) |f 0|).add
         ((memLp_eval hB t).norm.const_mul C1))
-      ((hf_cont.measurable.comp (hBmeas t)).aestronglyMeasurable) (ae_of_all _ fun ω => ?_)
+      ((hf_cont.measurable.comp (hBmeas t)).aestronglyMeasurable) (ae_of_all _ fun ω ↦ ?_)
     calc ‖f (B t ω)‖ = |f (B t ω)| := Real.norm_eq_abs _
       _ ≤ |f 0| + C1 * ‖B t ω‖ := by rw [Real.norm_eq_abs]; exact hlip (B t ω)
       _ ≤ ‖|f 0| + C1 * ‖B t ω‖‖ := le_abs_self _
@@ -77,10 +77,10 @@ theorem ito_formula_L2_bddDeriv
       ((memLp_pathIntegral hB hBmeas hBcont hf''_cont hf2 T).const_mul (1 / 2))
   -- A-core: the Riemann sums converge in `L²` to `I`; lift to `Lp`
   have hcore := ito_formula_L2 hB hBmeas hBcont T hf hf' hf'' hf2 hf3
-  have hcore_Lp : Tendsto (fun n => (memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n).toLp
+  have hcore_Lp : Tendsto (fun n ↦ (memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n).toLp
         (riemannφ hBmeas f' T n)) atTop (𝓝 (hI_memLp.toLp I)) :=
     tendsto_iff_norm_sub_tendsto_zero.mpr
-      (tendsto_norm_toLp_sub' (fun n => memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n)
+      (tendsto_norm_toLp_sub' (fun n ↦ memLp_riemannφ hB hBmeas hf'_cont.measurable hf1 T n)
         hI_memLp hcore)
   -- both limits are the same `L²` limit ⇒ they coincide
   have huniq : hI_memLp.toLp I = itoIntegralCLM_T hB T hBmeas gf' :=
@@ -103,15 +103,15 @@ theorem ito_formula_L2_bddDeriv_mk {X : ℝ≥0 → Ω → ℝ} (hX : IsPreBrown
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x)
     {C1 : ℝ} (hf1 : ∀ x, |f' x| ≤ C1) {C2 : ℝ} (hf2 : ∀ x, |f'' x| ≤ C2)
     {C3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ C3) :
-    ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t => IsPreBrownianReal.measurable_mk (h := hX) t)),
-      (fun ω => f (IsPreBrownianReal.mk (h := hX) X T ω) - f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
-        (fun ω => (itoIntegralCLM_T (hX.isBrownianReal_mk).toIsPreBrownianReal T
-                    (fun t => IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω
+    ∃ gf' : Lp ℝ 2 (trimMeasure_T (μ := μ) T (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)),
+      (fun ω ↦ f (IsPreBrownianReal.mk (h := hX) X T ω) - f (IsPreBrownianReal.mk (h := hX) X 0 ω)) =ᵐ[μ]
+        (fun ω ↦ (itoIntegralCLM_T (hX.isBrownianReal_mk).toIsPreBrownianReal T
+                    (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t) gf') ω
           + (1 / 2) * ∫ s in Set.Ioc 0 T,
               f'' (IsPreBrownianReal.mk (h := hX) X s ω) ∂ItoIntegralL2.timeMeasure) :=
   ito_formula_L2_bddDeriv (hB := (hX.isBrownianReal_mk).toIsPreBrownianReal)
     (B := IsPreBrownianReal.mk (h := hX) X)
-    (fun t => IsPreBrownianReal.measurable_mk (h := hX) t)
-    (fun ω => IsPreBrownianReal.continuous_mk (h := hX) ω) T hf hf' hf'' hf1 hf2 hf3
+    (fun t ↦ IsPreBrownianReal.measurable_mk (h := hX) t)
+    (fun ω ↦ IsPreBrownianReal.continuous_mk (h := hX) ω) T hf hf' hf'' hf1 hf2 hf3
 
 end MathFin

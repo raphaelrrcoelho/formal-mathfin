@@ -69,7 +69,7 @@ private lemma eq_empty_of_pos_singleton {μ : Measure Ω} (hμ : ∀ ω, 0 < μ 
 sure non-loss (`0 ≤ᵐ[P]` discounted gains) with a positive chance of gain. On a
 full-support finite space the `ᵐ[P]` form coincides with the pointwise one. -/
 def NoArbitrage : Prop :=
-  ∀ φ : ℕ → Ω → ℝ, StronglyAdapted 𝓕 (fun n => φ (n + 1)) →
+  ∀ φ : ℕ → Ω → ℝ, StronglyAdapted 𝓕 (fun n ↦ φ (n + 1)) →
     0 ≤ᵐ[P] martingaleTransform φ S T → martingaleTransform φ S T =ᵐ[P] 0
 
 /-- **Equivalent martingale measure** for the finite horizon. The martingale
@@ -84,7 +84,7 @@ structure IsEMM (Q : Measure Ω) : Prop where
 /-- `𝟙_A · (S_{t+1} − S_t)` — the discounted gain of holding one unit on the
 event `A` over period `t+1`. -/
 noncomputable def incrementIndicator (t : ℕ) (A : Set Ω) : Ω → ℝ :=
-  fun ω => A.indicator (fun _ => (1 : ℝ)) ω * (S (t + 1) ω - S t ω)
+  fun ω ↦ A.indicator (fun _ ↦ (1 : ℝ)) ω * (S (t + 1) ω - S t ω)
 
 /-- The **attainable-gains subspace**: the span of the single-period
 increment-indicators `𝟙_A · (S_{t+1} − S_t)` over `t < T` and `𝓕_t`-measurable
@@ -106,7 +106,7 @@ private lemma martingaleTransform_smul (c : ℝ) (φ : ℕ → Ω → ℝ) (n : 
     martingaleTransform (c • φ) S n = c • martingaleTransform φ S n := by
   funext ω
   simp only [martingaleTransform, Pi.smul_apply, smul_eq_mul, Finset.mul_sum]
-  exact Finset.sum_congr rfl fun k _ => by ring
+  exact Finset.sum_congr rfl fun k _ ↦ by ring
 
 /-- Every element of the attainable-gains subspace is the discounted gains of a
 predictable strategy. (`span`-induction: the generators are the gains of the
@@ -114,12 +114,12 @@ single-period indicator strategies, and predictable gains are closed under the
 vector-space operations.) -/
 theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace 𝓕 S T) :
     ∃ φ : ℕ → Ω → ℝ,
-      StronglyAdapted 𝓕 (fun n => φ (n + 1)) ∧ martingaleTransform φ S T = g := by
+      StronglyAdapted 𝓕 (fun n ↦ φ (n + 1)) ∧ martingaleTransform φ S T = g := by
   classical
   induction hg using Submodule.span_induction with
   | mem x hx =>
     obtain ⟨t, htT, A, hA, rfl⟩ := hx
-    refine ⟨fun s => if s = t + 1 then A.indicator (fun _ => (1 : ℝ)) else 0, ?_, ?_⟩
+    refine ⟨fun s ↦ if s = t + 1 then A.indicator (fun _ ↦ (1 : ℝ)) else 0, ?_, ?_⟩
     · intro n
       dsimp only
       split_ifs with h
@@ -136,15 +136,15 @@ theorem mem_gains_imp_predictable {g : Ω → ℝ} (hg : g ∈ gainsSubspace �
         simp
       · intro ht
         exact absurd (Finset.mem_range.mpr htT) ht
-  | zero => exact ⟨0, fun _ => stronglyMeasurable_const, by funext ω; simp [martingaleTransform]⟩
+  | zero => exact ⟨0, fun _ ↦ stronglyMeasurable_const, by funext ω; simp [martingaleTransform]⟩
   | add x y _ _ ihx ihy =>
     obtain ⟨φ, hφ, hφeq⟩ := ihx
     obtain ⟨ψ, hψ, hψeq⟩ := ihy
-    exact ⟨φ + ψ, fun n => (hφ n).add (hψ n),
+    exact ⟨φ + ψ, fun n ↦ (hφ n).add (hψ n),
       by rw [martingaleTransform_add, hφeq, hψeq]⟩
   | smul c x _ ih =>
     obtain ⟨φ, hφ, hφeq⟩ := ih
-    exact ⟨c • φ, fun n => (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
+    exact ⟨c • φ, fun n ↦ (hφ n).const_smul c, by rw [martingaleTransform_smul, hφeq]⟩
 
 /-- Under no arbitrage, the attainable-gains subspace is disjoint from the
 standard simplex: a non-negative, non-zero gains vector would be an arbitrage. -/
@@ -154,13 +154,13 @@ theorem gains_disjoint_stdSimplex (hP : ∀ ω, 0 < P {ω}) (hNA : NoArbitrage �
   obtain ⟨φ, hφ, hφeq⟩ := mem_gains_imp_predictable 𝓕 S T hv
   -- The gains are `≥ 0` (`v` is in the simplex), so no arbitrage forces them `= 0`.
   have hge : 0 ≤ᵐ[P] martingaleTransform φ S T := by
-    rw [hφeq]; exact Filter.Eventually.of_forall fun ω => hsimplex.1 ω
+    rw [hφeq]; exact Filter.Eventually.of_forall fun ω ↦ hsimplex.1 ω
   have hzero : v =ᵐ[P] 0 := by rw [← hφeq]; exact hNA φ hφ hge
   -- But `∑ v = 1`, so some `v ω₀ > 0`, contradicting `v = 0` a.e. on full support.
   obtain ⟨ω₀, hω₀⟩ : ∃ ω₀, 0 < v ω₀ := by
     by_contra hcon
     simp only [not_exists, not_lt] at hcon
-    have hle : ∑ ω, v ω ≤ 0 := Finset.sum_nonpos fun ω _ => hcon ω
+    have hle : ∑ ω, v ω ≤ 0 := Finset.sum_nonpos fun ω _ ↦ hcon ω
     rw [hsimplex.2] at hle; linarith
   have hnull : P {ω | v ω ≠ 0} = 0 := by simpa using ae_iff.mp hzero
   have hmem : ω₀ ∈ {ω | v ω ≠ 0} := ne_of_gt hω₀
@@ -180,44 +180,44 @@ theorem exists_isEMM_of_noArbitrage (hS : StronglyAdapted 𝓕 S)
     exists_pos_dual_of_disjoint_stdSimplex (gainsSubspace 𝓕 S T)
       (gains_disjoint_stdSimplex 𝓕 P S T hP hNA)
   set Z : ℝ := ∑ ω, q ω with hZ
-  have hZpos : 0 < Z := Finset.sum_pos (fun ω _ => hq_pos ω) Finset.univ_nonempty
-  have hmnn : ∀ ω, (0 : ℝ) ≤ q ω / Z := fun ω => (div_pos (hq_pos ω) hZpos).le
+  have hZpos : 0 < Z := Finset.sum_pos (fun ω _ ↦ hq_pos ω) Finset.univ_nonempty
+  have hmnn : ∀ ω, (0 : ℝ) ≤ q ω / Z := fun ω ↦ (div_pos (hq_pos ω) hZpos).le
   have hsum1 : ∑ ω, ENNReal.ofReal (q ω / Z) = 1 := by
-    rw [← ENNReal.ofReal_sum_of_nonneg (fun ω _ => hmnn ω), ← Finset.sum_div, ← hZ,
+    rw [← ENNReal.ofReal_sum_of_nonneg (fun ω _ ↦ hmnn ω), ← Finset.sum_div, ← hZ,
       div_self hZpos.ne', ENNReal.ofReal_one]
-  set Q : Measure Ω := (PMF.ofFintype (fun ω => ENNReal.ofReal (q ω / Z)) hsum1).toMeasure
+  set Q : Measure Ω := (PMF.ofFintype (fun ω ↦ ENNReal.ofReal (q ω / Z)) hsum1).toMeasure
     with hQdef
   haveI hQprob : IsProbabilityMeasure Q := by rw [hQdef]; infer_instance
-  have hQsingle : ∀ ω, Q {ω} = ENNReal.ofReal (q ω / Z) := fun ω => by
+  have hQsingle : ∀ ω, Q {ω} = ENNReal.ofReal (q ω / Z) := fun ω ↦ by
     rw [hQdef, PMF.toMeasure_apply_singleton _ _ (measurableSet_singleton ω), PMF.ofFintype_apply]
-  have hQpos : ∀ ω, 0 < Q {ω} := fun ω => by
+  have hQpos : ∀ ω, 0 < Q {ω} := fun ω ↦ by
     rw [hQsingle ω]; exact ENNReal.ofReal_pos.mpr (div_pos (hq_pos ω) hZpos)
   have hQint : ∀ h : Ω → ℝ, ∫ ω, h ω ∂Q = ∑ ω, (q ω / Z) * h ω := by
     intro h
     rw [hQdef, PMF.integral_eq_sum]
-    exact Finset.sum_congr rfl fun ω _ => by
+    exact Finset.sum_congr rfl fun ω _ ↦ by
       rw [PMF.ofFintype_apply, ENNReal.toReal_ofReal (hmnn ω), smul_eq_mul]
   -- Full support ⇒ `P` and `Q` are mutually absolutely continuous.
   have hQP : Q ≪ P := by
     intro s hs; rw [eq_empty_of_pos_singleton hP hs]; exact measure_empty
   have hPQ : P ≪ Q := by
     intro s hs; rw [eq_empty_of_pos_singleton hQpos hs]; exact measure_empty
-  refine ⟨Q, hQprob, hQP, hPQ, fun t htT => ?_⟩
+  refine ⟨Q, hQprob, hQP, hPQ, fun t htT ↦ ?_⟩
   -- Martingale property via the conditional-expectation characterisation.
   refine ae_eq_condExp_of_forall_setIntegral_eq (𝓕.le t) Integrable.of_finite
-    (fun s _ _ => Integrable.of_finite.integrableOn) (fun s hs _ => ?_)
+    (fun s _ _ ↦ Integrable.of_finite.integrableOn) (fun s hs _ ↦ ?_)
     (hS t).aestronglyMeasurable
   -- Key: `∫_s (S_{t+1} − S_t) dQ = 0` because the increment-indicator is annihilated.
   have hsm : MeasurableSet s := 𝓕.le t s hs
-  have hinc_eq : s.indicator (fun ω => S (t + 1) ω - S t ω) = incrementIndicator S t s := by
+  have hinc_eq : s.indicator (fun ω ↦ S (t + 1) ω - S t ω) = incrementIndicator S t s := by
     funext ω; simp only [incrementIndicator, Set.indicator_apply]; split_ifs <;> ring
-  have hkey : ∫ ω, s.indicator (fun ω => S (t + 1) ω - S t ω) ω ∂Q = 0 := by
+  have hkey : ∫ ω, s.indicator (fun ω ↦ S (t + 1) ω - S t ω) ω ∂Q = 0 := by
     rw [hinc_eq, hQint]
     have hdual := hq_dual (incrementIndicator S t s)
       (Submodule.subset_span ⟨t, htT, s, hs, rfl⟩)
     calc ∑ ω, (q ω / Z) * incrementIndicator S t s ω
         = (∑ ω, q ω * incrementIndicator S t s ω) / Z := by
-          rw [Finset.sum_div]; exact Finset.sum_congr rfl fun ω _ => by ring
+          rw [Finset.sum_div]; exact Finset.sum_congr rfl fun ω _ ↦ by ring
       _ = 0 := by rw [hdual, zero_div]
   rw [integral_indicator hsm,
     integral_sub Integrable.of_finite.integrableOn Integrable.of_finite.integrableOn] at hkey
@@ -252,11 +252,11 @@ theorem noArbitrage_of_isEMM (hS : StronglyAdapted 𝓕 S)
   -- Sum the steps: `∫ G_T dQ = 0`.
   have hGint : ∫ ω, martingaleTransform φ S T ω ∂Q = 0 := by
     have hsplit : ∀ ω, martingaleTransform φ S T ω
-        = ∑ k ∈ Finset.range T, φ (k + 1) ω * (S (k + 1) ω - S k ω) := fun ω => by
+        = ∑ k ∈ Finset.range T, φ (k + 1) ω * (S (k + 1) ω - S k ω) := fun ω ↦ by
       rw [martingaleTransform]
     simp_rw [hsplit]
-    rw [integral_finsetSum _ (fun k _ => Integrable.of_finite)]
-    exact Finset.sum_eq_zero fun k hk => hstep k (Finset.mem_range.mp hk)
+    rw [integral_finsetSum _ (fun k _ ↦ Integrable.of_finite)]
+    exact Finset.sum_eq_zero fun k hk ↦ hstep k (Finset.mem_range.mp hk)
   -- `G_T ≥ 0` `Q`-a.e. (equivalence) and `∫ G_T = 0` give `G_T = 0` a.e.
   have hposQ : 0 ≤ᵐ[Q] martingaleTransform φ S T := hQ.absP.ae_le hpos
   have hzeroQ : martingaleTransform φ S T =ᵐ[Q] 0 :=
@@ -269,7 +269,7 @@ on a finite full-support probability space has no arbitrage **iff** it admits an
 equivalent martingale measure. -/
 theorem ftap_discrete (hS : StronglyAdapted 𝓕 S) (hP : ∀ ω, 0 < P {ω}) :
     NoArbitrage 𝓕 P S T ↔ ∃ Q, IsEMM 𝓕 P S T Q :=
-  ⟨fun hNA => exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
-   fun ⟨_, hQ⟩ => noArbitrage_of_isEMM 𝓕 P S T hS hQ⟩
+  ⟨fun hNA ↦ exists_isEMM_of_noArbitrage 𝓕 P S T hS hP hNA,
+   fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM 𝓕 P S T hS hQ⟩
 
 end MathFin

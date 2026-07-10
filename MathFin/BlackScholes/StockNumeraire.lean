@@ -100,28 +100,28 @@ theorem bsCall_asset_piece_integral
     rw [ν_log_def, mul_pow, Real.sq_sqrt hT.le]
   have h_algebra : μ_log + ν_log ^ 2 / 2 = r * T := by rw [hν_log_sq]; ring
   have h_shift_eq : ν_log - (-d_2) = d_1 := by rw [d_1_def, d_2_def, bsd2]; ring
-  have h_term_meas : Measurable fun z : ℝ => bsTerminal S_0 r σ T z := by
+  have h_term_meas : Measurable fun z : ℝ ↦ bsTerminal S_0 r σ T z := by
     unfold bsTerminal; fun_prop
-  have h_ind_meas : Measurable fun z : ℝ =>
+  have h_ind_meas : Measurable fun z : ℝ ↦
       (Set.Ioi (-d_2)).indicator (bsTerminal S_0 r σ T) z :=
     h_term_meas.indicator measurableSet_Ioi
   -- Step 1: express as ∘ Z and apply HasLaw transfer
-  rw [show (fun ω => (Set.Ioi (-d_2)).indicator (bsTerminal S_0 r σ T) (Z ω)) =
-        (fun z => (Set.Ioi (-d_2)).indicator (bsTerminal S_0 r σ T) z) ∘ Z from rfl,
+  rw [show (fun ω ↦ (Set.Ioi (-d_2)).indicator (bsTerminal S_0 r σ T) (Z ω)) =
+        (fun z ↦ (Set.Ioi (-d_2)).indicator (bsTerminal S_0 r σ T) z) ∘ Z from rfl,
       hZ.integral_comp h_ind_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Step 2: pdf · indicator (Ioi) bsTerminal = indicator (Ioi) (pdf · bsTerminal)
-  rw [show (fun z => gaussianPDFReal 0 1 z •
+  rw [show (fun z ↦ gaussianPDFReal 0 1 z •
               (Set.Ioi (-d_2)).indicator (bsTerminal S_0 r σ T) z)
         = (Set.Ioi (-d_2)).indicator
-            (fun z => gaussianPDFReal 0 1 z • bsTerminal S_0 r σ T z) from
-      funext (fun z => by
+            (fun z ↦ gaussianPDFReal 0 1 z • bsTerminal S_0 r σ T z) from
+      funext (fun z ↦ by
         by_cases hz : z ∈ Set.Ioi (-d_2)
         · rw [Set.indicator_of_mem hz, Set.indicator_of_mem hz]
         · rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem hz, smul_zero])]
   rw [integral_indicator measurableSet_Ioi]
   -- Step 3: rewrite pdf · bsTerminal in factored form
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ =>
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ ↦
     show gaussianPDFReal 0 1 z • bsTerminal S_0 r σ T z =
          S_0 * Real.exp μ_log *
            (Real.exp (ν_log * z) * gaussianPDFReal 0 1 z) from by
@@ -145,7 +145,7 @@ theorem bsCall_asset_piece_integral
 `Q` is `e^{−rT} · S_T / S_0`. -/
 noncomputable def stockNumeraireDensity {Ω : Type*}
     (S_0 r σ T : ℝ) (Z : Ω → ℝ) : Ω → ℝ≥0∞ :=
-  fun ω => ENNReal.ofReal (Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) / S_0)
+  fun ω ↦ ENNReal.ofReal (Real.exp (-r * T) * bsTerminal S_0 r σ T (Z ω) / S_0)
 
 /-- **Stock-numeraire measure**: `Q^(S) := Q.withDensity (e^{−rT} · S_T / S_0)`. -/
 noncomputable def stockNumeraireMeasure {Ω : Type*} {mΩ : MeasurableSpace Ω}
@@ -184,7 +184,7 @@ theorem stockNumeraire_exercise_probability
     {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
     (h : BSCallHyp Q S_0 K r σ T Z) :
     (∫ ω, (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
-      (fun z => Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0) (Z ω) ∂Q) =
+      (fun z ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0) (Z ω) ∂Q) =
         Phi (bsd1 S_0 K r σ T) := by
   obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
   -- Rewrite the indicator integrand:
@@ -192,7 +192,7 @@ theorem stockNumeraire_exercise_probability
   --   e^{-rT} / S_0 · indicator (Ioi) S_T z
   have h_factor : ∀ z : ℝ,
       (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
-        (fun z => Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0) z =
+        (fun z ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0) z =
       (Real.exp (-r * T) / S_0) *
         (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
           (bsTerminal S_0 r σ T) z := by
@@ -202,12 +202,12 @@ theorem stockNumeraire_exercise_probability
       field_simp
     · rw [Set.indicator_of_notMem hz, Set.indicator_of_notMem hz, mul_zero]
   -- Pull the constant outside the integral
-  rw [show (fun ω => (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
-              (fun z => Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0) (Z ω)) =
-        (fun ω => (Real.exp (-r * T) / S_0) *
+  rw [show (fun ω ↦ (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
+              (fun z ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0) (Z ω)) =
+        (fun ω ↦ (Real.exp (-r * T) / S_0) *
           (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
             (bsTerminal S_0 r σ T) (Z ω)) from
-    funext (fun ω => h_factor (Z ω))]
+    funext (fun ω ↦ h_factor (Z ω))]
   rw [integral_const_mul]
   -- Apply the asset-payoff integral identity
   rw [bsCall_asset_piece_integral
@@ -229,7 +229,7 @@ theorem stockNumeraire_exercise_probability
 money-market/stock instance `B_T = e^{rT}`, `B₀ = 1`, `N = S`. Concretely
 
   `stockNumeraireMeasure Q S₀ r σ T Z
-     = numeraireMeasure Q (fun _ => e^{rT}) (fun ω => S_T(Z ω)) 1 S₀`,
+     = numeraireMeasure Q (fun _ ↦ e^{rT}) (fun ω ↦ S_T(Z ω)) 1 S₀`,
 
 exhibiting the Black–Scholes stock numéraire (`dQ^(S)/dQ = e^{−rT}·S_T/S₀`) as a
 special case of the general change of numéraire `Foundations.Numeraire`
@@ -240,11 +240,11 @@ theorem stockNumeraireMeasure_eq_numeraireMeasure
     {Ω : Type*} {mΩ : MeasurableSpace Ω} (Q : Measure Ω)
     (S_0 r σ T : ℝ) (Z : Ω → ℝ) :
     stockNumeraireMeasure Q S_0 r σ T Z
-      = numeraireMeasure Q (fun _ => Real.exp (r * T))
-          (fun ω => bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
+      = numeraireMeasure Q (fun _ ↦ Real.exp (r * T))
+          (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
   have hd : stockNumeraireDensity S_0 r σ T Z
-      = numeraireDensity (fun _ => Real.exp (r * T))
-          (fun ω => bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
+      = numeraireDensity (fun _ ↦ Real.exp (r * T))
+          (fun ω ↦ bsTerminal S_0 r σ T (Z ω)) 1 S_0 := by
     unfold stockNumeraireDensity numeraireDensity
     funext ω
     congr 1

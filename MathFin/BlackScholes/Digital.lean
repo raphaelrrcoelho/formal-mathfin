@@ -37,7 +37,7 @@ open scoped NNReal ENNReal
 /-- **Indicator pushforward through `bsTerminal`.** For any payoff `f`, the payoff-on-`{S_T > K}`
 read as a function of the standard-normal driver `z` is the `Ioi (-d₂)`-indicator of `f ∘ S_T`:
 `1_{Ioi K}(S_T z) · f = 1_{Ioi (-d₂)}(z) · (f ∘ S_T)`. Both digital formulas below instantiate it
-(at `f = fun _ => 1` and `f = fun s => s`), sharing the `bsTerminal_gt_K_iff` case split. -/
+(at `f = fun _ ↦ 1` and `f = fun s ↦ s`), sharing the `bsTerminal_gt_K_iff` case split. -/
 private lemma indicator_bsTerminal_Ioi_comp {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) (f : ℝ → ℝ) (z : ℝ) :
     (Set.Ioi K).indicator f (bsTerminal S_0 r σ T z)
@@ -69,35 +69,35 @@ theorem bs_cash_or_nothing_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
     {S_0 K r σ T : ℝ} {Z : Ω → ℝ}
     (h : BSCallHyp Q S_0 K r σ T Z) :
     ∫ ω, Real.exp (-r * T) *
-        (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) ∂Q
+        (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) ∂Q
       = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) := by
   obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
   set d_2 : ℝ := bsd2 S_0 K r σ T
   -- Indicator on {S_T > K} viewed as a function of z equals indicator on Ioi(-d_2)
   have h_indic_eq : ∀ z : ℝ,
-      (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T z)
-        = (Set.Ioi (-d_2)).indicator (fun _ => (1 : ℝ)) z :=
-    fun z => indicator_bsTerminal_Ioi_comp hS_0 hK hσ hT (fun _ => (1 : ℝ)) z
+      (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T z)
+        = (Set.Ioi (-d_2)).indicator (fun _ ↦ (1 : ℝ)) z :=
+    fun z ↦ indicator_bsTerminal_Ioi_comp hS_0 hK hσ hT (fun _ ↦ (1 : ℝ)) z
   -- Measurability of the payoff
-  have h_payoff_meas : Measurable fun z : ℝ =>
-      (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T z) := by
-    have h_simp : (fun z : ℝ =>
-        (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T z))
-          = (Set.Ioi (-d_2)).indicator (fun _ => (1 : ℝ)) := funext h_indic_eq
+  have h_payoff_meas : Measurable fun z : ℝ ↦
+      (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T z) := by
+    have h_simp : (fun z : ℝ ↦
+        (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T z))
+          = (Set.Ioi (-d_2)).indicator (fun _ ↦ (1 : ℝ)) := funext h_indic_eq
     rw [h_simp]
     exact (measurable_const.indicator measurableSet_Ioi)
   -- Pull out e^{-rT}, HasLaw transfer
   rw [integral_const_mul]
-  rw [show (fun ω => (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)))
-        = (fun z => (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T z)) ∘ Z
+  rw [show (fun ω ↦ (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)))
+        = (fun z ↦ (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T z)) ∘ Z
         from rfl,
       hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   -- Replace the indicator by the Ioi(-d_2) form, integrate against pdf
   have h_smul_eq :
-      (fun z : ℝ => gaussianPDFReal 0 1 z •
-          (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T z))
-        = (Set.Ioi (-d_2)).indicator (fun z => gaussianPDFReal 0 1 z) := by
+      (fun z : ℝ ↦ gaussianPDFReal 0 1 z •
+          (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T z))
+        = (Set.Ioi (-d_2)).indicator (fun z ↦ gaussianPDFReal 0 1 z) := by
     funext z
     rw [smul_eq_mul, h_indic_eq z]
     by_cases hz : z ∈ Set.Ioi (-d_2)
@@ -128,7 +128,7 @@ theorem bs_asset_or_nothing_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
     (h : BSCallHyp Q S_0 K r σ T Z) :
     ∫ ω, Real.exp (-r * T) *
         (Set.Ioi K).indicator
-          (fun s => s) (bsTerminal S_0 r σ T (Z ω)) ∂Q
+          (fun s ↦ s) (bsTerminal S_0 r σ T (Z ω)) ∂Q
       = S_0 * Phi (bsd1 S_0 K r σ T) := by
   obtain ⟨hS_0, hK, hσ, hT, hZ⟩ := h
   set d_1 : ℝ := bsd1 S_0 K r σ T with d_1_def
@@ -145,29 +145,29 @@ theorem bs_asset_or_nothing_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
   -- payoff(z) = if S_T(z) > K then S_T(z) else 0
   --          = indicator(Ioi(-d_2), S_T)(z)
   have h_indic_eq : ∀ z : ℝ,
-      (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T z)
-        = (Set.Ioi (-d_2)).indicator (fun z' => bsTerminal S_0 r σ T z') z :=
-    fun z => indicator_bsTerminal_Ioi_comp hS_0 hK hσ hT (fun s => s) z
-  have h_payoff_meas : Measurable fun z : ℝ =>
-      (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T z) := by
-    have h_simp : (fun z : ℝ =>
-        (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T z))
+      (Set.Ioi K).indicator (fun s ↦ s) (bsTerminal S_0 r σ T z)
+        = (Set.Ioi (-d_2)).indicator (fun z' ↦ bsTerminal S_0 r σ T z') z :=
+    fun z ↦ indicator_bsTerminal_Ioi_comp hS_0 hK hσ hT (fun s ↦ s) z
+  have h_payoff_meas : Measurable fun z : ℝ ↦
+      (Set.Ioi K).indicator (fun s ↦ s) (bsTerminal S_0 r σ T z) := by
+    have h_simp : (fun z : ℝ ↦
+        (Set.Ioi K).indicator (fun s ↦ s) (bsTerminal S_0 r σ T z))
           = (Set.Ioi (-d_2)).indicator
-              (fun z' => bsTerminal S_0 r σ T z') := funext h_indic_eq
+              (fun z' ↦ bsTerminal S_0 r σ T z') := funext h_indic_eq
     rw [h_simp]
     exact Measurable.indicator (by unfold bsTerminal; fun_prop) measurableSet_Ioi
   -- Pull out e^{-rT}, HasLaw transfer, convert to volume
   rw [integral_const_mul]
-  rw [show (fun ω => (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T (Z ω)))
-        = (fun z => (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T z)) ∘ Z
+  rw [show (fun ω ↦ (Set.Ioi K).indicator (fun s ↦ s) (bsTerminal S_0 r σ T (Z ω)))
+        = (fun z ↦ (Set.Ioi K).indicator (fun s ↦ s) (bsTerminal S_0 r σ T z)) ∘ Z
         from rfl,
       hZ.integral_comp h_payoff_meas.aestronglyMeasurable,
       integral_gaussianReal_eq_integral_smul (one_ne_zero : (1 : ℝ≥0) ≠ 0)]
   have h_smul_eq :
-      (fun z : ℝ => gaussianPDFReal 0 1 z •
-          (Set.Ioi K).indicator (fun s => s) (bsTerminal S_0 r σ T z))
+      (fun z : ℝ ↦ gaussianPDFReal 0 1 z •
+          (Set.Ioi K).indicator (fun s ↦ s) (bsTerminal S_0 r σ T z))
         = (Set.Ioi (-d_2)).indicator
-            (fun z => gaussianPDFReal 0 1 z * bsTerminal S_0 r σ T z) := by
+            (fun z ↦ gaussianPDFReal 0 1 z * bsTerminal S_0 r σ T z) := by
     funext z
     rw [smul_eq_mul, h_indic_eq z]
     by_cases hz : z ∈ Set.Ioi (-d_2)
@@ -186,7 +186,7 @@ theorem bs_asset_or_nothing_formula {Ω : Type*} {mΩ : MeasurableSpace Ω}
             = Real.exp ((r - σ^2 / 2) * T) * Real.exp (σ * Real.sqrt T * z)
       exact Real.exp_add _ _
     rw [h_exp]; ring
-  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ => h_split_integrand z)]
+  rw [setIntegral_congr_fun measurableSet_Ioi (fun z _ ↦ h_split_integrand z)]
   rw [integral_const_mul, integral_exp_mul_gaussianPDFReal_Ioi, h_shift_eq]
   -- Final algebra: e^{-rT} · S_0 · e^{μ_log} · e^{ν_log²/2} · Phi(d_1) = S_0 · Phi(d_1)
   have h_exp_combine : Real.exp (-r * T) * Real.exp μ_log * Real.exp (ν_log^2 / 2) = 1 := by
@@ -215,10 +215,10 @@ theorem bs_call_eq_asset_minus_K_cash {Ω : Type*} {mΩ : MeasurableSpace Ω}
       =
     (∫ ω, Real.exp (-r * T) *
         (Set.Ioi K).indicator
-          (fun s => s) (bsTerminal S_0 r σ T (Z ω)) ∂Q)
+          (fun s ↦ s) (bsTerminal S_0 r σ T (Z ω)) ∂Q)
     - K *
     (∫ ω, Real.exp (-r * T) *
-        (Set.Ioi K).indicator (fun _ => (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) ∂Q) := by
+        (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) ∂Q) := by
   rw [bs_call_formula h, bs_asset_or_nothing_formula h, bs_cash_or_nothing_formula h]
   ring
 

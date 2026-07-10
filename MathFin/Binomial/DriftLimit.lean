@@ -47,19 +47,19 @@ Algebraic identity `e^{σh} + e^{−σh} − 2 = e^{−σh} · (e^{σh} − 1)²
 to a product of three existing limits: `e^{−σh} → 1`, `(e^{σh} − 1)/h → σ`,
 and squaring is continuous. -/
 lemma tendsto_exp_sym_sub_two_div_sq (σ : ℝ) :
-    Tendsto (fun h : ℝ => (Real.exp (σ * h) + Real.exp (-(σ * h)) - 2) / h^2)
+    Tendsto (fun h : ℝ ↦ (Real.exp (σ * h) + Real.exp (-(σ * h)) - 2) / h^2)
       (𝓝[≠] 0) (𝓝 (σ^2)) := by
   -- Building blocks.
-  have h_exp_neg : Tendsto (fun h : ℝ => Real.exp (-(σ * h))) (𝓝[≠] 0) (𝓝 1) := by
-    have h_cont : Continuous (fun h : ℝ => Real.exp (-(σ * h))) := by continuity
+  have h_exp_neg : Tendsto (fun h : ℝ ↦ Real.exp (-(σ * h))) (𝓝[≠] 0) (𝓝 1) := by
+    have h_cont : Continuous (fun h : ℝ ↦ Real.exp (-(σ * h))) := by continuity
     have h_at_zero : Real.exp (-(σ * 0)) = 1 := by simp [Real.exp_zero]
-    have h_tendsto : Tendsto (fun h : ℝ => Real.exp (-(σ * h))) (𝓝 0) (𝓝 1) := by
+    have h_tendsto : Tendsto (fun h : ℝ ↦ Real.exp (-(σ * h))) (𝓝 0) (𝓝 1) := by
       rw [show (1 : ℝ) = Real.exp (-(σ * 0)) from h_at_zero.symm]
       exact h_cont.tendsto 0
     exact h_tendsto.mono_left nhdsWithin_le_nhds
-  have h_exp_diff : Tendsto (fun h : ℝ => (Real.exp (σ * h) - 1) / h) (𝓝[≠] 0) (𝓝 σ) :=
+  have h_exp_diff : Tendsto (fun h : ℝ ↦ (Real.exp (σ * h) - 1) / h) (𝓝[≠] 0) (𝓝 σ) :=
     tendsto_exp_sub_one_div σ
-  have h_exp_diff_sq : Tendsto (fun h : ℝ => ((Real.exp (σ * h) - 1) / h)^2)
+  have h_exp_diff_sq : Tendsto (fun h : ℝ ↦ ((Real.exp (σ * h) - 1) / h)^2)
       (𝓝[≠] 0) (𝓝 (σ^2)) := h_exp_diff.pow 2
   have h_prod := h_exp_neg.mul h_exp_diff_sq
   have h_target : (1 : ℝ) * σ^2 = σ^2 := one_mul _
@@ -88,12 +88,12 @@ lemma tendsto_exp_sym_sub_two_div_sq (σ : ℝ) :
 Combines `tendsto_exp_sq_sub_one_div_sq r` (gives `(e^{rh²}-1)/h² → r`) with
 `tendsto_exp_sym_sub_two_div_sq σ` (gives `(e^{σh}+e^{-σh}-2)/h² → σ²`). -/
 lemma tendsto_crr_numerator_div_sq (σ r : ℝ) :
-    Tendsto (fun h : ℝ =>
+    Tendsto (fun h : ℝ ↦
         (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h))) / h^2)
       (𝓝[≠] 0) (𝓝 (2 * r - σ^2)) := by
   have h_exp_sq := tendsto_exp_sq_sub_one_div_sq r
   -- 2 · (e^{rh²} - 1)/h² → 2r
-  have h_2exp_sq : Tendsto (fun h : ℝ => 2 * ((Real.exp (r * h^2) - 1) / h^2))
+  have h_2exp_sq : Tendsto (fun h : ℝ ↦ 2 * ((Real.exp (r * h^2) - 1) / h^2))
       (𝓝[≠] 0) (𝓝 (2 * r)) := h_exp_sq.const_mul 2
   have h_sym := tendsto_exp_sym_sub_two_div_sq σ
   have h_diff := h_2exp_sq.sub h_sym
@@ -109,7 +109,7 @@ lemma tendsto_crr_numerator_div_sq (σ r : ℝ) :
 
 Quotient of `tendsto_crr_numerator_div_sq r` and `tendsto_sinh_div σ`. -/
 lemma tendsto_crr_drift_quotient {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
-    Tendsto (fun h : ℝ =>
+    Tendsto (fun h : ℝ ↦
         (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))
           / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))
       (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) := by
@@ -118,7 +118,7 @@ lemma tendsto_crr_drift_quotient {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
   have h_2σ : (2 * σ : ℝ) ≠ 0 := by
     intro h; apply hσ; linarith
   have h_quot := h_num.div h_den h_2σ
-  -- h_quot : Tendsto (fun h => (Num/h²) / ((e^{σh}-e^{-σh})/h)) (𝓝[≠] 0) (𝓝 ((2r-σ²)/(2σ)))
+  -- h_quot : Tendsto (fun h ↦ (Num/h²) / ((e^{σh}-e^{-σh})/h)) (𝓝[≠] 0) (𝓝 ((2r-σ²)/(2σ)))
   have h_target : (2 * r - σ^2) / (2 * σ) = (r - σ^2 / 2) / σ := by
     field_simp
   rw [h_target] at h_quot
@@ -144,7 +144,7 @@ To extract the textbook `n · (2 p_n − 1) · σ √(T/n) → (r − σ²/2) T`
 substitute `h = √(T/n)`, multiply by `σT`, and use `n · √(T/n) · √(T/n) = T`.
 That n-indexed form is completed below in `crr_drift_limit_n`. -/
 theorem crr_drift_limit_h {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
-    Tendsto (fun h : ℝ =>
+    Tendsto (fun h : ℝ ↦
         (2 * Real.exp (r * h^2) - Real.exp (σ * h) - Real.exp (-(σ * h)))
           / (h * (Real.exp (σ * h) - Real.exp (-(σ * h)))))
       (𝓝[≠] 0) (𝓝 ((r - σ^2 / 2) / σ)) :=
@@ -156,15 +156,15 @@ theorem crr_drift_limit_h {σ : ℝ} (hσ : σ ≠ 0) (r : ℝ) :
 The substitution `h_n = √(T/n)` reduces this to `crr_drift_limit_h` scaled by
 `σ T`, using the algebraic identity `n · (√(T/n))² = T`. -/
 theorem crr_drift_limit_n {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
-    Tendsto (fun n : ℕ =>
+    Tendsto (fun n : ℕ ↦
         (n : ℝ) * (2 * crrProb r σ T n - 1) * σ * Real.sqrt (T / n))
       atTop (𝓝 ((r - σ^2 / 2) * T)) := by
-  have h_sqrt_step : Tendsto (fun n : ℕ => Real.sqrt (crrStep T n)) atTop (𝓝[≠] 0) := by
-    have h_to_zero : Tendsto (fun n : ℕ => Real.sqrt (crrStep T n)) atTop (𝓝 0) :=
+  have h_sqrt_step : Tendsto (fun n : ℕ ↦ Real.sqrt (crrStep T n)) atTop (𝓝[≠] 0) := by
+    have h_to_zero : Tendsto (fun n : ℕ ↦ Real.sqrt (crrStep T n)) atTop (𝓝 0) :=
       tendsto_sqrt_crrStep_zero T
     refine tendsto_nhdsWithin_iff.mpr ⟨h_to_zero, ?_⟩
     rw [eventually_atTop]
-    refine ⟨1, fun n hn => ?_⟩
+    refine ⟨1, fun n hn ↦ ?_⟩
     have h_step_pos : 0 < crrStep T n := by
       unfold crrStep
       exact div_pos hT (by exact_mod_cast (Nat.lt_of_lt_of_le Nat.zero_lt_one hn))
@@ -172,7 +172,7 @@ theorem crr_drift_limit_n {σ T r : ℝ} (hσ : 0 < σ) (hT : 0 < T) :
     exact h_sqrt_pos.ne'
   have h_drift_h := tendsto_crr_drift_quotient (hσ.ne') r
   have h_comp := h_drift_h.comp h_sqrt_step
-  have h_σT : Tendsto (fun n : ℕ =>
+  have h_σT : Tendsto (fun n : ℕ ↦
       σ * T * ((2 * Real.exp (r * (Real.sqrt (crrStep T n))^2)
             - Real.exp (σ * Real.sqrt (crrStep T n))
             - Real.exp (-(σ * Real.sqrt (crrStep T n))))

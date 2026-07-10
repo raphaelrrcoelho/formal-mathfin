@@ -59,8 +59,8 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} (P : Measure Ω) [IsProbability
 zero cost into a sure non-negative discounted gain `⟪θ, Y⟫` with a chance of profit —
 any `θ` whose gain `⟪θ, Y⟫` is `≥ 0` a.e. already has `⟪θ, Y⟫ = 0` a.e. -/
 def NoArbitrage : Prop :=
-  ∀ θ : F, 0 ≤ᵐ[P] (fun ω => inner ℝ θ (Y ω)) →
-    (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0
+  ∀ θ : F, 0 ≤ᵐ[P] (fun ω ↦ inner ℝ θ (Y ω)) →
+    (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0
 
 /-- **Equivalent martingale measure** (one period, finite-dim): `Q ~ P`, `Y` is
 `Q`-integrable, and `E_Q[Y] = 0 ∈ F`. -/
@@ -78,10 +78,10 @@ equivalence transports this back to `P`. -/
 theorem noArbitrage_of_isEMM {Q : Measure Ω} (hQ : IsEMM P Y Q) : NoArbitrage P Y := by
   haveI := hQ.prob
   intro θ hpos
-  have hposQ : 0 ≤ᵐ[Q] (fun ω => inner ℝ θ (Y ω)) := hQ.absP.ae_le hpos
+  have hposQ : 0 ≤ᵐ[Q] (fun ω ↦ inner ℝ θ (Y ω)) := hQ.absP.ae_le hpos
   have hint : ∫ ω, inner ℝ θ (Y ω) ∂Q = 0 := by
     rw [integral_inner hQ.int, hQ.fair, inner_zero_right]
-  have hzeroQ : (fun ω => inner ℝ θ (Y ω)) =ᵐ[Q] 0 :=
+  have hzeroQ : (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[Q] 0 :=
     (integral_eq_zero_iff_of_nonneg_ae hposQ (hQ.int.const_inner θ)).mp hint
   exact hQ.Pabs.ae_eq hzeroQ
 
@@ -131,19 +131,19 @@ lemma softplus_le (u : ℝ) : softplus u ≤ |u| + Real.log 2 := by
 /-- `softplus` is differentiable with derivative the logistic `σ`. -/
 lemma hasDerivAt_softplus (u : ℝ) : HasDerivAt softplus (logistic u) u := by
   have h2 : (1 : ℝ) + Real.exp u ≠ 0 := by positivity
-  have h1 : HasDerivAt (fun v => 1 + Real.exp v) (Real.exp u) u := by
+  have h1 : HasDerivAt (fun v ↦ 1 + Real.exp v) (Real.exp u) u := by
     simpa using (Real.hasDerivAt_exp u).const_add 1
   have h3 := (Real.hasDerivAt_log h2).comp u h1
   rw [show logistic u = (1 + Real.exp u)⁻¹ * Real.exp u from by rw [logistic, div_eq_inv_mul]]
   exact h3
 
 lemma continuous_softplus : Continuous softplus := by
-  have hpos : ∀ u : ℝ, (0 : ℝ) < 1 + Real.exp u := fun u => by positivity
-  exact (continuous_const.add Real.continuous_exp).log (fun u => (hpos u).ne')
+  have hpos : ∀ u : ℝ, (0 : ℝ) < 1 + Real.exp u := fun u ↦ by positivity
+  exact (continuous_const.add Real.continuous_exp).log (fun u ↦ (hpos u).ne')
 
 lemma continuous_logistic : Continuous logistic := by
-  have hpos : ∀ u : ℝ, (0 : ℝ) < 1 + Real.exp u := fun u => by positivity
-  exact Real.continuous_exp.div (continuous_const.add Real.continuous_exp) (fun u => (hpos u).ne')
+  have hpos : ∀ u : ℝ, (0 : ℝ) < 1 + Real.exp u := fun u ↦ by positivity
+  exact Real.continuous_exp.div (continuous_const.add Real.continuous_exp) (fun u ↦ (hpos u).ne')
 
 /-- The **softplus potential** `f(θ) = ∫ softplus⟪θ,Y⟫ ∂P`, minimised in the backward
 direction; its first-order condition produces the equivalent martingale measure. -/
@@ -153,11 +153,11 @@ noncomputable def potential (θ : F) : ℝ :=
 omit [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 /-- `softplus⟪θ,Y⟫` is `P`-integrable, dominated by `‖θ‖‖Y‖ + log 2`. -/
 lemma integrable_softplus_inner (hYint : Integrable Y P) (θ : F) :
-    Integrable (fun ω => softplus (inner ℝ θ (Y ω))) P := by
-  have hmeas : AEStronglyMeasurable (fun ω => softplus (inner ℝ θ (Y ω))) P :=
+    Integrable (fun ω ↦ softplus (inner ℝ θ (Y ω))) P := by
+  have hmeas : AEStronglyMeasurable (fun ω ↦ softplus (inner ℝ θ (Y ω))) P :=
     continuous_softplus.comp_aestronglyMeasurable
       ((continuous_const.inner continuous_id).comp_aestronglyMeasurable hYint.aestronglyMeasurable)
-  refine Integrable.mono' (g := fun ω => ‖θ‖ * ‖Y ω‖ + Real.log 2) ?_ hmeas ?_
+  refine Integrable.mono' (g := fun ω ↦ ‖θ‖ * ‖Y ω‖ + Real.log 2) ?_ hmeas ?_
   · exact (hYint.norm.const_mul ‖θ‖).add (integrable_const _)
   · filter_upwards with ω
     rw [Real.norm_eq_abs, abs_of_nonneg (softplus_nonneg _)]
@@ -167,21 +167,21 @@ lemma integrable_softplus_inner (hYint : Integrable Y P) (θ : F) :
 differentiable at `0` with derivative `∫ σ⟪θ,Y⟫ · ⟪u,Y⟫ ∂P` — differentiation under the
 integral, dominated by `‖u‖‖Y‖` since `σ ∈ (0,1)`. -/
 lemma hasDerivAt_potential_dir (hY : Measurable Y) (hYint : Integrable Y P) (θ u : F) :
-    HasDerivAt (fun t : ℝ => potential P Y (θ + t • u))
+    HasDerivAt (fun t : ℝ ↦ potential P Y (θ + t • u))
       (∫ ω, logistic (inner ℝ θ (Y ω)) * inner ℝ u (Y ω) ∂P) 0 := by
-  have hbmeas : Measurable (fun ω => inner ℝ u (Y ω)) := measurable_const.inner hY
+  have hbmeas : Measurable (fun ω ↦ inner ℝ u (Y ω)) := measurable_const.inner hY
   have hexp : ∀ (t : ℝ) (ω : Ω),
-      inner ℝ (θ + t • u) (Y ω) = inner ℝ θ (Y ω) + t * inner ℝ u (Y ω) := fun t ω => by
+      inner ℝ (θ + t • u) (Y ω) = inner ℝ θ (Y ω) + t * inner ℝ u (Y ω) := fun t ω ↦ by
     rw [inner_add_left, real_inner_smul_left]
   set Φ : ℝ → Ω → ℝ :=
-    fun t ω => softplus (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) with hΦ
+    fun t ω ↦ softplus (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) with hΦ
   set Φ' : ℝ → Ω → ℝ :=
-    fun t ω => logistic (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) * inner ℝ u (Y ω) with hΦ'
+    fun t ω ↦ logistic (inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) * inner ℝ u (Y ω) with hΦ'
   have hmeas_arg : ∀ t : ℝ, AEStronglyMeasurable
-      (fun ω => inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) P :=
-    fun t => ((measurable_const.inner hY).add (hbmeas.const_mul t)).aestronglyMeasurable
+      (fun ω ↦ inner ℝ θ (Y ω) + t * inner ℝ u (Y ω)) P :=
+    fun t ↦ ((measurable_const.inner hY).add (hbmeas.const_mul t)).aestronglyMeasurable
   have hΦ_meas : ∀ᶠ t in nhds (0 : ℝ), AEStronglyMeasurable (Φ t) P :=
-    Filter.Eventually.of_forall fun t =>
+    Filter.Eventually.of_forall fun t ↦
       continuous_softplus.comp_aestronglyMeasurable (hmeas_arg t)
   have hΦ_int : Integrable (Φ 0) P := by
     simp only [hΦ, zero_mul, add_zero]; exact integrable_softplus_inner P Y hYint θ
@@ -197,17 +197,17 @@ lemma hasDerivAt_potential_dir (hY : Measurable Y) (hYint : Integrable Y P) (θ 
         ≤ 1 * (‖u‖ * ‖Y ω‖) := mul_le_mul h1 h2 (abs_nonneg _) zero_le_one
       _ = ‖u‖ * ‖Y ω‖ := one_mul _
   have h_diff : ∀ᵐ ω ∂P, ∀ x ∈ (Set.univ : Set ℝ),
-      HasDerivAt (fun t => Φ t ω) (Φ' x ω) x := by
+      HasDerivAt (fun t ↦ Φ t ω) (Φ' x ω) x := by
     filter_upwards with ω x _
-    have haff : HasDerivAt (fun t : ℝ => inner ℝ θ (Y ω) + t * inner ℝ u (Y ω))
+    have haff : HasDerivAt (fun t : ℝ ↦ inner ℝ θ (Y ω) + t * inner ℝ u (Y ω))
         (inner ℝ u (Y ω)) x := by
       simpa using ((hasDerivAt_id x).mul_const (inner ℝ u (Y ω))).const_add (inner ℝ θ (Y ω))
     have hc := (hasDerivAt_softplus _).comp x haff
     simpa only [hΦ, hΦ', Function.comp_def] using hc
   obtain ⟨-, hderiv⟩ := hasDerivAt_integral_of_dominated_loc_of_deriv_le (μ := P)
-    (bound := fun ω => ‖u‖ * ‖Y ω‖) Filter.univ_mem hΦ_meas hΦ_int hΦ'_meas h_bound
+    (bound := fun ω ↦ ‖u‖ * ‖Y ω‖) Filter.univ_mem hΦ_meas hΦ_int hΦ'_meas h_bound
     (hYint.norm.const_mul ‖u‖) h_diff
-  have hpot : (fun t : ℝ => potential P Y (θ + t • u)) = fun t => ∫ ω, Φ t ω ∂P := by
+  have hpot : (fun t : ℝ ↦ potential P Y (θ + t • u)) = fun t ↦ ∫ ω, Φ t ω ∂P := by
     funext t; simp only [potential, hΦ]
     exact integral_congr_ae (by filter_upwards with ω; rw [hexp t ω])
   have hval : (∫ ω, Φ' 0 ω ∂P) = ∫ ω, logistic (inner ℝ θ (Y ω)) * inner ℝ u (Y ω) ∂P := by
@@ -217,7 +217,7 @@ lemma hasDerivAt_potential_dir (hY : Measurable Y) (hYint : Integrable Y P) (θ 
 /-- `softplus` is `1`-Lipschitz (its derivative `σ` lies in `(0,1)`). -/
 lemma lipschitzWith_softplus : LipschitzWith 1 softplus := by
   refine lipschitzWith_of_nnnorm_deriv_le
-    (fun x => (hasDerivAt_softplus x).differentiableAt) fun x => ?_
+    (fun x ↦ (hasDerivAt_softplus x).differentiableAt) fun x ↦ ?_
   rw [(hasDerivAt_softplus x).deriv, ← NNReal.coe_le_coe, coe_nnnorm, NNReal.coe_one,
     Real.norm_eq_abs, abs_of_pos (logistic_pos x)]
   exact (logistic_lt_one x).le
@@ -226,11 +226,11 @@ omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [Bor
 /-- For a `1`-Lipschitz `φ`, the averaged map `θ ↦ ∫ φ⟪θ,Y⟫ ∂P` is `(∫‖Y‖)`-Lipschitz
 (`φ` is `1`-Lipschitz and `θ ↦ ⟪θ,Y ω⟫` is `‖Y ω‖`-Lipschitz, by Cauchy–Schwarz). -/
 lemma lipschitzWith_integral_inner {φ : ℝ → ℝ} (hφ : LipschitzWith 1 φ)
-    (hint : ∀ θ : F, Integrable (fun ω => φ (inner ℝ θ (Y ω))) P)
+    (hint : ∀ θ : F, Integrable (fun ω ↦ φ (inner ℝ θ (Y ω))) P)
     (hYint : Integrable Y P) :
-    LipschitzWith (∫ ω, ‖Y ω‖ ∂P).toNNReal (fun θ => ∫ ω, φ (inner ℝ θ (Y ω)) ∂P) := by
-  have hnn : 0 ≤ ∫ ω, ‖Y ω‖ ∂P := integral_nonneg fun ω => norm_nonneg _
-  refine LipschitzWith.of_dist_le_mul fun θ θ' => ?_
+    LipschitzWith (∫ ω, ‖Y ω‖ ∂P).toNNReal (fun θ ↦ ∫ ω, φ (inner ℝ θ (Y ω)) ∂P) := by
+  have hnn : 0 ≤ ∫ ω, ‖Y ω‖ ∂P := integral_nonneg fun ω ↦ norm_nonneg _
+  refine LipschitzWith.of_dist_le_mul fun θ θ' ↦ ?_
   rw [Real.dist_eq, Real.coe_toNNReal _ hnn, ← integral_sub (hint θ) (hint θ'), dist_eq_norm]
   have hbound : ∀ ω, ‖φ (inner ℝ θ (Y ω)) - φ (inner ℝ θ' (Y ω))‖ ≤ ‖Y ω‖ * ‖θ - θ'‖ := by
     intro ω
@@ -255,17 +255,17 @@ lemma continuous_potential (hYint : Integrable Y P) : Continuous (potential P Y)
     (integrable_softplus_inner P Y hYint) hYint).continuous
 
 /-- `s ↦ max s 0` (positive part) is `1`-Lipschitz. -/
-lemma lipschitzWith_posPart : LipschitzWith 1 (fun s : ℝ => max s 0) :=
+lemma lipschitzWith_posPart : LipschitzWith 1 (fun s : ℝ ↦ max s 0) :=
   LipschitzWith.id.max_const 0
 
 omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 /-- `max⟪θ,Y⟫ 0` is `P`-integrable (dominated by `‖θ‖‖Y‖`). -/
 lemma integrable_posPart_inner (hYint : Integrable Y P) (θ : F) :
-    Integrable (fun ω => max (inner ℝ θ (Y ω)) 0) P := by
-  have hmeas : AEStronglyMeasurable (fun ω => max (inner ℝ θ (Y ω)) 0) P :=
+    Integrable (fun ω ↦ max (inner ℝ θ (Y ω)) 0) P := by
+  have hmeas : AEStronglyMeasurable (fun ω ↦ max (inner ℝ θ (Y ω)) 0) P :=
     (continuous_id.max continuous_const).comp_aestronglyMeasurable
       ((continuous_const.inner continuous_id).comp_aestronglyMeasurable hYint.aestronglyMeasurable)
-  refine Integrable.mono' (hYint.norm.const_mul ‖θ‖) hmeas (Filter.Eventually.of_forall fun ω => ?_)
+  refine Integrable.mono' (hYint.norm.const_mul ‖θ‖) hmeas (Filter.Eventually.of_forall fun ω ↦ ?_)
   rw [Real.norm_eq_abs, abs_of_nonneg (le_max_right _ _), max_le_iff]
   exact ⟨(le_abs_self _).trans (abs_real_inner_le_norm θ (Y ω)), by positivity⟩
 
@@ -273,7 +273,7 @@ omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [Bor
 /-- The positive-gain average `g(θ) = ∫⟪θ,Y⟫⁺ ∂P` is continuous. It lower-bounds the
 potential (`softplus s ≥ s⁺`) and drives the coercivity argument. -/
 lemma continuous_gainsPos (hYint : Integrable Y P) :
-    Continuous (fun θ => ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P) :=
+    Continuous (fun θ ↦ ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P) :=
   (lipschitzWith_integral_inner P Y lipschitzWith_posPart
     (integrable_posPart_inner P Y hYint) hYint).continuous
 
@@ -288,29 +288,29 @@ non-redundancy hypothesis is required. -/
 /-- The **gains kernel** `N = {θ : ⟪θ,Y⟫ = 0 a.e.}`: portfolios whose discounted gain is
 a.e. zero. A linear subspace of `F`; the market is non-redundant iff `N = ⊥`. -/
 def gainsKernel : Submodule ℝ F where
-  carrier := {θ | (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0}
+  carrier := {θ | (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0}
   zero_mem' := by
-    show (fun ω => inner ℝ (0 : F) (Y ω)) =ᵐ[P] 0
+    show (fun ω ↦ inner ℝ (0 : F) (Y ω)) =ᵐ[P] 0
     filter_upwards with ω; simp
   add_mem' := by
     intro a b ha hb
-    show (fun ω => inner ℝ (a + b) (Y ω)) =ᵐ[P] 0
-    have ha' : (fun ω => inner ℝ a (Y ω)) =ᵐ[P] 0 := ha
-    have hb' : (fun ω => inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
+    show (fun ω ↦ inner ℝ (a + b) (Y ω)) =ᵐ[P] 0
+    have ha' : (fun ω ↦ inner ℝ a (Y ω)) =ᵐ[P] 0 := ha
+    have hb' : (fun ω ↦ inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
     filter_upwards [ha', hb'] with ω ea eb
     simp only [Pi.zero_apply] at ea eb ⊢
     rw [inner_add_left, ea, eb, add_zero]
   smul_mem' := by
     intro c b hb
-    show (fun ω => inner ℝ (c • b) (Y ω)) =ᵐ[P] 0
-    have hb' : (fun ω => inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
+    show (fun ω ↦ inner ℝ (c • b) (Y ω)) =ᵐ[P] 0
+    have hb' : (fun ω ↦ inner ℝ b (Y ω)) =ᵐ[P] 0 := hb
     filter_upwards [hb'] with ω eb
     simp only [Pi.zero_apply] at eb ⊢
     rw [real_inner_smul_left, eb, mul_zero]
 
 omit [IsProbabilityMeasure P] [FiniteDimensional ℝ F] [MeasurableSpace F] [BorelSpace F] in
 @[simp] lemma mem_gainsKernel {θ : F} :
-    θ ∈ gainsKernel P Y ↔ (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 := Iff.rfl
+    θ ∈ gainsKernel P Y ↔ (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0 := Iff.rfl
 
 omit [MeasurableSpace F] [BorelSpace F] in
 /-- **Coercivity** of the potential on `Nᗮ` (no arbitrage). The positive gain average
@@ -322,16 +322,16 @@ lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
     ∃ c > 0, ∀ θ ∈ (gainsKernel P Y)ᗮ, c * ‖θ‖ ≤ potential P Y θ := by
   classical
   set N := gainsKernel P Y
-  set g : F → ℝ := fun θ => ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P with hg
-  have hg_nonneg : ∀ θ, 0 ≤ g θ := fun θ => integral_nonneg fun ω => le_max_right _ _
+  set g : F → ℝ := fun θ ↦ ∫ ω, max (inner ℝ θ (Y ω)) 0 ∂P with hg
+  have hg_nonneg : ∀ θ, 0 ≤ g θ := fun θ ↦ integral_nonneg fun ω ↦ le_max_right _ _
   -- `g` is positive on `Nᗮ \ {0}`
   have hg_pos : ∀ θ ∈ Nᗮ, θ ≠ 0 → 0 < g θ := by
     intro θ hθK hθ
-    refine (hg_nonneg θ).lt_of_ne fun h => hθ ?_
-    have hmax : (fun ω => max (inner ℝ θ (Y ω)) 0) =ᵐ[P] 0 :=
-      (integral_eq_zero_iff_of_nonneg_ae (Filter.Eventually.of_forall fun ω => le_max_right _ _)
+    refine (hg_nonneg θ).lt_of_ne fun h ↦ hθ ?_
+    have hmax : (fun ω ↦ max (inner ℝ θ (Y ω)) 0) =ᵐ[P] 0 :=
+      (integral_eq_zero_iff_of_nonneg_ae (Filter.Eventually.of_forall fun ω ↦ le_max_right _ _)
         (integrable_posPart_inner P Y hYint θ)).mp h.symm
-    have hnonpos : (fun ω => inner ℝ θ (Y ω)) ≤ᵐ[P] 0 := by
+    have hnonpos : (fun ω ↦ inner ℝ θ (Y ω)) ≤ᵐ[P] 0 := by
       filter_upwards [hmax] with ω hm
       have hle : inner ℝ θ (Y ω) ≤ max (inner ℝ θ (Y ω)) 0 := le_max_left _ _
       simp only [Pi.zero_apply] at hm ⊢; rwa [hm] at hle
@@ -339,7 +339,7 @@ lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
       filter_upwards [hnonpos] with ω h
       simp only [Pi.zero_apply] at h ⊢; rw [inner_neg_left]; linarith)
     have hθN : θ ∈ N := by
-      show (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0
+      show (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0
       filter_upwards [hneg] with ω hh
       simp only [Pi.zero_apply, inner_neg_left] at hh ⊢; linarith
     exact inner_self_eq_zero.mp (N.inner_right_of_mem_orthogonal hθN hθK)
@@ -348,7 +348,7 @@ lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
     intro r hr θ
     simp only [hg]
     rw [← integral_const_mul]
-    refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+    refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
     show max (inner ℝ (r • θ) (Y ω)) 0 = r * max (inner ℝ θ (Y ω)) 0
     rw [real_inner_smul_left]
     rcases le_total 0 (inner ℝ θ (Y ω)) with hs | hs
@@ -366,14 +366,14 @@ lemma exists_pos_lower_bound (hYint : Integrable Y P) (hNA : NoArbitrage P Y)
   obtain ⟨u₀, hu₀mem, hu₀min⟩ :=
     hScompact.exists_isMinOn hSne (continuous_gainsPos P Y hYint).continuousOn
   obtain ⟨hu₀K, hu₀S⟩ := hu₀mem
-  have hu₀ne : u₀ ≠ 0 := fun h => by
+  have hu₀ne : u₀ ≠ 0 := fun h ↦ by
     rw [Metric.mem_sphere, h, dist_self] at hu₀S; exact one_ne_zero hu₀S.symm
-  refine ⟨g u₀, hg_pos u₀ hu₀K hu₀ne, fun θ hθK => ?_⟩
+  refine ⟨g u₀, hg_pos u₀ hu₀K hu₀ne, fun θ hθK ↦ ?_⟩
   have hpg : g θ ≤ potential P Y θ := by
     rw [hg, potential]
     exact integral_mono_ae (integrable_posPart_inner P Y hYint θ)
       (integrable_softplus_inner P Y hYint θ)
-      (Filter.Eventually.of_forall fun ω => posPart_le_softplus _)
+      (Filter.Eventually.of_forall fun ω ↦ posPart_le_softplus _)
   refine le_trans ?_ hpg
   rcases eq_or_ne θ 0 with rfl | hθ
   · simpa using hg_nonneg 0
@@ -401,14 +401,14 @@ lemma exists_global_min_potential (hYint : Integrable Y P) (hNA : NoArbitrage P 
   -- the potential is constant along `N`
   have hinv : ∀ ψ : F, ∀ n ∈ N, potential P Y (ψ + n) = potential P Y ψ := by
     intro ψ n hn
-    have hn' : (fun ω => inner ℝ n (Y ω)) =ᵐ[P] 0 := hn
+    have hn' : (fun ω ↦ inner ℝ n (Y ω)) =ᵐ[P] 0 := hn
     refine integral_congr_ae ?_
     filter_upwards [hn'] with ω he
     simp only [Pi.zero_apply] at he
     show softplus (inner ℝ (ψ + n) (Y ω)) = softplus (inner ℝ ψ (Y ω))
     rw [inner_add_left, he, add_zero]
   -- minimise over the compact set `Nᗮ ∩ closedBall 0 R`
-  have hp0 : 0 ≤ potential P Y 0 := integral_nonneg fun ω => softplus_nonneg _
+  have hp0 : 0 ≤ potential P Y 0 := integral_nonneg fun ω ↦ softplus_nonneg _
   set R : ℝ := potential P Y 0 / c with hRdef
   have hR0 : 0 ≤ R := div_nonneg hp0 hc.le
   have hKcompact : IsCompact ((Nᗮ : Set F) ∩ Metric.closedBall 0 R) :=
@@ -430,7 +430,7 @@ lemma exists_global_min_potential (hYint : Integrable Y P) (hNA : NoArbitrage P 
         _ ≤ c * ‖θ‖ := mul_le_mul_of_nonneg_left hlt.le hc.le
         _ ≤ potential P Y θ := hlb θ hθK
   -- lift to all of `F`: `f(θ) = f(z) ≥ f(θ₀)` for the `Nᗮ`-component `z` of `θ`
-  refine ⟨θ₀, fun θ => ?_⟩
+  refine ⟨θ₀, fun θ ↦ ?_⟩
   obtain ⟨n, hn, z, hz, hnz⟩ : ∃ n ∈ N, ∃ z ∈ Nᗮ, n + z = θ := by
     have hmem : θ ∈ N ⊔ Nᗮ := by
       rw [Submodule.sup_orthogonal_of_hasOrthogonalProjection]; trivial
@@ -448,16 +448,16 @@ lemma integral_logistic_smul_eq_zero (hY : Measurable Y) (hYint : Integrable Y P
   -- every directional derivative at `θ₀` is `0`
   have hdir : ∀ u, ∫ ω, logistic (inner ℝ θ₀ (Y ω)) * inner ℝ u (Y ω) ∂P = 0 := by
     intro u
-    have hmin0 : IsLocalMin (fun t : ℝ => potential P Y (θ₀ + t • u)) 0 :=
-      Filter.Eventually.of_forall fun t => by simp only [zero_smul, add_zero]; exact hmin _
+    have hmin0 : IsLocalMin (fun t : ℝ ↦ potential P Y (θ₀ + t • u)) 0 :=
+      Filter.Eventually.of_forall fun t ↦ by simp only [zero_smul, add_zero]; exact hmin _
     exact hmin0.hasDerivAt_eq_zero (hasDerivAt_potential_dir P Y hY hYint θ₀ u)
   -- the gradient vector is `0`: it is `inner`-orthogonal to everything
-  have hGint : Integrable (fun ω => logistic (inner ℝ θ₀ (Y ω)) • Y ω) P := by
+  have hGint : Integrable (fun ω ↦ logistic (inner ℝ θ₀ (Y ω)) • Y ω) P := by
     refine Integrable.mono' hYint.norm
       ((continuous_logistic.comp_aestronglyMeasurable
         ((continuous_const.inner continuous_id).comp_aestronglyMeasurable
           hYint.aestronglyMeasurable)).smul hYint.aestronglyMeasurable)
-      (Filter.Eventually.of_forall fun ω => ?_)
+      (Filter.Eventually.of_forall fun ω ↦ ?_)
     rw [norm_smul, Real.norm_eq_abs, abs_of_pos (logistic_pos _)]
     exact mul_le_of_le_one_left (norm_nonneg _) (logistic_lt_one _).le
   have hGu : ∀ u, inner ℝ (∫ ω, logistic (inner ℝ θ₀ (Y ω)) • Y ω ∂P) u = 0 := by
@@ -487,59 +487,59 @@ theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Inte
     have hall : ∀ θ : F, inner ℝ θ (∫ ω, Y ω ∂P) = (0 : ℝ) := by
       intro θ
       have hmem : θ ∈ gainsKernel P Y := by rw [hNtop]; exact Submodule.mem_top
-      have hθN : (fun ω => inner ℝ θ (Y ω)) =ᵐ[P] 0 := (mem_gainsKernel P Y).mp hmem
+      have hθN : (fun ω ↦ inner ℝ θ (Y ω)) =ᵐ[P] 0 := (mem_gainsKernel P Y).mp hmem
       calc inner ℝ θ (∫ ω, Y ω ∂P)
           = ∫ ω, inner ℝ θ (Y ω) ∂P := (integral_inner hYint θ).symm
         _ = 0 := by rw [integral_congr_ae hθN]; simp
     exact inner_self_eq_zero.mp (hall _)
   · obtain ⟨θ₀, hmin⟩ := exists_global_min_potential P Y hYint hNA hY0
     have hfair := integral_logistic_smul_eq_zero P Y hY hYint hmin
-    set z : Ω → ℝ := fun ω => logistic (inner ℝ θ₀ (Y ω))
-    have hzpos : ∀ ω, 0 < z ω := fun ω => logistic_pos _
-    have hzlt : ∀ ω, z ω < 1 := fun ω => logistic_lt_one _
+    set z : Ω → ℝ := fun ω ↦ logistic (inner ℝ θ₀ (Y ω))
+    have hzpos : ∀ ω, 0 < z ω := fun ω ↦ logistic_pos _
+    have hzlt : ∀ ω, z ω < 1 := fun ω ↦ logistic_lt_one _
     have hzmeas : Measurable z := continuous_logistic.measurable.comp (measurable_const.inner hY)
     have hzint : Integrable z P :=
       ⟨hzmeas.aestronglyMeasurable, HasFiniteIntegral.of_bounded
-        (Filter.Eventually.of_forall fun ω => by
+        (Filter.Eventually.of_forall fun ω ↦ by
           rw [Real.norm_eq_abs, abs_of_pos (hzpos ω)]; exact (hzlt ω).le)⟩
     set ζ : ℝ := ∫ ω, z ω ∂P with hζ
     have hζpos : 0 < ζ := by
       rw [hζ, integral_pos_iff_support_of_nonneg_ae
-          (Filter.Eventually.of_forall fun ω => (hzpos ω).le) hzint,
-        show Function.support z = Set.univ from Set.eq_univ_of_forall fun ω => (hzpos ω).ne']
+          (Filter.Eventually.of_forall fun ω ↦ (hzpos ω).le) hzint,
+        show Function.support z = Set.univ from Set.eq_univ_of_forall fun ω ↦ (hzpos ω).ne']
       rw [measure_univ]; exact one_pos
-    set dens : Ω → ℝ := fun ω => z ω / ζ with hdens
-    have hdpos : ∀ ω, 0 < dens ω := fun ω => div_pos (hzpos ω) hζpos
+    set dens : Ω → ℝ := fun ω ↦ z ω / ζ with hdens
+    have hdpos : ∀ ω, 0 < dens ω := fun ω ↦ div_pos (hzpos ω) hζpos
     have hdmeas : Measurable dens := hzmeas.div_const ζ
     have hdint : Integrable dens P := hzint.div_const ζ
     have hdsum : ∫ ω, dens ω ∂P = 1 := by
       simp only [hdens, div_eq_inv_mul]
       rw [integral_const_mul, ← hζ, inv_mul_cancel₀ hζpos.ne']
-    have hdbound : ∀ ω, dens ω ≤ ζ⁻¹ := fun ω => by
+    have hdbound : ∀ ω, dens ω ≤ ζ⁻¹ := fun ω ↦ by
       rw [hdens, div_le_iff₀ hζpos, inv_mul_cancel₀ hζpos.ne']; exact (hzlt ω).le
-    set Q : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (dens ω)) with hQ
-    have hofReal_meas : Measurable (fun ω => ENNReal.ofReal (dens ω)) :=
+    set Q : Measure Ω := P.withDensity (fun ω ↦ ENNReal.ofReal (dens ω)) with hQ
+    have hofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (dens ω)) :=
       ENNReal.measurable_ofReal.comp hdmeas
     obtain ⟨hQprob, hQP, hPQ⟩ := isEquivProbMeasure_withDensity P hdmeas hdpos hdint hdsum
     rw [← hQ] at hQprob hQP hPQ
     haveI := hQprob
-    have hdY_int : Integrable (fun ω => dens ω • Y ω) P := by
+    have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by
       refine Integrable.mono' (hYint.norm.const_mul ζ⁻¹)
         (hdmeas.aestronglyMeasurable.smul hYint.aestronglyMeasurable)
-        (Filter.Eventually.of_forall fun ω => ?_)
+        (Filter.Eventually.of_forall fun ω ↦ ?_)
       rw [norm_smul, Real.norm_eq_abs, abs_of_pos (hdpos ω)]
       exact mul_le_mul_of_nonneg_right (hdbound ω) (norm_nonneg _)
     have hYintQ : Integrable Y Q := by
       rw [hQ, integrable_withDensity_iff_integrable_smul' hofReal_meas
-        (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
-      refine hdY_int.congr (Filter.Eventually.of_forall fun ω => ?_)
+        (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
+      refine hdY_int.congr (Filter.Eventually.of_forall fun ω ↦ ?_)
       show dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
       rw [ENNReal.toReal_ofReal (hdpos ω).le]
     have hQfair : ∫ ω, Y ω ∂Q = 0 := by
       rw [hQ, integral_withDensity_eq_integral_toReal_smul hofReal_meas
-        (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
-      have heq : (fun ω => (ENNReal.ofReal (dens ω)).toReal • Y ω)
-          = fun ω => ζ⁻¹ • (z ω • Y ω) := by
+        (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
+      have heq : (fun ω ↦ (ENNReal.ofReal (dens ω)).toReal • Y ω)
+          = fun ω ↦ ζ⁻¹ • (z ω • Y ω) := by
         funext ω
         show (ENNReal.ofReal (dens ω)).toReal • Y ω = ζ⁻¹ • (z ω • Y ω)
         rw [ENNReal.toReal_ofReal (hdpos ω).le]
@@ -556,39 +556,39 @@ an a.e. notion preserved by `P̃ ~ P`, so the integrable backward direction appl
 theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) :
     ∃ Q, IsEMM P Y Q := by
   classical
-  set w : Ω → ℝ := fun ω => (1 + ‖Y ω‖)⁻¹ with hwdef
+  set w : Ω → ℝ := fun ω ↦ (1 + ‖Y ω‖)⁻¹ with hwdef
   have hw_meas : Measurable w := (measurable_const.add hY.norm).inv
-  have hden_pos : ∀ ω, (0 : ℝ) < 1 + ‖Y ω‖ := fun ω => by positivity
-  have hw_pos : ∀ ω, 0 < w ω := fun ω => by simp only [hwdef]; exact inv_pos.mpr (hden_pos ω)
-  have hw_le_one : ∀ ω, w ω ≤ 1 := fun ω => by
+  have hden_pos : ∀ ω, (0 : ℝ) < 1 + ‖Y ω‖ := fun ω ↦ by positivity
+  have hw_pos : ∀ ω, 0 < w ω := fun ω ↦ by simp only [hwdef]; exact inv_pos.mpr (hden_pos ω)
+  have hw_le_one : ∀ ω, w ω ≤ 1 := fun ω ↦ by
     simp only [hwdef]; exact inv_le_one_of_one_le₀ (by linarith [norm_nonneg (Y ω)])
   have hw_int : Integrable w P :=
     ⟨hw_meas.aestronglyMeasurable, HasFiniteIntegral.of_bounded
-      (Filter.Eventually.of_forall fun ω => by
+      (Filter.Eventually.of_forall fun ω ↦ by
         rw [Real.norm_eq_abs, abs_of_pos (hw_pos ω)]; exact hw_le_one ω)⟩
   set κ : ℝ := ∫ ω, w ω ∂P with hκdef
   have hκ_pos : 0 < κ := by
     rw [hκdef, integral_pos_iff_support_of_nonneg_ae
-        (Filter.Eventually.of_forall fun ω => (hw_pos ω).le) hw_int,
-      show Function.support w = Set.univ from Set.eq_univ_of_forall fun ω => (hw_pos ω).ne']
+        (Filter.Eventually.of_forall fun ω ↦ (hw_pos ω).le) hw_int,
+      show Function.support w = Set.univ from Set.eq_univ_of_forall fun ω ↦ (hw_pos ω).ne']
     rw [measure_univ]; exact one_pos
-  set dens : Ω → ℝ := fun ω => w ω / κ with hddef
+  set dens : Ω → ℝ := fun ω ↦ w ω / κ with hddef
   have hd_meas : Measurable dens := hw_meas.div_const κ
-  have hd_pos : ∀ ω, 0 < dens ω := fun ω => div_pos (hw_pos ω) hκ_pos
+  have hd_pos : ∀ ω, 0 < dens ω := fun ω ↦ div_pos (hw_pos ω) hκ_pos
   have hd_int : Integrable dens P := hw_int.div_const κ
   have hd_sum : ∫ ω, dens ω ∂P = 1 := by
     simp only [hddef, div_eq_inv_mul]
     rw [integral_const_mul, ← hκdef, inv_mul_cancel₀ hκ_pos.ne']
-  set Pt : Measure Ω := P.withDensity (fun ω => ENNReal.ofReal (dens ω)) with hPtdef
-  have hd_ofReal_meas : Measurable (fun ω => ENNReal.ofReal (dens ω)) :=
+  set Pt : Measure Ω := P.withDensity (fun ω ↦ ENNReal.ofReal (dens ω)) with hPtdef
+  have hd_ofReal_meas : Measurable (fun ω ↦ ENNReal.ofReal (dens ω)) :=
     ENNReal.measurable_ofReal.comp hd_meas
   obtain ⟨hPt_prob, hPt_ll_P, hP_ll_Pt⟩ :=
     isEquivProbMeasure_withDensity P hd_meas hd_pos hd_int hd_sum
   rw [← hPtdef] at hPt_prob hPt_ll_P hP_ll_Pt
   haveI := hPt_prob
-  have hdY_int : Integrable (fun ω => dens ω • Y ω) P := by
+  have hdY_int : Integrable (fun ω ↦ dens ω • Y ω) P := by
     refine ⟨(hd_meas.aestronglyMeasurable.smul hY.aestronglyMeasurable),
-      HasFiniteIntegral.of_bounded (C := κ⁻¹) (Filter.Eventually.of_forall fun ω => ?_)⟩
+      HasFiniteIntegral.of_bounded (C := κ⁻¹) (Filter.Eventually.of_forall fun ω ↦ ?_)⟩
     rw [norm_smul, Real.norm_eq_abs, abs_of_pos (hd_pos ω)]
     have h1 : w ω * ‖Y ω‖ ≤ 1 := by
       simp only [hwdef, inv_mul_eq_div, div_le_one (hden_pos ω)]
@@ -597,11 +597,11 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
     rw [div_le_iff₀ hκ_pos, inv_mul_cancel₀ hκ_pos.ne']; exact h1
   have hYintPt : Integrable Y Pt := by
     rw [hPtdef, integrable_withDensity_iff_integrable_smul' hd_ofReal_meas
-      (Filter.Eventually.of_forall fun ω => ENNReal.ofReal_lt_top)]
-    refine hdY_int.congr (Filter.Eventually.of_forall fun ω => ?_)
+      (Filter.Eventually.of_forall fun ω ↦ ENNReal.ofReal_lt_top)]
+    refine hdY_int.congr (Filter.Eventually.of_forall fun ω ↦ ?_)
     show dens ω • Y ω = (ENNReal.ofReal (dens ω)).toReal • Y ω
     rw [ENNReal.toReal_ofReal (hd_pos ω).le]
-  have hNAt : NoArbitrage Pt Y := fun θ h =>
+  have hNAt : NoArbitrage Pt Y := fun θ h ↦
     hPt_ll_P.ae_eq (hNA θ (hP_ll_Pt.ae_le h))
   obtain ⟨Q, hQ⟩ := exists_isEMM_of_noArbitrage_integrable Pt Y hY hYintPt hNAt
   exact ⟨Q, hQ.prob, hQ.absP.trans hPt_ll_P, hP_ll_Pt.trans hQ.Pabs, hQ.int, hQ.fair⟩
@@ -615,7 +615,7 @@ the gains kernel's orthogonal complement — needing no Hahn–Banach, no L⁰-c
 no measurable selection, and **no non-redundancy hypothesis**. -/
 theorem ftap_one_period_vector (hY : Measurable Y) :
     NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
-  ⟨fun hNA => exists_isEMM_of_noArbitrage P Y hY hNA,
-   fun ⟨_, hQ⟩ => noArbitrage_of_isEMM P Y hQ⟩
+  ⟨fun hNA ↦ exists_isEMM_of_noArbitrage P Y hY hNA,
+   fun ⟨_, hQ⟩ ↦ noArbitrage_of_isEMM P Y hQ⟩
 
 end MathFin.OnePeriodVector

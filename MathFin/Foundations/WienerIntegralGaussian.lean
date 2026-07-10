@@ -80,7 +80,7 @@ lemma wienerIntegralLp_stepAssembly (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     wienerIntegralLp B hB T (stepAssembly T x) = wienerAssembly B hB T x := by
   rw [wienerIntegralLp,
     LinearMap.extendOfNorm_eq (stepAssembly_denseRange T)
-      ⟨1, fun y => by rw [one_mul]; exact (wiener_assembly_isometry hB T y).le⟩]
+      ⟨1, fun y ↦ by rw [one_mul]; exact (wiener_assembly_isometry hB T y).le⟩]
 
 /-! ### Simple processes are Gaussian -/
 
@@ -90,13 +90,13 @@ agrees a.e. with the finite sum of scaled Brownian increments. -/
 lemma wienerAssembly_coeFn (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (x : StepIndex T →₀ ℝ) :
     (wienerAssembly B hB T x : Ω → ℝ) =ᵐ[μ]
-      fun ω => ∑ i ∈ x.support, x i • (B i.1.2 ω - B i.1.1 ω) := by
+      fun ω ↦ ∑ i ∈ x.support, x i • (B i.1.2 ω - B i.1.1 ω) := by
   have hExpand : wienerAssembly B hB T x
       = ∑ i ∈ x.support, x i • wienerIncrementLp B hB i := by
     rw [wienerAssembly, Finsupp.linearCombination_apply, Finsupp.sum]
   have hterm : ∀ i ∈ x.support,
       (↑(x i • wienerIncrementLp B hB i) : Ω → ℝ)
-        =ᵐ[μ] fun ω => x i • (B i.1.2 ω - B i.1.1 ω) := by
+        =ᵐ[μ] fun ω ↦ x i • (B i.1.2 ω - B i.1.1 ω) := by
     intro i _
     filter_upwards [Lp.coeFn_smul (x i) (wienerIncrementLp B hB i),
       MemLp.coeFn_toLp (memLp_increment_two hB i)] with ω hsmul htoLp
@@ -104,10 +104,10 @@ lemma wienerAssembly_coeFn (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     simp only [Pi.smul_apply]
     rw [show (wienerIncrementLp B hB i : Ω → ℝ) ω = B i.1.2 ω - B i.1.1 ω from htoLp]
   rw [hExpand]
-  refine (Lp.coeFn_finsetSum x.support (fun i => x i • wienerIncrementLp B hB i)).trans ?_
+  refine (Lp.coeFn_finsetSum x.support (fun i ↦ x i • wienerIncrementLp B hB i)).trans ?_
   filter_upwards [(Filter.eventually_all_finset x.support).2 hterm] with ω hω
   rw [Finset.sum_apply]
-  exact Finset.sum_congr rfl (fun i hi => hω i hi)
+  exact Finset.sum_congr rfl (fun i hi ↦ hω i hi)
 
 omit [IsProbabilityMeasure μ] in
 /-- The scaled-increment family `i ↦ xᵢ (B_{hiᵢ} − B_{loᵢ})` is a Gaussian
@@ -115,12 +115,12 @@ process: each value is a (continuous-linear) combination of finitely many
 values of the Gaussian process `B`. -/
 lemma isGaussianProcess_scaledIncrement (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (x : StepIndex T →₀ ℝ) :
-    IsGaussianProcess (fun (i : StepIndex T) ω => x i • (B i.1.2 ω - B i.1.1 ω)) μ := by
-  refine hB.isGaussianProcess.of_isGaussianProcess (fun i => ⟨{i.1.1, i.1.2},
+    IsGaussianProcess (fun (i : StepIndex T) ω ↦ x i • (B i.1.2 ω - B i.1.1 ω)) μ := by
+  refine hB.isGaussianProcess.of_isGaussianProcess (fun i ↦ ⟨{i.1.1, i.1.2},
     LinearMap.toContinuousLinearMap
-      { toFun := fun v => x i • (v ⟨i.1.2, by simp⟩ - v ⟨i.1.1, by simp⟩)
-        map_add' := fun v w => by simp only [Pi.add_apply]; module
-        map_smul' := fun c v => by simp only [Pi.smul_apply, RingHom.id_apply]; module }, ?_⟩)
+      { toFun := fun v ↦ x i • (v ⟨i.1.2, by simp⟩ - v ⟨i.1.1, by simp⟩)
+        map_add' := fun v w ↦ by simp only [Pi.add_apply]; module
+        map_smul' := fun c v ↦ by simp only [Pi.smul_apply, RingHom.id_apply]; module }, ?_⟩)
   intro ω
   simp [Finset.restrict]
 
@@ -128,9 +128,9 @@ omit [IsProbabilityMeasure μ] in
 /-- A simple (step-process) Wiener integral has a Gaussian law. -/
 lemma wienerAssembly_hasGaussianLaw (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (x : StepIndex T →₀ ℝ) :
-    HasGaussianLaw (fun ω => (wienerAssembly B hB T x) ω) μ := by
+    HasGaussianLaw (fun ω ↦ (wienerAssembly B hB T x) ω) μ := by
   have hsum : HasGaussianLaw
-      (fun ω => ∑ i ∈ x.support, x i • (B i.1.2 ω - B i.1.1 ω)) μ :=
+      (fun ω ↦ ∑ i ∈ x.support, x i • (B i.1.2 ω - B i.1.1 ω)) μ :=
     (isGaussianProcess_scaledIncrement hB T x).hasGaussianLaw_fun_sum (I := x.support)
   exact hsum.congr (wienerAssembly_coeFn hB T x).symm
 
@@ -142,9 +142,9 @@ lemma wienerAssembly_integral_zero (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
   have hsum : ∫ ω, ∑ i ∈ x.support, x i • (B i.1.2 ω - B i.1.1 ω) ∂μ
       = ∑ i ∈ x.support, ∫ ω, x i • (B i.1.2 ω - B i.1.1 ω) ∂μ :=
     integral_finsetSum x.support
-      (fun i _ => Integrable.smul (x i) ((memLp_increment_two hB i).integrable one_le_two))
+      (fun i _ ↦ Integrable.smul (x i) ((memLp_increment_two hB i).integrable one_le_two))
   rw [hsum]
-  refine Finset.sum_eq_zero (fun i _ => ?_)
+  refine Finset.sum_eq_zero (fun i _ ↦ ?_)
   rw [integral_smul,
     integral_sub ((hB.isGaussianProcess.hasGaussianLaw_eval i.1.2).memLp_two.integrable one_le_two)
       ((hB.isGaussianProcess.hasGaussianLaw_eval i.1.1).memLp_two.integrable one_le_two),
@@ -153,12 +153,12 @@ lemma wienerAssembly_integral_zero (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
 /-- The law of a simple-process Wiener integral: `gaussianReal 0 ‖stepAssembly x‖²`. -/
 lemma wienerAssembly_map_eq_gaussianReal (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (x : StepIndex T →₀ ℝ) :
-    μ.map (fun ω => (wienerAssembly B hB T x) ω)
+    μ.map (fun ω ↦ (wienerAssembly B hB T x) ω)
       = gaussianReal 0 (‖stepAssembly T x‖ ^ 2).toNNReal := by
   rw [(wienerAssembly_hasGaussianLaw hB T x).map_eq_gaussianReal]
-  have hmean : μ[fun ω => (wienerAssembly B hB T x) ω] = 0 :=
+  have hmean : μ[fun ω ↦ (wienerAssembly B hB T x) ω] = 0 :=
     wienerAssembly_integral_zero hB T x
-  have hvar : Var[fun ω => (wienerAssembly B hB T x) ω; μ] = ‖stepAssembly T x‖ ^ 2 := by
+  have hvar : Var[fun ω ↦ (wienerAssembly B hB T x) ω; μ] = ‖stepAssembly T x‖ ^ 2 := by
     rw [variance_eq_integral
       ((Lp.aestronglyMeasurable (wienerAssembly B hB T x)).aemeasurable), hmean]
     simp only [sub_zero]
@@ -180,9 +180,9 @@ lemma L1_norm_le_L2_norm_prob (g : Lp ℝ 2 μ) :
 lemma charFun_map_lp_dist_le (t : ℝ) (h₁ h₂ : Lp ℝ 2 μ) :
     ‖charFun (μ.map (h₁ : Ω → ℝ)) t - charFun (μ.map (h₂ : Ω → ℝ)) t‖
       ≤ |t| * ‖h₁ - h₂‖ := by
-  have hInt : ∀ h : Lp ℝ 2 μ, Integrable (fun ω => cexp (↑t * ↑(h ω) * I)) μ := fun h =>
+  have hInt : ∀ h : Lp ℝ 2 μ, Integrable (fun ω ↦ cexp (↑t * ↑(h ω) * I)) μ := fun h ↦
     (memLp_top_of_bound (by fun_prop) 1
-      (ae_of_all _ fun ω => by rw [Complex.norm_exp]; simp)).integrable le_top
+      (ae_of_all _ fun ω ↦ by rw [Complex.norm_exp]; simp)).integrable le_top
   have hcf : ∀ h : Lp ℝ 2 μ, charFun (μ.map (h : Ω → ℝ)) t
       = ∫ ω, cexp (↑t * ↑(h ω) * I) ∂μ := by
     intro h
@@ -202,9 +202,9 @@ lemma charFun_map_lp_dist_le (t : ℝ) (h₁ h₂ : Lp ℝ 2 μ) :
     calc ‖cexp (I * ((t * (h₁ ω - h₂ ω) : ℝ) : ℂ)) - 1‖
         ≤ ‖(t * (h₁ ω - h₂ ω) : ℝ)‖ := Real.norm_exp_I_mul_ofReal_sub_one_le
       _ = |t| * |h₁ ω - h₂ ω| := by rw [Real.norm_eq_abs, abs_mul]
-  have hint_bound : Integrable (fun ω => |t| * |h₁ ω - h₂ ω|) μ := by
+  have hint_bound : Integrable (fun ω ↦ |t| * |h₁ ω - h₂ ω|) μ := by
     refine Integrable.const_mul ?_ _
-    have hi : Integrable (fun ω => (h₁ - h₂) ω) μ := (Lp.memLp (h₁ - h₂)).integrable one_le_two
+    have hi : Integrable (fun ω ↦ (h₁ - h₂) ω) μ := (Lp.memLp (h₁ - h₂)).integrable one_le_two
     refine hi.abs.congr ?_
     filter_upwards [Lp.coeFn_sub h₁ h₂] with ω hω; rw [hω, Pi.sub_apply]
   rw [hcf, hcf]
@@ -214,7 +214,7 @@ lemma charFun_map_lp_dist_le (t : ℝ) (h₁ h₂ : Lp ℝ 2 μ) :
     _ ≤ ∫ ω, ‖cexp (↑t * ↑(h₁ ω) * I) - cexp (↑t * ↑(h₂ ω) * I)‖ ∂μ :=
         norm_integral_le_integral_norm _
     _ ≤ ∫ ω, |t| * |h₁ ω - h₂ ω| ∂μ :=
-        integral_mono_of_nonneg (ae_of_all _ fun ω => norm_nonneg _) hint_bound
+        integral_mono_of_nonneg (ae_of_all _ fun ω ↦ norm_nonneg _) hint_bound
           (ae_of_all _ hbound)
     _ = |t| * ∫ ω, |h₁ ω - h₂ ω| ∂μ := by rw [integral_const_mul]
     _ ≤ |t| * ‖h₁ - h₂‖ := by
@@ -230,23 +230,23 @@ lemma charFun_map_lp_dist_le (t : ℝ) (h₁ h₂ : Lp ℝ 2 μ) :
 `f ∈ L²([0,T])`, `μ.map (wienerIntegralLp B hB T f) = gaussianReal 0 ‖f‖²`. -/
 theorem wienerIntegralLp_map_eq_gaussianReal (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :
-    μ.map (fun ω => (wienerIntegralLp B hB T f) ω)
+    μ.map (fun ω ↦ (wienerIntegralLp B hB T f) ω)
       = gaussianReal 0 (‖f‖ ^ 2).toNNReal := by
-  refine Measure.ext_of_charFun (funext fun t => ?_)
-  have hcont1 : Continuous (fun g : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) =>
-      charFun (μ.map (fun ω => (wienerIntegralLp B hB T g) ω)) t) := by
+  refine Measure.ext_of_charFun (funext fun t ↦ ?_)
+  have hcont1 : Continuous (fun g : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) ↦
+      charFun (μ.map (fun ω ↦ (wienerIntegralLp B hB T g) ω)) t) := by
     have hL : LipschitzWith |t|.toNNReal
-        (fun h : Lp ℝ 2 μ => charFun (μ.map (h : Ω → ℝ)) t) :=
-      LipschitzWith.of_dist_le_mul fun h₁ h₂ => by
+        (fun h : Lp ℝ 2 μ ↦ charFun (μ.map (h : Ω → ℝ)) t) :=
+      LipschitzWith.of_dist_le_mul fun h₁ h₂ ↦ by
         rw [Complex.dist_eq]
         refine (charFun_map_lp_dist_le t h₁ h₂).trans (le_of_eq ?_)
         rw [Real.coe_toNNReal _ (abs_nonneg t), dist_eq_norm]
     exact hL.continuous.comp (wienerIntegralLp B hB T).continuous
-  have hcont2 : Continuous (fun g : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) =>
+  have hcont2 : Continuous (fun g : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ))) ↦
       cexp (-(((‖g‖ ^ 2 : ℝ) : ℂ) * (t : ℂ) ^ 2 / 2))) := by
     apply Continuous.cexp; fun_prop
   have hbase : ∀ x : StepIndex T →₀ ℝ,
-      charFun (μ.map (fun ω => (wienerIntegralLp B hB T (stepAssembly T x)) ω)) t
+      charFun (μ.map (fun ω ↦ (wienerIntegralLp B hB T (stepAssembly T x)) ω)) t
         = cexp (-(((‖stepAssembly T x‖ ^ 2 : ℝ) : ℂ) * (t : ℂ) ^ 2 / 2)) := by
     intro x
     rw [wienerIntegralLp_stepAssembly hB T x, wienerAssembly_map_eq_gaussianReal hB T x,
@@ -255,10 +255,10 @@ theorem wienerIntegralLp_map_eq_gaussianReal (hB : IsPreBrownianReal B μ) (T : 
     rw [show (((‖stepAssembly T x‖ ^ 2).toNNReal : ℝ)) = ‖stepAssembly T x‖ ^ 2 from
       Real.coe_toNNReal _ (by positivity)]
     push_cast; ring
-  have hf_eq : charFun (μ.map (fun ω => (wienerIntegralLp B hB T f) ω)) t
+  have hf_eq : charFun (μ.map (fun ω ↦ (wienerIntegralLp B hB T f) ω)) t
       = cexp (-(((‖f‖ ^ 2 : ℝ) : ℂ) * (t : ℂ) ^ 2 / 2)) :=
     (stepAssembly_denseRange T).induction_on
-      (p := fun g => charFun (μ.map (fun ω => (wienerIntegralLp B hB T g) ω)) t
+      (p := fun g ↦ charFun (μ.map (fun ω ↦ (wienerIntegralLp B hB T g) ω)) t
         = cexp (-(((‖g‖ ^ 2 : ℝ) : ℂ) * (t : ℂ) ^ 2 / 2)))
       f (isClosed_eq hcont1 hcont2) hbase
   rw [hf_eq, charFun_gaussianReal]
@@ -269,7 +269,7 @@ theorem wienerIntegralLp_map_eq_gaussianReal (hB : IsPreBrownianReal B μ) (T : 
 /-- **`HasLaw` form**, with the variance in integral shape `∫₀ᵀ f²`. -/
 theorem wienerIntegralLp_hasLaw_gaussian (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
     (f : Lp ℝ 2 (volume.restrict (Set.Ioc (0 : ℝ) (T : ℝ)))) :
-    HasLaw (fun ω => (wienerIntegralLp B hB T f) ω)
+    HasLaw (fun ω ↦ (wienerIntegralLp B hB T f) ω)
       (gaussianReal 0 (∫ s in Set.Ioc (0 : ℝ) (T : ℝ), (f s) ^ 2 ∂volume).toNNReal) μ where
   aemeasurable := (Lp.aestronglyMeasurable _).aemeasurable
   map_eq := by

@@ -98,17 +98,17 @@ lemma bsV_le_mertonCallPrice_delta_zero {S_0 K r σ T k : ℝ} (Λ : ℝ≥0)
     integrable_mertonSpot Λ hS_0 hk
   -- the affine tangent minorant …
   have h_lin_int : Integrable
-      (fun n => Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0))
+      (fun n ↦ Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0))
       (poissonMeasure Λ) :=
     (h_spot_int.sub (integrable_const _)).const_mul _
-  have h_tan_int : Integrable (fun n =>
+  have h_tan_int : Integrable (fun n ↦
       bsV K r σ S_0 T + Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0))
       (poissonMeasure Λ) :=
     (integrable_const _).add h_lin_int
   -- … lies below every conditional value (tangent bound at each spot_n) …
   have h_tan_le : ∀ n, bsV K r σ S_0 T
       + Phi (bsd1 S_0 K r σ T) * (mertonSpot S_0 k Λ n - S_0)
-      ≤ mertonCallTerm S_0 K r σ T k 0 Λ n := fun n => by
+      ≤ mertonCallTerm S_0 K r σ T k 0 Λ n := fun n ↦ by
     rw [mertonCallTerm_eq_bsV, mertonVol_delta_zero hσ.le]
     exact bsV_spot_tangent_le hK hσ hT hS_0 (mertonSpot_pos hS_0 hk Λ n)
   -- … and integrates to exactly `bsV` by the compensation identity.

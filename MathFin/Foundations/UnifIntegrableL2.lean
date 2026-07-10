@@ -103,13 +103,13 @@ theorem tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound [IsFiniteMeasure μ]
     {f : ℕ → α → ℝ} {g : α → ℝ} (hf : ∀ n, MemLp (f n) 2 μ)
     {M : ℝ} (hM : ∀ n, ∫ x, (f n x) ^ 2 ∂μ ≤ M) (hg : MemLp g 1 μ)
     (hconv : TendstoInMeasure μ f atTop g) (A : Set α) :
-    Tendsto (fun n => ∫ x in A, f n x ∂μ) atTop (𝓝 (∫ x in A, g x ∂μ)) := by
+    Tendsto (fun n ↦ ∫ x in A, f n x ∂μ) atTop (𝓝 (∫ x in A, g x ∂μ)) := by
   have hui : UnifIntegrable f 1 μ := unifIntegrable_one_of_sq_integral_le hf hM
-  have hL1 : Tendsto (fun n => eLpNorm (f n - g) 1 μ) atTop (𝓝 0) :=
+  have hL1 : Tendsto (fun n ↦ eLpNorm (f n - g) 1 μ) atTop (𝓝 0) :=
     tendsto_Lp_finite_of_tendstoInMeasure le_rfl ENNReal.one_ne_top
-      (fun n => (hf n).aestronglyMeasurable) hg hui hconv
+      (fun n ↦ (hf n).aestronglyMeasurable) hg hui hconv
   refine tendsto_setIntegral_of_L1 g hg.aestronglyMeasurable
-    (Filter.Eventually.of_forall fun n => (hf n).integrable (by norm_num)) ?_ A
+    (Filter.Eventually.of_forall fun n ↦ (hf n).integrable (by norm_num)) ?_ A
   simp_rw [eLpNorm_one_eq_lintegral_enorm, Pi.sub_apply] at hL1
   exact hL1
 
@@ -128,15 +128,15 @@ theorem tendsto_setIntegral_of_subseq_ae_of_sq_bound [IsFiniteMeasure μ]
     {f : ℕ → α → ℝ} {g : α → ℝ} (hf : ∀ n, MemLp (f n) 2 μ)
     {M : ℝ} (hM : ∀ n, ∫ x, (f n x) ^ 2 ∂μ ≤ M) (hg : MemLp g 1 μ)
     (hsub : ∀ ns : ℕ → ℕ, Tendsto ns atTop atTop →
-      ∃ ms : ℕ → ℕ, ∀ᵐ x ∂μ, Tendsto (fun k => f (ns (ms k)) x) atTop (𝓝 (g x)))
+      ∃ ms : ℕ → ℕ, ∀ᵐ x ∂μ, Tendsto (fun k ↦ f (ns (ms k)) x) atTop (𝓝 (g x)))
     (A : Set α) :
-    Tendsto (fun n => ∫ x in A, f n x ∂μ) atTop (𝓝 (∫ x in A, g x ∂μ)) := by
-  refine tendsto_of_subseq_tendsto (fun ns hns => ?_)
+    Tendsto (fun n ↦ ∫ x in A, f n x ∂μ) atTop (𝓝 (∫ x in A, g x ∂μ)) := by
+  refine tendsto_of_subseq_tendsto (fun ns hns ↦ ?_)
   obtain ⟨ms, hae⟩ := hsub ns hns
   refine ⟨ms, ?_⟩
-  have hconv : TendstoInMeasure μ (fun k => f (ns (ms k))) atTop g :=
-    tendstoInMeasure_of_tendsto_ae (fun k => (hf _).aestronglyMeasurable) hae
+  have hconv : TendstoInMeasure μ (fun k ↦ f (ns (ms k))) atTop g :=
+    tendstoInMeasure_of_tendsto_ae (fun k ↦ (hf _).aestronglyMeasurable) hae
   exact tendsto_setIntegral_of_tendstoInMeasure_of_sq_bound
-    (fun k => hf (ns (ms k))) (fun k => hM (ns (ms k))) hg hconv A
+    (fun k ↦ hf (ns (ms k))) (fun k ↦ hM (ns (ms k))) hg hconv A
 
 end MathFin

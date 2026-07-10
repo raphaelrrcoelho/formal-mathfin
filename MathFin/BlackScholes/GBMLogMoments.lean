@@ -117,11 +117,11 @@ theorem bsLogReturn_mean
   unfold bsLogReturn
   -- HasLaw transfer: ∫ ω, g (Z ω) ∂Q = ∫ z, g z ∂(gaussianReal 0 1)
   have h_g : AEStronglyMeasurable
-      (fun z : ℝ => (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
+      (fun z : ℝ ↦ (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z)
       (gaussianReal 0 1) :=
     Continuous.aestronglyMeasurable (by fun_prop)
-  rw [show (fun ω => (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω)
-        = (fun z : ℝ => (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z) ∘ Z from rfl]
+  rw [show (fun ω ↦ (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * Z ω)
+        = (fun z : ℝ ↦ (r - σ ^ 2 / 2) * T + σ * Real.sqrt T * z) ∘ Z from rfl]
   rw [hZ.integral_comp h_g]
   -- Now ∫ z, ((r-σ²/2)·T + σ·√T·z) ∂(gaussianReal 0 1)
   -- = (r-σ²/2)·T + σ·√T · ∫ z, z ∂(gaussianReal 0 1)
@@ -129,8 +129,8 @@ theorem bsLogReturn_mean
   have h_int_id : Integrable (id : ℝ → ℝ) (gaussianReal 0 1) :=
     (memLp_id_gaussianReal (μ := 0) (v := 1) 1).integrable (le_refl _)
   have h_int_lin : Integrable
-      (fun z : ℝ => σ * Real.sqrt T * z) (gaussianReal 0 1) := by
-    have h_eq : (fun z : ℝ => σ * Real.sqrt T * z) =
+      (fun z : ℝ ↦ σ * Real.sqrt T * z) (gaussianReal 0 1) := by
+    have h_eq : (fun z : ℝ ↦ σ * Real.sqrt T * z) =
                 (σ * Real.sqrt T) • (id : ℝ → ℝ) := by
       funext z; rfl
     rw [h_eq]

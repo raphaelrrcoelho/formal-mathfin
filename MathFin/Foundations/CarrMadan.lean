@@ -46,13 +46,13 @@ private theorem secondOrder_remainder_eq_integral {f f' f'' : ℝ → ℝ} {κ S
     (hf' : ∀ t ∈ Set.uIcc κ S, HasDerivAt f' (f'' t) t)
     (hf'' : ContinuousOn f'' (Set.uIcc κ S)) :
     ∫ t in κ..S, (S - t) * f'' t = f S - f κ - f' κ * (S - κ) := by
-  have hu : ∀ t ∈ Set.uIcc κ S, HasDerivAt (fun s => S - s) (-1 : ℝ) t :=
-    fun t _ => by simpa using (hasDerivAt_id t).const_sub S
+  have hu : ∀ t ∈ Set.uIcc κ S, HasDerivAt (fun s ↦ S - s) (-1 : ℝ) t :=
+    fun t _ ↦ by simpa using (hasDerivAt_id t).const_sub S
   have hf'_cont : ContinuousOn f' (Set.uIcc κ S) :=
-    fun t ht => (hf' t ht).continuousAt.continuousWithinAt
+    fun t ht ↦ (hf' t ht).continuousAt.continuousWithinAt
   have hf'_int : IntervalIntegrable f' MeasureTheory.volume κ S := hf'_cont.intervalIntegrable
   have hf''_int : IntervalIntegrable f'' MeasureTheory.volume κ S := hf''.intervalIntegrable
-  have hconst_int : IntervalIntegrable (fun _ => (-1 : ℝ)) MeasureTheory.volume κ S :=
+  have hconst_int : IntervalIntegrable (fun _ ↦ (-1 : ℝ)) MeasureTheory.volume κ S :=
     intervalIntegrable_const
   have hibp := intervalIntegral.integral_mul_deriv_eq_deriv_mul hu hf' hconst_int hf''_int
   have hftc : ∫ t in κ..S, f' t = f S - f κ :=
@@ -86,16 +86,16 @@ theorem carrMadan_spanning {f f' f'' : ℝ → ℝ} {L U κ S : ℝ}
   have hU : U ∈ Set.Icc L U := ⟨hLκ.trans hκU, le_rfl⟩
   have hsub : Set.uIcc κ S ⊆ Set.Icc L U := Set.uIcc_subset_Icc hκ hS
   have hcore : ∫ t in κ..S, (S - t) * f'' t = f S - f κ - f' κ * (S - κ) :=
-    secondOrder_remainder_eq_integral (fun t ht => hf t (hsub ht))
-      (fun t ht => hf' t (hsub ht)) (hf''.mono hsub)
-  have hcont_put : ContinuousOn (fun K => f'' K * max (K - S) 0) (Set.Icc L U) :=
+    secondOrder_remainder_eq_integral (fun t ht ↦ hf t (hsub ht))
+      (fun t ht ↦ hf' t (hsub ht)) (hf''.mono hsub)
+  have hcont_put : ContinuousOn (fun K ↦ f'' K * max (K - S) 0) (Set.Icc L U) :=
     hf''.mul (((continuous_id.sub continuous_const).max continuous_const).continuousOn)
-  have hcont_call : ContinuousOn (fun K => f'' K * max (S - K) 0) (Set.Icc L U) :=
+  have hcont_call : ContinuousOn (fun K ↦ f'' K * max (S - K) 0) (Set.Icc L U) :=
     hf''.mul (((continuous_const.sub continuous_id).max continuous_const).continuousOn)
   rcases le_total κ S with h | h
   · -- `κ ≤ S`: the put leg vanishes; the call leg is the remainder.
     have hput0 : (∫ K in L..κ, f'' K * max (K - S) 0) = 0 := by
-      have h0 : Set.EqOn (fun K => f'' K * max (K - S) 0) (fun _ => (0 : ℝ)) (Set.uIcc L κ) := by
+      have h0 : Set.EqOn (fun K ↦ f'' K * max (K - S) 0) (fun _ ↦ (0 : ℝ)) (Set.uIcc L κ) := by
         intro K hK
         rw [Set.uIcc_of_le hLκ] at hK
         simp only [max_eq_right (show K - S ≤ 0 by linarith [hK.2]), mul_zero]
@@ -107,20 +107,20 @@ theorem carrMadan_spanning {f f' f'' : ℝ → ℝ} {L U κ S : ℝ}
           (hcont_call.mono (Set.uIcc_subset_Icc hκ hS)).intervalIntegrable
           (hcont_call.mono (Set.uIcc_subset_Icc hS hU)).intervalIntegrable).symm
       have hupper : (∫ K in S..U, f'' K * max (S - K) 0) = 0 := by
-        have h0 : Set.EqOn (fun K => f'' K * max (S - K) 0) (fun _ => (0 : ℝ)) (Set.uIcc S U) := by
+        have h0 : Set.EqOn (fun K ↦ f'' K * max (S - K) 0) (fun _ ↦ (0 : ℝ)) (Set.uIcc S U) := by
           intro K hK
           rw [Set.uIcc_of_le hS.2] at hK
           simp only [max_eq_right (show S - K ≤ 0 by linarith [hK.1]), mul_zero]
         rw [intervalIntegral.integral_congr h0]; simp
       have hlower : (∫ K in κ..S, f'' K * max (S - K) 0) = ∫ K in κ..S, (S - K) * f'' K := by
-        refine intervalIntegral.integral_congr fun K hK => ?_
+        refine intervalIntegral.integral_congr fun K hK ↦ ?_
         rw [Set.uIcc_of_le h] at hK
         rw [max_eq_left (show (0 : ℝ) ≤ S - K by linarith [hK.2])]; ring
       rw [hsplit, hupper, hlower, add_zero, hcore]
     rw [hput0, hcall]; ring
   · -- `S ≤ κ`: the call leg vanishes; the put leg is the remainder.
     have hcall0 : (∫ K in κ..U, f'' K * max (S - K) 0) = 0 := by
-      have h0 : Set.EqOn (fun K => f'' K * max (S - K) 0) (fun _ => (0 : ℝ)) (Set.uIcc κ U) := by
+      have h0 : Set.EqOn (fun K ↦ f'' K * max (S - K) 0) (fun _ ↦ (0 : ℝ)) (Set.uIcc κ U) := by
         intro K hK
         rw [Set.uIcc_of_le hκU] at hK
         simp only [max_eq_right (show S - K ≤ 0 by linarith [hK.1]), mul_zero]
@@ -132,18 +132,18 @@ theorem carrMadan_spanning {f f' f'' : ℝ → ℝ} {L U κ S : ℝ}
           (hcont_put.mono (Set.uIcc_subset_Icc hL hS)).intervalIntegrable
           (hcont_put.mono (Set.uIcc_subset_Icc hS hκ)).intervalIntegrable).symm
       have hlowZero : (∫ K in L..S, f'' K * max (K - S) 0) = 0 := by
-        have h0 : Set.EqOn (fun K => f'' K * max (K - S) 0) (fun _ => (0 : ℝ)) (Set.uIcc L S) := by
+        have h0 : Set.EqOn (fun K ↦ f'' K * max (K - S) 0) (fun _ ↦ (0 : ℝ)) (Set.uIcc L S) := by
           intro K hK
           rw [Set.uIcc_of_le hS.1] at hK
           simp only [max_eq_right (show K - S ≤ 0 by linarith [hK.2]), mul_zero]
         rw [intervalIntegral.integral_congr h0]; simp
       have hhigh : (∫ K in S..κ, f'' K * max (K - S) 0) = ∫ K in S..κ, (K - S) * f'' K := by
-        refine intervalIntegral.integral_congr fun K hK => ?_
+        refine intervalIntegral.integral_congr fun K hK ↦ ?_
         rw [Set.uIcc_of_le h] at hK
         rw [max_eq_left (show (0 : ℝ) ≤ K - S by linarith [hK.1])]; ring
       rw [hsplit, hlowZero, hhigh, zero_add, ← hcore,
           intervalIntegral.integral_symm S κ, ← intervalIntegral.integral_neg]
-      refine intervalIntegral.integral_congr fun K _ => ?_
+      refine intervalIntegral.integral_congr fun K _ ↦ ?_
       ring
     rw [hcall0, hput]; ring
 
@@ -160,10 +160,10 @@ theorem carrMadan_log_spanning {L U κ S : ℝ} (hL : 0 < L)
     Real.log S = Real.log κ + κ⁻¹ * (S - κ)
       + (∫ K in L..κ, -(K ^ 2)⁻¹ * max (K - S) 0)
       + (∫ K in κ..U, -(K ^ 2)⁻¹ * max (S - K) 0) := by
-  have hpos : ∀ t ∈ Set.Icc L U, t ≠ 0 := fun t ht => (lt_of_lt_of_le hL ht.1).ne'
-  exact carrMadan_spanning (f := Real.log) (f' := fun t => t⁻¹) (f'' := fun K => -(K ^ 2)⁻¹)
-    hLκ hκU hS (fun t ht => Real.hasDerivAt_log (hpos t ht))
-    (fun t ht => by simpa using hasDerivAt_inv (hpos t ht))
-    (((continuousOn_id.pow 2).inv₀ (fun K hK => pow_ne_zero 2 (hpos K hK))).neg)
+  have hpos : ∀ t ∈ Set.Icc L U, t ≠ 0 := fun t ht ↦ (lt_of_lt_of_le hL ht.1).ne'
+  exact carrMadan_spanning (f := Real.log) (f' := fun t ↦ t⁻¹) (f'' := fun K ↦ -(K ^ 2)⁻¹)
+    hLκ hκU hS (fun t ht ↦ Real.hasDerivAt_log (hpos t ht))
+    (fun t ht ↦ by simpa using hasDerivAt_inv (hpos t ht))
+    (((continuousOn_id.pow 2).inv₀ (fun K hK ↦ pow_ne_zero 2 (hpos K hK))).neg)
 
 end MathFin

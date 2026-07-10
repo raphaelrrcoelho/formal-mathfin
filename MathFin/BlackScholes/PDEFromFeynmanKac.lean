@@ -74,23 +74,23 @@ theorem bsV_eq_feynmanU {K r σ S τ : ℝ}
     (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ) :
     bsV K r σ S τ =
       FeynmanKacHeatEquation.feynmanU
-        (fun ξ => Real.exp (-(r * τ)) * max (Real.exp ξ - K) 0)
+        (fun ξ ↦ Real.exp (-(r * τ)) * max (Real.exp ξ - K) 0)
         (σ ^ 2 * τ)
         (Real.log S + (r - σ ^ 2 / 2) * τ) := by
   have hvar : (0:ℝ) < σ ^ 2 * τ := by positivity
-  set g : ℝ → ℝ := fun ξ => Real.exp (-(r * τ)) * max (Real.exp ξ - K) 0 with hg
+  set g : ℝ → ℝ := fun ξ ↦ Real.exp (-(r * τ)) * max (Real.exp ξ - K) 0 with hg
   have hg_cont : Continuous g := by
     rw [hg]
     exact continuous_const.mul
       ((Real.continuous_exp.sub continuous_const).max continuous_const)
-  have hmap : Measure.map (fun ω => σ * Real.sqrt τ * ω) (gaussianReal 0 1)
+  have hmap : Measure.map (fun ω ↦ σ * Real.sqrt τ * ω) (gaussianReal 0 1)
       = gaussianReal 0 (σ ^ 2 * τ).toNNReal := by
     rw [gaussianReal_map_const_mul (σ * Real.sqrt τ), mul_zero, mul_one]
     congr 1
     apply NNReal.coe_injective
     rw [NNReal.coe_mk, Real.coe_toNNReal _ hvar.le, mul_pow, Real.sq_sqrt hτ.le]
   rw [FeynmanKacHeatEquation.feynmanU_eq_integral_of_map
-        (B := fun _ ω => σ * Real.sqrt τ * ω) (μ := gaussianReal 0 1)
+        (B := fun _ ω ↦ σ * Real.sqrt τ * ω) (μ := gaussianReal 0 1)
         (measurable_const.mul measurable_id).aemeasurable hmap hg_cont hvar
         (Real.log S + (r - σ ^ 2 / 2) * τ)]
   have hpoint : ∀ ω : ℝ,
@@ -111,7 +111,7 @@ theorem bsV_eq_feynmanU {K r σ S τ : ℝ}
   rw [hcf, bsV, neg_mul]
 
 private lemma callPayoff_continuous (K : ℝ) :
-    Continuous (fun ξ => max (Real.exp ξ - K) 0) :=
+    Continuous (fun ξ ↦ max (Real.exp ξ - K) 0) :=
   (Real.continuous_exp.sub continuous_const).max continuous_const
 
 private lemma callPayoff_le_exp {K : ℝ} (hK : 0 < K) (z : ℝ) :
@@ -123,7 +123,7 @@ private lemma callPayoff_le_exp {K : ℝ} (hK : 0 < K) (z : ℝ) :
 theorem bsV_eq_discount_feynmanU {K r σ S τ : ℝ}
     (hS : 0 < S) (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ) :
     bsV K r σ S τ = Real.exp (-(r * τ))
-      * feynmanU (fun ξ => max (Real.exp ξ - K) 0) (σ ^ 2 * τ)
+      * feynmanU (fun ξ ↦ max (Real.exp ξ - K) 0) (σ ^ 2 * τ)
           (Real.log S + (r - σ ^ 2 / 2) * τ) := by
   rw [bsV_eq_feynmanU hS hK hσ hτ]
   simp only [feynmanU]
@@ -135,7 +135,7 @@ theorem bsV_eq_discount_feynmanU {K r σ S τ : ℝ}
 /-- **Step 3 (Delta) — the `S`-derivative of `bsV`, via Feynman–Kac.** -/
 private lemma hasDerivAt_bsV_S_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) :
-    HasDerivAt (fun S' => bsV K r σ S' τ)
+    HasDerivAt (fun S' ↦ bsV K r σ S' τ)
       (Real.exp (-(r * τ))
         * ((∫ z, max (Real.exp z - K) 0
               * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
@@ -158,9 +158,9 @@ that makes `hasDerivAt_feynmanU_comp` — and through it the heat kernel's *join
 `hasFDerivAt_heatKernel` — load-bearing for the Black–Scholes time-derivative. -/
 private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S : ℝ} (hS : 0 < S) {τ : ℝ} (hτ : 0 < τ) :
-    HasDerivAt (fun τ' => bsV K r σ S τ')
+    HasDerivAt (fun τ' ↦ bsV K r σ S τ')
       (-r * Real.exp (-(r * τ))
-          * feynmanU (fun ξ => max (Real.exp ξ - K) 0) (σ ^ 2 * τ)
+          * feynmanU (fun ξ ↦ max (Real.exp ξ - K) 0) (σ ^ 2 * τ)
               (Real.log S + (r - σ ^ 2 / 2) * τ)
         + Real.exp (-(r * τ))
           * (∫ z, max (Real.exp z - K) 0
@@ -170,15 +170,15 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
                 + (r - σ ^ 2 / 2) * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
                     * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)))) ∂volume)) τ := by
   have hσ2 : (0 : ℝ) < σ ^ 2 := by positivity
-  have hexp : HasDerivAt (fun τ' => Real.exp (-(r * τ'))) (-r * Real.exp (-(r * τ))) τ := by
-    have h1 : HasDerivAt (fun τ' : ℝ => -(r * τ')) (-r) τ := by
+  have hexp : HasDerivAt (fun τ' ↦ Real.exp (-(r * τ'))) (-r * Real.exp (-(r * τ))) τ := by
+    have h1 : HasDerivAt (fun τ' : ℝ ↦ -(r * τ')) (-r) τ := by
       have h := (hasDerivAt_id τ).const_mul (-r)
       simp only [neg_mul, mul_one] at h
       exact h
     have h2 := h1.exp
     convert h2 using 1
     ring
-  have hfk := hasDerivAt_feynmanU_comp (h := fun ξ => max (Real.exp ξ - K) 0)
+  have hfk := hasDerivAt_feynmanU_comp (h := fun ξ ↦ max (Real.exp ξ - K) 0)
     (callPayoff_continuous K) (callPayoff_le_exp hK) (α := σ ^ 2) (β := r - σ ^ 2 / 2)
     (x₀ := Real.log S) hσ2 hτ
   refine (hexp.mul hfk).congr_of_eventuallyEq ?_
@@ -192,7 +192,7 @@ contributes `−U_x·S⁻²`, so `∂_SS V = e^{−rτ}·(U_xx − U_x)/S²`. Th
 the step-4 PDE assembly. -/
 private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ) (hτ : 0 < τ)
     {S : ℝ} (hS : 0 < S) :
-    HasDerivAt (fun S' => Real.exp (-(r * τ))
+    HasDerivAt (fun S' ↦ Real.exp (-(r * τ))
         * ((∫ z, max (Real.exp z - K) 0
               * ((z - (Real.log S' + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
                 * heatKernel (σ ^ 2 * τ) (z - (Real.log S' + (r - σ ^ 2 / 2) * τ)))) * S'⁻¹))
@@ -215,9 +215,9 @@ private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   set Ux := ∫ z, max (Real.exp z - K) 0
       * ((z - (Real.log S + (r - σ ^ 2 / 2) * τ)) / (σ ^ 2 * τ)
           * heatKernel (σ ^ 2 * τ) (z - (Real.log S + (r - σ ^ 2 / 2) * τ)))
-  have hUx_eq : ((fun x' => ∫ (z : ℝ), max (Real.exp z - K) 0 * ((z - x') / (σ ^ 2 * τ)
+  have hUx_eq : ((fun x' ↦ ∫ (z : ℝ), max (Real.exp z - K) 0 * ((z - x') / (σ ^ 2 * τ)
                       * heatKernel (σ ^ 2 * τ) (z - x'))) ∘
-                   fun x => Real.log x + (r - σ ^ 2 / 2) * τ) S = Ux := by
+                   fun x ↦ Real.log x + (r - σ ^ 2 / 2) * τ) S = Ux := by
     simp only [Function.comp_def]
     rfl
   refine hprod.congr_deriv ?_
@@ -229,14 +229,14 @@ private lemma hasDerivAt_bsV_SS_fk {K r σ τ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
 (`|h| ≤ eᶻ`), dominated by the sub-Gaussian envelope. Needed to split the combined `τ`-derivative
 integral in the PDE assembly. -/
 private lemma integrable_payoff_mul_dtK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0 < K) (x : ℝ) :
-    Integrable (fun z => max (Real.exp z - K) 0
+    Integrable (fun z ↦ max (Real.exp z - K) 0
       * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2))) volume := by
   apply ((integrable_exp_mul_poly_heatKernel ht x t).const_mul (1 / (2 * t ^ 2))).mono'
   · exact ((callPayoff_continuous K).mul
       (((continuous_heatKernel t).comp (continuous_id.sub continuous_const)).mul
         (((continuous_id.sub continuous_const).pow 2).sub continuous_const)
         |>.div_const _)).aestronglyMeasurable
-  · refine ae_of_all _ fun z => ?_
+  · refine ae_of_all _ fun z ↦ ?_
     have hKnn := heatKernel_nonneg ht (z - x)
     have hnorm : ‖max (Real.exp z - K) 0 * (heatKernel t (z - x) * ((z - x) ^ 2 - t) / (2 * t ^ 2))‖
         = 1 / (2 * t ^ 2) * (|max (Real.exp z - K) 0| * (heatKernel t (z - x) * |(z - x) ^ 2 - t|)) := by
@@ -255,13 +255,13 @@ private lemma integrable_payoff_mul_dtK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0
 
 /-- Integrability of the call payoff against the kernel's space-derivative integrand `h·∂_x K`. -/
 private lemma integrable_payoff_mul_dxK {t : ℝ} (ht : 0 < t) {K : ℝ} (hK : 0 < K) (x : ℝ) :
-    Integrable (fun z => max (Real.exp z - K) 0
+    Integrable (fun z ↦ max (Real.exp z - K) 0
       * ((z - x) / t * heatKernel t (z - x))) volume := by
   apply ((integrable_exp_mul_poly_heatKernel ht x 1).const_mul (1 / t)).mono'
   · exact ((callPayoff_continuous K).mul
       (((continuous_id.sub continuous_const).div_const t).mul
         ((continuous_heatKernel t).comp (continuous_id.sub continuous_const)))).aestronglyMeasurable
-  · refine ae_of_all _ fun z => ?_
+  · refine ae_of_all _ fun z ↦ ?_
     have hKnn := heatKernel_nonneg ht (z - x)
     have hnorm : ‖max (Real.exp z - K) 0 * ((z - x) / t * heatKernel t (z - x))‖
         = 1 / t * (|max (Real.exp z - K) 0| * (|z - x| * heatKernel t (z - x))) := by
@@ -285,9 +285,9 @@ identity `∂_t K = ½ ∂_xx K`, and the operator vanishing is then exact algeb
 theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
     {S τ : ℝ} (hS : 0 < S) (hτ : 0 < τ) :
     ∃ Vτ VS VSS : ℝ,
-      HasDerivAt (fun τ' => bsV K r σ S τ') Vτ τ ∧
-      HasDerivAt (fun S' => bsV K r σ S' τ) VS S ∧
-      HasDerivAt (fun S' => deriv (fun S'' => bsV K r σ S'' τ) S') VSS S ∧
+      HasDerivAt (fun τ' ↦ bsV K r σ S τ') Vτ τ ∧
+      HasDerivAt (fun S' ↦ bsV K r σ S' τ) VS S ∧
+      HasDerivAt (fun S' ↦ deriv (fun S'' ↦ bsV K r σ S'' τ) S') VSS S ∧
       -Vτ + (1 / 2) * σ ^ 2 * S ^ 2 * VSS + r * S * VS - r * bsV K r σ S τ = 0 := by
   refine ⟨_, _, _, hasDerivAt_bsV_tau_fk hK hσ hS hτ, hasDerivAt_bsV_S_fk hK hσ hτ hS,
     (hasDerivAt_bsV_SS_fk (r := r) hK hσ hτ hS).congr_of_eventuallyEq ?_, ?_⟩
@@ -296,7 +296,7 @@ theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0
   · have ht₀ : (0 : ℝ) < σ ^ 2 * τ := by positivity
     have hSne : S ≠ 0 := hS.ne'
     set c₀ : ℝ := Real.log S + (r - σ ^ 2 / 2) * τ
-    have hheat := feynmanU_heat_equation ht₀ (fun ξ => max (Real.exp ξ - K) 0) c₀
+    have hheat := feynmanU_heat_equation ht₀ (fun ξ ↦ max (Real.exp ξ - K) 0) c₀
     rw [bsV_eq_discount_feynmanU hS hK hσ hτ,
       show (∫ z, max (Real.exp z - K) 0
             * (σ ^ 2 * (heatKernel (σ ^ 2 * τ) (z - c₀)
@@ -311,7 +311,7 @@ theorem bsV_satisfies_bs_pde_via_feynmanKac {K r σ : ℝ} (hK : 0 < K) (hσ : 0
             ((integrable_payoff_mul_dxK ht₀ hK c₀).const_mul _)]
         congr 1; ext z; ring,
       hheat]
-    set U := feynmanU (fun ξ => max (Real.exp ξ - K) 0) (σ ^ 2 * τ) c₀
+    set U := feynmanU (fun ξ ↦ max (Real.exp ξ - K) 0) (σ ^ 2 * τ) c₀
     set Uxx := ∫ z, max (Real.exp z - K) 0
         * (heatKernel (σ ^ 2 * τ) (z - c₀) * ((z - c₀) ^ 2 - σ ^ 2 * τ) / (σ ^ 2 * τ) ^ 2)
     set Ux := ∫ z, max (Real.exp z - K) 0

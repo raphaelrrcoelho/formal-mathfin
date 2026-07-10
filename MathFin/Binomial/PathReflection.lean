@@ -88,7 +88,7 @@ lemma walkStep_not (b : Bool) : walkStep (!b) = -walkStep b := by
 For `k = 0` the sum is empty and the position is `0`. For `k ≥ n` all
 steps are included. -/
 def walkPos (ω : Fin n → Bool) (k : ℕ) : ℤ :=
-  ∑ i ∈ (Finset.univ : Finset (Fin n)).filter (fun (i : Fin n) => i.val < k),
+  ∑ i ∈ (Finset.univ : Finset (Fin n)).filter (fun (i : Fin n) ↦ i.val < k),
     walkStep (ω i)
 
 @[simp]
@@ -98,7 +98,7 @@ lemma walkPos_zero (ω : Fin n → Bool) : walkPos ω 0 = 0 := by
 
 /-- **Reflection after time `τ`**: flip every step at index `≥ τ`. -/
 def reflectAfter (τ : ℕ) (ω : Fin n → Bool) : Fin n → Bool :=
-  fun (i : Fin n) => if i.val < τ then ω i else !(ω i)
+  fun (i : Fin n) ↦ if i.val < τ then ω i else !(ω i)
 
 /-- **Reflection at fixed `τ` is involutive**: applying it twice recovers the
 original path. -/
@@ -141,10 +141,10 @@ reflection, contributing `walkPos ω τ`) and the suffix `{τ ≤ i.val < k}`
 gives `walkPos (reflect) k = 2·walkPos ω τ − walkPos ω k`. -/
 lemma walkPos_reflectAfter_ge (τ : ℕ) (ω : Fin n → Bool) {k : ℕ} (hτk : τ ≤ k) :
     walkPos (reflectAfter τ ω) k = 2 * walkPos ω τ - walkPos ω k := by
-  let Pτ : Finset (Fin n) := Finset.univ.filter (fun (i : Fin n) => i.val < τ)
+  let Pτ : Finset (Fin n) := Finset.univ.filter (fun (i : Fin n) ↦ i.val < τ)
   let Pτk : Finset (Fin n) :=
-    Finset.univ.filter (fun (i : Fin n) => τ ≤ i.val ∧ i.val < k)
-  let Pk : Finset (Fin n) := Finset.univ.filter (fun (i : Fin n) => i.val < k)
+    Finset.univ.filter (fun (i : Fin n) ↦ τ ≤ i.val ∧ i.val < k)
+  let Pk : Finset (Fin n) := Finset.univ.filter (fun (i : Fin n) ↦ i.val < k)
   have h_disj : Disjoint Pτ Pτk := by
     rw [Finset.disjoint_filter]
     intros i _ hi1 hi2
@@ -232,7 +232,7 @@ variable {a : ℤ}
 
 /-- The (finite) set of times `k ∈ {0, …, n}` at which the walk hits level `a`. -/
 def hittingSet (ω : Fin n → Bool) (a : ℤ) : Finset ℕ :=
-  (Finset.range (n + 1)).filter (fun k => walkPos ω k = a)
+  (Finset.range (n + 1)).filter (fun k ↦ walkPos ω k = a)
 
 /-- A path **hits level `a`** if `hittingSet` is nonempty. -/
 abbrev HitsLevel (a : ℤ) (ω : Fin n → Bool) : Prop := (hittingSet ω a).Nonempty
@@ -371,8 +371,8 @@ lemma walkPos_succ (ω : Fin n → Bool) {k : ℕ} (hk : k < n) :
     walkPos ω (k + 1) = walkPos ω k + walkStep (ω ⟨k, hk⟩) := by
   unfold walkPos
   have h_split :
-      (Finset.univ.filter (fun (i : Fin n) => i.val < k + 1)) =
-      (Finset.univ.filter (fun (i : Fin n) => i.val < k)) ∪ {⟨k, hk⟩} := by
+      (Finset.univ.filter (fun (i : Fin n) ↦ i.val < k + 1)) =
+      (Finset.univ.filter (fun (i : Fin n) ↦ i.val < k)) ∪ {⟨k, hk⟩} := by
     ext i
     simp only [Finset.mem_filter, Finset.mem_univ, Finset.mem_union,
       Finset.mem_singleton, true_and]
@@ -385,7 +385,7 @@ lemma walkPos_succ (ω : Fin n → Bool) {k : ℕ} (hk : k < n) :
       · omega
       · simp [h_eq]
   have h_disj : Disjoint
-      (Finset.univ.filter (fun (i : Fin n) => i.val < k))
+      (Finset.univ.filter (fun (i : Fin n) ↦ i.val < k))
       ({⟨k, hk⟩} : Finset (Fin n)) := by
     rw [Finset.disjoint_singleton_right, Finset.mem_filter]
     intro h
@@ -406,7 +406,7 @@ theorem HitsLevel_of_walkPos_endpoint_ge (ω : Fin n → Bool) (a : ℤ)
   classical
   -- Use Finset.min' on the set of k ≤ n with walkPos ω k ≥ a.
   let S : Finset ℕ :=
-    (Finset.range (n + 1)).filter (fun k => a ≤ walkPos ω k)
+    (Finset.range (n + 1)).filter (fun k ↦ a ≤ walkPos ω k)
   have h_n_mem : n ∈ S := by
     show n ∈ S
     rw [show S = _ from rfl, Finset.mem_filter, Finset.mem_range]
@@ -414,7 +414,7 @@ theorem HitsLevel_of_walkPos_endpoint_ge (ω : Fin n → Bool) (a : ℤ)
   have hS_nonempty : S.Nonempty := ⟨n, h_n_mem⟩
   let τ := S.min' hS_nonempty
   have h_τ_mem_filter :
-      τ ∈ (Finset.range (n + 1)).filter (fun k => a ≤ walkPos ω k) :=
+      τ ∈ (Finset.range (n + 1)).filter (fun k ↦ a ≤ walkPos ω k) :=
     S.min'_mem hS_nonempty
   have h_τ_lt : τ < n + 1 :=
     Finset.mem_range.mp (Finset.mem_filter.mp h_τ_mem_filter).1
@@ -548,7 +548,7 @@ lemma firstHit?_eq_some_of_hitsLevel (ω : Fin n → Bool) (a : ℤ)
 
 lemma firstHit?_eq_none_iff_not_hitsLevel (ω : Fin n → Bool) (a : ℤ) :
     firstHit? ω a = none ↔ ¬ HitsLevel a ω := by
-  refine ⟨fun h h_hit => ?_, fun h_not_hit => ?_⟩
+  refine ⟨fun h h_hit ↦ ?_, fun h_not_hit ↦ ?_⟩
   · unfold firstHit? at h
     rw [dif_pos h_hit] at h
     exact Option.some_ne_none _ h
@@ -556,7 +556,7 @@ lemma firstHit?_eq_none_iff_not_hitsLevel (ω : Fin n → Bool) (a : ℤ) :
 
 lemma firstHit?_isSome_iff (ω : Fin n → Bool) (a : ℤ) :
     (firstHit? ω a).isSome ↔ HitsLevel a ω := by
-  refine ⟨fun h => ?_, fun h_hit => ?_⟩
+  refine ⟨fun h ↦ ?_, fun h_hit ↦ ?_⟩
   · by_contra h_not_hit
     unfold firstHit? at h
     rw [dif_neg h_not_hit] at h

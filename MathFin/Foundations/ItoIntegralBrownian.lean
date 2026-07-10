@@ -76,7 +76,7 @@ lemma measurable_clampM (M : ℝ) : Measurable (clampM M) := by
 /-- `clamp_M(B_a)` is `𝓕_a`-measurable when `B_a` is. -/
 lemma measurable_clampM_comp {a : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {M : ℝ}
     {f : Ω → ℝ} (hf : Measurable[natFiltration hBmeas a] f) :
-    Measurable[natFiltration hBmeas a] (fun ω => clampM M (f ω)) :=
+    Measurable[natFiltration hBmeas a] (fun ω ↦ clampM M (f ω)) :=
   (measurable_clampM M).comp hf
 
 /-! ### A single bounded adapted step `φ·𝟙_{(a,b]}` -/
@@ -89,18 +89,18 @@ noncomputable def stepSP {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {a b :
     TBoundedSP T hBmeas :=
   ⟨{ valueBot := 0
      value := Finsupp.single (a, b) φ
-     le_of_mem_support_value := fun p hp => by
+     le_of_mem_support_value := fun p hp ↦ by
        obtain rfl := Finset.mem_singleton.mp (Finsupp.support_single_subset hp)
        exact hab
      measurable_valueBot := measurable_const
-     measurable_value' := fun p hp => by
+     measurable_value' := fun p hp ↦ by
        obtain rfl := Finset.mem_singleton.mp (Finsupp.support_single_subset hp)
        rw [Finsupp.single_eq_same]; exact hφ
      bounded_valueBot := ⟨0, by simp⟩
-     bounded_value := ⟨M, fun p hp ω => by
+     bounded_value := ⟨M, fun p hp ω ↦ by
        obtain rfl := Finset.mem_singleton.mp (Finsupp.support_single_subset hp)
        rw [Finsupp.single_eq_same, Real.norm_eq_abs]; exact hφM ω⟩ },
-   fun p hp => by
+   fun p hp ↦ by
      obtain rfl := Finset.mem_singleton.mp (Finsupp.support_single_subset hp)
      exact hbT⟩
 
@@ -110,7 +110,7 @@ lemma itoSimple_stepSP {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {a b : �
     (hφ : Measurable[natFiltration hBmeas a] φ) {M : ℝ} (hφM : ∀ ω, |φ ω| ≤ M) (ω : Ω) :
     itoSimple hBmeas (stepSP hBmeas hab hbT hφ hφM).val ω = φ ω * (B b ω - B a ω) := by
   rw [itoSimple_apply]
-  show (Finsupp.single (a, b) φ).sum (fun p v => v ω * (B p.2 ω - B p.1 ω))
+  show (Finsupp.single (a, b) φ).sum (fun p v ↦ v ω * (B p.2 ω - B p.1 ω))
       = φ ω * (B b ω - B a ω)
   rw [Finsupp.sum_single_index (by simp)]
 
@@ -118,7 +118,7 @@ lemma itoSimple_stepSP {T : ℝ≥0} (hBmeas : ∀ t, Measurable (B t)) {a b : �
 
 /-- The uniform partition points `unifPart T n = (k/n)·T` are monotone in `k`. -/
 lemma unifPart_mono (T : ℝ≥0) (n : ℕ) : Monotone (unifPart T n) :=
-  fun a b hab => by simp only [unifPart]; gcongr
+  fun a b hab ↦ by simp only [unifPart]; gcongr
 
 /-- A partition point `unifPart T n j ≤ T` whenever `j ≤ n`. -/
 lemma unifPart_le_T {T : ℝ≥0} {n j : ℕ} (hj : j ≤ n) : unifPart T n j ≤ T := by
@@ -135,7 +135,7 @@ natural filtration at `s` is `⨆ j ≤ s, comap (B j)`, which contains `comap (
 lemma measurable_eval_natFiltration (hBmeas : ∀ t, Measurable (B t)) (s : ℝ≥0) :
     Measurable[natFiltration hBmeas s] (B s) := by
   have hle : MeasurableSpace.comap (B s) inferInstance ≤ natFiltration hBmeas s :=
-    le_iSup₂ (f := fun j (_ : j ≤ s) => MeasurableSpace.comap (B j) inferInstance) s le_rfl
+    le_iSup₂ (f := fun j (_ : j ≤ s) ↦ MeasurableSpace.comap (B j) inferInstance) s le_rfl
   exact (measurable_iff_comap_le.mpr le_rfl).mono hle le_rfl
 
 /-! ### The truncated left-endpoint process -/
@@ -151,9 +151,9 @@ noncomputable def truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n 
     stepSP hBmeas (a := unifPart T n k.1) (b := unifPart T n (k.1 + 1))
       (unifPart_mono T n (Nat.le_succ k.1))
       (unifPart_le_T (Finset.mem_range.mp k.2))
-      (φ := fun ω => clampM (m : ℝ) (B (unifPart T n k.1) ω))
+      (φ := fun ω ↦ clampM (m : ℝ) (B (unifPart T n k.1) ω))
       (measurable_clampM_comp hBmeas (measurable_eval_natFiltration hBmeas (unifPart T n k.1)))
-      (M := (m : ℝ)) (fun ω => clampM_abs_le (Nat.cast_nonneg m) (B (unifPart T n k.1) ω))
+      (M := (m : ℝ)) (fun ω ↦ clampM_abs_le (Nat.cast_nonneg m) (B (unifPart T n k.1) ω))
 
 /-- The truncated left-endpoint Riemann sum as a function:
 `∑_{k<n} clamp_m(B_{t_k})·(B_{t_{k+1}} − B_{t_k})`. -/
@@ -176,9 +176,9 @@ lemma itoSimple_truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m 
     itoSimple hBmeas (truncStep hBmeas T n m).val ω = truncRiemannFn hBmeas T n m ω := by
   rw [truncStep, AddSubmonoidClass.coe_finsetSum, itoSimple_sum]
   rw [Finset.sum_apply]
-  rw [truncRiemannFn, ← Finset.sum_attach (Finset.range n) (fun k =>
+  rw [truncRiemannFn, ← Finset.sum_attach (Finset.range n) (fun k ↦
     clampM (m : ℝ) (B (unifPart T n k) ω) * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω))]
-  refine Finset.sum_congr rfl fun k _ => ?_
+  refine Finset.sum_congr rfl fun k _ ↦ ?_
   rw [itoSimple_stepSP]
 
 /-! ### `L²` truncation primitives -/
@@ -196,9 +196,9 @@ omit mΩ [IsProbabilityMeasure μ] hB in
 /-- `clampM` preserves adaptedness: clamping an `𝓕_{t₀}`-adapted coefficient keeps it adapted. -/
 lemma adaptedAt_clampM {t₀ : ℝ≥0} {φ : Ω → ℝ} (M : ℝ)
     (hφ : ItoIsometryAdapted.AdaptedAt B t₀ φ) :
-    ItoIsometryAdapted.AdaptedAt B t₀ (fun ω => clampM M (φ ω)) := by
+    ItoIsometryAdapted.AdaptedAt B t₀ (fun ω ↦ clampM M (φ ω)) := by
   obtain ⟨g, hg, rfl⟩ := hφ
-  exact ⟨fun p => clampM M (g p), (measurable_clampM M).comp hg, rfl⟩
+  exact ⟨fun p ↦ clampM M (g p), (measurable_clampM M).comp hg, rfl⟩
 
 omit mΩ [IsProbabilityMeasure μ] hB in
 /-- `clamp_M(x) = x` once `|x| ≤ M`. -/
@@ -223,22 +223,22 @@ omit [IsProbabilityMeasure μ] hB in
 `∫ (clamp_m(X) − X)² ∂μ → 0` as `m → ∞`. Dominated convergence: the integrand is
 dominated by `X²` and tends pointwise to `0` (`clamp_m(X) = X` once `m ≥ |X|`). -/
 lemma tendsto_clampM_sub_sq_integral {X : Ω → ℝ} (hX : MemLp X 2 μ) :
-    Tendsto (fun m : ℕ => ∫ ω, (clampM (m : ℝ) (X ω) - X ω) ^ 2 ∂μ) atTop (𝓝 0) := by
-  have hXsq : Integrable (fun ω => (X ω) ^ 2) μ := hX.integrable_sq
+    Tendsto (fun m : ℕ ↦ ∫ ω, (clampM (m : ℝ) (X ω) - X ω) ^ 2 ∂μ) atTop (𝓝 0) := by
+  have hXsq : Integrable (fun ω ↦ (X ω) ^ 2) μ := hX.integrable_sq
   have hconv := MeasureTheory.tendsto_integral_of_dominated_convergence
-    (bound := fun ω => (X ω) ^ 2)
-    (F := fun (m : ℕ) ω => (clampM (m : ℝ) (X ω) - X ω) ^ 2)
-    (f := fun _ => (0 : ℝ))
-    (fun m => (((measurable_clampM (m : ℝ)).comp_aemeasurable hX.aemeasurable).sub
+    (bound := fun ω ↦ (X ω) ^ 2)
+    (F := fun (m : ℕ) ω ↦ (clampM (m : ℝ) (X ω) - X ω) ^ 2)
+    (f := fun _ ↦ (0 : ℝ))
+    (fun m ↦ (((measurable_clampM (m : ℝ)).comp_aemeasurable hX.aemeasurable).sub
         hX.aemeasurable).pow_const 2 |>.aestronglyMeasurable)
     hXsq
-    (fun m => ae_of_all _ fun ω => by
+    (fun m ↦ ae_of_all _ fun ω ↦ by
       show ‖(clampM (m : ℝ) (X ω) - X ω) ^ 2‖ ≤ (X ω) ^ 2
       rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _), ← sq_abs (X ω),
           ← sq_abs (clampM (m : ℝ) (X ω) - X ω)]
       exact pow_le_pow_left₀ (abs_nonneg _)
         (clampM_sub_self_abs_le (Nat.cast_nonneg m) (X ω)) 2)
-    (ae_of_all _ fun ω => ?_)
+    (ae_of_all _ fun ω ↦ ?_)
   · simpa using hconv
   · -- eventually `clamp_m(X ω) = X ω`, so the sequence is eventually 0.
     refine tendsto_const_nhds.congr' ?_
@@ -257,18 +257,18 @@ noncomputable def riemannFn (_hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n
 lemma memLp_truncRiemannFn (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m : ℕ) :
     MemLp (truncRiemannFn hBmeas T n m) 2 μ := by
   unfold truncRiemannFn
-  refine memLp_finsetSum _ fun k _ => ?_
+  refine memLp_finsetSum _ fun k _ ↦ ?_
   refine ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas
     (unifPart_mono T n (Nat.le_succ k)) (adaptedAt_clampM _ (adaptedAt_eval le_rfl)) ?_
   exact MemLp.of_bound ((measurable_clampM (m : ℝ)).comp (hBmeas _)).aestronglyMeasurable (m : ℝ)
-    (ae_of_all _ fun ω => by rw [Real.norm_eq_abs]; exact clampM_abs_le (Nat.cast_nonneg m) _)
+    (ae_of_all _ fun ω ↦ by rw [Real.norm_eq_abs]; exact clampM_abs_le (Nat.cast_nonneg m) _)
 
 omit [IsProbabilityMeasure μ] in
 /-- `MemLp` of the untruncated Riemann sum. -/
 lemma memLp_riemannFn (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n : ℕ) :
     MemLp (riemannFn hBmeas T n) 2 μ := by
   unfold riemannFn
-  refine memLp_finsetSum _ fun k _ => ?_
+  refine memLp_finsetSum _ fun k _ ↦ ?_
   exact ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas
     (unifPart_mono T n (Nat.le_succ k)) (adaptedAt_eval le_rfl) (memLp_eval hB (unifPart T n k))
 
@@ -280,11 +280,11 @@ lemma itoIntegralCLM_T_truncStep (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0
     itoIntegralCLM_T hB T hBmeas (simpleAssembly_T (μ := μ) T hBmeas (truncStep hBmeas T n m))
       = (memLp_truncRiemannFn hB hBmeas T n m).toLp (truncRiemannFn hBmeas T n m) := by
   rw [itoIntegralCLM_T, LinearMap.extendOfNorm_eq (simpleAssembly_T_denseRange (μ := μ) T hBmeas)
-        ⟨1, fun V => by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
+        ⟨1, fun V ↦ by rw [one_mul]; exact (assembly_isometry_T hB T hBmeas V).le⟩]
   show ItoIntegralL2.itoSimpleLp hB hBmeas (truncStep hBmeas T n m).val = _
   rw [ItoIntegralL2.itoSimpleLp]
   exact (MemLp.toLp_eq_toLp_iff _ _).mpr
-    (Filter.Eventually.of_forall fun ω => itoSimple_truncStep hBmeas T n m ω)
+    (Filter.Eventually.of_forall fun ω ↦ itoSimple_truncStep hBmeas T n m ω)
 
 omit [IsProbabilityMeasure μ] hB in
 /-- The truncated minus untruncated Riemann sum is the increment sum of the clamp errors. -/
@@ -293,7 +293,7 @@ lemma truncRiemannFn_sub_riemannFn (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
       = ∑ k ∈ Finset.range n, (clampM (m : ℝ) (B (unifPart T n k) ω) - B (unifPart T n k) ω)
           * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) := by
   rw [truncRiemannFn, riemannFn, ← Finset.sum_sub_distrib]
-  exact Finset.sum_congr rfl fun k _ => by ring
+  exact Finset.sum_congr rfl fun k _ ↦ by ring
 
 /-- **The truncation error as a variance sum** (Itô isometry). -/
 lemma integral_truncRiemann_sub_sq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n m : ℕ) :
@@ -301,32 +301,32 @@ lemma integral_truncRiemann_sub_sq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ�
       = ∑ k ∈ Finset.range n,
           (∫ ω, (clampM (m : ℝ) (B (unifPart T n k) ω) - B (unifPart T n k) ω) ^ 2 ∂μ)
             * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
-  rw [show (fun ω => (truncRiemannFn hBmeas T n m ω - riemannFn hBmeas T n ω) ^ 2)
-        = (fun ω => (∑ k ∈ Finset.range n,
+  rw [show (fun ω ↦ (truncRiemannFn hBmeas T n m ω - riemannFn hBmeas T n ω) ^ 2)
+        = (fun ω ↦ (∑ k ∈ Finset.range n,
             (clampM (m : ℝ) (B (unifPart T n k) ω) - B (unifPart T n k) ω)
               * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω)) ^ 2)
-      from funext fun ω => by rw [truncRiemannFn_sub_riemannFn]]
+      from funext fun ω ↦ by rw [truncRiemannFn_sub_riemannFn]]
   refine ito_isometry_discrete hB hBmeas (unifPart_mono T n)
-    (fun k => (adaptedAt_clampM _ (adaptedAt_eval le_rfl)).sub (adaptedAt_eval le_rfl))
-    (fun k => MemLp.sub ?_ (memLp_eval hB (unifPart T n k)))
+    (fun k ↦ (adaptedAt_clampM _ (adaptedAt_eval le_rfl)).sub (adaptedAt_eval le_rfl))
+    (fun k ↦ MemLp.sub ?_ (memLp_eval hB (unifPart T n k)))
   exact MemLp.of_bound ((measurable_clampM (m : ℝ)).comp (hBmeas _)).aestronglyMeasurable (m : ℝ)
-    (ae_of_all _ fun ω => by rw [Real.norm_eq_abs]; exact clampM_abs_le (Nat.cast_nonneg m) _)
+    (ae_of_all _ fun ω ↦ by rw [Real.norm_eq_abs]; exact clampM_abs_le (Nat.cast_nonneg m) _)
 
 /-- **For each `n`, the truncation error → 0 as `m → ∞`** (a finite sum of clamp-error
 integrals, each vanishing by `tendsto_clampM_sub_sq_integral`). -/
 lemma tendsto_integral_truncRiemann_sub_sq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) (n : ℕ) :
-    Tendsto (fun m => ∫ ω, (truncRiemannFn hBmeas T n m ω - riemannFn hBmeas T n ω) ^ 2 ∂μ)
+    Tendsto (fun m ↦ ∫ ω, (truncRiemannFn hBmeas T n m ω - riemannFn hBmeas T n ω) ^ 2 ∂μ)
       atTop (𝓝 0) := by
   have heq : ∀ m, ∫ ω, (truncRiemannFn hBmeas T n m ω - riemannFn hBmeas T n ω) ^ 2 ∂μ
       = ∑ k ∈ Finset.range n,
           (∫ ω, (clampM (m : ℝ) (B (unifPart T n k) ω) - B (unifPart T n k) ω) ^ 2 ∂μ)
             * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) :=
-    fun m => integral_truncRiemann_sub_sq hB hBmeas T n m
+    fun m ↦ integral_truncRiemann_sub_sq hB hBmeas T n m
   simp_rw [heq]
   have h0 : (0 : ℝ) = ∑ k ∈ Finset.range n, (0 : ℝ) * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) := by
     simp only [zero_mul, Finset.sum_const_zero]
   rw [h0]
-  exact tendsto_finsetSum _ fun k _ =>
+  exact tendsto_finsetSum _ fun k _ ↦
     (tendsto_clampM_sub_sq_integral (memLp_eval hB (unifPart T n k))).mul_const _
 
 /-! ### The limit `½(B_T² − B₀² − T)` as an `L²` element -/
@@ -335,8 +335,8 @@ omit [IsProbabilityMeasure μ] in
 /-- `B 0 = 0` a.s. (its second moment `∫ (B 0)² = 0`). -/
 lemma eval_zero_ae (hBmeas : ∀ t, Measurable (B t)) : B 0 =ᵐ[μ] 0 := by
   have hint : ∫ ω, (B 0 ω) ^ 2 ∂μ = 0 := by rw [integral_eval_sq hB hBmeas 0]; simp
-  have hsq : (fun ω => (B 0 ω) ^ 2) =ᵐ[μ] 0 :=
-    (integral_eq_zero_iff_of_nonneg_ae (ae_of_all _ fun ω => sq_nonneg _)
+  have hsq : (fun ω ↦ (B 0 ω) ^ 2) =ᵐ[μ] 0 :=
+    (integral_eq_zero_iff_of_nonneg_ae (ae_of_all _ fun ω ↦ sq_nonneg _)
       (memLp_eval hB 0).integrable_sq).mp hint
   filter_upwards [hsq] with ω hω
   exact pow_eq_zero_iff two_ne_zero |>.mp hω
@@ -345,7 +345,7 @@ omit [IsProbabilityMeasure μ] in
 /-- `MemLp` of the keystone limit `½(B_T² − B₀² − T)` (`= ½(B_T² − T)` a.s. since `B₀ = 0`),
 via the centered squared increment `(B_T − B₀)² − T ∈ L²`. -/
 lemma memLp_halfD (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
-    MemLp (fun ω => (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) 2 μ := by
+    MemLp (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) 2 μ := by
   refine (memLp_congr_ae ?_).mp
     (MemLp.const_mul (memLp_increment_sq_centered_two hB 0 T (T : ℝ)) (1 / 2))
   filter_upwards [eval_zero_ae hB hBmeas] with ω hω
@@ -368,10 +368,10 @@ omit [IsProbabilityMeasure μ] hB in
 /-- If `∫ (Fₙ − Gₙ)² → 0` then the `L²` classes converge: `‖⟦Fₙ⟧ − ⟦Gₙ⟧‖ → 0`. -/
 lemma tendsto_norm_toLp_sub {F G : ℕ → Ω → ℝ} (hF : ∀ n, MemLp (F n) 2 μ)
     (hG : ∀ n, MemLp (G n) 2 μ)
-    (h : Tendsto (fun n => ∫ ω, (F n ω - G n ω) ^ 2 ∂μ) atTop (𝓝 0)) :
-    Tendsto (fun n => ‖(hF n).toLp (F n) - (hG n).toLp (G n)‖) atTop (𝓝 0) := by
-  have heq : (fun n => ‖(hF n).toLp (F n) - (hG n).toLp (G n)‖)
-      = fun n => Real.sqrt (∫ ω, (F n ω - G n ω) ^ 2 ∂μ) := by
+    (h : Tendsto (fun n ↦ ∫ ω, (F n ω - G n ω) ^ 2 ∂μ) atTop (𝓝 0)) :
+    Tendsto (fun n ↦ ‖(hF n).toLp (F n) - (hG n).toLp (G n)‖) atTop (𝓝 0) := by
+  have heq : (fun n ↦ ‖(hF n).toLp (F n) - (hG n).toLp (G n)‖)
+      = fun n ↦ Real.sqrt (∫ ω, (F n ω - G n ω) ^ 2 ∂μ) := by
     funext n; rw [← lp_dist_sq (hF n) (hG n), Real.sqrt_sq (norm_nonneg _)]
   rw [heq]
   have := (Real.continuous_sqrt.tendsto 0).comp h
@@ -388,35 +388,35 @@ unbounded-`L²` discrete isometry. -/
 theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) :
     ∃ gB : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas),
       itoIntegralCLM_T hB T hBmeas gB
-        = (memLp_halfD hB hBmeas T).toLp (fun ω => (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) := by
+        = (memLp_halfD hB hBmeas T).toLp (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) := by
   classical
   set c := (memLp_halfD hB hBmeas T).toLp
-    (fun ω => (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) with hc
+    (fun ω ↦ (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) with hc
   -- Diagonal truncation level `M n` making the truncation error `< 1/(n+1)`.
   have hMex : ∀ n, ∃ m, ∫ ω, (truncRiemannFn hBmeas T n m ω - riemannFn hBmeas T n ω) ^ 2 ∂μ
-      < 1 / (n + 1) := fun n =>
+      < 1 / (n + 1) := fun n ↦
     ((tendsto_integral_truncRiemann_sub_sq hB hBmeas T n).eventually_lt_const (by positivity)).exists
   choose M hM using hMex
   -- Truncation error → 0 (squeeze by `1/(n+1)`).
-  have herr : Tendsto (fun n => ∫ ω,
+  have herr : Tendsto (fun n ↦ ∫ ω,
       (truncRiemannFn hBmeas T n (M n) ω - riemannFn hBmeas T n ω) ^ 2 ∂μ) atTop (𝓝 0) :=
-    squeeze_zero (fun n => integral_nonneg fun ω => sq_nonneg _) (fun n => (hM n).le)
+    squeeze_zero (fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) (fun n ↦ (hM n).le)
       tendsto_one_div_add_atTop_nhds_zero_nat
   -- Untruncated Riemann sums → ½(B_T²−B₀²−T) in L² (the QV keystone).
-  have hrito : Tendsto (fun n => ∫ ω,
+  have hrito : Tendsto (fun n ↦ ∫ ω,
       (riemannFn hBmeas T n ω - (1 / 2 : ℝ) * (B T ω ^ 2 - B 0 ω ^ 2 - (T : ℝ))) ^ 2 ∂μ)
       atTop (𝓝 0) := by
     have key := itoSquared_L2_tendsto_div2 hB hBmeas T
     simpa only [riemannFn] using key
   -- The CLM images `a n = ⟦truncRiemannFn n (M n)⟧` converge to `c = ⟦½(B_T²−B₀²−T)⟧`.
-  have hA : Tendsto (fun n => (memLp_truncRiemannFn hB hBmeas T n (M n)).toLp
+  have hA : Tendsto (fun n ↦ (memLp_truncRiemannFn hB hBmeas T n (M n)).toLp
       (truncRiemannFn hBmeas T n (M n))) atTop (𝓝 c) := by
-    have hb1 := tendsto_norm_toLp_sub (fun n => memLp_truncRiemannFn hB hBmeas T n (M n))
-      (fun n => memLp_riemannFn hB hBmeas T n) herr
-    have hb2 := tendsto_norm_toLp_sub (fun n => memLp_riemannFn hB hBmeas T n)
-      (fun _ => memLp_halfD hB hBmeas T) hrito
+    have hb1 := tendsto_norm_toLp_sub (fun n ↦ memLp_truncRiemannFn hB hBmeas T n (M n))
+      (fun n ↦ memLp_riemannFn hB hBmeas T n) herr
+    have hb2 := tendsto_norm_toLp_sub (fun n ↦ memLp_riemannFn hB hBmeas T n)
+      (fun _ ↦ memLp_halfD hB hBmeas T) hrito
     rw [tendsto_iff_norm_sub_tendsto_zero]
-    refine squeeze_zero (fun n => norm_nonneg _) (fun n => ?_) (by simpa using hb1.add hb2)
+    refine squeeze_zero (fun n ↦ norm_nonneg _) (fun n ↦ ?_) (by simpa using hb1.add hb2)
     calc ‖(memLp_truncRiemannFn hB hBmeas T n (M n)).toLp (truncRiemannFn hBmeas T n (M n)) - c‖
         = dist ((memLp_truncRiemannFn hB hBmeas T n (M n)).toLp (truncRiemannFn hBmeas T n (M n))) c :=
           (dist_eq_norm _ _).symm
@@ -429,23 +429,23 @@ theorem itoIntegralCLM_T_brownian (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥
   have hisom : Isometry (itoIntegralCLM_T hB T hBmeas) :=
     AddMonoidHomClass.isometry_of_norm _ (itoIntegralCLM_T_norm hB T hBmeas)
   set x : ℕ → Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
-    fun n => simpleAssembly_T (μ := μ) T hBmeas (truncStep hBmeas T n (M n)) with hxdef
+    fun n ↦ simpleAssembly_T (μ := μ) T hBmeas (truncStep hBmeas T n (M n)) with hxdef
   have hax : ∀ n, itoIntegralCLM_T hB T hBmeas (x n)
       = (memLp_truncRiemannFn hB hBmeas T n (M n)).toLp (truncRiemannFn hBmeas T n (M n)) :=
-    fun n => itoIntegralCLM_T_truncStep hB hBmeas T n (M n)
+    fun n ↦ itoIntegralCLM_T_truncStep hB hBmeas T n (M n)
   have hxCauchy : CauchySeq x := by
-    have haC : CauchySeq (fun n => itoIntegralCLM_T hB T hBmeas (x n)) := by
+    have haC : CauchySeq (fun n ↦ itoIntegralCLM_T hB T hBmeas (x n)) := by
       simp only [hax]; exact hA.cauchySeq
     rw [Metric.cauchySeq_iff] at haC ⊢
     intro ε hε
     obtain ⟨N, hN⟩ := haC ε hε
-    exact ⟨N, fun mm hmm nn hnn => by rw [← hisom.dist_eq]; exact hN mm hmm nn hnn⟩
+    exact ⟨N, fun mm hmm nn hnn ↦ by rw [← hisom.dist_eq]; exact hN mm hmm nn hnn⟩
   obtain ⟨gB, hgB⟩ := cauchySeq_tendsto_of_complete hxCauchy
   refine ⟨gB, ?_⟩
-  have h1 : Tendsto (fun n => itoIntegralCLM_T hB T hBmeas (x n)) atTop
+  have h1 : Tendsto (fun n ↦ itoIntegralCLM_T hB T hBmeas (x n)) atTop
       (𝓝 (itoIntegralCLM_T hB T hBmeas gB)) :=
     ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto gB).comp hgB
-  have h2 : Tendsto (fun n => itoIntegralCLM_T hB T hBmeas (x n)) atTop (𝓝 c) := by
+  have h2 : Tendsto (fun n ↦ itoIntegralCLM_T hB T hBmeas (x n)) atTop (𝓝 c) := by
     simp only [hax]; exact hA
   exact tendsto_nhds_unique h1 h2
 

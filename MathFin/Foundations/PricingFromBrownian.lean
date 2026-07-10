@@ -120,7 +120,7 @@ theorem bs_cash_or_nothing_formula_via_brownian
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
-        (Set.Ioi K).indicator (fun _ => (1 : ℝ))
+        (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ))
           (bsTerminal S_0 r σ T (W T.toNNReal ω / Real.sqrt T)) ∂Q
       = Real.exp (-r * T) * Phi (bsd2 S_0 K r σ T) :=
   bs_cash_or_nothing_formula (BSCallHyp.of_isPreBrownian Q W hW hS_0 hK hσ hT)
@@ -133,7 +133,7 @@ theorem bs_asset_or_nothing_formula_via_brownian
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     ∫ ω, Real.exp (-r * T) *
-        (Set.Ioi K).indicator (fun s => s)
+        (Set.Ioi K).indicator (fun s ↦ s)
           (bsTerminal S_0 r σ T (W T.toNNReal ω / Real.sqrt T)) ∂Q
       = S_0 * Phi (bsd1 S_0 K r σ T) :=
   bs_asset_or_nothing_formula (BSCallHyp.of_isPreBrownian Q W hW hS_0 hK hσ hT)
@@ -178,7 +178,7 @@ theorem stockNumeraire_exercise_probability_via_brownian
     {S_0 K r σ T : ℝ}
     (hS_0 : 0 < S_0) (hK : 0 < K) (hσ : 0 < σ) (hT : 0 < T) :
     (∫ ω, (Set.Ioi (-bsd2 S_0 K r σ T)).indicator
-      (fun z => Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0)
+      (fun z ↦ Real.exp (-r * T) * bsTerminal S_0 r σ T z / S_0)
         (W T.toNNReal ω / Real.sqrt T) ∂Q) =
         Phi (bsd1 S_0 K r σ T) :=
   stockNumeraire_exercise_probability

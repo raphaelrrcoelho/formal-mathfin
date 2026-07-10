@@ -71,7 +71,7 @@ log-derivative form against `S = hazardSurvival h`. Mirrors
 and actuarial recoveries are the same identity. -/
 theorem hazard_eq_neg_log_deriv_survival {h : ℝ → ℝ} (t : ℝ)
     (hh : Continuous h) :
-    HasDerivAt (fun s => -(Real.log (hazardSurvival h s))) (h t) t := by
+    HasDerivAt (fun s ↦ -(Real.log (hazardSurvival h s))) (h t) t := by
   have hH : HasDerivAt (cumHazard h) (h t) t :=
     intervalIntegral.integral_hasDerivAt_right
       (hh.intervalIntegrable 0 t)
@@ -81,7 +81,7 @@ theorem hazard_eq_neg_log_deriv_survival {h : ℝ → ℝ} (t : ℝ)
 
 /-- For a constant hazard `h_0`, `H(t) = h_0 · t`. -/
 lemma cumHazard_const (h_0 t : ℝ) :
-    cumHazard (fun _ => h_0) t = h_0 * t := by
+    cumHazard (fun _ ↦ h_0) t = h_0 * t := by
   unfold cumHazard cumulativeIntensity
   rw [intervalIntegral.integral_const]
   simp [mul_comm]
@@ -89,9 +89,9 @@ lemma cumHazard_const (h_0 t : ℝ) :
 /-- The time-varying model collapses to the constant-hazard `survivalProbability`
 under `t = 0` and constant hazard. -/
 lemma hazardSurvival_eq_const_survival (h_0 T : ℝ) :
-    hazardSurvival (fun _ => h_0) T = survivalProbability h_0 0 T := by
+    hazardSurvival (fun _ ↦ h_0) T = survivalProbability h_0 0 T := by
   unfold hazardSurvival survivalFromIntensity survivalProbability
-  rw [show cumulativeIntensity (fun _ => h_0) T = h_0 * T from cumHazard_const h_0 T]
+  rw [show cumulativeIntensity (fun _ ↦ h_0) T = h_0 * T from cumHazard_const h_0 T]
   congr 1; ring
 
 /-- **Credit spread as time-averaged hazard**: for `T > 0`,

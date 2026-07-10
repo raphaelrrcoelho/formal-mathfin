@@ -54,13 +54,13 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
   have hL2 : ∀ t ∈ Set.uIcc x y, |f'' t - f'' x| ≤ Cf3 * |y - x| := by
     intro t ht
     have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
-      (fun u _ => (hf'' u).hasDerivWithinAt) (fun u _ => by rw [Real.norm_eq_abs]; exact hf3 u)
+      (fun u _ ↦ (hf'' u).hasDerivWithinAt) (fun u _ ↦ by rw [Real.norm_eq_abs]; exact hf3 u)
       Set.left_mem_uIcc ht
     rw [Real.norm_eq_abs, Real.norm_eq_abs] at h
     exact h.trans (mul_le_mul_of_nonneg_left (hmem t ht) hCf3)
   -- Level 1: `|f′ t − f′ x − f″ x·(t−x)| ≤ Cf3·|y−x|²`
-  have hd1 : ∀ u, HasDerivAt (fun s => f' s - f' x - f'' x * (s - x)) (f'' u - f'' x) u :=
-    fun u => by
+  have hd1 : ∀ u, HasDerivAt (fun s ↦ f' s - f' x - f'' x * (s - x)) (f'' u - f'' x) u :=
+    fun u ↦ by
       have h := ((hf' u).sub_const (f' x)).sub
         (((hasDerivAt_id u).sub_const x).const_mul (f'' x))
       simp only [id_eq] at h
@@ -68,8 +68,8 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
   have hL1 : ∀ t ∈ Set.uIcc x y, |f' t - f' x - f'' x * (t - x)| ≤ Cf3 * |y - x| ^ 2 := by
     intro t ht
     have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
-      (fun u _ => (hd1 u).hasDerivWithinAt)
-      (fun u hu => by rw [Real.norm_eq_abs]; exact hL2 u hu)
+      (fun u _ ↦ (hd1 u).hasDerivWithinAt)
+      (fun u hu ↦ by rw [Real.norm_eq_abs]; exact hL2 u hu)
       Set.left_mem_uIcc ht
     simp only [Real.norm_eq_abs, sub_self, mul_zero, sub_zero] at h
     calc |f' t - f' x - f'' x * (t - x)| ≤ Cf3 * |y - x| * |t - x| := h
@@ -77,16 +77,16 @@ theorem abs_discreteTaylorRemainder_le {f f' f'' f''' : ℝ → ℝ}
           mul_le_mul_of_nonneg_left (hmem t ht) (mul_nonneg hCf3 (abs_nonneg _))
       _ = Cf3 * |y - x| ^ 2 := by ring
   -- Level 0: the remainder itself
-  have hd0 : ∀ u, HasDerivAt (fun s => f s - f x - f' x * (s - x) - 1 / 2 * f'' x * (s - x) ^ 2)
-      (f' u - f' x - f'' x * (u - x)) u := fun u => by
+  have hd0 : ∀ u, HasDerivAt (fun s ↦ f s - f x - f' x * (s - x) - 1 / 2 * f'' x * (s - x) ^ 2)
+      (f' u - f' x - f'' x * (u - x)) u := fun u ↦ by
     have h := (((hf u).sub_const (f x)).sub
         (((hasDerivAt_id u).sub_const x).const_mul (f' x))).sub
         ((((hasDerivAt_id u).sub_const x).pow 2).const_mul (1 / 2 * f'' x))
     simp only [id_eq] at h
     convert h using 1 <;> first | rfl | ring
   have h := (convex_uIcc x y).norm_image_sub_le_of_norm_hasDerivWithin_le
-    (fun u _ => (hd0 u).hasDerivWithinAt)
-    (fun u hu => by rw [Real.norm_eq_abs]; exact hL1 u hu)
+    (fun u _ ↦ (hd0 u).hasDerivWithinAt)
+    (fun u hu ↦ by rw [Real.norm_eq_abs]; exact hL1 u hu)
     Set.left_mem_uIcc Set.right_mem_uIcc
   simp only [Real.norm_eq_abs] at h
   rw [show f y - f x - f' x * (y - x) - 1 / 2 * f'' x * (y - x) ^ 2
@@ -111,7 +111,7 @@ theorem integral_increment_pow6 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
       abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr ht))]
   have hlaw : HasLaw (B t₁ - B t₀) (gaussianReal 0 (max (t₁ - t₀) (t₀ - t₁))) μ := by
     rw [hbridge]; exact hB.hasLaw_sub t₁ t₀
-  have hcomp := hlaw.integral_comp (f := fun x : ℝ => x ^ 6)
+  have hcomp := hlaw.integral_comp (f := fun x : ℝ ↦ x ^ 6)
     (measurable_id.pow_const 6).aestronglyMeasurable
   simp only [Function.comp_def, Pi.sub_apply] at hcomp
   rw [hcomp, integral_pow6_gaussianReal, hmax]
@@ -119,15 +119,15 @@ theorem integral_increment_pow6 {t₀ t₁ : ℝ≥0} (ht : t₀ ≤ t₁) :
 /-- The sixth power of a Brownian increment is integrable (all Gaussian moments are
 finite); the companion to `integral_increment_pow6`. -/
 theorem integrable_increment_pow6 (t₀ t₁ : ℝ≥0) :
-    Integrable (fun ω => (B t₁ ω - B t₀ ω) ^ 6) μ := by
-  have hg : Integrable (fun x : ℝ => x ^ 6) (gaussianReal 0 (nndist (t₁ : ℝ) (t₀ : ℝ))) := by
+    Integrable (fun ω ↦ (B t₁ ω - B t₀ ω) ^ 6) μ := by
+  have hg : Integrable (fun x : ℝ ↦ x ^ 6) (gaussianReal 0 (nndist (t₁ : ℝ) (t₀ : ℝ))) := by
     have h := (memLp_id_gaussianReal (μ := (0 : ℝ)) (v := nndist (t₁ : ℝ) (t₀ : ℝ)) 6).integrable_norm_pow
       (p := 6) (by norm_num)
     simp only [id_eq, Real.norm_eq_abs] at h
-    have hfe : (fun x : ℝ => |x| ^ 6) = fun x : ℝ => x ^ 6 :=
-      funext fun x => by rw [pow_abs, abs_of_nonneg (by positivity)]
+    have hfe : (fun x : ℝ ↦ |x| ^ 6) = fun x : ℝ ↦ x ^ 6 :=
+      funext fun x ↦ by rw [pow_abs, abs_of_nonneg (by positivity)]
     rwa [hfe] at h
-  have hmap : Integrable (fun x : ℝ => x ^ 6) (Measure.map (B t₁ - B t₀) μ) := by
+  have hmap : Integrable (fun x : ℝ ↦ x ^ 6) (Measure.map (B t₁ - B t₀) μ) := by
     rw [(hB.hasLaw_sub t₁ t₀).map_eq]; exact hg
   exact (integrable_map_measure hmap.aestronglyMeasurable (hB.hasLaw_sub t₁ t₀).aemeasurable).mp hmap
 
@@ -138,17 +138,17 @@ theorem tendsto_ito_remainder
     {f f' f'' f''' : ℝ → ℝ}
     (hf : ∀ x, HasDerivAt f (f' x) x) (hf' : ∀ x, HasDerivAt f' (f'' x) x)
     (hf'' : ∀ x, HasDerivAt f'' (f''' x) x) {Cf3 : ℝ} (hf3 : ∀ x, |f''' x| ≤ Cf3) :
-    Tendsto (fun n : ℕ => ∫ ω, (∑ k ∈ Finset.range n,
+    Tendsto (fun n : ℕ ↦ ∫ ω, (∑ k ∈ Finset.range n,
         discreteTaylorRemainder f f' f''
           (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ) atTop (𝓝 0) := by
   haveI : IsProbabilityMeasure μ := hB.isGaussianProcess.isProbabilityMeasure
   have hCf3 : 0 ≤ Cf3 := le_trans (abs_nonneg _) (hf3 0)
-  have hfm : Measurable f := (continuous_iff_continuousAt.mpr fun x => (hf x).continuousAt).measurable
-  have hf'm : Measurable f' := (continuous_iff_continuousAt.mpr fun x => (hf' x).continuousAt).measurable
-  have hf''m : Measurable f'' := (continuous_iff_continuousAt.mpr fun x => (hf'' x).continuousAt).measurable
-  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab => by simp only [unifPart]; gcongr
+  have hfm : Measurable f := (continuous_iff_continuousAt.mpr fun x ↦ (hf x).continuousAt).measurable
+  have hf'm : Measurable f' := (continuous_iff_continuousAt.mpr fun x ↦ (hf' x).continuousAt).measurable
+  have hf''m : Measurable f'' := (continuous_iff_continuousAt.mpr fun x ↦ (hf'' x).continuousAt).measurable
+  have hmono : ∀ n, Monotone (unifPart T n) := fun n a b hab ↦ by simp only [unifPart]; gcongr
   -- per-step squared remainder: measurable, and `≤ Cf3²·(ΔBₖ)⁶`
-  have hRk_meas : ∀ n k, Measurable (fun ω => discreteTaylorRemainder f f' f''
+  have hRk_meas : ∀ n k, Measurable (fun ω ↦ discreteTaylorRemainder f f' f''
       (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) := by
     intro n k
     unfold discreteTaylorRemainder
@@ -172,44 +172,44 @@ theorem tendsto_ito_remainder
             * (Cf3 * |B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω| ^ 3) :=
           mul_self_le_mul_self (abs_nonneg _) hb
       _ = Cf3 ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 := by rw [← he]; ring
-  have hRsq_int : ∀ n k, Integrable (fun ω => (discreteTaylorRemainder f f' f''
+  have hRsq_int : ∀ n k, Integrable (fun ω ↦ (discreteTaylorRemainder f f' f''
       (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2) μ := by
     intro n k
     refine Integrable.mono'
       ((integrable_increment_pow6 hB (unifPart T n k) (unifPart T n (k + 1))).const_mul (Cf3 ^ 2))
-      ((hRk_meas n k).pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω => ?_)
+      ((hRk_meas n k).pow_const 2).aestronglyMeasurable (Eventually.of_forall fun ω ↦ ?_)
     rw [Real.norm_eq_abs, abs_of_nonneg (sq_nonneg _)]
     exact hRsq_le n k ω
   -- squeeze: `∫ (∑ₖ Rₖ)² ≤ 15·Cf3²·T³/n → 0`
-  refine squeeze_zero' (g := fun n : ℕ => 15 * Cf3 ^ 2 * (T : ℝ) ^ 3 / n)
-    (Eventually.of_forall fun n => integral_nonneg fun ω => sq_nonneg _) ?_
+  refine squeeze_zero' (g := fun n : ℕ ↦ 15 * Cf3 ^ 2 * (T : ℝ) ^ 3 / n)
+    (Eventually.of_forall fun n ↦ integral_nonneg fun ω ↦ sq_nonneg _) ?_
     (by simpa using tendsto_const_div_atTop_nhds_zero_nat (15 * Cf3 ^ 2 * (T : ℝ) ^ 3))
   filter_upwards [eventually_gt_atTop 0] with n hn
   have hn0 : (n : ℝ) ≠ 0 := Nat.cast_ne_zero.mpr hn.ne'
   have hΔ : ∀ k ∈ Finset.range n, ((unifPart T n (k + 1) : ℝ) - unifPart T n k) = (T : ℝ) / n :=
-    fun k _ => by simp only [unifPart]; push_cast; field_simp; ring
+    fun k _ ↦ by simp only [unifPart]; push_cast; field_simp; ring
   calc ∫ ω, (∑ k ∈ Finset.range n, discreteTaylorRemainder f f' f''
             (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ
       ≤ ∫ ω, (n : ℝ) * ∑ k ∈ Finset.range n, (discreteTaylorRemainder f f' f''
             (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ := by
-        refine integral_mono_of_nonneg (Eventually.of_forall fun ω => sq_nonneg _)
-          ((integrable_finsetSum _ fun k _ => hRsq_int n k).const_mul _)
-          (Eventually.of_forall fun ω => ?_)
+        refine integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
+          ((integrable_finsetSum _ fun k _ ↦ hRsq_int n k).const_mul _)
+          (Eventually.of_forall fun ω ↦ ?_)
         have := sq_sum_le_card_mul_sum_sq (s := Finset.range n)
-          (f := fun k => discreteTaylorRemainder f f' f''
+          (f := fun k ↦ discreteTaylorRemainder f f' f''
             (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω))
         rwa [Finset.card_range] at this
     _ = (n : ℝ) * ∑ k ∈ Finset.range n, ∫ ω, (discreteTaylorRemainder f f' f''
             (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ := by
-        rw [integral_const_mul, integral_finsetSum _ fun k _ => hRsq_int n k]
+        rw [integral_const_mul, integral_finsetSum _ fun k _ ↦ hRsq_int n k]
     _ ≤ (n : ℝ) * ∑ k ∈ Finset.range n, 15 * Cf3 ^ 2 * ((T : ℝ) / n) ^ 3 := by
         gcongr with k hk
         calc ∫ ω, (discreteTaylorRemainder f f' f''
               (B (unifPart T n k) ω) (B (unifPart T n (k + 1)) ω)) ^ 2 ∂μ
             ≤ ∫ ω, Cf3 ^ 2 * (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 ∂μ :=
-              integral_mono_of_nonneg (Eventually.of_forall fun ω => sq_nonneg _)
+              integral_mono_of_nonneg (Eventually.of_forall fun ω ↦ sq_nonneg _)
                 ((integrable_increment_pow6 hB _ _).const_mul _)
-                (Eventually.of_forall fun ω => hRsq_le n k ω)
+                (Eventually.of_forall fun ω ↦ hRsq_le n k ω)
           _ = Cf3 ^ 2 * ∫ ω, (B (unifPart T n (k + 1)) ω - B (unifPart T n k) ω) ^ 6 ∂μ :=
               integral_const_mul _ _
           _ = Cf3 ^ 2 * (15 * ((unifPart T n (k + 1) : ℝ) - unifPart T n k) ^ 3) := by

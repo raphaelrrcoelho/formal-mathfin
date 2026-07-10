@@ -91,7 +91,7 @@ theorem acceptableUnderUtility_convex
     {X Y : ι → ℝ} {α : ℝ} (hα : 0 ≤ α) (hα1 : α ≤ 1)
     (hX : acceptableUnderUtility s p u W X)
     (hY : acceptableUnderUtility s p u W Y) :
-    acceptableUnderUtility s p u W (fun i => α * X i + (1 - α) * Y i) := by
+    acceptableUnderUtility s p u W (fun i ↦ α * X i + (1 - α) * Y i) := by
   unfold acceptableUnderUtility at *
   have h_ptwise : ∀ i ∈ s,
       α * u (W + X i) + (1 - α) * u (W + Y i) ≤
@@ -112,7 +112,7 @@ theorem acceptableUnderUtility_convex
         (1 - α) * (∑ i ∈ s, p i * u (W + Y i)) := by
     rw [Finset.mul_sum, Finset.mul_sum]
     rw [← Finset.sum_add_distrib]
-    refine Finset.sum_congr rfl (fun i _ => by ring)
+    refine Finset.sum_congr rfl (fun i _ ↦ by ring)
   rw [h_LHS] at h_sum
   have h_target : α * u W + (1 - α) * u W = u W := by ring
   have h_bound : α * u W + (1 - α) * u W ≤
@@ -141,7 +141,7 @@ theorem acceptableUnderUtility_monotone_translation
     (h_mono : Monotone u)
     {X : ι → ℝ} {c : ℝ} (hc : 0 ≤ c)
     (hX : acceptableUnderUtility s p u W X) :
-    acceptableUnderUtility s p u W (fun i => X i + c) := by
+    acceptableUnderUtility s p u W (fun i ↦ X i + c) := by
   unfold acceptableUnderUtility at *
   have h_ptwise : ∀ i ∈ s, u (W + X i) ≤ u (W + (X i + c)) := by
     intro i _
@@ -158,7 +158,7 @@ utility below baseline. -/
 theorem acceptableUnderUtility_zero
     {ι : Type*} (s : Finset ι) (p : ι → ℝ) (u : ℝ → ℝ) (W : ℝ)
     (h_p_sum : ∑ i ∈ s, p i = 1) :
-    acceptableUnderUtility s p u W (fun _ => 0) := by
+    acceptableUnderUtility s p u W (fun _ ↦ 0) := by
   unfold acceptableUnderUtility
   simp only [add_zero]
   rw [← Finset.sum_mul, h_p_sum, one_mul]

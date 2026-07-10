@@ -63,16 +63,16 @@ zero-coupon bond `P(·, T)` as numéraire. In the constant-rate model
 `N_T = P(T, T) = 1`, `N_0 = P(0, T) = e^{−rT}`, against the money-market
 reference `B_T = e^{rT}`, `B_0 = 1`. -/
 noncomputable def forwardMeasure (Q : Measure Ω) (r T : ℝ) : Measure Ω :=
-  numeraireMeasure Q (fun _ => Real.exp (r * T)) (fun _ => (1 : ℝ)) 1 (Real.exp (-(r * T)))
+  numeraireMeasure Q (fun _ ↦ Real.exp (r * T)) (fun _ ↦ (1 : ℝ)) 1 (Real.exp (-(r * T)))
 
 /-- **The T-forward measure is a probability measure.** The normalisation
 `𝔼^Q[N_T/B_T] = N_0/B_0` reads `𝔼^Q[e^{−rT}] = e^{−rT}`, which holds because the
 integrand is the constant `e^{−rT}` and `Q` is a probability measure. -/
 theorem forwardMeasure_isProbabilityMeasure {Q : Measure Ω} [IsProbabilityMeasure Q] (r T : ℝ) :
     IsProbabilityMeasure (forwardMeasure Q r T) := by
-  refine numeraireMeasure_isProbabilityMeasure (fun _ => one_pos) (fun _ => Real.exp_pos _)
+  refine numeraireMeasure_isProbabilityMeasure (fun _ ↦ one_pos) (fun _ ↦ Real.exp_pos _)
     one_pos (Real.exp_pos _) (integrable_const _) ?_
-  have hconst : (fun ω : Ω => (1 : ℝ) / Real.exp (r * T)) = fun _ => Real.exp (-(r * T)) := by
+  have hconst : (fun ω : Ω ↦ (1 : ℝ) / Real.exp (r * T)) = fun _ ↦ Real.exp (-(r * T)) := by
     funext ω; simp [Real.exp_neg]
   rw [hconst, integral_const]
   simp
@@ -83,13 +83,13 @@ Directly the change-of-numéraire theorem with the bond slots `N_T = 1`,
 theorem forwardMeasure_price {Q : Measure Ω} (X : Ω → ℝ) (r T : ℝ) :
     Real.exp (-(r * T)) * ∫ ω, X ω ∂(forwardMeasure Q r T)
       = ∫ ω, Real.exp (-(r * T)) * X ω ∂Q := by
-  have h := changeOfNumeraire (Q := Q) (BT := fun _ => Real.exp (r * T))
-    (NT := fun _ => (1 : ℝ)) (B0 := (1 : ℝ)) (N0 := Real.exp (-(r * T))) X
-    measurable_const measurable_const (fun _ => one_pos) (fun _ => Real.exp_pos _)
+  have h := changeOfNumeraire (Q := Q) (BT := fun _ ↦ Real.exp (r * T))
+    (NT := fun _ ↦ (1 : ℝ)) (B0 := (1 : ℝ)) (N0 := Real.exp (-(r * T))) X
+    measurable_const measurable_const (fun _ ↦ one_pos) (fun _ ↦ Real.exp_pos _)
     (by norm_num) (Real.exp_pos _)
   simp only [div_one, one_mul] at h
   rw [forwardMeasure, h]
-  refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+  refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
   show X ω / Real.exp (r * T) = Real.exp (-(r * T)) * X ω
   rw [div_eq_mul_inv, ← Real.exp_neg, mul_comm]
 

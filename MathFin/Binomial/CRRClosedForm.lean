@@ -43,7 +43,7 @@ lemma exp_neg_mul_integral_put_gaussian_eq {r σ T S₀ K : ℝ}
   have hν_pos : 0 < ν := mul_pos hσ (Real.sqrt_pos.mpr hT)
   have hσ2T_pos : 0 < σ ^ 2 * T := by positivity
   -- Standardisation `Z = (· − μ_bs)/ν` has `N(0,1)` law under the BS gaussian.
-  have hlaw : HasLaw (fun x => (x - μ_bs) / ν) (gaussianReal 0 1)
+  have hlaw : HasLaw (fun x ↦ (x - μ_bs) / ν) (gaussianReal 0 1)
       (gaussianReal μ_bs (σ ^ 2 * T).toNNReal) := by
     have h1 := gaussianReal_sub_const
       (HasLaw.id (μ := gaussianReal μ_bs (σ ^ 2 * T).toNNReal)) μ_bs
@@ -60,12 +60,12 @@ lemma exp_neg_mul_integral_put_gaussian_eq {r σ T S₀ K : ℝ}
     · rw [sub_self, zero_div]
     · rw [hvar]
   have hbs : BSCallHyp (gaussianReal μ_bs (σ ^ 2 * T).toNNReal) S₀ K r σ T
-      (fun x => (x - μ_bs) / ν) := ⟨hS₀, hK, hσ, hT, hlaw⟩
+      (fun x ↦ (x - μ_bs) / ν) := ⟨hS₀, hK, hσ, hT, hlaw⟩
   have hpf := bs_put_formula hbs
   -- `bsTerminal S₀ r σ T ((x − μ_bs)/ν) = S₀ · eˣ`.
-  have hterm : (fun x : ℝ => Real.exp (-r * T) *
+  have hterm : (fun x : ℝ ↦ Real.exp (-r * T) *
         max (K - bsTerminal S₀ r σ T ((x - μ_bs) / ν)) 0)
-      = (fun x : ℝ => Real.exp (-r * T) * max (K - S₀ * Real.exp x) 0) := by
+      = (fun x : ℝ ↦ Real.exp (-r * T) * max (K - S₀ * Real.exp x) 0) := by
     funext x
     have hb : bsTerminal S₀ r σ T ((x - μ_bs) / ν) = S₀ * Real.exp x := by
       rw [bsTerminal]
@@ -89,8 +89,8 @@ chained, via `exp_neg_mul_integral_put_gaussian_eq` + `Phi_neg`, onto the closed
 theorem binomialPrice_call_tendsto_bs_closed {r σ T S₀ K : ℝ}
     (hσ : 0 < σ) (hT : 0 < T) (hS₀ : 0 < S₀) (hK : 0 < K)
     (hna : ∀ n, BinomialNoArb (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)) :
-    Tendsto (fun n : ℕ => binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
-        (fun x => max (x - K) 0) n S₀) atTop
+    Tendsto (fun n : ℕ ↦ binomialPrice (crrUp σ T n) (crrDown σ T n) (crrPerStepRate r T n)
+        (fun x ↦ max (x - K) 0) n S₀) atTop
       (𝓝 (S₀ * Phi (bsd1 S₀ K r σ T)
           - K * Real.exp (-(r * T)) * Phi (bsd2 S₀ K r σ T))) := by
   have h := binomialPrice_call_tendsto_bs (K := K) hσ hT hS₀ hna

@@ -44,7 +44,7 @@ namespace MathFin
 remainder vanishes identically — `x ↦ x²` *is* its own second-order Taylor
 expansion at every point. -/
 lemma discreteTaylorRemainder_sq (Xk Xkp1 : ℝ) :
-    discreteTaylorRemainder (fun x => x ^ 2) (fun x => 2 * x) (fun _ => 2) Xk Xkp1 = 0 := by
+    discreteTaylorRemainder (fun x ↦ x ^ 2) (fun x ↦ 2 * x) (fun _ ↦ 2) Xk Xkp1 = 0 := by
   unfold discreteTaylorRemainder
   ring
 
@@ -58,9 +58,9 @@ theorem discrete_squaring_identity (N : ℕ) (X : ℕ → ℝ) :
     X N ^ 2 - X 0 ^ 2 =
       2 * (∑ k ∈ Finset.range N, X k * (X (k + 1) - X k)) +
       ∑ k ∈ Finset.range N, (X (k + 1) - X k) ^ 2 := by
-  have h := discrete_ito_formula N X (fun x => x ^ 2) (fun x => 2 * x) (fun _ => 2)
+  have h := discrete_ito_formula N X (fun x ↦ x ^ 2) (fun x ↦ 2 * x) (fun _ ↦ 2)
   -- Collapse the remainder sum to 0 via `discreteTaylorRemainder_sq`.
-  rw [Finset.sum_congr rfl (fun k _ => discreteTaylorRemainder_sq (X k) (X (k + 1))),
+  rw [Finset.sum_congr rfl (fun k _ ↦ discreteTaylorRemainder_sq (X k) (X (k + 1))),
       Finset.sum_const_zero, add_zero] at h
   -- Pull the `2 X_k` and the `2` from the f''-sum into the standard form.
   rw [h]

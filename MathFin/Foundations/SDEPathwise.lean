@@ -57,13 +57,13 @@ modification `(σ∘X) ● B` (`itoProcessAssembled` is *defined* from `itoConti
 equation `X = Φ(X)` holds in `E`; taking `coeFn` through `Lp.coeFn_add` and the two realization
 identities slices it into this pathwise form. -/
 theorem sde_pathwise_decomposition (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
     (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) :
     ⇑(picardSolution hB T hBmeas hBcont hb hσ η_E hc)
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas]
-      fun z => ⇑η_E z
+      fun z ↦ ⇑η_E z
         + Function.uncurry (driftContinuousMod T hBmeas
             (lipComp T hBmeas b Lb hb (picardSolution hB T hBmeas hBcont hb hσ η_E hc))) z
         + Function.uncurry (itoContinuousMod T hBmeas
@@ -96,7 +96,7 @@ integral `∫₀ᵗ (b∘X)_s(ω) ds` — `driftContinuousMod_eq_setIntegral` ap
 composition `b∘X = lipComp b X`. This closes the honest-remainder gap: the drift term of the strong
 solution is not merely an abstract limit but the recognizable SDE integral `∫₀ᵗ b(X_s(ω)) ds`. -/
 theorem sde_pathwise_drift_eq_setIntegral (hB : IsPreBrownianReal B μ) (T : ℝ≥0)
-    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 => B t ω)
+    (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
     {b σ : ℝ → ℝ} {Lb Lσ : ℝ≥0} (hb : LipschitzWith Lb b) (hσ : LipschitzWith Lσ σ)
     (η_E : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (hc : (T : ℝ) * Lb + Real.sqrt (T : ℝ) * Lσ < 1) {t : ℝ≥0} (ht : t ≤ T) :

@@ -78,13 +78,13 @@ theorem hasDerivAt_almgrenChrissPath (X_0 κ T : ℝ)
       (-(X_0 * κ * Real.cosh (κ * (T - t)) / Real.sinh (κ * T))) t := by
   unfold almgrenChrissPath
   -- Inner derivative: d/dt (κ (T − t)) = −κ.
-  have h_inner : HasDerivAt (fun t : ℝ => κ * (T - t)) (-κ) t := by
-    have h_id : HasDerivAt (fun t : ℝ => T - t) (-1) t := by
+  have h_inner : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
+    have h_id : HasDerivAt (fun t : ℝ ↦ T - t) (-1) t := by
       have := (hasDerivAt_id t).const_sub T
       simpa using this
     have := h_id.const_mul κ
     convert this using 1 <;> first | ring | rfl
-  have h_sinh : HasDerivAt (fun t => Real.sinh (κ * (T - t)))
+  have h_sinh : HasDerivAt (fun t ↦ Real.sinh (κ * (T - t)))
                 (Real.cosh (κ * (T - t)) * (-κ)) t := h_inner.sinh
   have h_mul := h_sinh.const_mul X_0
   have h_div := h_mul.div_const (Real.sinh (κ * T))
@@ -96,18 +96,18 @@ The second derivative — obtained by differentiating the first — has the
 same `sinh(κ (T − t))` shape multiplied by `κ²`. -/
 theorem almgrenChrissPath_satisfies_EL (X_0 κ T : ℝ)
     (hT : Real.sinh (κ * T) ≠ 0) (t : ℝ) :
-    HasDerivAt (fun s : ℝ =>
+    HasDerivAt (fun s : ℝ ↦
         -(X_0 * κ * Real.cosh (κ * (T - s)) / Real.sinh (κ * T)))
       (κ^2 * almgrenChrissPath X_0 κ T t) t := by
   unfold almgrenChrissPath
   -- d/dt of cosh(κ (T − t)) = sinh(κ (T − t)) · (−κ).
-  have h_inner : HasDerivAt (fun t : ℝ => κ * (T - t)) (-κ) t := by
-    have h_id : HasDerivAt (fun t : ℝ => T - t) (-1) t := by
+  have h_inner : HasDerivAt (fun t : ℝ ↦ κ * (T - t)) (-κ) t := by
+    have h_id : HasDerivAt (fun t : ℝ ↦ T - t) (-1) t := by
       have := (hasDerivAt_id t).const_sub T
       simpa using this
     have := h_id.const_mul κ
     convert this using 1 <;> first | ring | rfl
-  have h_cosh : HasDerivAt (fun t => Real.cosh (κ * (T - t)))
+  have h_cosh : HasDerivAt (fun t ↦ Real.cosh (κ * (T - t)))
                 (Real.sinh (κ * (T - t)) * (-κ)) t := h_inner.cosh
   have h_const_mul := h_cosh.const_mul (X_0 * κ)
   have h_div := h_const_mul.div_const (Real.sinh (κ * T))

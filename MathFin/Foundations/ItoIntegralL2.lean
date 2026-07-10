@@ -62,7 +62,7 @@ variable {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
 
 /-- The **natural Brownian filtration** `𝓕ᴮ_t = σ(B_u : u ≤ t)`. -/
 noncomputable def natFiltration (hBmeas : ∀ t, Measurable (B t)) : Filtration ℝ≥0 mΩ :=
-  Filtration.natural B (fun t => (hBmeas t).stronglyMeasurable)
+  Filtration.natural B (fun t ↦ (hBmeas t).stronglyMeasurable)
 
 /-- **Bridge to the past-process encoding.** A function measurable with respect to
 the natural Brownian filtration at `s` is `ItoIsometryAdapted.AdaptedAt B s` —
@@ -78,9 +78,9 @@ theorem adaptedAt_of_measurable_natural (hBmeas : ∀ t, Measurable (B t)) {s : 
   -- `B u` (u ≤ s) factors as `eval_u ∘ pastProcess`.
   have hle : (natFiltration hBmeas s) ≤
       MeasurableSpace.comap (ItoIsometryAdapted.pastProcess B s) inferInstance := by
-    refine iSup₂_le fun u hu => ?_
+    refine iSup₂_le fun u hu ↦ ?_
     have hBu : B u
-        = (fun p : Set.Iic s → ℝ => p ⟨u, hu⟩) ∘ ItoIsometryAdapted.pastProcess B s := rfl
+        = (fun p : Set.Iic s → ℝ ↦ p ⟨u, hu⟩) ∘ ItoIsometryAdapted.pastProcess B s := rfl
     rw [hBu, ← MeasurableSpace.comap_comp]
     exact MeasurableSpace.comap_mono (measurable_iff_comap_le.mp (measurable_pi_apply _))
   obtain ⟨g, hg, hgeq⟩ := (hf.mono hle le_rfl).exists_eq_measurable_comp
@@ -98,7 +98,7 @@ noncomputable def itoSimple (hBmeas : ∀ t, Measurable (B t))
 lemma itoSimple_apply (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (ω : Ω) :
     itoSimple hBmeas V ω
-      = V.value.sum fun p v => v ω * (B p.2 ω - B p.1 ω) := by
+      = V.value.sum fun p v ↦ v ω * (B p.2 ω - B p.1 ω) := by
   simp only [itoSimple, SimpleProcess.integral_top, ContinuousLinearMap.mul_apply']
 
 variable [IsProbabilityMeasure μ]
@@ -111,9 +111,9 @@ theorem memLp_itoSimple (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Measurabl
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     MemLp (itoSimple hBmeas V) 2 μ := by
   rw [show itoSimple hBmeas V
-        = fun ω => ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
-      from funext fun ω => by rw [itoSimple_apply]; rfl]
-  refine memLp_finsetSum V.value.support (fun p hp => ?_)
+        = fun ω ↦ ∑ p ∈ V.value.support, V.value p ω * (B p.2 ω - B p.1 ω)
+      from funext fun ω ↦ by rw [itoSimple_apply]; rfl]
+  refine memLp_finsetSum V.value.support (fun p hp ↦ ?_)
   refine ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (V.le_of_mem_support_value p hp)
     (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p)) ?_
   exact MemLp.of_bound
@@ -142,36 +142,36 @@ theorem itoSimple_sq_integral (hB : IsPreBrownianReal B μ) (hBmeas : ∀ t, Mea
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
   classical
-  set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω => V.value p ω * (B p.2 ω - B p.1 ω) with ha_def
-  have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp =>
+  set a : (ℝ≥0 × ℝ≥0) → Ω → ℝ := fun p ω ↦ V.value p ω * (B p.2 ω - B p.1 ω) with ha_def
+  have ha_L2 : ∀ p ∈ V.value.support, MemLp (a p) 2 μ := fun p hp ↦
     ItoIsometryAdapted.memLp_adapted_mul_increment hB hBmeas (V.le_of_mem_support_value p hp)
       (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
       (MemLp.of_bound
         ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).aestronglyMeasurable
         V.valueBound (ae_of_all _ (V.value_le_valueBound p)))
   have hint : ∀ p ∈ V.value.support, ∀ q ∈ V.value.support,
-      Integrable (fun ω => a p ω * a q ω) μ :=
-    fun p hp q hq => (ha_L2 p hp).integrable_mul (ha_L2 q hq)
+      Integrable (fun ω ↦ a p ω * a q ω) μ :=
+    fun p hp q hq ↦ (ha_L2 p hp).integrable_mul (ha_L2 q hq)
   calc ∫ ω, (itoSimple hBmeas V ω) ^ 2 ∂μ
       = ∫ ω, ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω ∂μ := by
-        refine integral_congr_ae (Filter.Eventually.of_forall fun ω => ?_)
+        refine integral_congr_ae (Filter.Eventually.of_forall fun ω ↦ ?_)
         show itoSimple hBmeas V ω ^ 2
           = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, a p ω * a q ω
         rw [show itoSimple hBmeas V ω = ∑ p ∈ V.value.support, a p ω from by
               rw [itoSimple_apply]; rfl, sq, Finset.sum_mul_sum]
     _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support, ∫ ω, a p ω * a q ω ∂μ := by
-        rw [integral_finsetSum _ (fun p hp => integrable_finsetSum _ fun q hq => hint p hp q hq)]
-        exact Finset.sum_congr rfl fun p hp =>
-          integral_finsetSum _ (fun q hq => hint p hp q hq)
+        rw [integral_finsetSum _ (fun p hp ↦ integrable_finsetSum _ fun q hq ↦ hint p hp q hq)]
+        exact Finset.sum_congr rfl fun p hp ↦
+          integral_finsetSum _ (fun q hq ↦ hint p hp q hq)
     _ = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           (∫ ω, V.value p ω * V.value q ω ∂μ)
             * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-        refine Finset.sum_congr rfl fun p hp => Finset.sum_congr rfl fun q hq => ?_
+        refine Finset.sum_congr rfl fun p hp ↦ Finset.sum_congr rfl fun q hq ↦ ?_
         exact ItoIsometryAdapted.rect_increment_pairing hB hBmeas
           (adaptedAt_of_measurable_natural hBmeas (V.measurable_value p))
           (adaptedAt_of_measurable_natural hBmeas (V.measurable_value q))
-          (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
-          (fun ω => by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
+          (fun ω ↦ by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound p ω)
+          (fun ω ↦ by rw [← Real.norm_eq_abs]; exact V.value_le_valueBound q ω)
           (V.le_of_mem_support_value p hp) (V.le_of_mem_support_value q hq)
 
 /-- For `g : Lp ℝ 2 ν`, `‖g‖² = ∫ (g a)² ∂ν` (the real `L²` norm-square as an integral).
@@ -262,13 +262,13 @@ form `𝟙_{(p.1,p.2]}(t) · V(p)(ω)`. -/
 noncomputable def rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
     ℝ≥0 × Ω → ℝ :=
-  fun z => (Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) z.1 * V.value p z.2
+  fun z ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1 * V.value p z.2
 
 /-- The rectangle term as an indicator of the product rectangle `(p.1,p.2] ×ˢ univ`. -/
 lemma rectTerm_eq_indicator (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
     rectTerm hBmeas V p
-      = (Set.Ioc p.1 p.2 ×ˢ (Set.univ : Set Ω)).indicator (fun z => V.value p z.2) := by
+      = (Set.Ioc p.1 p.2 ×ˢ (Set.univ : Set Ω)).indicator (fun z ↦ V.value p z.2) := by
   funext z
   rw [rectTerm, Set.indicator_apply, Set.indicator_apply]
   simp only [Set.mem_prod, Set.mem_univ, and_true]
@@ -285,17 +285,17 @@ lemma memLp_rectTerm (hBmeas : ∀ t, Measurable (B t))
   rw [rectTerm_eq_indicator,
       memLp_indicator_iff_restrict (measurableSet_Ioc.prod MeasurableSet.univ),
       ← Measure.prod_restrict, Measure.restrict_univ]
-  have hmeas : Measurable (fun z : ℝ≥0 × Ω => V.value p z.2) :=
+  have hmeas : Measurable (fun z : ℝ≥0 × Ω ↦ V.value p z.2) :=
     ((V.measurable_value p).mono ((natFiltration hBmeas).le p.1) le_rfl).comp measurable_snd
   exact MemLp.of_bound hmeas.aestronglyMeasurable V.valueBound
-    (ae_of_all _ fun z => by rw [Real.norm_eq_abs]; exact V.value_le_valueBound p z.2)
+    (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact V.value_le_valueBound p z.2)
 
 /-- **The uncurried simple process is a.e. the finite sum of its rectangle terms.**
 They agree off the time-fibre `{⊥}`, which is `timeMeasure.prod μ`-null. -/
 lemma uncurry_ae_eq_sum_rectTerm (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     Function.uncurry ⇑V
-      =ᵐ[timeMeasure.prod μ] fun z => ∑ p ∈ V.value.support, rectTerm hBmeas V p z := by
+      =ᵐ[timeMeasure.prod μ] fun z ↦ ∑ p ∈ V.value.support, rectTerm hBmeas V p z := by
   have hmem : {z : ℝ≥0 × Ω | z.1 ≠ ⊥} ∈ MeasureTheory.ae (timeMeasure.prod μ) := by
     rw [mem_ae_iff,
         show {z : ℝ≥0 × Ω | z.1 ≠ ⊥}ᶜ = {(⊥ : ℝ≥0)} ×ˢ (Set.univ : Set Ω) from by ext z; simp,
@@ -303,7 +303,7 @@ lemma uncurry_ae_eq_sum_rectTerm (hBmeas : ∀ t, Measurable (B t))
   filter_upwards [hmem] with z hz
   show ⇑V z.1 z.2 = _
   rw [SimpleProcess.apply_eq, Set.indicator_of_notMem (by simpa using hz), zero_add, Finsupp.sum]
-  refine Finset.sum_congr rfl fun p _ => ?_
+  refine Finset.sum_congr rfl fun p _ ↦ ?_
   rw [rectTerm, Set.indicator_apply, Set.indicator_apply]
   split_ifs <;> simp
 
@@ -313,7 +313,7 @@ lemma memLp_uncurry_prod (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) :
     MemLp (Function.uncurry ⇑V) 2 (timeMeasure.prod μ) :=
   (memLp_congr_ae (uncurry_ae_eq_sum_rectTerm hBmeas V)).mpr
-    (memLp_finsetSum _ fun p _ => memLp_rectTerm hBmeas V p)
+    (memLp_finsetSum _ fun p _ ↦ memLp_rectTerm hBmeas V p)
 
 /-- The uncurried simple process is `L²` in the **trimmed** (predictable) product
 measure: it is predictable-strongly-measurable (`SimpleProcess.isStronglyPredictable`)
@@ -343,18 +343,18 @@ lemma integral_rectTerm_mul (hBmeas : ∀ t, Measurable (B t))
     ∫ z, rectTerm hBmeas V p z * rectTerm hBmeas V q z ∂(timeMeasure.prod μ)
       = (∫ ω, V.value p ω * V.value q ω ∂μ)
           * max 0 ((min (p.2 : ℝ) q.2) - (max (p.1 : ℝ) q.1)) := by
-  have hfun : (fun z : ℝ≥0 × Ω => rectTerm hBmeas V p z * rectTerm hBmeas V q z)
-      = fun z => ((Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) z.1
-                    * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) z.1)
+  have hfun : (fun z : ℝ≥0 × Ω ↦ rectTerm hBmeas V p z * rectTerm hBmeas V q z)
+      = fun z ↦ ((Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) z.1
+                    * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) z.1)
                   * (V.value p z.2 * V.value q z.2) := by
     funext z; simp only [rectTerm]; ring
   rw [hfun, integral_prod_mul
-        (fun i => (Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) i
-          * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) i)
-        (fun ω => V.value p ω * V.value q ω), mul_comm]
+        (fun i ↦ (Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) i
+          * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) i)
+        (fun ω ↦ V.value p ω * V.value q ω), mul_comm]
   congr 1
-  have hpt : ∀ i : ℝ≥0, (Set.Ioc p.1 p.2).indicator (fun _ => (1 : ℝ)) i
-        * (Set.Ioc q.1 q.2).indicator (fun _ => (1 : ℝ)) i
+  have hpt : ∀ i : ℝ≥0, (Set.Ioc p.1 p.2).indicator (fun _ ↦ (1 : ℝ)) i
+        * (Set.Ioc q.1 q.2).indicator (fun _ ↦ (1 : ℝ)) i
         = (Set.Ioc p.1 p.2 ∩ Set.Ioc q.1 q.2).indicator (1 : ℝ≥0 → ℝ) i := by
     intro i; rw [Set.inter_indicator_one]; rfl
   simp_rw [hpt]
@@ -376,32 +376,32 @@ theorem simpleProcessL2_norm_sq (hBmeas : ∀ t, Measurable (B t))
   have hStepA : ‖simpleProcessL2 (μ := μ) hBmeas V‖ ^ 2
       = ∫ z, (Function.uncurry ⇑V z) ^ 2 ∂(timeMeasure.prod μ) := by
     rw [lp_two_norm_sq (simpleProcessL2 (μ := μ) hBmeas V)]
-    have hco : (fun z => (simpleProcessL2 (μ := μ) hBmeas V z) ^ 2)
+    have hco : (fun z ↦ (simpleProcessL2 (μ := μ) hBmeas V z) ^ 2)
         =ᵐ[(timeMeasure.prod μ).trim (natFiltration hBmeas).predictable_le_prod]
-          fun z => (Function.uncurry ⇑V z) ^ 2 := by
+          fun z ↦ (Function.uncurry ⇑V z) ^ 2 := by
       filter_upwards [(memLp_uncurry_trim hBmeas V).coeFn_toLp] with z hz
       rw [show (simpleProcessL2 (μ := μ) hBmeas V) z = Function.uncurry ⇑V z from hz]
     rw [integral_congr_ae hco]
     simp only [pow_two]
     have hsm2 : StronglyMeasurable[(natFiltration hBmeas).predictable]
-        (fun z => Function.uncurry ⇑V z * Function.uncurry ⇑V z) :=
+        (fun z ↦ Function.uncurry ⇑V z * Function.uncurry ⇑V z) :=
       V.isStronglyPredictable.mul V.isStronglyPredictable
     exact (integral_trim (natFiltration hBmeas).predictable_le_prod hsm2).symm
   rw [hStepA]
   -- Step B: expand the square into the rectangle double sum and integrate termwise.
   have hint : ∀ p ∈ V.value.support, ∀ q ∈ V.value.support,
-      Integrable (fun z => rectTerm hBmeas V p z * rectTerm hBmeas V q z) (timeMeasure.prod μ) :=
-    fun p _ q _ => (memLp_rectTerm hBmeas V p).integrable_mul (memLp_rectTerm hBmeas V q)
+      Integrable (fun z ↦ rectTerm hBmeas V p z * rectTerm hBmeas V q z) (timeMeasure.prod μ) :=
+    fun p _ q _ ↦ (memLp_rectTerm hBmeas V p).integrable_mul (memLp_rectTerm hBmeas V q)
   have hsq : ∀ᵐ z ∂(timeMeasure.prod μ), (Function.uncurry ⇑V z) ^ 2
       = ∑ p ∈ V.value.support, ∑ q ∈ V.value.support,
           rectTerm hBmeas V p z * rectTerm hBmeas V q z := by
     filter_upwards [uncurry_ae_eq_sum_rectTerm hBmeas V] with z hz
     rw [hz, sq, Finset.sum_mul_sum]
   rw [integral_congr_ae hsq,
-      integral_finsetSum _ (fun p hp => integrable_finsetSum _ fun q hq => hint p hp q hq)]
-  refine Finset.sum_congr rfl fun p hp => ?_
-  rw [integral_finsetSum _ fun q hq => hint p hp q hq]
-  exact Finset.sum_congr rfl fun q _ => integral_rectTerm_mul hBmeas V p q
+      integral_finsetSum _ (fun p hp ↦ integrable_finsetSum _ fun q hq ↦ hint p hp q hq)]
+  refine Finset.sum_congr rfl fun p hp ↦ ?_
+  rw [integral_finsetSum _ fun q hq ↦ hint p hp q hq]
+  exact Finset.sum_congr rfl fun q _ ↦ integral_rectTerm_mul hBmeas V p q
 
 /-! ### Linear assembly maps and the isometry on simple processes -/
 
