@@ -365,6 +365,182 @@ lemma tendstoInMeasure_marshalDrift (T : ℝ≥0)
   filter_upwards [hdom n] with ω hω
   rwa [Real.sqrt_mul u.coe_nonneg] at hω
 
+/-- **The marshalled quadratic variations converge in measure to `∫₀ᵀθ² ds`.** For a raw
+approximating sequence `V n → θ̂`, the discrete quadratic variations `∑ cᵢ²·Δτ` of the clamped
+marshalled approximants (the drift half of the marshalled Doléans exponent) converge in `μ`-measure to
+`∫₀ᵀ(⇑θ̂)² ds`. Writing `Q − L = 2∫step·(step − θ̂) − Dₙ` and using the deterministic bound `|step| ≤ C`
+on `(0,T]`, `|Q − L| ≤ 2C√T·√(Dₙ) + Dₙ` (finite-measure `L¹ ≤ L²`), which vanishes in `L¹(μ)` since
+`∫Dₙ = ‖simpleAssembly_T Ṽⁿ − θ̂‖² → 0` and `∫√Dₙ ≤ √(∫Dₙ)`. -/
+lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
+    TendstoInMeasure μ
+      (fun n => simpleQuadVar (marshalPart hBmeas T (V n).val)
+        (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) T)
+      atTop
+      (fun ω => ∫ s in Set.Ioc (0 : ℝ≥0) T,
+        (⇑(processToLpPredictable (μ := μ) T hBmeas hpred hbdd) (s, ω)) ^ 2 ∂timeMeasure) := by
+  set θhat := processToLpPredictable (μ := μ) T hBmeas hpred hbdd with hθhat
+  set W : ℕ → TBoundedSP T hBmeas := fun n => marshalStepSP hBmeas T (V n).val (V n).property hC
+    ((marshalEndpoints hBmeas T (V n).val).card - 1) with hW
+  haveI hfin : IsFiniteMeasure (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
+    ⟨by rw [Measure.restrict_apply_univ, timeMeasure_Ioc]; exact ENNReal.ofReal_lt_top⟩
+  set D : ℕ → Ω → ℝ := fun n ω =>
+    ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2 ∂timeMeasure with hDdef
+  have hDnn : ∀ n, 0 ≤ᵐ[μ] D n := fun n => ae_of_all _ fun ω => integral_nonneg fun s => sq_nonneg _
+  have hDint : ∀ n, Integrable (D n) μ :=
+    fun n => (drift_slice_sq_integrable T hBmeas θhat (W n)).integral_prod_right
+  have hD0 : Tendsto (fun n => ∫ ω, D n ω ∂μ) atTop (𝓝 0) := by
+    have heq : ∀ n, (∫ ω, D n ω ∂μ) = ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖ ^ 2 :=
+      fun n => drift_slice_energy_eq T hBmeas θhat (W n)
+    simp_rw [heq]
+    have h0 : Tendsto (fun n => ‖simpleAssembly_T (μ := μ) T hBmeas (W n) - θhat‖) atTop (𝓝 0) :=
+      tendsto_iff_norm_sub_tendsto_zero.mp
+        (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
+    simpa using h0.pow 2
+  have hg_prod : MemLp (⇑θhat) 2 ((timeMeasure_T T).prod μ) :=
+    ⟨aestronglyMeasurable_of_aestronglyMeasurable_trim (natFiltration hBmeas).predictable_le_prod
+      (Lp.aestronglyMeasurable θhat),
+     by rw [← eLpNorm_trim_ae (natFiltration hBmeas).predictable_le_prod (Lp.aestronglyMeasurable θhat)]
+        exact (Lp.memLp θhat).2⟩
+  have hg_slice : ∀ᵐ ω ∂μ, MemLp (fun s => ⇑θhat (s, ω)) 2 (timeMeasure_T T) := by
+    filter_upwards [hg_prod.1.prodMk_right, hg_prod.integrable_sq.prod_left_ae] with ω hω1 hω2
+    exact (memLp_two_iff_integrable_sq hω1).mpr hω2
+  have hQmeas : ∀ n, AEStronglyMeasurable
+      (fun ω => simpleQuadVar (marshalPart hBmeas T (V n).val)
+        (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω) μ := by
+    intro n
+    refine Measurable.aestronglyMeasurable ?_
+    unfold SimpleDoleansMoments.simpleQuadVar
+    refine Finset.measurable_sum _ fun i _ => ?_
+    exact (((measurable_clampM_comp hBmeas
+      (stronglyMeasurable_marshalMult hBmeas T (V n).val i).measurable).pow_const 2).mul_const _).mono
+      ((natFiltration hBmeas).le _) le_rfl
+  have hLmeas : AEStronglyMeasurable
+      (fun ω => ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure) μ :=
+    hg_prod.integrable_sq.swap.aestronglyMeasurable.integral_prod_right'
+  -- the pointwise `|Q − L| ≤ 2C√T·√Dₙ + Dₙ` domination
+  have hdom : ∀ n, ∀ᵐ ω ∂μ,
+      dist (simpleQuadVar (marshalPart hBmeas T (V n).val)
+          (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+          ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω)
+        (∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure)
+        ≤ 2 * C * Real.sqrt (T : ℝ) * Real.sqrt (D n ω) + D n ω := by
+    intro n
+    filter_upwards [hg_slice] with ω hωg
+    have hmpN : marshalPart hBmeas T (V n).val ((marshalEndpoints hBmeas T (V n).val).card - 1) = T :=
+      marshalPart_card_sub_one hBmeas T (V n).val (V n).property
+    have hQeq : simpleQuadVar (marshalPart hBmeas T (V n).val)
+        (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω
+        = ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω) ^ 2 ∂timeMeasure :=
+      simpleQuadVar_marshalStepSP_eq hBmeas T (V n).val (V n).property hC hmpN ω
+    have hVt : MemLp (fun s => ⇑(W n).val s ω) 2 (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) :=
+      memLp_slice T hBmeas (W n).val ω
+    have hgt : MemLp (fun s => ⇑θhat (s, ω)) 2 (timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T)) := hωg
+    have hstepbnd : ∀ s ∈ Set.Ioc (0 : ℝ≥0) T, |⇑(W n).val s ω| ≤ C := by
+      intro s hs
+      rw [show ⇑(W n).val s ω = Function.uncurry ⇑(W n).val (s, ω) from rfl,
+        uncurry_marshalStepSP_eq_clamp hBmeas T (V n).val (V n).property hC hmpN hs.1 hs.2 ω]
+      exact clampM_abs_le hC _
+    -- decompose `∫(step² − θ̂²) = 2∫step·(step − θ̂) − ∫(step − θ̂)²`
+    rw [Real.dist_eq, hQeq]
+    have hdecomp : (∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω) ^ 2 ∂timeMeasure)
+        - ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure
+        = 2 * (∫ s in Set.Ioc (0 : ℝ≥0) T,
+              ⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)) ∂timeMeasure) - D n ω := by
+      have h1 : (∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω) ^ 2 ∂timeMeasure)
+          - ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure
+          = ∫ s in Set.Ioc (0 : ℝ≥0) T,
+              (2 * (⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)))
+                - (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2) ∂timeMeasure := by
+        rw [← integral_sub hVt.integrable_sq hgt.integrable_sq]
+        exact integral_congr_ae (ae_of_all _ fun s => by ring)
+      have h2 : (∫ s in Set.Ioc (0 : ℝ≥0) T,
+              (2 * (⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)))
+                - (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2) ∂timeMeasure)
+          = 2 * (∫ s in Set.Ioc (0 : ℝ≥0) T,
+              ⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)) ∂timeMeasure)
+            - ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2 ∂timeMeasure := by
+        rw [integral_sub (f := fun s => 2 * (⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω))))
+            (g := fun s => (⇑(W n).val s ω - ⇑θhat (s, ω)) ^ 2)
+            ((((hVt.sub hgt).mul hVt).integrable le_rfl).const_mul 2) (hVt.sub hgt).integrable_sq,
+          integral_const_mul]
+      rw [h1, h2, hDdef]
+    rw [hdecomp]
+    have hCS : |∫ s in Set.Ioc (0 : ℝ≥0) T,
+        ⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)) ∂timeMeasure|
+        ≤ C * Real.sqrt (T : ℝ) * Real.sqrt (D n ω) := by
+      have habs : |∫ s in Set.Ioc (0 : ℝ≥0) T,
+          ⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)) ∂timeMeasure|
+          ≤ ∫ s in Set.Ioc (0 : ℝ≥0) T,
+            C * |⇑(W n).val s ω - ⇑θhat (s, ω)| ∂timeMeasure := by
+        refine (abs_integral_le_integral_abs).trans ?_
+        refine setIntegral_mono_on (((hVt.sub hgt).mul hVt).integrable le_rfl).abs
+          (((hVt.sub hgt).integrable one_le_two).abs.const_mul C) measurableSet_Ioc
+          (fun s hs => ?_)
+        rw [abs_mul]
+        exact mul_le_mul_of_nonneg_right (hstepbnd s hs) (abs_nonneg _)
+      have hL1L2 : ∫ s in Set.Ioc (0 : ℝ≥0) T, |⇑(W n).val s ω - ⇑θhat (s, ω)| ∂timeMeasure
+          ≤ Real.sqrt (T : ℝ) * Real.sqrt (D n ω) := by
+        rw [← Real.sqrt_mul T.coe_nonneg (D n ω),
+          ← Real.sqrt_sq (integral_nonneg fun s => abs_nonneg _)]
+        refine Real.sqrt_le_sqrt ?_
+        have hcs := sq_integral_le_measureReal_mul (ν := timeMeasure.restrict (Set.Ioc (0 : ℝ≥0) T))
+          (hVt.sub hgt).abs
+        rw [Measure.restrict_apply_univ, timeMeasure_Ioc,
+          ENNReal.toReal_ofReal (by rw [NNReal.coe_zero, sub_zero]; exact T.coe_nonneg),
+          NNReal.coe_zero, sub_zero] at hcs
+        refine hcs.trans_eq ?_
+        rw [hDdef]
+        refine congrArg (fun z => (T : ℝ) * z) (integral_congr_ae (ae_of_all _ fun s => ?_))
+        simp only [Pi.abs_apply, Pi.sub_apply, sq_abs]
+      calc |∫ s in Set.Ioc (0 : ℝ≥0) T,
+              ⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)) ∂timeMeasure|
+          ≤ ∫ s in Set.Ioc (0 : ℝ≥0) T, C * |⇑(W n).val s ω - ⇑θhat (s, ω)| ∂timeMeasure := habs
+        _ = C * ∫ s in Set.Ioc (0 : ℝ≥0) T, |⇑(W n).val s ω - ⇑θhat (s, ω)| ∂timeMeasure :=
+            integral_const_mul _ _
+        _ ≤ C * (Real.sqrt (T : ℝ) * Real.sqrt (D n ω)) := mul_le_mul_of_nonneg_left hL1L2 hC
+        _ = C * Real.sqrt (T : ℝ) * Real.sqrt (D n ω) := by ring
+    have hDeq : |D n ω| = D n ω := abs_of_nonneg (integral_nonneg fun s => sq_nonneg _)
+    calc |2 * (∫ s in Set.Ioc (0 : ℝ≥0) T,
+            ⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)) ∂timeMeasure) - D n ω|
+        ≤ 2 * |∫ s in Set.Ioc (0 : ℝ≥0) T,
+            ⇑(W n).val s ω * (⇑(W n).val s ω - ⇑θhat (s, ω)) ∂timeMeasure| + D n ω := by
+          refine (abs_sub _ _).trans (le_of_eq ?_); rw [abs_mul, abs_two, hDeq]
+      _ ≤ 2 * (C * Real.sqrt (T : ℝ) * Real.sqrt (D n ω)) + D n ω := by gcongr
+      _ = 2 * C * Real.sqrt (T : ℝ) * Real.sqrt (D n ω) + D n ω := by ring
+  have hsqrtint : ∀ n, Integrable (fun ω => Real.sqrt (D n ω)) μ := by
+    intro n
+    have hpt : ∀ ω, 0 ≤ D n ω := fun ω => integral_nonneg fun s => sq_nonneg _
+    refine Integrable.mono' ((hDint n).add (integrable_const (1 : ℝ)))
+      (Real.continuous_sqrt.comp_aestronglyMeasurable (hDint n).1) (ae_of_all _ fun ω => ?_)
+    simp only [Pi.add_apply, Real.norm_eq_abs, abs_of_nonneg (Real.sqrt_nonneg _)]
+    nlinarith [sq_nonneg (Real.sqrt (D n ω) - 1), Real.sq_sqrt (hpt ω), Real.sqrt_nonneg (D n ω),
+      hpt ω]
+  refine tendstoInMeasure_of_ae_dist_le_of_tendsto_integral hQmeas hLmeas
+    (fun n => ((hsqrtint n).const_mul (2 * C * Real.sqrt (T : ℝ))).add (hDint n)) hdom ?_
+  have hbnd : ∀ n, (∫ ω, (2 * C * Real.sqrt (T : ℝ) * Real.sqrt (D n ω) + D n ω) ∂μ)
+      ≤ 2 * C * Real.sqrt (T : ℝ) * Real.sqrt (∫ ω, D n ω ∂μ) + ∫ ω, D n ω ∂μ := by
+    intro n
+    have hcf : (0 : ℝ) ≤ 2 * C * Real.sqrt (T : ℝ) :=
+      mul_nonneg (mul_nonneg (by norm_num) hC) (Real.sqrt_nonneg _)
+    rw [integral_add ((hsqrtint n).const_mul _) (hDint n), integral_const_mul]
+    gcongr
+    exact integral_sqrt_le_sqrt_integral (hDnn n) (hDint n)
+  have hg0 : Tendsto (fun n => 2 * C * Real.sqrt (T : ℝ) * Real.sqrt (∫ ω, D n ω ∂μ)
+      + ∫ ω, D n ω ∂μ) atTop (𝓝 0) := by
+    have h1 : Tendsto (fun n => Real.sqrt (∫ ω, D n ω ∂μ)) atTop (𝓝 0) := by
+      rw [← Real.sqrt_zero]; exact (Real.continuous_sqrt.tendsto 0).comp hD0
+    simpa using (h1.const_mul (2 * C * Real.sqrt (T : ℝ))).add hD0
+  refine squeeze_zero (fun n => integral_nonneg fun ω => ?_) hbnd hg0
+  exact add_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hC) (Real.sqrt_nonneg _))
+    (Real.sqrt_nonneg _)) (integral_nonneg fun s => sq_nonneg _)
+
 end Convergence
 
 end MathFin
