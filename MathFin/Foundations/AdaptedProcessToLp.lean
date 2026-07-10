@@ -94,4 +94,38 @@ theorem processToLp_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
       =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry σ :=
   (memLp_uncurry_of_bdd_adapted_cont T hBmeas hadap hcont hbdd).coeFn_toLp
 
+/-! ### The σ-realization for a bounded **predictable** integrand (Girsanov Rung 1)
+
+Dropping the continuity hypothesis: the Itô integral's domain is the *predictable* `L²` space, so a
+bounded process that is already strongly predictable needs no continuity to be realized — the
+`aestronglyMeasurable` it carries is exactly what `MemLp.of_bound` consumes. The continuous
+realization above is the special case `IsStronglyPredictable` = `isStronglyPredictable_of_bdd_adapted_cont`. -/
+
+/-- **A bounded predictable process is `L²` over `trimMeasure_T T`.** Predictable + bounded on the
+finite measure `trimMeasure_T T` ⟹ `MemLp.of_bound`; the continuity of
+`memLp_uncurry_of_bdd_adapted_cont` is dropped. -/
+theorem memLp_uncurry_of_bdd_predictable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
+    {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
+    MemLp (Function.uncurry σ) 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+  MemLp.of_bound hpred.aestronglyMeasurable C
+    (ae_of_all _ fun z ↦ by rw [Real.norm_eq_abs]; exact hbdd z.1 z.2)
+
+/-- **The σ-realization for a bounded predictable process.** Realizes a bounded strongly-predictable
+`σ : ℝ≥0 → Ω → ℝ` as an element of the Itô-integrand space `E = Lp ℝ 2 (trimMeasure_T T)` — the
+domain of `ItoIntegralCLM.itoIntegralCLM_T` — with no continuity assumption. -/
+noncomputable def processToLpPredictable (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
+    {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
+    Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas) :=
+  (memLp_uncurry_of_bdd_predictable T hBmeas hpred hbdd).toLp (Function.uncurry σ)
+
+/-- **The predictable realization agrees with `σ` a.e.** -/
+theorem processToLpPredictable_coeFn (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    {σ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) σ)
+    {C : ℝ} (hbdd : ∀ t ω, |σ t ω| ≤ C) :
+    processToLpPredictable (μ := μ) T hBmeas hpred hbdd
+      =ᵐ[trimMeasure_T (μ := μ) T hBmeas] Function.uncurry σ :=
+  (memLp_uncurry_of_bdd_predictable T hBmeas hpred hbdd).coeFn_toLp
+
 end MathFin

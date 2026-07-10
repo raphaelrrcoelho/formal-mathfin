@@ -257,10 +257,10 @@
     },
     "gir-thm-9.1.8": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-07-09",
-      "elapsed_s": 618.7,
-      "input_hash": "7f860d9b13547f6879fefe0105c09367b5f288a3a618e8f7345c755c4abd614d",
-      "verified_at_commit": "1ecffe8"
+      "date": "2026-07-10",
+      "elapsed_s": 62.0,
+      "input_hash": "7a3c1433842b303d996e8648f7f3b6680c0c91d095ac6bbdfcf5ea67665c41b1",
+      "verified_at_commit": "cf2c565"
     },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",

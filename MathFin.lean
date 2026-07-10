@@ -173,6 +173,11 @@ import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 import MathFin.Foundations.DriftRiemannConvergence
 -- Continuous adapted-θ Girsanov assembly (α4 (c)): convergence core toward Btheta_isQBrownianMotion_adapted
 import MathFin.Foundations.GirsanovAdaptedTheta
+-- Rung 1 (bounded predictable θ Girsanov, Route B): marshal a SimpleProcess into single-partition
+-- (s,c) form; generic simple-Doléans moment bounds; the predictable distributional Girsanov theorem.
+import MathFin.Foundations.SimpleProcessPartition
+import MathFin.Foundations.GirsanovSimpleDoleansMoments
+import MathFin.Foundations.GirsanovPredictableTheta
 import MathFin.Foundations.ItoFormulaCLM
 -- Summit A′: time-dependent Itô formula in L² — TD Taylor remainder vanishes,
 -- TD Riemann↔CLM bridge, and the assembly f(T,B_T) = f(0,B₀) + ∫f_x dB + ∫(f_t+½f_xx)ds
