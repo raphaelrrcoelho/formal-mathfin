@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (259 constants). Scope: proof-position MathFin names only —
+  corpus (260 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -25,6 +25,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.Btheta_isQBrownianMotion_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_isQBrownianMotion_adapted
+
+/-- info: 'MathFin.Btheta_isQBrownianMotion_predictable_of_bdd' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_isQBrownianMotion_predictable_of_bdd
 
 /-- info: 'MathFin.Btheta_map_eq_gaussianReal' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_map_eq_gaussianReal

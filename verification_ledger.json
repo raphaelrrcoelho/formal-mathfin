@@ -262,6 +262,13 @@
       "input_hash": "7a3c1433842b303d996e8648f7f3b6680c0c91d095ac6bbdfcf5ea67665c41b1",
       "verified_at_commit": "cf2c565"
     },
+    "gir-thm-9.1.8-predictable": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-10",
+      "elapsed_s": 92.9,
+      "input_hash": "c1d9656e695933fb5bc2138f54b168670d1996c2721be310dd61e328d1783e9f",
+      "verified_at_commit": "3ea2944"
+    },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-04",
@@ -2224,10 +2231,10 @@
     },
     "sde-picard-existence-uniqueness": {
       "benchmark_file": "stochastic_calculus.json",
-      "date": "2026-07-04",
-      "elapsed_s": 60.4,
-      "input_hash": "1a28223cfb6480d88a20aabd2981054d9acea639536f923ab431e47cdc34be06",
-      "verified_at_commit": "eb0aee9"
+      "date": "2026-07-10",
+      "elapsed_s": 171.9,
+      "input_hash": "8c9cf20f0f0a88872c60aa626c9a8d566596f906998030798914d78bc3018ac7",
+      "verified_at_commit": "3ea2944"
     }
   }
 }

@@ -145,6 +145,55 @@ lemma quad_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs
     _ = Real.exp (6 * K ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
 
 include hX in
+/-- **Uniform `L²` bound on the simple Doléans density.** `∫ (Z_{−c}_T)² ≤ exp(K²T)`, partition-free
+(the `L²` analogue of `quad_integral_simpleDoleans_le`): `(Z_{−c})² = E^{−2c}·exp(QV) ≤ exp(K²T)·E^{−2c}`
+(`simpleDoleansExp_scaled_eq` at `r = −1, −2` + `simpleQuadVar_le`), and `E^{−2c}` is a positive
+unit-mean density. This is the `M` the limit density's Fatou `L²` bound consumes. -/
+lemma sq_integral_simpleDoleans_le {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
+    (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
+    (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
+    ∫ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2 ∂P
+      ≤ Real.exp (K ^ 2 * (T : ℝ)) := by
+  obtain ⟨h2m, h2b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-2)
+  have hmean : ∫ ω, simpleDoleansExp (X := X) s (fun i ω => (-2 : ℝ) * c i ω) N T ω ∂P = 1 :=
+    simpleDoleansExp_integral_eq_one (X := X) s hs _ h2m h2b N T
+  have hint2 : Integrable (fun ω => simpleDoleansExp (X := X) s
+      (fun i ω => (-2 : ℝ) * c i ω) N T ω) P :=
+    (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ h2m h2b N).integrable T
+  have hpt : ∀ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2
+      ≤ Real.exp (K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
+          (fun i ω => (-2 : ℝ) * c i ω) N T ω := by
+    intro ω
+    rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two, ← Real.exp_add, ← Real.exp_add]
+    exact Real.exp_le_exp.mpr (by linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
+  calc ∫ ω, (simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) ^ 2 ∂P
+      ≤ ∫ ω, Real.exp (K ^ 2 * (T : ℝ)) * simpleDoleansExp (X := X) s
+          (fun i ω => (-2 : ℝ) * c i ω) N T ω ∂P :=
+        integral_mono_of_nonneg (ae_of_all _ fun ω => sq_nonneg _) (hint2.const_mul _)
+          (ae_of_all _ hpt)
+    _ = Real.exp (K ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
+
+include hX in
+/-- **The simple Doléans density is in `L²`** (the `MemLp` form of `sq_integral_simpleDoleans_le`),
+via the same `E^{−2c}` domination: `(Z_{−c})² ≤ exp(K²T)·E^{−2c}`, integrable. Feeds the predictable
+density limit's Fatou `L²` bound as the per-`n` `MemLp` hypothesis. -/
+lemma memLp_simpleDoleans_two {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}
+    (hc : ∀ i, StronglyMeasurable[(𝓕 (s i) : MeasurableSpace Ω)] (c i)) {K : ℝ}
+    (hc_bdd : ∀ i ω, |c i ω| ≤ K) (N : ℕ) {T : ℝ≥0} (hNT : T ≤ s N) :
+    MemLp (fun ω => simpleDoleansExp (X := X) s (fun i ω => -(c i ω)) N T ω) 2 P := by
+  obtain ⟨h2m, h2b⟩ := scaled_adapted_bounded (𝓕 := 𝓕) hc hc_bdd (-2)
+  have hZmeas := measurable_simpleDoleans (X := X) (P := P) hs hc hc_bdd N T
+  have hint2 : Integrable (fun ω => simpleDoleansExp (X := X) s
+      (fun i ω => (-2 : ℝ) * c i ω) N T ω) P :=
+    (simpleDoleansExp_isMartingale (X := X) (P := P) s hs _ h2m h2b N).integrable T
+  rw [memLp_two_iff_integrable_sq hZmeas.aestronglyMeasurable]
+  refine (hint2.const_mul (Real.exp (K ^ 2 * (T : ℝ)))).mono'
+    (hZmeas.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω => ?_)
+  rw [Real.norm_of_nonneg (sq_nonneg _), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two,
+    ← Real.exp_add, ← Real.exp_add]
+  exact Real.exp_le_exp.mpr (by linarith [simpleQuadVar_le (Ω := Ω) hs hs0 hc_bdd N hNT ω])
+
+include hX in
 /-- **Uniform `L⁴`-integrability of the simple Doléans density** (the domination behind
 `quad_integral_simpleDoleans_le`): `(Z_{−c})⁴ ≤ exp(6K²T)·E^{−4c}`, an integrable simple density. -/
 lemma integrable_simpleDoleans_four {s : ℕ → ℝ≥0} (hs : Monotone s) (hs0 : s 0 = 0) {c : ℕ → Ω → ℝ}

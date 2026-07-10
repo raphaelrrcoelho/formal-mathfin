@@ -60,6 +60,23 @@ breadth at this stage, and what the concrete next round would look like.
 > predictable class) plus an `L²→L¹` density-convergence step — its own focused effort (brick α4, see
 > `docs/plans/2026-07-06-girsanov-track-alpha.md`).
 
+> **Update (2026-07-10) — bounded PREDICTABLE θ CLOSED (Girsanov Rung 1, corpus 319).** The Girsanov
+> ladder extends one more rung: `Foundations/GirsanovPredictableTheta.Btheta_isQBrownianMotion_predictable_of_bdd`
+> (new `full` entry `gir-thm-9.1.8-predictable`) drops the path-continuity of `gir-thm-9.1.8` and proves
+> `B^θ_u = B_u + driftContinuousMod θ̂ u` is a `Q`-Brownian motion for a bounded **predictable** `θ` — the
+> honest domain of the Itô `L²` integral. The front half is a **Route-B marshalled** density approximation:
+> `θ` is approximated in `L²` by clamped dense simple processes marshalled into single-partition `(s,c)`
+> form (`Foundations/SimpleProcessPartition.lean`), so the simple-θ exponential-martingale identity applies
+> per `n`; where the continuous case had the drift converge *everywhere* (deterministic Riemann sums), here
+> **all three** integrand functionals — stochastic integral, drift, quadratic variation — converge only in
+> `μ`-measure (via the drift-modification tower's `L²`-slice energy identity), and are fused through a
+> **common a.e.-subsequence** (`exists_subseq_tendsto_ae₂`) into the same set-integral engine plus a generic
+> Fatou-`L²` limit (`memLp_two_of_subseq_ae_of_sq_bound`, used for both the density and the mixed-time
+> product), keyed on the partition-generic moment bounds of `Foundations/GirsanovSimpleDoleansMoments.lean`.
+> The limit drift is the genuinely-`𝓕`-adapted `driftContinuousMod θ̂` (=ᵐ `∫₀ᵘθds`), so no fresh
+> predictable-progressive lemma was needed. **Rung 2** (fully general `L²`/progressive θ under Novikov,
+> unbounded, `sc-thm-9.1.8`) remains `reduced_core`.
+
 > **Update (2026-07-09) — CONTINUOUS bounded-adapted θ FULLY CLOSED; Track-α COMPLETE (corpus 318).** Both
 > gating pieces named above landed, and `gir-thm-9.1.8` flips `reduced_core → full`:
 > `Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted` proves `B^θ_u = B_u + ∫₀ᵘθ ds` is a

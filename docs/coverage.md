@@ -26,7 +26,26 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-09, continuous-adapted Girsanov closes `gir-thm-9.1.8`):** corpus **318**,
+> **Live status (2026-07-10, bounded-PREDICTABLE Girsanov — Rung 1):** corpus **319**,
+> **286 full + 18 wrappers = 304/319 delivery-ready**, 15 reduced cores, 0 placeholders. New `full`
+> entry `gir-thm-9.1.8-predictable` (`girsanov_predictable_qbm`,
+> `Foundations/GirsanovPredictableTheta.Btheta_isQBrownianMotion_predictable_of_bdd`) **strengthens**
+> the continuous-adapted `gir-thm-9.1.8` to a bounded **predictable** `θ` — the honest domain of the Itô
+> `L²` integral, dropping the path-continuity assumption. `B^θ_u = B_u + driftContinuousMod θ̂ u` (the
+> genuinely-`𝓕`-adapted modification of `∫₀ᵘθ ds`) is a `Q`-Brownian motion under
+> `Q = μ.withDensity(exp(−∫₀ᵀθ dB − ½∫₀ᵀθ² ds))`. **Still spine-free**, over a Route-B marshalled
+> density approximation: `θ` is approximated in `L²` by clamped dense simple processes marshalled into
+> single-partition `(s,c)` form (so `isExpQMartingale_BthetaSimple` applies per `n`); the stochastic
+> integral, drift, AND quadratic variation each converge in `μ`-measure (via the drift-modification
+> tower's `L²`-slice energy identity), fused through a common a.e.-subsequence (`exists_subseq_tendsto_ae₂`)
+> into the same set-integral engine `tendsto_setIntegral_of_subseq_ae_of_sq_bound` plus a generic
+> Fatou-`L²` limit (`memLp_two_of_subseq_ae_of_sq_bound`), with the partition-generic uniform L⁴/L²
+> moment bounds of `GirsanovSimpleDoleansMoments`. Axioms-clean, `lake build` green (8860 jobs), gates +
+> ledger fresh. Girsanov ladder: constant → simple-adapted → continuous-adapted → **predictable (Rung 1)**;
+> only the strictly more general `L²`/progressive-`θ` under Novikov (unbounded, Rung 2) remains
+> `reduced_core`, at `sc-thm-9.1.8`.
+>
+> **Prior (2026-07-09, continuous-adapted Girsanov closes `gir-thm-9.1.8`):** corpus **318**,
 > **285 full + 18 wrappers = 303/318 delivery-ready**, 15 reduced cores, 0 placeholders. `gir-thm-9.1.8`
 > flips `reduced_core → full`: `girsanov_adapted_continuous_qbm`
 > (`Foundations/GirsanovAdaptedTheta.Btheta_isQBrownianMotion_adapted`) derives the complete Q-Brownian

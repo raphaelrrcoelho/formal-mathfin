@@ -74,6 +74,73 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-10 — corpus 319 — bounded-PREDICTABLE-θ Girsanov: `B^θ` is a `Q`-Brownian motion (Rung 1)
+
+**Scope**: the whole new `Foundations/GirsanovPredictableTheta.lean` (the bounded-predictable-θ assembly,
+`Btheta_isQBrownianMotion_predictable_of_bdd`, corpus `gir-thm-9.1.8-predictable` **full**, 318→319 /
+285→286 full), plus the two generic moment bounds added to `GirsanovSimpleDoleansMoments.lean`
+(`sq_integral_simpleDoleans_le`, `memLp_simpleDoleans_two`) and `driftContinuousMod_stronglyAdapted`
+in `DriftProcessPredictable.lean`. Reviewed by **two independent panel agents** (slop/idiom/coherence;
+architecture/clarity/first-principles/inspired/elegance), read-only, then maintainer-adjudicated against
+`grep`-confirmed usage and the green `lake build` (8860 jobs) + axiom-clean audit + fresh ledger. The
+panels were **not sycophantic** and **converged** on the same top slop (the strongest signal it is real):
+both independently confirmed a **byte-identical ~25-line prologue** duplicated between
+`tendstoInMeasure_marshalDrift` and `tendstoInMeasure_marshalQuadVar`. Over-escalation was filtered:
+`clampM_marshalMult_abs_le` (a consumed 10× rewrite-handle) and the `memLp_simpleDoleans_two` inline
+domination (a necessary verbose mirror; both `MemLp` and `∫≤M` are genuinely independent engine inputs)
+were checked and cleared, not flagged.
+
+**Upgrades executed this session** (during authoring, before the panel):
+- **(lens 4/2) one generic Fatou-`L²` principle, consumed twice.** `memLp_two_of_subseq_ae_of_sq_bound`
+  (uniform 2nd moment + one a.e.-subsequence ⟹ limit ∈ `L²`) is proved once and instantiated for *both*
+  the Doléans density (`memLp_ZTpred_two`) and the mixed-time product (`memLp_gpred_one`) — the limit-side
+  argument the continuous file (`memLp_ZT_two`) still hand-rolls once, factored here into a reusable lemma.
+- **(lens 2) the partition-generic back half feeds two consumers.** The `SimpleDoleansMoments` uniform
+  L⁴/L² bounds serve *both* the set-integral engine's `M` (`sq_integral_mixedProduct_le`) and the Fatou
+  limits (`sq_integral_simpleDoleans_le`) — one abstract `(s,c)` back half, no grid-vs-marshalled fork.
+- **(lens 3) dead code removed pre-merge.** `sq_integral_driftExp_le` was written for a `memLp_contD_two`
+  route later dissolved by Fatou-on-the-product; deleted before merge rather than left as an orphan.
+- **(lens 5/7) faithful benchmark statement.** The public `Btheta_isQBrownianMotion_predictable_of_bdd`
+  obtains its `L²` approximating sequence internally (`exists_approxSeq`), so the corpus entry's hypotheses
+  are the honest ones (bounded predictable θ), with no approximating-sequence artefact leaking into the
+  statement.
+
+**Refreshed ranked backlog** (owners = a future session's opening move; the top two are the highest-ROI
+coherence upgrades and pair naturally):
+1. **[HIGH, coherence] Wire the adapted case through `SimpleDoleansMoments`.** `GirsanovAdaptedTheta.lean`
+   still hand-rolls `simpleDoleansExp_{neg,scaled}_eq` / `sq_mul_le_half_add_pow4` (a *literal* duplicate of
+   `GirsanovSimpleDoleansMoments.lean:286`) / `driftSqSum_le` / `sq_integral_Zn_le` / `quad_integral_Zn_le`
+   / `memLp_Zn_two` / `integrable_{Zn,Dn}_four` — the grid-specialisation the generic tower now subsumes.
+   Add `simpleStochSum = riemannσ` / `simpleQuadVar = driftSqSum` bridges and delete ~10 grid lemmas; the
+   `SimpleDoleansMoments` sub-namespace name-clash is the visible symptom, and it dissolves with the merge.
+2. **[HIGH, coherence] Hoist `memLp_two_of_subseq_ae_of_sq_bound` to `UnifIntegralL2.lean`** (beside its
+   pair `tendsto_setIntegral_of_subseq_ae_of_sq_bound`). It sits in the *downstream* predictable file, so
+   the continuous `memLp_ZT_two` — the identical `lintegral`/`liminf` argument — *cannot* consume it (file
+   order). Move it upstream, retrofit both `memLp_ZT_two` and `memLp_ZTpred_two`, delete ~40 duplicated lines.
+3. **[MED, slop] Dedup the marshalled-convergence prologue.** `tendstoInMeasure_marshalDrift` vs
+   `_marshalQuadVar` share a byte-identical `θhat`/`W`/`D`/`hDnn`/`hDint`/`hD0`/`hg_prod`/`hg_slice` block.
+   Extract a private `slice_energy_facts (W) (g)` returning `(hDnn, hDint, hg_slice)` (generic in the step
+   sequence and the `Lp` integrand); `hD0` stays per-caller (marshalled-specific). ~25 lines removed.
+4. **[MED, architecture] Internalise `V`/`hV`.** The approximating sequence threads through 9 internal
+   declarations and leaks into `Btheta_isQBrownianMotion_predictable`, yet the conclusions are
+   `V`-independent and `driftContinuousMod` already canonicalises via `(approxSeq …).choose`. Mark the
+   `V`-taking versions `private` (or thread `(exists_approxSeq …).choose` internally) and expose only the
+   `_of_bdd` form. The `(μ := μ)` pinning itself is correct (`BthetaPred` genuinely depends on μ via the
+   trim-space representative) — keep it.
+5. **[LOW, coherence] `continuous_clampM`.** `stronglyMeasurable_clampM_marshalMult` re-derives
+   `Continuous (clampM C)` via `unfold clampM; fun_prop`; add `continuous_clampM` next to `measurable_clampM`
+   (`ItoIntegralBrownian.lean:73`) and consume it. Also drop the dead `set … with h` names
+   (`hr`/`hθhat`/`hW` in the two convergence lemmas).
+6. **[LOW, clarity] μ-independent benchmark corollary.** Optionally restate the headline on the honest
+   `B_u + ∫₀ᵘθ ds` (via the `driftContinuousMod_eq_setIntegral` a.e.-bridge) so the corpus statement does
+   not carry the trim-space representative. Defensible reuse today; the docstrings are already honest.
+
+**Evidence/context**: mechanical floor green (`lake build` 8860 jobs, `AxiomAuditGen` pins
+`Btheta_isQBrownianMotion_predictable_of_bdd` at the three standard axioms, ledger fresh, router+ledger
+tests pass). The two HIGH items are the same coherence debt from the other direction (generic-vs-grid
+duplication + a limit-side lemma stranded downstream) and are best done together as the next session's
+opening move on the continuous file.
+
 ## 2026-07-09 — corpus 318 — continuous bounded-adapted-θ Girsanov: `B^θ` is a `Q`-Brownian motion (Track-α closes)
 
 **Scope**: `Foundations/GirsanovAdaptedTheta.lean` (the α4 assembly, `Btheta_isQBrownianMotion_adapted`)

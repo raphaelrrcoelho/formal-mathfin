@@ -541,6 +541,526 @@ lemma tendstoInMeasure_marshalQuadVar (T : ℝ≥0) (hBmeas : ∀ t, Measurable 
   exact add_nonneg (mul_nonneg (mul_nonneg (mul_nonneg (by norm_num) hC) (Real.sqrt_nonneg _))
     (Real.sqrt_nonneg _)) (integral_nonneg fun s => sq_nonneg _)
 
+omit [IsProbabilityMeasure μ] in
+/-- **Common a.e.-subsequence from two convergences in measure.** Given `f → F` and `g → G` in
+measure and any subsequence `ns`, a single further subsequence `ms` makes *both* `f (ns (ms ·)) → F`
+and `g (ns (ms ·)) → G` a.e.: extract an a.e.-subsequence for `f` along `ns`, then a further one for
+`g` along `ns ∘ ms₁`; `f`'s a.e. limit survives restriction to the second subsequence. This is the
+diagonal that lets the predictable Doléans limit read `Zⁿ = exp(−stochⁿ − ½quadⁿ)` at the common
+a.e. limit. -/
+lemma exists_subseq_tendsto_ae₂ {f g : ℕ → Ω → ℝ} {F G : Ω → ℝ}
+    (hf : TendstoInMeasure μ f atTop F) (hg : TendstoInMeasure μ g atTop G)
+    (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
+    ∃ ms : ℕ → ℕ, StrictMono ms ∧
+      (∀ᵐ ω ∂μ, Tendsto (fun k => f (ns (ms k)) ω) atTop (𝓝 (F ω)))
+      ∧ (∀ᵐ ω ∂μ, Tendsto (fun k => g (ns (ms k)) ω) atTop (𝓝 (G ω))) := by
+  obtain ⟨a, ha, hfa⟩ := (show TendstoInMeasure μ (fun k => f (ns k)) atTop F from
+    fun ε hε => (hf ε hε).comp hns).exists_seq_tendsto_ae
+  obtain ⟨b, hb, hgb⟩ := (show TendstoInMeasure μ (fun k => g (ns (a k))) atTop G from
+    fun ε hε => (hg ε hε).comp (hns.comp ha.tendsto_atTop)).exists_seq_tendsto_ae
+  refine ⟨a ∘ b, ha.comp hb, ?_, hgb⟩
+  filter_upwards [hfa] with ω hω
+  exact hω.comp hb.tendsto_atTop
+
+omit [IsProbabilityMeasure μ] in
+/-- **Fatou `L²`-membership of an a.e.-subsequence limit.** If `fₙ ∈ L²` with a uniform second moment
+`∫ fₙ² ≤ M` and some subsequence has `f (msₖ) → g` a.e., then `g ∈ L²`: Fatou on the squared enorms
+`∫⁻ ‖g²‖ₑ ≤ liminf ∫⁻ ‖f(msₖ)²‖ₑ = liminf ∫ f(msₖ)² ≤ M < ∞`. The single limit-side principle behind
+both the predictable Doléans density and the mixed-time product being `L²`, keyed on the uniform
+moment bounds of `GirsanovSimpleDoleansMoments`. -/
+lemma memLp_two_of_subseq_ae_of_sq_bound {f : ℕ → Ω → ℝ} {g : Ω → ℝ}
+    (hf : ∀ n, MemLp (f n) 2 μ) (hmeas : ∀ n, Measurable (f n))
+    {M : ℝ} (hM : ∀ n, ∫ ω, (f n ω) ^ 2 ∂μ ≤ M)
+    (hsub : ∃ ms : ℕ → ℕ, ∀ᵐ ω ∂μ, Tendsto (fun k => f (ms k) ω) atTop (𝓝 (g ω))) :
+    MemLp g 2 μ := by
+  obtain ⟨ms, hae⟩ := hsub
+  have hgmeas : AEStronglyMeasurable g μ :=
+    aestronglyMeasurable_of_tendsto_ae atTop (fun k => (hmeas (ms k)).aestronglyMeasurable) hae
+  rw [memLp_two_iff_integrable_sq hgmeas]
+  refine ⟨hgmeas.pow 2, ?_⟩
+  rw [hasFiniteIntegral_iff_enorm]
+  have hsqbnd : ∀ k, ∫⁻ ω, ‖(f (ms k) ω) ^ 2‖ₑ ∂μ ≤ ENNReal.ofReal M := fun k => by
+    have hint_sq := (memLp_two_iff_integrable_sq (hf (ms k)).1).mp (hf (ms k))
+    calc ∫⁻ ω, ‖(f (ms k) ω) ^ 2‖ₑ ∂μ
+        = ∫⁻ ω, ENNReal.ofReal ((f (ms k) ω) ^ 2) ∂μ :=
+          lintegral_congr fun ω => by rw [Real.enorm_eq_ofReal (sq_nonneg _)]
+      _ = ENNReal.ofReal (∫ ω, (f (ms k) ω) ^ 2 ∂μ) :=
+          (ofReal_integral_eq_lintegral_ofReal hint_sq (ae_of_all _ fun ω => sq_nonneg _)).symm
+      _ ≤ ENNReal.ofReal M := ENNReal.ofReal_le_ofReal (hM (ms k))
+  have hlim : (fun ω => ‖(g ω) ^ 2‖ₑ)
+      =ᵐ[μ] fun ω => Filter.liminf (fun k => ‖(f (ms k) ω) ^ 2‖ₑ) atTop := by
+    filter_upwards [hae] with ω hω
+    exact ((hω.pow 2).enorm.liminf_eq).symm
+  rw [lintegral_congr_ae hlim]
+  exact ((lintegral_liminf_le (fun k => ((hmeas (ms k)).pow_const 2).enorm)).trans
+    ((liminf_le_liminf (Filter.Eventually.of_forall hsqbnd)).trans (liminf_const _).le)).trans_lt
+    ENNReal.ofReal_lt_top
+
 end Convergence
+
+/-! ## The predictable-θ assembly: limit objects and the `Q`-Brownian conclusion -/
+
+section Assembly
+
+variable {μ : Measure Ω} [IsProbabilityMeasure μ] (hB : IsPreBrownianReal B μ)
+
+/-- The predictable Itô integral `∫₀ᵀ θ dB` as a genuine function — a chosen `Lp`-representative of the
+CLM value `itoIntegralCLM_T θ̂`. Predictable analogue of `itoIntCont`. -/
+noncomputable def itoIntPred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
+    Ω → ℝ :=
+  ⇑(itoIntegralCLM_T hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))
+
+/-- The predictable limit Doléans density `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ̂²ds)` — the `contDoleansExp` of
+the predictable Itô integral and the sliced `L²` integrand realization `θ̂`. -/
+noncomputable def ZTpred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) :
+    Ω → ℝ :=
+  contDoleansExp (itoIntPred hB T hBmeas hpred hbdd)
+    (fun s ω => ⇑(processToLpPredictable (μ := μ) T hBmeas hpred hbdd) (s, ω)) T
+
+/-- The predictable drift-corrected process `B^θ_u = B_u + driftContinuousMod θ̂ u` — `driftContinuousMod`
+is the genuinely-`𝓕`-adapted modification of the honest drift `∫₀ᵘθ ds`. -/
+noncomputable def BthetaPred (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C)
+    (u : ℝ≥0) (ω : Ω) : ℝ :=
+  B u ω + driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u ω
+
+omit hB in
+/-- **Bridge: the marshalled stochastic sum is the elementary Itô sum of the step process.** With all
+marshalled partition points `≤ T`, the clamps `min(sⱼ,T)` in `simpleStochSum` drop, so it equals
+`itoSimple (marshalStepSP)` (`∑ clampM·ΔB`). This routes the stochastic exponent into the marshalled
+Itô convergence `tendstoInMeasure_marshalStochSum`. -/
+lemma simpleStochSum_marshalStepSP_eq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (hle : ∀ p ∈ V.value.support, p.2 ≤ T)
+    {C : ℝ} (hC : 0 ≤ C) {N : ℕ} (hmpN : marshalPart hBmeas T V N = T) (ω : Ω) :
+    simpleStochSum (X := B) (marshalPart hBmeas T V)
+        (fun i ω => clampM C (marshalMult hBmeas T V i ω)) N T ω
+      = itoSimple hBmeas (marshalStepSP hBmeas T V hle hC N).val ω := by
+  rw [itoSimple_marshalStepSP, simpleStochSum]
+  refine Finset.sum_congr rfl fun i hi => ?_
+  have hmono := marshalPart_mono hBmeas T V hle
+  rw [min_eq_left (le_trans (hmono (Finset.mem_range.mp hi)) hmpN.le),
+    min_eq_left (le_trans (hmono (le_of_lt (Finset.mem_range.mp hi))) hmpN.le)]
+
+/-- **The approximant densities converge a.e. along subsequences to `Z_T`.** For every subsequence
+`ns`, a further subsequence `ms` has `Zⁿ_T → Z_T` a.e.: `exists_subseq_tendsto_ae₂` fuses the stochastic
+exponent's convergence (`tendstoInMeasure_marshalStochSum`, bridged to `simpleStochSum`) with the
+quadratic variation's (`tendstoInMeasure_marshalQuadVar`), and `exp(−· − ½·)` (`simpleDoleansExp_neg_eq`)
+is pushed to the common a.e. limit. Predictable analogue of `tendsto_Zn_ae_subseq`. -/
+lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
+    (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
+    ∃ ms : ℕ → ℕ, StrictMono ms ∧ ∀ᵐ ω ∂μ, Tendsto (fun k =>
+        simpleDoleansExp (X := B) (marshalPart hBmeas T (V (ns (ms k))).val)
+          (fun i ω => -(clampM C (marshalMult hBmeas T (V (ns (ms k))).val i ω)))
+          ((marshalEndpoints hBmeas T (V (ns (ms k))).val).card - 1) T ω) atTop
+      (𝓝 (ZTpred hB T hBmeas hpred hbdd ω)) := by
+  set θhat := processToLpPredictable (μ := μ) T hBmeas hpred hbdd with hθhat
+  set N : ℕ → ℕ := fun n => (marshalEndpoints hBmeas T (V n).val).card - 1 with hN
+  have hmpN : ∀ n, marshalPart hBmeas T (V n).val (N n) = T :=
+    fun n => marshalPart_card_sub_one hBmeas T (V n).val (V n).property
+  -- stochastic exponent → `∫θdB` in measure (bridged from `itoSimple`)
+  have hstoch : TendstoInMeasure μ (fun n => simpleStochSum (X := B)
+      (marshalPart hBmeas T (V n).val)
+      (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω)) (N n) T) atTop
+      (⇑(itoIntegralCLM_T hB T hBmeas θhat)) := by
+    refine tendstoInMeasure_congr_left (fun n => ?_)
+      (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hC hbdd V hV)
+    exact ae_of_all _ fun ω =>
+      (simpleStochSum_marshalStepSP_eq hBmeas T (V n).val (V n).property hC (hmpN n) ω).symm
+  -- quadratic variation → `∫θ̂²` in measure
+  have hquad : TendstoInMeasure μ (fun n => simpleQuadVar (marshalPart hBmeas T (V n).val)
+      (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω)) (N n) T) atTop
+      (fun ω => ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure) :=
+    tendstoInMeasure_marshalQuadVar T hBmeas hpred hC hbdd V hV
+  obtain ⟨ms, hms, hstochae, hquadae⟩ := exists_subseq_tendsto_ae₂ hstoch hquad ns hns
+  refine ⟨ms, hms, ?_⟩
+  filter_upwards [hstochae, hquadae] with ω hωs hωq
+  have hZeq : ZTpred hB T hBmeas hpred hbdd ω
+      = Real.exp (-(⇑(itoIntegralCLM_T hB T hBmeas θhat) ω)
+        - 2⁻¹ * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑θhat (s, ω)) ^ 2 ∂timeMeasure) := by
+    simp only [ZTpred, contDoleansExp, itoIntPred, ← hθhat]
+  rw [hZeq]
+  refine ((Real.continuous_exp.tendsto _).comp ((hωs.neg).sub (hωq.const_mul (2⁻¹ : ℝ)))).congr
+    (fun k => ?_)
+  simp only [Function.comp_def]
+  exact (SimpleDoleansMoments.simpleDoleansExp_neg_eq (X := B)
+    (marshalPart hBmeas T (V (ns (ms k))).val)
+    (fun i ω => clampM C (marshalMult hBmeas T (V (ns (ms k))).val i ω))
+    (N (ns (ms k))) T ω).symm
+
+/-! ### The clamped-multiplier side conditions and the limit-density `L²`/`L¹`/mean facts -/
+
+omit hB in
+/-- The clamped marshalled multiplier `clampM C ∘ (marshalMult V)ᵢ` is `𝓕_{sᵢ}`-adapted (`clampM C`
+continuous, `marshalMult` adapted) — the `hc` side condition of the simple-Doléans moment bounds. -/
+lemma stronglyMeasurable_clampM_marshalMult (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0) {C : ℝ}
+    (V : TBoundedSP T hBmeas) (i : ℕ) :
+    StronglyMeasurable[(natFiltration hBmeas (marshalPart hBmeas T V.val i) : MeasurableSpace Ω)]
+      (fun ω => clampM C (marshalMult hBmeas T V.val i ω)) :=
+  (show Continuous (clampM C) by unfold clampM; fun_prop).comp_stronglyMeasurable
+    (stronglyMeasurable_marshalMult hBmeas T V.val i)
+
+omit hB in
+/-- `|clampM C ∘ (marshalMult V)ᵢ| ≤ C`, the `hc_bdd` side condition. -/
+lemma clampM_marshalMult_abs_le {C : ℝ} (hC : 0 ≤ C) (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    (V : TBoundedSP T hBmeas) (i : ℕ) (ω : Ω) :
+    |clampM C (marshalMult hBmeas T V.val i ω)| ≤ C := clampM_abs_le hC _
+
+include hB in
+/-- **The predictable limit density is in `L²`.** Fatou (`memLp_two_of_subseq_ae_of_sq_bound`) on the
+approximant densities: each `Zⁿ ∈ L²` (`memLp_simpleDoleans_two`), `∫(Zⁿ)² ≤ exp(C²T)`
+(`sq_integral_simpleDoleans_le`), and `Zⁿ → Z_T` a.e. along a subsequence (`tendsto_ZTpred_ae_subseq`). -/
+lemma memLp_ZTpred_two (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
+    MemLp (ZTpred hB T hBmeas hpred hbdd) 2 μ := by
+  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  refine memLp_two_of_subseq_ae_of_sq_bound (f := fun n ω =>
+      simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
+        (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω)
+    (fun n => SimpleDoleansMoments.memLp_simpleDoleans_two (X := B) (P := μ)
+      (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (marshalPart_zero hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
+    (fun n => SimpleDoleansMoments.measurable_simpleDoleans (X := B) (P := μ)
+      (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T)
+    (M := Real.exp (C ^ 2 * (T : ℝ)))
+    (fun n => SimpleDoleansMoments.sq_integral_simpleDoleans_le (X := B) (P := μ)
+      (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (marshalPart_zero hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge) ?_
+  obtain ⟨ms, _, hae⟩ := tendsto_ZTpred_ae_subseq hB T hBmeas hpred hC hbdd V hV id tendsto_id
+  simp only [id_eq] at hae
+  exact ⟨ms, hae⟩
+
+include hB in
+/-- **The predictable limit density is in `L¹`** (`L² ⊆ L¹` on the probability measure). -/
+lemma memLp_ZTpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
+    MemLp (ZTpred hB T hBmeas hpred hbdd) 1 μ :=
+  (memLp_ZTpred_two hB hBmeas T hpred hC hbdd V hV).mono_exponent (by norm_num)
+
+include hB in
+/-- **The mixed-time product converges to `g = D_u·Z_T` a.e. along a subsequence (the engine's `hsub`).**
+Refine the density a.e.-subsequence (`tendsto_ZTpred_ae_subseq`) by the marshalled drift's convergence
+in measure (`tendstoInMeasure_marshalDrift`, bridged to `simpleDrift`): a further subsequence makes the
+drift converge a.e. too, then `exp(a·(B + drift) − ½a²·)·Zⁿ` converges to `exp(a·B^θ − ½a²·)·Z_T` a.e. -/
+lemma tendsto_fnPred_ae_subseq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
+    (a : ℝ) {u : ℝ≥0} (huT : u ≤ T) (ns : ℕ → ℕ) (hns : Tendsto ns atTop atTop) :
+    ∃ ms : ℕ → ℕ, ∀ᵐ ω ∂μ, Tendsto (fun k =>
+        Real.exp (a * (B u ω + simpleDrift (marshalPart hBmeas T (V (ns (ms k))).val)
+          (fun i ω => clampM C (marshalMult hBmeas T (V (ns (ms k))).val i ω))
+          ((marshalEndpoints hBmeas T (V (ns (ms k))).val).card - 1) u ω) - a ^ 2 * (u : ℝ) / 2)
+        * simpleDoleansExp (X := B) (marshalPart hBmeas T (V (ns (ms k))).val)
+          (fun i ω => -(clampM C (marshalMult hBmeas T (V (ns (ms k))).val i ω)))
+          ((marshalEndpoints hBmeas T (V (ns (ms k))).val).card - 1) T ω) atTop
+      (𝓝 (Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2)
+        * ZTpred hB T hBmeas hpred hbdd ω)) := by
+  obtain ⟨ms', hms', hZae⟩ := tendsto_ZTpred_ae_subseq hB T hBmeas hpred hC hbdd V hV ns hns
+  have hdrift : TendstoInMeasure μ (fun n => simpleDrift (marshalPart hBmeas T (V n).val)
+      (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+      ((marshalEndpoints hBmeas T (V n).val).card - 1) u) atTop
+      (driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u) := by
+    refine tendstoInMeasure_congr_left (fun n => ?_)
+      (tendstoInMeasure_marshalDrift T hBmeas hpred hC hbdd V hV huT)
+    exact ae_of_all _ fun ω => (simpleDrift_marshalStepSP_eq hBmeas T (V n).val (V n).property hC
+      ((marshalEndpoints hBmeas T (V n).val).card - 1) u ω).symm
+  obtain ⟨b, hb, hDae⟩ := (show TendstoInMeasure μ (fun k =>
+      simpleDrift (marshalPart hBmeas T (V (ns (ms' k))).val)
+        (fun i ω => clampM C (marshalMult hBmeas T (V (ns (ms' k))).val i ω))
+        ((marshalEndpoints hBmeas T (V (ns (ms' k))).val).card - 1) u) atTop
+      (driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u) from
+    fun ε hε => (hdrift ε hε).comp (hns.comp hms'.tendsto_atTop)).exists_seq_tendsto_ae
+  refine ⟨fun k => ms' (b k), ?_⟩
+  filter_upwards [hZae, hDae] with ω hZω hDω
+  have hZ := hZω.comp hb.tendsto_atTop
+  have hD : Tendsto (fun k => Real.exp (a * (B u ω
+      + simpleDrift (marshalPart hBmeas T (V (ns (ms' (b k)))).val)
+        (fun i ω => clampM C (marshalMult hBmeas T (V (ns (ms' (b k)))).val i ω))
+        ((marshalEndpoints hBmeas T (V (ns (ms' (b k)))).val).card - 1) u ω)
+      - a ^ 2 * (u : ℝ) / 2)) atTop
+      (𝓝 (Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2))) :=
+    (Real.continuous_exp.tendsto _).comp (((hDω.const_add (B u ω)).const_mul a).sub_const _)
+  exact hD.mul hZ
+
+include hB in
+/-- **The limit `g = D_u·Z_T` is in `L¹`.** Fatou (`memLp_two_of_subseq_ae_of_sq_bound`) gives
+`g ∈ L²` from the mixed-product `L²` membership + uniform second moment (`memLp_mixedProduct_two`,
+`sq_integral_mixedProduct_le`) and the product a.e.-subsequence (`tendsto_fnPred_ae_subseq`), then
+`L² ⊆ L¹`. Predictable analogue of `memLp_g_one`. -/
+lemma memLp_gpred_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd)))
+    (a : ℝ) {u : ℝ≥0} (huT : u ≤ T) :
+    MemLp (fun ω => Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2)
+      * ZTpred hB T hBmeas hpred hbdd ω) 1 μ := by
+  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  refine (memLp_two_of_subseq_ae_of_sq_bound (f := fun n ω =>
+      Real.exp (a * (B u ω + simpleDrift (marshalPart hBmeas T (V n).val)
+        (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) u ω) - a ^ 2 * (u : ℝ) / 2)
+      * simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
+        (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω)
+    (fun n => SimpleDoleansMoments.memLp_mixedProduct_two (X := B) (P := μ)
+      (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (marshalPart_zero hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
+    (fun n => (SimpleDoleansMoments.measurable_driftExp (X := B) (P := μ) (𝓕 := natFiltration hBmeas)
+      (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) a _ u).mul
+      (SimpleDoleansMoments.measurable_simpleDoleans (X := B) (P := μ) (𝓕 := natFiltration hBmeas)
+        (marshalPart_mono hBmeas T (V n).val (V n).property)
+        (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T))
+    (M := 2⁻¹ * (Real.exp (4 * |a| * C * (T : ℝ)) * (∫ ω, Real.exp (4 * a * B u ω) ∂μ)
+        + Real.exp (6 * C ^ 2 * (T : ℝ))))
+    (fun n => SimpleDoleansMoments.sq_integral_mixedProduct_le (X := B) (P := μ)
+      (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (marshalPart_zero hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
+    (tendsto_fnPred_ae_subseq hB hBmeas T hpred hC hbdd V hV a huT id tendsto_id
+      |>.imp fun ms hms => by simpa only [id_eq] using hms)).mono_exponent (by norm_num)
+
+include hB in
+/-- **Unit mean of the predictable limit density: `∫ Z_T = 1`.** The a.e.-subsequence engine gives
+`∫ Zⁿ → ∫ Z_T`, and `∫ Zⁿ = 1` (`simpleDoleansExp_integral_eq_one`), so the limit is `1`. -/
+lemma integral_ZTpred_eq_one (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
+    ∫ ω, ZTpred hB T hBmeas hpred hbdd ω ∂μ = 1 := by
+  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hone : ∀ n, ∫ ω, simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
+      (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+      ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω ∂μ = 1 := fun n =>
+    simpleDoleansExp_integral_eq_one (X := B)
+      (marshalPart hBmeas T (V n).val) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+      (fun i => (stronglyMeasurable_clampM_marshalMult hBmeas T (V n) i).neg)
+      (fun i ω => by rw [abs_neg]; exact clampM_marshalMult_abs_le hC hBmeas T (V n) i ω)
+      ((marshalEndpoints hBmeas T (V n).val).card - 1) T
+  have hlim := tendsto_setIntegral_of_subseq_ae_of_sq_bound (f := fun n ω =>
+      simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
+        (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω)
+    (fun n => SimpleDoleansMoments.memLp_simpleDoleans_two (X := B) (P := μ)
+      (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (marshalPart_zero hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
+    (M := Real.exp (C ^ 2 * (T : ℝ)))
+    (fun n => SimpleDoleansMoments.sq_integral_simpleDoleans_le (X := B) (P := μ)
+      (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+      (marshalPart_zero hBmeas T (V n).val (V n).property)
+      (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+      _ (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
+    (memLp_ZTpred_one hB hBmeas T hpred hC hbdd V hV)
+    (fun ns hns => (tendsto_ZTpred_ae_subseq hB T hBmeas hpred hC hbdd V hV ns hns).imp
+      fun ms h => h.2) Set.univ
+  simp only [setIntegral_univ, hone] at hlim
+  exact tendsto_nhds_unique hlim tendsto_const_nhds
+
+include hB in
+/-- **The predictable Girsanov measure is a probability measure.** `Q = μ.withDensity(Z_T)` with the
+positive, unit-mean, `L¹` density `Z_T`. -/
+lemma isProbabilityMeasure_predGirsanov (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
+    {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
+    IsProbabilityMeasure (μ.withDensity fun ω =>
+      ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) := by
+  refine ⟨?_⟩
+  rw [withDensity_apply _ MeasurableSet.univ, Measure.restrict_univ,
+    ← ofReal_integral_eq_lintegral_ofReal ((memLp_ZTpred_one hB hBmeas T hpred hC hbdd V hV).integrable le_rfl)
+      (ae_of_all _ fun ω => (contDoleansExp_pos _ _ _ _).le),
+    integral_ZTpred_eq_one hB hBmeas T hpred hC hbdd V hV, ENNReal.ofReal_one]
+
+/-! ### The exponential-martingale data and the `Q`-Brownian conclusion -/
+
+include hB in
+/-- **Predictable bounded-θ exponential-martingale data.** For a bounded (`|θ| ≤ C`) predictable market
+price of risk `θ` — the honest domain of the Itô `L²` integral — under `Q = μ.withDensity(Z_T)` with the
+Doléans density `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)`, the drift-corrected process
+`B^θ_u = B_u + driftContinuousMod θ̂ u` is `𝓕`-adapted, starts at `0` a.e. `Q`, and every
+`exp(a·B^θ − ½a²·)` is a `Q`-martingale on `[0,T]`. The martingale field is the limit of the simple-θ
+identity (`isExpQMartingale_BthetaSimple` on the clamped marshalled approximants `Ṽⁿ`): transported to
+`μ`, both sides pass through the a.e.-subsequence engine (`tendsto_setIntegral_of_subseq_ae_of_sq_bound`),
+and the simple identity forces the limits equal. Predictable analogue of `isExpQMartingale_BthetaCont`,
+with the marshalled density-approximation front half in place of the uniform grid. -/
+theorem isExpQMartingale_BthetaPredictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
+    IsExpQMartingale (μ.withDensity fun ω => ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))
+      (natFiltration hBmeas) (BthetaPred (μ := μ) T hBmeas hpred hbdd) T := by
+  haveI hFB : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
+  have hZTaesm : AEStronglyMeasurable (ZTpred hB T hBmeas hpred hbdd) μ :=
+    (memLp_ZTpred_one hB hBmeas T hpred hC hbdd V hV).1
+  have hZTpos : ∀ ω, 0 ≤ ZTpred hB T hBmeas hpred hbdd ω := fun ω => (contDoleansExp_pos _ _ _ _).le
+  have hB0 : ∀ᵐ ω ∂μ, B 0 ω = 0 := by
+    have hmap := Measure.map_apply (μ := μ) (hBmeas 0) (measurableSet_singleton (0 : ℝ)).compl
+    rw [(hFB.hasLaw_eval 0).map_eq, gaussianReal_zero_var,
+      Measure.dirac_apply' _ (measurableSet_singleton (0 : ℝ)).compl] at hmap
+    rw [show B 0 ⁻¹' {(0 : ℝ)}ᶜ = {ω | B 0 ω ≠ 0} from by ext ω; simp [Set.mem_preimage]] at hmap
+    exact ae_iff.mpr (by simpa using hmap.symm)
+  have hdrift0 : ∀ᵐ ω ∂μ, driftContinuousMod T hBmeas
+      (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) 0 ω = 0 := by
+    filter_upwards [driftContinuousMod_eq_setIntegral T hBmeas
+      (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) (zero_le : (0 : ℝ≥0) ≤ T)] with ω hω
+    rw [hω]; simp
+  refine ⟨fun u => (hFB.stronglyAdapted u).add (driftContinuousMod_stronglyAdapted T hBmeas
+    (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u), ?_, ?_⟩
+  · filter_upwards [(withDensity_absolutelyContinuous _ _).ae_le hB0,
+      (withDensity_absolutelyContinuous _ _).ae_le hdrift0] with ω hω hωd
+    simp only [BthetaPred, Pi.zero_apply, hω, hωd, add_zero]
+  · intro a s' t' hst' ht'T A hA
+    have hAmΩ : MeasurableSet A := (natFiltration hBmeas).le s' A hA
+    have engine : ∀ (u : ℝ≥0), u ≤ T →
+        Tendsto (fun n => ∫ ω in A, (Real.exp (a * (B u ω
+            + simpleDrift (marshalPart hBmeas T (V n).val)
+              (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+              ((marshalEndpoints hBmeas T (V n).val).card - 1) u ω) - a ^ 2 * (u : ℝ) / 2)
+          * simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
+              (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+              ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω) ∂μ) atTop
+          (𝓝 (∫ ω in A, (Real.exp (a * BthetaPred (μ := μ) T hBmeas hpred hbdd u ω - a ^ 2 * (u : ℝ) / 2)
+            * ZTpred hB T hBmeas hpred hbdd ω) ∂μ)) := fun u huT =>
+      tendsto_setIntegral_of_subseq_ae_of_sq_bound
+        (fun n => SimpleDoleansMoments.memLp_mixedProduct_two (X := B) (P := μ)
+          (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+          (marshalPart_zero hBmeas T (V n).val (V n).property)
+          (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+          a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
+        (M := 2⁻¹ * (Real.exp (4 * |a| * C * (T : ℝ)) * (∫ ω, Real.exp (4 * a * B u ω) ∂μ)
+            + Real.exp (6 * C ^ 2 * (T : ℝ))))
+        (fun n => SimpleDoleansMoments.sq_integral_mixedProduct_le (X := B) (P := μ)
+          (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+          (marshalPart_zero hBmeas T (V n).val (V n).property)
+          (stronglyMeasurable_clampM_marshalMult hBmeas T (V n)) (clampM_marshalMult_abs_le hC hBmeas T (V n))
+          a _ huT (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge)
+        (memLp_gpred_one hB hBmeas T hpred hC hbdd V hV a huT)
+        (fun ns hns => tendsto_fnPred_ae_subseq hB hBmeas T hpred hC hbdd V hV a huT ns hns) A
+    have hsimple : ∀ n, ∫ ω in A, (Real.exp (a * (B t' ω
+          + simpleDrift (marshalPart hBmeas T (V n).val)
+            (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+            ((marshalEndpoints hBmeas T (V n).val).card - 1) t' ω) - a ^ 2 * (t' : ℝ) / 2)
+        * simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
+            (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+            ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω) ∂μ
+        = ∫ ω in A, (Real.exp (a * (B s' ω
+            + simpleDrift (marshalPart hBmeas T (V n).val)
+              (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+              ((marshalEndpoints hBmeas T (V n).val).card - 1) s' ω) - a ^ 2 * (s' : ℝ) / 2)
+          * simpleDoleansExp (X := B) (marshalPart hBmeas T (V n).val)
+              (fun i ω => -(clampM C (marshalMult hBmeas T (V n).val i ω)))
+              ((marshalEndpoints hBmeas T (V n).val).card - 1) T ω) ∂μ := by
+      intro n
+      have hfield := (isExpQMartingale_BthetaSimple (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
+        (marshalPart hBmeas T (V n).val) (marshalPart_mono hBmeas T (V n).val (V n).property)
+        (marshalPart_zero hBmeas T (V n).val (V n).property)
+        (fun i ω => clampM C (marshalMult hBmeas T (V n).val i ω))
+        (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+        (clampM_marshalMult_abs_le hC hBmeas T (V n))
+        ((marshalEndpoints hBmeas T (V n).val).card - 1)
+        (marshalPart_card_sub_one hBmeas T (V n).val (V n).property).ge).martingale a hst' ht'T hA
+      rwa [setIntegral_withDensity_ofReal (SimpleDoleansMoments.measurable_simpleDoleans (X := B)
+            (P := μ) (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+            (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+            (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T).aestronglyMeasurable
+          (fun ω => (simpleDoleansExp_pos _ _ _ _ ω).le) _ hAmΩ,
+        setIntegral_withDensity_ofReal (SimpleDoleansMoments.measurable_simpleDoleans (X := B)
+            (P := μ) (𝓕 := natFiltration hBmeas) (marshalPart_mono hBmeas T (V n).val (V n).property)
+            (stronglyMeasurable_clampM_marshalMult hBmeas T (V n))
+            (clampM_marshalMult_abs_le hC hBmeas T (V n)) _ T).aestronglyMeasurable
+          (fun ω => (simpleDoleansExp_pos _ _ _ _ ω).le) _ hAmΩ] at hfield
+    rw [setIntegral_withDensity_ofReal hZTaesm hZTpos _ hAmΩ,
+      setIntegral_withDensity_ofReal hZTaesm hZTpos _ hAmΩ]
+    exact tendsto_nhds_unique (engine t' ht'T)
+      ((engine s' (hst'.trans ht'T)).congr'
+        (Filter.eventually_atTop.mpr ⟨0, fun n _ => (hsimple n).symm⟩))
+
+include hB in
+/-- **Predictable bounded-θ distributional Girsanov: `B^θ` is a `Q`-Brownian motion.** For a bounded
+**predictable** market price of risk `θ` (the honest `L²` Itô-integrand domain, no continuity), under
+`Q = μ.withDensity(Z_T)` with the Doléans density `Z_T = exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds)`, the drift-corrected
+process `B^θ_u = B_u + driftContinuousMod θ̂ u` is a `Q`-Brownian motion on `[0,T]`: zero start, Gaussian
+increments `𝒩(0,t−s)`, and independence of disjoint increments. One application of the exponential
+characterization `isQBrownianMotion_of_expMartingale` to `isExpQMartingale_BthetaPredictable` — the
+bounded-predictable case (Rung 1), strengthening the bounded-adapted-continuous
+`Btheta_isQBrownianMotion_adapted` to the full honest Itô-integrand domain. -/
+theorem Btheta_isQBrownianMotion_predictable (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
+    (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (V : ℕ → TBoundedSP T hBmeas)
+    (hV : Tendsto (fun n => simpleAssembly_T (μ := μ) T hBmeas (V n)) atTop
+      (𝓝 (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) :
+    (∀ᵐ ω ∂(μ.withDensity fun ω => ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)),
+        BthetaPred (μ := μ) T hBmeas hpred hbdd 0 ω = 0)
+      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
+          (μ.withDensity fun ω => ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)).map
+            (fun ω => BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
+              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω) = gaussianReal 0 (t - s))
+      ∧ (∀ ⦃s t u v : ℝ≥0⦄, s ≤ t → t ≤ u → u ≤ v → v ≤ T →
+          IndepFun (fun ω => BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
+              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω)
+            (fun ω => BthetaPred (μ := μ) T hBmeas hpred hbdd v ω
+              - BthetaPred (μ := μ) T hBmeas hpred hbdd u ω)
+            (μ.withDensity fun ω => ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))) := by
+  haveI : IsProbabilityMeasure (μ.withDensity fun ω =>
+      ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)) :=
+    isProbabilityMeasure_predGirsanov hB hBmeas T hpred hC hbdd V hV
+  exact isQBrownianMotion_of_expMartingale
+    (isExpQMartingale_BthetaPredictable hB hBmeas hpred hC hbdd T V hV)
+
+include hB in
+/-- **Bounded-predictable-θ Girsanov, clean form.** For a bounded predictable market price of risk `θ`
+(no approximating sequence in the hypotheses — one is obtained internally via `exists_approxSeq`, and
+the conclusion `ZTpred`/`BthetaPred` depends only on `θ`), the drift-corrected process
+`B^θ_u = B_u + driftContinuousMod θ̂ u` is a `Q`-Brownian motion on `[0,T]` under
+`Q = μ.withDensity(exp(−∫₀ᵀθdB − ½∫₀ᵀθ²ds))`. The benchmark-facing form of
+`Btheta_isQBrownianMotion_predictable`. -/
+theorem Btheta_isQBrownianMotion_predictable_of_bdd (hBmeas : ∀ t, Measurable (B t))
+    {θ : ℝ≥0 → Ω → ℝ} (hpred : IsStronglyPredictable (natFiltration hBmeas) θ) {C : ℝ} (hC : 0 ≤ C)
+    (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
+    (∀ᵐ ω ∂(μ.withDensity fun ω => ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)),
+        BthetaPred (μ := μ) T hBmeas hpred hbdd 0 ω = 0)
+      ∧ (∀ ⦃s t : ℝ≥0⦄, s ≤ t → t ≤ T →
+          (μ.withDensity fun ω => ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω)).map
+            (fun ω => BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
+              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω) = gaussianReal 0 (t - s))
+      ∧ (∀ ⦃s t u v : ℝ≥0⦄, s ≤ t → t ≤ u → u ≤ v → v ≤ T →
+          IndepFun (fun ω => BthetaPred (μ := μ) T hBmeas hpred hbdd t ω
+              - BthetaPred (μ := μ) T hBmeas hpred hbdd s ω)
+            (fun ω => BthetaPred (μ := μ) T hBmeas hpred hbdd v ω
+              - BthetaPred (μ := μ) T hBmeas hpred hbdd u ω)
+            (μ.withDensity fun ω => ENNReal.ofReal (ZTpred hB T hBmeas hpred hbdd ω))) := by
+  obtain ⟨V, hV⟩ := exists_approxSeq (μ := μ) hBmeas T hpred hbdd
+  exact Btheta_isQBrownianMotion_predictable hB hBmeas hpred hC hbdd T V hV
+
+end Assembly
 
 end MathFin

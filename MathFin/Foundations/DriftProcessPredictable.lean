@@ -148,6 +148,20 @@ theorem driftContinuousMod_isStronglyPredictable (T : ℝ≥0) (hBmeas : ∀ t, 
     driftSimpleProcess_isStronglyPredictable hBmeas
       ((approxSeq T hBmeas φ).choose n).val)
 
+/-- **The assembled drift is fixed-time `𝓕`-adapted.** At each `t`, `driftContinuousMod T φ t` is the
+pointwise `limUnder` of the elementary drifts `driftSimpleProcess (approxSeq φ)ₙ t`, each
+`𝓕 t`-strongly-measurable (`driftSimpleProcess_stronglyAdapted`), and `StronglyMeasurable.limUnder`
+lifts adaptedness to the limit — the pointwise-in-time companion of
+`driftContinuousMod_isStronglyPredictable`, feeding the `IsExpQMartingale.adapted` field of the
+predictable-θ Girsanov theorem. -/
+theorem driftContinuousMod_stronglyAdapted (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
+    (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas)) :
+    StronglyAdapted (natFiltration hBmeas) (driftContinuousMod T hBmeas φ) := by
+  intro t
+  letI : MeasurableSpace Ω := (natFiltration hBmeas t : MeasurableSpace Ω)
+  exact StronglyMeasurable.limUnder fun n =>
+    driftSimpleProcess_stronglyAdapted hBmeas ((approxSeq T hBmeas φ).choose n).val t
+
 /-! ## Part 2 — the drift assembled into `E` (`L²`, energy bound, linearity) -/
 
 /-- **Bridge to the honest Lebesgue integral.** The elementary drift is literally the
