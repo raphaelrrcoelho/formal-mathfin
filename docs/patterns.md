@@ -551,3 +551,66 @@ the split is exactly three `neg_mul` reconciliations at the bridges
 (`PDEFromFeynmanKac` ×2, `MertonJumpDiffusion` ×1), accepted permanently in
 round 6 — a unifying sweep would re-stale a large ledger slice for zero
 mathematical content.
+
+## Mathlib house-style golf (2026-07-10, BM PR #484 maintainer review)
+
+Distilled from a BrownianMotion maintainer's review of our upstream PR #484
+(`isStoppingTime_tauMeshLift` + `tendsto_iSup_setIntegral_tauMesh_zero` in
+`DoobMeyer.lean`). The review was ALL idiomatic golf plus one architectural
+lift — no math errors — so it reads as the repo's binding house style. Every
+item was verified compiling at the v4.31.0 pin. These map directly onto our own
+zero-slop / idiomatic-register / coherence / concept-clarity lenses; adopt them
+in MathFin proofs too, not just upstream contributions.
+
+### The golf checklist (most transferable first)
+
+1. **Bare proof term over `by exact` / `by exact_mod_cast`.** If `h : A` and the
+   goal is defeq to `A`, pass `h`. A subtype `mesh ι n = {x : ι // x ∈ …}` has
+   `v ≤ u` *defeq* to `(↑v : ι) ≤ ↑u`, so `le_trans hv hu` needs no cast. A stray
+   `exact_mod_cast` usually masks an already-defeq coercion.
+2. **Let Lean insert coercions; never hand-write them.** `WithTop ι`,
+   subtype→base, `ℝ≥0 → ℝ`, `⊥`/`⊤` coercions elaborate from context in `≤`,
+   set-builder, and argument position: `{ω | f ω ≤ (s : WithTop ι)}` → `… ≤ s`;
+   `fun c => (c : ℝ) / 2` → `fun c => c / 2`; `fun u => ((u : ι) ≤ s)` →
+   `fun u => u ≤ s`.
+3. **Bind ∀-vars in the `have` signature, not via `intro`.**
+   `have h (v : T) : P v := by …` beats `have h : ∀ v, P v := by intro v; …`.
+4. **Fold `have h := e; simp … at h; exact h` into `simpa … using e`.**
+5. **No gratuitous `classical`.** `LinearOrder ι` already gives `DecidableLE`, so
+   `Finset.univ.filter (· ≤ s)` needs none. Reach for it only for a genuinely
+   nonconstructive `Decidable`/choice.
+6. **`set x := e with hx` only if you rewrite with `hx`.** To merely unfold `x`
+   inside the proof, drop `with hx` and use `simp [x]` (the local def is
+   simp-usable). Fewer named artifacts; often deletes a helper `have` outright.
+7. **Minimal typeclass, matching neighbours.** Don't assume `IsFiniteMeasure`
+   when the callees need only `SigmaFiniteFiltration`; check each dependency's
+   actual requirement. Instance implications
+   (`[IsFiniteMeasure μ] → SigmaFiniteFiltration μ 𝓕`) mean weakening a lemma
+   never breaks a stronger-hypothesis caller. Over-assuming is a coherence smell.
+8. **Fewer `have`s; mix forward + backward reasoning** (`suffices`,
+   `show … from`, `simp`/`simpa`) so the argument's SHAPE stays visible. A long
+   ladder of `have`s hides structure. (Balance against concept-clarity — don't
+   over-golf past readability.)
+9. **Lift the reusable abstraction; don't tailor the proof to one call site.**
+   The review's headline. Extract the bespoke ε–δ core into a general,
+   Mathlib-worthy lemma
+   (`UniformIntegrable.eLpNorm_tendsto_zero_of_iSup_measure_tendsto_zero`), prove
+   it once, apply it. Work out the honest side-conditions (sets measurable;
+   `p ≠ ∞`, since an L∞ indicator norm does not shrink with the measure). This is
+   our anti-wrapper / consume-the-idiomatic-lemma value aimed at our own code.
+10. **Delete parens the parser doesn't need.**
+
+### Local-build gotchas hit while verifying (transferable)
+
+- `set x := e` (no `with`) makes `x` opaque to `simpa [T] using <term>` when the
+  term mentions `e` unfolded — `simp [T]` rewrote `T` *inside* `T.max'`, so
+  `↑({…}.max')` no longer matched the goal's folded `↑x`. Fix: bind `x ∈ T` first
+  (`have hu_mem : u ∈ T := T.max'_mem hTne`), THEN `simpa [T]` unfolds only the
+  filter, leaving `x` intact.
+- `ae_all_iff.2 fun t => ht t` needs the target's type ascription
+  (`have h : ∀ᵐ ω, ∀ t : mesh ι k, …`) or Lean infers the index as the uncountable
+  base `ι` → `Countable ι` synthesis failure. Keep the `have`'s ascription.
+- `UniformIntegrable` is a `def` reducing to `And`, so `hd.myLemma` dot-notation
+  resolves against `And` (`invalidField`). Call `UniformIntegrable.myLemma hd …`
+  by full name; positional field access `hd.2.1` for the `UnifIntegrable`
+  component is fine.

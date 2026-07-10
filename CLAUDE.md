@@ -233,6 +233,26 @@ The gate (the repo contract applies unchanged to machine-found proofs):
   environment; OOM-kills inside batch 1 at any cgroup cap < ~14 GB, confirmed
   2026-06-07), so it is `workflow_dispatch`-only and wants a >16 GB box.
 
+**Idiomatic register — the Mathlib house-style checklist** (full form +
+before/after in `docs/patterns.md` → "Mathlib house-style golf"): when polishing
+any proof to final form, apply the golf idioms a Mathlib/BrownianMotion
+maintainer holds code to (distilled from our PR #484 review). They are the
+zero-slop + idiomatic-register + coherence lenses made concrete, and apply to
+MathFin proofs, not just upstream BM:
+- bare proof TERM over `by exact` / `by exact_mod_cast` when the goal is defeq (a
+  stray `exact_mod_cast` masks an already-defeq coercion);
+- let Lean insert coercions (subtype→base, `WithTop`, `ℝ≥0→ℝ`, `⊥`/`⊤`) — never
+  hand-write `↑`;
+- bind ∀-vars in the `have` signature (`have h (v : T) : P v := …`), not `intro`;
+- fold `have h := e; simp at h; exact h` into `simpa … using e`;
+- no gratuitous `classical` (`LinearOrder` already gives `DecidableLE`);
+- `set x := e` WITHOUT `with hx` unless you rewrite by `hx` (unfold via `simp [x]`);
+- MINIMAL typeclass matching the callees (`SigmaFiniteFiltration`, not
+  `IsFiniteMeasure`, when that is all they need);
+- and the headline — LIFT the reusable abstraction: extract the bespoke core into
+  a general, Mathlib-worthy lemma and apply it, rather than tailoring the proof to
+  one call site.
+
 ## Architecture
 
 Single Lean 4 verification backend, driven by a thin Python orchestrator.
