@@ -3598,6 +3598,27 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: FX Esscher tilt + independent-normal decomposition + Gaussian MGF cross-term. Re-export from MathFin. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-futures-contango",
+      "name": "Contango / Backwardation Sign Structure",
+      "description": "For the cost-of-carry forward F(T) = S*e^{(r-delta)T}: contango F>S iff r>delta, backwardation F<S iff r<delta, and basis convergence F(0)=S.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Futures.Contango\n\nopen MathFin\n\n/-- Contango/backwardation sign structure + basis convergence for the\n    cost-of-carry forward F(T) = S*exp((r-delta)T). -/\ntheorem mf_futures_contango {S r delta T : ℝ} (hS : 0 < S) (hT : 0 < T) :\n    (S < S * Real.exp ((r - delta) * T) ↔ delta < r) ∧\n    (S * Real.exp ((r - delta) * T) < S ↔ r < delta) ∧\n    S * Real.exp ((r - delta) * 0) = S :=\n  MathFin.contango_backwardation_basis hS hT\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Cost-of-carry / contango-backwardation (Hull, futures)",
+        "difficulty": "good-first",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Futures/Contango.lean (Real.exp monotonicity in the effective drift). Re-export from MathFin. Axioms-clean.",
+        "provenance": {
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 88
+        }
+      }
     }
   ]
 }

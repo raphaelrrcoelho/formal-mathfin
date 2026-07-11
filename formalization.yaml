@@ -25,7 +25,7 @@ sources:
     author_contacted: n/a
     prior_work: ""
 status:
-  scope: 324 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 310 delivery-ready (full + library-wrapper).
+  scope: 325 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 311 delivery-ready (full + library-wrapper).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -46,7 +46,7 @@ automation:
         - labs-leanstral-1-5
       framework: "mathfin-foundry: probe / vibe <-> lean-lsp-mcp"
       tool_setup: token-paced GitHub Actions pipeline; on a pass it opens a ready-for-review PR on formal-mathfin that a human reviews (8-lens values panel) and merges
-      prompting_notes: 0 Leanstral-scouted proof(s) merged
+      prompting_notes: "1 Leanstral-scouted proof(s) merged (closing #88)"
   spend_usd: 0 (Mistral Labs beta)
   notes: "scout, not author: the pipeline opens the PR; a human reviews and merges, so no machine proof enters the library unreviewed"
 fidelity:
@@ -100,9 +100,9 @@ alignment:
       status: full 6 · wrapper 3 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: mathematical_finance (Saporito, Stochastic Processes)
-      lean: 225 statements
+      lean: 226 statements
       module: benchmarks/mathematical_finance.json
-      status: full 224 · wrapper 1 · reduced 0 · placeholder 0
+      status: full 225 · wrapper 1 · reduced 0 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: poisson_processes (Saporito, Stochastic Processes)
       lean: 5 statements
