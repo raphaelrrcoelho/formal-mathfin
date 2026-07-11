@@ -26,7 +26,18 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-11, finance-breadth sprint):** corpus **324**,
+> **Live status (2026-07-11, survival-model foundation):** corpus **326**,
+> **294 full + 18 wrappers = 312/326 delivery-ready**, 14 reduced cores, 0 placeholders. Two new
+> `full` entries open the life-contingencies foundation (issue #112): the survival-ratio keystone
+> `mf-survival-ccdf-ratio` (`tpₓ = S_X(x+t)/S_X(x)` for `t ≥ 0` — the conditional-probability
+> definition of `survive`, built on Mathlib's conditional measure `cond`, collapses to the ratio)
+> and `mf-survival-ccdf-zero` (`S_X(0) = 1`), in `Actuarial/SurvivalModel`. **Provenance:** the
+> design and proofs are our own, in this library's Mathlib idiom; Yosuke Ito's Isabelle/HOL AFP
+> entry *Actuarial Mathematics* (`Survival_Model`, BSD) was consulted as a source for the classical
+> result set and is cited, with the author's kind permission. The disclosure is mechanical —
+> `metadata.provenance.source == afp-actuarial-mathematics`, counted in `formalization.yaml`.
+>
+> **Prior (2026-07-11, finance-breadth sprint):** corpus **324**,
 > **292 full + 18 wrappers = 310/324 delivery-ready**, 14 reduced cores, 0 placeholders. Five new
 > `full` finance entries land and one `reduced_core` flips to `full`, so `mathematical_finance`
 > is now **224/225 full**: (1) the **n-date geometric-Asian** option — driver law

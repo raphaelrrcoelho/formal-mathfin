@@ -1816,6 +1816,20 @@
       "input_hash": "4e44fc1c9be6a8232540f5572b1f867bbd9d96dfcaebeca39d13c3506b0a01ae",
       "verified_at_commit": "bfa3834"
     },
+    "mf-survival-ccdf-ratio": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 8.3,
+      "input_hash": "4bb09ff98379384ef36cdeeaaf1bc3aea28253afd8e3f243c4e79bce856f52b3",
+      "verified_at_commit": "986d976"
+    },
+    "mf-survival-ccdf-zero": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 242.3,
+      "input_hash": "a30215af1f02db6ba7bcedb312b4a19c7a95f92a4c1736805b8201301ceae5e9",
+      "verified_at_commit": "986d976"
+    },
     "mf-survival-pos": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-11",

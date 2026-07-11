@@ -3598,6 +3598,48 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof: FX Esscher tilt + independent-normal decomposition + Gaussian MGF cross-term. Re-export from MathFin. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-survival-ccdf-ratio",
+      "name": "Survival Ratio tpₓ = S_X(x+t)/S_X(x)",
+      "description": "Keystone of the survival model (Ito's ccdfTx_ccdfX): the conditional survival probability tpₓ = P(X>x+t | X>x) equals the ratio S_X(x+t)/S_X(x) of unconditional survival probabilities, for t ≥ 0.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.SurvivalModel\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin.SurvivalModel\n\n/-- **Survival ratio** `tpₓ = S_X(x+t) / S_X(x)` for `t ≥ 0` — the keystone of the\nsurvival model (Ito's `ccdfTx_ccdfX`): conditioning on survival to age `x`, a further\n`t` years of survival has probability the ratio of the two unconditional survival\nprobabilities. Re-exports `MathFin.SurvivalModel.survive_eq_survivalFunction_ratio`. -/\ntheorem survival_ratio\n    {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ}\n    (hX : Measurable X) (x : ℝ) {t : ℝ} (ht : 0 ≤ t) :\n    survive P X t x = survivalFunction P X (x + t) / survivalFunction P X x :=\n  MathFin.SurvivalModel.survive_eq_survivalFunction_ratio hX x ht\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Yosuke Ito, AFP Actuarial Mathematics, Survival_Model (ccdfTx_ccdfX)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, our own design: the conditional survival probability, defined via Mathlib's conditional measure cond, collapses to the survival-function ratio through cond_apply and the sub-event alive(x+t) ⊆ alive(x). The AFP entry (Ito, Actuarial Mathematics, Survival_Model) was consulted as a source and is cited. Axioms-clean.",
+        "provenance": {
+          "source": "afp-actuarial-mathematics",
+          "issue": 112,
+          "upstream": "Yosuke Ito, AFP Actuarial Mathematics (Survival_Model), BSD — consulted as a source, cited"
+        }
+      }
+    },
+    {
+      "id": "mf-survival-ccdf-zero",
+      "name": "Survival Function at Age Zero S_X(0)=1",
+      "description": "Ito's ccdfX_0_1: the survival function of the age at death is 1 at age 0, since X > 0 almost surely.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.SurvivalModel\n\nopen MeasureTheory ProbabilityTheory\nopen MathFin.SurvivalModel\n\n/-- **`S_X(0) = 1`**: everyone is alive at age `0`, since the age at death `X > 0`\nalmost surely — Ito's `ccdfX_0_1`. Re-exports `MathFin.SurvivalModel.survivalFunction_zero`. -/\ntheorem survival_at_zero\n    {Ω : Type*} [MeasurableSpace Ω] {P : Measure Ω} [IsProbabilityMeasure P] {X : Ω → ℝ}\n    (hpos : ∀ᵐ ω ∂P, 0 < X ω) :\n    survivalFunction P X 0 = 1 :=\n  MathFin.SurvivalModel.survivalFunction_zero hpos\n"
+      },
+      "metadata": {
+        "chapter": 11,
+        "reference": "Yosuke Ito, AFP Actuarial Mathematics, Survival_Model (ccdfX_0_1)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof, our own design: X > 0 a.e. makes {X > 0} an ae-full event, so P{X>0} = 1 via measure_congr on the ae-equality to univ. The AFP entry (Ito, Actuarial Mathematics, Survival_Model) was consulted as a source and is cited. Axioms-clean.",
+        "provenance": {
+          "source": "afp-actuarial-mathematics",
+          "issue": 112,
+          "upstream": "Yosuke Ito, AFP Actuarial Mathematics (Survival_Model), BSD — consulted as a source, cited"
+        }
+      }
     }
   ]
 }

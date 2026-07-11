@@ -58,6 +58,29 @@ def _machine_note(doc):
     raise AssertionError("machine method not found")
 
 
+def _afp_note(doc):
+    for m in doc["automation"]["methods"]:
+        if "AFP" in m.get("prompting_notes", ""):
+            return m["prompting_notes"]
+    raise AssertionError("AFP re-formalization method not found")
+
+
+def test_afp_count_matches_corpus_provenance():
+    # the AFP-ported count is MECHANICAL: it reports the number of live corpus
+    # entries carrying provenance.source == "afp-actuarial-mathematics", so the
+    # "translated, not independently derived" disclosure can never drift.
+    import glob
+    import json
+    n = 0
+    for f in glob.glob(os.path.join(ROOT, "benchmarks", "*.json")):
+        data = json.load(open(f, encoding="utf-8"))
+        for t in (data.get("theorems", data) if isinstance(data, dict) else data):
+            prov = (t.get("metadata") or {}).get("provenance") or {}
+            if prov.get("source") == "afp-actuarial-mathematics":
+                n += 1
+    assert _afp_note(F.build_doc(ROOT)).startswith(f"{n} proof(s) authored in our own design")
+
+
 def test_autoform_provenance_count_is_mechanical(tmp_path):
     # a benchmark entry the pipeline scouted (provenance marker) is COUNTED, not
     # hand-set — so the automation disclosure can never drift from the truth.

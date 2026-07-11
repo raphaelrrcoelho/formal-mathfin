@@ -133,6 +133,12 @@ def build_doc(root: str) -> dict:
     # drift from a hand-set "0" once machine-scouted proofs start merging.
     autoform_count = 0
     autoform_issues: list = []
+    # provenance: entries re-formalized (translated + cited) from an external
+    # formalization carry metadata.provenance.source == "afp-actuarial-mathematics".
+    # Counting them keeps the "these are translations, not independent derivations"
+    # disclosure MECHANICAL — it cannot drift from a hand-set number.
+    afp_count = 0
+    afp_issues: list = []
     for base, t in _theorems(root):
         n += 1
         md = t.get("metadata") or {}
@@ -143,6 +149,10 @@ def build_doc(root: str) -> dict:
             autoform_count += 1
             if prov.get("issue") is not None:
                 autoform_issues.append(prov["issue"])
+        elif prov.get("source") == "afp-actuarial-mathematics":
+            afp_count += 1
+            if prov.get("issue") is not None:
+                afp_issues.append(prov["issue"])
         d = by_file.setdefault(base, {"n": 0, "full": 0, "library_wrapper": 0,
                                       "reduced_core": 0, "placeholder": 0,
                                       "domain": t.get("domain", "")})
@@ -154,6 +164,11 @@ def build_doc(root: str) -> dict:
     if autoform_issues:
         issues = ", ".join("#" + str(i) for i in sorted(set(autoform_issues)))
         autoform_note += f" (closing {issues})"
+    afp_note = (f"{afp_count} proof(s) authored in our own design, with Yosuke Ito's AFP "
+                f"'Actuarial Mathematics' (Survival_Model, BSD) consulted as a source and cited")
+    if afp_issues:
+        issues = ", ".join("#" + str(i) for i in sorted(set(afp_issues)))
+        afp_note += f" (issues {issues})"
 
     proj = meta.get("project", {})
     project = {
@@ -224,6 +239,15 @@ def build_doc(root: str) -> dict:
                                    "ready-for-review PR on formal-mathfin that a human reviews "
                                    "(8-lens values panel) and merges"),
                     "prompting_notes": autoform_note,
+                },
+                {
+                    "method": "own design, external source consulted (cited)",
+                    "models": [],
+                    "framework": ("Lean 4 + Mathlib, this library's conventions; an Isabelle/HOL "
+                                  "AFP entry consulted as a source for the classical result set"),
+                    "tool_setup": ("provenance.source == afp-actuarial-mathematics; per-file "
+                                   "citation header; cited with the author's permission"),
+                    "prompting_notes": afp_note,
                 },
             ],
             "spend_usd": "0 (Mistral Labs beta)",

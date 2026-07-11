@@ -651,3 +651,23 @@ in MathFin proofs too, not just upstream contributions.
   goal's plain `AddCommGroup`), or `id` unfolding — `simpa`'s weaker post-simp
   matching fails with a type mismatch. Build-verify every simpa-fold; the daemon's
   `lean-check` can pass one that `lake build` later rejects.
+
+## Provenance header for source-consulted proofs
+
+When a proof is developed with an external formalization or textbook as a *source*
+(not a template — our design and Mathlib idiom lead; see the values doctrine), the file
+carries an attribution block in its copyright header and the benchmark entry a machine-checkable
+provenance marker, so the "our design, source consulted" claim is honest and cannot drift.
+
+- **File header** (after `Authors:`), e.g. `MathFin/Actuarial/SurvivalModel.lean`:
+  > The definitions and proofs here are our own, following this library's conventions … `<Source>`
+  > … was consulted as a source for the classical result set, and is cited here with thanks and
+  > with the author's kind permission.
+
+  State the design as OURS; cite the source with its license and (where applicable) the author's
+  permission. Never "Mathematical design © <them>" or "translated/re-formalized from".
+- **Benchmark entry**: `metadata.provenance.source: "<slug>"` (e.g. `afp-actuarial-mathematics`),
+  optionally `issue` + `upstream`. `tools/formalization_yaml.py` counts these per source and emits a
+  mechanical disclosure ("N proof(s) authored in our own design, with … consulted as a source and
+  cited"); `tests/test_formalization_yaml.py` pins the count so it tracks the live corpus.
+- **coverage.md**: one disclosure line per source-consulted batch.

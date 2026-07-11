@@ -413,6 +413,8 @@ import MathFin.Actuarial.Mortality
 import MathFin.Actuarial.CompoundPoisson
 -- Compound-Poisson aggregate-loss MGF: iid-sum MGF composed with the Poisson pgf
 import MathFin.Actuarial.CompoundPoissonMGF
+-- Survival model (re-formalized from Yosuke Ito's AFP `Survival_Model`, BSD, cited)
+import MathFin.Actuarial.SurvivalModel
 
 -- Upstream (Degenne BrownianMotion) modules consumed ONLY by benchmark
 -- wrappers, imported here so `lake build` puts them in the build graph —
