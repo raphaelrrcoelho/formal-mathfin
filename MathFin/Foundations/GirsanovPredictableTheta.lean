@@ -562,40 +562,6 @@ lemma exists_subseq_tendsto_ae₂ {f g : ℕ → Ω → ℝ} {F G : Ω → ℝ}
   filter_upwards [hfa] with ω hω
   exact hω.comp hb.tendsto_atTop
 
-omit [IsProbabilityMeasure μ] in
-/-- **Fatou `L²`-membership of an a.e.-subsequence limit.** If `fₙ ∈ L²` with a uniform second moment
-`∫ fₙ² ≤ M` and some subsequence has `f (msₖ) → g` a.e., then `g ∈ L²`: Fatou on the squared enorms
-`∫⁻ ‖g²‖ₑ ≤ liminf ∫⁻ ‖f(msₖ)²‖ₑ = liminf ∫ f(msₖ)² ≤ M < ∞`. The single limit-side principle behind
-both the predictable Doléans density and the mixed-time product being `L²`, keyed on the uniform
-moment bounds of `GirsanovSimpleDoleansMoments`. -/
-lemma memLp_two_of_subseq_ae_of_sq_bound {f : ℕ → Ω → ℝ} {g : Ω → ℝ}
-    (hf : ∀ n, MemLp (f n) 2 μ) (hmeas : ∀ n, Measurable (f n))
-    {M : ℝ} (hM : ∀ n, ∫ ω, (f n ω) ^ 2 ∂μ ≤ M)
-    (hsub : ∃ ms : ℕ → ℕ, ∀ᵐ ω ∂μ, Tendsto (fun k ↦ f (ms k) ω) atTop (𝓝 (g ω))) :
-    MemLp g 2 μ := by
-  obtain ⟨ms, hae⟩ := hsub
-  have hgmeas : AEStronglyMeasurable g μ :=
-    aestronglyMeasurable_of_tendsto_ae atTop (fun k ↦ (hmeas (ms k)).aestronglyMeasurable) hae
-  rw [memLp_two_iff_integrable_sq hgmeas]
-  refine ⟨hgmeas.pow 2, ?_⟩
-  rw [hasFiniteIntegral_iff_enorm]
-  have hsqbnd : ∀ k, ∫⁻ ω, ‖(f (ms k) ω) ^ 2‖ₑ ∂μ ≤ ENNReal.ofReal M := fun k ↦ by
-    have hint_sq := (memLp_two_iff_integrable_sq (hf (ms k)).1).mp (hf (ms k))
-    calc ∫⁻ ω, ‖(f (ms k) ω) ^ 2‖ₑ ∂μ
-        = ∫⁻ ω, ENNReal.ofReal ((f (ms k) ω) ^ 2) ∂μ :=
-          lintegral_congr fun ω ↦ by rw [Real.enorm_eq_ofReal (sq_nonneg _)]
-      _ = ENNReal.ofReal (∫ ω, (f (ms k) ω) ^ 2 ∂μ) :=
-          (ofReal_integral_eq_lintegral_ofReal hint_sq (ae_of_all _ fun ω ↦ sq_nonneg _)).symm
-      _ ≤ ENNReal.ofReal M := ENNReal.ofReal_le_ofReal (hM (ms k))
-  have hlim : (fun ω ↦ ‖(g ω) ^ 2‖ₑ)
-      =ᵐ[μ] fun ω ↦ Filter.liminf (fun k ↦ ‖(f (ms k) ω) ^ 2‖ₑ) atTop := by
-    filter_upwards [hae] with ω hω
-    exact ((hω.pow 2).enorm.liminf_eq).symm
-  rw [lintegral_congr_ae hlim]
-  exact ((lintegral_liminf_le (fun k ↦ ((hmeas (ms k)).pow_const 2).enorm)).trans
-    ((liminf_le_liminf (Filter.Eventually.of_forall hsqbnd)).trans (liminf_const _).le)).trans_lt
-    ENNReal.ofReal_lt_top
-
 end Convergence
 
 /-! ## The predictable-θ assembly: limit objects and the `Q`-Brownian conclusion -/

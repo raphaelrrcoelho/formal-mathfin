@@ -360,9 +360,12 @@ classical maximal-distribution counting identity
 
   `|{ω : HitsLevel a ω}| = 2 · |{ω : a ≤ walkPos ω n}| − |{ω : walkPos ω n = a}|`
 
-for `a ≥ 0`. This is the headline result of the reflection principle in
-its application to barrier-option pricing: the cardinality of paths that
-*ever* exceed level `a` is computable in terms of the *endpoint* distribution.
+for `a ≥ 0`. The bijection above together with the discrete intermediate value
+theorem *reduces* this maximal-distribution identity to the endpoint
+distribution — the mechanism behind barrier-option pricing. This file delivers
+that bijection (`reflectionPrincipleEquiv`) and the IVT direction
+(`walkPos_reflectAfter_endpoint`); the `Fintype.card` identity is their
+immediate corollary and is not separately stated here.
 -/
 
 /-- **Step relation**: the walk's position at time `k + 1` equals the position

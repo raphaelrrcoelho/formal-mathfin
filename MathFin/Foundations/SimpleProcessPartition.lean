@@ -9,6 +9,7 @@ public import MathFin.Foundations.GirsanovSimpleTheta
 public import MathFin.Foundations.AdaptedProcessToLp
 public import MathFin.Foundations.ItoIntegralProcess
 public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
+public import MathFin.Foundations.UnifIntegrableL2
 
 /-! # Marshalling a `SimpleProcess` into single-partition `(s,c)` form (Girsanov Rung 1, Route B)
 
@@ -591,17 +592,6 @@ theorem tendsto_itoAssembly_marshalStepSP (hB : IsPreBrownianReal B μ) (T : ℝ
   simpa only [Function.comp_def, itoIntegralCLM_T_simpleAssembly_T] using
     ((itoIntegralCLM_T hB T hBmeas).continuous.tendsto _).comp
       (tendsto_simpleAssembly_marshalStepSP T hBmeas hpred hC hbdd V hV)
-
-omit [IsProbabilityMeasure μ] in
-/-- Replacing each `f n` by an a.e.-equal `f' n` preserves convergence in measure. -/
-lemma tendstoInMeasure_congr_left {E : Type*} [MetricSpace E] {f f' : ℕ → Ω → E} {g : Ω → E}
-    (h : ∀ n, f n =ᵐ[μ] f' n) (hfg : TendstoInMeasure μ f atTop g) :
-    TendstoInMeasure μ f' atTop g := by
-  intro ε hε
-  refine (hfg ε hε).congr fun n ↦ measure_congr ?_
-  rw [Filter.eventuallyEq_set]
-  filter_upwards [h n] with x hx
-  simp only [hx]
 
 /-- **A raw approximating sequence for `θ̂`.** From the density of the simple-process embedding, there
 is a sequence `V : ℕ → TBoundedSP` with `simpleAssembly_T (V n) → θ̂`. -/

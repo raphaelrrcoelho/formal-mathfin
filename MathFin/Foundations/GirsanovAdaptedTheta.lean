@@ -56,18 +56,6 @@ omit mΩ in
 lemma contDoleansExp_pos (W : Ω → ℝ) (θ : ℝ≥0 → Ω → ℝ) (T : ℝ≥0) (ω : Ω) :
     0 < contDoleansExp W θ T ω := Real.exp_pos _
 
-omit [IsProbabilityMeasure μ] in
-/-- `TendstoInMeasure` only sees a.e.-classes of the sequence: replacing each `f n` by an
-a.e.-equal `f' n` preserves convergence in measure. -/
-lemma tendstoInMeasure_congr_left {E : Type*} [MetricSpace E] {f f' : ℕ → Ω → E} {g : Ω → E}
-    (h : ∀ n, f n =ᵐ[μ] f' n) (hfg : TendstoInMeasure μ f atTop g) :
-    TendstoInMeasure μ f' atTop g := by
-  intro ε hε
-  refine (hfg ε hε).congr fun n ↦ measure_congr ?_
-  rw [Filter.eventuallyEq_set]
-  filter_upwards [h n] with x hx
-  simp only [hx]
-
 variable (hB : IsPreBrownianReal B μ)
 
 /-- The Itô integral `∫₀ᵀ θ dB` as a genuine function — the chosen `Lp`-representative of
@@ -312,52 +300,19 @@ lemma integrable_Zn (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → 
     n).integrable T
 
 include hB in
-/-- **The continuous density is in `L²`.** By Fatou on the squares of an a.e.-convergent approximant
-subsequence: `∫⁻ (Z_T)² ≤ liminf ∫⁻ (Zⁿ)² = liminf ∫ (Zⁿ)² ≤ exp(C²T) < ∞` (`sq_integral_Zn_le`). -/
+/-- **The continuous density is in `L²`.** The generic Fatou-`L²` principle
+(`memLp_two_of_subseq_ae_of_sq_bound`) on the grid approximants `Zⁿ`: `Zⁿ ∈ L²` (`memLp_Zn_two`), a
+uniform second moment `∫ (Zⁿ)² ≤ exp(C²T)` (`sq_integral_Zn_le`), and an a.e.-convergent subsequence
+`Zⁿ → Z_T` (`tendsto_Zn_ae_subseq`). -/
 lemma memLp_ZT_two (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
-    MemLp (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T) 2 μ := by
-  obtain ⟨ms, hae⟩ := tendsto_Zn_ae_subseq hB hBmeas hadap hcont hbdd T id tendsto_id
-  simp only [id_eq] at hae
-  have hZTmeas : AEStronglyMeasurable
-      (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T) μ :=
-    aestronglyMeasurable_of_tendsto_ae atTop
-      (fun k ↦ (measurable_Zn hB hBmeas hadap hbdd T (ms k)).aestronglyMeasurable) hae
-  rw [memLp_two_iff_integrable_sq hZTmeas]
-  refine ⟨aestronglyMeasurable_of_tendsto_ae atTop
-    (fun k ↦ ((measurable_Zn hB hBmeas hadap hbdd T (ms k)).pow_const 2).aestronglyMeasurable)
-    (by filter_upwards [hae] with ω hω; exact hω.pow 2), ?_⟩
-  rw [hasFiniteIntegral_iff_enorm]
-  have hsqbnd : ∀ k, ∫⁻ ω, ‖(simpleDoleansExp (X := B) (unifPart T (ms k))
-      (fun i ω ↦ -(θ (unifPart T (ms k) i) ω)) (ms k) T ω) ^ 2‖ₑ ∂μ
-      ≤ ENNReal.ofReal (Real.exp (C ^ 2 * (T : ℝ))) := by
-    intro k
-    have hint_sq := (memLp_two_iff_integrable_sq
-      (measurable_Zn hB hBmeas hadap hbdd T (ms k)).aestronglyMeasurable).mp
-        (memLp_Zn_two hB hBmeas hadap hbdd T (ms k))
-    calc ∫⁻ ω, ‖(simpleDoleansExp (X := B) (unifPart T (ms k))
-            (fun i ω ↦ -(θ (unifPart T (ms k) i) ω)) (ms k) T ω) ^ 2‖ₑ ∂μ
-        = ∫⁻ ω, ENNReal.ofReal ((simpleDoleansExp (X := B) (unifPart T (ms k))
-            (fun i ω ↦ -(θ (unifPart T (ms k) i) ω)) (ms k) T ω) ^ 2) ∂μ :=
-          lintegral_congr fun ω ↦ by rw [Real.enorm_eq_ofReal (sq_nonneg _)]
-      _ = ENNReal.ofReal (∫ ω, (simpleDoleansExp (X := B) (unifPart T (ms k))
-            (fun i ω ↦ -(θ (unifPart T (ms k) i) ω)) (ms k) T ω) ^ 2 ∂μ) :=
-          (ofReal_integral_eq_lintegral_ofReal hint_sq (ae_of_all _ fun ω ↦ sq_nonneg _)).symm
-      _ ≤ ENNReal.ofReal (Real.exp (C ^ 2 * (T : ℝ))) :=
-          ENNReal.ofReal_le_ofReal (sq_integral_Zn_le hB hBmeas hadap hbdd T (ms k))
-  have hlim : (fun ω ↦ ‖(contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T ω) ^ 2‖ₑ)
-      =ᵐ[μ] fun ω ↦ Filter.liminf (fun k ↦ ‖(simpleDoleansExp (X := B) (unifPart T (ms k))
-        (fun i ω ↦ -(θ (unifPart T (ms k) i) ω)) (ms k) T ω) ^ 2‖ₑ) atTop := by
-    filter_upwards [hae] with ω hω
-    exact ((hω.pow 2).enorm.liminf_eq).symm
-  rw [lintegral_congr_ae hlim]
-  have hbound : ∫⁻ ω, Filter.liminf (fun k ↦ ‖(simpleDoleansExp (X := B) (unifPart T (ms k))
-        (fun i ω ↦ -(θ (unifPart T (ms k) i) ω)) (ms k) T ω) ^ 2‖ₑ) atTop ∂μ
-      ≤ ENNReal.ofReal (Real.exp (C ^ 2 * (T : ℝ))) :=
-    (lintegral_liminf_le (fun k ↦ ((measurable_Zn hB hBmeas hadap hbdd T (ms k)).pow_const 2).enorm)).trans
-      ((liminf_le_liminf (Filter.Eventually.of_forall hsqbnd)).trans (liminf_const _).le)
-  exact hbound.trans_lt ENNReal.ofReal_lt_top
+    MemLp (contDoleansExp (itoIntCont hB hBmeas hadap hcont hbdd T) θ T) 2 μ :=
+  memLp_two_of_subseq_ae_of_sq_bound
+    (fun n ↦ memLp_Zn_two hB hBmeas hadap hbdd T n)
+    (fun n ↦ measurable_Zn hB hBmeas hadap hbdd T n)
+    (fun n ↦ sq_integral_Zn_le hB hBmeas hadap hbdd T n)
+    (by simpa only [id_eq] using tendsto_Zn_ae_subseq hB hBmeas hadap hcont hbdd T id tendsto_id)
 
 include hB in
 /-- **The continuous density is in `L¹`.** `L² ⊆ L¹` on the probability (finite) measure `μ`

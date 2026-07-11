@@ -172,7 +172,9 @@ private lemma hasDerivAt_bsV_tau_fk {K r σ : ℝ} (hK : 0 < K) (hσ : 0 < σ)
   have hσ2 : (0 : ℝ) < σ ^ 2 := by positivity
   have hexp : HasDerivAt (fun τ' ↦ Real.exp (-(r * τ'))) (-r * Real.exp (-(r * τ))) τ := by
     have h1 : HasDerivAt (fun τ' : ℝ ↦ -(r * τ')) (-r) τ := by
-      simpa only [neg_mul, mul_one] using (hasDerivAt_id τ).const_mul (-r)
+      have h := (hasDerivAt_id τ).const_mul (-r)
+      simp only [neg_mul, mul_one] at h
+      exact h
     have h2 := h1.exp
     convert h2 using 1
     ring
