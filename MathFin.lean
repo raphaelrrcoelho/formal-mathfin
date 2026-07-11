@@ -421,3 +421,4 @@ import MathFin.Actuarial.CompoundPoissonMGF
 -- cm-thm-4.3.7; its sibling cm-thm-4.3.9 works only because
 -- Foundations/LpContinuousMartingaleConvergence imports Degenne's DoobLp).
 import BrownianMotion.StochasticIntegral.LocalMartingale
+import MathFin.Futures.Contango

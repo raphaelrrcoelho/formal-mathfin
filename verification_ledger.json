@@ -1263,6 +1263,13 @@
       "input_hash": "d9b3d62903db08a37d561fe16d340f2d884bd7d5d93d22f15812d373a1073ccf",
       "verified_at_commit": "4ca5e6d"
     },
+    "mf-futures-contango": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 7.3,
+      "input_hash": "0c0b1acc43d67c6036906ee5309a7d832ae82ffd4433f706399d4f4d861b83aa",
+      "verified_at_commit": "unknown"
+    },
     "mf-garman-kohlhagen": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-10",
