@@ -74,6 +74,89 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-10 — corpus 319 — whole-repo style sweep + 8-lens values panel (243 files)
+
+**Scope**: a full-repo pass, not a single-theorem review. Two tracks. (1) A **mechanical/idiomatic
+house-style sweep** across all 243 `MathFin/*.lean` files: `fun … =>` → `fun … ↦` (4318 arrows, 180
+files); 28 unused `set … with h` handles dropped; 7 `have h := e; simp only […] at h; exact h` folded
+to `simpa`; 45 gratuitous `classical` removed (each individually confirmed to still elaborate without
+it; 7 load-bearing kept). The ~104 `exact_mod_cast` and ~50 explicit `↑` were reviewed and
+**deliberately kept** — genuine numeric casts and ℝ→ℂ coercions the elaborator needs, load-bearing not
+slop. (2) A **whole-corpus 8-lens values panel**: four independent read-only review agents (Itô/
+martingale tower · Girsanov/FTAP/SDE/processes · pricing · portfolio/risk/actuarial + cross-cutting
+naming/docstrings), maintainer-adjudicated against grep-confirmed usage and a green `lake build`. The
+panels were rigorous — each shipped an over-escalation-filtered section (false positives explicitly
+cleared: `crr_drift_limit_h` is a benchmark handle; the Greeks/PDE "duplication" is false;
+`GaussianGirsanov` is a distinct Esscher lane; no `full` benchmark is `rfl`-backed) — and **converged**
+across agents on the same top coherence debt.
+
+**The dominant, repo-wide finding** (four agents, independently): *generic Mathlib-shaped lemmas
+duplicated or stranded in specialised files.* The exemplar of the fix is
+`Foundations/UnifIntegrableL2.lean` — it names the exact Mathlib gap it fills, states fully generic
+theorems, gives certificate-shaped proofs, and is consumed by all three Girsanov files. It is the home
+every "trapped-generic" lemma below wants.
+
+**Upgrades executed this session:**
+- **(lens 2/4) Hoisted `memLp_two_of_subseq_ae_of_sq_bound` to `UnifIntegrableL2`** beside its pair
+  `tendsto_setIntegral_of_subseq_ae_of_sq_bound`, and retrofitted the continuous `memLp_ZT_two` from a
+  hand-rolled ~44-line `lintegral`/`liminf` Fatou argument to a 6-line application. (Backlog #2, closed.)
+- **(lens 2/3) Deduped `tendstoInMeasure_congr_left`** — byte-identical in `SimpleProcessPartition` and
+  `GirsanovAdaptedTheta` — into a single generic `UnifIntegrableL2` theorem consumed by all four sites.
+- **(lens 7) Honest `PathReflection` docstring** — softened the "headline cardinality theorem" overclaim
+  to state what the file delivers (the bijection + IVT direction), naming the `Fintype.card` identity as
+  the unstated corollary.
+- Plus the mechanical/idiomatic sweep above (arrows · set-handles · simpa-folds · classical).
+
+**Refreshed ranked backlog** (fresh whole-repo panel; owners = future opening moves):
+
+*Foundations coherence (highest ROI — the dominant theme):*
+1. **[HIGH] Wire `GirsanovAdaptedTheta`'s grid lemmas through `SimpleDoleansMoments`.** 1:1 generic
+   superset confirmed (incl. the literal `sq_mul_le_half_add_pow4` duplicate); needs 2 bridges
+   (`simpleStochSum (unifPart)=riemannσ`, `simpleQuadVar=driftSqSum`) + an `n=0` special-case +
+   **name-preserving re-exports** so the crown `Btheta_isQBrownianMotion_adapted` stays untouched.
+   ~180–200 net lines removed. Risk LOW via re-exports (MED-HIGH if done naively). The dedicated
+   next-session item; supersedes old backlog #1.
+2. **[MED-HIGH] Lift one generic Riemann-bridge core.** `ItoIntegralRiemannBridge{,Adapted,TD}` re-roll
+   structurally identical `memLp_riemann*`/`itoSimple_step*`/`itoIntegralCLM_T_step*` for φ(B)/θ/φ(t,B);
+   one generic adapted-bounded-multiplier core, three instantiations. Feeds the Itô summits + adapted crown.
+3. **[MED] Hoist the 3 pure-analysis Taylor lemmas** (`abs_sub_le_of_hasDerivAt`, `abs_taylor1_le`,
+   `abs_discreteTaylorRemainder_le`) to a generic mean-value module; the order-2 remainder re-inlines the
+   order-1 ladder byte-identically — build it *on* order-1.
+4. **[MED] Dedup the marshalled-convergence prologue** (`tendstoInMeasure_marshalDrift` vs `_marshalQuadVar`,
+   ~22 identical lines incl. `hD0`) into a private `slice_energy_facts` helper. (Old backlog #3.)
+5. **[LOW] Small dedups/relocations:** `isCadlag_of_continuous` (triplicated private), `memLp_increment_two`
+   (dup), the `itoIntegralCLM_T_simpleAssembly_T` name-clash, and trapped-generics
+   `continuous_uncurry_of_bdd_partials` / `continuous_timeMeasure_primitive` / `Lp_real_two_norm_sq` →
+   generic homes.
+
+*Pricing:*
+6. **[MED] CRR one-step identity `p·u+(1−p)·d=eʳ` proved 5×** → route the 3 inline `field_simp;ring` bodies
+   + 1 alias through the canonical `crrUpProb_mul_up_add` (`Binomial/Model.lean`).
+7. **[MED] ZCB and constant-hazard Credit** (`exp(-(r·(T-t)))`, byte-identical) → route `zcb_pos` /
+   `survival_pos` through the `ExponentialDiscount` principle they claim to instance; share a constant-rate core.
+8. **[MED] Greeks:** promote `hasDerivAt_bsd1_sigma_clean` public + add `hasDerivAt_exp_neg_mul` in `PDE.lean`,
+   retiring ~13 re-inlined `d/dx exp(−x·c)` micro-derivations; complete `PathReflection` by stating the
+   `Fintype.card` corollary.
+9. **[LOW] `exp(−r)·exp(r)=1`** re-derived ~14× across the Binomial cluster → one shared helper; SnellEnvelope
+   minimality proved twice (verify the corollary is shorter first); trim `Call.lean`'s un-machine-checked
+   numeric-audit docstring.
+
+*Portfolio / Risk / Actuarial:*
+10. **[MED-HIGH] Portfolio quadratic-form primitives.** `marginalVariance`/`portfolioVariance`/`portfolioReturn`
+    are defined in the application-named `CAPMEquilibrium.lean` yet consumed as generics, and `portfolioVarN`
+    is the same form with swapped args — extract to `Portfolio/Primitives.lean`, standardise the `(s,kernel,w)`
+    order, and have `CAPMEquilibrium` import them.
+11. **[MED] Risk-parity two-tower gap.** `RiskParityFOC`'s docstring promises a bridge no lemma delivers; add
+    `riskParityWeightTwo_isRiskParity` mirroring the proven `tangentTwo_isTangentPortfolioN`.
+12. **[LOW] Relocate Lundberg/compound-Poisson** out of `Actuarial/Mortality.lean` into `Insurance`/`RuinTheory`
+    (and into that file's `## Results` block); fix the `isLundbergAdjustmentCoefficient` casing; standardise the
+    covariance-kernel name (`Sg`); drop `let`-in-statement (`RiskParity`, `TangentPortfolio`).
+
+**Evidence/context**: whole-repo `lake build MathFin` green covering the sweep + the executed upgrades;
+`exact_mod_cast`/`↑` reviewed-and-kept (not churned); over-escalations filtered per-agent. Cross-cutting
+naming/docstring verdict: **excellent** — `Is*` predicates, `hasDerivAt_*`, honest `Scope`/`What is not in
+this file` blocks, no overclaims; the one structural blemish is the Portfolio-primitive layer (#10).
+
 ## 2026-07-10 — corpus 319 — bounded-PREDICTABLE-θ Girsanov: `B^θ` is a `Q`-Brownian motion (Rung 1)
 
 **Scope**: the whole new `Foundations/GirsanovPredictableTheta.lean` (the bounded-predictable-θ assembly,
