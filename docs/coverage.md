@@ -26,7 +26,24 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-10, bounded-PREDICTABLE Girsanov — Rung 1):** corpus **319**,
+> **Live status (2026-07-11, finance-breadth sprint):** corpus **324**,
+> **292 full + 18 wrappers = 310/324 delivery-ready**, 14 reduced cores, 0 placeholders. Five new
+> `full` finance entries land and one `reduced_core` flips to `full`, so `mathematical_finance`
+> is now **224/225 full**: (1) the **n-date geometric-Asian** option — driver law
+> `mf-asian-geom-n-driver` (`(1/n)∑ B_{τᵢ} ~ N(0, (1/n²)∑∑min(τᵢ,τⱼ))`) and closed-form price
+> `mf-asian-geom-n-price` (reduction to one effective BS driver), `BlackScholes/AsianGeometricN`;
+> (2) **binomial barrier/lookback** via the reflection principle — the counting identity
+> `mf-barrier-reflection-count` and the running-maximum law `mf-barrier-maximal-distribution`
+> (`#{max ≥ a} = 2·#{end > a} + #{end = a}`), consuming the previously-stranded
+> `reflectionPrincipleEquiv_below`, `Binomial/BarrierReflection`; (3) the **Girsanov-grounded quanto
+> forward** `mf-quanto-forward-grounded` — the `−ρ σ_S σ_FX` drift adjustment *derived* from a
+> joint-Gaussian FX model + change of measure rather than posited, `BlackScholes/QuantoGrounding`;
+> and (4) the **compound-Poisson aggregate-loss MGF** `mf-compound-poisson-mgf` (`reduced_core → full`),
+> the n-claim iid-sum MGF composed with the Poisson pgf, `Actuarial/CompoundPoissonMGF`. Honestly
+> deferred: the fully general **2D Itô formula** `sc-thm-7.5.2` stays `reduced_core` — its
+> continuous-time covariation form is a summit-scale build, not a breadth item.
+
+> **Prior (2026-07-10, bounded-PREDICTABLE Girsanov — Rung 1):** corpus **319**,
 > **286 full + 18 wrappers = 304/319 delivery-ready**, 15 reduced cores, 0 placeholders. New `full`
 > entry `gir-thm-9.1.8-predictable` (`girsanov_predictable_qbm`,
 > `Foundations/GirsanovPredictableTheta.Btheta_isQBrownianMotion_predictable_of_bdd`) **strengthens**

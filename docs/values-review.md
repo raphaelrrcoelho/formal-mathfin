@@ -74,6 +74,40 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-11 — corpus 324 — finance-breadth sprint (Asian / barrier / quanto / compound-Poisson)
+
+A four-deliverable finance-breadth sprint, all axiom-clean (`AxiomAuditGen` green), ledger fresh,
+`lake build` green (8864 jobs). `mathematical_finance` is now **224/225 full**. The unifying values
+angle was **coherence (lens 2/4): each deliverable cashes in a foundational asset that was previously
+built but under-consumed**, rather than adding standalone bookkeeping:
+
+- **(A) n-date geometric-Asian** (`BlackScholes/AsianGeometricN`): generalizes the two-date driver law
+  to arbitrary `n` via the same Wiener step-kernel + Brownian-covariance route, then reduces the
+  geometric average to *one effective BS driver* (`bsTerminal Ŝ₀ r σ_G T`) and prices it through
+  `bs_call_formula` — the Margrabe move. Makes `wienerIntegralLp_stepIndicator` (WG.3, built 2026-07-08)
+  load-bearing for a real exotic price, not just the two-date law.
+- **(B) binomial barrier/lookback** (`Binomial/BarrierReflection`): consumes the **stranded**
+  `reflectionPrincipleEquiv_below` (PathReflection's own docstring flagged "the `Fintype.card` identity is
+  … not separately stated here") — the exact "stranded generic" theme the 2026-07-10 panel named. Ships
+  the counting identity **and** the substantive running-maximum law `#{max ≥ a} = 2·#{end>a} + #{end=a}`.
+- **(C) Girsanov-grounded quanto** (`BlackScholes/QuantoGrounding`): upgrades `mf-quanto-correction-factor`
+  from a *definitional* identity (the `−ρσ_Sσ_FX` drift baked into `quantoForward`) to a **derivation** —
+  the cross-term emerges from an FX Esscher tilt + independent-normal decomposition + the Gaussian MGF.
+  First-principles lens (5): the correction is now *earned* from the correlation.
+- **(D) compound-Poisson MGF** (`Actuarial/CompoundPoissonMGF`): flips `mf-compound-poisson-mgf`
+  `reduced_core → full`, replacing the algebraic shell `e^{−λ}e^{λM}=e^{λ(M−1)}` with the real
+  composition — the n-claim iid-sum MGF (`iIndepFun.mgf_sum`) integrated against the Poisson pgf.
+
+**Honesty note (lens 5/7):** the fourth intended item, the fully general **2D Itô formula**
+(`sc-thm-7.5.2`), stays `reduced_core`. Its continuous-time covariation form (`∫ ∂_xy f d⟨X,Y⟩`) is a
+summit-scale tower, not a breadth item — recorded as a depth-track item, not forced or faked.
+
+**Refreshed backlog (top):** (1) the general **2D covariation Itô** tower (unlocks `sc-thm-7.5.2` +
+multi-asset basket/spread rigorously); (2) hoist the private `integral_exp_mul_stdNormal` (std-normal MGF)
+to a shared Gaussian-MGF home — it is re-derived across QuantoGrounding / Vasicek / Asian; (3) the
+arithmetic-Asian price (needs a lognormal-sum approximation, genuinely harder than geometric); (4) carry
+the barrier maximal-distribution to an actual knock-in/knock-out *option price* summed over a payoff.
+
 ## 2026-07-11 — corpus 319 — executed backlog #1: adapted Girsanov grid→generic wiring
 
 The top HIGH item from the 2026-07-10 panel, done. `GirsanovAdaptedTheta`'s uniform-partition density

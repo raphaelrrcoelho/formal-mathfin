@@ -3027,18 +3027,18 @@
     },
     {
       "id": "mf-compound-poisson-mgf",
-      "name": "Compound Poisson MGF Algebraic Core",
+      "name": "Compound-Poisson Aggregate-Loss MGF",
       "description": "e^{-λ} · e^{λM} = e^{λ(M − 1)}: the algebraic core of the compound-Poisson MGF identity E[e^{tS}] = exp(λ(M_X(t) − 1)).",
       "domain": "mathematical_finance",
       "code": {
-        "lean": "import MathFin.Actuarial.CompoundPoisson\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\ntheorem compoundPoisson_mgf_identity_thm (lam M : ℝ) :\n    Real.exp (-lam) * Real.exp (lam * M) = Real.exp (lam * (M - 1)) :=\n  MathFin.compoundPoisson_mgf_identity lam M\n"
+        "lean": "import MathFin.Actuarial.CompoundPoissonMGF\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin\n\n/-- **Compound-Poisson aggregate-loss MGF.** For a Poisson claim count `N ∼ Poisson(λ)` and\ni.i.d. claim sizes `Xᵢ`, integrating the `n`-claim aggregate MGF against the Poisson law gives\n`exp(λ·(M_X(t) − 1))` — the Poisson PGF evaluated at the common claim MGF. Re-exports\n`MathFin.compoundPoisson_mgf`. -/\ntheorem compound_poisson_mgf\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω}\n    (lam : ℝ≥0) (t : ℝ) (X : ℕ → Ω → ℝ)\n    (hindep : iIndepFun X μ) (hmeas : ∀ i, Measurable (X i))\n    (hident : ∀ i, IdentDistrib (X i) (X 0) μ μ) :\n    ∫ n, mgf (fun ω => ∑ i ∈ Finset.range n, X i ω) μ t ∂(poissonMeasure lam)\n      = Real.exp ((lam : ℝ) * (mgf (X 0) μ t - 1)) :=\n  MathFin.compoundPoisson_mgf lam t X hindep hmeas hident\n"
       },
       "metadata": {
         "chapter": 11,
         "reference": "Compound Poisson MGF (Cramér-Lundberg actuarial theory)",
         "difficulty": "intermediate",
-        "formalization_status": "reduced_core",
-        "formalization_scope": "Reduced core: the formalized statement is the exponential-algebra core e^{-λ}·e^{λM} = e^{λ(M-1)} of the compound-Poisson MGF identity E[e^{tS}] = exp(λ(M_X(t) − 1)), for arbitrary real λ, M — no random variables, expectation, or conditioning are encoded. The genuine identity needs the compound-sum conditioning step (tower property over N) on top of the library's poisson_pgf; future work."
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: n-claim iid-sum MGF (iIndepFun.mgf_sum) composed with the Poisson pgf (integral_pow_poissonMeasure). Re-export from MathFin. Axioms-clean."
       }
     },
     {
@@ -3517,6 +3517,86 @@
         "difficulty": "advanced",
         "formalization_status": "full",
         "formalization_scope": "Full formal proof. Re-export from MathFin.BlackScholes.AsianGeometric (asianGeom_driver_hasLaw). The two-date geometric-Asian log-driver (B_s + B_t)/2 has law N(0, (3s+t)/4). Route: (B_s + B_t)/2 = int 1/2*(1_{(0,s]} + 1_{(0,t]}) dB is a single Wiener integral of a deterministic step kernel, using the new foundational identity wienerIntegralLp_stepIndicator (MathFin.Foundations.WienerIntegralIndicator: int 1_{(s,t]} dB = B_t - B_s, from LinearMap.extendOfNorm_eq on the single-basis coefficient); so wienerIntegralLp_hasLaw_gaussian gives the centred Gaussian law, its variance the kernel L2-norm computed on the Omega-side through the Brownian covariance integral_mul_eval (int B_u * B_v = min(u,v)) plus zero-start B_0 = 0 a.s. (from int B_0^2 = 0). Same 'sum of Brownian values as a Wiener integral of a step kernel' route as the Vasicek bond price for the integrated rate; here the kernel is a sum of indicators. Honest scope: two dates (matching the AM-GM entry mf-asian-geom-le-arith-two); the n-date extension is the Finset covariance sum (1/n^2) sum sum min(t_i, t_j), unblocked by the same crux. Axioms-clean: [propext, Classical.choice, Quot.sound]."
+      }
+    },
+    {
+      "id": "mf-asian-geom-n-driver",
+      "name": "n-Date Geometric-Asian Log-Driver is Gaussian",
+      "description": "The average of Brownian values (1/n) sum B_{t_i} is Gaussian with variance (1/n^2) sum sum min(t_i,t_j).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianGeometricN\n\nopen MeasureTheory ProbabilityTheory\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **n-date geometric-Asian log-driver is Gaussian.** The average of the Brownian\nvalues `(1/n) ∑ᵢ B_{τᵢ}` — the Gaussian part of the log geometric average of a\nBlack–Scholes GBM sampled at `τ₁,…,τₙ` — has the centred Gaussian law\n`N(0, (1/n²) ∑ᵢ∑ⱼ min(τᵢ,τⱼ))`. Re-exports `MathFin.geomAsianN_driver_hasLaw`. -/\ntheorem asian_geom_n_driver\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) {n : ℕ} (hn : 0 < n)\n    (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T) :\n    HasLaw (fun ω => (∑ i, B (τ i) ω) / n)\n      (gaussianReal 0 ((∑ i, ∑ j, min (τ i : ℝ) (τ j)) / (n : ℝ) ^ 2).toNNReal) μ :=\n  MathFin.geomAsianN_driver_hasLaw hB T hn τ hτT\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Kemna-Vorst 1990; geometric Asian options",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: n-date generalization via the Wiener step-kernel + Brownian covariance. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-asian-geom-n-price",
+      "name": "n-Date Geometric-Asian Call Price (Closed Form)",
+      "description": "Discounted geometric-Asian call price equals the Black-Scholes call with effective spot and volatility.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.AsianGeometricN\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin MathFin.WienerIntegralL2\n\n/-- **n-date geometric-Asian call price, closed form.** The discounted expected\ngeometric-Asian call payoff equals the Black–Scholes call price with the effective\nspot `Ŝ₀` and volatility `σ_G` — the geometric average reduced to one effective BS\ndriver. Re-exports `MathFin.geomAsianN_call_price`. -/\ntheorem asian_geom_n_price\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) (T : ℝ≥0) {n : ℕ} (hn : 0 < n)\n    (τ : Fin n → ℝ≥0) (hτT : ∀ i, τ i ≤ T)\n    (S₀ K r σ Tmat : ℝ) (hS₀ : 0 < S₀) (hK : 0 < K) (hσ : 0 < σ) (hTmat : 0 < Tmat)\n    (hV : 0 < geomAsianVar τ) :\n    ∫ ω, Real.exp (-r * Tmat) *\n        max ((∏ i, (S₀ * Real.exp ((r - σ ^ 2 / 2) * (τ i : ℝ) + σ * B (τ i) ω)) ^ ((n : ℝ)⁻¹))\n          - K) 0 ∂μ\n      = geomAsianEffSpot S₀ r σ Tmat τ *\n          Phi (bsd1 (geomAsianEffSpot S₀ r σ Tmat τ) K r (geomAsianEffVol σ Tmat τ) Tmat)\n        - K * Real.exp (-r * Tmat) *\n          Phi (bsd2 (geomAsianEffSpot S₀ r σ Tmat τ) K r (geomAsianEffVol σ Tmat τ) Tmat) :=\n  MathFin.geomAsianN_call_price hB T hn τ hτT S₀ K r σ Tmat hS₀ hK hσ hTmat hV\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Kemna-Vorst 1990",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: reduction to one effective BS driver + bs_call_formula. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-barrier-reflection-count",
+      "name": "Reflection-Principle Counting Identity",
+      "description": "Number of paths touching a and ending at b equals number ending at 2a-b, for 0<a, b<=a.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Binomial.BarrierReflection\n\nopen MathFin\n\n/-- **Reflection-principle counting identity** (barrier-pricing backbone). For a barrier\n`0 < a` and terminal `b ≤ a`, the number of `n`-step ±1 paths that touch `a` and finish\nat `b` equals the number that finish at `2a − b`. Re-exports `MathFin.reflection_principle_card`. -/\ntheorem barrier_reflection_count (n : ℕ) (a b : ℤ) (ha : 0 < a) (hb : b ≤ a) :\n    Nat.card {ω : Fin n → Bool // HitsLevel a ω ∧ walkPos ω n = b}\n      = Nat.card {ω : Fin n → Bool // walkPos ω n = 2 * a - b} :=\n  MathFin.reflection_principle_card (n := n) a b ha hb\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Andre 1887; barrier-option counting",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof via reflectionPrincipleEquiv_below. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-barrier-maximal-distribution",
+      "name": "Binomial Maximal-Distribution (Running-Max Law)",
+      "description": "Number of paths with running max >= a equals 2*#{end>a} + #{end=a}.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Binomial.BarrierReflection\n\nopen MathFin\n\n/-- **Binomial maximal-distribution identity** (running-maximum law). For a barrier `0 < a`,\nthe number of `n`-step ±1 paths whose running maximum reaches `a` is\n`2·#{end > a} + #{end = a}` — the discrete `P(max ≥ a) = 2·P(Sₙ > a) + P(Sₙ = a)`.\nRe-exports `MathFin.binomial_maximal_distribution_card`. -/\ntheorem barrier_maximal_distribution (n : ℕ) (a : ℤ) (ha : 0 < a) :\n    Nat.card {ω : Fin n → Bool // HitsLevel a ω}\n      = 2 * Nat.card {ω : Fin n → Bool // a < walkPos ω n}\n        + Nat.card {ω : Fin n → Bool // walkPos ω n = a} :=\n  MathFin.binomial_maximal_distribution_card (n := n) a ha\n"
+      },
+      "metadata": {
+        "chapter": 13,
+        "reference": "Reflection principle; barrier/lookback pricing",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: trichotomy of the hit-set + reflection of below-barrier endpoints. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-quanto-forward-grounded",
+      "name": "Quanto Forward Derived from a Joint-Gaussian FX Model",
+      "description": "FX-density-weighted foreign expectation of the terminal equals quantoForward; the -rho sigma_S sigma_FX drift is derived, not posited.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.QuantoGrounding\n\nopen MeasureTheory ProbabilityTheory Real\nopen scoped NNReal\nopen MathFin\n\n/-- **Girsanov-grounded quanto forward.** The FX-density-weighted foreign expectation of the\nforeign terminal equals the quanto-adjusted forward `S₀·exp((r_dom − ρ σ_S σ_FX)T)` — the\n`−ρ σ_S σ_FX` drift adjustment is the log-covariance produced by the change of measure, not an\nassumption. Re-exports `MathFin.quantoForward_of_gaussian`. -/\ntheorem quanto_forward_grounded\n    {Ω : Type*} [MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]\n    (S₀ r_dom σ_S σ_FX ρ T : ℝ) (hT : 0 ≤ T) (hρ : ρ ^ 2 ≤ 1)\n    {Z_S Z_perp : Ω → ℝ}\n    (hZS : HasLaw Z_S (gaussianReal 0 1) μ) (hZperp : HasLaw Z_perp (gaussianReal 0 1) μ)\n    (hZSm : Measurable Z_S) (hZperpm : Measurable Z_perp)\n    (hindep : IndepFun Z_S Z_perp μ) :\n    ∫ ω, (S₀ * Real.exp ((r_dom - σ_S ^ 2 / 2) * T + σ_S * Real.sqrt T * Z_S ω))\n        * Real.exp (-(σ_FX * Real.sqrt T)\n            * (ρ * Z_S ω + Real.sqrt (1 - ρ ^ 2) * Z_perp ω) - σ_FX ^ 2 * T / 2) ∂μ\n      = quantoForward S₀ r_dom ρ σ_S σ_FX T :=\n  MathFin.quantoForward_of_gaussian S₀ r_dom σ_S σ_FX ρ T hT hρ hZS hZperp hZSm hZperpm hindep\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "Reiner 1992; quanto via change of measure",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof: FX Esscher tilt + independent-normal decomposition + Gaussian MGF cross-term. Re-export from MathFin. Axioms-clean."
       }
     }
   ]

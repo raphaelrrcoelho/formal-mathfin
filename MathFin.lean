@@ -231,6 +231,8 @@ import MathFin.BlackScholes.StaticBounds
 import MathFin.BlackScholes.AsianInequality
 -- Geometric-average Asian: two-date log-driver is Gaussian with the covariance-sum variance
 import MathFin.BlackScholes.AsianGeometric
+-- Geometric-average Asian: n-date driver law + closed-form price via effective-BS reduction
+import MathFin.BlackScholes.AsianGeometricN
 import MathFin.BlackScholes.ImpliedVolatility
 import MathFin.BlackScholes.LognormalMoments
 import MathFin.BlackScholes.VarianceSwap
@@ -256,6 +258,8 @@ import MathFin.BlackScholes.SpotConvexity
 import MathFin.BlackScholes.PriceBounds
 -- Phase 13 additions:
 import MathFin.BlackScholes.Quanto
+-- Quanto correction derived from a joint-Gaussian FX model (Girsanov-grounded)
+import MathFin.BlackScholes.QuantoGrounding
 import MathFin.BlackScholes.NewtonConvergence
 import MathFin.BlackScholes.NewtonRaphsonIV
 import MathFin.BlackScholes.LognormalCOV
@@ -283,6 +287,8 @@ import MathFin.Binomial.ReplicatingUniqueness
 import MathFin.BlackScholes.GreekSigns
 -- Phase 16: reflection-principle algebraic core (André 1887)
 import MathFin.Binomial.PathReflection
+-- Barrier-option counting: reflection card identity + maximal-distribution (running-max law)
+import MathFin.Binomial.BarrierReflection
 -- Phase 19: Snell envelope characterization of americanPrice
 import MathFin.Binomial.SnellEnvelope
 -- Phase 43: Binomial up-probability as two-state FTAP EMM
@@ -405,6 +411,8 @@ import MathFin.Actuarial.Insurance
 import MathFin.Actuarial.Mortality
 -- Phase 13 additions:
 import MathFin.Actuarial.CompoundPoisson
+-- Compound-Poisson aggregate-loss MGF: iid-sum MGF composed with the Poisson pgf
+import MathFin.Actuarial.CompoundPoissonMGF
 
 -- Upstream (Degenne BrownianMotion) modules consumed ONLY by benchmark
 -- wrappers, imported here so `lake build` puts them in the build graph —

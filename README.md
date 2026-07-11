@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`319` theorems · `304` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`324` theorems · `310` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -96,10 +96,10 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 
 | | |
 |---|---:|
-| theorems (machine-checked) | **319** |
-| delivery-ready (`full` + `library_wrapper`) | **304** |
-| full derivations | 286 |
-| reduced cores (honest special cases) | 15 |
+| theorems (machine-checked) | **324** |
+| delivery-ready (`full` + `library_wrapper`) | **310** |
+| full derivations | 292 |
+| reduced cores (honest special cases) | 14 |
 | placeholders / sorries | **0** |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
 | Lean / Mathlib | `v4.31.0`, pinned ([`lean-toolchain`](lean-toolchain)) |

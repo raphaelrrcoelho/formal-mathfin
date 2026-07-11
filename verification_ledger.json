@@ -465,6 +465,20 @@
       "input_hash": "33903eb915974862dd82f7ffbe1cb0e2f1ef3c86ef2ad7aa6cd752c255b606fc",
       "verified_at_commit": "bfa3834"
     },
+    "mf-asian-geom-n-driver": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 344.5,
+      "input_hash": "a97a9c4a0dfcad2dff54c735532c2b1ad89512f03d53fae9dbe16066e6c0ba3a",
+      "verified_at_commit": "7235970"
+    },
+    "mf-asian-geom-n-price": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 192.5,
+      "input_hash": "635626116358322296a1670241634feaeb87b9ec418ba37e65939ef1aed8d21e",
+      "verified_at_commit": "7235970"
+    },
     "mf-asset-digital-delta": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-10",
@@ -541,6 +555,20 @@
       "elapsed_s": 135.3,
       "input_hash": "fc09cc691f294baca4f8d55c476c7f1c18923a593c6f7d485f1658d01041e8b8",
       "verified_at_commit": "bfa3834"
+    },
+    "mf-barrier-maximal-distribution": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 272.0,
+      "input_hash": "93549416b98065b1b3122d70fc11cbc43380a2be36dad36202e0e061a3cf6ede",
+      "verified_at_commit": "7235970"
+    },
+    "mf-barrier-reflection-count": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 284.1,
+      "input_hash": "e3dc061085242974c197ee1e8e892ae39a9963fa92db2610c65f772759e6ecda",
+      "verified_at_commit": "7235970"
     },
     "mf-bermudan-sandwich": {
       "benchmark_file": "mathematical_finance.json",
@@ -1069,10 +1097,10 @@
     },
     "mf-compound-poisson-mgf": {
       "benchmark_file": "mathematical_finance.json",
-      "date": "2026-07-10",
-      "elapsed_s": 8.7,
-      "input_hash": "9af82092631056bb225cc42b1c56d1c6ce8fb85bc717659c956b0c42a2309ee0",
-      "verified_at_commit": "bfa3834"
+      "date": "2026-07-11",
+      "elapsed_s": 10.4,
+      "input_hash": "2651ee3f151a9e874930d60a64bb19ce6edf3bc7c73485eb09cdae1080c18872",
+      "verified_at_commit": "7235970"
     },
     "mf-convex-duality-root": {
       "benchmark_file": "mathematical_finance.json",
@@ -1682,6 +1710,13 @@
       "elapsed_s": 71.7,
       "input_hash": "a72b01a1271bdb0f20ca05a36f2f76b556344be71fb4ca3376a198506e0a7536",
       "verified_at_commit": "bfa3834"
+    },
+    "mf-quanto-forward-grounded": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-11",
+      "elapsed_s": 292.7,
+      "input_hash": "f8267cf547b83b19b86f24eb9149ccbf5a137bedcebc5751ec2cdfa26a98d635",
+      "verified_at_commit": "7235970"
     },
     "mf-reflection-principle-counting": {
       "benchmark_file": "mathematical_finance.json",
