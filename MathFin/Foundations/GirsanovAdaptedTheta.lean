@@ -9,6 +9,7 @@ public import MathFin.Foundations.GirsanovSimpleTheta
 public import MathFin.Foundations.ItoIntegralRiemannBridgeAdapted
 public import MathFin.Foundations.DriftRiemannConvergence
 public import MathFin.Foundations.UnifIntegrableL2
+public import MathFin.Foundations.GirsanovSimpleDoleansMoments
 
 /-! # Continuous bounded-adapted-θ Girsanov — `B^θ` is a `Q`-Brownian motion (α4 assembly)
 
@@ -35,6 +36,7 @@ namespace MathFin
 open MeasureTheory ProbabilityTheory Filter Topology NNReal ENNReal MathFin.QuadraticVariationL2
 open scoped MeasureTheory NNReal ENNReal
 open ItoIntegralL2 ItoIntegralBrownian ItoIntegralCLM ItoIntegralRiemannBridge ItoIsometryAdapted
+open SimpleDoleansMoments
 
 variable {Ω : Type*} [mΩ : MeasurableSpace Ω] {μ : Measure Ω} [IsProbabilityMeasure μ]
   {B : ℝ≥0 → Ω → ℝ}
@@ -121,82 +123,27 @@ lemma exists_subseq_riemannσ_ae (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥
   obtain ⟨ms, hms, hae⟩ := hconv.exists_seq_tendsto_ae
   exact ⟨ms, hms, hae⟩
 
-omit hB mΩ in
-/-- The quadratic drift is bounded by `C²·T`: each `θ(tₖ)² ≤ C²` and the cell lengths telescope to
-`unifPart T n n ≤ T`. -/
-lemma driftSqSum_le {θ : ℝ≥0 → Ω → ℝ} {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ)
-    (ω : Ω) : driftSqSum θ T n ω ≤ C ^ 2 * (T : ℝ) := by
-  have hC0 : (0 : ℝ) ≤ C := (abs_nonneg _).trans (hbdd 0 ω)
-  rw [driftSqSum]
-  calc ∑ k ∈ Finset.range n,
-          (θ (unifPart T n k) ω) ^ 2 * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ))
-      ≤ ∑ k ∈ Finset.range n, C ^ 2 * ((unifPart T n (k + 1) : ℝ) - (unifPart T n k : ℝ)) := by
-        refine Finset.sum_le_sum fun k _ ↦ mul_le_mul_of_nonneg_right ?_
-          (sub_nonneg.mpr (by exact_mod_cast unifPart_mono T n (Nat.le_succ k)))
-        rw [← sq_abs (θ (unifPart T n k) ω)]
-        exact pow_le_pow_left₀ (abs_nonneg _) (hbdd _ ω) 2
-    _ = C ^ 2 * ((unifPart T n n : ℝ) - (unifPart T n 0 : ℝ)) := by
-        rw [← Finset.mul_sum, Finset.sum_range_sub (fun k ↦ (unifPart T n k : ℝ))]
-    _ ≤ C ^ 2 * (T : ℝ) := by
-        rw [show unifPart T n 0 = 0 by simp [unifPart], NNReal.coe_zero, sub_zero]
-        exact mul_le_mul_of_nonneg_left (by exact_mod_cast unifPart_le_T (le_refl n)) (sq_nonneg C)
-
-omit hB mΩ in
-/-- **Scaled Doléans exponent.** For a scalar `r`, `E^{rθ⁽ⁿ⁾}_T = exp(r·Wⁿ − ½r²·driftSqSumⁿ)` — the
-generalization of `simpleDoleansExp_neg_eq` (which is the `r = −1` case). Powers the `Lᵖ`-bounds:
-`(Zⁿ)^p = E^{−pθ}·exp(½p(p−1)·driftSqSumⁿ)`. -/
-lemma simpleDoleansExp_scaled_eq {θ : ℝ≥0 → Ω → ℝ} (r : ℝ) (T : ℝ≥0) (n : ℕ) (ω : Ω) :
-    simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ r * θ (unifPart T n i) ω) n T ω
-      = Real.exp (r * riemannσ (B := B) θ T n ω - 2⁻¹ * r ^ 2 * driftSqSum θ T n ω) := by
-  rw [simpleDoleansExp_eq_exp_sum]
-  congr 1
-  rw [riemannσ, driftSqSum, Finset.mul_sum, Finset.mul_sum, ← Finset.sum_sub_distrib]
-  refine Finset.sum_congr rfl fun k hk ↦ ?_
-  have hk1 : k + 1 ≤ n := Finset.mem_range.mp hk
-  rw [min_eq_left (unifPart_le_T hk1), min_eq_left (unifPart_le_T (le_of_lt (Finset.mem_range.mp hk)))]
-  ring
 
 include hB in
-/-- **Uniform `L²` bound on the approximant densities.** `∫ (Zⁿ_T)² ≤ exp(C²T)`, uniform in `n`.
-Pointwise `(Zⁿ_T)² = E^{−2c⁽ⁿ⁾}_T · exp(driftSqSumⁿ) ≤ exp(C²T)·E^{−2c⁽ⁿ⁾}_T` (from the scaled
-identity + `driftSqSum_le`), and `E^{−2c⁽ⁿ⁾}` is a positive density with `∫ = 1`
-(`simpleDoleansExp_integral_eq_one`). This feeds the a.e.-subsequence engine (the `L²` bound the
-linchpin needs) for the density limit `Zⁿ → Z`. -/
+/-- **Uniform `L²` bound on the approximant densities.** `∫ (Zⁿ_T)² ≤ exp(C²T)`, uniform in `n` — the
+`s = unifPart T n`, `c = θ(tᵢ)` instance of the partition-generic `sq_integral_simpleDoleans_le`. The
+grid's last point `unifPart T n n = T` supplies the generic's `T ≤ s N` coverage; `n = 0` is the
+constant-`1` density. Feeds the a.e.-subsequence engine's `L²` bound for the density limit `Zⁿ → Z`. -/
 lemma sq_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ^ 2 ∂μ
       ≤ Real.exp (C ^ 2 * (T : ℝ)) := by
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
-  have hd2m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
-      (fun ω ↦ (-2 : ℝ) * θ (unifPart T n i) ω) := fun i ↦ (hadap (unifPart T n i)).const_mul (-2)
-  have hd2b : ∀ i ω, |(-2 : ℝ) * θ (unifPart T n i) ω| ≤ 2 * C := fun i ω ↦ by
-    rw [abs_mul, show |(-2 : ℝ)| = 2 by norm_num]
-    exact mul_le_mul_of_nonneg_left (hbdd _ ω) (by norm_num)
-  have hmean : ∫ ω, simpleDoleansExp (X := B) (unifPart T n)
-      (fun i ω ↦ (-2 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ = 1 :=
-    simpleDoleansExp_integral_eq_one (X := B) (𝓕 := natFiltration hBmeas) (unifPart T n)
-      (unifPart_mono T n) _ hd2m hd2b n T
-  have hint2 : Integrable (fun ω ↦ simpleDoleansExp (X := B) (unifPart T n)
-      (fun i ω ↦ (-2 : ℝ) * θ (unifPart T n i) ω) n T ω) μ :=
-    (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
-      (unifPart_mono T n) _ hd2m hd2b n).integrable T
-  have hpt : ∀ ω,
-      (simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ^ 2
-        ≤ Real.exp (C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
-            (fun i ω ↦ (-2 : ℝ) * θ (unifPart T n i) ω) n T ω := by
-    intro ω
-    rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two, ← Real.exp_add,
-      ← Real.exp_add]
-    refine Real.exp_le_exp.mpr ?_
-    have := driftSqSum_le hbdd T n ω
-    linarith [this]
-  calc ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ^ 2 ∂μ
-      ≤ ∫ ω, Real.exp (C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
-          (fun i ω ↦ (-2 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ :=
-        integral_mono_of_nonneg (ae_of_all _ fun ω ↦ sq_nonneg _) (hint2.const_mul _)
-          (ae_of_all _ hpt)
-    _ = Real.exp (C ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · have h1 : ∀ ω, simpleDoleansExp (X := B) (unifPart T 0)
+        (fun i ω ↦ -(θ (unifPart T 0 i) ω)) 0 T ω = 1 := fun ω ↦ rfl
+    simp only [h1, one_pow, integral_const, probReal_univ, smul_eq_mul, mul_one]
+    exact Real.one_le_exp (by positivity)
+  · have hlast : unifPart T n n = T := by
+      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+    exact sq_integral_simpleDoleans_le (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
+      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 omit hB mΩ in
 /-- **Per-path Doléans convergence.** If the Riemann–Itô sums `riemannσ` along a subsequence
@@ -235,35 +182,20 @@ lemma tendsto_Zn_ae_subseq (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → 
     (itoIntCont hB hBmeas hadap hcont hbdd T) ω (hns.comp hms.tendsto_atTop) hω
 
 include hB in
-/-- The approximant density is in `L²` (the same `E^{−2c}` domination as `sq_integral_Zn_le`). -/
+/-- **The approximant density is in `L²`** — the `s = unifPart T n`, `c = θ(tᵢ)` instance of
+`memLp_simpleDoleans_two`; `n = 0` is the constant-`1` density. -/
 lemma memLp_Zn_two (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     MemLp (fun ω ↦ simpleDoleansExp (X := B) (unifPart T n)
       (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) 2 μ := by
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
-  have hd1m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
-      (fun ω ↦ -(θ (unifPart T n i) ω)) := fun i ↦ (hadap (unifPart T n i)).neg
-  have hd1b : ∀ i ω, |(-(θ (unifPart T n i) ω))| ≤ C := fun i ω ↦ by simpa using hbdd (unifPart T n i) ω
-  have hZmeas : Measurable (fun ω ↦ simpleDoleansExp (X := B) (unifPart T n)
-      (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) :=
-    (((simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
-      (unifPart_mono T n) _ hd1m hd1b n).1 T).mono ((natFiltration hBmeas).le T)).measurable
-  have hd2m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
-      (fun ω ↦ (-2 : ℝ) * θ (unifPart T n i) ω) := fun i ↦ (hadap (unifPart T n i)).const_mul (-2)
-  have hd2b : ∀ i ω, |(-2 : ℝ) * θ (unifPart T n i) ω| ≤ 2 * C := fun i ω ↦ by
-    rw [abs_mul, show |(-2 : ℝ)| = 2 by norm_num]
-    exact mul_le_mul_of_nonneg_left (hbdd _ ω) (by norm_num)
-  have hint2 : Integrable (fun ω ↦ simpleDoleansExp (X := B) (unifPart T n)
-      (fun i ω ↦ (-2 : ℝ) * θ (unifPart T n i) ω) n T ω) μ :=
-    (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
-      (unifPart_mono T n) _ hd2m hd2b n).integrable T
-  rw [memLp_two_iff_integrable_sq hZmeas.aestronglyMeasurable]
-  refine (hint2.const_mul (Real.exp (C ^ 2 * (T : ℝ)))).mono'
-    (hZmeas.pow_const 2).aestronglyMeasurable (ae_of_all _ fun ω ↦ ?_)
-  rw [Real.norm_of_nonneg (sq_nonneg _), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, pow_two,
-    ← Real.exp_add, ← Real.exp_add]
-  exact Real.exp_le_exp.mpr (by linarith [driftSqSum_le hbdd T n ω])
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · exact memLp_const 1
+  · have hlast : unifPart T n n = T := by
+      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+    exact memLp_simpleDoleans_two (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
+      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 include hB in
 /-- Unit `P`-mean of the approximant density: `∫ Zⁿ_T = 1`. -/
@@ -276,16 +208,15 @@ lemma integral_Zn_eq_one (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω
     (unifPart_mono T n) _ (fun i ↦ (hadap _).neg) (fun i ω ↦ by simpa using hbdd (unifPart T n i) ω) n T
 
 include hB in
-/-- Measurability of the approximant density. -/
+/-- Measurability of the approximant density — the grid instance of `measurable_simpleDoleans`. -/
 lemma measurable_Zn (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     Measurable (fun ω ↦ simpleDoleansExp (X := B) (unifPart T n)
       (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) := by
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
-  exact (((simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
-    (unifPart_mono T n) _ (fun i ↦ (hadap _).neg) (fun i ω ↦ by simpa using hbdd (unifPart T n i) ω)
-    n).1 T).mono ((natFiltration hBmeas).le T)).measurable
+  exact measurable_simpleDoleans (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
+    (unifPart_mono T n) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n T
 
 include hB in
 /-- Integrability of the approximant density (it is a martingale). -/
@@ -354,41 +285,22 @@ lemma isProbabilityMeasure_contGirsanov (hBmeas : ∀ t, Measurable (B t)) {θ :
     integral_ZT_eq_one hB hBmeas hadap hcont hbdd T, ENNReal.ofReal_one]
 
 include hB in
-/-- **Uniform `L⁴` bound on the approximant densities.** `∫ (Zⁿ_T)⁴ ≤ exp(6C²T)`, uniform in `n`
-(the 4th-moment analogue of `sq_integral_Zn_le`): `(Zⁿ)⁴ = E^{−4c}·exp(6·driftSqSumⁿ)`. Needed for
-the Hölder step of the mixed-time product `L²` bound. -/
+/-- **Uniform `L⁴` bound on the approximant densities.** `∫ (Zⁿ_T)⁴ ≤ exp(6C²T)` — the grid instance
+of `quad_integral_simpleDoleans_le`; `n = 0` is the constant-`1` density. Needed for the Hölder step of
+the mixed-time product `L²` bound. -/
 lemma quad_integral_Zn_le (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ^ 4 ∂μ
       ≤ Real.exp (6 * C ^ 2 * (T : ℝ)) := by
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
-  have hd4m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
-      (fun ω ↦ (-4 : ℝ) * θ (unifPart T n i) ω) := fun i ↦ (hadap (unifPart T n i)).const_mul (-4)
-  have hd4b : ∀ i ω, |(-4 : ℝ) * θ (unifPart T n i) ω| ≤ 4 * C := fun i ω ↦ by
-    rw [abs_mul, show |(-4 : ℝ)| = 4 by norm_num]
-    exact mul_le_mul_of_nonneg_left (hbdd _ ω) (by norm_num)
-  have hmean : ∫ ω, simpleDoleansExp (X := B) (unifPart T n)
-      (fun i ω ↦ (-4 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ = 1 :=
-    simpleDoleansExp_integral_eq_one (X := B) (𝓕 := natFiltration hBmeas) (unifPart T n)
-      (unifPart_mono T n) _ hd4m hd4b n T
-  have hint4 : Integrable (fun ω ↦ simpleDoleansExp (X := B) (unifPart T n)
-      (fun i ω ↦ (-4 : ℝ) * θ (unifPart T n i) ω) n T ω) μ :=
-    (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
-      (unifPart_mono T n) _ hd4m hd4b n).integrable T
-  have hpt : ∀ ω,
-      (simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ^ 4
-        ≤ Real.exp (6 * C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
-            (fun i ω ↦ (-4 : ℝ) * θ (unifPart T n i) ω) n T ω := by
-    intro ω
-    rw [simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq, ← Real.exp_nat_mul, ← Real.exp_add]
-    exact Real.exp_le_exp.mpr (by push_cast; linarith [driftSqSum_le hbdd T n ω])
-  calc ∫ ω, (simpleDoleansExp (X := B) (unifPart T n) (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ^ 4 ∂μ
-      ≤ ∫ ω, Real.exp (6 * C ^ 2 * (T : ℝ)) * simpleDoleansExp (X := B) (unifPart T n)
-          (fun i ω ↦ (-4 : ℝ) * θ (unifPart T n i) ω) n T ω ∂μ :=
-        integral_mono_of_nonneg (ae_of_all _ fun ω ↦ by positivity) (hint4.const_mul _)
-          (ae_of_all _ hpt)
-    _ = Real.exp (6 * C ^ 2 * (T : ℝ)) := by rw [integral_const_mul, hmean, mul_one]
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp only [simpleDoleansExp, one_pow, integral_const, probReal_univ, smul_eq_mul, mul_one]
+    exact Real.one_le_exp (by positivity)
+  · have hlast : unifPart T n n = T := by
+      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+    exact quad_integral_simpleDoleans_le (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
+      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 omit hB mΩ in
 /-- The `unifPart` simple drift is bounded by `C·u` for `u ≤ T` (all `n`; `n = 0` is the empty sum). -/
@@ -527,29 +439,20 @@ lemma measurable_Dn (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → 
   fun_prop (disch := exact hsd)
 
 include hB in
-/-- **Uniform `L⁴`-integrability of the approximant density `Zⁿ_T`** (the domination behind
-`quad_integral_Zn_le`): `(Zⁿ)⁴ ≤ exp(6C²T)·E^{−4c⁽ⁿ⁾}`, an integrable simple density. -/
+/-- **Uniform `L⁴`-integrability of the approximant density `Zⁿ_T`** — the grid instance of
+`integrable_simpleDoleans_four`; `n = 0` is the constant-`1` density. -/
 lemma integrable_Zn_four (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω → ℝ}
     (hadap : ∀ t, StronglyMeasurable[(natFiltration hBmeas t : MeasurableSpace Ω)] (θ t))
     {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) (n : ℕ) :
     Integrable (fun ω ↦ (simpleDoleansExp (X := B) (unifPart T n)
       (fun i ω ↦ -(θ (unifPart T n i) ω)) n T ω) ^ 4) μ := by
   haveI : IsFilteredPreBrownian B (natFiltration hBmeas) μ := hB.isFilteredPreBrownian hBmeas
-  have hd4m : ∀ i, StronglyMeasurable[(natFiltration hBmeas (unifPart T n i) : MeasurableSpace Ω)]
-      (fun ω ↦ (-4 : ℝ) * θ (unifPart T n i) ω) := fun i ↦ (hadap (unifPart T n i)).const_mul (-4)
-  have hd4b : ∀ i ω, |(-4 : ℝ) * θ (unifPart T n i) ω| ≤ 4 * C := fun i ω ↦ by
-    rw [abs_mul, show |(-4 : ℝ)| = 4 by norm_num]
-    exact mul_le_mul_of_nonneg_left (hbdd _ ω) (by norm_num)
-  have hint4 : Integrable (fun ω ↦ simpleDoleansExp (X := B) (unifPart T n)
-      (fun i ω ↦ (-4 : ℝ) * θ (unifPart T n i) ω) n T ω) μ :=
-    (simpleDoleansExp_isMartingale (X := B) (𝓕 := natFiltration hBmeas) (P := μ) (unifPart T n)
-      (unifPart_mono T n) _ hd4m hd4b n).integrable T
-  refine (hint4.const_mul (Real.exp (6 * C ^ 2 * (T : ℝ)))).mono'
-    ((measurable_Zn hB hBmeas hadap hbdd T n).pow_const 4).aestronglyMeasurable
-    (ae_of_all _ fun ω ↦ ?_)
-  rw [Real.norm_of_nonneg (by positivity), simpleDoleansExp_neg_eq, simpleDoleansExp_scaled_eq,
-    ← Real.exp_nat_mul, ← Real.exp_add]
-  exact Real.exp_le_exp.mpr (by push_cast; linarith [driftSqSum_le hbdd T n ω])
+  rcases Nat.eq_zero_or_pos n with rfl | hn
+  · simp only [simpleDoleansExp, one_pow]; exact integrable_const 1
+  · have hlast : unifPart T n n = T := by
+      rw [unifPart, div_self (Nat.cast_ne_zero.mpr hn.ne'), one_mul]
+    exact integrable_simpleDoleans_four (X := B) (𝓕 := natFiltration hBmeas) (P := μ)
+      (unifPart_mono T n) (by simp [unifPart]) (fun i ↦ hadap _) (fun i ω ↦ hbdd _ ω) n hlast.ge
 
 include hB in
 omit [IsProbabilityMeasure μ] in
@@ -577,11 +480,6 @@ lemma integrable_Dn_four (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥0 → Ω
             (by exact_mod_cast huT) ((abs_nonneg _).trans (hbdd 0 ω)))) (abs_nonneg a)
   push_cast
   nlinarith [h4, sq_nonneg a, u.coe_nonneg]
-
-omit hB mΩ in
-/-- Pointwise AM–GM `(x·y)² ≤ ½(x⁴ + y⁴)` — the domination behind the mixed-product `L²` bound. -/
-lemma sq_mul_le_half_add_pow4 (x y : ℝ) : (x * y) ^ 2 ≤ 2⁻¹ * (x ^ 4 + y ^ 4) := by
-  nlinarith [sq_nonneg (x ^ 2 - y ^ 2), sq_nonneg (x * y)]
 
 include hB in
 /-- **The mixed-time product is in `L²`**, via the AM–GM domination `(Dⁿ·Zⁿ)² ≤ ½(Dⁿ⁴ + Zⁿ⁴)`. -/
