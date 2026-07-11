@@ -595,10 +595,26 @@ in MathFin proofs too, not just upstream contributions.
    The review's headline. Extract the bespoke ε–δ core into a general,
    Mathlib-worthy lemma
    (`UniformIntegrable.eLpNorm_tendsto_zero_of_iSup_measure_tendsto_zero`), prove
-   it once, apply it. Work out the honest side-conditions (sets measurable;
-   `p ≠ ∞`, since an L∞ indicator norm does not shrink with the measure). This is
-   our anti-wrapper / consume-the-idiomatic-lemma value aimed at our own code.
+   it once, apply it. Work out the honest side-conditions — here just
+   measurability of the sets: because the lemma consumes `UniformIntegrable X p μ`
+   directly it inherits any `p` (the `ε = ∞` case falls to `le_top`), so despite
+   the reviewer's hint NO `p ≠ ∞` is needed. This is our anti-wrapper /
+   consume-the-idiomatic-lemma value aimed at our own code.
 10. **Delete parens the parser doesn't need.**
+11. **`↦` over `=>` in `fun` and binders** (a leanprover-community style-guide
+    rule). Keep a single declaration internally consistent; the file at large
+    mixes the two.
+12. **Collapse a trivial two-step `calc` into one term.** A `calc` whose second
+    step is just an equality (`… ≤ x := h; _ = y := heq`) is `h.trans_eq heq`
+    (or `.trans`) — drop the `calc` entirely. If a `calc` genuinely stays, the
+    `calc` keyword goes on its own line when the head term/relation wraps.
+13. **Squeeze, don't ε–δ, for `Tendsto _ _ (𝓝 0)`.** A hand-rolled
+    `rw [ENNReal.tendsto_nhds_zero]; intro ε …; filter_upwards …` collapses to
+    `tendsto_of_tendsto_of_tendsto_of_le_of_le' tendsto_const_nhds hbound
+    (Eventually.of_forall fun _ ↦ zero_le) …` once you have an eventual upper
+    bound that itself → 0 — e.g. `C / ENNReal.ofReal (b c)` via
+    `ENNReal.tendsto_ofReal_atTop` + `ENNReal.Tendsto.const_div`. The squeeze
+    reads as the actual argument (`0 ≤ ⨆ ≤ C/(b c) → 0`).
 
 ### Local-build gotchas hit while verifying (transferable)
 
@@ -607,10 +623,31 @@ in MathFin proofs too, not just upstream contributions.
   `↑({…}.max')` no longer matched the goal's folded `↑x`. Fix: bind `x ∈ T` first
   (`have hu_mem : u ∈ T := T.max'_mem hTne`), THEN `simpa [T]` unfolds only the
   filter, leaving `x` intact.
-- `ae_all_iff.2 fun t => ht t` needs the target's type ascription
-  (`have h : ∀ᵐ ω, ∀ t : mesh ι k, …`) or Lean infers the index as the uncountable
-  base `ι` → `Countable ι` synthesis failure. Keep the `have`'s ascription.
+- `ae_all_iff.2 fun t => ht t` needs the index type pinned, or Lean infers it as
+  the uncountable base `ι` → `Countable ι` synthesis failure. Ascribe the BINDER —
+  `ae_all_iff.2 fun t : mesh ι k ↦ ht t` — which then inlines straight into
+  `filter_upwards [...]` with no separate `have : ∀ᵐ ω, ∀ t : mesh ι k, …`.
 - `UniformIntegrable` is a `def` reducing to `And`, so `hd.myLemma` dot-notation
   resolves against `And` (`invalidField`). Call `UniformIntegrable.myLemma hd …`
   by full name; positional field access `hd.2.1` for the `UnifIntegrable`
   component is fine.
+- `hv.trans h` (dot notation) FAILS where `le_trans hv h` succeeds when the middle
+  term needs a subtype→base coercion: dot resolves `.trans` against `hv`'s type
+  (`mesh ι n`), pinning the middle to `mesh ι n` and refusing `↑u : ι`. Use the
+  `le_trans` / `_root_.`-qualified form so the expected type drives the coercion.
+  This is the flip side of item 1 — the coercion IS defeq, but only when
+  elaboration is expected-type-driven, which dot notation defeats.
+- Deleting a declaration ORPHANS its preceding `omit …/include …/attribute … in`
+  modifier onto the NEXT declaration. If that next declaration is a `variable (…)`,
+  the modifier silently breaks the variable's registration, so under `lake build`
+  (`autoImplicit` false) every later use of that variable is an "Unknown identifier"
+  — a whole-file cascade from one root cause. The warm daemon (`autoImplicit` TRUE)
+  MASKS it. When deleting a lemma, check the line above for an `omit … in` and
+  delete it too. (2026-07-10: hoisting a lemma out of `GirsanovAdaptedTheta` orphaned
+  its `omit` onto `variable (hB …)` → 60+ `hB`-unknown errors.)
+- `have h := e; simp only [L] at h; exact h` does NOT always fold to
+  `simpa only [L] using e`. When `exact h` was closing by full defeq — instance-path
+  differences (`HasDerivAt.const_mul` producing the `NormedAlgebra` path vs the
+  goal's plain `AddCommGroup`), or `id` unfolding — `simpa`'s weaker post-simp
+  matching fails with a type mismatch. Build-verify every simpa-fold; the daemon's
+  `lean-check` can pass one that `lake build` later rejects.

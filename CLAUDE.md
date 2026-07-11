@@ -249,6 +249,11 @@ MathFin proofs, not just upstream BM:
 - `set x := e` WITHOUT `with hx` unless you rewrite by `hx` (unfold via `simp [x]`);
 - MINIMAL typeclass matching the callees (`SigmaFiniteFiltration`, not
   `IsFiniteMeasure`, when that is all they need);
+- FEWER `have`s — surface the argument's shape with `suffices` / `show … from`,
+  mixing forward + backward reasoning (a long have-ladder hides the structure);
+- `↦` over `=>`; fold a trivial two-step `calc` (`… ≤ x := h; _ = y := heq`) into
+  `h.trans_eq heq` and drop the `calc`; replace a hand-rolled `𝓝 0` ε–δ with a
+  squeeze (`tendsto_of_tendsto_of_tendsto_of_le_of_le'`);
 - and the headline — LIFT the reusable abstraction: extract the bespoke core into
   a general, Mathlib-worthy lemma and apply it, rather than tailoring the proof to
   one call site.
