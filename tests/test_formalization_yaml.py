@@ -80,6 +80,17 @@ def test_autoform_provenance_count_is_mechanical(tmp_path):
     assert "#88" in note and "#109" in note  # sorted, de-duped issues
 
 
-def test_autoform_count_zero_on_live_corpus_until_first_merge():
-    # today: no autoform entry has merged, so the mechanical count reads 0.
-    assert _machine_note(F.build_doc(ROOT)).startswith("0 Leanstral-scouted proof")
+def test_autoform_count_matches_corpus_provenance():
+    # the note reports the MECHANICAL count of leanstral-autoform provenance
+    # entries in the live corpus, so it stays honest as autoform PRs merge (0 on
+    # a clean main, 1 once #88's PR lands, …) — never a hand-set snapshot.
+    import glob
+    import json
+    n = 0
+    for f in glob.glob(os.path.join(ROOT, "benchmarks", "*.json")):
+        data = json.load(open(f, encoding="utf-8"))
+        for t in (data.get("theorems", data) if isinstance(data, dict) else data):
+            prov = (t.get("metadata") or {}).get("provenance") or {}
+            if prov.get("source") == "leanstral-autoform":
+                n += 1
+    assert _machine_note(F.build_doc(ROOT)).startswith(f"{n} Leanstral-scouted proof")

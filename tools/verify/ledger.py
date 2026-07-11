@@ -219,11 +219,16 @@ def exec_check(code: str, timeout: float) -> dict:
     to run next to an idle daemon."""
     tmp_host = REPO / EXEC_TMP
     tmp_host.write_text(code, encoding="utf-8")
+    # LEDGER_EXEC_LOCAL: run `lake env lean` directly in THIS environment (already
+    # inside a Lean-equipped container, e.g. the autoform PR-assembly build) rather
+    # than `docker exec` into a named daemon container.
+    if os.environ.get("LEDGER_EXEC_LOCAL"):
+        cmd = ["lake", "env", "lean", EXEC_TMP]
+    else:
+        cmd = ["docker", "exec", EXEC_CONTAINER, "lake", "env", "lean", f"/app/{EXEC_TMP}"]
     try:
         proc = subprocess.run(
-            ["docker", "exec", EXEC_CONTAINER, "lake", "env", "lean",
-             f"/app/{EXEC_TMP}"],
-            capture_output=True, text=True, timeout=timeout, cwd=REPO,
+            cmd, capture_output=True, text=True, timeout=timeout, cwd=REPO,
         )
     finally:
         tmp_host.unlink(missing_ok=True)
