@@ -258,16 +258,16 @@
     "gir-thm-9.1.8": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-11",
-      "elapsed_s": 68.7,
-      "input_hash": "d21e6a956bae7f52221aa6a83a12a8c3f9721b3b802f547e90b948bc14e152a1",
-      "verified_at_commit": "4ca5e6d"
+      "elapsed_s": 6.7,
+      "input_hash": "32e38925d45b96f521b38b4b58f9f5ee45a181a40071d2e779f6a6604190ce7a",
+      "verified_at_commit": "4bd5e2d"
     },
     "gir-thm-9.1.8-predictable": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-11",
-      "elapsed_s": 34.2,
-      "input_hash": "55904e3f300ea1c5ae3ca3558da7c1047ded263a620e8b9835a15c063f28240e",
-      "verified_at_commit": "4ca5e6d"
+      "elapsed_s": 102.9,
+      "input_hash": "a2fdeb8e5eaeb10ffec3922e1c79567870f510841d3ebe3a9124d6ed2c446a0d",
+      "verified_at_commit": "4bd5e2d"
     },
     "gir-thm-9.3.4": {
       "benchmark_file": "girsanov_finance.json",
