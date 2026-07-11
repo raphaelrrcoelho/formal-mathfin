@@ -74,6 +74,25 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-11 — corpus 319 — executed backlog #1: adapted Girsanov grid→generic wiring
+
+The top HIGH item from the 2026-07-10 panel, done. `GirsanovAdaptedTheta`'s uniform-partition density
+moment lemmas (`sq_integral_Zn_le`, `memLp_Zn_two`, `quad_integral_Zn_le`, `integrable_Zn_four`,
+`measurable_Zn`) now instantiate the partition-generic `SimpleDoleansMoments` tower directly (`Zⁿ` *is*
+`simpleDoleansExp` at `s = unifPart T n`; the grid's `unifPart T n n = T` supplies the generic's
+`T ≤ s N` coverage; `n = 0` is the constant-`1` density). The literal `sq_mul_le_half_add_pow4`
+duplicate and the now-orphaned `driftSqSum_le` / grid `simpleDoleansExp_scaled_eq` are deleted.
+**Net −102 lines**, one file, crown untouched (name-preserving re-exports), axiom-clean, ledger fresh
+(the 2 crown entries re-verified).
+
+**Two refinements of the panel's plan, found in execution.** (1) The ~180-line estimate was optimistic:
+the `Dn`/`fn` drift-exponential and mixed-product lemmas are KEPT, not routed — their grid proofs bound
+the drift for *all* `n` via `simpleDriftUnif_abs_le`, strictly more general than the generics'
+`hNT : T ≤ s N` coverage requirement, so routing them would *regress* (an `n = 0` special case for no
+gain). (2) No `simpleStochSum = riemannσ` / `simpleQuadVar = driftSqSum` bridges were needed — the moment
+lemmas route directly. Remaining top backlog: the generic Riemann-bridge core, the Taylor-remainder
+hoist, the marshalled-prologue dedup, and the pricing/portfolio items.
+
 ## 2026-07-10 — corpus 319 — whole-repo style sweep + 8-lens values panel (243 files)
 
 **Scope**: a full-repo pass, not a single-theorem review. Two tracks. (1) A **mechanical/idiomatic
