@@ -49,3 +49,37 @@ def test_report_matches_corpus():
     # automation honestly names the scout
     methods = doc["automation"]["methods"]
     assert any("labs-leanstral-1-5" in m.get("models", []) for m in methods)
+
+
+def _machine_note(doc):
+    for m in doc["automation"]["methods"]:
+        if "labs-leanstral-1-5" in m.get("models", []):
+            return m["prompting_notes"]
+    raise AssertionError("machine method not found")
+
+
+def test_autoform_provenance_count_is_mechanical(tmp_path):
+    # a benchmark entry the pipeline scouted (provenance marker) is COUNTED, not
+    # hand-set — so the automation disclosure can never drift from the truth.
+    import json
+    (tmp_path / "benchmarks").mkdir()
+    (tmp_path / "benchmarks" / "x.json").write_text(json.dumps({"theorems": [
+        {"id": "human-1", "domain": "mathematical_finance",
+         "metadata": {"formalization_status": "full"}},
+        {"id": "auto-1", "domain": "mathematical_finance",
+         "metadata": {"formalization_status": "full",
+                      "provenance": {"source": "leanstral-autoform", "issue": 109}}},
+        {"id": "auto-2", "domain": "mathematical_finance",
+         "metadata": {"formalization_status": "full",
+                      "provenance": {"source": "leanstral-autoform", "issue": 88}}},
+    ]}), encoding="utf-8")
+    (tmp_path / "tools").mkdir()
+    (tmp_path / "tools" / "formalization_meta.toml").write_text("", encoding="utf-8")
+    note = _machine_note(F.build_doc(str(tmp_path)))
+    assert note.startswith("2 Leanstral-scouted proof")
+    assert "#88" in note and "#109" in note  # sorted, de-duped issues
+
+
+def test_autoform_count_zero_on_live_corpus_until_first_merge():
+    # today: no autoform entry has merged, so the mechanical count reads 0.
+    assert _machine_note(F.build_doc(ROOT)).startswith("0 Leanstral-scouted proof")

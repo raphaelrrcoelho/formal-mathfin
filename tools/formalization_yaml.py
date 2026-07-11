@@ -127,10 +127,22 @@ def build_doc(root: str) -> dict:
     by_file: dict[str, dict] = {}
     totals = {"full": 0, "library_wrapper": 0, "reduced_core": 0, "placeholder": 0}
     n = 0
+    # provenance: entries the autoform pipeline scouted carry
+    # metadata.provenance.source == "leanstral-autoform" (+ the issue it closed).
+    # Counting them here keeps the automation disclosure MECHANICAL — it can never
+    # drift from a hand-set "0" once machine-scouted proofs start merging.
+    autoform_count = 0
+    autoform_issues: list = []
     for base, t in _theorems(root):
         n += 1
-        status = (t.get("metadata") or {}).get("formalization_status", "full")
+        md = t.get("metadata") or {}
+        status = md.get("formalization_status", "full")
         totals[status] = totals.get(status, 0) + 1
+        prov = md.get("provenance") or {}
+        if prov.get("source") == "leanstral-autoform":
+            autoform_count += 1
+            if prov.get("issue") is not None:
+                autoform_issues.append(prov["issue"])
         d = by_file.setdefault(base, {"n": 0, "full": 0, "library_wrapper": 0,
                                       "reduced_core": 0, "placeholder": 0,
                                       "domain": t.get("domain", "")})
@@ -138,6 +150,10 @@ def build_doc(root: str) -> dict:
         d[status] = d.get(status, 0) + 1
 
     ready = totals["full"] + totals["library_wrapper"]
+    autoform_note = f"{autoform_count} Leanstral-scouted proof(s) merged"
+    if autoform_issues:
+        issues = ", ".join("#" + str(i) for i in sorted(set(autoform_issues)))
+        autoform_note += f" (closing {issues})"
 
     proj = meta.get("project", {})
     project = {
@@ -204,13 +220,15 @@ def build_doc(root: str) -> dict:
                     "method": "machine autoformalization (scout, not author)",
                     "models": ["labs-leanstral-1-5"],
                     "framework": "mathfin-foundry: probe / vibe <-> lean-lsp-mcp",
-                    "tool_setup": ("token-paced GitHub Actions pipeline; candidates pass the "
-                                   "values gate + an 8-lens refinery before a human authors the PR"),
-                    "prompting_notes": "0 Leanstral-scouted proofs merged as of this generation",
+                    "tool_setup": ("token-paced GitHub Actions pipeline; on a pass it opens a "
+                                   "ready-for-review PR on formal-mathfin that a human reviews "
+                                   "(8-lens values panel) and merges"),
+                    "prompting_notes": autoform_note,
                 },
             ],
             "spend_usd": "0 (Mistral Labs beta)",
-            "notes": "scout-not-author: no machine proof merges unrefined; a human authors every PR",
+            "notes": ("scout, not author: the pipeline opens the PR; a human reviews and merges, "
+                      "so no machine proof enters the library unreviewed"),
         },
         "fidelity": {
             "divergences": (
