@@ -69,11 +69,17 @@ piecewise-constant, `𝓕`-predictable, bounded holdings `hold i` held over `(ti
 Does not depend on any measure — it is a purely path-space/filtration object. -/
 structure SimpleStrategy (𝓕 : Filtration ℝ≥0 mΩ) (F : Type*)
     [NormedAddCommGroup F] [InnerProductSpace ℝ F] where
+  /-- The number of trading intervals. -/
   N : ℕ
+  /-- The `N + 1` trading dates `time 0 ≤ time 1 ≤ ⋯ ≤ time N`. -/
   time : Fin (N + 1) → ℝ≥0
+  /-- The trading dates are nondecreasing. -/
   mono : Monotone time
+  /-- The holding `hold i` carried over the `i`-th interval `(time i, time i+1]`. -/
   hold : Fin N → Ω → F
+  /-- Predictability: each holding is `𝓕`-strongly-measurable at the start of its interval. -/
   meas : ∀ i : Fin N, StronglyMeasurable[𝓕 (time i.castSucc)] (hold i)
+  /-- The holdings are uniformly bounded (in `ω` and `i`). -/
   bdd : ∃ K : ℝ, ∀ (i : Fin N) ω, ‖hold i ω‖ ≤ K
 
 /-- The **discounted terminal gains** of a simple strategy `ψ` against the price process `S`:
