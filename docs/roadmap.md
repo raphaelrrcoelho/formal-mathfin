@@ -1183,3 +1183,21 @@ terminal-time `discountedGBM_eq_itoIntegral` opens; unrestricted C² Itô formul
 (Summit C); the Itô formula *against a general Itô process* `∫ f'(X) dX` (drift+diffusion `X`
 beyond the GBM closed form); general-Ω multi-period DMW FTAP; SDE existence and uniqueness
 (Itô–Picard iteration); Lévy's martingale characterization of Brownian motion.
+
+## phase: continuous first-FTAP frame — meaning 1 (2026-07-12, corpus 326→330)
+
+The model-agnostic continuous-market EMM frame + the discounted-GBM instance. Four `full` entries
+(`gir-continuous-emm-forward`, `gir-discounted-gbm-emm`, `gir-discounted-gbm-no-arbitrage`,
+`gir-martingale-reindex`). `isEMM_noArbitrageSimple`: an equivalent martingale measure precludes
+arbitrage against SIMPLE (piecewise-constant, predictable, bounded) strategies — a direct term-by-term
+proof via the bilinear `condExp` pull-out, sharing the vanishing primitive
+`ae_zero_of_nonneg_of_integral_zero` with the discrete FTAP. Instance at `F = ℝ` via
+`discountedGBM_isEMM` (`Q = P`).
+
+**Honest scope:** meaning-1. The physical-measure Girsanov EMM `Q ≠ P` is intrinsically bounded-horizon
+(`Q = withDensity Z_T` is a martingale measure only on `[0,T]`) → a horizon-aware EMM is the meaning-1.5
+backlog. General admissible strategies / NFLVR / the converse (Delbaen–Schachermayer) are meaning-2.
+`IsEMM`-on-a-process is DS-shaped, so meaning 2 is additive.
+
+**Next:** (1) horizon-aware EMM for the Girsanov `Q ≠ P` instance; (2) the discrete general-Ω
+multi-period DMW crown (the nearer FTAP summit); (3) meaning-2 Delbaen–Schachermayer proper.

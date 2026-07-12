@@ -74,6 +74,48 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-12 — corpus 330 — continuous first-FTAP frame (meaning 1), DS-shaped for meaning 2
+
+The model-agnostic continuous-market EMM frame (`Foundations/ContinuousMarket` + the `Q = P`
+Black–Scholes instance in `ContinuousFTAP`): six commits, all axiom-clean (`AxiomAudit` +
+`AxiomAuditGen` green), ledger fresh at 330, `lake build` green. Reviewed per-task (opus on the crux
+forward theorem); this is the close-of-session gradient read, not a PASS stamp.
+
+- **Coherence (lens 2/4) — the session's spine.** The forward theorem and the discrete
+  `emm_implies_no_arbitrage` genuinely SHARE the closing primitive `ae_zero_of_nonneg_of_integral_zero`
+  (nonneg + `∫=0` ⟹ null), each supplying its own zero-integral. The first cut extracted a
+  *martingale-shaped* core the continuous side never used — caught in-session, re-split to the honestly
+  shared shape. The proof CONSUMES Mathlib's bilinear `condExp` pull-out
+  (`condExp_bilin_of_stronglyMeasurable_left` + `innerSL ℝ`) rather than reproving it (the general-`F`
+  pull-out, not a scalar fallback).
+- **Architectural ingenuity (lens 4).** `IsEMM` is stated *on a process* — exactly the object DS
+  produces — so meaning 2 is an additive extension (new strategy class + theorem), not a rewrite; the
+  frontier is a docstring'd marker, not vaporware. Sub-namespaced `MathFin.ContinuousMarket` per the
+  `OnePeriod`/`OnePeriodVector` variant pattern (a name collision the build gate caught, the isolated
+  daemon missed).
+- **First principles / honesty (lens 5/7) — the headline.** The BS instance uses `Q = P` because the
+  physical-measure Girsanov EMM `Q ≠ P` is *intrinsically bounded-horizon* (`Q = withDensity Z_T` is a
+  martingale measure only on `[0,T]`); rather than freeze a process or fake a full-horizon claim, the
+  scope is stated plainly in the theorem docstring, the benchmark scope text, and the plan, and the
+  horizon-aware EMM is tracked as explicit backlog. The orphaned `martingale_comp_monotone` (unused by
+  the direct proof) had its docstring corrected from "the bridge" to an honest standalone-lemma framing
+  (user decision: keep + benchmark).
+- **Concept clarity (lens 7).** `docs/patterns.md` was elevated to a first-class citizen (user
+  directive): the session's reusable pointers — the bilinear pull-out, `Martingale`-is-a-bare-`And`
+  accessors, the shared-vanishing-primitive lesson — were distilled in-flight, folded into the proof
+  commit, not deferred.
+
+**Upgrades executed this session:** lifted the genuinely-shared no-arbitrage primitive (lens 2/4);
+delivered the general forward continuous FTAP via the direct term-by-term route (lens 5/8); made
+`patterns.md` a standing first-class artifact (lens 7).
+
+**Refreshed backlog (top):** (1) **horizon-aware EMM** (`IsEMM`-on-`[0,T]` or a stopped price) so the
+Girsanov change-of-measure EMM `Q ≠ P` becomes a first-class instance — the natural meaning-1.5 next
+step; (2) the **discrete general-Ω multi-period DMW crown** (the nearer FTAP summit, one rung below
+DS); (3) **meaning 2** proper: NFLVR, general admissible strategies / `∫φ dS`, the closedness-of-K
+(Kreps–Yan) converse; (4) still open from prior panels — the general **2D covariation Itô** tower and
+hoisting the private std-normal Gaussian-MGF to a shared home.
+
 ## 2026-07-11 — corpus 324 — finance-breadth sprint (Asian / barrier / quanto / compound-Poisson)
 
 A four-deliverable finance-breadth sprint, all axiom-clean (`AxiomAuditGen` green), ledger fresh,

@@ -26,7 +26,23 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-11, survival-model foundation):** corpus **326**,
+> **Live status (2026-07-12, continuous first-FTAP frame):** corpus **330**,
+> **298 full + 18 wrappers = 316/330 delivery-ready**, 14 reduced cores, 0 placeholders. Four new
+> `full` entries land the model-agnostic continuous-market EMM frame (`Foundations/ContinuousMarket`):
+> the general forward FTAP `gir-continuous-emm-forward` (`isEMM_noArbitrageSimple` — an equivalent
+> martingale measure precludes arbitrage against **simple** piecewise-constant predictable bounded
+> strategies, proved directly via the bilinear conditional-expectation pull-out
+> `condExp_bilin_of_stronglyMeasurable_left` with `innerSL ℝ` and a vanishing primitive
+> `ae_zero_of_nonneg_of_integral_zero` **shared with the discrete FTAP**); its `F = ℝ` instance
+> `gir-discounted-gbm-emm` (`discountedGBM_isEMM`, **Q = P**: the discounted GBM is already a
+> full-horizon `P`-martingale, so `P` is its own EMM); the corollary `gir-discounted-gbm-no-arbitrage`;
+> and the standalone foundational lemma `gir-martingale-reindex` (a `Q`-martingale sampled along a
+> monotone schedule is a discrete `Q`-martingale). **Honest scope:** meaning-1 (simple strategies).
+> The physical-measure Girsanov EMM `Q ≠ P` is intrinsically bounded-horizon (`Q = withDensity Z_T`
+> is a martingale measure only on `[0,T]`), so a horizon-aware EMM is tracked as follow-up; general
+> admissible strategies / NFLVR / the converse (Delbaen–Schachermayer) are the deferred meaning-2.
+>
+> **Prior (2026-07-11, survival-model foundation):** corpus **326**,
 > **294 full + 18 wrappers = 312/326 delivery-ready**, 14 reduced cores, 0 placeholders. Two new
 > `full` entries open the life-contingencies foundation (issue #112): the survival-ratio keystone
 > `mf-survival-ccdf-ratio` (`tpₓ = S_X(x+t)/S_X(x)` for `t ≥ 0` — the conditional-probability

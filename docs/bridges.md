@@ -344,3 +344,21 @@ on the Gaussian joint law. *Open:* the *general bounded-adapted*-`θ` Girsanov (
 drift-corrected `B^θ = B − ∫θ ds` for adapted `θ`) — its adapted drift needs an adapted-integrand Itô
 formula / pathwise quadratic variation the Itô tower does not yet expose (every `ito_formula_*` is a
 function of `B_t`, and the Itô-integral QV exists only in expectation).
+
+## The continuous first-FTAP frame — pricing tower ↔ no-arbitrage (meaning 1, 2026-07-12)
+
+`Foundations/ContinuousMarket` (the model-agnostic EMM frame) ↔ `Foundations/ContinuousFTAP`
+(the `F = ℝ` discounted-GBM instance) ↔ `Foundations/NoArbitrageCore` (shared with the discrete FTAP).
+
+- **ContinuousMarket → ContinuousFTAP.** `IsEMM` / `NoArbitrageSimple` / `isEMM_noArbitrageSimple`
+  (the general forward theorem) are instantiated by `discountedGBM_isEMM` /
+  `discountedGBM_noArbitrageSimple`, which package the existing `discountedGBM_isMartingale` (the
+  operational continuous FTAP) as a concrete EMM. The frame gives the GBM martingale property its
+  economic payoff: no simple-strategy arbitrage.
+- **NoArbitrageCore shared by discrete + continuous.** `ae_zero_of_nonneg_of_integral_zero` (nonneg +
+  zero mean ⟹ vanishes) is the common closing step of BOTH `FTAP.emm_implies_no_arbitrage` (discrete,
+  via a martingale transform) and `ContinuousMarket.isEMM_noArbitrageSimple` (continuous, term-by-term
+  via the bilinear `condExp` pull-out). One argument, two settings; each supplies its own zero-integral.
+- **Seam to meaning 2.** `IsEMM`-on-a-process is exactly what Delbaen–Schachermayer produces, so the
+  frame is a strict sub-object of the DS one and meaning 2 (NFLVR, admissible strategies, the converse)
+  is additive. The physical-measure Girsanov EMM `Q ≠ P` (bounded-horizon) is the meaning-1.5 bridge.
