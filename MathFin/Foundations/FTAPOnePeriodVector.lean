@@ -20,16 +20,17 @@ probability space `(Ω, P)`: no arbitrage ⟺ there is an equivalent martingale 
 
 This is the `d`-asset generalisation of the scalar `Foundations/FTAPOnePeriod.lean`.
 Because `θ` ranges over the **finite-dimensional** `F`, the equivalent martingale measure
-is **explicit** — the backward direction is the Esscher / minimal-divergence
-construction: minimise the smooth convex potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`. The
+is **explicit**: the backward direction minimises the smooth convex softplus
+potential `θ ↦ E[log(1 + exp⟪θ,Y⟫)]`. The
 potential is constant along the **gains kernel** `N = {θ : ⟪θ,Y⟫ = 0 a.e.}` (the
 redundant portfolio directions) and, under no arbitrage, coercive on its orthogonal
-complement `Nᗮ`; so a minimiser `θ*` exists on `Nᗮ` and — because the potential is flat
-along `N` — is a *global* minimiser. Its first-order condition `E[Y · σ(⟪θ*,Y⟫)] = 0`
+complement `Nᗮ`; so a minimiser `θ*` exists on `Nᗮ` and, because the potential is flat
+along `N`, is a *global* minimiser. Its first-order condition `E[Y · σ(⟪θ*,Y⟫)] = 0`
 (with `σ` the logistic function) hands back a strictly-positive bounded weight
-`z = σ(⟪θ*,Y⟫)` whose normalisation `z / E[z]` is the EMM density. No Hahn–Banach, no
-L⁰-cone closedness, no measurable selection — those are needed only for the general-Ω
-**multi-period** DMW.
+`z = σ(⟪θ*,Y⟫)` whose normalisation `z / E[z]` is the EMM density: a bounded
+`(0,1)`-valued logistic tilt, the softplus analogue of the exponential Esscher measure
+rather than the Esscher measure itself. No Hahn–Banach, no L⁰-cone closedness, no
+measurable selection; those are needed only for the general-Ω **multi-period** DMW.
 
 ## Scope
 
@@ -468,7 +469,7 @@ lemma integral_logistic_smul_eq_zero (hY : Measurable Y) (hYint : Integrable Y P
 
 /-- **Integrable backward direction** (finite-dim market). For an integrable `Y`, no
 arbitrage gives an equivalent martingale measure. If `Y =ᵐ 0` (every direction redundant)
-then `Q = P`; otherwise the Esscher density `z = σ⟪θ₀,Y⟫` at the potential's global
+then `Q = P`; otherwise the logistic density `z = σ⟪θ₀,Y⟫` at the potential's global
 minimiser is strictly positive, bounded, and fair, so `Q = P.withDensity (z / ∫z)` is the
 EMM. -/
 theorem exists_isEMM_of_noArbitrage_integrable (hY : Measurable Y) (hYint : Integrable Y P)
@@ -606,9 +607,9 @@ theorem exists_isEMM_of_noArbitrage (hY : Measurable Y) (hNA : NoArbitrage P Y) 
 /-- **One-period Fundamental Theorem of Asset Pricing**, finite-dimensional market, general
 `Ω`. For a measurable `F`-valued discounted excess return `Y` (`F = EuclideanSpace ℝ (Fin
 d)` is the `d`-asset case), no arbitrage holds iff there is an equivalent martingale
-measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`. The backward direction is the
-explicit Esscher / minimal-divergence construction — minimise the softplus potential over
-the gains kernel's orthogonal complement — needing no Hahn–Banach, no L⁰-cone closedness,
+measure `Q ~ P` with `Y` integrable and `E_Q[Y] = 0`. The backward direction is
+explicit: minimise the softplus potential over the gains kernel's orthogonal complement
+(its logistic weight is the density), needing no Hahn–Banach, no L⁰-cone closedness,
 no measurable selection, and **no non-redundancy hypothesis**. -/
 theorem ftap_one_period_vector (hY : Measurable Y) :
     NoArbitrage P Y ↔ ∃ Q, IsEMM P Y Q :=
