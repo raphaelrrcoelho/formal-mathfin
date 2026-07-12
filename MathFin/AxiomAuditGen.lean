@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (267 constants). Scope: proof-position MathFin names only —
+  corpus (271 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -34,6 +34,12 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.Btheta_simple_isQBrownianMotion' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_simple_isQBrownianMotion
+
+/-- info: 'MathFin.ContinuousMarket.isEMM_noArbitrageSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ContinuousMarket.isEMM_noArbitrageSimple
+
+/-- info: 'MathFin.ContinuousMarket.martingale_comp_monotone' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ContinuousMarket.martingale_comp_monotone
 
 /-- info: 'MathFin.ErlangSum.sum_iidExp_law_gammaMeasure' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ErlangSum.sum_iidExp_law_gammaMeasure
@@ -293,8 +299,14 @@ namespace MathFin.AxiomAuditGen
 /-- info: 'MathFin.discountedGBM_eq_itoIntegral' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_eq_itoIntegral
 
+/-- info: 'MathFin.discountedGBM_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_isEMM
+
 /-- info: 'MathFin.discountedGBM_isMartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_isMartingale
+
+/-- info: 'MathFin.discountedGBM_noArbitrageSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_noArbitrageSimple
 
 /-- info: 'MathFin.discounted_americanPrice_supermartingale' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.discounted_americanPrice_supermartingale

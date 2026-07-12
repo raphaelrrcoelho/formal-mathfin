@@ -1002,4 +1002,31 @@ and lands as a one-line application:
 /-- info: 'MathFin.Btheta_isQBrownianMotion_adapted' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.Btheta_isQBrownianMotion_adapted
 
+/-! ### Continuous-time first FTAP: an EMM precludes simple-strategy arbitrage
+
+A model-agnostic continuous-market frame (`Foundations/ContinuousMarket.lean`): an **equivalent
+martingale measure** for a discounted price process precludes arbitrage against **simple**
+(piecewise-constant, predictable, bounded) strategies — the honest, economically transparent
+meaning-1 scope (general admissible strategies, NFLVR, and the converse are the deferred
+Delbaen–Schachermayer meaning-2). The forward theorem is DIRECT: each predictable-weighted
+increment `⟪φᵢ, S(tᵢ₊₁) − S(tᵢ)⟫` integrates to `0` under `Q` via the bilinear
+conditional-expectation pull-out (`condExp_bilin_of_stronglyMeasurable_left` with `innerSL ℝ`) and
+the martingale property, the finite sum vanishes, and the shared closing primitive
+`ae_zero_of_nonneg_of_integral_zero` — the SAME step the discrete `emm_implies_no_arbitrage` uses,
+each setting supplying its own zero-integral — finishes. Instantiated at `F = ℝ` by the discounted
+GBM under its risk-neutral measure (`Q = P`, `discountedGBM_isMartingale` a full-horizon
+`P`-martingale). -/
+
+/-- info: 'MathFin.ae_zero_of_nonneg_of_integral_zero' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ae_zero_of_nonneg_of_integral_zero
+
+/-- info: 'MathFin.ContinuousMarket.isEMM_noArbitrageSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.ContinuousMarket.isEMM_noArbitrageSimple
+
+/-- info: 'MathFin.discountedGBM_isEMM' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_isEMM
+
+/-- info: 'MathFin.discountedGBM_noArbitrageSimple' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.discountedGBM_noArbitrageSimple
+
 end MathFin.AxiomAudit

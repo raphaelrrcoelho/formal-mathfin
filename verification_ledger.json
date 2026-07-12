@@ -234,12 +234,40 @@
       "input_hash": "fad0715cac8698d50d338cb6c63c3d2710899434edd456ac73f33a33d639f7c7",
       "verified_at_commit": "4ca5e6d"
     },
+    "gir-continuous-emm-forward": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-12",
+      "elapsed_s": 116.6,
+      "input_hash": "7a0468b18e5d05f02fca4072312b92a254b5d95c9b6d959f238daa5b2db5cbd8",
+      "verified_at_commit": "f9a4747"
+    },
     "gir-continuous-ftap": {
       "benchmark_file": "girsanov_finance.json",
-      "date": "2026-07-11",
-      "elapsed_s": 154.8,
-      "input_hash": "74f0c14390d8fa0d63b8c2c7ecfe5bbe0f677aed66f06699363b78c9e845464f",
-      "verified_at_commit": "4ca5e6d"
+      "date": "2026-07-12",
+      "elapsed_s": 21.3,
+      "input_hash": "c6aad828716421d58cc56fafdf60d7add8d2bcd80e13649c9e3181787cc08f13",
+      "verified_at_commit": "f9a4747"
+    },
+    "gir-discounted-gbm-emm": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-12",
+      "elapsed_s": 137.6,
+      "input_hash": "86b3e20fb9da6aeacd7b700669055eeb973ff153125938c1a2b477eb9b2043de",
+      "verified_at_commit": "f9a4747"
+    },
+    "gir-discounted-gbm-no-arbitrage": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-12",
+      "elapsed_s": 115.4,
+      "input_hash": "9403909a58098ef9c35e3676c9b9170971f7033d7d339372e775217582cdd718",
+      "verified_at_commit": "f9a4747"
+    },
+    "gir-martingale-reindex": {
+      "benchmark_file": "girsanov_finance.json",
+      "date": "2026-07-12",
+      "elapsed_s": 100.3,
+      "input_hash": "5fe807e65fed4c18000aa846f54230c7129e1877410344476290807dad3653cb",
+      "verified_at_commit": "f9a4747"
     },
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
@@ -334,10 +362,10 @@
     },
     "mart-thm-2.6.7": {
       "benchmark_file": "martingales.json",
-      "date": "2026-07-11",
-      "elapsed_s": 82.9,
-      "input_hash": "a6e346b3e4b5152ad9e340468e0b4be8b04794d9c5a2ba9be1eb687274f25a5b",
-      "verified_at_commit": "4ca5e6d"
+      "date": "2026-07-12",
+      "elapsed_s": 95.9,
+      "input_hash": "6bbfe79d3e4fe87fccdde6d64c1ce046bd12d5d8aca32eec918ff5ab751437ee",
+      "verified_at_commit": "f9a4747"
     },
     "mc-def-1.1.1": {
       "benchmark_file": "markov_chains.json",
