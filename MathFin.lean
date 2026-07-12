@@ -58,6 +58,8 @@ import MathFin.Foundations.FeynmanKacHeatEquation
 import MathFin.Foundations.BrownianMartingale
 -- Continuous-time first FTAP: discounted GBM price is a Q-martingale (Wald exponential)
 import MathFin.Foundations.ContinuousFTAP
+-- Model-agnostic continuous-market vocabulary: IsEMM on a process, simple strategies, no-arbitrage
+import MathFin.Foundations.ContinuousMarket
 -- Bayes change-of-measure engine + Black–Scholes EMM via an explicit Girsanov density
 import MathFin.Foundations.ChangeOfMeasure
 import MathFin.Foundations.Girsanov
