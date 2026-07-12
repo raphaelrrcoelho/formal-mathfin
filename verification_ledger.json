@@ -1193,6 +1193,13 @@
       "input_hash": "49a94be75bf5932b0296759114dae375add20f210f4db71845b697c543e97ef2",
       "verified_at_commit": "bfa3834"
     },
+    "mf-fi-fra": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-12",
+      "elapsed_s": 7.7,
+      "input_hash": "7e2443a9d046ac3867cb3855c570919c4bbe90be9375b5a8d5f8cd6035822141",
+      "verified_at_commit": "unknown"
+    },
     "mf-first-to-default-spread": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-11",

@@ -3640,6 +3640,27 @@
           "upstream": "Yosuke Ito, AFP Actuarial Mathematics (Survival_Model), BSD — consulted as a source, cited"
         }
       }
+    },
+    {
+      "id": "mf-fi-fra",
+      "name": "Forward-Rate Agreement: Value and Fair Simple Forward Rate",
+      "description": "For zero-coupon discount factors P1=P(0,T1), P2=P(0,T2) (P2>0, accrual delta != 0) and the simple forward rate F=(P1/P2-1)/delta: F is the no-arbitrage rate P1=P2*(1+delta*F), the FRA value delta*P2*(F-K) equals the floating leg minus the fixed leg (P1-P2)-delta*K*P2, and it vanishes exactly at the fair rate K=F.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.FRA\n\nopen MathFin\n\n/-- FRA value and fair simple forward rate: no-arbitrage rate, value as\n    floating-minus-fixed leg, and zero value exactly at K = F. -/\ntheorem mf_fi_fra {P₁ P₂ δ K F : ℝ} (hP₂ : 0 < P₂) (hδ : δ ≠ 0)\n    (hF : F = (P₁ / P₂ - 1) / δ) :\n    P₁ = P₂ * (1 + δ * F) ∧\n    δ * P₂ * (F - K) = (P₁ - P₂) - δ * K * P₂ ∧\n    (δ * P₂ * (F - K) = 0 ↔ K = F) :=\n  MathFin.fra_value_and_fair_rate hP₂ hδ hF\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Forward-rate agreement / simple forward rate (Brigo–Mercurio, Bjork)",
+        "difficulty": "good-first",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/FixedIncome/FRA.lean (field_simp/ring over discount factors). Re-export from MathFin. Axioms-clean.",
+        "provenance": {
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 67
+        }
+      }
     }
   ]
 }
