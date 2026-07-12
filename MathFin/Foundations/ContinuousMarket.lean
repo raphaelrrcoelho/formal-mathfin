@@ -100,8 +100,10 @@ omit [FiniteDimensional ℝ F] in
 /-- **A `Q`-martingale sampled along a monotone schedule is a discrete `Q`-martingale.**
 Sampling `S` at the increasing times `t 0 ≤ t 1 ≤ ⋯` gives a martingale w.r.t. the sampled
 filtration `sampledFiltration 𝓕 ht`: adaptedness and the tower property both restrict along
-`t`. This is the bridge that lets a continuous-time EMM discharge simple-strategy arbitrage
-through the discrete `martingale_nonneg_terminal_ae_zero`. -/
+`t`. A general, standalone structural lemma (the discrete-time trace of a continuous-time
+martingale). The forward theorem `isEMM_noArbitrageSimple` below takes a direct term-by-term
+route and does not use this; it is kept as a reusable primitive (benchmarked as
+`gir-martingale-reindex`) for sampled-model instances and the eventual meaning-2 development. -/
 theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
     (hS : Martingale S 𝓕 Q) {t : ℕ → ℝ≥0} (ht : Monotone t) :
     Martingale (fun n ↦ S (t n)) (sampledFiltration 𝓕 ht) Q :=
