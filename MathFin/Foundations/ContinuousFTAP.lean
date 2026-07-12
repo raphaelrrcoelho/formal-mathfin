@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.BrownianMartingale
+public import MathFin.Foundations.ContinuousMarket
 
 /-!
 # Continuous-time first fundamental theorem of asset pricing (martingale property)
@@ -61,5 +62,31 @@ theorem discountedGBM_isMartingale (S_0 r σ : ℝ) :
     ring
   rw [heq]
   exact (IsFilteredPreBrownian.waldExponential_isMartingale σ).smul S_0
+
+/-- **The discounted GBM is an equivalent martingale measure — with `Q = P`.** When `P` is the
+risk-neutral measure (the driver `X` is a `P`-pre-Brownian), the discounted price `e^{−rt} S_t` is
+already a `P`-martingale, so `P` is trivially its own EMM for it: an instance of the model-agnostic
+`ContinuousMarket.IsEMM` frame at `F = ℝ`. (The physical-measure Girsanov EMM `Q ≠ P` is
+intrinsically bounded-horizon — `Q = withDensity Z_T` is a martingale measure only on `[0,T]`, cf.
+`bs_discounted_isQMartingale` — so it fits a horizon-aware EMM, tracked as follow-up, not this
+full-horizon `IsEMM`.) -/
+theorem discountedGBM_isEMM [IsProbabilityMeasure P] (S_0 r σ : ℝ) :
+    ContinuousMarket.IsEMM (P := P) (𝓕 := 𝓕)
+      (fun (t : ℝ≥0) ω ↦ Real.exp (-r * t) *
+        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) P where
+  isProb := inferInstance
+  ac := Measure.AbsolutelyContinuous.rfl
+  ac' := Measure.AbsolutelyContinuous.rfl
+  martingale := discountedGBM_isMartingale S_0 r σ
+
+/-- **No simple-strategy arbitrage for the discounted GBM under its risk-neutral measure.** The
+frame's forward FTAP (`isEMM_noArbitrageSimple`) applied to the EMM `discountedGBM_isEMM`: no simple
+(piecewise-constant, predictable, bounded) strategy trading the discounted GBM has gains that are
+`P`-a.s. nonnegative and strictly positive on a `P`-non-null set. -/
+theorem discountedGBM_noArbitrageSimple [IsProbabilityMeasure P] (S_0 r σ : ℝ) :
+    ContinuousMarket.NoArbitrageSimple (P := P) (𝓕 := 𝓕)
+      (fun (t : ℝ≥0) ω ↦ Real.exp (-r * t) *
+        (S_0 * Real.exp ((r - σ ^ 2 / 2) * t + σ * X t ω))) :=
+  ContinuousMarket.isEMM_noArbitrageSimple (discountedGBM_isEMM S_0 r σ)
 
 end MathFin
