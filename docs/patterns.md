@@ -671,3 +671,51 @@ provenance marker, so the "our design, source consulted" claim is honest and can
   mechanical disclosure ("N proof(s) authored in our own design, with … consulted as a source and
   cited"); `tests/test_formalization_yaml.py` pins the count so it tracks the live corpus.
 - **coverage.md**: one disclosure line per source-consulted batch.
+
+## Continuous-time FTAP / conditional-expectation idioms (2026-07-11 batch)
+
+Distilled from the continuous first-FTAP frame (`Foundations/ContinuousMarket.lean`).
+
+### Bilinear `condExp` pull-out for predictable-weighted martingale increments
+The building block of the forward FTAP — "a `𝓕_s`-measurable bounded weight against a martingale
+increment integrates to `0`" — is Mathlib's **`condExp_bilin_of_stronglyMeasurable_left`**
+(`Mathlib/MeasureTheory/Function/ConditionalExpectation/PullOut.lean`):
+`Q[fun ω ↦ B (φ ω) (g ω) | m] =ᵐ fun ω ↦ B (φ ω) (Q[g | m] ω)` for `φ` `m`-strongly-measurable.
+- `B` must be a **continuous** bilinear map `F →L[ℝ] E →L[ℝ] G`. For the real inner product use
+  **`innerSL ℝ`** (`⟪·,·⟫_ℝ`), NOT `innerₗ` (that is only `→ₗ`, and the pull-out needs `→L`).
+- Then `∫ ⟪φ, Δ⟫ dQ = ∫ Q[⟪φ,Δ⟫|𝓕_s] dQ` (`integral_condExp`) `= ∫ ⟪φ, Q[Δ|𝓕_s]⟫ dQ` (pull-out
+  under `integral_congr_ae`) `= 0`, since `Q[S t − S s | 𝓕 s] = 0` for a martingale.
+- Increment integrability: Cauchy–Schwarz `‖⟪φ,Δ⟫‖ ≤ ‖φ‖·‖Δ‖ ≤ K·‖Δ‖` + `Integrable.mono'` with
+  `AEStronglyMeasurable.inner`; `Martingale.integrable i` gives `Integrable (S i) Q`.
+
+### `Martingale` is a bare `And` on this pin — `.1`/`.2`, and `.adapted` does NOT exist
+`Martingale f 𝓕 μ := StronglyAdapted 𝓕 f ∧ ∀ i j, i ≤ j → μ[f j | 𝓕 i] =ᵐ[μ] f i`. So:
+- adaptedness is **`hS.1 i : StronglyMeasurable[𝓕 i] (f i)`** (via the `And`) — `hS.adapted` errors
+  with `And.adapted` (mirrors the `UniformIntegrable`-is-a-`def` gotcha above);
+- the tower is **`hS.2 i j hij`**; the named lemmas `Martingale.condExp_ae_eq` and
+  `Martingale.integrable` DO exist and are fine to use by dot notation.
+
+### Sub-namespace variant frames — and the build gate, not the daemon, catches the collision
+`MathFin.IsEMM` already exists (`FTAPDiscrete`). A second `IsEMM` under bare `namespace MathFin`
+collides. Variant frames sub-namespace: `MathFin.OnePeriod`, `MathFin.OnePeriodVector`, and now
+`MathFin.ContinuousMarket`. The isolated warm-daemon `lean-check` PASSES (it never loads the sibling
+module), so only `lake build MathFin` (the umbrella) surfaces
+`environment already contains 'MathFin.IsEMM'`. One more entry in the daemon-masks / build-verifies
+column: name collisions join `autoImplicit` and instance-path `simpa`-folds there.
+
+### Lift the shared *vanishing* primitive, let each setting supply its own zero-integral
+When two forward-FTAP settings both close through "nonneg + `∫ = 0` ⟹ positive set is null,"
+extract exactly THAT (`ae_zero_of_nonneg_of_integral_zero`, `Foundations/NoArbitrageCore.lean`) and
+let each side reach `∫ = 0` its own way — the discrete one via a martingale transform started at `0`
+(`∫ V_T = ∫ V_0 = 0`), the continuous one term-by-term via the pull-out. Do NOT force a
+martingale-shaped shared lemma onto the continuous setting, which has no martingale to hand: that
+was the plan's first cut, and it produced an over-general core whose docstring overclaimed its
+consumers. Match the abstraction to what is actually shared.
+
+### Small syntax pointers
+- `Fin.castSucc_lt_succ` takes `i` **implicit** — `(Fin.castSucc_lt_succ (i := i)).le`, or let it
+  unify; do NOT apply it to `i` positionally (`... i` → "function expected").
+- `condExp_of_stronglyMeasurable hm hf hint : Q[f | m] = f` is a real **`=`**, not `=ᵐ`; use it in
+  `rw`, or lift with `.symm ▸` where an `=ᵐ` is expected.
+- `integrable_finsetSum` / `integral_finsetSum` are the current spellings; the `_finset_sum` forms
+  are deprecated (the daemon is silent, `lake build` warns — fix on sight, zero-slop).
