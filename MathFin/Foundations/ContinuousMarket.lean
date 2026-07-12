@@ -87,4 +87,23 @@ def NoArbitrageSimple (S : ℝ≥0 → Ω → F) : Prop :=
   ∀ ψ : SimpleStrategy 𝓕 F, (0 ≤ᵐ[P] fun ω ↦ ψ.gains S ω) →
     P {ω | 0 < ψ.gains S ω} = 0
 
+/-- The discrete `ℕ`-filtration `n ↦ 𝓕 (t n)` obtained by **sampling** a continuous-time
+filtration `𝓕` along a monotone schedule `t : ℕ → ℝ≥0`. -/
+def sampledFiltration (𝓕 : Filtration ℝ≥0 mΩ) {t : ℕ → ℝ≥0} (ht : Monotone t) :
+    Filtration ℕ mΩ where
+  seq n := 𝓕 (t n)
+  mono' _ _ hij := 𝓕.mono (ht hij)
+  le' n := 𝓕.le (t n)
+
+omit [FiniteDimensional ℝ F] in
+/-- **A `Q`-martingale sampled along a monotone schedule is a discrete `Q`-martingale.**
+Sampling `S` at the increasing times `t 0 ≤ t 1 ≤ ⋯` gives a martingale w.r.t. the sampled
+filtration `sampledFiltration 𝓕 ht`: adaptedness and the tower property both restrict along
+`t`. This is the bridge that lets a continuous-time EMM discharge simple-strategy arbitrage
+through the discrete `martingale_nonneg_terminal_ae_zero`. -/
+theorem martingale_comp_monotone {Q : Measure Ω} {S : ℝ≥0 → Ω → F}
+    (hS : Martingale S 𝓕 Q) {t : ℕ → ℝ≥0} (ht : Monotone t) :
+    Martingale (fun n ↦ S (t n)) (sampledFiltration 𝓕 ht) Q :=
+  ⟨fun n ↦ hS.1 (t n), fun i j hij ↦ hS.2 (t i) (t j) (ht hij)⟩
+
 end MathFin.ContinuousMarket
