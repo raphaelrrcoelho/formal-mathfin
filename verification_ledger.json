@@ -237,37 +237,37 @@
     "gir-continuous-emm-forward": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-12",
-      "elapsed_s": 116.6,
-      "input_hash": "7a0468b18e5d05f02fca4072312b92a254b5d95c9b6d959f238daa5b2db5cbd8",
-      "verified_at_commit": "f9a4747"
+      "elapsed_s": 398.9,
+      "input_hash": "013356fb814396b744dc8c9467a0b03034868381a0229dcf4ee684a9b89e04d3",
+      "verified_at_commit": "a9d9724"
     },
     "gir-continuous-ftap": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-12",
-      "elapsed_s": 21.3,
-      "input_hash": "c6aad828716421d58cc56fafdf60d7add8d2bcd80e13649c9e3181787cc08f13",
-      "verified_at_commit": "f9a4747"
+      "elapsed_s": 342.1,
+      "input_hash": "c1a1069e36cd9468a16933b0af7aa4d38a75cb969dbe414f9a199f9a099d2d23",
+      "verified_at_commit": "a9d9724"
     },
     "gir-discounted-gbm-emm": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-12",
-      "elapsed_s": 137.6,
-      "input_hash": "86b3e20fb9da6aeacd7b700669055eeb973ff153125938c1a2b477eb9b2043de",
-      "verified_at_commit": "f9a4747"
+      "elapsed_s": 255.8,
+      "input_hash": "fba0a613a9d76921b4abdcd24fcca0c5aa0125a673843416ac830c4f56e54064",
+      "verified_at_commit": "a9d9724"
     },
     "gir-discounted-gbm-no-arbitrage": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-12",
-      "elapsed_s": 115.4,
-      "input_hash": "9403909a58098ef9c35e3676c9b9170971f7033d7d339372e775217582cdd718",
-      "verified_at_commit": "f9a4747"
+      "elapsed_s": 254.2,
+      "input_hash": "b3112d0be0884454ef86fe00dfbea87f415b3638cfc286aa5b7f472174553346",
+      "verified_at_commit": "a9d9724"
     },
     "gir-martingale-reindex": {
       "benchmark_file": "girsanov_finance.json",
       "date": "2026-07-12",
-      "elapsed_s": 100.3,
-      "input_hash": "5fe807e65fed4c18000aa846f54230c7129e1877410344476290807dad3653cb",
-      "verified_at_commit": "f9a4747"
+      "elapsed_s": 241.6,
+      "input_hash": "8d94a05114d90b7715964c52600827ea574873086d991c31cd81d461ac7658b9",
+      "verified_at_commit": "a9d9724"
     },
     "gir-simple-adapted": {
       "benchmark_file": "girsanov_finance.json",
