@@ -238,7 +238,7 @@
         "reference": "First FTAP, forward direction, Black–Scholes model (Shreve II Ch 5)",
         "difficulty": "advanced",
         "formalization_status": "full",
-        "formalization_scope": "Full formal proof. The frame's forward FTAP isEMM_noArbitrageSimple applied to discountedGBM_isEMM: a one-line corollary giving no simple-strategy arbitrage for the risk-neutral discounted GBM. Non-vacuous (the discounted GBM is a genuine non-constant martingale). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
+        "formalization_scope": "Full formal proof. The frame's forward FTAP isEMM_noArbitrageSimple applied to discountedGBM_isEMM: a one-line corollary giving no simple-strategy arbitrage for the risk-neutral discounted GBM. Non-vacuous (for σ ≠ 0 the discounted GBM is a genuine non-constant martingale). Lives in MathFin/Foundations/ContinuousFTAP.lean. Axioms-clean."
       }
     }
   ]
