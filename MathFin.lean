@@ -69,6 +69,7 @@ import MathFin.Foundations.Numeraire
 import MathFin.Foundations.BrownianQuadraticVariation
 import MathFin.Foundations.QuadraticVariationL2
 import MathFin.Foundations.ExpMin
+import MathFin.Foundations.NoArbitrageCore
 import MathFin.Foundations.FTAP
 import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence

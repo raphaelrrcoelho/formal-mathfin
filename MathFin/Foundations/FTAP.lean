@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import MathFin.Foundations.MartingaleTransform
+public import MathFin.Foundations.NoArbitrageCore
 
 /-!
 # FTAP (Theorem 2.6.7), forward (⇒) direction: EMM ⇒ no arbitrage
@@ -53,17 +54,6 @@ theorem emm_implies_no_arbitrage
     exact martingaleTransform_isMartingale hSQ hφ_pred
       ⟨K, Filter.Eventually.of_forall fun ω n ↦ hK n ω⟩
   have hV0_zero : V 0 = 0 := by simp [V]
-  have hV_T_integral : ∫ ω, V T ω ∂Q = 0 := by
-    have : ∫ ω, V T ω ∂Q = ∫ ω, V 0 ω ∂Q := by
-      rw [(integral_condExp (𝓕.le 0)).symm]
-      exact integral_congr_ae (hV_mart.condExp_ae_eq (Nat.zero_le T))
-    rw [this, hV0_zero]; simp
-  have hV_T_nonneg_Q : 0 ≤ᵐ[Q] V T := hQP.ae_le hV_nonneg
-  have hV_T_zero_Q : V T =ᵐ[Q] 0 :=
-    (integral_eq_zero_iff_of_nonneg_ae hV_T_nonneg_Q (hV_mart.integrable T)).mp hV_T_integral
-  have h_pos_Q_zero : Q {ω | 0 < V T ω} = 0 :=
-    measure_mono_null (fun ω hω ↦ ne_of_gt hω : {ω | 0 < V T ω} ⊆ {ω | V T ω ≠ 0})
-      (ae_iff.mp hV_T_zero_Q)
-  exact hPQ h_pos_Q_zero
+  exact hPQ (martingale_nonneg_terminal_ae_zero hV_mart hV0_zero (hQP.ae_le hV_nonneg))
 
 end MathFin
