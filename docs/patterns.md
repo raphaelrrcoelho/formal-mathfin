@@ -712,6 +712,15 @@ martingale-shaped shared lemma onto the continuous setting, which has no marting
 was the plan's first cut, and it produced an over-general core whose docstring overclaimed its
 consumers. Match the abstraction to what is actually shared.
 
+### CI runs `lake lint`, `lake build MathFin` does NOT (docBlame on struct data fields)
+A green local `lake build MathFin` can still push RED: CI (`build.yml` via `lean-action`) also runs
+`lake lint` (Batteries `runLinter` over `MathFin`), the same env-linters Mathlib uses. The common
+new-`structure` catch is **`docBlame`: every non-`Prop` DATA field needs a `/-- … -/` docstring**
+(`SimpleStrategy`'s `N`/`time`/`hold` failed; the `Prop` fields `mono`/`meas`/`bdd` and the `Prop`
+structure `IsEMM` are exempt). Run `lake build MathFin && lake lint` (daemon DOWN) before pushing —
+and REBUILD first: `runLinter` reads the olean's doc metadata, so linting after only a docstring
+edit lints the stale olean and re-reports the old failures at the old line numbers.
+
 ### Small syntax pointers
 - `Fin.castSucc_lt_succ` takes `i` **implicit** — `(Fin.castSucc_lt_succ (i := i)).le`, or let it
   unify; do NOT apply it to `i` positionally (`... i` → "function expected").
