@@ -35,6 +35,16 @@ _SERVER_DEATH_MARKERS = (
     "not enough memory",
 )
 
+# Per-elaboration wall-clock bound. lean-interact's own DEFAULT_TIMEOUT is None
+# (an unbounded `t.join(None)` on the REPL read), so WITHOUT this a single spinning
+# tactic — e.g. a leanstral faithfulness-gate candidate running `nlinarith` on an
+# unprovable `⊢ False` — wedges the daemon forever (the REPL never replies, the read
+# blocks, the client only ever hits its own socket timeout). Bounding each call lets
+# lean-interact kill the stuck REPL and respawn a fresh one. Generous (a real proof
+# elaborates in well under a minute); override via LEAN_ELAB_TIMEOUT for the rare
+# heavy file.
+_ELAB_TIMEOUT_S = float(os.environ.get("LEAN_ELAB_TIMEOUT", "180"))
+
 
 def _looks_like_server_death(exc: Exception) -> bool:
     """Heuristic: did this exception come from the REPL subprocess dying
@@ -230,7 +240,21 @@ class LeanBackend:
         last_exc: Exception | None = None
         for attempt in range(attempts):
             try:
-                return self._server.run(Command(cmd=code))
+                return self._server.run(Command(cmd=code), timeout=_ELAB_TIMEOUT_S)
+            except TimeoutError as e:
+                # A bounded elaboration timed out: lean-interact has already KILLED
+                # the REPL process (the spinning tactic is gone). Do NOT retry — the
+                # same code just spins again. The next request lazily respawns a
+                # fresh REPL (AutoLeanServer restarts a dead server on its next run),
+                # so surface this as an elaboration failure the daemon returns to the
+                # client, which then treats it as a failed check and moves on.
+                logger.warning(
+                    "Lean elaboration timed out after %ss — REPL killed; "
+                    "next request respawns a fresh one", _ELAB_TIMEOUT_S,
+                )
+                raise RuntimeError(
+                    f"elaboration timed out after {_ELAB_TIMEOUT_S}s (REPL killed)"
+                ) from e
             except Exception as e:  # noqa: BLE001 — classify, then recover or re-raise
                 last_exc = e
                 if not _looks_like_server_death(e):
