@@ -85,4 +85,41 @@ theorem hasDerivAt_riccatiCoeff (Â T t : ℝ) :
         = Â * ((1 - Real.tanh (Â * (T - t)) ^ 2) * -Â) by ring]
   exact h
 
+/-! ## §2  Value-function verification of the approximate Hamilton–Jacobi equation (d = 1) -/
+
+/-- **Value-function verification (Prop. 1, `d = 1`).** The quadratic ansatz
+    `θ̌(t, q) = −A(t) q² − B(t) q − C(t)` has time-derivative equal to the algebraic right-hand side
+    of the approximate Hamilton–Jacobi equation (the paper's Eq. 9, `Q = ∞`) whenever `(A, B, C)`
+    solve the scalar reduction of the ODE system (Eq. 11) — `A` the Riccati coefficient
+    (`Â = σ · √(γ · (α₂ᵇ + α₂ᵃ) · z)`). The `B`/`C` ODE right-hand sides are pinned by the `ring`
+    closure below (self-certifying). -/
+theorem valueFunction_satisfies_approxHJ
+    (γ σ z α₀b α₁b α₂b α₀a α₁a α₂a : ℝ) (hz : 0 < z)
+    (A B C : ℝ → ℝ) (t q : ℝ)
+    (hA : HasDerivAt A (2 * z * (α₂b + α₂a) * A t ^ 2 - γ * σ ^ 2 / 2) t)
+    (hB : HasDerivAt B (2 * z * (α₁b - α₁a) * A t + 2 * z ^ 2 * (α₂b - α₂a) * A t ^ 2
+                        + 2 * z * (α₂b + α₂a) * A t * B t) t)
+    (hC : HasDerivAt C (z * (α₀b + α₀a) + z ^ 2 * (α₁b + α₁a) * A t + z * (α₁b - α₁a) * B t
+                        + z ^ 3 * (α₂b + α₂a) * A t ^ 2 / 2 + z * (α₂b + α₂a) * B t ^ 2 / 2
+                        + z ^ 2 * (α₂b - α₂a) * A t * B t) t) :
+    HasDerivAt (fun s => -(A s) * q ^ 2 - B s * q - C s)
+      (γ * σ ^ 2 / 2 * q ^ 2 - z * (α₀b + α₀a)
+        - α₁b * (2 * A t * q * z + A t * z ^ 2 + B t * z)
+        - α₁a * (-2 * A t * q * z + A t * z ^ 2 - B t * z)
+        - (1 / (2 * z)) * (α₂b * (2 * A t * q * z + A t * z ^ 2 + B t * z) ^ 2
+                    + α₂a * (-2 * A t * q * z + A t * z ^ 2 - B t * z) ^ 2)) t := by
+  have hz' : z ≠ 0 := hz.ne'
+  have h2z : (2 : ℝ) * z ≠ 0 := by positivity
+  have hθ : HasDerivAt (fun s => -(A s) * q ^ 2 - B s * q - C s)
+      (-(2 * z * (α₂b + α₂a) * A t ^ 2 - γ * σ ^ 2 / 2) * q ^ 2
+        - (2 * z * (α₁b - α₁a) * A t + 2 * z ^ 2 * (α₂b - α₂a) * A t ^ 2
+           + 2 * z * (α₂b + α₂a) * A t * B t) * q
+        - (z * (α₀b + α₀a) + z ^ 2 * (α₁b + α₁a) * A t + z * (α₁b - α₁a) * B t
+           + z ^ 3 * (α₂b + α₂a) * A t ^ 2 / 2 + z * (α₂b + α₂a) * B t ^ 2 / 2
+           + z ^ 2 * (α₂b - α₂a) * A t * B t)) t :=
+    ((hA.neg.mul_const (q ^ 2)).sub (hB.mul_const q)).sub hC
+  convert hθ using 1
+  field_simp
+  ring
+
 end MathFin
