@@ -26,7 +26,23 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-12, continuous first-FTAP frame):** corpus **330**,
+> **Live status (2026-07-16, single-asset market-making Riccati):** corpus **333**,
+> **301 full + 18 wrappers = 319/333 delivery-ready**, 14 reduced cores, 0 placeholders. Three new
+> `full` entries open optimal **market making** (`Foundations/MarketMakingRiccati`) — the single-asset
+> (`d = 1`) closed-form approximation of Bergault–Evangelista–Guéant–Vieira (arXiv:1810.04383): the
+> Riccati coefficient `mf-mm-riccati` (`a(t) = Â·tanh(Â(T−t))` solves `a' = a² − Â²`; the `tanh`
+> derivative is derived locally, Mathlib carrying none at this pin), the value-function verification
+> `mf-mm-value-function` (the quadratic ansatz `θ̌ = −Aq² − Bq − C` solves the **approximate**
+> quadratic-Hamiltonian Hamilton–Jacobi equation given the Riccati/linear ODE system — Prop. 1 at
+> `d = 1`, the `B`/`C` coefficients certified by the `ring` closure), and the closed-form quotes
+> `mf-mm-quotes` (constant half-spread + inventory-linear skew, instantiated at the Model-A
+> `quoteConstA` and Model-B `quoteConstB` constants). **Honest scope** (mirroring `mf-almgren-chriss-EL`):
+> we verify the closed-form solution of the *approximate* HJ equation only; the stochastic
+> optimal-control substrate (existence of the true value function, the verification theorem linking
+> `θ` to optimal quotes), the approximation-to-truth (numerical in the paper), the multi-asset
+> matrix-Riccati case, and the `T → ∞` ergodic limit are out of scope / deferred follow-ups.
+>
+> **Prior (2026-07-12, continuous first-FTAP frame):** corpus **330**,
 > **298 full + 18 wrappers = 316/330 delivery-ready**, 14 reduced cores, 0 placeholders. Four new
 > `full` entries land the model-agnostic continuous-market EMM frame (`Foundations/ContinuousMarket`):
 > the general forward FTAP `gir-continuous-emm-forward` (`isEMM_noArbitrageSimple` — an equivalent
