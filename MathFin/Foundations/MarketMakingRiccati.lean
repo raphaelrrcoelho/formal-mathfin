@@ -122,4 +122,35 @@ theorem valueFunction_satisfies_approxHJ
   field_simp
   ring
 
+/-! ## §3  Closed-form quotes — constant spread + inventory-linear skew (Models A & B) -/
+
+/-- **Exponential-intensity quote map** `δ̃_ξ(p) = p + c` (Guéant [18] / GLFT [20]); `c` is the model
+    constant (`quoteConstA`/`quoteConstB`). Defined, not re-derived from the intensity sup. -/
+noncomputable def expIntensityQuote (c p : ℝ) : ℝ := p + c
+
+/-- **Model-A (CARA, `ξ = γ`) quote constant** `c = (1 / (γ z)) · log (1 + γ z / k)`. -/
+noncomputable def quoteConstA (γ z k : ℝ) : ℝ := 1 / (γ * z) * Real.log (1 + γ * z / k)
+
+/-- **Model-B (risk-adjusted, `ξ = 0`) quote constant** `c = 1 / k`. -/
+noncomputable def quoteConstB (k : ℝ) : ℝ := 1 / k
+
+/-- **Greedy bid quote** `δ̌ᵇ = δ̃(2 A(t) q + A(t) z + B(t))` (from `Δ⁺ / z`). -/
+noncomputable def mmQuoteBid (A B : ℝ → ℝ) (z c t q : ℝ) : ℝ :=
+  expIntensityQuote c (2 * A t * q + A t * z + B t)
+
+/-- **Greedy ask quote** `δ̌ᵃ = δ̃(−2 A(t) q + A(t) z − B(t))` (from `Δ⁻ / z`). -/
+noncomputable def mmQuoteAsk (A B : ℝ → ℝ) (z c t q : ℝ) : ℝ :=
+  expIntensityQuote c (-2 * A t * q + A t * z - B t)
+
+/-- **Constant half-spread**: `(δ̌ᵃ + δ̌ᵇ) / 2 = A(t) · z + c`, independent of inventory `q`. Holds for
+    both models via the constant `c` (`quoteConstA` for Model A, `quoteConstB` for Model B). -/
+theorem mmHalfSpread_const (A B : ℝ → ℝ) (z c t q : ℝ) :
+    (mmQuoteAsk A B z c t q + mmQuoteBid A B z c t q) / 2 = A t * z + c := by
+  unfold mmQuoteAsk mmQuoteBid expIntensityQuote; ring
+
+/-- **Inventory-linear skew**: `(δ̌ᵃ − δ̌ᵇ) / 2 = −2 · A(t) · q − B(t)` (the constant `c` cancels). -/
+theorem mmSkew_linear (A B : ℝ → ℝ) (z c t q : ℝ) :
+    (mmQuoteAsk A B z c t q - mmQuoteBid A B z c t q) / 2 = -2 * A t * q - B t := by
+  unfold mmQuoteAsk mmQuoteBid expIntensityQuote; ring
+
 end MathFin
