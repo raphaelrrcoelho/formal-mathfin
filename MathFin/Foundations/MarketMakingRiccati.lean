@@ -42,7 +42,7 @@ closed form from Guéant [18] / Guéant–Lehalle–Fernandez-Tapia [20]).
 
 namespace MathFin
 
-open Real Filter Topology
+open Real
 
 /-! ## §1  Abstract scalar Riccati coefficient -/
 
