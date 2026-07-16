@@ -3650,7 +3650,7 @@
         "lean": "import MathFin.Foundations.MarketMakingRiccati\n\n/-- **Market-making Riccati coefficient — closed form.** The scalar coefficient\n`a(t) = Â · tanh (Â (T − t))` solves the Riccati ODE `a' = a² − Â²`\n(Bergault–Evangelista–Guéant–Vieira, single-asset LQ approximation). Re-exports\n`MathFin.hasDerivAt_riccatiCoeff`. -/\ntheorem mm_riccati_closed_form (Â T t : ℝ) :\n    HasDerivAt (MathFin.riccatiCoeff Â T) (MathFin.riccatiCoeff Â T t ^ 2 - Â ^ 2) t :=\n  MathFin.hasDerivAt_riccatiCoeff Â T t\n"
       },
       "metadata": {
-        "chapter": 0,
+        "chapter": 16,
         "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), single-asset case",
         "difficulty": "advanced",
         "formalization_status": "full",
@@ -3666,7 +3666,7 @@
         "lean": "import MathFin.Foundations.MarketMakingRiccati\n\n/-- **Market-making value function — approximate-HJ verification (d = 1).** The quadratic ansatz\n`θ̌(t,q) = −A(t) q² − B(t) q − C(t)` has time-derivative equal to the approximate\n(quadratic-Hamiltonian) Hamilton–Jacobi right-hand side when `(A, B, C)` solve the scalar\nRiccati/linear ODE system. Re-exports `MathFin.valueFunction_satisfies_approxHJ`. -/\ntheorem mm_value_function_hj\n    (γ σ z α₀b α₁b α₂b α₀a α₁a α₂a : ℝ) (hz : 0 < z) (A B C : ℝ → ℝ) (t q : ℝ)\n    (hA : HasDerivAt A (2 * z * (α₂b + α₂a) * A t ^ 2 - γ * σ ^ 2 / 2) t)\n    (hB : HasDerivAt B (2 * z * (α₁b - α₁a) * A t + 2 * z ^ 2 * (α₂b - α₂a) * A t ^ 2\n                        + 2 * z * (α₂b + α₂a) * A t * B t) t)\n    (hC : HasDerivAt C (z * (α₀b + α₀a) + z ^ 2 * (α₁b + α₁a) * A t + z * (α₁b - α₁a) * B t\n                        + z ^ 3 * (α₂b + α₂a) * A t ^ 2 / 2 + z * (α₂b + α₂a) * B t ^ 2 / 2\n                        + z ^ 2 * (α₂b - α₂a) * A t * B t) t) :\n    HasDerivAt (fun s => -(A s) * q ^ 2 - B s * q - C s)\n      (γ * σ ^ 2 / 2 * q ^ 2 - z * (α₀b + α₀a)\n        - α₁b * (2 * A t * q * z + A t * z ^ 2 + B t * z)\n        - α₁a * (-2 * A t * q * z + A t * z ^ 2 - B t * z)\n        - (1 / (2 * z)) * (α₂b * (2 * A t * q * z + A t * z ^ 2 + B t * z) ^ 2\n                    + α₂a * (-2 * A t * q * z + A t * z ^ 2 - B t * z) ^ 2)) t :=\n  MathFin.valueFunction_satisfies_approxHJ γ σ z α₀b α₁b α₂b α₀a α₁a α₂a hz A B C t q hA hB hC\n"
       },
       "metadata": {
-        "chapter": 0,
+        "chapter": 16,
         "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), single-asset case, Prop. 1",
         "difficulty": "advanced",
         "formalization_status": "full",
@@ -3682,7 +3682,7 @@
         "lean": "import MathFin.Foundations.MarketMakingRiccati\n\n/-- **Market-making closed-form quotes — constant spread + linear skew (Models A & B).** The greedy\nhalf-spread is constant in inventory (with the model constant `c`: `quoteConstA` for the CARA\nModel A, `quoteConstB` for the risk-adjusted Model B), and the skew is inventory-linear and\nmodel-independent (`c` cancels). Re-exports `MathFin.mmHalfSpread_const` / `MathFin.mmSkew_linear`. -/\ntheorem mm_quotes_spread_skew (A B : ℝ → ℝ) (γ z k t q : ℝ) :\n    (MathFin.mmQuoteAsk A B z (MathFin.quoteConstA γ z k) t q\n        + MathFin.mmQuoteBid A B z (MathFin.quoteConstA γ z k) t q) / 2\n      = A t * z + MathFin.quoteConstA γ z k\n    ∧ (MathFin.mmQuoteAsk A B z (MathFin.quoteConstB k) t q\n        + MathFin.mmQuoteBid A B z (MathFin.quoteConstB k) t q) / 2\n      = A t * z + MathFin.quoteConstB k\n    ∧ ∀ c : ℝ, (MathFin.mmQuoteAsk A B z c t q - MathFin.mmQuoteBid A B z c t q) / 2\n      = -2 * A t * q - B t :=\n  ⟨MathFin.mmHalfSpread_const A B z (MathFin.quoteConstA γ z k) t q,\n   MathFin.mmHalfSpread_const A B z (MathFin.quoteConstB k) t q,\n   fun c => MathFin.mmSkew_linear A B z c t q⟩\n"
       },
       "metadata": {
-        "chapter": 0,
+        "chapter": 16,
         "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), single-asset case, §3.3.3; recovers Guéant–Lehalle–Fernandez-Tapia for Model A",
         "difficulty": "advanced",
         "formalization_status": "full",

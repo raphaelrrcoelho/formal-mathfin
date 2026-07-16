@@ -98,7 +98,7 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 |---|---:|
 | theorems (machine-checked) | **333** |
 | delivery-ready (`full` + `library_wrapper`) | **319** |
-| full derivations | 298 |
+| full derivations | 301 |
 | reduced cores (honest special cases) | 14 |
 | placeholders / sorries | **0** |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
