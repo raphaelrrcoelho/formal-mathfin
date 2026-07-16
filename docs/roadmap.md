@@ -8,6 +8,21 @@ breadth at this stage, and what the concrete next round would look like.
 
 ## 2026-06-29 — POST-ITÔ STRATEGIC UPDATE: the gate is open (supersedes the "out of reach" framing below)
 
+> **Update (2026-07-16) — optimal market making, single-asset closed-form (corpus 330 → 333).** A new
+> breadth axis opens: `Foundations/MarketMakingRiccati` formalizes the single-asset (`d = 1`) closed-form
+> (LQ/Riccati) approximation of Bergault–Evangelista–Guéant–Vieira (arXiv:1810.04383). Three `full`
+> entries — the Riccati coefficient `mf-mm-riccati` (`a(t) = Â·tanh(Â(T−t))` solves `a' = a² − Â²`; the
+> `tanh` derivative is derived locally, Mathlib carrying none at this pin), the value-function verification
+> `mf-mm-value-function` (the quadratic ansatz solves the **approximate** quadratic-Hamiltonian HJ equation
+> given the Riccati/linear ODE system — Prop. 1 at `d = 1`, the `B`/`C` coefficients certified by the `ring`
+> closure), and the closed-form quotes `mf-mm-quotes` (constant half-spread + inventory-linear skew,
+> instantiated at the Model-A/Model-B constants). **Honest scope** (mirroring `mf-almgren-chriss-EL`): the
+> *approximate* HJ solution only — the stochastic-control substrate (true value function + verification
+> theorem), the approximation-to-truth (numerical in the paper), the multi-asset matrix-Riccati case, and the
+> `T → ∞` ergodic limit are deferred follow-ups. Natural next rungs: the **matrix Riccati** (multi-asset, via
+> `Matrix.exp` + spectral decomposition) and the Appendix-A **jump (Brémaud–Jacod) Girsanov** construction
+> (wiring into the change-of-measure engine).
+>
 > **Update (2026-06-29, evening) — Phase 1 done (corpus 306).** Since this strategic update, the
 > **convex-duality unification** (I↔IV — the architecture doc's #1 seam,
 > [`mathematical-architecture.md`](mathematical-architecture.md)) was realized: the FTAP (pricing) and
