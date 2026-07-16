@@ -728,3 +728,38 @@ edit lints the stale olean and re-reports the old failures at the old line numbe
   `rw`, or lift with `.symm ▸` where an `=ᵐ` is expected.
 - `integrable_finsetSum` / `integral_finsetSum` are the current spellings; the `_finset_sum` forms
   are deprecated (the daemon is silent, `lake build` warns — fix on sight, zero-slop).
+
+## Market-making Riccati / calculus idioms (2026-07-16 batch)
+
+### Mathlib has no `tanh` calculus at this pin (v4.31.0)
+- `loogle 'Real.tanh, HasDerivAt'` → **0 results**; `Real.deriv_tanh` absent. Derive it:
+  `hasDerivAt_tanh x : HasDerivAt Real.tanh (1 - Real.tanh x ^ 2) x` from `Real.tanh_eq_sinh_div_cosh`
+  + `HasDerivAt.div` (`sinh`/`cosh`, `cosh x ≠ 0` via `Real.cosh_pos`). The `tanh → 1` limit at `atTop`
+  is also absent — defer it (or build via `tanh x = 1 - 2/(exp(2x)+1)`) if it isn't on the critical path.
+- `HasDerivAt.div` yields the function as **`sinh / cosh` (Pi-div), not `fun y => sinh y / cosh y`**, and
+  `Real.tanh`'s defeq to `sinh/cosh` is **not exposed for `exact`** — rewrite the goal's *value* to the
+  div-form, rewrite the head with `funext … Real.tanh_eq_sinh_div_cosh`, then `field_simp; ring`.
+
+### `HasDerivAt` combinators build Pi-level functions — annotate to collapse `convert`
+- `hA.neg.mul_const c`, `.sub`, … produce `((-A) * c - B) - C` (Pi `Sub`/`Neg`), NOT a single `fun s => …`.
+  So `convert h using 1` against a `fun s => …` goal leaves a spurious **function-equality** subgoal, and
+  `field_simp`/`ring` then report **"made no progress"** (they're staring at a function goal, not an equation).
+  Fix: give the `have` the single-lambda **type annotation** (defeq to the combinator term via `Pi.sub`/`Pi.neg`
+  unfolding) so `convert … using 1` leaves ONLY the derivative-value goal. Diagnose a stuck `convert` with
+  `exact h` — the type-mismatch prints both the combinator's Pi-form and the target lambda.
+
+### Polynomial identity with `1/(2z)`: `field_simp` needs a beta-reduced goal + nonzero facts
+- `ring` alone can't cancel `z²/(2z) = z/2` (no `z ≠ 0`); `field_simp` must clear it first, and it also needs
+  `z ≠ 0` / `2*z ≠ 0` in context and no `(fun y => …) x` residue. The `field_simp; ring` closure of such a
+  verification **self-certifies** hand-derived coefficients — a wrong sign/coefficient fails `ring`, so a green
+  build IS the check (used for the market-making `B`/`C` ODE right-hand sides).
+
+### `axiom_audit_gen` pins `:= MathFin.X` re-export HEADS only
+- A benchmark proved by an anonymous constructor `:= ⟨MathFin.a …, MathFin.b …⟩` gets **none** of its cited
+  constants auto-pinned (the gen matches `:=\s*\(*\s*MathFin\.…`). Fine when they're trivial + ledger-covered;
+  add to the curated `AxiomAudit.lean` if you want them pinned.
+
+### ★ Review subagents must NOT touch the daemon
+- A review subagent that runs `./scripts/lean-check.sh` / `docker` will bring the lean-repl daemon up **and tear
+  it back down**, killing the controller's warmed daemon. Instruct review subagents to **read files only — never
+  run docker/lake/lean-check**. (Cost a daemon restart mid-run.)
