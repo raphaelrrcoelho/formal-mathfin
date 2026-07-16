@@ -17,8 +17,9 @@ Riccati system whose solution is a closed-form proxy for the value function `θ(
 
 Specialised here to a **single asset** (`d = 1`), we verify, in three layers:
 
-* **Riccati coefficient** — `a(t) = Â · tanh (Â · (T − t))` solves `a' = a² − Â²`, `a(T) = 0`,
-  and `a(0) → Â` as `T → ∞` (the ergodic regime).
+* **Riccati coefficient** — `a(t) = Â · tanh (Â · (T − t))` solves `a' = a² − Â²` with `a(T) = 0`
+  (the `tanh` derivative is derived locally — Mathlib carries none at this pin; the `T → ∞` ergodic
+  limit `a(0) → Â` is a deferred follow-up).
 * **Value function** — the quadratic ansatz `θ̌(t, q) = −A(t) q² − B(t) q − C(t)` solves the
   approximate Hamilton–Jacobi equation (the paper's Eq. 9) whenever `(A, B, C)` solve the
   Riccati/linear ODE system, with `A` the Riccati coefficient.
@@ -42,5 +43,46 @@ closed form from Guéant [18] / Guéant–Lehalle–Fernandez-Tapia [20]).
 namespace MathFin
 
 open Real Filter Topology
+
+/-! ## §1  Abstract scalar Riccati coefficient -/
+
+/-- **Derivative of `tanh`** — `tanh'(x) = 1 − tanh² x` — derived from `tanh = sinh / cosh` and the
+    quotient rule (Mathlib carries no `HasDerivAt` lemma for `tanh` at this pin). -/
+theorem hasDerivAt_tanh (x : ℝ) : HasDerivAt Real.tanh (1 - Real.tanh x ^ 2) x := by
+  have hc : Real.cosh x ≠ 0 := (Real.cosh_pos x).ne'
+  have hsinh : HasDerivAt Real.sinh (Real.cosh x) x := by simpa using (hasDerivAt_id x).sinh
+  have hcosh : HasDerivAt Real.cosh (Real.sinh x) x := by simpa using (hasDerivAt_id x).cosh
+  have hfun : Real.tanh = Real.sinh / Real.cosh := by
+    funext y; simp [Real.tanh_eq_sinh_div_cosh]
+  have hval : (1 : ℝ) - Real.tanh x ^ 2
+      = (Real.cosh x * Real.cosh x - Real.sinh x * Real.sinh x) / Real.cosh x ^ 2 := by
+    rw [Real.tanh_eq_sinh_div_cosh]; field_simp
+  rw [hval, hfun]
+  exact hsinh.div hcosh hc
+
+/-- **Scalar Riccati coefficient** `a(t) = Â · tanh (Â · (T − t))` — the closed-form solution of the
+    normalised Riccati equation `a' = a² − Â²` with terminal value `a(T) = 0`. In the market-making
+    instance, `Â = σ · √(γ · (α₂ᵇ + α₂ᵃ) · z)` and the value-function coefficient is
+    `A(t) = riccatiCoeff Â T t / (2 · (α₂ᵇ + α₂ᵃ) · z)`. -/
+noncomputable def riccatiCoeff (Â T t : ℝ) : ℝ := Â * Real.tanh (Â * (T - t))
+
+/-- **Terminal condition**: `a(T) = 0`. -/
+theorem riccatiCoeff_terminal (Â T : ℝ) : riccatiCoeff Â T T = 0 := by
+  unfold riccatiCoeff
+  rw [sub_self, mul_zero, Real.tanh_zero, mul_zero]
+
+/-- **Riccati ODE**: `a'(t) = a(t)² − Â²`. -/
+theorem hasDerivAt_riccatiCoeff (Â T t : ℝ) :
+    HasDerivAt (riccatiCoeff Â T) (riccatiCoeff Â T t ^ 2 - Â ^ 2) t := by
+  unfold riccatiCoeff
+  have h_inner : HasDerivAt (fun s : ℝ => Â * (T - s)) (-Â) t := by
+    have h_id : HasDerivAt (fun s : ℝ => T - s) (-1) t := by
+      simpa using (hasDerivAt_id t).const_sub T
+    simpa using h_id.const_mul Â
+  have h := ((hasDerivAt_tanh (Â * (T - t))).comp t h_inner).const_mul Â
+  simp only [Function.comp_def] at h
+  rw [show (Â * Real.tanh (Â * (T - t))) ^ 2 - Â ^ 2
+        = Â * ((1 - Real.tanh (Â * (T - t)) ^ 2) * -Â) by ring]
+  exact h
 
 end MathFin
