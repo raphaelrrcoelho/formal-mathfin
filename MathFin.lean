@@ -90,6 +90,7 @@ import MathFin.Foundations.StatePrices
 import MathFin.Foundations.TriangleArbitrage
 import MathFin.Foundations.CarrMadan
 import MathFin.Foundations.AlmgrenChriss
+import MathFin.Foundations.MarketMakingRiccati
 import MathFin.Foundations.ConvexPricingFunctional
 import MathFin.Foundations.ConvexSeparation
 -- Phase 1 (convex-duality unification): cone-separation root generalizing
