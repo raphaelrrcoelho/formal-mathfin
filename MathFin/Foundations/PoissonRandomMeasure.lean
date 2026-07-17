@@ -127,9 +127,11 @@ noncomputable def referenceIntensity (ν : Measure E) : Measure (ℝ × E) :=
 
 /-- **Poisson random measure on `[0,∞) × E`** with σ-finite mark-intensity `ν`, over a
 probability space `(Ω, P)`. Its fields are the Applebaum (Def. 2.3.1) properties: each
-`N(·, B)` is `Poisson(ν̂(B))`-distributed (`ν̂ = Leb[0,∞) ⊗ ν`), counts on disjoint regions
-are independent, and the past is independent of a future increment. Field shape consulted
-from `cgarryZA/LevyStochCalc` (cited); the isometry built on it is our own. -/
+`N(·, B)` is `Poisson(ν̂(B))`-distributed (`ν̂ = Leb[0,∞) ⊗ ν`), and `N` scatters
+independently — the counts on any region disjoint from `D` are independent of `N(·, D)`
+(`indep_of_disjoint_region`), which unifies disjoint-box independence with past/future
+increment independence. Field shape consulted from `cgarryZA/LevyStochCalc` (cited); the
+isometry built on it is our own. -/
 structure PoissonRandomMeasure (P : Measure Ω) [IsProbabilityMeasure P]
     (ν : Measure E) [SigmaFinite ν] where
   /-- The `ω`-indexed family of counting measures on the time-mark space `ℝ × E`. -/
@@ -139,18 +141,17 @@ structure PoissonRandomMeasure (P : Measure Ω) [IsProbabilityMeasure P]
   /-- `N(·, B)` has `Poisson(ν̂ B)` law under `P`, for finite-intensity `B`. -/
   poisson_law : ∀ {B : Set (ℝ × E)}, MeasurableSet B → referenceIntensity ν B ≠ ⊤ →
     P.map (fun ω => N ω B) = poissonMeasureENN (referenceIntensity ν B).toNNReal
-  /-- Counts on a countable pairwise-disjoint family are independent. -/
-  independent_disjoint : ∀ {ι : Type*} [Countable ι] (B : ι → Set (ℝ × E)),
-    (∀ i, MeasurableSet (B i)) → Pairwise (fun i j => Disjoint (B i) (B j)) →
-    iIndepFun (fun (i : ι) (ω : Ω) => N ω (B i)) P
-  /-- The past `σ`-algebra at time `s` is independent of a future space-time increment
-  `N(·, (s,t] × A)` — the cross-term engine (the PRM analogue of increment independence). -/
-  joint_past_future_independent : ∀ {s t : ℝ}, 0 ≤ s → s < t →
-    ∀ {A : Set E}, MeasurableSet A → ν A ≠ ⊤ →
-      Indep
-        (⨆ C ∈ {C : Set (ℝ × E) | C ⊆ Set.Iic s ×ˢ Set.univ ∧ MeasurableSet C},
-          MeasurableSpace.comap (fun ω => N ω C) inferInstance)
-        (MeasurableSpace.comap (fun ω => N ω (Set.Ioc s t ×ˢ A)) inferInstance) P
+  /-- **Independent scattering** (the defining Poisson-random-measure property, Applebaum
+  Def. 2.3.1(2), in its `σ`-algebra form): the counts `N(·, C)` on *all* measurable regions
+  `C` disjoint from `D`, jointly, are independent of the count `N(·, D)`. This single field
+  drives every cross-term of the Itô–Lévy isometry: it subsumes both count-independence on
+  disjoint boxes (take a two-element family) and past/future increment independence (the past
+  at `s` lives on `(-∞,s] × E`, disjoint from any future box `(s,t] × A`). -/
+  indep_of_disjoint_region : ∀ {D : Set (ℝ × E)}, MeasurableSet D →
+    Indep
+      (⨆ C ∈ {C : Set (ℝ × E) | Disjoint C D ∧ MeasurableSet C},
+        MeasurableSpace.comap (fun ω => N ω C) inferInstance)
+      (MeasurableSpace.comap (fun ω => N ω D) inferInstance) P
 
 /-- The **compensated increment** `Ñ(B) := N(B) − ν̂(B)` (a real number for finite-intensity
 `B`) — the mean-zero, `L²` object one integrates against. -/
@@ -158,6 +159,12 @@ noncomputable def PoissonRandomMeasure.compensated {P : Measure Ω} [IsProbabili
     {ν : Measure E} [SigmaFinite ν] (N : PoissonRandomMeasure P ν)
     (B : Set (ℝ × E)) (ω : Ω) : ℝ :=
   (N.N ω B).toReal - (referenceIntensity ν B).toReal
+
+/-- The compensated increment `Ñ(B)` is measurable. -/
+theorem PoissonRandomMeasure.measurable_compensated {P : Measure Ω} [IsProbabilityMeasure P]
+    {ν : Measure E} [SigmaFinite ν] (N : PoissonRandomMeasure P ν) {B : Set (ℝ × E)}
+    (hB : MeasurableSet B) : Measurable (N.compensated B) :=
+  ((N.measurable_eval hB).ennreal_toReal).sub measurable_const
 
 /-! ### Compensated-increment moments (transport of the scalar moments through `poisson_law`) -/
 
@@ -228,5 +235,24 @@ theorem compensated_integral_sq (N : PoissonRandomMeasure P ν) {B : Set (ℝ ×
   rw [integral_poissonMeasure]
   simp only [smul_eq_mul]
   exact (hasSum_pw_compensated_sq (referenceIntensity ν B).toNNReal).tsum_eq
+
+/-- **The compensated increment is `L²`**: `Ñ(D) ∈ L²(P)` for finite-intensity `D`. Its law is
+`Poisson(ν̂ D)` pushed through `n ↦ n − ν̂ D`, whose second moment is finite — concretely
+`∑ₙ c_r(n)·(n − r)² = r < ∞` (`hasSum_pw_compensated_sq`). This is the `L²`-membership each
+simple-integrand term of the Itô–Lévy isometry needs. -/
+theorem memLp_compensated (N : PoissonRandomMeasure P ν) {D : Set (ℝ × E)}
+    (hD : MeasurableSet D) (hfin : referenceIntensity ν D ≠ ⊤) :
+    MemLp (N.compensated D) 2 P := by
+  refine (memLp_two_iff_integrable_sq (N.measurable_compensated hD).aestronglyMeasurable).mpr ?_
+  have hrw : (fun ω => (N.compensated D ω) ^ 2)
+      = (fun x : ℝ≥0∞ => (x.toReal - (referenceIntensity ν D).toReal) ^ 2) ∘ (fun ω => N.N ω D) := rfl
+  rw [hrw, ← integrable_map_measure (by fun_prop) (N.measurable_eval hD).aemeasurable,
+      N.poisson_law hD hfin, poissonMeasureENN,
+      integrable_map_measure (by fun_prop) (Measurable.aemeasurable (by fun_prop)),
+      integrable_poissonMeasure_iff]
+  refine ((hasSum_pw_compensated_sq (referenceIntensity ν D).toNNReal).summable).congr fun n => ?_
+  simp only [Function.comp_apply, ENNReal.toReal_natCast, Real.norm_eq_abs]
+  rw [abs_of_nonneg (sq_nonneg _)]
+  rfl
 
 end MathFin
