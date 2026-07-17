@@ -51,6 +51,7 @@ import MathFin.Foundations.PoissonPgf
 import MathFin.Foundations.PoissonRandomMeasure
 import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 import MathFin.Foundations.PoissonCompensatedIntegralL2
+import MathFin.Foundations.PoissonCompensatedIntegralL2Dense
 -- QV of an Itô process: drift contributes nothing (Saporito 7.4.5)
 import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments

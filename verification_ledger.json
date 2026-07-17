@@ -2260,9 +2260,16 @@
     "sc-levy-isometry-compensated-simple": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-07-17",
-      "elapsed_s": 69.3,
-      "input_hash": "1073946576ba9ec65d92944289141bb7682f8d9bdb98ba7431357130b86fc05b",
-      "verified_at_commit": "643edb7"
+      "elapsed_s": 157.8,
+      "input_hash": "628b8dd383a74a2092d6d23297bbc8e6d03ded0d5dc786710277ca33107941c1",
+      "verified_at_commit": "4f9030a"
+    },
+    "sc-levy-isometry-normform": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-07-17",
+      "elapsed_s": 109.9,
+      "input_hash": "918a92662824ef6e1ce47d7509a1484ceee4a206b89b0c99bbda315a55e67288",
+      "verified_at_commit": "4f9030a"
     },
     "sc-memlp-ito-simple-process": {
       "benchmark_file": "stochastic_calculus.json",

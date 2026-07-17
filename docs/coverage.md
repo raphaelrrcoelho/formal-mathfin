@@ -26,19 +26,24 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-17, jump calculus — the Itô–Lévy isometry):** corpus **336**,
-> **304 full + 18 wrappers = 322/336 delivery-ready**, 14 reduced cores, 0 placeholders. New `full`
-> entry `sc-levy-isometry-compensated-simple` opens the **jump/Lévy axis**: the compensated-Poisson
-> (Itô–Lévy) **L² isometry** for simple predictable integrands over a time×mark grid,
-> `𝔼[(∑ⱼ∑ₗ φⱼₗ·Ñ((tⱼ,tⱼ₊₁]×Aₗ))²] = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁−tⱼ)·ν(Aₗ)`
+> **Live status (2026-07-17, jump calculus — the Itô–Lévy isometry):** corpus **337**,
+> **305 full + 18 wrappers = 323/337 delivery-ready**, 14 reduced cores, 0 placeholders. Two new
+> `full` entries open and advance the **jump/Lévy axis**. `sc-levy-isometry-compensated-simple` — the
+> compensated-Poisson (Itô–Lévy) **L² isometry** for simple predictable integrands over a time×mark
+> grid, `𝔼[(∑ⱼ∑ₗ φⱼₗ·Ñ((tⱼ,tⱼ₊₁]×Aₗ))²] = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁−tⱼ)·ν(Aₗ)`
 > (`Foundations/PoissonCompensatedIntegralL2`, kernel `PoissonCompensatedIsometryAdapted`, object
 > `PoissonRandomMeasure`). It **proves what `cgarryZA/LevyStochCalc` (Apache-2.0, cited) states as
 > its axiom #6**: off-diagonal grid pairs vanish by the single independent-scattering PRM field
 > `indep_of_disjoint_region` (different-time and same-time/different-mark, uniformly), and the
 > diagonal is the Poisson second moment `𝔼[Ñ(B)²]=ν̂(B)` — a Mathlib gap-fill via a pmf index-shift
-> `(n+1)·c_r(n+1)=r·c_r(n)`, no exp-series differentiation. **Honest scope**: the dense `L²`
-> extension to a CLM (LevyStochCalc's axiom over *general* integrands) and PRM *existence* (their
-> axiom #2) are declared, deferred follow-ups.
+> `(n+1)·c_r(n+1)=r·c_r(n)`, no exp-series differentiation. `sc-levy-isometry-normform` recasts it in
+> **norm-preserving form** `𝔼[(∫ H dÑ)²] = ‖H‖²_{L²(dP⊗dt⊗dν)}`
+> (`Foundations/PoissonCompensatedIntegralL2Dense`): the integrand's own `L²(P⊗ν̂)`-norm equals the
+> integral's `L²(P)`-norm — the usual statement of the isometry and the identity the compensated
+> integral CLM is completed from. **Honest scope**: the integral **operator** (CLM over the
+> *characterised* predictable `L²`, LevyStochCalc's axiom over *general* integrands — needing a
+> from-scratch marked-predictable `σ`-algebra + density for the PRM filtration) and PRM *existence*
+> (their axiom #2) are declared, deferred Summits.
 >
 > **Prior (2026-07-16, multi-asset matrix Riccati):** the two matrix-Riccati `full` entries
 > `mf-mm-matrix-riccati` / `mf-mm-matrix-value` (`Foundations/MatrixMarketMakingRiccati`, BEGV

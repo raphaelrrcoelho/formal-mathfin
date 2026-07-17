@@ -119,7 +119,7 @@ theorem PoissonRandomMeasure.AdaptedAt.measurable {N : PoissonRandomMeasure P ν
   exact hφ'.mono (iSup₂_le fun _ hC => measurable_iff_comap_le.mp (N.measurable_eval hC.2)) le_rfl
 
 /-- The reference intensity of a finite-mark box `(s,t] × A` is finite. -/
-private lemma referenceIntensity_box_ne_top {s t : ℝ} {A : Set E} (hAfin : ν A ≠ ⊤) :
+theorem referenceIntensity_box_ne_top {s t : ℝ} {A : Set E} (hAfin : ν A ≠ ⊤) :
     referenceIntensity ν (Set.Ioc s t ×ˢ A) ≠ ⊤ := by
   show ((volume.restrict (Set.Ici (0 : ℝ))).prod ν) (Set.Ioc s t ×ˢ A) ≠ ⊤
   rw [Measure.prod_prod]

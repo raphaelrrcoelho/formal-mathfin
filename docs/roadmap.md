@@ -1271,5 +1271,18 @@ disjoint-count nor a pure past/future field would.
 (mirroring `ItoIntegralL2Dense`, with the extra mark-dimension π-system), i.e. axiom #6 in full; (2)
 PRM *existence* (their axiom #2) — Mathlib has no PRM substrate, a separate Summit.
 
-**Next:** (1) B2 — the dense CLM extension; (2) the Itô–Lévy *formula* and a jump-FTAP once the
-integral operator exists; (3) upstream the Poisson variance to Mathlib.
+**Update (2026-07-17, B2 norm-form isometry):** `sc-levy-isometry-normform`
+(`Foundations/PoissonCompensatedIntegralL2Dense`) recasts the simple isometry into norm-preserving
+form `𝔼[(∫ H dÑ)²] = ‖H‖²_{L²(dP⊗dt⊗dν)}` — the integrand's own `L²(P⊗ν̂)`-norm equals the integral's
+`L²(P)`-norm (the usual statement, and the identity `LinearMap.extendOfNorm` completes the CLM from).
+The integrand-norm computation `∫ H² d(P⊗ν̂) = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁−tⱼ)·ν(Aₗ)` mirrors our continuous
+`simpleProcessL2_norm_sq` but is *simpler* (disjoint grid boxes ⇒ cross terms vanish by `ν̂(∩)=0`, no
+interval-overlap formula). What remains for the full CLM: the integral **operator** over the
+*characterised* predictable `L²` needs (a) the overlapping-box bilinear kernel (general integrands,
+mirroring `rect_increment_pairing`) and (b) a from-scratch marked-predictable `σ`-algebra + density
+for the PRM filtration — a genuine Summit, since Degenne's Brownian `ItoIntegralCLM` machinery is not
+reusable for the PRM's own filtration.
+
+**Next:** (1) the CLM operator (overlapping-box kernel + marked-predictable density); (2) the
+Itô–Lévy *formula* and a jump-FTAP once the operator exists; (3) upstream the Poisson variance to
+Mathlib.
