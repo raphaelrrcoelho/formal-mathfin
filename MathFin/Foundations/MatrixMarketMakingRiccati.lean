@@ -28,6 +28,18 @@ This equals `Â · tanh (Â (T − t))` spectrally without ever constructing a m
 matrix Riccati ODE `a' = a·a − Â·Â` reduces, on each eigenvalue, to the scalar identity
 `hasDerivAt_riccatiCoeff` already proven.
 
+## Where this sits (the Riccati is one, approximate, view)
+
+The Riccati is the **LQ-approximation** view of optimal market making, not the fundamental structure.
+For exponential order-arrival intensities the single-asset Avellaneda–Stoikov HJB equation is
+*exactly* linearisable — a Hopf–Cole change of variables turns it into a **linear** ODE system
+(Guéant–Lehalle–Fernandez-Tapia), i.e. a matrix-exponential object with no approximation. The exact
+*multi-asset* problem has no closed form, which is precisely why BEGV quadratically approximate the
+Hamiltonians to recover a solvable Riccati. So this module formalises the tractable approximate closed
+form (the spectral route below); the **exact linearisation is the deeper, more faithful target**
+(gated on matrix-exponential calculus, absent at this pin). Read the result as "this closed form solves
+this approximate Riccati", not as "optimal market making, mechanised".
+
 We verify, in two layers:
 
 * **§1 Abstract matrix Riccati** — `matrixRiccatiCoeff` solves `a'(t) = a(t)·a(t) − Â·Â` with

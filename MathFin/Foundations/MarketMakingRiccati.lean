@@ -15,6 +15,12 @@ and Vieira (*Closed-form approximations in multi-asset market making*, arXiv:181
 reduces, via a quadratic (LQ) approximation of the trade-intensity Hamiltonians, to a
 Riccati system whose solution is a closed-form proxy for the value function `θ(t, q)`.
 
+This Riccati is the LQ-**approximation** view, not the fundamental structure: for exponential
+intensities the exact single-asset problem is *linearisable* by a Hopf–Cole change of variables into a
+linear ODE system (Guéant–Lehalle–Fernandez-Tapia), the deeper and more faithful target (gated on
+matrix-exponential calculus, absent at this pin). We formalise the tractable approximate closed form
+(see `MatrixMarketMakingRiccati` for the multi-asset analogue and the full landscape note).
+
 Specialised here to a **single asset** (`d = 1`), we verify, in three layers:
 
 * **Riccati coefficient** — `a(t) = Â · tanh (Â · (T − t))` solves `a' = a² − Â²` with `a(T) = 0`
@@ -33,9 +39,11 @@ We verify the closed-form solution of the **approximate** (quadratic-Hamiltonian
 Out of scope: the stochastic optimal-control substrate (existence/uniqueness of the true value
 function solving the exact HJ equation, and the verification theorem linking `θ` to optimal
 quotes — controlled marked-point-process control beyond the current pin); that the approximate
-value function approximates the true one (justified numerically in the paper); the multi-asset
-matrix-Riccati case; and deriving `δ̃_ξ` from the intensity sup (it is defined by its known
-closed form from Guéant [18] / Guéant–Lehalle–Fernandez-Tapia [20]).
+value function approximates the true one (justified numerically in the paper); the exact Hopf–Cole
+linearisation (the fundamental structure — matrix-exponential-gated, absent at this pin); and deriving
+`δ̃_ξ` from the intensity sup (it is defined by its known closed form from Guéant [18] /
+Guéant–Lehalle–Fernandez-Tapia [20]). The multi-asset **approximate** matrix Riccati is now discharged
+in `MatrixMarketMakingRiccati`.
 -/
 
 @[expose] public section

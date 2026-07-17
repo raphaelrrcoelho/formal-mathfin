@@ -146,14 +146,27 @@ suggestion DISSOLVED on adjudication:** the proposed `simpa only [Function.comp_
 post-simp match cannot; reverted, with an in-code comment recording why (the panel lacked the
 instance-defeq context — the exact over-escalation the protocol's adjudication step guards against).
 
-**Refreshed ranked backlog (top):** (1) **[HIGH]** PSD matrix-sqrt existence lemma → "Â constructed" not
-"Â assumed" (retires the sole deferred caveat); (2) **[MED→HIGH]** hoist the L∞ norm-policy instance +
-`matrixRiccatiCoeff_spectral_sq` into a shared matrix prelude before a 2nd matrix consumer lands; (3)
-**[MED]** extract `conj_diagonal_mul` — DRY the conjugated-square collapse (derived twice); (4) **[MED]**
-add `mmMatrixValueCoeff_isHermitian` consuming the orphaned `matrixRiccatiCoeff_isHermitian` (symmetric
-value-function Hessian, M1/M2 parity); (5) **[MED]** `T→∞` matrix ergodic limit; (6) **[LOW]** roadmap
-wording tighten; (7) *(carried)* Appendix-A jump (Brémaud–Jacod) point-process Girsanov; the general 2D
-covariation Itô tower; hoist the private std-normal Gaussian-MGF to a shared home.
+**Refreshed ranked backlog (top)** — *re-ranked on maintainer reflection; the earlier draft over-weighted
+within-the-Riccati refinements. Governing decision (see the roadmap "Direction" note): these two entries are
+a finished **flag-plant** (first matrix-analytic finance), NOT a market-making build-out. The Riccati is the
+LQ-**approximation** view; the fundamental structure is the exact Hopf–Cole/GLFT linearisation. So:*
+
+- **Stop the Riccati drill.** The items that only deepen the *approximation* — `B`/`C` coefficients, PSD
+  matrix-sqrt existence ("Â constructed" not "Â assumed"), the `T→∞` matrix ergodic limit — are **deprioritised**
+  (do not pick these up as opening moves; they grow a satellite island, not the spine).
+- **The honest deep target *if* we return to market making** is the **exact linearisation** (the Hopf–Cole
+  reduction of the Avellaneda–Stoikov HJB to a linear ODE system / matrix exponential — the structural gem the
+  Riccati approximates), a real project gated on matrix-exponential calculus (absent at the pin) — *not* more
+  Riccati refinement.
+- **Cheap in-module hygiene, only if the file is touched again** (not worth a dedicated pass): extract
+  `conj_diagonal_mul` (DRY the conjugated-square collapse, derived twice); add `mmMatrixValueCoeff_isHermitian`
+  consuming the orphaned `matrixRiccatiCoeff_isHermitian`; and — the one architectural item worth doing before a
+  *second* matrix consumer lands — hoist the L∞ norm-policy instance + `matrixRiccatiCoeff_spectral_sq` into a
+  shared matrix prelude so the finance leaf imports the norm commitment instead of declaring it.
+- **The real leverage is the depth spine** (Itô → Girsanov → FTAP), where results compound: the discrete
+  general-Ω multi-period **DMW FTAP** crown, the general **2D covariation Itô** tower, and **Girsanov L²/Novikov**.
+  *(Carried:)* Appendix-A jump (Brémaud–Jacod) point-process Girsanov — a candidate only because it wires into
+  the existing change-of-measure engine; and hoisting the private std-normal Gaussian-MGF to a shared home.
 
 ## 2026-07-12 — corpus 330 — continuous first-FTAP frame (meaning 1), DS-shaped for meaning 2
 

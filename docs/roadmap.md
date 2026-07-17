@@ -37,7 +37,20 @@ breadth at this stage, and what the concrete next round would look like.
 > **Honest scope**: in `mf-mm-matrix-value`, `Â` enters by its defining relation `Â·Â = γ·(D₊^{½}ΣD₊^{½})`
 > (the matrix-square-root *construction* is out of scope — the verified content is the change of variables);
 > the `B`/`C` coefficients (matrix variation-of-parameters), the general-`d` value-function verification, and
-> the optimal-control substrate remain deferred. Remaining next rung: the Appendix-A **jump Girsanov**.
+> the optimal-control substrate remain deferred.
+>
+> **Direction (course-correction, 2026-07-16).** These two entries are a deliberate *flag-plant* — the
+> library's first matrix-analytic finance (eigendecomposition, a committed matrix-norm policy, spectral
+> reduction) — not the start of a market-making build-out. The Riccati is the **LQ-approximation** view; the
+> *fundamental* structure is the exact Hopf–Cole linearisation of the Avellaneda–Stoikov HJB into a linear
+> ODE system / matrix exponential (Guéant–Lehalle–Fernandez-Tapia), which the exact multi-asset problem lacks
+> a closed form for (hence BEGV approximate). So we **stop the Riccati drill** here: the `B`/`C` refinements,
+> the matrix-sqrt existence, and the `T→∞` limit are *within-the-approximation* items, deprioritised. If we
+> ever deepen market making, the honest target is the **exact linearisation** (a real project, matrix-exp-gated),
+> not more approximation. Market making is a stochastic-control *satellite*, orthogonal to the library's depth
+> spine (Itô → Girsanov → FTAP); the leverage stays on that spine — the DMW FTAP crown, the 2D covariation Itô,
+> Girsanov L²/Novikov — which is where results compound. (The Appendix-A **jump Girsanov** remains a candidate
+> only because it wires into the existing change-of-measure engine, not because it grows the MM island.)
 >
 > **Update (2026-06-29, evening) — Phase 1 done (corpus 306).** Since this strategic update, the
 > **convex-duality unification** (I↔IV — the architecture doc's #1 seam,
