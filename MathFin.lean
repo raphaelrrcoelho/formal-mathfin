@@ -48,6 +48,8 @@ import MathFin.Foundations.PoissonInterarrival
 -- Poisson probability generating function E[x^N] = e^{r(x−1)} (absent from
 -- Mathlib); the engine behind Merton-mixture compensation identities
 import MathFin.Foundations.PoissonPgf
+import MathFin.Foundations.PoissonRandomMeasure
+import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 -- QV of an Itô process: drift contributes nothing (Saporito 7.4.5)
 import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments
