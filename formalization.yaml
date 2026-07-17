@@ -41,12 +41,13 @@ automation:
       framework: Lean 4 + Mathlib + BrownianMotion; VS Code / lean-repl daemon
       tool_setup: lake build; AxiomAudit + verification-ledger + values-review gates
       prompting_notes: author edits MathFin/<Section>/*.lean directly
-    - method: machine autoformalization (scout, not author)
+    - method: machine autoformalization (two-stage; scout, not author)
       models:
+        - magistral-medium
         - labs-leanstral-1-5
       framework: "mathfin-foundry: probe / vibe <-> lean-lsp-mcp"
-      tool_setup: token-paced GitHub Actions pipeline; on a pass it opens a ready-for-review PR on formal-mathfin that a human reviews (8-lens values panel) and merges
-      prompting_notes: 0 Leanstral-scouted proof(s) merged
+      tool_setup: token-paced GitHub Actions pipeline; Magistral specifies the statement, Leanstral formalizes + proves it. A cheap autop tactic-probe may scout-close a goal Leanstral missed; those open as DRAFT PRs (labeled scout-proof, attributed to the tactic, refactored before merge, never silently merged). On a Leanstral pass it opens a ready-for-review PR on formal-mathfin that a human reviews (8-lens values panel) and merges
+      prompting_notes: "0 autoformalized proof(s) merged (two-stage: statement specified by Magistral, formalization + proof by Leanstral)"
     - method: own design, external source consulted (cited)
       models: []
       framework: Lean 4 + Mathlib, this library's conventions; an Isabelle/HOL AFP entry consulted as a source for the classical result set
