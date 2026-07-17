@@ -53,6 +53,8 @@ import MathFin.Foundations.PoissonCompensatedIsometryAdapted
 import MathFin.Foundations.PoissonCompensatedBilinear
 import MathFin.Foundations.PoissonCompensatedIntegralL2
 import MathFin.Foundations.PoissonCompensatedIntegralL2Dense
+import MathFin.Foundations.PoissonCompensatedSimpleIntegrand
+import MathFin.Foundations.PoissonCompensatedIntegralOperator
 -- QV of an Itô process: drift contributes nothing (Saporito 7.4.5)
 import MathFin.Foundations.ItoProcessQV
 import MathFin.Foundations.GaussianMoments
