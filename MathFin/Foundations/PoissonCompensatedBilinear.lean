@@ -149,4 +149,316 @@ theorem compensated_covariance (N : PoissonRandomMeasure P ν) {C D : Set (ℝ �
     compensated_mul_compensated_disjoint N hC'ms hD'ms hC'D' hD'fin]
   ring
 
+/-! ### Weighted future pairings — the bilinear rung
+
+The covariance above is the `φ ≡ 1` case of a **weighted** future pairing
+`𝔼[φ · Ñ(C) · Ñ(D)] = 𝔼[φ] · ν̂(C ∩ D)` for `φ` adapted at a time `s` before both `C, D`
+(`C, D ⊆ (s, ∞) × E`). It is the jump analogue of `ItoIsometryAdapted.rect_increment_pairing`
+(Brownian rectangles — cited, not reused): the past-adapted weight factors out of every future
+increment, and the increment covariance supplies `ν̂(C ∩ D)`. From it, splitting a box at the later
+of two start times gives the **overlapping-box bilinear pairing** the Itô–Lévy isometry sums over.
+
+All of it rests on the *single-increment* field `indep_of_disjoint_region` — no past-vs-future
+`σ`-algebra independence is assumed. Integrability of the triple products is bought by the same
+independence (a past-adapted factor is `⟂` any future increment it multiplies). -/
+
+/-- The past `σ`-algebra is monotone in time: `pastSigma s ≤ pastSigma s'` for `s ≤ s'`. -/
+private lemma pastSigma_mono (N : PoissonRandomMeasure P ν) {s s' : ℝ} (h : s ≤ s') :
+    N.pastSigma s ≤ N.pastSigma s' :=
+  iSup₂_le fun C hC => le_iSup₂_of_le C
+    ⟨hC.1.trans (Set.prod_mono (Set.Iic_subset_Iic.mpr h) le_rfl), hC.2⟩ le_rfl
+
+/-- The past `σ`-algebra at `s` sits inside the disjoint-region `σ`-algebra of any set lying
+strictly after `s` (`D ⊆ (s, ∞) × E`) — the generalisation of `pastSigma_le_regionSigma` from a
+future box to an arbitrary future set. -/
+private lemma pastSigma_le_regionSigma_sub (N : PoissonRandomMeasure P ν) {s : ℝ}
+    {D : Set (ℝ × E)} (hD : D ⊆ Set.Ioi s ×ˢ Set.univ) :
+    N.pastSigma s ≤ N.regionSigma D := by
+  refine iSup₂_le fun C hC => le_iSup₂_of_le C ⟨?_, hC.2⟩ le_rfl
+  refine Set.disjoint_of_subset hC.1 hD (Set.disjoint_left.mpr ?_)
+  rintro ⟨x, e⟩ hx hxD
+  exact absurd (Set.mem_Iic.mp (Set.mem_prod.mp hx).1)
+    (not_le.mpr (Set.mem_Ioi.mp (Set.mem_prod.mp hxD).1))
+
+/-- A compensated increment on `p` is measurable for the disjoint-region `σ`-algebra of any set `q`
+disjoint from `p`. -/
+private lemma compensated_measurable_regionSigma (N : PoissonRandomMeasure P ν)
+    {p q : Set (ℝ × E)} (hpq : Disjoint p q) (hpms : MeasurableSet p) :
+    Measurable[N.regionSigma q] (N.compensated p) := by
+  show Measurable[N.regionSigma q] fun ω => (N.N ω p).toReal - (referenceIntensity ν p).toReal
+  have hc : Measurable[N.regionSigma q] fun ω => N.N ω p :=
+    (measurable_iff_comap_le.mpr le_rfl).mono (le_iSup₂_of_le p ⟨hpq, hpms⟩ le_rfl) le_rfl
+  exact hc.ennreal_toReal.sub measurable_const
+
+/-- **Past-adapted `⟂` future compensated increment (general future set).** For `φ` adapted at `s`
+and `D ⊆ (s, ∞) × E`, `φ ⟂ Ñ(D)`. The set-level version of `adapted_indepFun_compensated`. -/
+private lemma adapted_indepFun_compensated_sub (N : PoissonRandomMeasure P ν) {s : ℝ}
+    {D : Set (ℝ × E)} (hDms : MeasurableSet D) (hDsub : D ⊆ Set.Ioi s ×ˢ Set.univ)
+    {φ : Ω → ℝ} (hφ : N.AdaptedAt s φ) :
+    IndepFun φ (N.compensated D) P := by
+  have hfield : Indep (N.regionSigma D)
+      (MeasurableSpace.comap (fun ω => N.N ω D) inferInstance) P :=
+    N.indep_of_disjoint_region hDms
+  have hφ_le : MeasurableSpace.comap φ inferInstance ≤ N.regionSigma D :=
+    le_trans (measurable_iff_comap_le.mp (show Measurable[N.pastSigma s] φ from hφ))
+      (pastSigma_le_regionSigma_sub N hDsub)
+  have hraw : IndepFun φ (fun ω => N.N ω D) P :=
+    (IndepFun_iff_Indep _ _ _).mpr (indep_of_indep_of_le_left hfield hφ_le)
+  have hcomp := hraw.comp (φ := (id : ℝ → ℝ))
+    (ψ := fun x : ℝ≥0∞ => x.toReal - (referenceIntensity ν D).toReal)
+    measurable_id (by fun_prop)
+  simp only [Function.comp_def, id_eq] at hcomp
+  exact hcomp
+
+/-- **Weighted diagonal energy (general future set).** For `φ` adapted at `s`, integrable, and
+`D ⊆ (s, ∞) × E`, `𝔼[φ · Ñ(D)²] = 𝔼[φ] · ν̂(D)`: `φ ⟂ Ñ(D)²` and `𝔼[Ñ(D)²] = ν̂(D)`. -/
+private lemma integral_adapted_mul_compensated_sq_sub (N : PoissonRandomMeasure P ν) {s : ℝ}
+    {D : Set (ℝ × E)} (hDms : MeasurableSet D) (hDsub : D ⊆ Set.Ioi s ×ˢ Set.univ)
+    (hDfin : referenceIntensity ν D ≠ ⊤) {φ : Ω → ℝ} (hφ : N.AdaptedAt s φ)
+    (hφint : Integrable φ P) :
+    ∫ ω, φ ω * (N.compensated D ω) ^ 2 ∂P = (∫ ω, φ ω ∂P) * (referenceIntensity ν D).toReal := by
+  have hindep2 := (adapted_indepFun_compensated_sub N hDms hDsub hφ).comp
+    (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ => x ^ 2) measurable_id (by fun_prop)
+  simp only [Function.comp_def, id_eq] at hindep2
+  have hÑsq : Integrable (fun ω => (N.compensated D ω) ^ 2) P :=
+    (memLp_compensated N hDms hDfin).integrable_sq
+  rw [hindep2.integral_fun_mul_eq_mul_integral hφint.aestronglyMeasurable
+        hÑsq.aestronglyMeasurable, compensated_integral_sq N hDms hDfin]
+
+/-- **The weighted future bilinear pairing** — the covariance carrying a past-adapted weight. For
+`φ` adapted at `s` and integrable, and `C, D ⊆ (s, ∞) × E` measurable finite-intensity,
+
+  `𝔼[φ · Ñ(C) · Ñ(D)] = 𝔼[φ] · ν̂(C ∩ D)`.
+
+This is `compensated_covariance` with a weight (`φ ≡ 1` recovers it). Decompose `C, D` into the three
+disjoint pieces `C∩D`, `C\D`, `D\C` (all still after `s`); the weighted product expands into the
+diagonal `φ · Ñ(C∩D)²` plus three cross pieces `φ · Ñ(p) · Ñ(q)` with `p, q` disjoint. Each cross
+piece pairs to zero (`integral_mul_compensated_eq_zero`, the weighted factor `φ · Ñ(p)` being
+`regionSigma q`-measurable); the diagonal is `𝔼[φ] · ν̂(C∩D)`
+(`integral_adapted_mul_compensated_sq_sub`). Every product is integrable because a past-adapted
+factor is independent of the future increment it multiplies. -/
+theorem integral_adapted_bilinear_future (N : PoissonRandomMeasure P ν) {s : ℝ}
+    {C D : Set (ℝ × E)} (hCms : MeasurableSet C) (hDms : MeasurableSet D)
+    (hCsub : C ⊆ Set.Ioi s ×ˢ Set.univ) (hDsub : D ⊆ Set.Ioi s ×ˢ Set.univ)
+    (hCfin : referenceIntensity ν C ≠ ⊤) (hDfin : referenceIntensity ν D ≠ ⊤)
+    {φ : Ω → ℝ} (hφ : N.AdaptedAt s φ) (hφint : Integrable φ P) :
+    ∫ ω, φ ω * N.compensated C ω * N.compensated D ω ∂P
+      = (∫ ω, φ ω ∂P) * (referenceIntensity ν (C ∩ D)).toReal := by
+  -- the three disjoint pieces, all still strictly after `s`
+  have hIms : MeasurableSet (C ∩ D) := hCms.inter hDms
+  have hC'ms : MeasurableSet (C \ D) := hCms.diff hDms
+  have hD'ms : MeasurableSet (D \ C) := hDms.diff hCms
+  have hIsub : C ∩ D ⊆ Set.Ioi s ×ˢ Set.univ := Set.inter_subset_left.trans hCsub
+  have hC'sub : C \ D ⊆ Set.Ioi s ×ˢ Set.univ := Set.sdiff_subset.trans hCsub
+  have hD'sub : D \ C ⊆ Set.Ioi s ×ˢ Set.univ := Set.sdiff_subset.trans hDsub
+  have hIfin : referenceIntensity ν (C ∩ D) ≠ ⊤ :=
+    ne_top_of_le_ne_top hCfin (measure_mono Set.inter_subset_left)
+  have hC'fin : referenceIntensity ν (C \ D) ≠ ⊤ :=
+    ne_top_of_le_ne_top hCfin (measure_mono Set.sdiff_subset)
+  have hD'fin : referenceIntensity ν (D \ C) ≠ ⊤ :=
+    ne_top_of_le_ne_top hDfin (measure_mono Set.sdiff_subset)
+  have hIC' : Disjoint (C ∩ D) (C \ D) := Set.disjoint_left.mpr fun _ hx1 hx2 => hx2.2 hx1.2
+  have hID' : Disjoint (C ∩ D) (D \ C) := Set.disjoint_left.mpr fun _ hx1 hx2 => hx2.2 hx1.1
+  have hC'D' : Disjoint (C \ D) (D \ C) := Set.disjoint_left.mpr fun _ hx1 hx2 => hx2.2 hx1.1
+  -- a.e. decompositions of the two increments
+  have hdC : ∀ᵐ ω ∂P, N.compensated C ω
+      = N.compensated (C ∩ D) ω + N.compensated (C \ D) ω := by
+    have h := compensated_add_of_disjoint N hIms hC'ms hIC' hIfin hC'fin
+    rwa [Set.inter_union_sdiff] at h
+  have hdD : ∀ᵐ ω ∂P, N.compensated D ω
+      = N.compensated (C ∩ D) ω + N.compensated (D \ C) ω := by
+    have h := compensated_add_of_disjoint N hIms hD'ms hID' hIfin hD'fin
+    rwa [show (C ∩ D) ∪ (D \ C) = D from by
+      rw [Set.inter_comm]; exact Set.inter_union_sdiff D C] at h
+  -- reusable measurability / integrability shorthands
+  have hφreg : ∀ {q : Set (ℝ × E)}, q ⊆ Set.Ioi s ×ˢ Set.univ → Measurable[N.regionSigma q] φ :=
+    fun hq => (show Measurable[N.pastSigma s] φ from hφ).mono
+      (pastSigma_le_regionSigma_sub N hq) le_rfl
+  have hÑint : ∀ {p : Set (ℝ × E)}, MeasurableSet p → referenceIntensity ν p ≠ ⊤ →
+      Integrable (N.compensated p) P :=
+    fun hp hpf => (memLp_compensated N hp hpf).integrable (by norm_num)
+  have hφÑint : ∀ {p : Set (ℝ × E)}, MeasurableSet p → p ⊆ Set.Ioi s ×ˢ Set.univ →
+      referenceIntensity ν p ≠ ⊤ → Integrable (fun ω => φ ω * N.compensated p ω) P :=
+    fun hp hps hpf =>
+      (adapted_indepFun_compensated_sub N hp hps hφ).integrable_mul hφint (hÑint hp hpf)
+  -- independence of a weighted disjoint increment from a fresh increment
+  have hindep_cross : ∀ {p q : Set (ℝ × E)}, Disjoint p q → MeasurableSet p →
+      q ⊆ Set.Ioi s ×ˢ Set.univ → MeasurableSet q →
+      IndepFun (fun ω => φ ω * N.compensated p ω) (N.compensated q) P := by
+    intro p q hpq hpms hqsub hqms
+    have hX : Measurable[N.regionSigma q] (fun ω => φ ω * N.compensated p ω) :=
+      (hφreg hqsub).mul (compensated_measurable_regionSigma N hpq hpms)
+    have hfield : Indep (N.regionSigma q)
+        (MeasurableSpace.comap (fun ω => N.N ω q) inferInstance) P := N.indep_of_disjoint_region hqms
+    have hraw : IndepFun (fun ω => φ ω * N.compensated p ω) (fun ω => N.N ω q) P :=
+      (IndepFun_iff_Indep _ _ _).mpr
+        (indep_of_indep_of_le_left hfield (measurable_iff_comap_le.mp hX))
+    have hc := hraw.comp (φ := (id : ℝ → ℝ))
+      (ψ := fun x : ℝ≥0∞ => x.toReal - (referenceIntensity ν q).toReal) measurable_id (by fun_prop)
+    simp only [Function.comp_def, id_eq] at hc
+    exact hc
+  -- expand the weighted product into diagonal + three cross pieces
+  have hprod : ∀ᵐ ω ∂P, φ ω * N.compensated C ω * N.compensated D ω
+      = φ ω * (N.compensated (C ∩ D) ω) ^ 2
+        + φ ω * N.compensated (C ∩ D) ω * N.compensated (D \ C) ω
+        + φ ω * N.compensated (C \ D) ω * N.compensated (C ∩ D) ω
+        + φ ω * N.compensated (C \ D) ω * N.compensated (D \ C) ω := by
+    filter_upwards [hdC, hdD] with ω hCω hDω
+    rw [hCω, hDω]; ring
+  rw [integral_congr_ae hprod]
+  -- integrabilities of the four pieces
+  have hindepI2 := (adapted_indepFun_compensated_sub N hIms hIsub hφ).comp
+    (φ := (id : ℝ → ℝ)) (ψ := fun x : ℝ => x ^ 2) measurable_id (by fun_prop)
+  simp only [Function.comp_def, id_eq] at hindepI2
+  have hi1 : Integrable (fun ω => φ ω * (N.compensated (C ∩ D) ω) ^ 2) P :=
+    hindepI2.integrable_mul hφint ((memLp_compensated N hIms hIfin).integrable_sq)
+  have hi2 : Integrable
+      (fun ω => φ ω * N.compensated (C ∩ D) ω * N.compensated (D \ C) ω) P :=
+    (hindep_cross hID' hIms hD'sub hD'ms).integrable_mul
+      (hφÑint hIms hIsub hIfin) (hÑint hD'ms hD'fin)
+  have hi3 : Integrable
+      (fun ω => φ ω * N.compensated (C \ D) ω * N.compensated (C ∩ D) ω) P :=
+    (hindep_cross hIC'.symm hC'ms hIsub hIms).integrable_mul
+      (hφÑint hC'ms hC'sub hC'fin) (hÑint hIms hIfin)
+  have hi4 : Integrable
+      (fun ω => φ ω * N.compensated (C \ D) ω * N.compensated (D \ C) ω) P :=
+    (hindep_cross hC'D' hC'ms hD'sub hD'ms).integrable_mul
+      (hφÑint hC'ms hC'sub hC'fin) (hÑint hD'ms hD'fin)
+  have hf12 : Integrable (fun ω => φ ω * (N.compensated (C ∩ D) ω) ^ 2
+      + φ ω * N.compensated (C ∩ D) ω * N.compensated (D \ C) ω) P := hi1.add hi2
+  have hf123 : Integrable (fun ω => φ ω * (N.compensated (C ∩ D) ω) ^ 2
+      + φ ω * N.compensated (C ∩ D) ω * N.compensated (D \ C) ω
+      + φ ω * N.compensated (C \ D) ω * N.compensated (C ∩ D) ω) P := hf12.add hi3
+  -- the three cross pieces vanish; the diagonal is `𝔼[φ]·ν̂(C∩D)`
+  have hX2 : Measurable[N.regionSigma (D \ C)] (fun ω => φ ω * N.compensated (C ∩ D) ω) :=
+    (hφreg hD'sub).mul (compensated_measurable_regionSigma N hID' hIms)
+  have hX3 : Measurable[N.regionSigma (C ∩ D)] (fun ω => φ ω * N.compensated (C \ D) ω) :=
+    (hφreg hIsub).mul (compensated_measurable_regionSigma N hIC'.symm hC'ms)
+  have hX4 : Measurable[N.regionSigma (D \ C)] (fun ω => φ ω * N.compensated (C \ D) ω) :=
+    (hφreg hD'sub).mul (compensated_measurable_regionSigma N hC'D' hC'ms)
+  rw [integral_add hf123 hi4, integral_add hf12 hi3, integral_add hi1 hi2,
+    integral_adapted_mul_compensated_sq_sub N hIms hIsub hIfin hφ hφint,
+    integral_mul_compensated_eq_zero N hD'ms hD'fin hX2,
+    integral_mul_compensated_eq_zero N hIms hIfin hX3,
+    integral_mul_compensated_eq_zero N hD'ms hD'fin hX4]
+  ring
+
+/-- **The overlapping-box bilinear pairing** — the Itô–Lévy inner-product core. For coefficients
+`φa` adapted at `sa`, `φb` adapted at `sb` with `sa ≤ sb`, both bounded,
+
+  `𝔼[(φa · Ñ(boxa)) · (φb · Ñ(boxb))] = 𝔼[φa · φb] · ν̂(boxa ∩ boxb)`,
+
+with `boxa = (sa, ta] × Aa`, `boxb = (sb, tb] × Ab`. The jump analogue of
+`ItoIsometryAdapted.rect_increment_pairing` (Brownian rectangles — cited, not reused). Split `boxa`
+in time at the later start `sb`: the past part `(-∞, sb]` pairs to zero against the future increment
+`Ñ(boxb)` (`integral_mul_compensated_eq_zero`); the future part `(sb, ∞)` starts at `sb` alongside
+`boxb`, so the weighted future pairing `integral_adapted_bilinear_future` supplies
+`𝔼[φa φb] · ν̂(futPart ∩ boxb)`, and `futPart ∩ boxb = boxa ∩ boxb`. -/
+theorem integral_bilinear_pairing (N : PoissonRandomMeasure P ν)
+    {sa ta sb tb : ℝ} (hab : sa ≤ sb)
+    {Aa Ab : Set E} (hAa : MeasurableSet Aa) (hAb : MeasurableSet Ab)
+    (hAafin : ν Aa ≠ ⊤) (hAbfin : ν Ab ≠ ⊤)
+    {φa φb : Ω → ℝ} {Ca Cb : ℝ}
+    (hφa : N.AdaptedAt sa φa) (hφb : N.AdaptedAt sb φb)
+    (hφaB : ∀ ω, |φa ω| ≤ Ca) (hφbB : ∀ ω, |φb ω| ≤ Cb) :
+    ∫ ω, (φa ω * N.compensated (Set.Ioc sa ta ×ˢ Aa) ω)
+          * (φb ω * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω) ∂P
+      = (∫ ω, φa ω * φb ω ∂P)
+          * (referenceIntensity ν ((Set.Ioc sa ta ×ˢ Aa) ∩ (Set.Ioc sb tb ×ˢ Ab))).toReal := by
+  -- measurability of the boxes and the past / future half-planes at `sb`
+  have hboxams : MeasurableSet (Set.Ioc sa ta ×ˢ Aa) := measurableSet_Ioc.prod hAa
+  have hboxbms : MeasurableSet (Set.Ioc sb tb ×ˢ Ab) := measurableSet_Ioc.prod hAb
+  have hIicms : MeasurableSet (Set.Iic sb ×ˢ (Set.univ : Set E)) :=
+    measurableSet_Iic.prod MeasurableSet.univ
+  have hIoims : MeasurableSet (Set.Ioi sb ×ˢ (Set.univ : Set E)) :=
+    measurableSet_Ioi.prod MeasurableSet.univ
+  have hpastms : MeasurableSet (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ)) :=
+    hboxams.inter hIicms
+  have hfutms : MeasurableSet (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) :=
+    hboxams.inter hIoims
+  -- finiteness (the halves are subsets of `boxa`)
+  have hboxafin : referenceIntensity ν (Set.Ioc sa ta ×ˢ Aa) ≠ ⊤ :=
+    referenceIntensity_box_ne_top hAafin
+  have hboxbfin : referenceIntensity ν (Set.Ioc sb tb ×ˢ Ab) ≠ ⊤ :=
+    referenceIntensity_box_ne_top hAbfin
+  have hpastfin : referenceIntensity ν (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ)) ≠ ⊤ :=
+    ne_top_of_le_ne_top hboxafin (measure_mono Set.inter_subset_left)
+  have hfutfin : referenceIntensity ν (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) ≠ ⊤ :=
+    ne_top_of_le_ne_top hboxafin (measure_mono Set.inter_subset_left)
+  -- geometry: `boxb ⊆` future, past `⟂` future, past `∪` future `= boxa`, `futPart ∩ boxb = boxa ∩ boxb`
+  have hIicIoi : Disjoint (Set.Iic sb ×ˢ (Set.univ : Set E)) (Set.Ioi sb ×ˢ Set.univ) :=
+    Set.disjoint_left.mpr fun ⟨x, e⟩ hx hxD =>
+      absurd (Set.mem_Iic.mp (Set.mem_prod.mp hx).1)
+        (not_le.mpr (Set.mem_Ioi.mp (Set.mem_prod.mp hxD).1))
+  have hboxbsub : Set.Ioc sb tb ×ˢ Ab ⊆ Set.Ioi sb ×ˢ Set.univ :=
+    Set.prod_mono Set.Ioc_subset_Ioi_self (Set.subset_univ _)
+  have hfutsub : Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ) ⊆ Set.Ioi sb ×ˢ Set.univ :=
+    Set.inter_subset_right
+  have hpastdisjb : Disjoint (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ))
+      (Set.Ioc sb tb ×ˢ Ab) :=
+    Set.disjoint_of_subset Set.inter_subset_right hboxbsub hIicIoi
+  have hdisj_pf : Disjoint (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ))
+      (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) :=
+    Set.disjoint_of_subset Set.inter_subset_right Set.inter_subset_right hIicIoi
+  have hunion : (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ))
+      ∪ (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) = Set.Ioc sa ta ×ˢ Aa := by
+    rw [← Set.inter_union_distrib_left, ← Set.union_prod, Set.Iic_union_Ioi,
+      Set.univ_prod_univ, Set.inter_univ]
+  have hfutinter : (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) ∩ (Set.Ioc sb tb ×ˢ Ab)
+      = (Set.Ioc sa ta ×ˢ Aa) ∩ (Set.Ioc sb tb ×ˢ Ab) := by
+    rw [Set.inter_assoc, Set.inter_eq_right.mpr hboxbsub]
+  -- the weight `φa · φb` is adapted at `sb`, bounded, hence integrable
+  have hφ : N.AdaptedAt sb (fun ω => φa ω * φb ω) :=
+    ((show Measurable[N.pastSigma sa] φa from hφa).mono (pastSigma_mono N hab) le_rfl).mul
+      (show Measurable[N.pastSigma sb] φb from hφb)
+  have hbound : ∀ ω, ‖φa ω * φb ω‖ ≤ Ca * Cb := fun ω => by
+    rw [Real.norm_eq_abs, abs_mul]
+    exact mul_le_mul (hφaB ω) (hφbB ω) (abs_nonneg _) ((abs_nonneg _).trans (hφaB ω))
+  have hφint : Integrable (fun ω => φa ω * φb ω) P :=
+    (memLp_top_of_bound hφ.measurable.aestronglyMeasurable (Ca * Cb) (ae_of_all _ hbound)).integrable
+      le_top
+  -- `Ñ(boxa) = Ñ(pastPart) + Ñ(futPart)` a.e.
+  have hdecomp : ∀ᵐ ω ∂P, N.compensated (Set.Ioc sa ta ×ˢ Aa) ω
+      = N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ)) ω
+        + N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) ω := by
+    have h := compensated_add_of_disjoint N hpastms hfutms hdisj_pf hpastfin hfutfin
+    rwa [hunion] at h
+  -- split the integrand: past term (⟶ 0) + future term (⟶ master pairing)
+  have hprod : ∀ᵐ ω ∂P,
+      (φa ω * N.compensated (Set.Ioc sa ta ×ˢ Aa) ω)
+        * (φb ω * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω)
+      = φa ω * φb ω * N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ)) ω
+          * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω
+        + φa ω * φb ω * N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) ω
+          * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω := by
+    filter_upwards [hdecomp] with ω hω
+    rw [hω]; ring
+  rw [integral_congr_ae hprod]
+  -- integrabilities: bounded weight × (`L²`-increment) × (`L²`-increment)
+  have hint_past : Integrable (fun ω => φa ω * φb ω
+      * N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ)) ω
+      * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω) P :=
+    (((memLp_compensated N hpastms hpastfin).integrable_mul
+        (memLp_compensated N hboxbms hboxbfin)).bdd_mul
+        hφ.measurable.aestronglyMeasurable (ae_of_all _ hbound)).congr
+      (ae_of_all _ fun ω => by simp only [Pi.mul_apply]; ring)
+  have hint_fut : Integrable (fun ω => φa ω * φb ω
+      * N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Ioi sb ×ˢ Set.univ)) ω
+      * N.compensated (Set.Ioc sb tb ×ˢ Ab) ω) P :=
+    (((memLp_compensated N hfutms hfutfin).integrable_mul
+        (memLp_compensated N hboxbms hboxbfin)).bdd_mul
+        hφ.measurable.aestronglyMeasurable (ae_of_all _ hbound)).congr
+      (ae_of_all _ fun ω => by simp only [Pi.mul_apply]; ring)
+  rw [integral_add hint_past hint_fut]
+  -- past term vanishes (weighted past-region factor `⟂` fresh future increment)
+  have hXpast : Measurable[N.regionSigma (Set.Ioc sb tb ×ˢ Ab)]
+      (fun ω => φa ω * φb ω
+        * N.compensated (Set.Ioc sa ta ×ˢ Aa ∩ (Set.Iic sb ×ˢ Set.univ)) ω) :=
+    ((show Measurable[N.pastSigma sb] (fun ω => φa ω * φb ω) from hφ).mono
+      (pastSigma_le_regionSigma_sub N hboxbsub) le_rfl).mul
+      (compensated_measurable_regionSigma N hpastdisjb hpastms)
+  rw [integral_mul_compensated_eq_zero N hboxbms hboxbfin hXpast, zero_add,
+    integral_adapted_bilinear_future N hfutms hboxbms hfutsub hboxbsub hfutfin hboxbfin hφ hφint,
+    hfutinter]
+
 end MathFin
