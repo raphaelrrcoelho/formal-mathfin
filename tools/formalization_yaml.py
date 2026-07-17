@@ -160,7 +160,9 @@ def build_doc(root: str) -> dict:
         d[status] = d.get(status, 0) + 1
 
     ready = totals["full"] + totals["library_wrapper"]
-    autoform_note = f"{autoform_count} Leanstral-scouted proof(s) merged"
+    autoform_note = (f"{autoform_count} autoformalized proof(s) merged "
+                     "(two-stage: statement specified by Magistral, formalization + proof by "
+                     "Leanstral)")
     if autoform_issues:
         issues = ", ".join("#" + str(i) for i in sorted(set(autoform_issues)))
         autoform_note += f" (closing {issues})"
@@ -232,12 +234,16 @@ def build_doc(root: str) -> dict:
                     "prompting_notes": "author edits MathFin/<Section>/*.lean directly",
                 },
                 {
-                    "method": "machine autoformalization (scout, not author)",
-                    "models": ["labs-leanstral-1-5"],
+                    "method": "machine autoformalization (two-stage; scout, not author)",
+                    "models": ["magistral-medium", "labs-leanstral-1-5"],
                     "framework": "mathfin-foundry: probe / vibe <-> lean-lsp-mcp",
-                    "tool_setup": ("token-paced GitHub Actions pipeline; on a pass it opens a "
-                                   "ready-for-review PR on formal-mathfin that a human reviews "
-                                   "(8-lens values panel) and merges"),
+                    "tool_setup": ("token-paced GitHub Actions pipeline; Magistral specifies the "
+                                   "statement, Leanstral formalizes + proves it. A cheap autop "
+                                   "tactic-probe may scout-close a goal Leanstral missed; those "
+                                   "open as DRAFT PRs (labeled scout-proof, attributed to the "
+                                   "tactic, refactored before merge, never silently merged). On a "
+                                   "Leanstral pass it opens a ready-for-review PR on formal-mathfin "
+                                   "that a human reviews (8-lens values panel) and merges"),
                     "prompting_notes": autoform_note,
                 },
                 {

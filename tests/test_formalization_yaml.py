@@ -99,8 +99,21 @@ def test_autoform_provenance_count_is_mechanical(tmp_path):
     (tmp_path / "tools").mkdir()
     (tmp_path / "tools" / "formalization_meta.toml").write_text("", encoding="utf-8")
     note = _machine_note(F.build_doc(str(tmp_path)))
-    assert note.startswith("2 Leanstral-scouted proof")
+    assert note.startswith("2 autoformalized proof")
     assert "#88" in note and "#109" in note  # sorted, de-duped issues
+
+
+def test_autoform_disclosure_is_two_stage():
+    # the automation disclosure names BOTH pipeline stages honestly: Magistral
+    # specifies the statement (statement_source), Leanstral formalizes + proves —
+    # not only the leanstral prover — and discloses the autop scout mechanism.
+    doc = F.build_doc(ROOT)
+    method = next(m for m in doc["automation"]["methods"]
+                  if "labs-leanstral-1-5" in m.get("models", []))
+    assert "magistral-medium" in method["models"]
+    note = method["prompting_notes"]
+    assert "Magistral" in note and "Leanstral" in note
+    assert "autop" in method["tool_setup"]
 
 
 def test_autoform_count_matches_corpus_provenance():
@@ -116,4 +129,4 @@ def test_autoform_count_matches_corpus_provenance():
             prov = (t.get("metadata") or {}).get("provenance") or {}
             if prov.get("source") == "leanstral-autoform":
                 n += 1
-    assert _machine_note(F.build_doc(ROOT)).startswith(f"{n} Leanstral-scouted proof")
+    assert _machine_note(F.build_doc(ROOT)).startswith(f"{n} autoformalized proof")
