@@ -23,6 +23,22 @@ breadth at this stage, and what the concrete next round would look like.
 > `Matrix.exp` + spectral decomposition) and the Appendix-A **jump (Brémaud–Jacod) Girsanov** construction
 > (wiring into the change-of-measure engine).
 >
+> **Update (2026-07-16, later) — the matrix Riccati rung landed (corpus 333 → 335).** The multi-asset
+> follow-on above is now done: `Foundations/MatrixMarketMakingRiccati` formalizes the **matrix-Riccati core of
+> BEGV Proposition 2** (the `A`-coefficient + change of variables; `B`/`C` and the value-function verification
+> stay out of scope), the matrix analogue of the scalar closed form. Two `full` entries — `mf-mm-matrix-riccati` (the abstract matrix
+> Riccati ODE `a'(t) = a(t)·a(t) − Â·Â` solved in closed form for any Hermitian `Â`) and `mf-mm-matrix-value`
+> (its market-making instantiation `A' = 2·A·D₊·A − (γ/2)·Σ` via the `D₊^{±½}` change of variables). The key
+> move is **spectral reduction, not `Matrix.exp`**: with `Â = U·diag(λ)·Uᴴ`, defining
+> `a(t) = U·diag(riccatiCoeff (λᵢ) T t)·Uᴴ` reduces the matrix ODE, on each eigenvalue, to the *scalar*
+> `hasDerivAt_riccatiCoeff` — no matrix `tanh` (absent at this pin) is ever built. Mathlib carries no
+> matrix-valued differentiation, so the matrix-level `HasDerivAt` is taken under the `L∞` operator norm
+> (`open scoped Matrix.Norms.Operator`), lifting the diagonal core's derivative through `diagonalLinearMap`.
+> **Honest scope**: in `mf-mm-matrix-value`, `Â` enters by its defining relation `Â·Â = γ·(D₊^{½}ΣD₊^{½})`
+> (the matrix-square-root *construction* is out of scope — the verified content is the change of variables);
+> the `B`/`C` coefficients (matrix variation-of-parameters), the general-`d` value-function verification, and
+> the optimal-control substrate remain deferred. Remaining next rung: the Appendix-A **jump Girsanov**.
+>
 > **Update (2026-06-29, evening) — Phase 1 done (corpus 306).** Since this strategic update, the
 > **convex-duality unification** (I↔IV — the architecture doc's #1 seam,
 > [`mathematical-architecture.md`](mathematical-architecture.md)) was realized: the FTAP (pricing) and

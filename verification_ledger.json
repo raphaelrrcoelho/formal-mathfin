@@ -1676,6 +1676,20 @@
       "input_hash": "2644e6694900d8b30e1745ab3bf5e7ed057f9126279550677f8da1c482cd2242",
       "verified_at_commit": "bfa3834"
     },
+    "mf-mm-matrix-riccati": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-16",
+      "elapsed_s": 21.9,
+      "input_hash": "b9024cafd9ab59a1a47c56909a9ea54049a94b93959f0ecfa01e2df8291a5492",
+      "verified_at_commit": "09b4a4d"
+    },
+    "mf-mm-matrix-value": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-16",
+      "elapsed_s": 135.8,
+      "input_hash": "b8648fb06e8107ba143b0739da115ee6cc4464f4a72fb29a7494fafbca5bd466",
+      "verified_at_commit": "09b4a4d"
+    },
     "mf-mm-quotes": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-16",

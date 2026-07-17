@@ -763,3 +763,47 @@ edit lints the stale olean and re-reports the old failures at the old line numbe
 - A review subagent that runs `./scripts/lean-check.sh` / `docker` will bring the lean-repl daemon up **and tear
   it back down**, killing the controller's warmed daemon. Instruct review subagents to **read files only — never
   run docker/lake/lean-check**. (Cost a daemon restart mid-run.)
+
+## Matrix Riccati via spectral reduction (2026-07-16, multi-asset follow-on)
+
+The matrix analogue of `a(t) = Â·tanh(Â(T−t))` (BEGV Prop. 2, `MatrixMarketMakingRiccati.lean`), with
+**no matrix `tanh`/`exp`** (both absent at the pin) and **no Mathlib matrix-differentiation** (also absent).
+
+### Spectral reduction — define diagonalised, reduce the ODE per eigenvalue
+- For Hermitian `Â = U·diag(λ)·Uᴴ` (`U = hÂ.eigenvectorUnitary`, `λ = hÂ.eigenvalues`), **define** the matrix
+  function as `U · diagonal (fun i => <scalar closed form> (λ i)) · star U`. Then the matrix ODE reduces, on each
+  eigenvalue, to the already-proven *scalar* lemma. No matrix transcendental is ever built.
+- `Matrix.IsHermitian.spectral_theorem` at this pin is stated via `conjStarAlgAut` (namespace **`Unitary`**):
+  `A = Unitary.conjStarAlgAut 𝕜 _ hA.eigenvectorUnitary (diagonal (RCLike.ofReal ∘ hA.eigenvalues))`, and
+  `Unitary.conjStarAlgAut_apply` is `@[simp] rfl`: `u * x * star u`.
+- `conjStarAlgAut U` is a `⋆`-alg hom ⇒ **`map_mul`** collapses conjugated products with zero `star U*U=1`
+  juggling: `Â*Â = U·diag(λ)·star U · U·diag(λ)·star U = U·diag(λ²)·star U` via
+  `conv_lhs => rw [hÂ.spectral_theorem]; rw [← map_mul, diagonal_mul_diagonal, Unitary.conjStarAlgAut_apply]`.
+  (Over ℝ, `RCLike.ofReal ∘ λ` cleans up with `simp [Function.comp, sq]`.)
+
+### Matrix-valued `HasDerivAt` — open the operator norm, lift `diagonalLinearMap`
+- Mathlib has **no** `HasDerivAt` for matrix-valued maps and **no default** norm on `Matrix` (diamond avoidance).
+  `open scoped Matrix.Norms.Operator` (the `L∞` operator norm — `NormedRing` + `NormedAlgebra`) turns
+  `HasDerivAt.const_mul U`, `.mul_const (star U)`, `.const_smul c` on matrices on. The operator-norm
+  `AddCommGroup` is **defeq** to the default `Matrix.addCommGroup`, so a goal stated with the default instance is
+  closed by `exact` (not `simpa`) after the derivative is built.
+- Diagonal-core derivative: `hasDerivAt_pi.2 (fun i => <scalar deriv>)` for the Pi part, then lift through
+  `(Matrix.diagonalLinearMap (R:=ℝ) (n:=n) (α:=ℝ)).toContinuousLinearMap.hasFDerivAt (x := g t)`
+  `|>.comp_hasDerivAt t hpi`, close with `simp only [Function.comp_def]; exact`. (`ContinuousLinearMap.hasFDerivAt`
+  needs its point `x` supplied — bind it to `g t`.)
+- Conjugation-preserves-Hermitian: `isHermitian_mul_mul_conjTranspose B hA : (B·A·Bᴴ).IsHermitian`, with
+  `isHermitian_diagonal` (real ⇒ `TrivialStar`) and `star M = Mᴴ` via `star_eq_conjTranspose`.
+
+### Change-of-variables / positive-diagonal collapses (M2)
+- `diagonal (√dᵢ)⁻¹ * diagonal (√dᵢ) = 1`: `diagonal_mul_diagonal` + `inv_mul_cancel₀ (Real.sqrt_ne_zero'.2 (hd i))`
+  + `diagonal_one`. For `D₊^{-½}·D₊·D₊^{-½}=1` the funext goal after `field_simp` is `d i = √(d i) ^ 2` → close
+  with **`Real.sq_sqrt (hd i).le`** (not `Real.mul_self_sqrt`, which is `√·√`).
+- Reassociate a sandwiched product `(Dm·a·Dm)·X·(Dm·a·Dm) = Dm·a·(Dm·X·Dm)·a·Dm` with `simp only [Matrix.mul_assoc]`
+  (both sides normalise to the same right-associated factor sequence), then collapse the centre with the `=1` lemma.
+- **ℕ vs ℝ smul**: a bare `2 • M` defaults to **ℕ**-smul, which `smul_smul` (single scalar action) can't fuse with
+  a `(1/2 : ℝ) •`. Write `(2 : ℝ) •` in the statement when the proof does smul algebra.
+- `pow_two` bridges `x*x` (from `diagonal_mul_diagonal`) and `x^2` inside a `diagonal (fun i => …)` equality —
+  `simp only [pow_two]` makes both sides identical, avoiding a `ring` on the post-`congr` shape (which emits a
+  spurious noncommutative "Try this: ring_nf" **info** even though the build is kernel-valid).
+- **`Σ` is a reserved token** (Sigma types) — never an identifier; name the covariance `cov`. (Also [[girsanov]]:
+  never capital Σ in idents.)

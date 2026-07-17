@@ -3688,6 +3688,38 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof re-exported from MathFin. The exponential-intensity quote map δ̃_ξ(p)=p+c is defined by its known closed form (Guéant [18]/[20]), not re-derived from the intensity sup; the spread/skew are exact consequences, instantiated at the Model-A (quoteConstA) and Model-B (quoteConstB) constants. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-mm-matrix-riccati",
+      "name": "Matrix Riccati Coefficient — Multi-Asset Closed Form",
+      "description": "The matrix analogue of the scalar market-making Riccati: the spectral closed form a(t)=U·diag(riccatiCoeff(λᵢ))·Uᴴ solves the matrix Riccati ODE a'=a·a−Â·Â for any Hermitian Â (no matrix tanh required).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.MatrixMarketMakingRiccati\n\n/-- **Matrix Riccati coefficient — multi-asset closed form (BEGV Prop. 2).** For a Hermitian\n`Â` with eigendecomposition `Â = U·diag(λ)·Uᴴ`, the spectral closed form\n`matrixRiccatiCoeff hÂ T t = U·diag(riccatiCoeff (λᵢ) T t)·Uᴴ` solves the matrix Riccati ODE\n`a'(t) = a(t)·a(t) − Â·Â` — no matrix `tanh` required. Re-exports\n`MathFin.hasDerivAt_matrixRiccatiCoeff`. -/\ntheorem mm_matrix_riccati_closed_form {n : Type*} [Fintype n] [DecidableEq n]\n    {Â : Matrix n n ℝ} (hÂ : Â.IsHermitian) (T t : ℝ) :\n    HasDerivAt (MathFin.matrixRiccatiCoeff hÂ T)\n      (MathFin.matrixRiccatiCoeff hÂ T t * MathFin.matrixRiccatiCoeff hÂ T t - Â * Â) t :=\n  MathFin.hasDerivAt_matrixRiccatiCoeff hÂ T t"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), Proposition 2 (matrix Riccati)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin/Foundations/MatrixMarketMakingRiccati.lean. Verifies the multi-asset matrix Riccati closed form (spectral reduction: a=U·diag(riccatiCoeff λ)·Uᴴ) solves the matrix ODE a'=a·a−Â·Â for any Hermitian Â, with the matrix-valued derivative taken under the L∞ operator norm. The stochastic optimal-control substrate (true value function, verification theorem) is out of scope, mirroring the single-asset entry. Axioms-clean."
+      }
+    },
+    {
+      "id": "mf-mm-matrix-value",
+      "name": "Matrix Value Coefficient — Multi-Asset Market-Making Riccati",
+      "description": "The change of variables A(t)=½·D₊^{-½}·matrixRiccatiCoeff·D₊^{-½} solves the market-making matrix Riccati A'=2·A·D₊·A−(γ/2)·Σ, given a positive diagonal D₊ and Â with Â·Â=γ·(D₊^{½}·Σ·D₊^{½}).",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Foundations.MatrixMarketMakingRiccati\n\n/-- **Matrix value coefficient — multi-asset market-making Riccati (BEGV Prop. 2, Eq. 11).**\nWith a positive diagonal `D₊ = diagonal d` and `Â` the Hermitian generator scale\n`Â·Â = γ•(D₊^{½}·cov·D₊^{½})`, the change of variables `A(t) = ½•(D₊^{-½}·matrixRiccatiCoeff·D₊^{-½})`\nsolves the market-making matrix Riccati `A'(t) = 2•(A(t)·D₊·A(t)) − (γ/2)•cov`. Re-exports\n`MathFin.hasDerivAt_mmMatrixValueCoeff`. -/\ntheorem mm_matrix_value_riccati {n : Type*} [Fintype n] [DecidableEq n]\n    (d : n → ℝ) (hd : ∀ i, 0 < d i) (cov : Matrix n n ℝ) (γ : ℝ)\n    {Â : Matrix n n ℝ} (hÂ : Â.IsHermitian)\n    (hÂsq : Â * Â = γ • (Matrix.diagonal (fun i => Real.sqrt (d i)) * cov\n                          * Matrix.diagonal (fun i => Real.sqrt (d i)))) (T t : ℝ) :\n    HasDerivAt (MathFin.mmMatrixValueCoeff d hÂ T)\n      ((2 : ℝ) • (MathFin.mmMatrixValueCoeff d hÂ T t * Matrix.diagonal d\n          * MathFin.mmMatrixValueCoeff d hÂ T t) - (γ / 2) • cov) t :=\n  MathFin.hasDerivAt_mmMatrixValueCoeff d hd cov γ hÂ hÂsq T t"
+      },
+      "metadata": {
+        "chapter": 16,
+        "reference": "Bergault, Evangelista, Guéant, Vieira — Closed-form approximations in multi-asset market making (arXiv:1810.04383), Proposition 2 / Eq. 11 (matrix value-function coefficient)",
+        "difficulty": "advanced",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof re-exported from MathFin. Verifies A(t)=½·D₊^{-½}·matrixRiccatiCoeff·D₊^{-½} solves the market-making matrix Riccati A'=2·A·D₊·A−(γ/2)·cov, with D₊=diagonal d positive and Â Hermitian satisfying Â·Â=γ·(D₊^{½}·cov·D₊^{½}) — Â enters by this defining relation (the matrix-square-root construction of Â is out of scope, so the verified content is the change of variables). The optimal-control substrate and the B/C coefficients are out of scope. Axioms-clean."
+      }
     }
   ]
 }

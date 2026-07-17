@@ -74,6 +74,87 @@ Entries from 2026-06-29 (corpus 302, the whole-repo review below) onward use the
 PASS / PASS-WITH-NOTES verdicts, kept as-is — the transition itself was an upgrade to lens 4 (the review
 should *generate work*, not certify "OK").
 
+## 2026-07-16 — corpus 335 — multi-asset matrix Riccati (BEGV Prop 2) via spectral reduction
+
+`Foundations/MatrixMarketMakingRiccati` (M1 abstract matrix Riccati `a' = a·a − Â·Â` solved in closed
+form for any Hermitian `Â`; M2 market-making instantiation `A' = 2·A·D₊·A − (γ/2)·cov`), + 2 `full`
+entries `mf-mm-matrix-{riccati,value}` (corpus 333 → **335**). **Mechanical floor green:** `lake build
+MathFin` + `lake lint` (8869 jobs), ledger fresh at 335, both bench-checks green, `AxiomAudit` +
+`AxiomAuditGen` axioms-clean (`[propext, Classical.choice, Quot.sound]`), `test_router`/`values`/`ledger`
+pass. Reviewed by an opus code-review (mergeable) **and** a 3-agent read-only values panel (8 lenses
+split), maintainer-adjudicated below.
+
+Per-lens **exemplar → next upgrade** (gradient, not a grade):
+
+- **1 Inspired math.** *Exemplar:* `hasDerivAt_matrixRiccatiCoeff` on `matrixRiccatiCoeff_spectral_sq`
+  — the spectral-reduction idea (define the solution already-diagonalised `U·diag(riccatiCoeff λᵢ)·Uᴴ`,
+  so the matrix ODE collapses to n scalar ODEs already proven) sidesteps BOTH missing pieces at the pin
+  (matrix `tanh` and `Matrix.exp` differentiation) with one move. *Upgrade (MED):* the `T→∞` matrix
+  ergodic limit `matrixRiccatiCoeff hÂ T 0 → Â` (per-eigenvalue `tanh→1`), gated on the absent
+  `tanh`-at-`atTop` limit.
+- **2 Coherence.** *Exemplar:* `matrixRiccatiCoeff_spectral_sq` uses Mathlib's own spectral-computation
+  idiom verbatim (`rw [hÂ.spectral_theorem, ← map_mul, diagonal_mul_diagonal, conjStarAlgAut_apply]`);
+  panel grep-confirmed all seven upstream APIs canonical against the checkout, and the scalar
+  `riccatiCoeff` is the one source of the `tanh` derivative, consumed matrix-side. *Upgrade (MED):*
+  extract a `conj_diagonal_mul` private helper — the conjugated-diagonal-square collapse is derived
+  twice (`_spectral_sq` for `Â²`, inline `hsq` for `a·a`).
+- **3 Zero slop.** *Exemplar:* the ODE derivative-equality discharged by one certificate-shaped `rw`
+  chain (`rw [hsq, matrixRiccatiCoeff_spectral_sq hÂ, ← hU, ← sub_mul, ← mul_sub, ← diagonal_sub]`) — the
+  conceptual step (both sides are `U·diag(…)·Uᴴ`) is *visible*. Forbidden-tactic grep: none. No dead
+  hypotheses — `cov` is deliberately **not** assumed symmetric/PSD (the algebra doesn't need it), so the
+  theorem is the honestly-general conditional.
+- **4 Architectural ingenuity.** *Exemplar:* M2's derivative is literally
+  `(((hasDerivAt_matrixRiccatiCoeff …).const_mul Dm).mul_const Dm).const_smul (1/2)` — M1 does all the
+  calculus, M2 pays only change-of-variables algebra; combined with cross-module reuse of the single-asset
+  scalar `riccatiCoeff` as the diagonal core. *Upgrade (MED → HIGH once a 2nd matrix consumer lands):*
+  the global `attribute [instance] Matrix.linftyOp…` (the L∞ norm commitment) is declared in a leaf
+  finance module — correct today (grep confirms MathFin has no other matrix-analytic usage, so no
+  diamond) but at the wrong altitude; hoist it + `matrixRiccatiCoeff_spectral_sq` into a shared
+  `Foundations/Matrix…` prelude so the finance leaf *imports* the commitment.
+- **5 First principles.** *Adjudicated headline — the "Â by hypothesis" charge is HONEST, not a smuggle.*
+  M2's `hÂsq : Â·Â = γ•(S·cov·S)` is `t`-free constant-matrix algebra; the conclusion is a `HasDerivAt`
+  in `t` — the hypothesis cannot be the conclusion unfolded. It defers only matrix-sqrt *existence* (a
+  separable fact); the theorem proves "for any witnessing `Â`, the change of variables solves the
+  Riccati," consistent with the accepted single-asset `valueFunction_satisfies_approxHJ` (A/B/C by
+  hypothesis, `full`). The anti-smuggle: `matrixRiccatiCoeff_spectral_sq` **derives** `Â²=U·diagλ²·Uᴴ`
+  from `spectral_theorem` rather than positing it. *Exemplar:* that lemma. *Upgrade (HIGH):* prove the
+  PSD matrix-sqrt existence `∃ Â, Â.IsHermitian ∧ Â·Â = γ•(S·cov·S)` for `cov` PSD — turns "Â assumed"
+  into "Â constructed," retiring the sole deferred algebraic caveat (needs Mathlib Hermitian/PSD CFC).
+- **6 Idiomatic register.** *Exemplar:* `set … with` discipline — every `with` is consumed by a later
+  `rw` (`hU`/`hS`/`hDm`), and the one that shouldn't have it (`set a := …`, line 211) had it **removed
+  this session**. *Upgrade (LOW, repo-wide):* the `=>`→`↦` sweep — a standing convention item, not to be
+  fragmented file-by-file.
+- **7 Concept clarity.** *Exemplar:* the module Scope block's `Â`-clause (a probabilist sees exactly
+  which object is assumed and that it is the paper's own construction). *Upgrade (LOW):* tighten
+  `roadmap.md` "formalizes BEGV Prop 2" → "the matrix-Riccati **core** of BEGV Prop 2" (Prop 2 also
+  carries `B`/`C` + the verification).
+- **8 Beautiful math.** *Exemplar:* `matrixRiccatiCoeff_spectral_sq`'s three-rewrite `← map_mul`
+  collapse — two conjugated diagonals become one conjugated product-of-diagonals, the "why the reduction
+  works" certificate in one line. *Upgrade (MED–HIGH):* make `conjStarAlgAut U (diagonal (riccatiCoeff∘λ))`
+  the **primary** definition (terminal ⇒ `map_zero`, `a·a` ⇒ one-step `map_mul`, ODE ⇒ push the
+  continuous `⋆`-alg-hom through `d/dt`) — the elegant unification the module is 90% toward.
+
+**Upgrades executed this session:** (i) dropped the unused `set … with ha` (lens 6, from the code
+review); (ii) added norm-independence + prose-`tanh` clarity clauses to the §1 docstring — `L∞` is
+MathFin's instance choice, not a mathematical restriction (finite-dim ⇒ norms equivalent ⇒
+norm-independent), and no matrix `tanh` object is built in Lean (lens 7, Panel C); (iii) distilled the
+reusable technique batch into `docs/patterns.md` (spectral reduction, operator-norm matrix `HasDerivAt`,
+`diagonalLinearMap` lift, positive-diagonal collapses, ℕ-vs-ℝ smul trap) in-flight (lens 2/7). **Panel
+suggestion DISSOLVED on adjudication:** the proposed `simpa only [Function.comp_def] using …` fold of the
+`hD` lift (lens 6 checklist) breaks the build — the goal needs `exact` to bridge the operator-norm
+`AddCommGroup` (only *defeq* to the default `Matrix.addCommGroup`), which `simpa`'s syntactic
+post-simp match cannot; reverted, with an in-code comment recording why (the panel lacked the
+instance-defeq context — the exact over-escalation the protocol's adjudication step guards against).
+
+**Refreshed ranked backlog (top):** (1) **[HIGH]** PSD matrix-sqrt existence lemma → "Â constructed" not
+"Â assumed" (retires the sole deferred caveat); (2) **[MED→HIGH]** hoist the L∞ norm-policy instance +
+`matrixRiccatiCoeff_spectral_sq` into a shared matrix prelude before a 2nd matrix consumer lands; (3)
+**[MED]** extract `conj_diagonal_mul` — DRY the conjugated-square collapse (derived twice); (4) **[MED]**
+add `mmMatrixValueCoeff_isHermitian` consuming the orphaned `matrixRiccatiCoeff_isHermitian` (symmetric
+value-function Hessian, M1/M2 parity); (5) **[MED]** `T→∞` matrix ergodic limit; (6) **[LOW]** roadmap
+wording tighten; (7) *(carried)* Appendix-A jump (Brémaud–Jacod) point-process Girsanov; the general 2D
+covariation Itô tower; hoist the private std-normal Gaussian-MGF to a shared home.
+
 ## 2026-07-12 — corpus 330 — continuous first-FTAP frame (meaning 1), DS-shaped for meaning 2
 
 The model-agnostic continuous-market EMM frame (`Foundations/ContinuousMarket` + the `Q = P`

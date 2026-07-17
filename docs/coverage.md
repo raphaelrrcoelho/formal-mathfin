@@ -26,7 +26,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-16, single-asset market-making Riccati):** corpus **333**,
+> **Live status (2026-07-16, multi-asset matrix Riccati follow-on):** corpus **335**,
+> **303 full + 18 wrappers = 321/335 delivery-ready**, 14 reduced cores, 0 placeholders. Two new
+> `full` entries extend market making to the **multi-asset matrix Riccati**
+> (`Foundations/MatrixMarketMakingRiccati`, BEGV Proposition 2): `mf-mm-matrix-riccati` — the abstract
+> matrix Riccati closed form `a(t) = U·diag(riccatiCoeff(λᵢ))·Uᴴ` solving `a'(t) = a(t)·a(t) − Â·Â`
+> for any Hermitian `Â` (**spectral reduction** — no matrix `tanh`, which the pin lacks; the
+> matrix-valued derivative taken under the `L∞` operator norm), and `mf-mm-matrix-value` — its
+> market-making instantiation `A' = 2·A·D₊·A − (γ/2)·Σ` via the `D₊^{±½}` change of variables.
+> **Honest scope**: in `mf-mm-matrix-value`, `Â` enters by its defining relation
+> `Â·Â = γ·(D₊^{½}ΣD₊^{½})` (the matrix-square-root construction of `Â` is out of scope, so the
+> verified content is the change of variables); the `B`/`C` coefficients, the general-`d`
+> value-function verification, and the optimal-control substrate remain deferred follow-ups.
+>
+> **Prior (2026-07-16, single-asset market-making Riccati):** corpus **333**,
 > **301 full + 18 wrappers = 319/333 delivery-ready**, 14 reduced cores, 0 placeholders. Three new
 > `full` entries open optimal **market making** (`Foundations/MarketMakingRiccati`) — the single-asset
 > (`d = 1`) closed-form approximation of Bergault–Evangelista–Guéant–Vieira (arXiv:1810.04383): the
