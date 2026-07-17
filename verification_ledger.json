@@ -2257,6 +2257,13 @@
       "input_hash": "5f15df5f735df38082d42781a3e270377982123583b3a68aac8f266708ba5504",
       "verified_at_commit": "4ca5e6d"
     },
+    "sc-levy-bilinear-pairing": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-07-17",
+      "elapsed_s": 21.9,
+      "input_hash": "84d88679a300495932c8fb3d68e151b2ec4f915d3d12c22bf430f54e761f13bf",
+      "verified_at_commit": "eac2065"
+    },
     "sc-levy-isometry-compensated-simple": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-07-17",
