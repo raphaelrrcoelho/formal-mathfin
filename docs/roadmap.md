@@ -1245,3 +1245,31 @@ backlog. General admissible strategies / NFLVR / the converse (Delbaen–Schache
 
 **Next:** (1) horizon-aware EMM for the Girsanov `Q ≠ P` instance; (2) the discrete general-Ω
 multi-period DMW crown (the nearer FTAP summit); (3) meaning-2 Delbaen–Schachermayer proper.
+
+## phase: jump/Lévy axis opened — the Itô–Lévy isometry, simple integrands (2026-07-17, corpus 335→336)
+
+The first rung of stochastic integration against a compensated Poisson random measure. One `full`
+entry `sc-levy-isometry-compensated-simple`: the Itô–Lévy `L²` isometry for a simple predictable
+integrand over a time×mark grid,
+`𝔼[(∑ⱼ∑ₗ φⱼₗ·Ñ((tⱼ,tⱼ₊₁]×Aₗ))²] = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁−tⱼ)·ν(Aₗ)`. Three new Foundations modules:
+`PoissonRandomMeasure` (the PRM as a hypothesis-bundling structure + the Poisson moments `𝔼[N]=r`,
+`𝔼[N²]=r²+r` gap-filled by a pmf index-shift `(n+1)·c_r(n+1)=r·c_r(n)`, since Mathlib carries the
+Poisson law but not its variance), `PoissonCompensatedIsometryAdapted` (the energy kernel), and
+`PoissonCompensatedIntegralL2` (the grid double-sum). The design mirrors our continuous
+`ito_isometry_discrete` 1:1 but is hand-rolled: Mathlib/Degenne have no marked simple-process object,
+so the `time×mark` double sum is built from scratch.
+
+**The honesty differentiator.** We *prove* what `cgarryZA/LevyStochCalc` (Apache-2.0, cited) states as
+its axiom #6. The PRM independence is one faithful structure field `indep_of_disjoint_region`
+(independent scattering: `N` on any region disjoint from `D` is independent of `N(·,D)`), which
+subsumes disjoint-box and past/future independence and closes *every* cross-term uniformly —
+including the same-time / different-mark pairs a marked integrand produces, which neither a pure
+disjoint-count nor a pure past/future field would.
+
+**Honest scope:** the isometry is proved for SIMPLE integrands (LevyStochCalc's axiom is over general
+`L²` integrands). Deferred, declared: (1) B2 — the dense `L²` extension to a continuous-integral CLM
+(mirroring `ItoIntegralL2Dense`, with the extra mark-dimension π-system), i.e. axiom #6 in full; (2)
+PRM *existence* (their axiom #2) — Mathlib has no PRM substrate, a separate Summit.
+
+**Next:** (1) B2 — the dense CLM extension; (2) the Itô–Lévy *formula* and a jump-FTAP once the
+integral operator exists; (3) upstream the Poisson variance to Mathlib.

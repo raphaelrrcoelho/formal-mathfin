@@ -26,18 +26,25 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-16, multi-asset matrix Riccati follow-on):** corpus **335**,
-> **303 full + 18 wrappers = 321/335 delivery-ready**, 14 reduced cores, 0 placeholders. Two new
-> `full` entries extend market making to the **multi-asset matrix Riccati**
-> (`Foundations/MatrixMarketMakingRiccati`, BEGV Proposition 2): `mf-mm-matrix-riccati` — the abstract
-> matrix Riccati closed form `a(t) = U·diag(riccatiCoeff(λᵢ))·Uᴴ` solving `a'(t) = a(t)·a(t) − Â·Â`
-> for any Hermitian `Â` (**spectral reduction** — no matrix `tanh`, which the pin lacks; the
-> matrix-valued derivative taken under the `L∞` operator norm), and `mf-mm-matrix-value` — its
-> market-making instantiation `A' = 2·A·D₊·A − (γ/2)·Σ` via the `D₊^{±½}` change of variables.
-> **Honest scope**: in `mf-mm-matrix-value`, `Â` enters by its defining relation
-> `Â·Â = γ·(D₊^{½}ΣD₊^{½})` (the matrix-square-root construction of `Â` is out of scope, so the
-> verified content is the change of variables); the `B`/`C` coefficients, the general-`d`
-> value-function verification, and the optimal-control substrate remain deferred follow-ups.
+> **Live status (2026-07-17, jump calculus — the Itô–Lévy isometry):** corpus **336**,
+> **304 full + 18 wrappers = 322/336 delivery-ready**, 14 reduced cores, 0 placeholders. New `full`
+> entry `sc-levy-isometry-compensated-simple` opens the **jump/Lévy axis**: the compensated-Poisson
+> (Itô–Lévy) **L² isometry** for simple predictable integrands over a time×mark grid,
+> `𝔼[(∑ⱼ∑ₗ φⱼₗ·Ñ((tⱼ,tⱼ₊₁]×Aₗ))²] = ∑ⱼ∑ₗ 𝔼[φⱼₗ²]·(tⱼ₊₁−tⱼ)·ν(Aₗ)`
+> (`Foundations/PoissonCompensatedIntegralL2`, kernel `PoissonCompensatedIsometryAdapted`, object
+> `PoissonRandomMeasure`). It **proves what `cgarryZA/LevyStochCalc` (Apache-2.0, cited) states as
+> its axiom #6**: off-diagonal grid pairs vanish by the single independent-scattering PRM field
+> `indep_of_disjoint_region` (different-time and same-time/different-mark, uniformly), and the
+> diagonal is the Poisson second moment `𝔼[Ñ(B)²]=ν̂(B)` — a Mathlib gap-fill via a pmf index-shift
+> `(n+1)·c_r(n+1)=r·c_r(n)`, no exp-series differentiation. **Honest scope**: the dense `L²`
+> extension to a CLM (LevyStochCalc's axiom over *general* integrands) and PRM *existence* (their
+> axiom #2) are declared, deferred follow-ups.
+>
+> **Prior (2026-07-16, multi-asset matrix Riccati):** the two matrix-Riccati `full` entries
+> `mf-mm-matrix-riccati` / `mf-mm-matrix-value` (`Foundations/MatrixMarketMakingRiccati`, BEGV
+> Proposition 2): the spectral-reduction closed form `a(t) = U·diag(riccatiCoeff(λᵢ))·Uᴴ` solving
+> `a'(t) = a(t)·a(t) − Â·Â` and its market-making instantiation `A' = 2·A·D₊·A − (γ/2)·Σ`; the
+> `B`/`C` coefficients, general-`d` value verification, and optimal-control substrate remain deferred.
 >
 > **Prior (2026-07-16, single-asset market-making Riccati):** corpus **333**,
 > **301 full + 18 wrappers = 319/333 delivery-ready**, 14 reduced cores, 0 placeholders. Three new

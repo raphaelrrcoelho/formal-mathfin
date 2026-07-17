@@ -2257,6 +2257,13 @@
       "input_hash": "5f15df5f735df38082d42781a3e270377982123583b3a68aac8f266708ba5504",
       "verified_at_commit": "4ca5e6d"
     },
+    "sc-levy-isometry-compensated-simple": {
+      "benchmark_file": "stochastic_calculus.json",
+      "date": "2026-07-17",
+      "elapsed_s": 69.3,
+      "input_hash": "1073946576ba9ec65d92944289141bb7682f8d9bdb98ba7431357130b86fc05b",
+      "verified_at_commit": "643edb7"
+    },
     "sc-memlp-ito-simple-process": {
       "benchmark_file": "stochastic_calculus.json",
       "date": "2026-07-11",
