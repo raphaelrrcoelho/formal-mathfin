@@ -25,7 +25,7 @@ sources:
     author_contacted: n/a
     prior_work: ""
 status:
-  scope: 338 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 324 delivery-ready (full + library-wrapper).
+  scope: 339 theorems across continuous-time stochastic processes and mathematical finance, built on Mathlib + BrownianMotion; 325 delivery-ready (full + library-wrapper).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms:
@@ -116,8 +116,8 @@ alignment:
       status: full 4 · wrapper 0 · reduced 1 · placeholder 0
       note: per-statement map in docs/coverage.md
     - source: stochastic_calculus (Saporito, Stochastic Processes)
-      lean: 40 statements
+      lean: 41 statements
       module: benchmarks/stochastic_calculus.json
-      status: full 37 · wrapper 0 · reduced 3 · placeholder 0
+      status: full 38 · wrapper 0 · reduced 3 · placeholder 0
       note: per-statement map in docs/coverage.md
 acknowledgements: ""

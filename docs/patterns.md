@@ -807,3 +807,53 @@ The matrix analogue of `a(t) = Â·tanh(Â(T−t))` (BEGV Prop. 2, `MatrixMarket
   spurious noncommutative "Try this: ring_nf" **info** even though the build is kernel-valid).
 - **`Σ` is a reserved token** (Sigma types) — never an identifier; name the covariance `cov`. (Also [[girsanov]]:
   never capital Σ in idents.)
+
+## Extending an isometry to an `L²` closure — `extendOfNorm` into a submodule (2026-07-18 batch)
+
+From the Itô–Lévy integral CLM (`Foundations/PoissonCompensatedIntegralOperator`): building
+`f.extendOfNorm e : Eₗ →L F` where the dense domain `Eₗ` is a *submodule* of the ambient `L²`, not a
+full space. The continuous Itô CLM dodged this by making its codomain a full `Lp` of a bespoke
+trimmed measure; when you instead extend to a `Submodule.topologicalClosure`, these are the traps.
+
+### Target-as-closure makes density soft — no bespoke `σ`-algebra
+- To extend `emb : E →ₗ Lp` by continuity you need `DenseRange`. Rather than characterise which `L²`
+  functions are hit (a from-scratch predictable `σ`-algebra), **define the target as the closure of
+  the range**: `levyClosure := (LinearMap.range emb).topologicalClosure`, `embCorestrict :=
+  emb.codRestrict levyClosure (fun V => Submodule.le_topologicalClosure _ (mem_range_self _ V))`.
+- `DenseRange embCorestrict` is then a *soft* topological fact: `Topology.IsInducing.subtypeVal.dense_iff`
+  reduces it to `↑x ∈ closure (Subtype.val '' range embCorestrict)`; the image is `↑(range emb)`
+  (`← Set.range_comp; rfl`), whose closure is `↑levyClosure` **by construction**
+  (`← LinearMap.coe_range, ← Submodule.topologicalClosure_coe`), and `x.2` finishes. No induction, no
+  `σ`-algebra.
+- v4.31.0 names (loogle misses several — the `Inducing→IsInducing` rename put them under `Topology`):
+  `Topology.IsInducing` / `.subtypeVal` / `.dense_iff`, `Submodule.topologicalClosure_coe`
+  (`↑s.topologicalClosure = closure ↑s`), `LinearMap.coe_range` (NOT `range_coe`),
+  `Submodule.coe_norm` (`‖x‖ = ‖↑x‖`, a `rfl` `simp` lemma), `Submodule.le_topologicalClosure` (takes
+  the submodule explicitly), `denseRange_inclusion_iff`.
+
+### ★ The submodule-codomain instance diamond (and how to bridge it)
+- `extendOfNorm` needs `[SeminormedAddCommGroup Eₗ]`, which derives `Eₗ`'s `AddCommMonoid` via the
+  **`AddCommGroup`** path; a bare `_ →ₗ[ℝ] ↥sub` picks `Submodule.addCommMonoid` (the semiring path).
+  On `↥(Submodule …)` these are defeq (the norm/module instances would not typecheck otherwise) but
+  **not at the transparency the elaborator uses for the explicit `LinearMap` `AddCommMonoid` argument**
+  → a bare `f.extendOfNorm e` fails with an "application type mismatch" on the `AddCommMonoid` slot.
+  `set_option backward.isDefEq.respectTransparency false` does **not** help.
+- **Bridge for a `def`**: state it as a tactic block and let the *goal type* pin the instances —
+  `refine LinearMap.extendOfNorm (E := ↥Src) (F := Cod) f ?_; exact e`. The CLM goal
+  `Eₗ →L[ℝ] F` fixes `Eₗ = ↥levyClosure` with its seminormed-group instances, so `exact e` is a single
+  cheap `isDefEq` at default transparency. (`f.extendOfNorm (by exact e)` alone is "stuck, goal has
+  metavariables" — `E` isn't pinned yet inside the argument.)
+- **Bridge for the downstream norm lemma**: `unfold <thedef>` to expose the def's *already-bridged*
+  `extendOfNorm` term, then `exact norm_extendOfNorm_eq_of_isometry hdense key H` — but the lemma app
+  re-triggers the diamond `whnf`, which is heavy-but-**finite** (~50 s), so wrap the theorem in
+  `set_option maxHeartbeats 1000000 in`. `key : ∀ V, ‖f V‖ = ‖e V‖` via `rw [Submodule.coe_norm]`
+  (drop the subtype norm to the ambient one) `; exact <the isometry on the dense range>`.
+
+### Workflow: relocating a lemma restales its whole transitive importer set
+- The jump tower must not import `WienerIntegral` (it pulls in `BrownianMotion`), so the shared kernel
+  `norm_extendOfNorm_eq_of_isometry` was lifted into a new `Mathlib`-only leaf
+  `Foundations/ExtendOfNormIsometry.lean`, re-imported (and re-exported) by `WienerIntegral` and
+  imported by the operator file. **Cost**: changing `WienerIntegral`'s *source* restaled **every**
+  ledger entry that transitively imports it (the whole Itô/finance chain — 36 entries, a ~50-min
+  daemon `ledger verify`). Lift-to-a-shared-leaf is the right call for a genuinely generic kernel, but
+  budget the re-verify; if the tree is hot and the lemma is one-off, keeping it local is cheaper.

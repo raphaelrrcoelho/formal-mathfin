@@ -84,6 +84,7 @@ import MathFin.Foundations.OptionalSamplingInequality
 import MathFin.Foundations.LpContinuousMartingaleConvergence
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
+import MathFin.Foundations.ExtendOfNormIsometry
 import MathFin.Foundations.WienerIntegral
 import MathFin.Foundations.WienerIntegralL2
 import MathFin.Foundations.WienerIntegralGaussian

@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.BrownianMotion
+public import MathFin.Foundations.ExtendOfNormIsometry
 
 /-!
 # Wiener integral — Itô isometry kernel
@@ -130,28 +131,3 @@ theorem wiener_finset_isometry
 end IsPreBrownianReal
 
 end MathFin
-
-namespace LinearMap
-
-variable {𝕜 𝕜₂ E Eₗ F : Type*}
-  [NormedDivisionRing 𝕜] [NormedDivisionRing 𝕜₂] {σ₁₂ : 𝕜 →+* 𝕜₂}
-  [AddCommGroup E] [SeminormedAddCommGroup Eₗ] [NormedAddCommGroup F]
-  [Module 𝕜 E] [Module 𝕜₂ F] [IsBoundedSMul 𝕜₂ F] [Module 𝕜 Eₗ] [IsBoundedSMul 𝕜 Eₗ]
-  [CompleteSpace F]
-  {f : E →ₛₗ[σ₁₂] F} {e : E →ₗ[𝕜] Eₗ}
-
-/-- If `e` has dense range and `f` is a pointwise isometry along `e`
-(`‖f x‖ = ‖e x‖`), then the `extendOfNorm` extension of `f` along `e` is a global
-isometry `‖f.extendOfNorm e y‖ = ‖y‖`. The shared kernel of the Wiener,
-Itô-CLM, and predictable-Itô L² isometries. -/
-theorem norm_extendOfNorm_eq_of_isometry
-    (h_dense : DenseRange e) (h_isom : ∀ x, ‖f x‖ = ‖e x‖) (y : Eₗ) :
-    ‖f.extendOfNorm e y‖ = ‖y‖ := by
-  have h_on_range : ∀ x, ‖f.extendOfNorm e (e x)‖ = ‖e x‖ := fun x ↦ by
-    rw [LinearMap.extendOfNorm_eq h_dense ⟨1, fun z ↦ by rw [one_mul]; exact (h_isom z).le⟩,
-        h_isom]
-  exact h_dense.induction_on (p := fun z ↦ ‖f.extendOfNorm e z‖ = ‖z‖) y
-    (isClosed_eq (continuous_norm.comp (f.extendOfNorm e).continuous) continuous_norm)
-    h_on_range
-
-end LinearMap

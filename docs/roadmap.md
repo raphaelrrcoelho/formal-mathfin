@@ -1286,3 +1286,49 @@ reusable for the PRM's own filtration.
 **Next:** (1) the CLM operator (overlapping-box kernel + marked-predictable density); (2) the
 Itô–Lévy *formula* and a jump-FTAP once the operator exists; (3) upstream the Poisson variance to
 Mathlib.
+
+## phase: the Itô–Lévy integral CLM — axiom #6 in full generality (2026-07-18, corpus 336→339)
+
+The compensated-Poisson stochastic integral is now a **continuous linear operator on its full `L²`
+closure**, an isometry — `cgarryZA/LevyStochCalc`'s cited **axiom #6 in full generality**, closing the
+dense-extension Summit the simple-integrand rungs declared. Three new `full` entries land the two
+rungs the prior *Next* called for.
+
+**Rung 2 — the overlapping-box bilinear kernel** (`sc-levy-bilinear-pairing`,
+`Foundations/PoissonCompensatedBilinear`): `𝔼[(φa·Ñ(boxa))(φb·Ñ(boxb))] = 𝔼[φa·φb]·ν̂(boxa∩boxb)` for
+past-adapted bounded weights over general overlapping space-time boxes — the jump analogue of the
+Brownian `rect_increment_pairing`, the inner-product core an isometry sums over. Built on a master
+weighted-future pairing that generalizes the `φ≡1` covariance (`Ñ` is an orthogonal martingale
+measure). **Design win**: the whole pairing rests on the *single* `indep_of_disjoint_region` field —
+no past⟂future `σ`-algebra — and that same independence *buys* the triple-product integrability, so
+bounded / `L²` weights suffice.
+
+**Rung 3 — the operator and its isometry** (`sc-levy-integral-clm-isometry`,
+`Foundations/PoissonCompensatedSimpleIntegrand` + `PoissonCompensatedIntegralOperator`). The source is
+`levySimpleModule`, the marked simple integrands `∑_b φ_b·𝟙_{(s,t]×A}` encoded as a `Finsupp`
+**submodule** — adaptedness / finite-mark / boundedness are `+`/`•`/`0`-closed, so no bespoke `Module`
+boilerplate (Degenne hand-built the Brownian `SimpleProcess` instances). Two `L²` embeddings
+`intAssembly` (into `L²(P)`) and `emb` (into `L²(dP⊗dν̂)`) have equal norm (`assembly_isometry`) —
+both squared norms expand into the *same* box-family double sum, equated term-by-term by the rung-2
+pairing (compensated side) and Fubini (integrand side). Then `itoLevyIntegralL2 : levyClosure N →L[ℝ]
+L²(P)` via `LinearMap.extendOfNorm`, and `‖itoLevyIntegralL2 H‖ = ‖H‖` on the whole closure.
+
+**The Summit dissolved, not climbed.** The prior *Next* flagged a *from-scratch marked-predictable
+`σ`-algebra + density* as "a genuine Summit". We sidestepped it: define the operator's domain **as**
+`topologicalClosure(range emb)`, so density is a soft `Topology.IsInducing.subtypeVal.dense_iff` fact
+(the range's ambient closure *is* the target by construction). The continuous Itô CLM paid for a
+bespoke trimmed measure to get a *characterised* predictable `L²`; the isometry-extension needs only
+the closure, and gets it for free.
+
+**Two engineering notes worth the record.** (a) `extendOfNorm` into a submodule codomain hits a
+`Submodule.addCommMonoid` vs seminormed-group `AddCommMonoid` instance diamond; bridge the `def` with
+`refine LinearMap.extendOfNorm (E:=)(F:=) f ?_; exact e` (the CLM goal type pre-pins the normed
+instances so `exact` is one cheap `isDefEq`) and the norm theorem with `unfold` + a raised
+`maxHeartbeats` (see `docs/patterns.md`). (b) The generic isometry kernel
+`norm_extendOfNorm_eq_of_isometry` was lifted out of `WienerIntegral.lean` into a `Mathlib`-only leaf
+`Foundations/ExtendOfNormIsometry.lean` (now shared by the Wiener, Itô, and Lévy towers) — a clean
+single home whose one-time cost was restaling the whole Itô-chain ledger (its transitive importers).
+
+**Next:** PRM *existence* (LevyStochCalc's axiom #2 — Mathlib has no PRM substrate) is the remaining
+Summit; then the Itô–Lévy *formula* and a jump-FTAP become reachable; upstream the Poisson variance to
+Mathlib.

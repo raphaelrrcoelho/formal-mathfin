@@ -17,7 +17,7 @@
 > what is proved and what is assumed, and the deep connections between the field's pillars made
 > *load-bearing* rather than decorative.
 
-**`335` theorems · `321` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
+**`339` theorems · `325` delivery-ready · `0` sorries · axioms-clean · `lake build` is the proof.**
 
 ---
 
@@ -96,9 +96,9 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 
 | | |
 |---|---:|
-| theorems (machine-checked) | **335** |
-| delivery-ready (`full` + `library_wrapper`) | **321** |
-| full derivations | 303 |
+| theorems (machine-checked) | **339** |
+| delivery-ready (`full` + `library_wrapper`) | **325** |
+| full derivations | 307 |
 | reduced cores (honest special cases) | 14 |
 | placeholders / sorries | **0** |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
@@ -153,15 +153,18 @@ A breadth-and-depth library across eleven areas. Headlines per area (full per-th
 - **Risk measures** — Gaussian VaR/CVaR closed forms, the coherent (ADEH) axioms + **the representation
   as a sup over measures**, spectral measures, Rockafellar–Uryasev, Herfindahl–Hirschman.
 - **Stochastic foundations** — the **Itô tower** (from-scratch L² integral, isometry, quadratic
-  variation, Itô's formula), the **FTAP tower** (finite-Ω multi-period, general-Ω one-period, d-asset),
-  static Girsanov, Feynman–Kac, and **the convex-duality unification**.
+  variation, Itô's formula) and its jump analogue, the **compensated-Poisson (Itô–Lévy) integral** (the
+  stochastic integral against a compensated Poisson random measure, built to an L²-isometric continuous
+  linear operator — proving `cgarryZA/LevyStochCalc`'s cited axiom #6 in full generality), the **FTAP
+  tower** (finite-Ω multi-period, general-Ω one-period, d-asset), static Girsanov, Feynman–Kac, and
+  **the convex-duality unification**.
 - **Actuarial & DeFi** — Gompertz mortality, annuities, net premium; constant-product (Uniswap-v2) AMMs.
 
 ## Scope: what's not done
 
 Honesty is the point, so the gaps are explicit:
 
-- **15 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
+- **14 `reduced_core` entries** — special cases or algebraic/structural cores whose fully general form is
   not yet formalized (the 2-D Itô formula, Lévy's characterisation, the fully-general
   `L²`/progressive Girsanov under Novikov, some Markov/Poisson cores). Tracked per-entry in [`docs/coverage.md`](docs/coverage.md).
 - **SDE existence + uniqueness** — existence is the Picard fixed point in the predictable `L²` space `E` (conditional on the small-horizon contraction); **uniqueness (Theorem 8.2.5) is now `full`**, derived via the `L²`-energy Grönwall argument (`IsL2SolutionPair.uniqueness`).
