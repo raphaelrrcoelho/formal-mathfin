@@ -857,3 +857,55 @@ trimmed measure; when you instead extend to a `Submodule.topologicalClosure`, th
   ledger entry that transitively imports it (the whole Itô/finance chain — 36 entries, a ~50-min
   daemon `ledger verify`). Lift-to-a-shared-leaf is the right call for a genuinely generic kernel, but
   budget the re-verify; if the tree is hot and the lemma is one-off, keeping it local is cheaper.
+
+## Statement design (for the formalizer / drafter) (2026-07-18)
+
+The drafter's job is a faithful, in-depth *statement* — the hardest failures are
+not proof failures but statement failures. Design for these before writing `:= by
+sorry`.
+
+- **Shape hard side-conditions to be inherited, not asserted.** When the object is
+  a limit/closure, define it inside a class closed under the operation so the
+  condition is free: `levyClosure := (LinearMap.range emb).topologicalClosure` makes
+  `DenseRange` a soft `IsInducing.subtypeVal.dense_iff` fact — no bespoke σ-algebra.
+  Carve a `Submodule` (carrier + three closure proofs) rather than a `structure` +
+  `Module` instance. Diagonalize a matrix problem so the ODE reduces to the scalar
+  lemma. A draft that instead *asserts* the side-condition as a new hypothesis is
+  the wrong shape.
+- **Casts go outward around lattice/arith ops** to match library normal form:
+  `↑(min p t)`, not `min ↑p ↑t` — a coe-inward statement fails to unify downstream,
+  and a co-occurring "stuck metavariable" is a *symptom* of the cast mismatch, not a
+  separate problem. Fix the cast, not the instance.
+- **Name derived measures/σ-algebras** (`trimMeasure_T`, a predictable σ-algebra) as
+  defs; never inline `(P.trim …)` in a statement — the inlined form carries a
+  σ-algebra-instance mismatch the named def avoids.
+- **State Lp-class facts in `=ᵐ`/`condExp` form, not pointwise.** For a process whose
+  value is an Lp class, honest pointwise `Adapted` is awkward; the conditional-
+  expectation identity is the real content and it elaborates.
+- **State shared hypotheses in the eta-form the consumers want** (`fun ω ↦ B t ω - B s
+  ω`, not Pi-`sub`), so a defeq `exact` propagates instead of a rewrite failing.
+- **Don't quantify integrals over `↥Submodule`** — instance synthesis (`BorelSpace
+  ↥K`) fails; stay in the ambient space with subset/membership hypotheses.
+- **Natural generality** (already in the drafter contract, restated here): `s.Nonempty`
+  over a member-witness; `A ≠ 0` over provable positivity; the minimal typeclass the
+  callees need.
+
+## Repair table (compiler error → fix) (2026-07-18)
+
+The recurring error→fix mappings from the grind history. Try the mapped fix before
+a general search; most are one-line and defeq-driven.
+
+| Error signature | Fix |
+|---|---|
+| "did not find an occurrence" / "made no progress" with `(fun … ↦ …) x` or a Pi-`+`/`-`/`*` of lambdas in the goal | `show` the beta-reduced goal / `simp only []`; or type-annotate the `have` with the single-lambda form. Diagnose a stuck `convert` with `exact h`. |
+| Unknown identifier `X` | grep the **pinned** `.lake/packages/mathlib` for `X` and `Namespace.X` (loogle tracks a newer pin — upper bound only); if a sibling edited this session declares `X`, it's stale-olean: rebuild, don't respell. |
+| "typeclass instance problem is stuck `C args ?m.N`" | name the implicit at the call site (`(μ := μ)`), `@`-apply, or bind a fully-typed `have` first. |
+| "Function expected at `zero_le` … type `0 ≤ ?m`" | drop the applied argument, use the bare term; toggle the primed/unprimed variant. |
+| "unexpected token 'omit'/'set_option'; expected 'lemma'" | move the `… in` modifier **above** the docstring. |
+| mass "unknown namespace MeasureTheory" in a file importing a just-edited sibling | stale olean — rebuild the dep; do not edit the proof. |
+| Type mismatch of `Measurable`/`AEStronglyMeasurable` differing only in the `MeasurableSpace` instance | drop the explicit type annotation (let it infer the sub-σ), or `letI`-pin it. |
+| "Invalid field `f`" on an `And`/`Exists`/def-reducing-to-`And` | call `Namespace.f h …` by full name, or `obtain ⟨…⟩` first. |
+| "No goals to be solved" | delete the trailing tactic (cascade after a root error — fix only the first). |
+| "Ambiguous term X" (`intervalIntegral` vs `MeasureTheory`) | qualify by the goal's integral syntax. |
+| "failed to synthesize `LE Type`/`OfNat Type`" | `ℝ≥0` misparsed as `ℝ ≥ 0` — add `open scoped NNReal`; `𝓝` → `open Topology`. |
+| cast mismatch inside a `fun n : ℕ ↦ …` | put the ℕ-consuming atom leftmost, or ascribe the binder; write `(2:ℝ) •`, never `2 •`. |
