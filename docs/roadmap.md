@@ -1332,3 +1332,26 @@ single home whose one-time cost was restaling the whole Itô-chain ledger (its t
 **Next:** PRM *existence* (LevyStochCalc's axiom #2 — Mathlib has no PRM substrate) is the remaining
 Summit; then the Itô–Lévy *formula* and a jump-FTAP become reachable; upstream the Poisson variance to
 Mathlib.
+
+## program: HJM interest-rate models — ratified, keystone = a cross-tower stochastic Fubini (2026-07-18)
+
+The next depth axis is the **Heath–Jarrow–Morton drift condition**: the discounted zero-coupon bond
+`P(·,T)/B(·)` is a `Q`-martingale for every maturity iff `α(t,T) = σ(t,T) ∫_t^T σ(t,u) du` — the forward-rate
+drift pinned entirely by its own volatility. Ambition is the **full landmark**: the bond dynamics are
+*derived*, nothing assumed. Design ratified in `docs/hjm-program.md`; tracked in #138 (children #139–#158).
+
+**The axis is not HJM, it is a shared primitive.** The interchange the whole result rests on —
+`∫_t^T (∫₀ᵗ σ(s,u) dW_s) du = ∫₀ᵗ (∫_t^T σ(s,u) du) dW_s` — is "an integral-CLM commutes with a Bochner
+parameter-integral", i.e. Mathlib's `ContinuousLinearMap.integral_comp_comm` instantiated at each tower's
+integral CLM (`wienerIntegralLp`, `itoIntegralCLM_T`, `itoLevyIntegralL2`). The shared `extendOfNorm`/CLM
+abstraction that already unified the Wiener, Itô, and Lévy towers is exactly what makes Fubini cheap — the
+same *"the Summit dissolved, not climbed"* move as the Lévy CLM. Built once, it also unblocks the Lévy
+term-structure (#132, #133) and a Vasicek integrated-rate refactor. One genuinely analytic leaf remains: the
+L²-representative lemma (#141).
+
+**Atomic path (20 issues, 6 tiers):** stochastic Fubini (#140–#145) → log-bond dynamics (#146–#148) →
+bond / discounted-bond dynamics (#149–#150) → the drift condition #152 (crown) and #154 (iff) → the bridges,
+Ho–Lee #156 and the Vasicek/Hull–White seam #157. Musiela (#158) is a deferred SPDE summit (placeholder).
+
+**Next:** the keystone `F1 → F2 → F3` (#140 → #141 → #142) — the terminal Itô Fubini every downstream tier
+waits on. `F1` is a near-free wrap; `F2` is the one hard leaf.
