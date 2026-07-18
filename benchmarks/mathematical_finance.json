@@ -3720,6 +3720,35 @@
         "formalization_status": "full",
         "formalization_scope": "Full formal proof re-exported from MathFin. Verifies A(t)=½·D₊^{-½}·matrixRiccatiCoeff·D₊^{-½} solves the market-making matrix Riccati A'=2·A·D₊·A−(γ/2)·cov, with D₊=diagonal d positive and Â Hermitian satisfying Â·Â=γ·(D₊^{½}·cov·D₊^{½}) — Â enters by this defining relation (the matrix-square-root construction of Â is out of scope, so the verified content is the change of variables). The optimal-control substrate and the B/C coefficients are out of scope. Axioms-clean."
       }
+    },
+    {
+      "id": "mf-fixedincome-swap",
+      "name": "Formalize the vanilla interest-rate swap value and par swap rate S = (P(0,T₀)−P(0,Tₙ))/(δ·Σ P(0,Tᵢ))",
+      "description": "Vanilla interest-rate swap: annuity, payer-swap value, par swap rate, and the par identity over the zcb curve.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.FixedIncome.InterestRateSwap\n\nopen MathFin\n\n/-- Vanilla interest-rate swap par identity on the zcb curve: with a positive daycount and a nonempty payment schedule, the payer swap is worth zero iff the fixed rate is the par swap rate. -/\ntheorem mf_fixedincome_swap {ι : Type*} (r δ K T0 Tn : ℝ) (T : ι → ℝ) (s : Finset ι)\n    (hδ : 0 < δ) (hs : s.Nonempty) :\n    payerSwapValue (zcb r 0 T0) (zcb r 0 Tn) K (annuity δ (fun i ↦ zcb r 0 (T i)) s) = 0 ↔\n      K = parSwapRate (zcb r 0 T0) (zcb r 0 Tn) (annuity δ (fun i ↦ zcb r 0 (T i)) s) :=\n  MathFin.payerSwapValue_zcb_eq_zero_iff r δ K T0 Tn T s hδ hs\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Formalize the vanilla interest-rate swap value and par swap rate S = (P(0,T₀)−P(0,Tₙ))/(δ·Σ P(0,Tᵢ))",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/FixedIncome/InterestRateSwap.lean (magistral-drafted statement, leanstral proof, human-refined at review). The par identity payerSwapValue = 0 ↔ K = parSwapRate is proved abstractly for any nonzero annuity (payerSwapValue_eq_zero_iff) and instantiated on the zcb curve with positivity discharged by zcb_pos + annuity_pos rather than assumed. Re-export from MathFin. Axioms-clean. Introduces definitions: annuity, payerSwapValue, parSwapRate (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 66,
+          "new_defs": [
+            "annuity",
+            "payerSwapValue",
+            "parSwapRate"
+          ],
+          "refined": "statement generalized at review: abstract A ≠ 0 core + zcb corollary; lint-clean names + docstrings; unused hypotheses and imports removed"
+        }
+      }
     }
   ]
 }

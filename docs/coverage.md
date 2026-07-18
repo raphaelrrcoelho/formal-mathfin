@@ -26,7 +26,20 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-18, jump calculus — the Itô–Lévy integral CLM):** corpus **339**,
+> **Live status (2026-07-18, first refined autoform PR — the vanilla swap par identity):** corpus
+> **340**, **308 full + 18 wrappers = 326/340 delivery-ready**, 14 reduced cores, 0 placeholders.
+> `mf-fixedincome-swap` (`FixedIncome/InterestRateSwap`, closes #66; the first autoform-pipeline PR
+> to land — Leanstral-drafted and -proved, human-refined at review): the **par identity**
+> `payerSwapValue P₀ Pₙ K A = 0 ↔ K = parSwapRate P₀ Pₙ A`, proved abstractly for any nonzero
+> annuity (`payerSwapValue_eq_zero_iff`, a two-rewrite `sub_eq_zero`/`eq_div_iff` certificate) and
+> instantiated on the `zcb` curve (`payerSwapValue_zcb_eq_zero_iff`) where positivity is discharged
+> by `zcb_pos` + `annuity_pos` — assumed nowhere. New defs `annuity` (`A = δ·∑ P(0,Tᵢ)` — the
+> numéraire slot `blackPayerSwaption` consumes), `payerSwapValue`, `parSwapRate`. The refinery diff
+> vs the drafted statement: derivable positivity hypothesis dropped, member-witness binders replaced
+> by `s.Nonempty`, flat-curve specialization demoted from theorem to corollary, snake_case def names
+> and missing docstrings fixed (the classes the pipeline now gates itself).
+>
+> **Prior (2026-07-18, jump calculus — the Itô–Lévy integral CLM):** corpus **339**,
 > **307 full + 18 wrappers = 325/339 delivery-ready**, 14 reduced cores, 0 placeholders. The
 > **jump/Lévy axis** now carries the compensated-Poisson (Itô–Lévy) stochastic integral all the way
 > to a continuous linear operator and its `L²` isometry — **`cgarryZA/LevyStochCalc`'s (Apache-2.0,
