@@ -156,7 +156,7 @@ Docker notes:
   < MathFin.lean`) or restart the service. And never `| tail` a build
   log you are diagnosing — the first error is the diagnostic one.
 - Both Lean services default to `cpuset 0-3` (4 Lake workers) and
-  `mem_limit 6g`: this host gives WSL ~8 GB and uncapped Lean runs froze
+  `mem_limit 6g`: this host gives WSL ~10 GB (the Memory-doctrine cap) and uncapped Lean runs froze
   the machine. A runaway elaboration OOM-kills the container (exit 137,
   the backend respawns) instead of the host. Widen on bigger machines
   via `VERIFY_CPUSET=0-7`.
