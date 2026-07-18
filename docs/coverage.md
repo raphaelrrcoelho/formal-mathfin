@@ -26,7 +26,22 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-18, second refined autoform PR — loaded premium principles):** corpus
+> **Live status (2026-07-18, in-out barrier parity — closes #53):** corpus
+> **342**, **310 full + 18 wrappers = 328/342 delivery-ready**, 14 reduced cores, 0 placeholders.
+> `mf-barrier-inout-parity` (`BlackScholes/BarrierParity`, closes #53): knock-in / knock-out
+> **in-out parity** `V_in + V_out = V_vanilla` — the barrier-hit event `A` and its complement
+> partition every path, so the discounted expected payoffs add to the vanilla price (pure
+> linearity of expectation; no barrier density, in the register of `chooser_integral_decomp`).
+> The proof lifts the pathwise payoff split `barrier_payoff_partition`
+> (`𝟙_A·f + 𝟙_{Aᶜ}·f = f`, `Set.indicator_self_add_compl`) through `integral_indicator` +
+> `integral_add_compl`. New def `discountedValue D Q g = D·E_Q[g]` — the present-value functional
+> the pricing files had only ever written inline, now named so the three barrier values
+> (`knockInValue` / `knockOutValue` / `vanillaValue`) are thin specialisations and parity reads as
+> an identity about *values*. Axioms-clean. Provenance: the target the autoform pipeline repeatedly
+> failed to draft (depth-gate, then a hallucinated `MathFin.zcb`); authored by hand as the
+> bottleneck-locating control.
+>
+> **Prior (2026-07-18, second refined autoform PR — loaded premium principles):** corpus
 > **341**, **309 full + 18 wrappers = 327/341 delivery-ready**, 14 reduced cores, 0 placeholders.
 > `mf-insurance-premium-principles` (`Actuarial/ActuarialInsurance`, closes #85; the second
 > autoform-pipeline PR — the generalization run's output, Leanstral-drafted and -proved,

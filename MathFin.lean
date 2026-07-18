@@ -262,6 +262,7 @@ import MathFin.BlackScholes.Chooser
 import MathFin.BlackScholes.CappedCall
 import MathFin.BlackScholes.Spreads
 import MathFin.BlackScholes.Lookback
+import MathFin.BlackScholes.BarrierParity
 import MathFin.BlackScholes.PowerOption
 import MathFin.BlackScholes.BreedenLitzenberger
 import MathFin.BlackScholes.BisectionIV
