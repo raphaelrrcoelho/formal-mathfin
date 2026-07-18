@@ -26,7 +26,22 @@ Report `reduced_core` and `placeholder` separately. **Spec-with-axiomatized-conc
 
 ## Current Audit
 
-> **Live status (2026-07-18, first refined autoform PR — the vanilla swap par identity):** corpus
+> **Live status (2026-07-18, second refined autoform PR — loaded premium principles):** corpus
+> **341**, **309 full + 18 wrappers = 327/341 delivery-ready**, 14 reduced cores, 0 placeholders.
+> `mf-insurance-premium-principles` (`Actuarial/ActuarialInsurance`, closes #85; the second
+> autoform-pipeline PR — the generalization run's output, Leanstral-drafted and -proved,
+> human-refined at review): the three classical **loaded premium principles** — expected-value
+> `(1+θ)·μ`, variance `μ + α·σ²`, standard-deviation `μ + β·σ` — each with its own named
+> nonnegative-loading bound (`expectedValuePremium_ge_mean` via `le_mul_of_one_le_left`,
+> `variancePremium_ge_mean` / `stdDevPremium_ge_mean` via one-term `mul_nonneg` certificates), and
+> the bundle `premium_ge_mean` assembled from them. The loadings sit on top of the net premium of
+> `Actuarial/Insurance.lean` (prose seam; the net-premium algebra there is Mathlib's `eq_div_iff`
+> consumed directly, same certificate family as the swap par identity). Refinery diff vs the draft:
+> signature-bound def arguments + docstrings (the `docBlame` red), the never-used coupling
+> hypothesis `hσ_eq : σ = √σ²` dropped, the unused `Insurance` import dropped, per-principle lemmas
+> extracted so the bundle is a `⟨…, …, …⟩` of certificates rather than three `nlinarith` calls.
+>
+> **Prior (2026-07-18, first refined autoform PR — the vanilla swap par identity):** corpus
 > **340**, **308 full + 18 wrappers = 326/340 delivery-ready**, 14 reduced cores, 0 placeholders.
 > `mf-fixedincome-swap` (`FixedIncome/InterestRateSwap`, closes #66; the first autoform-pipeline PR
 > to land — Leanstral-drafted and -proved, human-refined at review): the **par identity**
