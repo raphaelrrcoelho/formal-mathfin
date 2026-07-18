@@ -228,7 +228,7 @@ G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 ## 7. Module layout
 
 ```
-MathFin/Foundations/StochasticFubini.lean          -- F1, F2
+MathFin/Foundations/StochasticFubini.lean          -- F1 (stochFubini_ofCLM + its L²-representative step)
 MathFin/Foundations/StochasticFubiniIto.lean        -- F3, F4  (+ F5 Wiener instance)
 MathFin/Foundations/StochasticFubiniLevy.lean       -- F6      (near the Lévy operator)
 MathFin/FixedIncome/HJM/Model.lean                  -- H0
