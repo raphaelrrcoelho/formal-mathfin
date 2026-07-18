@@ -3749,6 +3749,35 @@
           "refined": "statement generalized at review: abstract A ≠ 0 core + zcb corollary; lint-clean names + docstrings; unused hypotheses and imports removed"
         }
       }
+    },
+    {
+      "id": "mf-insurance-premium-principles",
+      "name": "Formalize the classical loaded premium principles (expected-value, variance, standard-deviation) and their nonnegative-loading bounds",
+      "description": "Classical loaded premium principles and their nonnegative-loading bounds: each prices at or above the pure premium.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Actuarial.ActuarialInsurance\n\nopen MathFin\n\n/-- The three classical loaded premium principles with nonnegative loadings price at or above the pure premium (the mean loss). -/\ntheorem mf_insurance_premium_principles (μ σ2 σ θ α β : ℝ) (hμ : 0 ≤ μ) (hσ2 : 0 ≤ σ2)\n    (hσ : 0 ≤ σ) (hθ : 0 ≤ θ) (hα : 0 ≤ α) (hβ : 0 ≤ β) :\n    expectedValuePremium θ μ ≥ μ ∧ variancePremium α μ σ2 ≥ μ ∧ stdDevPremium β μ σ ≥ μ :=\n  MathFin.premium_ge_mean μ σ2 σ θ α β hμ hσ2 hσ hθ hα hβ\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Formalize the classical loaded premium principles (expected-value, variance, standard-deviation) and their nonnegative-loading bounds",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Actuarial/ActuarialInsurance.lean (magistral-drafted statement, leanstral proof, human-refined at review). Each principle carries its own named bound (expectedValuePremium_ge_mean, variancePremium_ge_mean, stdDevPremium_ge_mean — one-term mul_nonneg certificates); premium_ge_mean bundles them. Re-export from MathFin. Axioms-clean. Introduces definitions: expectedValuePremium, variancePremium, stdDevPremium (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 85,
+          "new_defs": [
+            "expectedValuePremium",
+            "variancePremium",
+            "stdDevPremium"
+          ],
+          "refined": "signature-bound def arguments + docstrings (docBlame); unused hσ_eq hypothesis and unused Insurance import removed; per-principle lemmas extracted, bundle derived from them"
+        }
+      }
     }
   ]
 }

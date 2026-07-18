@@ -437,3 +437,4 @@ import MathFin.Actuarial.SurvivalModel
 -- Foundations/LpContinuousMartingaleConvergence imports Degenne's DoobLp).
 import BrownianMotion.StochasticIntegral.LocalMartingale
 import MathFin.FixedIncome.InterestRateSwap
+import MathFin.Actuarial.ActuarialInsurance

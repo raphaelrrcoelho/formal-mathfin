@@ -1473,6 +1473,13 @@
       "input_hash": "854b85e2bba65ee66575a3584c4198711341496a0e98b8a46e204bc7c1039329",
       "verified_at_commit": "4ca5e6d"
     },
+    "mf-insurance-premium-principles": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-18",
+      "elapsed_s": 3.7,
+      "input_hash": "c6576ab712d21ef7ec14885e128006dc0280cba345f385919e30ae728c1025c5",
+      "verified_at_commit": "unknown"
+    },
     "mf-integral-log-forward": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-11",
