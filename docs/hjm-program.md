@@ -106,18 +106,26 @@ and Lévy towers (`Foundations/ExtendOfNormIsometry.lean`):
 | Itô | `itoIntegralCLM_T : L²(predictable) →L[ℝ] Lp ℝ 2 μ` | `ItoIntegralCLM` |
 | Lévy | `itoLevyIntegralL2 : levyClosure N →L[ℝ] Lp ℝ 2 P` | `PoissonCompensatedIntegralOperator` |
 
-So stochastic Fubini decomposes into **one general leaf + one genuine analytic
-lemma + three one-line instances**:
+So stochastic Fubini is **one tower-agnostic primitive + one-line instances** —
+not a wrapper leaf plus a separate lemma. The primitive bundles the commute with
+its only non-trivial obligation:
 
 ```
-∫_A I(φ(·,u)) dμ(u) = I(∫_A φ(·,u) dμ(u))       for I ∈ {Wiener, Itô, Lévy}
+stochFubini_ofCLM (I : L²(m) →L[ℝ] L²(P)) (φ : A → L²(m)) (hφ : Integrable φ μ) :
+    ∫_A I(φ u) dμ(u) = I(fun s ↦ ∫_A φ u s dμ(u))       -- I ∈ {Wiener, Itô, Lévy}
 ```
 
-where `I(φ(·,u))` is the tower's integral of the `u`-slice, and the identity is
-`integral_comp_comm` at `L := I`. The only non-trivial obligation is the
-**L²-representative lemma**: the `L²`-valued Bochner integral `∫_A [φ(·,u)] dμ(u)`
-is represented pointwise by `s ↦ ∫_A φ(s,u) du` (needed on both sides). This is
-tower-agnostic and general — not an HJM artefact.
+Its proof is `integral_comp_comm` *inline* (no named wrapper) plus the one genuine
+analytic step, the **L²-representative fact**: the Bochner integral
+`∫_A [φ(·,u)] dμ(u)` in `L²(m)` is represented a.e. by `s ↦ ∫_A φ(s,u) du` (loogle
+Mathlib first — `integral_integral_swap` may already give it). Two deliberate
+non-choices keep it elegant: **no** `clm_comm_paramIntegral` wrapper (renaming a
+single Mathlib lemma is the avoid-wrapper anti-pattern — folded inline), and
+**no** `StochasticIntegralTower` typeclass (`I` as an explicit CLM argument is
+already maximal generality; a class would bundle an isometry the theorem never
+uses). The hypothesis `Integrable φ μ = ∫_A ‖φ(·,u)‖_{L²} dμ(u) < ∞` is the sharp
+Veraar condition, and on a finite maturity interval `A=[t,T]` follows from joint
+square-integrability by Cauchy–Schwarz — so no generality is lost.
 
 This is the same move as the Lévy roadmap's *"the Summit dissolved, not climbed"*:
 the shared abstraction that already exists is exactly what makes the hard theorem
@@ -135,7 +143,8 @@ cheap. **Consumers beyond HJM:**
 `ito_formula_expBrownian` (Itô-for-exp, `Foundations/ItoFormulaGBM`); the
 martingale ⇔ zero-drift core; the three tower CLMs; FTC/Leibniz calculus.
 
-**Genuinely new:** (a) the L²-representative lemma; (b) the process/pathwise lift
+**Genuinely new:** (a) the L²-representative fact inside `stochFubini_ofCLM` (its
+one analytic step, possibly already in Mathlib); (b) the process/pathwise lift
 onto `ItoIntegralProcess`; (c) the moving-boundary stochastic-Leibniz assembly
 (where `r(t)` emerges); (d) the drift-condition assembly; (e) the bridges.
 
@@ -148,7 +157,7 @@ be tightened iteratively — each node declares what it assumes.
 ## 6. The atomic issue DAG
 
 ```
-H0 ─┬─► F1 ─► F2 ─► F3 ─► F4 ─► B1 ─┐
+H0 ─┬─► F1 ─► F3 ─► F4 ─► B1 ─┐
     │         ├─► F5 (Wiener + Vasicek refactor)   ├─► B3 ─► D1 ─► D2 ─► C1 ─► C2 ─► C4
     │         └─► F6 (Lévy → #132/#133)      B2 ───┘                        └─► C3 ─┘
     └───────────────────────────────────────────────────────► G1, G2, G3, G4 (bridges)
@@ -156,9 +165,10 @@ H0 ─┬─► F1 ─► F2 ─► F3 ─► F4 ─► B1 ─┐
 
 Legend: `id · benchmark-id — title` *(labels · status · formalization_status)*.
 
-**Issue numbers:** H0 #139 · F1 #140 · F2 #141 · F3 #142 · F4 #143 · F5 #144 ·
-F6 #145 · B1 #146 · B2 #147 · B3 #148 · D1 #149 · D2 #150 · C1 #151 · C2 #152 ·
-C3 #153 · C4 #154 · G1 #155 · G2 #156 · G3 #157 · G4 #158 (umbrella #138).
+**Issue numbers:** H0 #139 · F1 #141 (the `stochFubini_ofCLM` primitive; #140
+dissolved into it) · F3 #142 · F4 #143 · F5 #144 · F6 #145 · B1 #146 · B2 #147 ·
+B3 #148 · D1 #149 · D2 #150 · C1 #151 · C2 #152 · C3 #153 · C4 #154 · G1 #155 ·
+G2 #156 · G3 #157 · G4 #158 (umbrella #138).
 
 ### Tier 0 — objects · `FixedIncome/HJM/Model.lean`
 - **H0 · `mf-hjm-model`** — the `HJMModel` bundle (`W, f(t,T), α, σ` + adapted /
@@ -167,13 +177,13 @@ C3 #153 · C4 #154 · G1 #155 · G2 #156 · G3 #157 · G4 #158 (umbrella #138).
   *(new-defs, area:fixed-income · ready · scaffolding)*
 
 ### Tier 1 — stochastic Fubini, the shared primitive · `Foundations/StochasticFubini*.lean`
-- **F1 · `sc-stochastic-fubini-clm`** — `clm_comm_paramIntegral`, an idiomatic
-  wrap of `integral_comp_comm` in the library's register. *(foundations · ready · library_wrapper)*
-- **F2 · `sc-stochastic-fubini-l2-rep`** — the L²-representative lemma: Bochner
-  `∫_A [φ(·,u)] dμ(u)` in `L²(m)` is represented by `s ↦ ∫_A φ(s,u) dμ(u)`. **the
-  real analytic node.** *(foundations · ready · full)*
-- **F3 · `sc-stochastic-fubini-ito`** — terminal Itô Fubini via `itoIntegralCLM_T`:
-  `∫_A (∫_0^T φ dW) du = ∫_0^T (∫_A φ du) dW`. *(foundations · ready · full)*
+- **F1 · `sc-stochastic-fubini-clm`** (#141, folds in the dissolved #140) — the
+  tower-agnostic primitive `stochFubini_ofCLM (I : L²(m) →L[ℝ] L²(P)) …`. Proof =
+  `integral_comp_comm` inline + the L²-representative fact (`∫_A [φ(·,u)] dμ`
+  represented by `s ↦ ∫_A φ(s,u) du`) — the one analytic step, maybe already in
+  Mathlib. No wrapper, no typeclass. **the keystone.** *(foundations · ready · full)*
+- **F3 · `sc-stochastic-fubini-ito`** — the one-line Itô instance of F1 at
+  `I := itoIntegralCLM_T`: `∫_A (∫_0^T φ dW) du = ∫_0^T (∫_A φ du) dW`. *(foundations · ready · full)*
 - **F4 · `sc-stochastic-fubini-ito-process`** — the pathwise all-`t` lift on
   `ItoIntegralProcess` (continuous modification). the form HJM's bond dynamics
   need. *(foundations · blocked-design · full)*
@@ -242,14 +252,15 @@ rule). File splits may consolidate if a node proves small.
   (`python3 -m tools.verify.axiom_audit_gen --write`), add the coverage row, and
   run `python3 -m tools.verify.ledger status` → `verify` on the stale entries.
 - `#guard_msgs`-pin the load-bearing constants in `AxiomAudit.lean`
-  (`clm_comm_paramIntegral`, the Itô-process Fubini, `mf-hjm-drift-condition`).
+  (`stochFubini_ofCLM`, the Itô-process Fubini, `mf-hjm-drift-condition`).
 - The values-review cadence gate (`test_values_review_is_current`) fires at +12
   entries; refresh `docs/values-review.md` with the ranked backlog when it does.
 
 ## 9. Build order
 
-1. **Keystone first:** `F1 → F2 → F3` (the terminal Itô Fubini) — every
-   downstream tier waits on it. `F1` is nearly free; `F2` is the one hard leaf.
+1. **Keystone first:** `F1` (the `stochFubini_ofCLM` primitive) → `F3` (its Itô
+   instance) — every downstream tier waits on it. `F1`'s one hard step is the
+   L²-representative fact (maybe already in Mathlib).
 2. `F4` (process lift) + `H0` (objects) in parallel.
 3. Critical path to the crown: `B1/B2 → B3 → D1 → D2 → C1 → C2 → C4`.
 4. Bridges `G1 → G2 → G3` (the Vasicek seam is the payoff); `G4` Musiela deferred.
@@ -258,10 +269,10 @@ rule). File splits may consolidate if a node proves small.
 
 ## 10. Risks & open questions
 
-- **F2 representative lemma** is the analytic crux — if Mathlib's
-  `Lp`/Bochner-representative API doesn't line up cleanly, this is the node that
-  could grow. Mitigation: it is fully general and reusable, so the investment is
-  never HJM-only.
+- **The L²-representative fact** (inside `F1`/`stochFubini_ofCLM`) is the analytic
+  crux — if Mathlib's `Lp`/Bochner-representative API (`integral_integral_swap`)
+  doesn't line up cleanly, this is the step that could grow. Mitigation: it is
+  fully general and reusable, so the investment is never HJM-only.
 - **B2 moving-boundary Leibniz** mixes a deterministic boundary derivative with a
   stochastic integrand differential; needs care that it is not a hidden second
   Fubini. Scope each assumption explicitly.

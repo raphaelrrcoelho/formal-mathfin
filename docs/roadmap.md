@@ -1349,9 +1349,10 @@ same *"the Summit dissolved, not climbed"* move as the Lévy CLM. Built once, it
 term-structure (#132, #133) and a Vasicek integrated-rate refactor. One genuinely analytic leaf remains: the
 L²-representative lemma (#141).
 
-**Atomic path (20 issues, 6 tiers):** stochastic Fubini (#140–#145) → log-bond dynamics (#146–#148) →
+**Atomic path (19 open issues, 6 tiers):** stochastic Fubini (#141–#145) → log-bond dynamics (#146–#148) →
 bond / discounted-bond dynamics (#149–#150) → the drift condition #152 (crown) and #154 (iff) → the bridges,
 Ho–Lee #156 and the Vasicek/Hull–White seam #157. Musiela (#158) is a deferred SPDE summit (placeholder).
 
-**Next:** the keystone `F1 → F2 → F3` (#140 → #141 → #142) — the terminal Itô Fubini every downstream tier
-waits on. `F1` is a near-free wrap; `F2` is the one hard leaf.
+**Next:** the keystone `stochFubini_ofCLM` (#141, the tower-agnostic primitive) then its Itô instance (#142)
+— every downstream tier waits on it; its one hard step is the L²-representative fact (maybe already in Mathlib).
+#140 (a would-be `integral_comp_comm` wrapper) was dissolved into #141 as an anti-wrapper cleanup.
