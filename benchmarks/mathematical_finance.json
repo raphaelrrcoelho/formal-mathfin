@@ -3778,6 +3778,32 @@
           "refined": "signature-bound def arguments + docstrings (docBlame); unused hσ_eq hypothesis and unused Insurance import removed; per-principle lemmas extracted, bundle derived from them"
         }
       }
+    },
+    {
+      "id": "mf-performance-gain_to_pain",
+      "name": "Add the gain-to-pain ratio and prove it is nonnegative",
+      "description": "Gain-to-pain ratio is nonnegative when defined.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.GainToPain\n\nopen MathFin\n\n/-- Gain-to-pain ratio is nonnegative when defined. -/\ntheorem mf_performance_gain_to_pain {α : Type*} (S : Finset α) (r : α → ℝ)\n    (h : 0 < ∑ s ∈ S, max (-(r s)) 0) : 0 ≤ gainToPain S r :=\n  MathFin.gainToPain_nonneg_of_pain_pos S r h\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Add the gain-to-pain ratio and prove it is nonnegative",
+        "difficulty": "good-first",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Performance/GainToPain.lean (magistral-drafted statement, leanstral proof). Re-export from MathFin. Axioms-clean. Introduces definitions: gainToPain (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 161,
+          "new_defs": [
+            "gainToPain"
+          ]
+        }
+      }
     }
   ]
 }

@@ -8,7 +8,7 @@
 
   The curated, storied audit is MathFin/AxiomAudit.lean (headliners + dated
   narrative); THIS file is its machine-written closure over the benchmark
-  corpus (281 constants). Scope: proof-position MathFin names only —
+  corpus (282 constants). Scope: proof-position MathFin names only —
   statement-position defs are exercised by elaboration + the verification
   ledger, and library_wrapper entries cite upstream names.
 
@@ -352,6 +352,9 @@ namespace MathFin.AxiomAuditGen
 
 /-- info: 'MathFin.ftap_discrete' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.ftap_discrete
+
+/-- info: 'MathFin.gainToPain_nonneg_of_pain_pos' depends on axioms: [propext, Classical.choice, Quot.sound] -/
+#guard_msgs (whitespace := lax) in #print axioms MathFin.gainToPain_nonneg_of_pain_pos
 
 /-- info: 'MathFin.garman_kohlhagen_call_formula' depends on axioms: [propext, Classical.choice, Quot.sound] -/
 #guard_msgs (whitespace := lax) in #print axioms MathFin.garman_kohlhagen_call_formula
