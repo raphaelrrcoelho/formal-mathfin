@@ -438,3 +438,4 @@ import MathFin.Actuarial.SurvivalModel
 import BrownianMotion.StochasticIntegral.LocalMartingale
 import MathFin.FixedIncome.InterestRateSwap
 import MathFin.Actuarial.ActuarialInsurance
+import MathFin.Performance.GainToPain
