@@ -2466,6 +2466,22 @@
       }
     },
     {
+      "id": "mf-barrier-inout-parity",
+      "name": "Knock-in / Knock-out Barrier Parity (in-out parity)",
+      "description": "V_in + V_out = V_vanilla: the barrier-hit event A and its complement partition every path, so the discounted expected payoffs add to the vanilla price. Pure linearity of expectation; needs no barrier density.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.BlackScholes.BarrierParity\n\nopen MeasureTheory\nopen MathFin\n\ntheorem knockIn_add_knockOut_eq_vanilla_thm {Ω : Type*} {mΩ : MeasurableSpace Ω}\n    (D : ℝ) (Q : Measure Ω) (A : Set Ω) (f : Ω → ℝ)\n    (hA : MeasurableSet A) (hf : Integrable f Q) :\n    knockInValue D Q A f + knockOutValue D Q A f = vanillaValue D Q f :=\n  MathFin.knockIn_add_knockOut_eq_vanilla D Q A f hA hf\n"
+      },
+      "metadata": {
+        "chapter": 14,
+        "reference": "In-out barrier parity (Hull, barrier options)",
+        "difficulty": "intermediate",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof. Re-export from MathFin. Axioms-clean."
+      }
+    },
+    {
       "id": "mf-capped-call-bull-spread",
       "name": "Capped Call equals Bull Call Spread",
       "description": "min(max(S - K₁, 0), K₂ - K₁) = max(S - K₁, 0) - max(S - K₂, 0). Pure pointwise algebra via case split on S.",

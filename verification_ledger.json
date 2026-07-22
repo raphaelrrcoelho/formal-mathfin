@@ -584,6 +584,13 @@
       "input_hash": "fc09cc691f294baca4f8d55c476c7f1c18923a593c6f7d485f1658d01041e8b8",
       "verified_at_commit": "bfa3834"
     },
+    "mf-barrier-inout-parity": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-18",
+      "elapsed_s": 34.3,
+      "input_hash": "507107b1d94a900f4544f4e14da59d7a5c8a3583631e9121ba6628e49b70c068",
+      "verified_at_commit": "e382e1c"
+    },
     "mf-barrier-maximal-distribution": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-11",
