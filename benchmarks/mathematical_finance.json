@@ -3778,6 +3778,32 @@
           "refined": "signature-bound def arguments + docstrings (docBlame); unused hσ_eq hypothesis and unused Insurance import removed; per-principle lemmas extracted, bundle derived from them"
         }
       }
+    },
+    {
+      "id": "mf-performance-upside_capture",
+      "name": "Add the upside-capture ratio and prove positive homogeneity in the portfolio return",
+      "description": "Upside-capture ratio and its homogeneity in portfolio returns.",
+      "domain": "mathematical_finance",
+      "code": {
+        "lean": "import MathFin.Performance.UpCapture\n\nopen MathFin\n\n/-- Upside-capture ratio and its homogeneity in portfolio returns. -/\ntheorem mf_performance_upside_capture {S : Type*} (up : Finset S) (p b : S → ℝ) (c : ℝ)\n    (h : (∑ s ∈ up, b s) ≠ 0) : upCapture up (fun s => c * p s) b = c * upCapture up p b :=\n  MathFin.upCapture_scale_invariant up p b c h\n"
+      },
+      "metadata": {
+        "chapter": 0,
+        "reference": "Add the upside-capture ratio and prove positive homogeneity in the portfolio return",
+        "difficulty": "small",
+        "formalization_status": "full",
+        "formalization_scope": "Full formal proof in MathFin/Performance/UpCapture.lean (magistral-drafted statement, leanstral proof). Re-export from MathFin. Axioms-clean. Introduces definitions: upCapture (new-defs review class).",
+        "provenance": {
+          "statement_source": "magistral-autoform",
+          "statement_model": "magistral-medium",
+          "source": "leanstral-autoform",
+          "model": "labs-leanstral-1-5",
+          "issue": 162,
+          "new_defs": [
+            "upCapture"
+          ]
+        }
+      }
     }
   ]
 }

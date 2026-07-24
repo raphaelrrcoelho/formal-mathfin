@@ -1753,6 +1753,13 @@
       "input_hash": "ebe70c2a0dce71ec428d8d3ea4cca7a525dc5dba1c2cfbaaf01ad2bbf17853c5",
       "verified_at_commit": "bfa3834"
     },
+    "mf-performance-upside_capture": {
+      "benchmark_file": "mathematical_finance.json",
+      "date": "2026-07-24",
+      "elapsed_s": 16.7,
+      "input_hash": "9f06f9425a28809e410a7a415aaf4129606b430beb04c89b4e7081caa6a4c7e5",
+      "verified_at_commit": "unknown"
+    },
     "mf-phi-le-one": {
       "benchmark_file": "mathematical_finance.json",
       "date": "2026-07-11",
