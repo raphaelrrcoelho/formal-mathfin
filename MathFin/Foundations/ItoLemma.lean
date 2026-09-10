@@ -103,10 +103,10 @@ theorem itoDrift_log_gbm (μ σ S : ℝ) (hS : S ≠ 0) :
   field_simp
   ring
 
-/-- **Volatility of `log S_t` under GBM**: the diffusion coefficient
-(`dB_t` factor) of `d(log S_t)` is `σ_X · f'(X) = σ S · (1/S) = σ`. This is
-the *constant* volatility of log-returns under GBM, contrasting with the
-*linear* volatility `σ S` of `S_t` itself. -/
+/-- The scalar identity `σ·S·(1/S) = σ` for `S ≠ 0`. Named for the step it marks in the
+GBM log-price computation — the `dB_t` coefficient of `d(log S_t)` is `σ_X · f'(X)`, which
+at `σ_X = σS`, `f' = 1/S` is the constant `σ`. The statement itself is only the algebra;
+the process content lives in `itoDrift_log_gbm` and the Itô-formula layer. -/
 lemma gbm_log_volatility (σ S : ℝ) (hS : S ≠ 0) :
     σ * S * (1 / S) = σ := by
   field_simp

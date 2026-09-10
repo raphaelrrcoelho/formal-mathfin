@@ -34,9 +34,11 @@ exp(2σX_u) + exp(−2θX_T)`, each a Gaussian-MGF term (`integrable_exp_mul_of_
 This wires the **I ↔ II seam** (pricing ↔ Itô/Brownian tower) on the martingale side:
 the risk-neutral measure is an explicit density change of the physical one, retiring the
 Wald shortcut of `discountedGBM_isMartingale` (which took `Q = P` from the start). The
-*distributional* Girsanov (the drift-corrected `B^θ = B − ∫θ ds` is a `Q`-Brownian motion,
-`gir-thm-9.1.8`) is a strictly stronger statement that needs an adapted-integrand Itô
-formula — absent from the tower — and remains open.
+*distributional* Girsanov (the drift-corrected `B^θ_t = B_t + ∫₀ᵗ θ_s ds` is a `Q`-Brownian
+motion, `gir-thm-9.1.8`) is strictly stronger, and it now ships: `GirsanovConstantTheta`
+for constant `θ`, `GirsanovAdaptedTheta` for bounded continuous adapted `θ`, and
+`GirsanovPredictableTheta` for bounded predictable `θ` — all without an adapted-integrand
+Itô formula, via the Bayes engine plus the characteristic-function characterization.
 
 ## Main result
 

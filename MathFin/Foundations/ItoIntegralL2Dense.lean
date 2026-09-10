@@ -190,7 +190,7 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
   -- the finite frames
   set Φ : ℕ → Set (ℝ≥0 × Ω) := fun n ↦ Set.Ioc 0 ((n : ℝ≥0) + 1) ×ˢ Set.univ with hΦ
   have hΦ_mem : ∀ n, Φ n ∈ ItoIntegralCLM.predictableRect (mΩ := mΩ) hBmeas := fun n ↦
-    Or.inr ⟨0, (n : ℝ≥0) + 1, Set.univ, by positivity, MeasurableSet.univ, rfl⟩
+    Or.inr ⟨0, (n : ℝ≥0) + 1, by positivity, Set.univ, MeasurableSet.univ, rfl⟩
   have hΦ_meas : ∀ n, MeasurableSet[(natFiltration (mΩ := mΩ) hBmeas).predictable] (Φ n) :=
     fun n ↦ hRpred _ (hΦ_mem n)
   -- per-frame a.e. zero

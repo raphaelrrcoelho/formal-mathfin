@@ -41,12 +41,14 @@ drift `A` — nothing else.
 * `submartingale_optional_sampling`: the optional sampling inequality
   `f_σ ≤ᵐ μ[f_τ | ℱ_σ]` for bounded stopping times `σ ≤ τ`.
 
-The Degenne `BrownianMotion` package states a `⊓`-form sibling
-(`Submartingale.stoppedValue_min_ae_le_condExp_nat`,
-`BrownianMotion/StochasticIntegral/OptionalSampling.lean`) whose proof is a
-`sorry` stub at the current pin; this file's derivation is sorry-free, and a
-candidate upstream donation alongside the `L2MartingaleConvergence` bridge
-recorded in `docs/bridges.md`.
+The Degenne `BrownianMotion` package now **proves** a `⊓`-form sibling,
+`Submartingale.stoppedValue_min_ae_le_condExp_nat`
+(`BrownianMotion/StochasticIntegral/OptionalSampling.lean`), and by the same
+Doob-decomposition route — strictly more generally than this file: `τ ⊓ σ` instead of a
+`σ ≤ τ` hypothesis, `∀ᵐ ω, τ ω ≤ k` instead of `∀ ω`, and a general ordered codomain
+instead of `ℝ`. So this derivation is no longer an upstream-donation candidate, and
+delegating to upstream is an open upgrade (its general-index version is still `sorry`,
+the `ℕ`-indexed one is not).
 -/
 
 @[expose] public section

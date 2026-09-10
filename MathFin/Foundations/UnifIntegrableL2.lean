@@ -172,16 +172,4 @@ theorem memLp_two_of_subseq_ae_of_sq_bound {f : ℕ → α → ℝ} {g : α → 
     ((liminf_le_liminf (Filter.Eventually.of_forall hsqbnd)).trans (liminf_const _).le)).trans_lt
     ENNReal.ofReal_lt_top
 
-/-- **`TendstoInMeasure` only sees a.e.-classes of the sequence.** Replacing each `f n` by an
-a.e.-equal `f' n` preserves convergence in measure — a generic congruence Mathlib does not ship
-in this left-argument form. -/
-theorem tendstoInMeasure_congr_left {E : Type*} [MetricSpace E] {f f' : ℕ → α → E} {g : α → E}
-    (h : ∀ n, f n =ᵐ[μ] f' n) (hfg : TendstoInMeasure μ f atTop g) :
-    TendstoInMeasure μ f' atTop g := by
-  intro ε hε
-  refine (hfg ε hε).congr fun n ↦ measure_congr ?_
-  rw [Filter.eventuallyEq_set]
-  filter_upwards [h n] with x hx
-  simp only [hx]
-
 end MathFin

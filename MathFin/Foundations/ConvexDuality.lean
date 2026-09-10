@@ -30,8 +30,12 @@ themselves are Mathlib's `geometric_hahn_banach_compact_closed` and `geometric_h
 
 ## API at this pin
 The cone is a `C : Set (ι → ℝ)` carrying `Convex ℝ C`, `IsClosed C`, and homogeneity
-`∀ x ∈ C, ∀ c ≥ 0, c • x ∈ C` (`ConvexCone.dual` is not a constant at this pin, so we keep the explicit
-`Set`-with-homogeneity representation rather than the bundled `ConvexCone`/`PointedCone` types).
+`∀ x ∈ C, ∀ c ≥ 0, c • x ∈ C`. There is no `ConvexCone.dual` constant at this pin, but
+`ProperCone`/`PointedCone` *are* live, and Mathlib's `ProperCone.hyperplane_separation`
+(`Analysis/Convex/Cone/Dual.lean`) is the separation theorem the results below re-derive
+from `geometric_hahn_banach_compact_closed`. Consuming it — packaging `C` as a
+`ProperCone ℝ (ι → ℝ)` and keeping only the `Pi.single` coordinate glue — is an open
+upgrade; the explicit `Set` representation is a historical choice, not a forced one.
 
 ## Main results
 * `MathFin.exists_pos_separating_of_cone_disjoint_simplex`

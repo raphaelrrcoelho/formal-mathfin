@@ -22,9 +22,10 @@ unconditional second moment of an increment is the measure of its time band,
 
   `𝔼[(M_b − M_a)²] = ⟨M⟩((a,b] × Ω)`,
 
-which is the defining property quadratic variation is for, at the level of expectations. What is
-*not* claimed is the conditional refinement (`𝔼[(M_b−M_a)² | 𝓕_a] = 𝔼[⟨M⟩_b−⟨M⟩_a | 𝓕_a]`) or a
-pathwise bracket; pathwise continuity of `M` lives in `ItoIntegralProcessContinuousModification`,
+which is the defining property quadratic variation is for, at the level of expectations. The
+conditional refinement (`𝔼[(M_b−M_a)² | 𝓕_a] = 𝔼[⟨M⟩_b−⟨M⟩_a | 𝓕_a]`) is not claimed *here* but
+does ship, in `PointwiseBracket` (`condExp_band_second_moment`) and `BracketCompensator`
+(`condExp_sq_sub_bracket`). What is claimed nowhere yet is a pathwise bracket; pathwise continuity of `M` lives in `ItoIntegralProcessContinuousModification`,
 not here. The integral itself is
 
   `∫ψ dM := ∫ ψφ dB`,

@@ -104,15 +104,6 @@ theorem statePricePricing_convexOn
     show q i * (a * g i K₁ + b * g i K₂)
         = a * (q i * g i K₁) + b * (q i * g i K₂) from by ring]
 
-/-- **The state-price pricing functional preserves convexity**: stated
-in terms of `statePricePricing` from `Foundations/StatePrices`. -/
-theorem statePricePricing_convexOn_inK
-    (s : Finset ι) (q : ι → ℝ) (hq : ∀ i ∈ s, 0 ≤ q i)
-    (g : ι → ℝ → ℝ) (hg : ∀ i ∈ s, ConvexOn ℝ (Set.univ : Set ℝ) (g i)) :
-    ConvexOn ℝ (Set.univ : Set ℝ)
-      (fun K ↦ statePricePricing s q (fun i ↦ g i K)) := by
-  unfold statePricePricing
-  exact statePricePricing_convexOn s q hq g hg
 
 /-- **Call price is convex in the strike (finite-state market)**: with
 non-negative state prices `q_i ≥ 0` and terminal asset values `S_i`,

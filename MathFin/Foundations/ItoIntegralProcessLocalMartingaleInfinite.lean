@@ -34,12 +34,6 @@ namespace ItoLocalMartingaleInfinite
 open ItoIntegralL2 ItoIntegralCLM ItoIntegralProcess ItoIntegralProcessGeneral
 open ItoIntegralProcessL2Infinite ItoIntegralProcessLocalMartingaleGeneral ItoLocalMartingale
 
-/-- Continuity ⟹ càdlàg (the `[0,T]` file's `isCadlag_of_continuous` is `private`; re-derived). -/
-private lemma isCadlag_of_continuous {ι E : Type*} [TopologicalSpace ι] [PartialOrder ι]
-    [TopologicalSpace E] {g : ι → E} (hg : Continuous g) : IsCadlag g where
-  right_continuous := fun _ ↦ hg.continuousWithinAt
-  left_limit := fun x ↦ ⟨g x, hg.continuousWithinAt.tendsto⟩
-
 variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
   (hBmeas : ∀ t, Measurable (B t)) (hBcont : ∀ ω, Continuous fun t : ℝ≥0 ↦ B t ω)
@@ -204,7 +198,7 @@ theorem exists_continuous_localMartingale_modification_infinite :
   obtain ⟨X, hmod, hcont, hmart⟩ :=
     exists_continuous_martingale_modification_infinite hB hBmeas hBcont f
   exact ⟨X, hmod, hcont,
-    Martingale.IsLocalMartingale hmart (fun ω ↦ isCadlag_of_continuous (hcont ω))⟩
+    Martingale.IsLocalMartingale hmart (fun ω ↦ (hcont ω).isCadlag)⟩
 
 end ItoLocalMartingaleInfinite
 end MathFin

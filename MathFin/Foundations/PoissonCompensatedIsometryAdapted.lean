@@ -70,14 +70,6 @@ private lemma disjoint_prod_time {I J : Set ℝ} (hIJ : Disjoint I J) (U V : Set
   rintro z hz1 hz2
   exact (Set.disjoint_left.mp hIJ) (Set.mem_prod.mp hz1).1 (Set.mem_prod.mp hz2).1
 
-omit [MeasurableSpace E] in
-/-- Two space-time products with disjoint mark-projections are disjoint. -/
-private lemma disjoint_prod_mark {U V : Set E} (hUV : Disjoint U V) (I J : Set ℝ) :
-    Disjoint (I ×ˢ U) (J ×ˢ V) := by
-  rw [Set.disjoint_left]
-  rintro z hz1 hz2
-  exact (Set.disjoint_left.mp hUV) (Set.mem_prod.mp hz1).2 (Set.mem_prod.mp hz2).2
-
 /-- A past-set at `sa` is disjoint from a future box `(sb, tb] × Ab` when `sa ≤ sb`, and it
 carries its measurability into membership of `regionSigma`'s index set. -/
 private lemma pastSet_mem_regionSigma_index {sa sb tb : ℝ} (hab : sa ≤ sb) (Ab : Set E)

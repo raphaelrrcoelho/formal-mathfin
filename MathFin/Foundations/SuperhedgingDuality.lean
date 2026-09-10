@@ -17,8 +17,11 @@ the EMM prices of a claim lie below its superhedging price — the dual side of 
 interval, and the pricing-side companion of the coherent-risk representation.
 
 The full superhedging *duality* (superhedging price *equals* the supremum of EMM prices) is the reverse,
-separation-based direction; it requires closedness of the super-replication cone `{W | ∃ θ, W ≤ θ·z}` (a
-polyhedral / Farkas fact not available in Mathlib at this pin) and is recorded as a follow-up.
+separation-based direction; it requires closedness of the super-replication cone `{W | ∃ θ, W ≤ θ·z}`.
+Farkas itself is *not* the blocker — Mathlib ships `ProperCone.hyperplane_separation` and
+`hyperplane_separation_point` (`Analysis/Convex/Cone/Dual.lean`). What is missing at this pin is
+closedness of a finitely generated cone: there is no `Polyhedron`/`Polyhedral` development and no
+`PointedCone.isClosed_span_of_finite`. That one lemma is the whole remaining cost.
 
 ## Main results
 * `MathFin.EMMSet`, `MathFin.SuperReplicates`
