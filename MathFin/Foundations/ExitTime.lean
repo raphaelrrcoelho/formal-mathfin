@@ -143,7 +143,7 @@ theorem isStoppingTime_exitTime (hBmeas : ∀ t, Measurable (B t))
       = ⋂ m : ℕ, ⋃ q : {q : ℚ // Real.toNNReal q ≤ i},
           {ω | (N : ℝ) - 1 / (m + 1) ≤ |B (Real.toNNReal (q : ℚ)) ω|} := by
     ext ω
-    simp only [Set.mem_setOf_eq, Set.mem_iInter, Set.mem_iUnion, Subtype.exists, exists_prop]
+    simp only [Set.mem_ofPred_eq, Set.mem_iInter, Set.mem_iUnion, Subtype.exists, exists_prop]
     rw [exitTime_le_iff hBcont, exists_le_abs_eq_iInter_iUnion hBcont]
   rw [hset]
   refine MeasurableSet.iInter fun m ↦ MeasurableSet.iUnion fun q ↦ ?_

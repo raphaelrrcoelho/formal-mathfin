@@ -206,7 +206,7 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
       intro n
       have hset : {ω | (⊤ : ℝ≥0∞) ≤ edist (f n ω) (g ω)} = ∅ := by
         ext ω
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, top_le_iff]
+        simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, top_le_iff]
         exact edist_ne_top _ _
       rw [hset]; exact measure_empty
     exact tendsto_const_nhds.congr fun n ↦ (hz n).symm

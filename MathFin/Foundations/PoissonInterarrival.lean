@@ -84,7 +84,7 @@ theorem survival_factorizes {N : ℝ → Ω → ℕ}
       = (N s) ⁻¹' {0} ∩ (fun ω ↦ N t ω - N s ω) ⁻¹' {0} := by
     ext ω
     have hm := hmono hst ω
-    simp only [Set.mem_setOf_eq, Set.mem_inter_iff, Set.mem_preimage,
+    simp only [Set.mem_ofPred_eq, Set.mem_inter_iff, Set.mem_preimage,
       Set.mem_singleton_iff]
     omega
   rw [hsplit,

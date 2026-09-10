@@ -96,7 +96,7 @@ lemma frestrictLe_preimage_singleton (path : ℕ → ι) (n : ℕ) :
       = pathCylinder path n := by
   ext ω
   simp only [Set.mem_preimage, Set.mem_singleton_iff, funext_iff,
-    frestrictLe_apply, Subtype.forall, mem_Iic, pathCylinder, Set.mem_setOf_eq]
+    frestrictLe_apply, Subtype.forall, mem_Iic, pathCylinder, Set.mem_ofPred_eq]
 
 omit [MeasurableSpace ι] [MeasurableSingletonClass ι] [Countable ι] in
 /-- Splitting the `(n+1)`-cylinder through the pair map
@@ -107,7 +107,7 @@ lemma pairMap_preimage_singleton_prod (path : ℕ → ι) (n : ℕ) :
       = pathCylinder path (n + 1) := by
   ext ω
   simp only [Set.mem_preimage, Set.mem_prod, Set.mem_singleton_iff, funext_iff,
-    frestrictLe_apply, Subtype.forall, mem_Iic, pathCylinder, Set.mem_setOf_eq]
+    frestrictLe_apply, Subtype.forall, mem_Iic, pathCylinder, Set.mem_ofPred_eq]
   constructor
   · rintro ⟨h₁, h₂⟩ k hk
     rcases (by omega : k ≤ n ∨ k = n + 1) with hk' | rfl

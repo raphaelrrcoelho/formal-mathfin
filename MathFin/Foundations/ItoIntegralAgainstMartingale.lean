@@ -172,8 +172,8 @@ theorem norm_itoIntegralAgainstCLM (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
     (φ : Lp ℝ 2 (trimMeasure_T (μ := μ) T hBmeas))
     (ψ : Lp ℝ 2 (bracketMeasure (μ := μ) T hBmeas φ)) :
     ‖itoIntegralAgainstCLM hB T hBmeas φ ψ‖ = ‖ψ‖ := by
-  rw [itoIntegralAgainstCLM_apply, itoIntegralCLM_T_norm, LinearIsometry.norm_map]
-  rfl
+  rw [itoIntegralAgainstCLM_apply, itoIntegralCLM_T_norm]
+  exact LinearIsometry.norm_map _ _
 
 /-! ### The elementary identity that earns the name -/
 

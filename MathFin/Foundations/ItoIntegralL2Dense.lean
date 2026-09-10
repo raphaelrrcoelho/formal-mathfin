@@ -259,7 +259,7 @@ private lemma aezeroOfOrth (hBmeas : ∀ t, Measurable (B t))
     rw [ae_iff]
     have hsub : {z : ℝ≥0 × Ω | z ∉ ⋃ n, Φ n} ⊆ {(0 : ℝ≥0)} ×ˢ Set.univ := by
       intro z hz
-      simp only [Set.mem_setOf_eq, Set.mem_iUnion, hΦ, Set.mem_prod, Set.mem_Ioc,
+      simp only [Set.mem_ofPred_eq, Set.mem_iUnion, hΦ, Set.mem_prod, Set.mem_Ioc,
         Set.mem_univ, and_true, not_exists, not_and, not_le] at hz
       obtain ⟨t, ω⟩ := z
       simp only [Set.mem_prod, Set.mem_singleton_iff, Set.mem_univ, and_true]
