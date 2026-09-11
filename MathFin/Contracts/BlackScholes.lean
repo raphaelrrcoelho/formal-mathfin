@@ -137,6 +137,7 @@ theorem value_digitalCall {Q : Measure Ω} [IsProbabilityMeasure Q]
       ((Payoff.const K).indicatorLt (Payoff.obs () T))
         = (Set.Ioi K).indicator (fun _ ↦ (1 : ℝ)) (bsTerminal S_0 r σ T (Z ω)) := by
     simp [Payoff.eval, scenarioAt, bsAssets, Set.indicator_apply, Set.mem_Ioi]
+    congr 1
   simp only [heq]
   exact MathFin.bs_cash_or_nothing_formula h
 

@@ -77,8 +77,8 @@ lemma tendstoInMeasure_riemannσ (hBmeas : ∀ t, Measurable (B t)) {θ : ℝ≥
     (hcont : ∀ ω, Continuous (fun s : ℝ≥0 ↦ θ s ω)) {C : ℝ} (hbdd : ∀ t ω, |θ t ω| ≤ C) (T : ℝ≥0) :
     TendstoInMeasure μ (fun n ↦ riemannσ (B := B) θ T n) atTop
       (itoIntCont hB hBmeas hadap hcont hbdd T) := by
-  refine tendstoInMeasure_congr_left
-    (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).coeFn_toLp) ?_
+  refine TendstoInMeasure.congr
+    (fun n ↦ (memLp_riemannσ hB hBmeas hadap hbdd T n).coeFn_toLp) EventuallyEq.rfl ?_
   exact tendstoInMeasure_of_tendsto_Lp
     (itoIntegralCLM_T_of_bdd_adapted_cont hB hBmeas hadap hcont hbdd T)
 

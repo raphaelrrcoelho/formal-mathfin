@@ -87,12 +87,6 @@ open ItoIntegralProcessContinuousModification ItoLocalMartingale
 variable {Ω : Type*} {m0 : MeasurableSpace Ω} {μ : Measure Ω}
   [IsProbabilityMeasure μ] {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ)
 
-/-- Continuity ⟹ càdlàg (B3's `isCadlag_of_continuous` is `private`; re-derived). -/
-private lemma isCadlag_of_continuous {ι E : Type*} [TopologicalSpace ι] [PartialOrder ι]
-    [TopologicalSpace E] {f : ι → E} (hf : Continuous f) : IsCadlag f where
-  right_continuous := fun _ ↦ hf.continuousWithinAt
-  left_limit := fun x ↦ ⟨f x, hf.continuousWithinAt.tendsto⟩
-
 /-- The **null-augmented Brownian filtration** `𝓕ᴮ ⊔ 𝓝`: at each time it adjoins the
 `μ`-null measurable sets to `𝓕ᴮ_t`. This supplies the **completeness** (null-set
 augmentation) needed to repair the a.e.-continuous modification into an
@@ -231,7 +225,7 @@ theorem exists_continuous_localMartingale_modification (T : ℝ≥0)
     fun i ↦ by rw [augFiltration_apply]; exact hadapt i⟩
   · have h := hmod t; rwa [min_eq_left ht] at h
   · refine Martingale.IsLocalMartingale ⟨fun i ↦ ?_, fun i j hij ↦ ?_⟩
-      (fun ω ↦ isCadlag_of_continuous (hcont ω))
+      (fun ω ↦ (hcont ω).isCadlag)
     · rw [augFiltration_apply]; exact hadapt i
     · rw [augFiltration_apply]; exact hmart hij
 

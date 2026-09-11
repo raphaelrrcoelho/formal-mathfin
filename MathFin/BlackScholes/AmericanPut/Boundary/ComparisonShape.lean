@@ -174,7 +174,7 @@ theorem initialDifference_superlevel_ordConnected (hα : α = k - h - 1) (hc : 0
   rw [Set.ordConnected_iff]
   intro x hx z hz _ y hy
   refine ⟨hx.1.trans_le hy.1, ?_⟩
-  simp only [Set.mem_setOf_eq] at hx hz
+  simp only [Set.mem_ofPred_eq] at hx hz
   rw [initialDifference_level_iff hf hg hε] at hx hz ⊢
   exact (initialRatio_between_le_max hα hc hf hg (sub_le_sub_right hy.1 d)
     (sub_le_sub_right hy.2 d)).trans_lt (max_lt hx.2 hz.2)
@@ -211,7 +211,7 @@ theorem normalizedDifference_initial_superlevel {p : ℝ → ℝ → ℝ} {b : �
   convert straight_initial_superlevel_ordConnected hp.rate_pos hp.dividend_nonneg hc hε d using 1
   ext x
   by_cases hx : 0 < x
-  · simp only [Set.mem_setOf_eq, hx, true_and]
+  · simp only [Set.mem_ofPred_eq, hx, true_and]
     rw [normalizedDifference_initial hp (profile_data hp.rate_pos.le) d hx.le]
   · simp [hx]
 

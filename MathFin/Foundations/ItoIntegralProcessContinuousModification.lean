@@ -205,7 +205,7 @@ theorem ae_eventually_sup_lt (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t))
     exact ENNReal.ofReal_ne_top
   filter_upwards [ae_eventually_notMem hconv] with ω hω
   filter_upwards [hω] with n hn
-  rwa [hA, Set.mem_setOf_eq, not_le] at hn
+  rwa [hA, Set.mem_ofPred_eq, not_le] at hn
 
 /-! ## Phase 3 — continuous limit, modification, capstone -/
 

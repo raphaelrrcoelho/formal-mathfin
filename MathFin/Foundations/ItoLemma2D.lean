@@ -199,13 +199,4 @@ theorem gbm_solves_sde (S₀ μ σ t x : ℝ) {f_t f_x f_xx : ℝ}
   · unfold itoDrift2D; ring
   · ring
 
-/-- **Sanity check via the 1D `itoDrift_log_gbm`**: the GBM drift identity
-is consistent with the log-price drift `μ − ½σ²` (`ItoLemma.itoDrift_log_gbm`).
-Here we see the *forward* direction — the exp-form recovers physical drift
-`μ` — as the inverse of the log-form's `μ − ½σ²`. -/
-lemma gbm_drift_inverts_log (μ σ S : ℝ) (hS : S ≠ 0) :
-    itoDrift (1 / S) (-1 / S ^ 2) (μ * S) (σ * S) + σ ^ 2 / 2 = μ := by
-  rw [itoDrift_log_gbm μ σ S hS]
-  ring
-
 end MathFin

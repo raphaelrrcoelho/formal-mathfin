@@ -96,15 +96,4 @@ theorem discrete_cubing_identity (N : ℕ) (X : ℕ → ℝ) :
   rw [e1, e2] at h
   rw [h]; ring
 
-/-- **Discrete Itô identity for cubing — rearranged.** Writes `X_N³` as
-`X_0³` plus the three Itô sums (Itô-integral against `X²`, the QV-weighted
-cross sum, and the cubic remainder). -/
-theorem discrete_cubing_identity' (N : ℕ) (X : ℕ → ℝ) :
-    X N ^ 3 = X 0 ^ 3 +
-      3 * (∑ k ∈ Finset.range N, X k ^ 2 * (X (k + 1) - X k)) +
-      3 * (∑ k ∈ Finset.range N, X k * (X (k + 1) - X k) ^ 2) +
-      ∑ k ∈ Finset.range N, (X (k + 1) - X k) ^ 3 := by
-  have := discrete_cubing_identity N X
-  linarith
-
 end MathFin

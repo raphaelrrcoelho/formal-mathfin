@@ -110,7 +110,7 @@ lemma continuous_timeMeasure_primitive {h : ℝ≥0 → ℝ} (hh : Continuous h)
       (hh.abs.continuousOn.integrableOn_compact isCompact_Icc)
   · -- a.e.-`s` continuity in `t` (off the null point `t₀`)
     have hne : ∀ᵐ s ∂ItoIntegralL2.timeMeasure, s ≠ t₀ := by
-      rw [ae_iff]; simp only [not_not, Set.setOf_eq_eq_singleton]
+      rw [ae_iff]; simp only [not_not, Set.ofPred_eq_eq_singleton]
       exact ItoIntegralL2.timeMeasure_singleton t₀
     filter_upwards [hne] with s hs
     by_cases hs0 : 0 < s
@@ -552,7 +552,7 @@ lemma indistinguishable_on_stochInterval {M' X' : ℝ≥0 → Ω → ℝ} {σ : 
           rw [← heq] at hpos; simpa using hpos
         rwa [← WithTop.coe_zero, WithTop.coe_lt_coe] at h
       have hIio : Set.Iio u ⊆ {t : ℝ≥0 | (t : WithTop ℝ≥0) < σ ω} := fun s hs ↦ by
-        rw [Set.mem_setOf_eq, ← heq, WithTop.coe_lt_coe]; exact hs
+        rw [Set.mem_ofPred_eq, ← heq, WithTop.coe_lt_coe]; exact hs
       exact closure_mono hIio ((closure_Iio' (a := u) ⟨0, hu0⟩).ge Set.self_mem_Iic)
   exact hEqU.closure (hM'cont ω) (hX'cont ω) humem
 

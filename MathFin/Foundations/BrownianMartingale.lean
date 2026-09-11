@@ -402,8 +402,8 @@ private lemma hittingAfter_lt_eq_iUnion_rationals
       = ⋃ (q : ℚ) (_ : (0 : ℝ) ≤ (q : ℝ)) (_ : (q : ℝ) < i),
           {ω | X (q : ℝ) ω ∈ A} := by
   ext ω
-  rw [Set.mem_setOf_eq, hittingAfter_lt_iff]
-  simp only [Set.mem_iUnion, Set.mem_setOf_eq, Set.mem_Ico, exists_prop]
+  rw [Set.mem_ofPred_eq, hittingAfter_lt_iff]
+  simp only [Set.mem_iUnion, Set.mem_ofPred_eq, Set.mem_Ico, exists_prop]
   constructor
   · rintro ⟨j, ⟨hj_nn, hj_lt⟩, hXj⟩
     have h_pre : (fun t : ℝ ↦ X t ω) ⁻¹' A ∈ nhds j :=

@@ -6,6 +6,7 @@ Authors: Raphael Coelho
 module
 
 public import MathFin.Foundations.ItoIntegralL2
+public import BrownianMotion.StochasticIntegral.Predictable
 
 /-!
 # Continuous Itô integral on `[0,T]` as a continuous linear isometry
@@ -128,85 +129,23 @@ is built (finite disjoint union of `{⊥} × B` and `(s,t] × B'`), so they
 generate everything `ElementaryPredictableSet` does (upstream:
 `ElementaryPredictableSet.generateFrom_eq_predictable`). -/
 
-/-- A basic predictable rectangle in `ℝ≥0 × Ω`: either `{0} ×ˢ F₀`
-(`F₀ ∈ ℱ₀`) or `Ioc a b ×ˢ F` (`F ∈ ℱₐ`, `0 < a < b`). The two cases together
-mirror the upstream `ElementaryPredictableSet` constituents (the `{⊥} × B` and
-`(s,t] × B'` pieces). No `T` constraint at the σ-algebra level: T enters only
-via the support of `timeMeasure_T`. -/
+/-- A basic predictable rectangle in `ℝ≥0 × Ω`: either `{⊥} ×ˢ F₀` (`F₀ ∈ ℱ₀`,
+and `(⊥ : ℝ≥0) = 0`) or `Ioc a b ×ˢ F` (`F ∈ ℱₐ`, `a < b`). This is Degenne's
+`Filtration.predictableRectangles` at our natural filtration — the family was
+upstreamed to BrownianMotion, so we consume it rather than restate it, and get
+`IsSetSemiring` (strictly more than the π-system this tower needs) for free. No
+`T` constraint at the σ-algebra level: T enters only via `timeMeasure_T`. -/
 def predictableRect (hBmeas : ∀ t, Measurable (B t)) :
     Set (Set (ℝ≥0 × Ω)) :=
-  -- The `{0} × F₀` piece (the "⊥" case)
-  {S | (∃ F₀ : Set Ω,
-          MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) 0] F₀ ∧
-          S = ({(0 : ℝ≥0)} ×ˢ F₀))} ∪
-  -- The `(a,b] × F` piece
-  {S | ∃ a b : ℝ≥0, ∃ F : Set Ω,
-         a < b ∧
-         MeasurableSet[(ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas) a] F ∧
-         S = (Set.Ioc a b ×ˢ F)}
+  (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).predictableRectangles
 
-/-- The basic predictable rectangles form a **π-system**: their non-empty
-intersections are again basic predictable rectangles. Case analysis on which
-piece (`{0}×ˢ ...` or `Ioc a b ×ˢ ...`) each rectangle belongs to:
-
-1. `{0}×ˢ F₀₁ ∩ {0}×ˢ F₀₂ = {0}×ˢ (F₀₁∩F₀₂)`, `F₀₁∩F₀₂ ∈ ℱ₀`.
-2. `{0}×ˢ F₀ ∩ Ioc a b ×ˢ F = ∅` (since `0 ∉ Ioc a b` for `a : ℝ≥0`).
-   Excluded by the non-emptiness hypothesis.
-3. Symmetric to (2).
-4. `Ioc a₁ b₁ ×ˢ F₁ ∩ Ioc a₂ b₂ ×ˢ F₂ = Ioc (a₁⊔a₂) (b₁⊓b₂) ×ˢ (F₁∩F₂)`
-   with the time interval non-degenerate (from intersection non-emptiness) and
-   `F₁∩F₂ ∈ ℱ_{a₁⊔a₂}` (filtration monotonicity). -/
+/-- The basic predictable rectangles form a **π-system**, which is all Dynkin
+needs downstream. Projected from Degenne's `IsSetSemiring`: upstream proves the
+strictly stronger statement (closure under intersection *and* the difference
+decomposition), so the π-system property is one field of it. -/
 lemma isPiSystem_predictableRect (hBmeas : ∀ t, Measurable (B t)) :
-    IsPiSystem (predictableRect (mΩ := mΩ) hBmeas) := by
-  rintro S₁ hS₁ S₂ hS₂ hne
-  rcases hS₁ with ⟨F₀₁, hF₀₁, rfl⟩ | ⟨a₁, b₁, F₁, hab₁, hF₁, rfl⟩
-  all_goals rcases hS₂ with ⟨F₀₂, hF₀₂, rfl⟩ | ⟨a₂, b₂, F₂, hab₂, hF₂, rfl⟩
-  -- Case (bot, bot)
-  · left
-    refine ⟨F₀₁ ∩ F₀₂, hF₀₁.inter hF₀₂, ?_⟩
-    rw [Set.prod_inter_prod, Set.inter_self]
-  -- Case (bot, Ioc): intersection is empty (0 ∉ Ioc a b for a : ℝ≥0)
-  · exfalso
-    obtain ⟨⟨t, ω⟩, ht_mem⟩ := hne
-    simp only [Set.mem_inter_iff, Set.mem_prod, Set.mem_singleton_iff,
-               Set.mem_Ioc] at ht_mem
-    obtain ⟨⟨rfl, _⟩, ⟨ha₂, _⟩, _⟩ := ht_mem
-    -- `ha₂ : a₂ < 0` is impossible in `ℝ≥0` (`⊥ = 0`)
-    exact not_lt_bot ha₂
-  -- Case (Ioc, bot): symmetric to the previous
-  · exfalso
-    obtain ⟨⟨t, ω⟩, ht_mem⟩ := hne
-    simp only [Set.mem_inter_iff, Set.mem_prod, Set.mem_Ioc,
-               Set.mem_singleton_iff] at ht_mem
-    obtain ⟨⟨⟨ha₁, _⟩, _⟩, rfl, _⟩ := ht_mem
-    exact not_lt_bot ha₁
-  -- Case (Ioc, Ioc)
-  · right
-    obtain ⟨⟨t, ω⟩, ht_mem⟩ := hne
-    simp only [Set.mem_inter_iff, Set.mem_prod, Set.mem_Ioc] at ht_mem
-    obtain ⟨⟨⟨ha₁, hb₁⟩, _⟩, ⟨ha₂, hb₂⟩, _⟩ := ht_mem
-    have h_lt : a₁ ⊔ a₂ < b₁ ⊓ b₂ :=
-      lt_of_lt_of_le (max_lt ha₁ ha₂) (le_min hb₁ hb₂)
-    refine ⟨a₁ ⊔ a₂, b₁ ⊓ b₂, F₁ ∩ F₂, h_lt, ?_, ?_⟩
-    · -- F₁ ∩ F₂ ∈ ℱ_{a₁⊔a₂} (filtration monotonicity)
-      have h1 := (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).mono
-        (le_max_left a₁ a₂) _ hF₁
-      have h2 := (ItoIntegralL2.natFiltration (mΩ := mΩ) hBmeas).mono
-        (le_max_right a₁ a₂) _ hF₂
-      exact h1.inter h2
-    · -- The set equation
-      rw [Set.prod_inter_prod, Set.Ioc_inter_Ioc]
-
-/-! ### σ-algebra generation
-
-The basic predictable rectangles generate the predictable σ-algebra. Mirrors
-upstream `ElementaryPredictableSet.generateFrom_eq_predictable`, but with the
-*basic* rectangles (single, not finite-disjoint-union) — the proof is short
-because we avoid the EPS-coercion-decomposition step and instead push directly
-through the predictable σ-algebra's own generators (`{⊥} ×ˢ A`, `Ioi i ×ˢ A`).
-The `Ioi i` decomposition is the same upstream trick: countable-generation of
-`atTop` on `ℝ≥0` (via separability) gives a monotone sequence exhausting `Ioi i`
-through `Ioc`-pieces. -/
+    IsPiSystem (predictableRect (mΩ := mΩ) hBmeas) :=
+  (MeasureTheory.Filtration.isSetSemiring_predictableRectangles _).isPiSystem
 
 /-- Generators of the predictable σ-algebra: the basic predictable rectangles
 form a generating family. -/
@@ -217,7 +156,7 @@ theorem generateFrom_predictableRect (hBmeas : ∀ t, Measurable (B t)) :
   apply le_antisymm
   · -- ≤: every basic rectangle is predictable-measurable
     apply MeasurableSpace.generateFrom_le
-    rintro S (⟨F₀, hF₀, rfl⟩ | ⟨a, b, F, _hab, hF, rfl⟩)
+    rintro S (⟨F₀, hF₀, rfl⟩ | ⟨a, b, _hab, F, hF, rfl⟩)
     · -- `{0} ×ˢ F₀ = {⊥} ×ˢ F₀` (`(⊥ : ℝ≥0) = 0` by `rfl`)
       exact MeasureTheory.measurableSet_predictable_singleton_bot_prod (𝓕 := 𝓕) hF₀
     · exact MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) a b hF
@@ -225,7 +164,8 @@ theorem generateFrom_predictableRect (hBmeas : ∀ t, Measurable (B t)) :
     apply MeasureTheory.measurableSpace_le_predictable_of_measurableSet
     -- Bot generator `{⊥} ×ˢ A`: directly a basic rectangle (`⊥ = 0`)
     · intro A hA
-      exact MeasurableSpace.measurableSet_generateFrom (Or.inl ⟨A, hA, rfl⟩)
+      exact MeasurableSpace.measurableSet_generateFrom
+        (MeasureTheory.Filtration.singletonBot_prod_mem_predictableRectangles _ hA)
     -- Ioi generator `Ioi i ×ˢ A`: write as countable union of `Ioc i (seq n) ×ˢ A`
     · intro i A hA
       obtain ⟨seq, _hmono, htends⟩ :=
@@ -238,16 +178,8 @@ theorem generateFrom_predictableRect (hBmeas : ∀ t, Measurable (B t)) :
         obtain ⟨n, hn⟩ := htends s
         exact ⟨n, his, hn n le_rfl⟩
       rw [h_Ioi, Set.iUnion_prod_const]
-      refine MeasurableSet.iUnion fun n ↦ ?_
-      by_cases hin : i < seq n
-      · exact MeasurableSpace.measurableSet_generateFrom
-          (Or.inr ⟨i, seq n, A, hin, hA, rfl⟩)
-      · -- `Ioc i (seq n) = ∅` so the rectangle is empty; ∅ is in any σ-algebra
-        have hempty : Set.Ioc i (seq n) ×ˢ A = (∅ : Set (ℝ≥0 × Ω)) := by
-          rw [Set.Ioc_eq_empty_of_le (not_lt.mp hin), Set.empty_prod]
-        rw [hempty]
-        exact @MeasurableSet.empty _
-          (MeasurableSpace.generateFrom (predictableRect (mΩ := mΩ) hBmeas))
+      exact MeasurableSet.iUnion fun n ↦ MeasurableSpace.measurableSet_generateFrom
+        (MeasureTheory.Filtration.Ioc_prod_mem_predictableRectangles _ i (seq n) hA)
 
 /-! ### Phase 4: T-restricted simple-process embedding
 
@@ -485,7 +417,7 @@ lemma setIntegral_eq_zero_of_orthogonal_pred (T : ℝ≥0)
     by_cases hT : 0 < T
     · -- `T > 0`: split ∫ univ into ∫_S + ∫_Sᶜ; both vanish.
       have hR : Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) ∈ predictableRect (mΩ := mΩ) hBmeas :=
-        Or.inr ⟨0, T, Set.univ, hT, MeasurableSet.univ, rfl⟩
+        Or.inr ⟨0, T, hT, Set.univ, MeasurableSet.univ, rfl⟩
       have hS_pred : MeasurableSet[𝓕.predictable] (Set.Ioc 0 T ×ˢ (Set.univ : Set Ω)) :=
         MeasureTheory.measurableSet_predictable_Ioc_prod (𝓕 := 𝓕) 0 T MeasurableSet.univ
       -- Sᶜ has zero trim_T-measure: trim_T = trim_full.restrict S, so trim_T Sᶜ = trim_full(Sᶜ∩S) = 0.
@@ -676,15 +608,15 @@ theorem simpleAssembly_T_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B
   have h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,
       ∫ z in R, g z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
     intro R hR
-    rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, F, _hab, hF, rfl⟩
+    rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, _hab, F, hF, rfl⟩
     · -- Bot: ∫_{{0} × F₀} g = 0 because {0} × F₀ ⊆ {0} × univ ⊆ (Ioc 0 T × univ)ᶜ
       -- (trim_T is supported on Ioc 0 T × univ).
-      have h_R_pred : MeasurableSet[𝓕.predictable] ({(0 : ℝ≥0)} ×ˢ F₀) :=
+      have h_R_pred : MeasurableSet[𝓕.predictable] ({(⊥ : ℝ≥0)} ×ˢ F₀) :=
         MeasureTheory.measurableSet_predictable_singleton_bot_prod (𝓕 := 𝓕) hF₀
       rw [setIntegral_eq_setIntegral_inter_supp hBmeas g _ h_R_pred]
-      have h_empty : ({(0 : ℝ≥0)} ×ˢ F₀) ∩ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) = ∅ := by
+      have h_empty : ({(⊥ : ℝ≥0)} ×ˢ F₀) ∩ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) = ∅ := by
         rw [Set.prod_inter_prod,
-            show ({(0 : ℝ≥0)} ∩ Set.Ioc 0 T : Set ℝ≥0) = ∅ by
+            show ({(⊥ : ℝ≥0)} ∩ Set.Ioc 0 T : Set ℝ≥0) = ∅ by
               ext x; simp,
             Set.empty_prod]
       rw [h_empty, setIntegral_empty]

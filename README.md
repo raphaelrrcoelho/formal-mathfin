@@ -112,7 +112,7 @@ See [`MathFin/Examples.lean`](MathFin/Examples.lean) for a curated tour.
 | Lean modules · lines of Lean | 459 · ~83,100 |
 | verification ledger | 372 fresh, 0 stale |
 | axioms used | `propext, Classical.choice, Quot.sound` only |
-| Lean / Mathlib | `v4.32.0` / `81a5d257`, pinned ([`lean-toolchain`](lean-toolchain), [`lake-manifest.json`](lake-manifest.json)) |
+| Lean / Mathlib / BrownianMotion | `v4.33.0-rc1` / `0434c033` / `314f04a`, pinned ([`lean-toolchain`](lean-toolchain), [`lake-manifest.json`](lake-manifest.json)) — a Lean **release candidate**, tracking BrownianMotion, which has not moved to a stable `v4.33.x` |
 
 The library is organized by theme under [`MathFin/`](MathFin): `Foundations/` (138 modules — the
 stochastic core), `BlackScholes/` (224), `FixedIncome/` (24), `Binomial/` (18), `Portfolio/` (14),

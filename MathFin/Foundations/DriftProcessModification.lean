@@ -135,7 +135,7 @@ lemma drift_maximal_prob (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) (W : T
   have hsub : {ω | ε ≤ ⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|}
       ⊆ {ω | ε ^ 2 ≤ (T : ℝ) * ∫ s in Set.Ioc (0 : ℝ≥0) T, (⇑W.val s ω) ^ 2 ∂timeMeasure} := by
     intro ω hω
-    simp only [Set.mem_setOf_eq] at hω ⊢
+    simp only [Set.mem_ofPred_eq] at hω ⊢
     calc ε ^ 2 ≤ (⨆ i : Set.Iic T, |driftSimpleProcess hBmeas W.val (i : ℝ≥0) ω|) ^ 2 := by
           simpa [pow_two] using mul_self_le_mul_self hε.le hω
       _ ≤ _ := drift_iSup_sq_le T hBmeas W.val ω
@@ -212,7 +212,7 @@ theorem drift_ae_eventually_sup_lt (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B 
     exact ENNReal.ofReal_ne_top
   filter_upwards [ae_eventually_notMem hconv] with ω hω
   filter_upwards [hω] with n hn
-  rwa [hA, Set.mem_setOf_eq, not_le] at hn
+  rwa [hA, Set.mem_ofPred_eq, not_le] at hn
 
 /-! ## Layer 2 — pointwise a.s. convergence of the elementary drifts -/
 

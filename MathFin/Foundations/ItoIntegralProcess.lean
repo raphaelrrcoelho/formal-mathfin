@@ -34,10 +34,11 @@ process layer rests on:
 * `itoSimpleProcess_zero_time` — `(V ● B)_0 = 0` (every increment collapses).
 * `V`-linearity (`add`/`smul`/`neg`), inherited from `SimpleProcess.integral`.
 
-What is still deferred (the *next* layer, which will consume this one):
-adaptedness of `t ↦ (V●B)_t` to `𝓕_t`, pathwise continuity, the martingale
-property, and the time-indexed Itô isometry. Those are genuine follow-ups built
-on `memLp_itoSimpleProcess` here. -/
+The next layer, built on `memLp_itoSimpleProcess` here, now delivers all four
+of adaptedness, pathwise continuity, the martingale property and the
+time-indexed isometry: see `ItoIntegralProcessIsometry`
+(`itoSimpleProcess_isometry_time`), `ItoIntegralProcessContinuousModification`
+and `ItoIntegralProcessMartingale`. -/
 
 @[expose] public section
 

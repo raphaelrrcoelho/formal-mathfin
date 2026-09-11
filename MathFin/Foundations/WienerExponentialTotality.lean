@@ -370,7 +370,7 @@ private lemma setIntegral_eq_zero_of_iSup_comap (hB : IsPreBrownianReal B μ)
     have hcx := eqOn_complexMGF_of_mgf' hmgf hnull
       (show Complex.I ∈ {z : ℂ | z.re ∈ interior
         (integrableExpSet (fun ω ↦ ∑ i, lam i * B (τ i) ω) nuPos)} by
-        rw [Set.mem_setOf_eq, hIES, interior_univ]; trivial)
+        rw [Set.mem_ofPred_eq, hIES, interior_univ]; trivial)
     have hcfd (ν : Measure Ω) :
         charFunDual (ν.map fun (ω : Ω) (i : ι) ↦ B (τ i) ω) L
           = complexMGF (fun ω ↦ ∑ i, lam i * B (τ i) ω) ν Complex.I := by

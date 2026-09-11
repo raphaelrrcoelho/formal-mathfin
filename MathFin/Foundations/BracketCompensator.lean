@@ -104,7 +104,7 @@ private theorem predictable_le_traceAlg (hBmeas : ∀ t, Measurable (B t)) (a b 
     (natFiltration (mΩ := mΩ) hBmeas).predictable ≤ traceAlg (mΩ := mΩ) hBmeas a b := by
   rw [← generateFrom_predictableRect hBmeas]
   refine MeasurableSpace.generateFrom_le ?_
-  rintro S (⟨F₀, _hF₀, rfl⟩ | ⟨c, d, F, _hcd, hF, rfl⟩)
+  rintro S (⟨F₀, _hF₀, rfl⟩ | ⟨c, d, _hcd, F, hF, rfl⟩)
   · change MeasurableSet[bandAlg (mΩ := mΩ) hBmeas b]
       (({(0 : ℝ≥0)} ×ˢ F₀) ∩ Set.Ioc a b ×ˢ (Set.univ : Set Ω))
     rw [Set.prod_inter_prod,

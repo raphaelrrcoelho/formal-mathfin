@@ -10,9 +10,11 @@ public import Mathlib
 /-!
 # Minimum of independent exponentials (Appendix B.2)
 
-The minimum of independent exponentials has `Exp(∑ rates)`, derived from joint
+The minimum of independent exponentials has the `Exp(∑ rates)` **survival function**:
+`μ {ω | t < min_i τ_i ω} = exp (-(∑ rates) * t)` for `t ≥ 0`, derived from joint
 independence (`iIndepFun.meas_iInter`) and the individual exponential laws
-(`expMeasure` CDF formula).
+(`expMeasure` CDF formula). The law identity itself — that the minimum *is*
+`Exp(∑ rates)` as a measure — is not stated here.
 -/
 
 @[expose] public section
@@ -48,7 +50,9 @@ private lemma min_gt_iInter (hn : 0 < n) (t : ℝ) :
       (fun i : Fin n ↦ τ i ω))}
       = ⋂ i : Fin n, (τ i) ⁻¹' Set.Ioi t := by
   ext ω
-  simp [Finset.lt_inf'_iff, Set.mem_iInter, Set.mem_preimage, Set.mem_Ioi]
+  simp only [Set.mem_setOf_eq, Set.mem_iInter, Set.mem_preimage, Set.mem_Ioi]
+  exact ⟨fun h i => h.trans_le (Finset.inf'_le _ (Finset.mem_univ i)),
+    fun h => (Finset.lt_inf'_iff _).2 fun i _ => h i⟩
 
 variable {m0 : MeasurableSpace Ω} {μ : Measure Ω}
 

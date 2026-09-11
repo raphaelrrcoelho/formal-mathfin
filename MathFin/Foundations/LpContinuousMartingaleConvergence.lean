@@ -433,9 +433,9 @@ private lemma incrementProc_martingale {μ : Measure Ω} [IsFiniteMeasure μ] {�
 
 /-- Right-continuity of `M (· , ω)` transfers to the increment `incrementProc M n (· , ω)`. -/
 private lemma incrementProc_isRightContinuous
-    {M : ℝ → Ω → ℝ} (hM_cont : ∀ ω, Function.IsRightContinuous (fun t : ℝ ↦ M t ω))
+    {M : ℝ → Ω → ℝ} (hM_cont : ∀ ω, _root_.IsRightContinuous (fun t : ℝ ↦ M t ω))
     (n : ℕ) (ω : Ω) :
-    Function.IsRightContinuous (fun t : ℝ≥0 ↦ incrementProc M n t ω) := by
+    _root_.IsRightContinuous (fun t : ℝ≥0 ↦ incrementProc M n t ω) := by
   intro a
   refine ContinuousWithinAt.sub ?_ continuousWithinAt_const
   set shift : ℝ≥0 → ℝ := fun t ↦ ((n : ℝ) + (t : ℝ)) with shift_def
@@ -575,7 +575,7 @@ private lemma sup_increment_measure_tendsto_zero
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
     (hM : Martingale M 𝓕 μ)
-    (hM_cont : ∀ ω, Function.IsRightContinuous (fun t : ℝ ↦ M t ω))
+    (hM_cont : ∀ ω, _root_.IsRightContinuous (fun t : ℝ ↦ M t ω))
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R)
     {ε : ℝ} (hε : 0 < ε) :
     Tendsto (fun n : ℕ ↦ μ.real {ω | ε ≤ ⨆ i : Set.Iic (1 : ℝ≥0),
@@ -614,10 +614,10 @@ maximal lemma `Submartingale.rightCont_iSup_ofReal_ne_top`. -/
 private lemma incrementProc_bddAbove_ae
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} (hM : Martingale M 𝓕 μ)
-    (hM_cont : ∀ ω, Function.IsRightContinuous (fun t : ℝ ↦ M t ω)) (n : ℕ) :
+    (hM_cont : ∀ ω, _root_.IsRightContinuous (fun t : ℝ ↦ M t ω)) (n : ℕ) :
     ∀ᵐ ω ∂μ, BddAbove (Set.range fun i : Set.Iic (1 : ℝ≥0) ↦
       ‖incrementProc M n i ω‖) := by
-  have h_cont : ∀ ω, Function.IsRightContinuous (fun i : ℝ≥0 ↦ ‖incrementProc M n i ω‖) :=
+  have h_cont : ∀ ω, _root_.IsRightContinuous (fun i : ℝ≥0 ↦ ‖incrementProc M n i ω‖) :=
     fun ω ↦ (incrementProc_isRightContinuous hM_cont n ω).continuous_comp continuous_norm
   have h_ne_top := (incrementProc_martingale hM n).submartingale_norm.rightCont_iSup_ofReal_ne_top
     (fun _ _ ↦ norm_nonneg _) (1 : ℝ≥0) h_cont
@@ -641,7 +641,7 @@ theorem lp_continuous_martingale_tendstoInMeasure
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p R : ℝ} (hp : 1 < p)
     (hM : Martingale M 𝓕 μ)
-    (hM_cont : ∀ ω, Function.IsRightContinuous (fun t : ℝ ↦ M t ω))
+    (hM_cont : ∀ ω, _root_.IsRightContinuous (fun t : ℝ ↦ M t ω))
     (hbound : ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     TendstoInMeasure μ M atTop (discreteSampleLimit μ 𝓕 M) := by
   set L := discreteSampleLimit μ 𝓕 M
@@ -680,8 +680,9 @@ theorem lp_continuous_martingale_tendstoInMeasure
       refine hAB.trans ?_
       set s : ℝ≥0 := ⟨t - (n : ℝ), by linarith⟩
       have h_s_le_one : s ≤ 1 := by
-        rw [show (1 : ℝ≥0) = ⟨1, zero_le_one⟩ from rfl, ← NNReal.coe_le_coe]
-        exact le_of_lt (by linarith : t - (n : ℝ) < 1)
+        rw [← NNReal.coe_le_coe, NNReal.coe_one]
+        show t - (n : ℝ) ≤ 1
+        linarith
       rw [show M t ω - M (n : ℝ) ω = incrementProc M n s ω by
         show _ = M ((n : ℝ) + (s : ℝ)) ω - M (n : ℝ) ω
         congr 2
@@ -717,7 +718,7 @@ theorem lp_continuous_martingale_full
     {μ : Measure Ω} [IsFiniteMeasure μ] {𝓕 : Filtration ℝ mΩ}
     {M : ℝ → Ω → ℝ} {p : ℝ} (hp : 1 < p)
     (hM : Martingale M 𝓕 μ)
-    (hM_cont : ∀ ω, Function.IsRightContinuous (fun t : ℝ ↦ M t ω))
+    (hM_cont : ∀ ω, _root_.IsRightContinuous (fun t : ℝ ↦ M t ω))
     (hbound : ∃ R : ℝ,
       ∀ t, eLpNorm (M t) (ENNReal.ofReal p) μ ≤ ENNReal.ofReal R) :
     ∃ (M_inf : Ω → ℝ), Integrable M_inf μ ∧

@@ -65,12 +65,14 @@ Beside the general identity the file states the classical facts it is the abstra
 
 ## Honest scope
 
-The bracket process is delivered through its increments' conditional expectations. This file does
-**not** package `t ↦ ∫₀ᵗ φ_s² ds` as an *adapted increasing process* (predictability of the
-representative does not give progressive measurability at this pin, and no pathwise quadratic
-variation is constructed); what is named is `bracketRep`, the ω-wise integral of the squared
-representative, with its nonnegativity, band additivity (`bracketRep_add`) and the monotonicity
-that follows (`bracketRep_mono`).
+The bracket process is delivered through its increments' conditional expectations. What *this file*
+names is `bracketRep`, the ω-wise integral of the squared representative, with its nonnegativity,
+band additivity (`bracketRep_add`) and the monotonicity that follows (`bracketRep_mono`) — not a
+packaged adapted process. The packaging is done downstream: `BracketCompensator.bracketProcess`
+is `⟨M⟩_{t∧T}` as a genuine adapted process (`bracketProcess_adapted`, axiom-audited). What is
+still constructed nowhere is a *pathwise* quadratic variation — and it cannot currently be
+imported either, since BM's `predQuadVariation` routes through the `sorry`-backed
+`IsLocalSubmartingale.doob_meyer`.
 -/
 
 @[expose] public section

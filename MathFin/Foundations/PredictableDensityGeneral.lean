@@ -211,13 +211,13 @@ theorem simpleAssembly_sqWeight_denseRange (T : ℝ≥0) (hBmeas : ∀ t, Measur
   have h_orth : ∀ R ∈ predictableRect (mΩ := mΩ) hBmeas,
       ∫ z in R, f z ^ 2 * (g : ℝ≥0 × Ω → ℝ) z ∂(trimMeasure_T (μ := μ) T hBmeas) = 0 := by
     intro R hR
-    rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, F, _hab, hF, rfl⟩
-    · have h_R_pred : MeasurableSet[𝓕.predictable] ({(0 : ℝ≥0)} ×ˢ F₀) :=
+    rcases hR with ⟨F₀, hF₀, rfl⟩ | ⟨a, b, _hab, F, hF, rfl⟩
+    · have h_R_pred : MeasurableSet[𝓕.predictable] ({(⊥ : ℝ≥0)} ×ˢ F₀) :=
         MeasureTheory.measurableSet_predictable_singleton_bot_prod (𝓕 := 𝓕) hF₀
       rw [setIntegral_eq_setIntegral_inter_supp hBmeas _ _ h_R_pred]
-      have h_empty : ({(0 : ℝ≥0)} ×ˢ F₀) ∩ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) = ∅ := by
+      have h_empty : ({(⊥ : ℝ≥0)} ×ˢ F₀) ∩ Set.Ioc 0 T ×ˢ (Set.univ : Set Ω) = ∅ := by
         rw [Set.prod_inter_prod,
-            show ({(0 : ℝ≥0)} ∩ Set.Ioc 0 T : Set ℝ≥0) = ∅ by ext x; simp,
+            show ({(⊥ : ℝ≥0)} ∩ Set.Ioc 0 T : Set ℝ≥0) = ∅ by ext x; simp,
             Set.empty_prod]
       rw [h_empty, setIntegral_empty]
     · have h_R_pred : MeasurableSet[𝓕.predictable] (Set.Ioc a b ×ˢ F) :=

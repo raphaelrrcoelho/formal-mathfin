@@ -284,8 +284,9 @@ by one application of the exponential characterization `isQBrownianMotion_of_exp
 constant-θ exponential martingale (`isExpQMartingale_Btheta`). This is the constant-θ half of
 Girsanov (`gir-thm-9.1.8`) in full, reached on the existing tower (Bayes engine + Wald exponentials
 + the reusable characteristic-function characterization), with no adapted-integrand Itô formula.
-The general bounded-*adapted*-θ statement remains open; the simple (piecewise-constant adapted)
-case is Route α's next brick. -/
+The general bounded-*adapted*-θ statement is delivered separately, by
+`GirsanovSimpleTheta` (piecewise-constant), `GirsanovAdaptedTheta` (bounded continuous
+adapted) and `GirsanovPredictableTheta` (bounded predictable). -/
 theorem Btheta_isQBrownianMotion
     {Ω : Type*} {mΩ : MeasurableSpace Ω} {P : Measure Ω} [IsProbabilityMeasure P]
     {𝓕 : Filtration ℝ≥0 mΩ} [SigmaFiniteFiltration P 𝓕]

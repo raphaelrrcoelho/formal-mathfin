@@ -610,7 +610,7 @@ theorem tendstoInMeasure_marshalStochSum (hB : IsPreBrownianReal B μ) (T : ℝ�
         (marshalStepSP hBmeas T (V n).val (V n).property hC
           ((marshalEndpoints hBmeas T (V n).val).card - 1)).val) atTop
       (⇑(itoIntegralCLM_T hB T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd))) := by
-  refine tendstoInMeasure_congr_left (fun n ↦ ?_)
+  refine TendstoInMeasure.congr (fun n ↦ ?_) EventuallyEq.rfl
     (tendstoInMeasure_of_tendsto_Lp
       (tendsto_itoAssembly_marshalStepSP hB T hBmeas hpred hC hbdd V hV))
   exact (memLp_itoSimple hB hBmeas (marshalStepSP hBmeas T (V n).val (V n).property hC

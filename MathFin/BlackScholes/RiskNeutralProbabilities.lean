@@ -79,7 +79,7 @@ theorem riskNeutralProb_S_T_gt_K
   have h_set_eq :
       {ω | bsTerminal S_0 r σ T (Z ω) > K} = Z ⁻¹' Set.Ioi (-bsd2 S_0 K r σ T) := by
     ext ω
-    rw [Set.mem_setOf_eq, Set.mem_preimage, Set.mem_Ioi]
+    rw [Set.mem_ofPred_eq, Set.mem_preimage, Set.mem_Ioi]
     exact bsTerminal_gt_K_iff hS_0 hK hσ hT (Z ω)
   rw [h_set_eq]
   -- HasLaw transfer: Q (Z ⁻¹' A) = (Q.map Z) A = (gaussianReal 0 1) A.

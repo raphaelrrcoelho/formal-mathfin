@@ -290,12 +290,6 @@ noncomputable def rectTerm (hBmeas : ∀ t, Measurable (B t))
     ℝ≥0 × Ω → ℝ :=
   elemIntegrand p.1 p.2 (V.value p)
 
-/-- `rectTerm` is the elementary integrand at its band — definitionally, so the two names
-never drift apart. -/
-lemma rectTerm_eq_elemIntegrand (hBmeas : ∀ t, Measurable (B t))
-    (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :
-    rectTerm hBmeas V p = elemIntegrand p.1 p.2 (V.value p) := rfl
-
 /-- The rectangle term as an indicator of the product rectangle `(p.1,p.2] ×ˢ univ`. -/
 lemma rectTerm_eq_indicator (hBmeas : ∀ t, Measurable (B t))
     (V : SimpleProcess ℝ (natFiltration (mΩ := mΩ) hBmeas)) (p : ℝ≥0 × ℝ≥0) :

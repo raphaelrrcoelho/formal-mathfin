@@ -49,8 +49,6 @@ identity as `rate_eq_neg_log_deriv` below.
   "rate from quantity" recovery.
 * `discount_pos`: `exp(-H) > 0` always (so all five discount/survival
   quantities are positive).
-* `discount_strictAnti`: `H₁ < H₂ ⇒ exp(-H₂) < exp(-H₁)` (discounting
-  decreases in cumulative rate).
 -/
 
 @[expose] public section
@@ -84,15 +82,6 @@ Underpins `survival_pos` (constant-hazard credit), `hazardSurvival_pos`
 (time-varying hazard), `survivalFromForce_pos` (mortality), and the
 implicit positivity of the BS discount factor `exp(−rT)`. -/
 lemma discount_pos (H : ℝ) : 0 < Real.exp (-H) := Real.exp_pos _
-
-/-- Universal discount monotonicity: `H₁ < H₂ ⇒ exp(−H₂) < exp(−H₁)`.
-
-Underpins `survival_strictAnti_of_pos_hazard`, the strict ordering of ZCB
-prices at distinct rates, and the strict-positive-correlation tightening
-of variance bounds. -/
-lemma discount_strictAnti {H₁ H₂ : ℝ} (h : H₁ < H₂) :
-    Real.exp (-H₂) < Real.exp (-H₁) :=
-  Real.exp_lt_exp.mpr (by linarith)
 
 /-- **Cumulative intensity** `∫₀ᵗ r(u) du` — the domain-neutral cumulative of a
 rate/intensity/force. The single definition that the actuarial cumulative force

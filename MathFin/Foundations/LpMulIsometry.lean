@@ -198,10 +198,6 @@ noncomputable def mulLI (ν : Measure α) (hf : Measurable f) :
   norm_map' ψ := by
     rw [Lp.norm_def, Lp.norm_def, eLpNorm_congr_ae (coeFn_mulLM ν hf ψ), eLpNorm_mul_eq hf]
 
-@[simp]
-lemma mulLI_toLinearMap (ν : Measure α) (hf : Measurable f) :
-    (mulLI ν hf).toLinearMap = mulLM ν hf := rfl
-
 /-- `coeFn_mulLM` for the bundled isometry. -/
 lemma coeFn_mulLI (ν : Measure α) (hf : Measurable f) (ψ : Lp ℝ 2 (sqWeight ν f)) :
     ⇑(mulLI ν hf ψ) =ᵐ[ν] fun x ↦ f x * ψ x :=

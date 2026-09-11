@@ -206,7 +206,7 @@ lemma tendstoInMeasure_of_ae_dist_le_sqrt {f : ℕ → Ω → ℝ} {g : Ω → �
       intro n
       have hset : {ω | (⊤ : ℝ≥0∞) ≤ edist (f n ω) (g ω)} = ∅ := by
         ext ω
-        simp only [Set.mem_setOf_eq, Set.mem_empty_iff_false, iff_false, top_le_iff]
+        simp only [Set.mem_ofPred_eq, Set.mem_empty_iff_false, iff_false, top_le_iff]
         exact edist_ne_top _ _
       rw [hset]; exact measure_empty
     exact tendsto_const_nhds.congr fun n ↦ (hz n).symm
@@ -634,7 +634,7 @@ lemma tendsto_ZTpred_ae_subseq (T : ℝ≥0) (hBmeas : ∀ t, Measurable (B t)) 
       (marshalPart hBmeas T (V n).val)
       (fun i ω ↦ clampM C (marshalMult hBmeas T (V n).val i ω)) (N n) T) atTop
       (⇑(itoIntegralCLM_T hB T hBmeas θhat)) := by
-    refine tendstoInMeasure_congr_left (fun n ↦ ?_)
+    refine TendstoInMeasure.congr (fun n ↦ ?_) EventuallyEq.rfl
       (tendstoInMeasure_marshalStochSum hB T hBmeas hpred hC hbdd V hV)
     exact ae_of_all _ fun ω ↦
       (simpleStochSum_marshalStepSP_eq hBmeas T (V n).val (V n).property hC (hmpN n) ω).symm
@@ -745,7 +745,7 @@ lemma tendsto_fnPred_ae_subseq (hBmeas : ∀ t, Measurable (B t)) (T : ℝ≥0)
       (fun i ω ↦ clampM C (marshalMult hBmeas T (V n).val i ω))
       ((marshalEndpoints hBmeas T (V n).val).card - 1) u) atTop
       (driftContinuousMod T hBmeas (processToLpPredictable (μ := μ) T hBmeas hpred hbdd) u) := by
-    refine tendstoInMeasure_congr_left (fun n ↦ ?_)
+    refine TendstoInMeasure.congr (fun n ↦ ?_) EventuallyEq.rfl
       (tendstoInMeasure_marshalDrift T hBmeas hpred hC hbdd V hV huT)
     exact ae_of_all _ fun ω ↦ (simpleDrift_marshalStepSP_eq hBmeas T (V n).val (V n).property hC
       ((marshalEndpoints hBmeas T (V n).val).card - 1) u ω).symm

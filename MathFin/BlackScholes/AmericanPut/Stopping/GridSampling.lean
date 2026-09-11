@@ -50,7 +50,7 @@ theorem gridIndex_stopping {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} 
     IsStoppingTime (gridFiltration 𝓕 δ) (fun ω => (gridIndex θ δ ω : ℕ∞)) := by
   intro i
   change MeasurableSet[𝓕 ((i : ℝ≥0)*δ)] {ω | (gridIndex θ δ ω : ℕ∞) ≤ i}
-  simpa only [ENat.coe_le_coe,WithTop.coe_le_coe,gridIndex_le_iff θ hδ] using θ.stopping ((i : ℝ≥0)*δ)
+  simpa only [ENat.natCast_le_natCast,WithTop.coe_le_coe,gridIndex_le_iff θ hδ] using θ.stopping ((i : ℝ≥0)*δ)
 
 theorem gridIndex_bounded {𝓕 : Filtration ℝ≥0 ‹MeasurableSpace Ω›} {T δ : ℝ≥0}
     (θ : BoundedRule 𝓕 T) (ω : Ω) : gridIndex θ δ ω ≤ ⌈T/δ⌉₊ :=
