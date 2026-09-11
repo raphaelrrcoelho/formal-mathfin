@@ -117,24 +117,24 @@
     },
     "cm-thm-4.3.10": {
       "benchmark_file": "continuous_martingales.json",
-      "date": "2026-08-20",
-      "elapsed_s": 3.9,
-      "input_hash": "db83d8fcde4655de4753d1d4bc96664c5c4fcfe2a112daca2b101c621b8fce0d",
-      "verified_at_commit": "70acfe0"
+      "date": "2026-09-10",
+      "elapsed_s": 177.2,
+      "input_hash": "ea32cc98f3f2f5842b46a09d6760794b30eedc597e424fdd670c07128057eb0f",
+      "verified_at_commit": "907923d"
     },
     "cm-thm-4.3.7": {
       "benchmark_file": "continuous_martingales.json",
-      "date": "2026-08-20",
-      "elapsed_s": 5.3,
-      "input_hash": "bfb7187460266d1b0bc87521ae3852dee3d6283b60f6b02727917b5a4a5c39d5",
-      "verified_at_commit": "70acfe0"
+      "date": "2026-09-10",
+      "elapsed_s": 99.3,
+      "input_hash": "9c3631bfd0c8817413421fd557d9d1590cb9c3e105c97997273c34709b99df80",
+      "verified_at_commit": "907923d"
     },
     "cm-thm-4.3.9": {
       "benchmark_file": "continuous_martingales.json",
-      "date": "2026-08-20",
-      "elapsed_s": 5.4,
-      "input_hash": "6e0188132f17c6b042061d597da19d48db263c2563fe2141a9ed3b717d9af661",
-      "verified_at_commit": "70acfe0"
+      "date": "2026-09-10",
+      "elapsed_s": 122.4,
+      "input_hash": "cb3ed6c5b7b416907e5ea619d3d405aece148b605891bb050955e72941141210",
+      "verified_at_commit": "907923d"
     },
     "cv-cond-exp-tower": {
       "benchmark_file": "cross_validated.json",
@@ -2259,10 +2259,10 @@
     },
     "pp-thm-3.3.10": {
       "benchmark_file": "poisson_processes.json",
-      "date": "2026-08-20",
-      "elapsed_s": 5.2,
-      "input_hash": "21ffd9600118e3ff09efbedcf201e6f5c126f41829eeb825aa60049aef045ea4",
-      "verified_at_commit": "70acfe0"
+      "date": "2026-09-10",
+      "elapsed_s": 61.5,
+      "input_hash": "a150c25e99c1c727b4491a2ce540639b7539133696f846d35499b6b39582f158",
+      "verified_at_commit": "907923d"
     },
     "pp-thm-3.3.5": {
       "benchmark_file": "poisson_processes.json",
@@ -2280,10 +2280,10 @@
     },
     "pp-thm-3.3.9": {
       "benchmark_file": "poisson_processes.json",
-      "date": "2026-08-20",
-      "elapsed_s": 4.1,
-      "input_hash": "69b9f19a4ba9f15cf19e81be9c68aa330d64aa85d865bd2ec7c49f591335dc0a",
-      "verified_at_commit": "70acfe0"
+      "date": "2026-09-10",
+      "elapsed_s": 112.3,
+      "input_hash": "3a3bad4c7cae63565fc47df53046676ba578e9551f60a55b3c76fc44683e0408",
+      "verified_at_commit": "907923d"
     },
     "sc-bracket-compensator": {
       "benchmark_file": "stochastic_calculus.json",
