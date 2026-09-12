@@ -7,6 +7,7 @@ module
 
 public import Mathlib
 public import BrownianMotion.Gaussian.Moment
+public import BrownianMotion.Gaussian.BrownianMotion
 
 /-!
 # Gaussian moments
@@ -115,5 +116,21 @@ lemma integral_sq_sub_var_gaussianReal (v : ℝ≥0) :
     rw [measureReal_def, measure_univ, ENNReal.toReal_one]
   rw [integral_sub hint2 (integrable_const _), integral_sq_gaussianReal, integral_const, huniv,
       one_smul, sub_self]
+
+/-! ### Brownian increments -/
+
+/-- For `s ≤ t : ℝ≥0`, the increment `B t − B s` of a pre-Brownian motion has law
+`gaussianReal 0 (t - s)`. Degenne's `hasLaw_sub` states the variance as `nndist`; this is the
+same fact with the `ℝ≥0` subtraction the time-indexed towers actually carry, which is the only
+reason the conversion keeps reappearing. -/
+lemma hasLaw_increment {Ω : Type*} {mΩ : MeasurableSpace Ω} {μ : Measure Ω}
+    {B : ℝ≥0 → Ω → ℝ} (hB : IsPreBrownianReal B μ) {s t : ℝ≥0} (hst : s ≤ t) :
+    HasLaw (fun ω ↦ B t ω - B s ω) (gaussianReal 0 (t - s)) μ := by
+  have hL := hB.hasLaw_sub t s
+  have hv : nndist (t : ℝ) (s : ℝ) = (t - s : ℝ≥0) := by
+    apply NNReal.coe_injective
+    rw [coe_nndist, Real.dist_eq, NNReal.coe_sub hst,
+      abs_of_nonneg (sub_nonneg.mpr (NNReal.coe_le_coe.mpr hst))]
+  rw [← hv]; exact hL
 
 end MathFin

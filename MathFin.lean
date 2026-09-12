@@ -87,7 +87,6 @@ import MathFin.Foundations.LpContinuousMartingaleConvergence
 import MathFin.Foundations.MartingaleTransform
 import MathFin.Foundations.DoobLpMaximalInequality
 import MathFin.Foundations.ExtendOfNormIsometry
-import MathFin.Foundations.WienerIntegral
 import MathFin.Foundations.WienerIntegralL2
 import MathFin.Foundations.WienerIntegralGaussian
 -- Wiener integral of a step indicator is the increment (∫𝟙_{(s,t]} dB = B_t − B_s)
